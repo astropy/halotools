@@ -50,11 +50,19 @@ Calculate total stellar mass :math:`M_{\ast}^{\rm tot}` in each halo
 To calculate the total stellar mass of galaxies in each halo, we'll use
 the `halotools.utils.group_member_generator`. You can read more about the 
 details of that function in its documentation, here we'll just demo some basic usage. 
+Briefly, this generator can be used to iterate over your galaxy population 
+on a group-by-group basis, so that you can perform group-wise calculations 
+with each step of the iteration. In this case, at each step of the iteration 
+we'll sum up the stellar masses of each group's members. 
 
 The ``halo_id`` is a natural grouping key for a galaxy catalog whose
-host halos are known. Let's use this grouping key to calculate the total
-stellar mass of galaxies in each halo, :math:`M_{\ast}^{\rm tot},` and
-broadcast the result to the members of the halo.
+host halos are known. So we'll sort our galaxy catalog on this column, 
+notify the `~halotools.utils.group_member_generator` that we have done so 
+by passing in ``halo_id`` as the *grouping_key*, and then request that 
+the generator yield the data stored in the ``stellar_mass`` column 
+at each iteration. The we'll loop over the generator,  
+calculate the sum of the yielded stellar mass column, 
+and broadcast the result to each group member. 
 
 .. code:: python
 
@@ -78,7 +86,14 @@ Calculate host halo mass :math:`M_{\rm host}` of each galaxy
 ------------------------------------------------------------
 
 Now we'll do a very similar calculation, but instead broadcasting the
-host halo mass to each halo's members. 
+host halo mass to each halo's members. Here we'll perform a two-property sort. 
+By sorting first on ``halo_id`` and then on ``halo_upid``, what we accomplish is that 
+galaxies sharing a common halo are grouped together, and then within each grouping 
+the true central galaxy appears first in the sequence. This means that when the 
+`~halotools.utils.group_member_generator` yields arrays to us, we can retrieve the 
+property of the central galaxy via the first element in each yielded array. 
+In this next calculation, we'll exploit that information to broadcast the 
+host halo virial mass to all members of the halo. 
 
 .. code:: python
 
@@ -145,12 +160,13 @@ Plot the result
 Quiescent fraction of centrals and satellites
 ----------------------------------------------
 
-In this section we'll perform a very similar calculation to the above, only here we'll compute the average quiescent fraction of centrals and satellites. 
+In this section we'll perform a very similar calculation to the above, 
+only here we'll compute the average quiescent fraction of centrals and satellites. 
 
 Calculate :math:`\langle F_{\rm q}^{\rm cen}\vert M_{\rm halo} \rangle` and :math:`\langle F_{\rm q}^{\rm sat} \vert M_{\rm halo}\rangle`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above calculation, we needed to create new columns for our galaxy catalog, :math:`M_{\rm host}` and :math:`M_{\ast}^{\rm tot}`. Here we'll reuse the :math:`M_{\rm host}` column, and our model already created a boolean-valued ``quiescent`` column for our galaxies. So all we need to do is calculate the average trends as a function of halo mass. 
+In the above calculation, we needed to create new columns for our galaxy catalog, :math:`M_{\rm host}` and :math:`M_{\ast}^{\rm tot}`. Here we'll reuse the :math:`M_{\rm host}` column, and our model already created a boolean-valued ``quiescent`` column for our galaxies. So no group iteration is necessary; all we need to do is calculate the average trends as a function of halo mass. 
 
 .. code:: python
 

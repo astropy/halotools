@@ -94,8 +94,14 @@ In the following calculation, we'll use the
 `~halotools.utils.group_member_generator` in order to group our 
 galaxy table together according to the FoF-determined group, and then 
 calculate a few quantities based on group membership. You can read about 
-the `~halotools.utils.group_member_generator` in its docstring, 
-and see usage similar to what follows in :ref:`galaxy_catalog_analysis_tutorial1`. 
+the `~halotools.utils.group_member_generator` in its docstring. 
+You may also find it useful to review :ref:`galaxy_catalog_analysis_tutorial1` 
+for usage similar to what follows, only with more exposition. 
+
+Here we perform another two-column sort. First, the galaxies 
+are sorted by their FoF group ID, and then within each grouping, 
+they are sorted by :math:`-M_{\ast}`, which will place the most massive 
+galaxy first within each FoF group. 
 
 .. code:: python
 
@@ -145,6 +151,7 @@ Let's inspect our results
 
 Calculating group richness :math:`N_{\rm group}`
 ------------------------------------------------
+Now we'll use the same generator to calculate the total number of members in each FoF group. 
 
 .. code:: python
 
