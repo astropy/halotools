@@ -8,6 +8,9 @@ from astropy.config.paths import _find_home
 import numpy as np 
 from copy import copy 
 
+from ....mock_observables import periodic_3d_distance
+from ....mock_observables import return_xyz_formatted_array, tpcf_one_two_halo_decomp
+
 from ....sim_manager import FakeSim
 from ....sim_manager.fake_sim import FakeSimHalosNearBoundaries
 from ..prebuilt_model_factory import PrebuiltHodModelFactory
@@ -148,3 +151,36 @@ class TestHodMockFactory(TestCase):
         halocat = FakeSim()
         model.populate_mock(halocat = halocat)
 
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_satellite_positions1(self):
+        model = PrebuiltHodModelFactory('zheng07')
+        model.populate_mock()
+
+        gals = model.mock.galaxy_table 
+        x1 = gals['x']
+        y1 = gals['y']
+        z1 = gals['z']
+        x2 = gals['halo_x']
+        y2 = gals['halo_y']
+        z2 = gals['halo_z']
+        d = periodic_3d_distance(x1, y1, z1, x2, y2, z2, model.mock.Lbox)
+        assert np.all(d <= gals['halo_rvir'])
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_one_two_halo_decomposition_on_mock(self):
+        """ Enforce that the one-halo term is exactly zero 
+        on sufficiently large scales. 
+        """
+        model = PrebuiltHodModelFactory('zheng07')
+        model.populate_mock()
+
+        gals = model.mock.galaxy_table 
+        pos = return_xyz_formatted_array(gals['x'], gals['y'], gals['z'])
+        halo_hostid = model.mock.galaxy_table['halo_id']
+
+        rbins = np.logspace(-1, 1.5, 15)
+        xi_1h, xi_2h = tpcf_one_two_halo_decomp(pos, halo_hostid, rbins,
+            period = model.mock.Lbox, num_threads='max')
+        assert xi_1h[-1] == -1
