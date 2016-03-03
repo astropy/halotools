@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np 
+from astropy.table import Table 
 
 from .. import array_utils
 
@@ -175,6 +176,21 @@ def test_convert_to_ndarray13():
     assert len(varr) == 1
     assert str(varr[0]) == str('abc')
 
+def test_convert_to_ndarray14():
+    """
+    """
+    v = []
+    varr = array_utils.convert_to_ndarray(v) 
 
+def test_convert_to_ndarray15():
+    """
+    """
+    v = np.array([])
+    varr = array_utils.convert_to_ndarray(v) 
 
+def test_convert_to_ndarray15():
+    """
+    """
+    t = Table(np.array([]))
+    tarr = array_utils.convert_to_ndarray(t) 
 

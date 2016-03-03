@@ -328,6 +328,8 @@ class MonteCarloGalProf(object):
 
         # get random angles
         Ngals = len(profile_params[0])
+        if Ngals == 0: 
+            return None, None, None
         x, y, z = self.mc_unit_sphere(Ngals, **kwargs)
 
         # Get the radial positions of the galaxies scaled by the halo radius
@@ -395,6 +397,8 @@ class MonteCarloGalProf(object):
         """
 
         x, y, z = self.mc_solid_sphere(*profile_params, **kwargs)
+        if x is None:
+            return None, None, None
 
         ### Retrieve the halo_radius
         if 'table' in kwargs:    
@@ -481,6 +485,8 @@ class MonteCarloGalProf(object):
         if 'table' in kwargs:
             table = kwargs['table']
             x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
+            if x is None:
+                return None
             if overwrite_table_pos is True:
                 table['x'][:] += x
                 table['y'][:] += y
@@ -497,7 +503,10 @@ class MonteCarloGalProf(object):
                     "to mc_pos, must pass the following keyword arguments:\n"
                     "``profile_params``, ``halo_radius``.")
             x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
-            return x, y, z
+            if x is None:
+                return None
+            else:
+                return x, y, z
 
 
     def _vrad_disp_from_lookup(self, scaled_radius, *profile_params, **kwargs):
@@ -650,7 +659,11 @@ class MonteCarloGalProf(object):
         scaled_radius = d/rhalo
 
         profile_params = [table[key] for key in self.prof_param_keys]
-    
+
+        Ngals = len(profile_params[0])
+        if Ngals == 0:
+            return None, None, None
+
         total_mass = table[self.prim_haloprop_key]
 
         vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)

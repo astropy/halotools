@@ -141,4 +141,10 @@ class TestHodMockFactory(TestCase):
             | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
         assert np.all(cens_outside_boundary_mask == False)
 
+    def test_zero_satellite_edge_case(self):
+        model = PrebuiltHodModelFactory('zheng07', threshold = -18)
+        model.param_dict['logM0'] = 20
+
+        halocat = FakeSim()
+        model.populate_mock(halocat = halocat)
 
