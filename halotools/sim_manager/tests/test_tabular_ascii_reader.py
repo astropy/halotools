@@ -24,11 +24,20 @@ else:
 
 __all__ = ('TestTabularAsciiReader', )
 
+
+def write_tabular_data(fname):
+    with open(fname, 'w') as f:
+        f.write('# id  vmax  mvir  upid\n')
+        f.write('100  100.  1e9  3999494332\n')
+        f.write('101  200.  1e10  -1\n')
+        f.write('102  300.  1e11  3999494331\n')
+        f.write('103  400.  1e12  3999494332\n')
+
 class TestTabularAsciiReader(TestCase):
 
     def setUp(self):
 
-        self.tmpdir = os.path.join(_find_home(), 'Desktop', 'tmp_testingdir')
+        self.tmpdir = os.path.join(_find_home(), '.temp_halotools_testing_dir')
         try:
             os.makedirs(self.tmpdir)
         except OSError:
@@ -41,23 +50,23 @@ class TestTabularAsciiReader(TestCase):
 
     def test_get_fname(self):
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')})
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')})
 
         with pytest.raises(IOError) as err:
             reader = TabularAsciiReader(
                 os.path.basename(self.dummy_fname), 
-                columns_to_keep_dict = {'mass': (3, 'f4')})
+                columns_to_keep_dict = {'mass': (2, 'f4')})
         substr = 'is not a file'
         assert substr in err.value.message
 
     def test_get_header_char(self):
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
             header_char = '*')
 
         with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(self.dummy_fname, 
-                columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                columns_to_keep_dict = {'mass': (2, 'f4')}, 
                 header_char = '###')
         substr = 'must be a single string character'
         assert substr in err.value.message
@@ -66,7 +75,7 @@ class TestTabularAsciiReader(TestCase):
 
         with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
-                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4', 'c')}, 
+                self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4', 'c')}, 
                 header_char = '*')
         substr = 'must be a two-element tuple.'
         assert substr in err.value.message
@@ -80,7 +89,7 @@ class TestTabularAsciiReader(TestCase):
 
         with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
-                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'Jose Canseco')}, 
+                self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'Jose Canseco')}, 
                 header_char = '*')
         substr = 'The second element of the two-element tuple'
         assert substr in err.value.message
@@ -88,44 +97,44 @@ class TestTabularAsciiReader(TestCase):
     def test_verify_input_row_cuts(self):
 
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
             row_cut_min_dict = {'mass': 8})
 
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
             row_cut_max_dict = {'mass': 8})
 
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
             row_cut_eq_dict = {'mass': 8})
 
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
             row_cut_neq_dict = {'mass': 8})
 
     def test_verify_min_max_consistency(self):
 
         reader = TabularAsciiReader(
-            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
             row_cut_min_dict = {'mass': 8}, row_cut_max_dict = {'mass': 9})
       
         with pytest.raises(ValueError) as err:
             reader = TabularAsciiReader(
-                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'mass': 8})
         substr = 'This will result in zero selected rows '
         assert substr in err.value.message
 
         with pytest.raises(KeyError) as err:
             reader = TabularAsciiReader(
-                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
         substr = 'The ``vmax`` key does not appear in the input'
         assert substr in err.value.message
 
         with pytest.raises(KeyError) as err:
             reader = TabularAsciiReader(
-                self.dummy_fname, columns_to_keep_dict = {'vmax': (3, 'f4')}, 
+                self.dummy_fname, columns_to_keep_dict = {'vmax': (1, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
         substr = 'The ``mass`` key does not appear in the input'
         assert substr in err.value.message
@@ -134,25 +143,24 @@ class TestTabularAsciiReader(TestCase):
 
         with pytest.raises(ValueError) as err:
             reader = TabularAsciiReader(
-                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
-                row_cut_eq_dict = {'mass': 8}, row_cut_neq_dict = {'mass': 8})
+                self.dummy_fname, columns_to_keep_dict = {'mvir': (2, 'f4')}, 
+                row_cut_eq_dict = {'mvir': 8}, row_cut_neq_dict = {'mvir': 8})
         substr = 'This will result in zero selected rows '
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog1(self):
         fname = 'abc'
-        columns_to_keep_dict = {'spin_bullock': (43, 'f4')}
+        columns_to_keep_dict = {'vmax': (1, 'f4')}
 
         with pytest.raises(IOError) as err:
             reader = TabularAsciiReader(fname, columns_to_keep_dict)
         substr = "is not a file"
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog2(self):
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
-        columns_to_keep_dict = {'spin_bullock': (43, 'f4'), 'x': (43, 'f4')}
+        fname = self.dummy_fname
+        write_tabular_data(fname)
+        columns_to_keep_dict = {'upid': (3, 'i8'), 'vmax': (3, 'f4')}
 
         with pytest.raises(ValueError) as err:
             reader = TabularAsciiReader(fname, columns_to_keep_dict)
@@ -160,47 +168,43 @@ class TestTabularAsciiReader(TestCase):
         assert substr in err.value.message
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog3(self):
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
-        columns_to_keep_dict = {'spin_bullock': (43, 'f4')}
-
-        row_cut_min_dict = {'spin_bullock': 0.5}
-        row_cut_max_dict = {'spin_bullock': 0.4}
+        columns_to_keep_dict = {'vmax': (1, 'f4')}
+        write_tabular_data(self.dummy_fname)
+        row_cut_min_dict = {'vmax': 0.5}
+        row_cut_max_dict = {'vmax': 0.4}
 
         with pytest.raises(ValueError) as err:
-            reader = TabularAsciiReader(fname, columns_to_keep_dict, 
+            reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict, 
                 row_cut_min_dict = row_cut_min_dict, row_cut_max_dict=row_cut_max_dict)
         substr = "This will result in zero selected rows and is not permissible."
         assert substr in err.value.message
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog4(self):
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
-        columns_to_keep_dict = {'spin_bullock': (43, 'f4')}
+        columns_to_keep_dict = {'vmax': (1, 'f4')}
+        write_tabular_data(self.dummy_fname)
 
-        row_cut_eq_dict = {'spin_bullock': 0.5}
-        row_cut_neq_dict = {'spin_bullock': 0.5}
+        row_cut_eq_dict = {'vmax': 0.5}
+        row_cut_neq_dict = {'vmax': 0.5}
 
         with pytest.raises(ValueError) as err:
-            reader = TabularAsciiReader(fname, columns_to_keep_dict, 
+            reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict, 
                 row_cut_eq_dict = row_cut_eq_dict, row_cut_neq_dict=row_cut_neq_dict)
         substr = "This will result in zero selected rows and is not permissible."
         assert substr in err.value.message
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog5(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        write_tabular_data(self.dummy_fname)
 
-        columns_to_keep_dict = {'spin_bullock': (43, 'f4'), 'id': (1, 'i8'), 'upid': (6, 'i8')}
+        columns_to_keep_dict = {'vmax': (1, 'f4'), 'id': (0, 'i8'), 'upid': (3, 'i8')}
 
-        reader = TabularAsciiReader(fname, columns_to_keep_dict, 
-            row_cut_min_dict = {'spin_bullock': 0.1}, 
-            row_cut_max_dict = {'spin_bullock': 0.5}, 
+        reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict, 
+            row_cut_min_dict = {'vmax': 101}, 
+            row_cut_max_dict = {'vmax': 399}, 
             row_cut_eq_dict = {'upid': -1}, 
             row_cut_neq_dict = {'id': -1}
             )
@@ -208,28 +212,27 @@ class TestTabularAsciiReader(TestCase):
         arr = reader.read_ascii()
 
         # Verify that the cuts were applied correctly 
-        assert np.all(arr['spin_bullock'] >= 0.1)
-        assert np.all(arr['spin_bullock'] <= 0.5)
+        assert np.all(arr['vmax'] >= 101)
+        assert np.all(arr['vmax'] <= 399)
         assert np.all(arr['upid'] == -1)
 
         # verify that the cuts were non-trivial 
-        reader = TabularAsciiReader(fname, columns_to_keep_dict)
+        reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict)
         arr = reader.read_ascii()
-        assert np.any(arr['spin_bullock'] < 0.1)
-        assert np.any(arr['spin_bullock'] > 0.5)
+        assert np.any(arr['vmax'] < 101)
+        assert np.any(arr['vmax'] > 399)
         assert np.any(arr['upid'] != -1)
 
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog6(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        write_tabular_data(self.dummy_fname)
 
-        columns_to_keep_dict = {'spin_bullock': (43, 'f4'), 'id': (1, 'i8'), 'upid': (6, 'i8')}
+        columns_to_keep_dict = {'vmax': (1, 'f4'), 'id': (0, 'i8'), 'upid': (3, 'i8')}
 
-        reader = TabularAsciiReader(fname, columns_to_keep_dict)
+        reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict)
 
         with pytest.raises(ValueError) as err:
             arr = reader.read_ascii(chunk_memory_size = 0)
