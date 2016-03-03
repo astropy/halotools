@@ -276,12 +276,12 @@ class HeavisideAssembias(object):
 
         elif self._loginterp is True:
             spline_function = model_helpers.custom_spline(
-                np.log10(self._split_abscissa), self._split_ordinates)
+                np.log10(self._split_abscissa), self._split_ordinates, k=3)
             result = spline_function(np.log10(prim_haloprop))
         else:
             model_abscissa = self._split_abscissa
             spline_function = model_helpers.custom_spline(
-                self._split_abscissa, self._split_ordinates)
+                self._split_abscissa, self._split_ordinates, k=3)
             result = spline_function(prim_haloprop)
 
         return result
@@ -308,7 +308,7 @@ class HeavisideAssembias(object):
         model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)] 
             for ipar in range(len(self._assembias_strength_abscissa)))
         spline_function = model_helpers.custom_spline(
-            self._assembias_strength_abscissa, list(model_ordinates))
+            self._assembias_strength_abscissa, list(model_ordinates), k=3)
 
         if self._loginterp is True:
             result = spline_function(np.log10(prim_haloprop))

@@ -240,7 +240,8 @@ def custom_spline(table_abscissa, table_ordinates, **kwargs):
         ordinate values defining the interpolation 
 
     k : int, optional
-        Degree of the desired spline interpolation
+        Degree of the desired spline interpolation. 
+        Default is 1. 
 
     Returns 
     -------
@@ -270,7 +271,7 @@ def custom_spline(table_abscissa, table_ordinates, **kwargs):
     if 'k' in kwargs:
         k = np.min([custom_len(table_abscissa)-1, kwargs['k'], max_scipy_spline_degree])
     else:
-        k = np.min([custom_len(table_abscissa)-1, max_scipy_spline_degree])
+        k = 1
 
     if k<0:
         raise HalotoolsError("Spline degree must be non-negative")
