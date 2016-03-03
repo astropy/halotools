@@ -256,6 +256,9 @@ class HodModelFactory(ModelFactory):
             Dictionary of any possible remaining keyword arguments passed to the `__init__` constructor 
             that are not part of the composite model dictionary, e.g., ``model_feature_calling_sequence``. 
         """
+        if len(kwargs) == 0:
+            msg = ("You did not pass any model features to the factory")
+            raise HalotoolsError(msg)
 
         if 'baseline_model_instance' in kwargs:
             baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary

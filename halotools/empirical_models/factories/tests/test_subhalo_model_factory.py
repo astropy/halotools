@@ -146,7 +146,11 @@ class TestSubhaloModelFactory(TestCase):
         assert hasattr(model1, 'mock')
         assert 'stellar_mass' in model1.mock.galaxy_table.keys()
 
-
+    def test_empty_arguments(self):
+        with pytest.raises(HalotoolsError) as err:
+            model = SubhaloModelFactory()
+        substr = "You did not pass any model features to the factory"
+        assert substr in err.value.message
 
     def tearDown(self):
         pass
