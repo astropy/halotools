@@ -187,15 +187,6 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(norm10a < 2*r)
      
         t = Table({'c': self.c15})
-        # with pytest.raises(HalotoolsError) as exc:
-        #     x, y, z = self.nfw.mc_halo_centric_pos(
-        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, table = t)
-        # t['host_centric_distance'] = 0.
-        # x, y, z = self.nfw.mc_halo_centric_pos(
-        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, table = t)
-        # norm = t['host_centric_distance']
-        # assert np.all(norm > 0)
-        # assert np.all(norm < halo_radius)
 
     def test_mc_pos(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 

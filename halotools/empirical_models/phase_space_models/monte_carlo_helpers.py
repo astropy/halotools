@@ -147,12 +147,12 @@ class MonteCarloGalProf(object):
             for ii, items in enumerate(product(*profile_params_list)):
                 table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
                 log_table_ordinates = np.log10(table_ordinates)
-                funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
+                funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=3)
                 func_table.append(funcobj)
 
                 velocity_table_ordinates = self.dimensionless_radial_velocity_dispersion(
                     radius_array, *items)
-                velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates)
+                velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates, k=3)
                 velocity_func_table.append(velocity_funcobj)
                 # Print a message for the expected runtime of the table build
                 if ii == 9:
