@@ -39,6 +39,9 @@ class CachedHaloCatalog(object):
     is stored in the ``ptcl_table`` attribute. 
     See the Examples section below for details on how to 
     access and manipulate this data. 
+
+    For a list of available snapshots provided by Halotools, 
+    see :ref:`supported_sim_list`. 
     """
     acceptable_kwargs = ('ptcl_version_name', 'fname', 'simname', 
         'halo_finder', 'redshift', 'version_name', 'dz_tol', 'update_cached_fname', 

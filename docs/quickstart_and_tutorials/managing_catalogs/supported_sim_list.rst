@@ -18,6 +18,18 @@ To see simple examples of how to manipulate the data stored in halo catalogs,
 see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
 For more detailed information, refer to the :ref:`halo_catalog_analysis_quickstart` tutorial. 
 
+Below appears a summary table of the provided snapshots. See the sections below for further information 
+
+============  ===========================  ======================
+simname          available halo-finders     available redshifts 
+============  ===========================  ======================
+bolshoi       rockstar, bdm                0.0, 0.5, 0.84, 2.0
+bolplanck     rockstar                     0.0, 0.5, 1.00, 2.0
+multidark     rockstar                     0.0, 0.5, 1.00, 2.15
+consuelo      rockstar                     0.0, 0.5, 1.00, 2.15
+============  ===========================  ======================
+
+
 
 Bolshoi (simname = `bolshoi`)
 ==================================
