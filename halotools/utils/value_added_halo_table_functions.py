@@ -13,7 +13,7 @@ from warnings import warn
 
 from astropy.table import Table 
 
-from .aggregation import add_new_table_column
+from .group_member_generator import group_member_generator
 
 from ..custom_exceptions import HalotoolsError 
 
@@ -35,9 +35,9 @@ def broadcast_host_halo_property(table, halo_property_key,
         Name of the column to be broadcasted to all halo members 
 
     table_is_already_sorted : bool, optional 
-        If set to True, `add_new_table_column` will skip the pre-processing 
+        If set to True, `group_member_generator` will skip the pre-processing 
         step of sorting the table. This improves performance, 
-        but `add_new_table_column` will return incorrect values 
+        but `group_member_generator` will return incorrect values 
         if the table has not been sorted properly. 
         Default is False, in which case the returned table will 
         generally be sorted in a different order than the input table. 
@@ -56,7 +56,7 @@ def broadcast_host_halo_property(table, halo_property_key,
     by ['halo_upid', 'halo_hostid'], 
     and that the new column will be named ``halo_property_key_host_halo``. 
     For more general functionality, 
-    use `~halotools.utils.add_new_table_column` instead. 
+    use `~halotools.utils.group_member_generator` instead. 
     """
 
     try:
@@ -81,14 +81,23 @@ def broadcast_host_halo_property(table, halo_property_key,
     elif (new_colname in table.keys()) & (delete_possibly_existing_column is True):
         del table[new_colname]
 
-    new_coltype = table[halo_property_key].dtype
+
+    if table_is_already_sorted is True:
+        pass
+    else:
+        table.sort(['halo_hostid', 'halo_upid'])
+
     grouping_key = 'halo_hostid'
-    aggregation_function = lambda x: x[0]
-    colnames_needed_by_function = [halo_property_key]
-    sorting_keys = ['halo_hostid', 'halo_upid']
-    add_new_table_column(table, new_colname, new_coltype, 
-        grouping_key, aggregation_function, colnames_needed_by_function, 
-        sorting_keys=sorting_keys, table_is_already_sorted=table_is_already_sorted)
+    requested_columns = [halo_property_key]
+    group_gen = group_member_generator(table, grouping_key, requested_columns)
+
+    result = np.zeros(len(table), dtype = table[halo_property_key].dtype)
+    for first, last, member_props in group_gen:
+        prop = member_props[0]
+        hostprop = prop[0]
+        result[first:last] = hostprop
+    table[new_colname] = result
+
 
 
 def add_halo_hostid(table, delete_possibly_existing_column = False):

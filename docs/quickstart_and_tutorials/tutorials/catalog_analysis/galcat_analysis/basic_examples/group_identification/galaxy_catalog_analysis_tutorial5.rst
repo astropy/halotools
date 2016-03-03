@@ -91,43 +91,36 @@ including redshift-space distortion effects.
 Determine group centrals and satellites
 ---------------------------------------
 In the following calculation, we'll use the 
-`~halotools.utils.add_new_table_column` function in order to group our 
+`~halotools.utils.group_member_generator` in order to group our 
 galaxy table together according to the FoF-determined group, and then 
 calculate a few quantities based on group membership. You can read about 
-the `~halotools.utils.add_new_table_column` function in its docstring, 
-and see usage similar to what follows in :ref:`galaxy_catalog_analysis_tutorial1`. 
+the `~halotools.utils.group_member_generator` in its docstring. 
+You may also find it useful to review :ref:`galaxy_catalog_analysis_tutorial1` 
+for usage similar to what follows, only with more exposition. 
+
+Here we perform another two-column sort. First, the galaxies 
+are sorted by their FoF group ID, and then within each grouping, 
+they are sorted by :math:`-M_{\ast}`, which will place the most massive 
+galaxy first within each FoF group. 
 
 .. code:: python
 
-    from halotools.utils import add_new_table_column
+    from halotools.utils import group_member_generator
 
     galaxy_sample['negative_stellar_mass'] = -1*galaxy_sample['stellar_mass']
-
+    galaxy_sample.sort(['fof_group_id', 'negative_stellar_mass'])
     grouping_key = 'fof_group_id'
-    new_colname, new_coltype = 'group_central', bool
-    
-    sorting_keys = ['fof_group_id', 'negative_stellar_mass']
-    # In sorting by -M*, within each fof group the most 
-    # massive galaxy will appear first. The most massive 
-    # galaxy in a group is typically defined as the group central
-    
-    # Define the function that assigns the first 
-    # element of each group to be True, and all remaining 
-    # elements to be False
-    def assign_first_group_member_true(x):
-        result = [False for elt in x]
-        result[0] = True
-        return result
-    aggregation_function = assign_first_group_member_true 
-    colnames_needed_by_function = ['fof_group_id'] # the value is never used, so any column will do
-    
-    add_new_table_column(galaxy_sample, 
-            new_colname, new_coltype, grouping_key, 
-            aggregation_function, colnames_needed_by_function, 
-            sorting_keys = sorting_keys)
-    
-    # we can now dispense with the negative_stellar_mass column
-    del galaxy_sample['negative_stellar_mass']
+    requested_columns = []
+
+    group_gen = group_member_generator(galaxy_sample, grouping_key, requested_columns)
+
+    group_central = np.zeros(len(galaxy_sample), dtype=bool)
+    for first, last, member_props in group_gen:
+        temp_result = [False for member in xrange(first, last)]
+        temp_result[0] = True
+        group_central[first:last] = temp_result
+        
+    galaxy_sample['group_central'] = group_central
 
 Let's inspect our results
 
@@ -158,22 +151,19 @@ Let's inspect our results
 
 Calculating group richness :math:`N_{\rm group}`
 ------------------------------------------------
+Now we'll use the same generator to calculate the total number of members in each FoF group. 
 
 .. code:: python
 
     grouping_key = 'fof_group_id'
-    new_colname, new_coltype = 'group_richness', 'i4'
-    
-    sorting_keys = ['fof_group_id']
-    
-    def richness(x): return len(x)
-    aggregation_function = richness 
-    colnames_needed_by_function = ['fof_group_id'] # the value is never used, so any column will do
-    
-    add_new_table_column(galaxy_sample, 
-            new_colname, new_coltype, grouping_key, 
-            aggregation_function, colnames_needed_by_function, 
-            table_is_already_sorted = True)
+    requested_columns = []
+
+    group_gen = group_member_generator(galaxy_sample, grouping_key, requested_columns)
+
+    group_richness = np.zeros(len(galaxy_sample), dtype=int)
+    for first, last, member_props in group_gen:
+        group_richness[first:last] = last-first
+    galaxy_sample['group_richness'] = group_richness
 
 .. code:: python
 
@@ -205,23 +195,19 @@ Calculate true halo mass of group central :math:`M_{\rm cen}^{\rm true}`
 
 .. code:: python
 
+    galaxy_sample.sort(['fof_group_id', 'negative_stellar_mass'])
     grouping_key = 'fof_group_id'
-    new_colname, new_coltype = 'group_central_true_mvir', 'f4'
-    
-    sorting_keys = ['fof_group_id']
-    
-    # Define the function that returns whatever value 
-    # is stored in the first group member
-    def return_first_element_in_sequence(x):
-        return x[0]
-    aggregation_function = return_first_element_in_sequence 
-    colnames_needed_by_function = ['halo_mvir_host_halo'] # the value is never used, so any column will do
-    
-    add_new_table_column(galaxy_sample, 
-            new_colname, new_coltype, grouping_key, 
-            aggregation_function, colnames_needed_by_function, 
-            table_is_already_sorted = True)
+    requested_columns = ['halo_mvir_host_halo']
+    group_gen = group_member_generator(galaxy_sample, grouping_key, requested_columns)
 
+    group_central_true_mvir = np.zeros(len(galaxy_sample))
+    for first, last, member_props in group_gen:
+        member_masses = member_props[0]
+        true_mass = member_masses[0]
+        group_central_true_mvir[first:last] = true_mass
+
+    galaxy_sample['group_central_true_mvir'] = group_central_true_mvir
+    
 Calculate :math:`\langle N_{\rm group}\rangle` as a function of :math:`M_{\rm cen}^{\rm true}`
 ----------------------------------------------------------------------------------------------
 

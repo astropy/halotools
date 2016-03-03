@@ -48,29 +48,37 @@ Calculate total stellar mass :math:`M_{\ast}^{\rm tot}` in each halo
 ------------------------------------------------------------------------------
 
 To calculate the total stellar mass of galaxies in each halo, we'll use
-the `halotools.utils.add_new_table_column` function. You can read more about the 
+the `halotools.utils.group_member_generator`. You can read more about the 
 details of that function in its documentation, here we'll just demo some basic usage. 
+Briefly, this generator can be used to iterate over your galaxy population 
+on a group-by-group basis, so that you can perform group-wise calculations 
+with each step of the iteration. In this case, at each step of the iteration 
+we'll sum up the stellar masses of each group's members. 
 
 The ``halo_id`` is a natural grouping key for a galaxy catalog whose
-host halos are known. Let's use this grouping key to calculate the total
-stellar mass of galaxies in each halo, :math:`M_{\ast}^{\rm tot},` and
-broadcast the result to the members of the halo.
+host halos are known. So we'll sort our galaxy catalog on this column, 
+notify the `~halotools.utils.group_member_generator` that we have done so 
+by passing in ``halo_id`` as the *grouping_key*, and then request that 
+the generator yield the data stored in the ``stellar_mass`` column 
+at each iteration. The we'll loop over the generator,  
+calculate the sum of the yielded stellar mass column, 
+and broadcast the result to each group member. 
 
 .. code:: python
 
-    from halotools.utils import add_new_table_column
+    from halotools.utils import group_member_generator
 
+    gals.sort('halo_id')
     grouping_key = 'halo_id'
-    new_colname, new_coltype = 'halo_total_stellar_mass', 'f4'
-    
-    # The aggregation function operates on the members of each halo, 
-    # in this case returning the sum of whatever column it is passed
-    aggregation_function = np.sum
-    colnames_needed_by_function = ['stellar_mass'] 
-    
-    add_new_table_column(gals, 
-            new_colname, new_coltype, grouping_key, 
-            aggregation_function, colnames_needed_by_function)
+    requested_columns = ['stellar_mass']
+    group_gen = group_member_generator(gals, grouping_key, requested_columns)
+
+    total_stellar_mass = np.zeros(len(gals))
+    for first, last, member_props in group_gen:
+        stellar_mass_of_members = member_props[0]
+        total_stellar_mass[first:last] = sum(stellar_mass_of_members)
+
+    gals['halo_total_stellar_mass'] = total_stellar_mass
 
 Our ``gals`` table now has a ``halo_total_stellar_mass`` column.
 
@@ -78,29 +86,29 @@ Calculate host halo mass :math:`M_{\rm host}` of each galaxy
 ------------------------------------------------------------
 
 Now we'll do a very similar calculation, but instead broadcasting the
-host halo mass to each halo's members
+host halo mass to each halo's members. Here we'll perform a two-property sort. 
+By sorting first on ``halo_id`` and then on ``halo_upid``, what we accomplish is that 
+galaxies sharing a common halo are grouped together, and then within each grouping 
+the true central galaxy appears first in the sequence. This means that when the 
+`~halotools.utils.group_member_generator` yields arrays to us, we can retrieve the 
+property of the central galaxy via the first element in each yielded array. 
+In this next calculation, we'll exploit that information to broadcast the 
+host halo virial mass to all members of the halo. 
 
 .. code:: python
 
-    new_colname, new_coltype = 'halo_mhost', 'f4'
+    gals.sort(['halo_id', 'halo_upid'])
     grouping_key = 'halo_id'
-    
-    sorting_keys = ['halo_id', 'halo_upid']
-    # upid = -1 for the the host halo, 
-    # so this choice for ``sorting_keys`` will place 
-    # host halos in the first element of each grouped array
-    
-    # Define the function that returns whatever value 
-    # is stored in the first group member
-    def return_first_element_in_sequence(x):
-        return x[0]
-    aggregation_function = return_first_element_in_sequence 
-    colnames_needed_by_function = ['halo_mvir'] 
-    
-    add_new_table_column(gals, 
-            new_colname, new_coltype, grouping_key, 
-            aggregation_function, colnames_needed_by_function, 
-            sorting_keys=sorting_keys)
+    requested_columns = ['halo_mvir']
+    group_gen = group_member_generator(gals, grouping_key, requested_columns)
+
+    host_mass = np.zeros(len(gals))
+    for first, last, member_props in group_gen:
+        mvir_members = member_props[0]
+        mvir_host = mvir_members[0]
+        host_mass[first:last] = mvir_host
+
+    gals['halo_mhost'] = host_mass
 
 Our ``gals`` table now has a ``halo_mhost`` column.
 
@@ -111,7 +119,9 @@ Now we'll exploit our previous calculations to compute the mean total stellar ma
 in bins of halo mass. For this calculation, 
 the `~halotools.mock_observables.mean_y_vs_x` provides useful wrapper behavior around 
 `scipy.stats.binned_statistic` and `numpy.histogram`. 
-
+Note that `~halotools.mock_observables.mean_y_vs_x` is really just a convenience 
+function used for quick exploratory work. For results going into science publications, 
+be sure to check how your findings depend on bin width, sampling, etc. 
 
 .. code:: python
 
@@ -150,12 +160,13 @@ Plot the result
 Quiescent fraction of centrals and satellites
 ----------------------------------------------
 
-In this section we'll perform a very similar calculation to the above, only here we'll compute the average quiescent fraction of centrals and satellites. 
+In this section we'll perform a very similar calculation to the above, 
+only here we'll compute the average quiescent fraction of centrals and satellites. 
 
 Calculate :math:`\langle F_{\rm q}^{\rm cen}\vert M_{\rm halo} \rangle` and :math:`\langle F_{\rm q}^{\rm sat} \vert M_{\rm halo}\rangle`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above calculation, we needed to create new columns for our galaxy catalog, :math:`M_{\rm host}` and :math:`M_{\ast}^{\rm tot}`. Here we'll reuse the :math:`M_{\rm host}` column, and our model already created a boolean-valued ``quiescent`` column for our galaxies. So all we need to do is calculate the average trends as a function of halo mass. 
+In the above calculation, we needed to create new columns for our galaxy catalog, :math:`M_{\rm host}` and :math:`M_{\ast}^{\rm tot}`. Here we'll reuse the :math:`M_{\rm host}` column, and our model already created a boolean-valued ``quiescent`` column for our galaxies. So no group iteration is necessary; all we need to do is calculate the average trends as a function of halo mass. 
 
 .. code:: python
 
