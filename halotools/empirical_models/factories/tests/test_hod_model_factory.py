@@ -23,5 +23,11 @@ class TestHodModelFactory(TestCase):
         """
         pass
 
+    def test_empty_arguments(self):
+        with pytest.raises(HalotoolsError) as err:
+            model = HodModelFactory()
+        substr = "You did not pass any model features to the factory"
+        assert substr in err.value.message
+
     def tearDown(self):
         pass

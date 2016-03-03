@@ -261,6 +261,9 @@ class SubhaloModelFactory(ModelFactory):
         ---------
         :ref:`subhalo_model_factory_parsing_kwargs`
         """
+        if len(kwargs) == 0:
+            msg = ("You did not pass any model features to the factory")
+            raise HalotoolsError(msg)
 
         if 'baseline_model_instance' in kwargs:
             baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary
