@@ -3,7 +3,14 @@ import numpy as np
 
 from .. import array_utils
 
-__all__ = ['test_find_idx_nearest_val']
+__all__ = ('test_find_idx_nearest_val', 
+    'test_convert_to_ndarray1', 'test_convert_to_ndarray2', 
+    'test_convert_to_ndarray3', 'test_convert_to_ndarray4', 
+    'test_convert_to_ndarray5', 'test_convert_to_ndarray6', 
+    'test_convert_to_ndarray7', 'test_convert_to_ndarray8', 
+    'test_convert_to_ndarray9', 'test_convert_to_ndarray10', 
+    'test_convert_to_ndarray11', 'test_convert_to_ndarray12', 
+    'test_convert_to_ndarray13')
 
 def test_find_idx_nearest_val():
 

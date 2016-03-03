@@ -9,6 +9,7 @@ from ..table_utils import SampleSelector, compute_conditional_percentiles
 
 from ...sim_manager import FakeSim
 
+__all__ = ('TestSampleSelector', 'TestComputeConditionalPercentiles')
 
 class TestSampleSelector(TestCase):
 	"""
