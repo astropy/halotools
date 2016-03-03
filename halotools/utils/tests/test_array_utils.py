@@ -175,6 +175,12 @@ def test_convert_to_ndarray13():
     assert len(varr) == 1
     assert str(varr[0]) == str('abc')
 
+def test_convert_to_ndarray14():
+    """
+    """
+    v = []
+    varr = array_utils.convert_to_ndarray(v) 
+    
 
 
 
