@@ -23,11 +23,126 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
+def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
+                  do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,\
+                  approx_cell2_size , approx_cellran_size):
+    """
+    Count random pairs.  There are two high level branches:
+        1. w/ or wo/ PBCs and randoms.
+        2. PBCs and analytical randoms
+    There are also logical bits to do RR and DR pair counts, as not all estimators
+    need one or the other, and not doing these can save a lot of calculation.
+    
+    Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
+    shells, which is the correct volume to use for a continious cubic volume with PBCs
+    """
+    def nball_volume(R,k=3):
+        """
+        Calculate the volume of a n-shpere.
+        This is used for the analytical randoms.
+        """
+        return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
+    
+    #randoms provided, so calculate random pair counts.
+    if randoms is not None:
+        if do_RR==True:
+            RR = npairs(randoms, randoms, rbins, period=period,
+                        num_threads=num_threads,
+                        approx_cell1_size=approx_cellran_size,
+                        approx_cell2_size=approx_cellran_size)
+            RR = np.diff(RR)
+        else: RR=None
+        if do_DR==True:
+            D1R = npairs(sample1, randoms, rbins, period=period,
+                         num_threads=num_threads,
+                         approx_cell1_size=approx_cell1_size,
+                         approx_cell2_size=approx_cellran_size
+                         )
+            D1R = np.diff(D1R)
+        else: D1R=None
+        if _sample1_is_sample2:
+            D2R = None
+        else:
+            if do_DR==True:
+                D2R = npairs(sample2, randoms, rbins, period=period,
+                             num_threads=num_threads,
+                             approx_cell1_size=approx_cell2_size,
+                             approx_cell2_size=approx_cellran_size)
+                D2R = np.diff(D2R)
+            else: D2R=None
+        
+        return D1R, D2R, RR
+    
+    #PBCs and no randoms--calculate randoms analytically.
+    elif randoms is None:
+        
+        #set the number of randoms equal to the number of points in sample1
+        NR = len(sample1)
+        
+        #do volume calculations
+        v = nball_volume(rbins) #volume of spheres
+        dv = np.diff(v) #volume of shells
+        global_volume = period.prod() #volume of simulation
+        
+        #calculate randoms for sample1
+        N1 = np.shape(sample1)[0] #number of points in sample1
+        rho1 = N1/global_volume #number density of points
+        D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
+        
+        #calculate randoms for sample2
+        N2 = np.shape(sample2)[0] #number of points in sample2
+        rho2 = N2/global_volume #number density of points
+        D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
+        
+        #calculate the random-random pairs.
+        rhor = (NR**2)/global_volume
+        RR = (dv*rhor)
+        
+        return D1R, D2R, RR
+
+def _pair_counts(sample1, sample2, rbins, 
+    period, num_threads, do_auto, do_cross,
+    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+    """
+    Count data-data pairs.
+    """
+    if do_auto==True:
+        D1D1 = npairs(sample1, sample1, rbins, period=period, 
+            num_threads=num_threads,
+            approx_cell1_size=approx_cell1_size,
+            approx_cell2_size=approx_cell1_size)
+        D1D1 = np.diff(D1D1)
+    else:
+        D1D1=None
+        D2D2=None
+    
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross==True:
+            D1D2 = npairs(sample1, sample2, rbins, period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cell2_size)
+            D1D2 = np.diff(D1D2)
+        else: D1D2=None
+        if do_auto==True:
+            D2D2 = npairs(sample2, sample2, rbins, period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell2_size,
+                approx_cell2_size=approx_cell2_size)
+            D2D2 = np.diff(D2D2)
+        else: D2D2=None
+    
+    return D1D1, D1D2, D2D2
+
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
-         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-         max_sample_size=int(1e6), approx_cell1_size = None,
-         approx_cell2_size = None, approx_cellran_size = None):
+    do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+    max_sample_size=int(1e6), approx_cell1_size = None,
+    approx_cell2_size = None, approx_cellran_size = None, 
+    RR_precomputed = None, NR_precomputed = None):
     """ 
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
     
@@ -95,7 +210,21 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     approx_cellran_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
         ``approx_cell1_size`` for details. 
-    
+
+    RR_precomputed : array_like, optional 
+        Array storing the number of previously calculated RR-counts. 
+        Must have the same length as *len(rbins)*. 
+        If the ``RR_precomputed`` argument is provided, 
+        you must also provide the ``NR_precomputed`` argument. 
+        Default is None. 
+
+    NR_precomputed : int, optional 
+        Number of points in the random sample used to calculate 
+        ``RR_precomputed``.  
+        If the ``NR_precomputed`` argument is provided, 
+        you must also provide the ``RR_precomputed`` argument. 
+        Default is None. 
+
     Returns 
     -------
     correlation_function(s) : numpy.array
@@ -168,134 +297,27 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     """
     
     #check input arguments using clustering helper functions
-    function_args = [sample1, rbins, sample2, randoms, period, do_auto, do_cross,\
-                     estimator, num_threads, max_sample_size, approx_cell1_size,\
-                     approx_cell2_size, approx_cellran_size]
+    function_args = (sample1, rbins, sample2, randoms, period, 
+        do_auto, do_cross, estimator, num_threads, max_sample_size, 
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, 
+        RR_precomputed, NR_precomputed)
     
     #pass arguments in, and get out processed arguments, plus some control flow variables
-    sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-    _sample1_is_sample2, PBCs = _tpcf_process_args(*function_args)
+    (sample1, rbins, sample2, randoms, period, 
+        do_auto, do_cross, num_threads,
+        _sample1_is_sample2, PBCs, 
+        RR_precomputed, NR_precomputed) = _tpcf_process_args(*function_args)
     
     #Below we define functions to count data-data pairs and random pairs.
     #After that, we get to work. The pair counting functions here actually call outside
     #pair counters that are highly optimized. Beware that the control flow inside 
     #these functions here can look a bit complicated, but don't des-pair!
     
-    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
-                      do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,\
-                      approx_cell2_size , approx_cellran_size):
-        """
-        Count random pairs.  There are two high level branches:
-            1. w/ or wo/ PBCs and randoms.
-            2. PBCs and analytical randoms
-        There are also logical bits to do RR and DR pair counts, as not all estimators
-        need one or the other, and not doing these can save a lot of calculation.
-        
-        Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
-        shells, which is the correct volume to use for a continious cubic volume with PBCs
-        """
-        def nball_volume(R,k=3):
-            """
-            Calculate the volume of a n-shpere.
-            This is used for the analytical randoms.
-            """
-            return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
-        
-        #randoms provided, so calculate random pair counts.
-        if randoms is not None:
-            if do_RR==True:
-                RR = npairs(randoms, randoms, rbins, period=period,
-                            num_threads=num_threads,
-                            approx_cell1_size=approx_cellran_size,
-                            approx_cell2_size=approx_cellran_size)
-                RR = np.diff(RR)
-            else: RR=None
-            if do_DR==True:
-                D1R = npairs(sample1, randoms, rbins, period=period,
-                             num_threads=num_threads,
-                             approx_cell1_size=approx_cell1_size,
-                             approx_cell2_size=approx_cellran_size
-                             )
-                D1R = np.diff(D1R)
-            else: D1R=None
-            if _sample1_is_sample2:
-                D2R = None
-            else:
-                if do_DR==True:
-                    D2R = npairs(sample2, randoms, rbins, period=period,
-                                 num_threads=num_threads,
-                                 approx_cell1_size=approx_cell2_size,
-                                 approx_cell2_size=approx_cellran_size)
-                    D2R = np.diff(D2R)
-                else: D2R=None
-            
-            return D1R, D2R, RR
-        
-        #PBCs and no randoms--calculate randoms analytically.
-        elif randoms is None:
-            
-            #set the number of randoms equal to the number of points in sample1
-            NR = len(sample1)
-            
-            #do volume calculations
-            v = nball_volume(rbins) #volume of spheres
-            dv = np.diff(v) #volume of shells
-            global_volume = period.prod() #volume of simulation
-            
-            #calculate randoms for sample1
-            N1 = np.shape(sample1)[0] #number of points in sample1
-            rho1 = N1/global_volume #number density of points
-            D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
-            
-            #calculate randoms for sample2
-            N2 = np.shape(sample2)[0] #number of points in sample2
-            rho2 = N2/global_volume #number density of points
-            D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
-            
-            #calculate the random-random pairs.
-            rhor = (NR**2)/global_volume
-            RR = (dv*rhor)
-            
-            return D1R, D2R, RR
-    
-    def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross,\
-                    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
-        """
-        Count data-data pairs.
-        """
-        if do_auto==True:
-            D1D1 = npairs(sample1, sample1, rbins, period=period, num_threads=num_threads,
-                          approx_cell1_size=approx_cell1_size,
-                          approx_cell2_size=approx_cell1_size)
-            D1D1 = np.diff(D1D1)
-        else:
-            D1D1=None
-            D2D2=None
-        
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross==True:
-                D1D2 = npairs(sample1, sample2, rbins, period=period,
-                              num_threads=num_threads,
-                              approx_cell1_size=approx_cell1_size,
-                              approx_cell2_size=approx_cell2_size)
-                D1D2 = np.diff(D1D2)
-            else: D1D2=None
-            if do_auto==True:
-                D2D2 = npairs(sample2, sample2, rbins, period=period,
-                              num_threads=num_threads,
-                              approx_cell1_size=approx_cell2_size,
-                              approx_cell2_size=approx_cell2_size)
-                D2D2 = np.diff(D2D2)
-            else: D2D2=None
-        
-        return D1D1, D1D2, D2D2
     
     # What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
-    
+    if RR_precomputed is not None: do_RR = False
+
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
@@ -304,17 +326,20 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     else:
         #set the number of randoms equal to the number of points in sample1
         #this is arbitrarily set, but must remain consistent!
-        NR = N1
-    
+        if NR_precomputed is not None:
+            NR = NR_precomputed
+        else:
+            NR = N1
+
     #count data pairs
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period,
-                                 num_threads, do_auto, do_cross, _sample1_is_sample2,
-                                 approx_cell1_size, approx_cell2_size)
+    D1D1,D1D2,D2D2 = _pair_counts(sample1, sample2, rbins, period,
+        num_threads, do_auto, do_cross, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size)
     #count random pairs
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
-                                    PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-                                    approx_cell1_size, approx_cell2_size,
-                                    approx_cellran_size)
+    D1R, D2R, RR = _random_counts(sample1, sample2, randoms, rbins, 
+        period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size)
+    if RR_precomputed is not None: RR = RR_precomputed
     
     #check to see if any of the random counts contain 0 pairs.
     if D1R is not None:

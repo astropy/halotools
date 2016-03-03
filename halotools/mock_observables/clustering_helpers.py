@@ -26,7 +26,8 @@ __author__=['Duncan Campbell', 'Andrew Hearin']
 
 def _tpcf_process_args(sample1, rbins, sample2, randoms, 
     period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+    approx_cell1_size, approx_cell2_size, approx_cellran_size, 
+    RR_precomputed, NR_precomputed):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.tpcf`. 
@@ -136,8 +137,35 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
                "{0}".value(available_estimators))
         raise HalotoolsError(msg)
     
+    if ((RR_precomputed is not None) | (NR_precomputed is not None)):
+        try:
+            assert ((RR_precomputed is not None) & (NR_precomputed is not None)) is True
+        except AssertionError:
+            msg = ("\nYou must either provide both "
+                "``RR_precomputed`` and ``NR_precomputed`` arguments, or neither\n")
+            raise HalotoolsError(msg)
+        # At this point, we have been provided *both* RR_precomputed *and* NR_precomputed
+
+        try:
+            assert len(RR_precomputed) == len(rbins)-1
+        except AssertionError:
+            msg = ("\nLength of ``RR_precomputed`` must match length of ``rbins``\n")
+            raise HalotoolsError(msg)
+
+        if np.any(RR_precomputed == 0):
+            msg = ("RR_precomputed has radial bin(s) which contain no pairs. \n"
+                   "Consider increasing the number of randoms, or using larger bins.")
+            warn(msg)
+
+        try:
+            assert len(randoms) == NR_precomputed
+        except AssertionError:
+            msg = ("If passing in randoms and also NR_precomputed, \n"
+                "the value of NR_precomputed must agree with the number of randoms\n")
+            raise HalotoolsError(msg)
+
     return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-           _sample1_is_sample2, PBCs
+           _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed
 
 
 def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period, do_auto,\
