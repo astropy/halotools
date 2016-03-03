@@ -52,12 +52,17 @@ def convert_to_ndarray(x, dt = None):
     if type(x) is np.ndarray:
         try:
             iterator = iter(x)
+            if len(x) == 0: 
+                return np.array([], dtype=dt)
             if dt is None:
                 return x.astype(type(x.flatten()[0]))
             else:
                 return x.astype(dt)
         except TypeError:
-            x = x.reshape(1)
+            try:
+                x = x.reshape(1)
+            except ValueError:
+                return np.array([], dtype=dt) 
             if dt is None:
                 return x.astype(type(x.flatten()[0]))
             else:
@@ -74,16 +79,25 @@ def convert_to_ndarray(x, dt = None):
         try:
             l = len(x)
             x = np.array(x)
+            if len(x) == 0:
+                return np.array([])
             if dt is None:
                 return x.astype(type(x.flatten()[0]))
             else:
                 return x.astype(dt)
         except TypeError:
             x = np.array([x])
+            x = x.flatten()
             if dt is None:
-                return x.astype(type(x.flatten()[0]))
+                if len(x) == 0:
+                    return np.array([])
+                else:
+                    return x.astype(type(x.flatten()[0]))
             else:
-                return x.astype(dt)
+                if len(x) == 0:
+                    return np.array([], dtype=dt)
+                else:
+                    return x.astype(dt)
 
 
 
