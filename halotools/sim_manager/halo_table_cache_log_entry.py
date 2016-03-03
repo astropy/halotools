@@ -172,7 +172,8 @@ class HaloTableCacheLogEntry(object):
                 '_verify_has_required_data_columns', 
                 '_verify_all_keys_begin_with_halo', 
                 '_verify_all_positions_inside_box', 
-                '_verify_halo_ids_are_unique')
+                '_verify_halo_ids_are_unique', 
+                '_verify_halo_rvir_mpc_units')
 
             for verification_function in verification_sequence:
                 func = getattr(self, verification_function)
@@ -372,6 +373,28 @@ class HaloTableCacheLogEntry(object):
             num_failures += 1
             msg = str(num_failures) + ". The input file must have '.hdf5' extension.\n\n"
         return msg, num_failures
+
+    def _verify_halo_rvir_mpc_units(self, num_failures):
+        """ Require that all values stored in the halo_rvir column 
+        are less than 50, a crude way to ensure that units are not kpc. 
+        """
+        msg = ''
+
+        try:
+            data = Table.read(self.fname, path='data')
+            try:
+                halo_rvir = data['halo_rvir']
+                assert np.all(halo_rvir < 50)
+            except AssertionError:
+                num_failures += 1
+                msg = (str(num_failures)+". All values of the "
+                    "``halo_rvir`` column\n"
+                    "must be less than 50, crudely ensuring you used Mpc/h units.\n\n"
+                    )
+        except:
+            pass
+
+        return msg, num_failures 
 
     def _verify_hdf5_has_complete_metadata(self, num_failures):
         """

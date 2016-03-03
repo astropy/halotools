@@ -378,6 +378,31 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "must contain a unique set of integers" in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
+    def test_scenario4b(self):
+        num_scenario = 4
+
+        try:
+            os.remove(self.fnames[num_scenario])
+        except:
+            pass
+
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        bad_table = deepcopy(self.good_table)
+        bad_table['halo_rvir'] = 0.
+        bad_table['halo_rvir'][0] = 51        
+        bad_table.write(self.fnames[num_scenario], path='data')
+        f = h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        assert "must be less than 50" in log_entry._cache_safety_message
+
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_passing_scenario(self):
         num_scenario = 4
 
