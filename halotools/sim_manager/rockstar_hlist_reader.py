@@ -264,7 +264,7 @@ class RockstarHlistReader(TabularAsciiReader):
         respectively, where the first column is index 0. 
         If you wish to keep *all* rows of the halo catalog:
 
-        >>> columns_to_keep_dict = {'halo_id': (1, 'i8'), 'halo_mvir': (45, 'f4'), 'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4'), 'halo_vpeak': (56, 'f4')}
+        >>> columns_to_keep_dict = {'halo_id': (1, 'i8'), 'halo_mvir': (45, 'f4'), 'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4'), 'halo_rvir': (36, 'f4')}
         >>> simname = 'any_nickname'
         >>> halo_finder = 'rockstar'
         >>> version_name = 'rockstar_v1.53_no_cuts'
@@ -291,21 +291,27 @@ class RockstarHlistReader(TabularAsciiReader):
         >>> print(halocat.version_name) # doctest: +SKIP
 
         Now suppose that for your science target of interest, 
-        subhalos in your simulation with :math:`V_{\\rm peak} < 100` km/s 
+        subhalos in your simulation with :math:`M_{\\rm vir} < 10^10 M_{\\odot}`  
         are not properly resolved. In this case you can use the ``row_cut_min_dict`` keyword 
         argument to discard such halos as the file is read. 
 
-        >>> row_cut_min_dict = {'halo_vpeak': 100}
-        >>> version_name = 'rockstar_v1.53_vpeak_gt_100'
-        >>> processing_notes = 'All halos with Vpeak < 100 km/s were thrown out during the initial catalog reduction'
+        >>> row_cut_min_dict = {'halo_mvir': 1e10}
+        >>> version_name = 'rockstar_v1.53_mvir_gt_100'
+        >>> processing_notes = 'All halos with halo_mvir < 1e10 km/s were thrown out during the initial catalog reduction'
 
         >>> reader = RockstarHlistReader(input_fname, columns_to_keep_dict, output_fname, simname, halo_finder, redshift, version_name, Lbox, particle_mass, row_cut_min_dict=row_cut_min_dict, processing_notes=processing_notes) # doctest: +SKIP
-        >>> reader.read_halocat(write_to_disk = True, update_cache_log = True) # doctest: +SKIP
+        >>> reader.read_halocat(['halo_rvir'], write_to_disk = True, update_cache_log = True) # doctest: +SKIP
 
-        This halo catalog is also stored in cache, and we load it in the same way as before 
+        Note the list we passed to the `read_halocat` method via the columns_to_convert_from_kpc_to_mpc 
+        argument. In common rockstar catalogs, :math:`R_{\\rm vir}` is stored in kpc/h units, 
+        while halo centers are stored in Mpc/h units, a potential source of buggy behavior. 
+        Take note of all units in your raw halo catalog before caching reductions of it. 
+
+        After calling `read_halocat`, the halo catalog is also stored in cache, 
+        and we load it in the same way as before 
         but now using a different ``version_name``: 
 
-        >>> halocat = CachedHaloCatalog(simname = 'any_nickname', halo_finder = 'rockstar', version_name = 'rockstar_v1.53_vpeak_gt_100', redshift = 0.3) # doctest: +SKIP
+        >>> halocat = CachedHaloCatalog(simname = 'any_nickname', halo_finder = 'rockstar', version_name = 'rockstar_v1.53_mvir_gt_100', redshift = 0.3) # doctest: +SKIP
 
         Using the ``processing_notes`` argument is helpful 
         in case you forgot exactly how the catalog was initially reduced. 
@@ -314,13 +320,13 @@ class RockstarHlistReader(TabularAsciiReader):
         bound to the `~halotools.sim_manager.CachedHaloCatalog` instance:
 
         >>> print(halocat.processing_notes) # doctest: +SKIP
-        >>> 'All halos with Vpeak < 100 km/s were thrown out during the initial catalog reduction' # doctest: +SKIP
+        >>> 'All halos with halo_mvir < 1e10 were thrown out during the initial catalog reduction' # doctest: +SKIP
 
         Any cut you placed on the catalog during its initial 
         reduction is automatically bound to the cached halo catalog as additional metadata. 
-        In this case, since we placed a lower bound on :math:`V_{\\rm peak}`:
+        In this case, since we placed a lower bound on :math:`M_{\\rm vir}`:
 
-        >>> print(halocat.halo_vpeak_row_cut_min) # doctest: +SKIP
+        >>> print(halocat.halo_mvir_row_cut_min) # doctest: +SKIP
         >>> 100 # doctest: +SKIP
 
         This metadata provides protection against typographical errors 
@@ -534,25 +540,19 @@ class RockstarHlistReader(TabularAsciiReader):
 
         Parameters 
         -----------
-        columns_to_convert_from_kpc_to_mpc : list 
-            By default, the Rockstar halo-finder produces some outputs 
-            in Mpc/h, and others in kpc/h, a potential source of bugs 
-            in catalog production. For example, in producing the Halotools-provided 
-            catalogs, the following columns are divided by 1000: 
-            ``halo_rvir``, ``halo_rs``, ``halo_xoff``. 
-            The ``columns_to_convert_from_kpc_to_mpc`` argument 
-            should be supplied a list of strings for all columns that you 
-            would like to divide by 1000. This list may be empty, but you are 
-            required to define it so that you are mindful of your units. 
-            Of course, there could be other columns whose units you want to convert 
-            prior to caching the catalog, and simply division by 1000 may not be the 
-            appropriate unit conversion. To handle such cases, you should 
-            use the ``read_halocat`` method with the ``write_to_disk`` and 
-            ``update_cache_log`` arguments both set to False, and manually 
-            overwrite the halo_table prior to calling the `write_to_disk` 
-            and `update_cache_log` methods (in that order). 
-            It is generally good practice to include any such unit 
-            manipulation in the ``processing_notes``. 
+        columns_to_convert_from_kpc_to_mpc : list of strings 
+            List providing column names that should be divided by 1000 
+            in order to convert from kpc/h to Mpc/h units. 
+            This is necessary with typical rockstar catalogs for the 
+            ``halo_rvir``, ``halo_rs`` and ``halo_xoff`` columns, which are stored 
+            in kpc/h, whereas halo centers are typically stored in Mpc/h. 
+            All strings appearing in ``columns_to_convert_from_kpc_to_mpc`` 
+            must also appear in the ``columns_to_keep_dict``. 
+            It is permissible for ``columns_to_convert_from_kpc_to_mpc`` 
+            to be an empty list. See Notes for further discussion. 
+
+            Note that this feature is only temporary. The API of this function 
+            will change when Halotools adopts Astropy Units. 
 
         write_to_disk : bool, optional 
             If True, the `write_to_disk` method will be called automatically. 
@@ -571,6 +571,23 @@ class RockstarHlistReader(TabularAsciiReader):
 
             Note that this feature is rather bare-bones and is likely to significantly 
             evolve and/or entirely vanish in future releases. 
+
+        Notes 
+        -----
+        Regarding the ``columns_to_convert_from_kpc_to_mpc`` argument, 
+        of course there could be other columns whose units you want to convert 
+        prior to caching the catalog, and simply division by 1000 may not be the 
+        appropriate unit conversion. To handle such cases, you should do 
+        the following. First, use the `read_halocat` method  with 
+        the ``write_to_disk`` and ``update_cache_log`` arguments both set to False. 
+        This will load the catalog from disk into memory. 
+        Now you are free to overwrite any column in the halo_table that you wish. 
+        When you have finished preparing the catalog, call the `write_to_disk` 
+        and `update_cache_log` methods (in that order). 
+        As you do so, be sure to include explicit notes of all manipulations you 
+        made on the halo_table between the time you called `read_halocat` and 
+        `write_to_disk`, and bind these notes to the ``processing_notes`` argument. 
+
         """
         for key in columns_to_convert_from_kpc_to_mpc:
             try:
