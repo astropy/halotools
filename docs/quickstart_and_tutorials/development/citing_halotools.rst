@@ -9,11 +9,10 @@ License and Citation Information
 Citing Halotools
 ------------------
 
-Halotools is currently in alpha-status. The first official package release in early-2016 will be 
+Halotools is currently in beta-status. The first official package release in early-2016 will be 
 accompanied by a code-release paper, which we will ask that you cite if your scientific publication 
 uses Halotools for supporting calculations. If you use Halotools modules in your publication prior to that time, 
-we ask that you simply acknowledge that you have used the package and provide a link in your paper to the source code, 
-https://github.com/astropy/halotools.  
+we ask that you simply acknowledge that you have used the package and provide a link in your paper to the source code, https://github.com/astropy/halotools.  
 
 
 Halotools License 

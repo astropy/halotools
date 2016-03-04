@@ -69,7 +69,9 @@ contribute to the Halotools code base.
    :maxdepth: 1
 
    development/index
+   development/bug_reports
    development/contributors
+   development/features_planned_for_next_release
  
 
 
