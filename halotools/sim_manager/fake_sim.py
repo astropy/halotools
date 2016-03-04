@@ -50,9 +50,20 @@ class FakeSim(UserSuppliedHaloCatalog):
 		"""
 		Lbox = 250.0
 		particle_mass = 1.e8
-		self.simname = 'fake'
-		self.halo_finder = 'fake'
-		self.version_name = 'dummy_version'
+		try:
+			self.simname = kwargs['simname']
+		except KeyError:
+			self.simname = 'fake'
+		try:
+			self.halo_finder = kwargs['halo_finder']
+		except KeyError:
+			self.halo_finder = 'fake'
+		try:
+			self.version_name = kwargs['version_name']
+		except KeyError:
+			self.version_name = 'dummy_version'
+		self.redshift = redshift
+
 
 		self.seed = seed
 		np.random.seed(self.seed)

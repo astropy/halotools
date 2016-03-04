@@ -50,7 +50,8 @@ class HodMockFactory(MockFactory):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement, 
+        halo_mass_column_key = 'halo_mvir', **kwargs):
         """
         Parameters 
         ----------
@@ -66,20 +67,31 @@ class HodMockFactory(MockFactory):
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
 
-        apply_completeness_cut : bool, optional 
-            If True, only halos passing the mass completeness cut defined in 
-            `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
-            Default is True. 
+        Num_ptcl_requirement : int, optional 
+            Requirement on the number of dark matter particles in the halo. 
+            The column defined by the ``halo_mass_column_key`` string will have a cut placed on it: 
+            all halos with halocat.halo_table[halo_mass_column_key] < Num_ptcl_requirement*halocat.particle_mass
+            will be thrown out immediately after reading the original halo catalog in memory. 
+            Default value is set in `~halotools.sim_defaults.Num_ptcl_requirement`. 
+
+        halo_mass_column_key : string, optional 
+            This string must be a column of the input halo catalog. 
+            The column defined by this string will have a cut placed on it: 
+            all halos with halocat.halo_table[halo_mass_column_key] < Num_ptcl_requirement*halocat.particle_mass
+            will be thrown out immediately after reading the original halo catalog in memory. 
+            Default is 'halo_mvir'
 
         """
 
         MockFactory.__init__(self, **kwargs)
 
         halocat = kwargs['halocat']
+        self.Num_ptcl_requirement = Num_ptcl_requirement
+        self.halo_mass_column_key = halo_mass_column_key
+
         self.preprocess_halo_catalog(halocat)
 
-
-    def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
+    def preprocess_halo_catalog(self, halocat):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This pre-processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
@@ -100,21 +112,15 @@ class HodMockFactory(MockFactory):
             Number of control points used in the lookup table for the halo profile.
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
-        apply_completeness_cut : bool, optional 
-            If True, only halos passing the mass completeness cut defined in 
-            `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
-            Default is True. 
         """
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
         halo_table = SampleSelector.host_halo_selection(table = halocat.halo_table)
 
-        # make a conservative mvir completeness cut 
-        # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
-        if apply_completeness_cut is True:
-            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.particle_mass
-            mass_cut = (halo_table['halo_mvir'] > cutoff_mvir)
-            halo_table = halo_table[mass_cut]
+        # make a (possibly trivial) completeness cut 
+        cutoff_mvir = self.Num_ptcl_requirement*self.particle_mass
+        mass_cut = halo_table[self.halo_mass_column_key] > cutoff_mvir
+        halo_table = halo_table[mass_cut]
 
         ############################################################
 

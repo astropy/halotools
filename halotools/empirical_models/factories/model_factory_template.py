@@ -24,6 +24,47 @@ from ...sim_manager import sim_defaults
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 
+inconsistent_redshift_error_msg = ("Inconsistency between the redshift "
+    "already bound to the existing mock = ``%f`` "
+    "and the redshift passed as a keyword argument = ``%f``.\n"
+    "You should instantiate a new model object if you wish to switch halo catalogs.")
+inconsistent_simname_error_msg = ("Inconsistency between the simname "
+    "already bound to the existing mock = ``%s`` "
+    "and the simname passed as a keyword argument = ``%s``.\n"
+    "You should instantiate a new model object if you wish to switch halo catalogs.")
+inconsistent_halo_finder_error_msg = ("Inconsistency between the halo-finder "
+    "already bound to the existing mock = ``%s`` "
+    "and the halo-finder passed as a keyword argument = ``%s``.\n"
+    "You should instantiate a new model object if you wish to switch halo catalogs.")
+inconsistent_version_name_error_msg = ("Inconsistency between the version_name "
+    "already bound to the existing mock = ``%s`` "
+    "and the version_name passed as a keyword argument = ``%s``.\n"
+    "You should instantiate a new model object if you wish to switch halo catalogs.")
+
+def _test_mock_consistency(mock, 
+    redshift = sim_defaults.default_redshift, 
+    simname = sim_defaults.default_simname, 
+    halo_finder = sim_defaults.default_halo_finder, 
+    version_name = sim_defaults.default_version_name, 
+    halocat = None):
+
+    if halocat is None:
+        pass
+    else:
+        redshift = halocat.redshift
+        simname = halocat.simname
+        halo_finder = halocat.halo_finder
+
+    if abs(redshift - mock.redshift) > 0.05:
+        raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, mock.redshift))
+    if simname != mock.simname:
+        raise HalotoolsError(inconsistent_simname_error_msg % (mock.simname, simname))
+    if halo_finder != mock.halo_finder:
+        raise HalotoolsError(inconsistent_halo_finder_error_msg % (mock.halo_finder,halo_finder ))
+    if version_name != mock.version_name:
+        raise HalotoolsError(inconsistent_version_name_error_msg % (mock.version_name,version_name ))
+    print("version_name = %s" % version_name)
+
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):
     """ Abstract container class used to build 
@@ -70,7 +111,13 @@ class ModelFactory(object):
             pass
 
 
-    def populate_mock(self, **kwargs):
+    def populate_mock(self, halocat = None, 
+        simname = sim_defaults.default_simname, 
+        redshift = sim_defaults.default_redshift, 
+        halo_finder = sim_defaults.default_halo_finder, 
+        version_name = sim_defaults.default_version_name,
+        Num_ptcl_requirement = sim_defaults.Num_ptcl_requirement, 
+        **kwargs):
         """ Method used to populate a simulation using the model. 
 
         After calling this method, the model instance will have a new ``mock`` attribute, 
@@ -82,7 +129,8 @@ class ModelFactory(object):
         halocat : object, optional 
             Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
             or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
-            If you pass a ``halocat`` argument, do not pass additional arguments. 
+            If you pass a ``halocat`` argument, additional arguments 
+            related to snapshot selection will be ignored. 
 
         simname : string, optional
             Nickname of the simulation of the cached catalog. 
@@ -103,86 +151,57 @@ class ModelFactory(object):
             Redshift of the cached catalog. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
+        Num_ptcl_requirement : int, optional 
+            Requirement on the number of dark matter particles in the halo. 
+            The column defined by the ``halo_mass_column_key`` string will have a cut placed on it: 
+            all halos with halocat.halo_table[halo_mass_column_key] < Num_ptcl_requirement*halocat.particle_mass
+            will be thrown out immediately after reading the original halo catalog in memory. 
+            Default value is set in `~halotools.sim_defaults.Num_ptcl_requirement`. 
+
+        halo_mass_column_key : string, optional 
+            This string must be a column of the input halo catalog. 
+            The column defined by this string will have a cut placed on it: 
+            all halos with halocat.halo_table[halo_mass_column_key] < Num_ptcl_requirement*halocat.particle_mass
+            will be thrown out immediately after reading the original halo catalog in memory. 
+            Default is 'halo_mvir'
+
         """
-        inconsistent_redshift_error_msg = ("Inconsistency between the model redshift = %.2f "
-            "and the halocat redshift = %.2f.\n"
-            "You should instantiate a new model object if you wish to switch halo catalogs.")
-        inconsistent_simname_error_msg = ("Inconsistency between the simname "
-            "already bound to the existing mock = ``%s`` "
-            "and the simname passed as a keyword argument = ``%s``.\n"
-            "You should instantiate a new model object if you wish to switch halo catalogs.")
-        inconsistent_halo_finder_error_msg = ("Inconsistency between the halo-finder "
-            "already bound to the existing mock = ``%s`` "
-            "and the halo-finder passed as a keyword argument = ``%s``.\n"
-            "You should instantiate a new model object if you wish to switch halo catalogs.")
-
-        def test_consistency_with_existing_mock(**kwargs):
-            if 'redshift' in kwargs:
-                redshift = kwargs['redshift']
-            elif hasattr(self, 'redshift'):
-                redshift = self.redshift
-            elif 'halocat' in kwargs:
-                redshift = kwargs['halocat'].redshift
-            else:
-                redshift = sim_defaults.default_redshift
-            if abs(redshift - self.mock.redshift) > 0.05:
-                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.redshift))
-
-            if 'simname' in kwargs:
-                simname = kwargs['simname']
-            elif 'halocat' in kwargs:
-                simname = kwargs['halocat'].simname
-            else:
-                simname = sim_defaults.default_simname
-            if simname != self.mock.simname:
-                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.simname, simname))
-
-            if 'halo_finder' in kwargs:
-                halo_finder = kwargs['halo_finder']
-            elif 'halocat' in kwargs:
-                halo_finder = kwargs['halocat'].halo_finder
-            else:
-                halo_finder = sim_defaults.default_halo_finder
-            if halo_finder != self.mock.halo_finder:
-                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.halo_finder,halo_finder ))
-
+        if halocat is not None:
+            redshift = halocat.redshift
+            simname = halocat.simname
+            halo_finder = halocat.halo_finder
+            version_name = halocat.version_name
 
         try:
-            assert kwargs['simname'] == 'fake'
-            use_fake_sim = True
-        except (AssertionError, KeyError):
-            use_fake_sim = False
+            mock = self.mock
+            _test_mock_consistency(mock, redshift = redshift, 
+                simname = simname, halo_finder = halo_finder, 
+                version_name = version_name)
+        except AttributeError:
+            pass
 
-        if hasattr(self, 'mock'):
-            if use_fake_sim is True:
-                halocat = FakeSim(**kwargs)
-                test_consistency_with_existing_mock(halocat=halocat)
-            else:
-                test_consistency_with_existing_mock(**kwargs)
+        if simname == 'fake':
+            HaloCatalogClass = FakeSim
         else:
-            if use_fake_sim is True:
-                halocat = FakeSim(**kwargs)
-            else:
-                if 'halocat' in kwargs.keys():
-                    halocat = kwargs['halocat']
-                    del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
-                else:
-                    key_intersection = set(kwargs) & set(CachedHaloCatalog.acceptable_kwargs)
-                    halocat_kwargs = {key: kwargs[key] for key in key_intersection}
-                    if 'redshift' in key_intersection:
-                        halocat = CachedHaloCatalog(**halocat_kwargs)
-                    elif hasattr(self, 'redshift'):
-                        halocat = CachedHaloCatalog(redshift = self.redshift, **halocat_kwargs)
-                    else:
-                        halocat = CachedHaloCatalog(**halocat_kwargs)
+            HaloCatalogClass = CachedHaloCatalog
 
-            if hasattr(self, 'redshift'):
-                if abs(self.redshift - halocat.redshift) > 0.05:
-                    raise HalotoolsError("Inconsistency between the model redshift = %.2f" 
-                        " and the halocat redshift = %.2f" % (self.redshift, halocat.redshift))
+        if halocat is None:
+            halocat = HaloCatalogClass(redshift = redshift, 
+                simname = simname, halo_finder = halo_finder, 
+                version_name = version_name)
 
-            mock_factory = self.mock_factory 
-            self.mock = mock_factory(halocat=halocat, model=self)
+        if hasattr(self, 'redshift'):
+            if abs(self.redshift - halocat.redshift) > 0.05:
+                raise HalotoolsError("Inconsistency between the model redshift = %.2f" 
+                    " and the halocat redshift = %.2f" % (self.redshift, halocat.redshift))
+
+        mock_factory_init_args = (
+            {'halocat': halocat, 'model': self, 'Num_ptcl_requirement': Num_ptcl_requirement})
+        try:
+            mock_factory_init_args['halo_mass_column_key'] = kwargs['halo_mass_column_key']
+        except KeyError:
+            pass
+        self.mock = self.mock_factory(**mock_factory_init_args)
 
         additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC')
         mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
