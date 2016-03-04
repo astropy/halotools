@@ -14,5 +14,4 @@ contribute to the Halotools code base.
 
    staying_up_to_date
    bug_reports
-   making_contributions
    contributors
