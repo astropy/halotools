@@ -5,6 +5,9 @@ import glob
 import os
 import sys
 
+if sys.version_info[0] >2:
+    raise SystemError("You are using python 3.x, but currently Halotools is only 2.x compatible.")
+
 import ah_bootstrap
 from setuptools import setup
 
