@@ -173,7 +173,9 @@ def _nth_matrix_minimum(m, n, axis=None):
     i,j = m.nonzero()
     d = np.array(m[i,j]).flatten()
     
-    if axis is None:
+    if len(i)==0: #no neighbors
+        result = np.zeros(N0, dtype=int)-1
+    elif axis is None:
         sort_inds = np.argsort(d)
         sorted_i = i[sort_inds]
         sorted_j = j[sort_inds]
