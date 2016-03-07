@@ -10,6 +10,5 @@ from .spherical_geometry import *
 from .array_utils import *
 from .io_utils import *
 from .table_utils import *
-from .distances import *
 from .value_added_halo_table_functions import *
 from .group_member_generator import group_member_generator
