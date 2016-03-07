@@ -77,7 +77,8 @@ cdef void relative_radial_velocity_weights(np.float64_t* w1,
        dvz = (w1[5] - w2[5])
        
        #the radial component of the velocity difference
-       result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm
+       #result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm
+       result = (dvx*rx + dvy*ry + dvz*rz)/norm
        
        result1[0] = result #radial velocity
        result2[0] = 0.0 #unused value
@@ -140,8 +141,10 @@ cdef void radial_velocity_weights(np.float64_t* w1,
         result3[0] = 1.0 #number of pairs
     else:        
        #the radial component of the velocities
-       resulta = (xshift*w1[3]*rx + yshift*w1[4]*ry + zshift*w1[5]*rz)/norm
-       resultb = (xshift*w2[3]*rx + yshift*w2[4]*ry + zshift*w2[5]*rz)/norm
+       #resulta = (xshift*w1[3]*rx + yshift*w1[4]*ry + zshift*w1[5]*rz)/norm
+       #resultb = (xshift*w2[3]*rx + yshift*w2[4]*ry + zshift*w2[5]*rz)/norm
+       resulta = (w1[3]*rx + w1[4]*ry + w1[5]*rz)/norm
+       resultb = (w2[3]*rx + w2[4]*ry + w2[5]*rz)/norm
        
        result1[0] = resulta*resultb #radial velocity
        result2[0] = 0.0 #unused value
@@ -213,7 +216,8 @@ cdef void radial_velocity_variance_counter_weights(np.float64_t* w1,
         dvz = (w1[5] - w2[5])
         
         #the radial component of the velocity difference
-        result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm - w1[6]*w2[6]
+        #result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm - w1[6]*w2[6]
+        result = (dvx*rx + dvy*ry + dvz*rz)/norm - w1[6]*w2[6]
         
         result1[0] = result #radial velocity
         result2[0] = result*result #radial velocity squared

@@ -180,7 +180,7 @@ def _marked_npairs_engine(double_tree, weights1, weights2,
     for icell2, xshift, yshift, zshift in adj_cell_generator:
         
         #set shift array as -1,1,0 depending on direction of/if cell shifted.
-        shift = np.array([xshift,zshift,yshift]).astype(float)
+        shift = np.array([xshift,yshift,zshift]).astype(float)
         
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
@@ -361,7 +361,7 @@ def _xy_z_marked_npairs_engine(double_tree, weights1, weights2,
     for icell2, xshift, yshift, zshift in adj_cell_generator:
         
         #set shift array as -1,1,0 depending on direction of/if cell shifted.
-        shift = np.array([xshift,zshift,yshift]).astype(float)
+        shift = np.array([xshift,yshift,zshift]).astype(float)
         
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
@@ -558,7 +558,7 @@ def _velocity_marked_npairs_engine(double_tree, weights1, weights2,
     for icell2, xshift, yshift, zshift in adj_cell_generator:
         
         #set shift array as -1,1,0 depending on direction of/if cell shifted.
-        shift = np.array([xshift,zshift,yshift]).astype(float)
+        shift = np.array([xshift,yshift,zshift]).astype(float)
         
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
@@ -764,7 +764,7 @@ def _xy_z_velocity_marked_npairs_engine(double_tree, weights1, weights2,
     for icell2, xshift, yshift, zshift in adj_cell_generator:
         
         #set shift array as -1,1,0 depending on direction of/if cell shifted.
-        shift = np.array([xshift,zshift,yshift]).astype(float)
+        shift = np.array([xshift,yshift,zshift]).astype(float)
         
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
