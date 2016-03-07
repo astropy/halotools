@@ -40,7 +40,8 @@ unavailable_haloprop_msg = ("Your model requires that the ``%s`` key appear in t
     "but this column is not available in the catalog you attempted to populate.\n")
 
 missing_halo_upid_msg = ("All HOD-style models populate host halos with mock galaxies.\n"
-    "The way Halotools distinguishes host halos from subhalos is via the ``halo_upid`` column.\n"
+    "The way Halotools distinguishes host halos from subhalos is via the ``halo_upid`` column,\n"
+    "with halo_upid = -1 for host halos and !=-1 for subhalos.\n"
     "The halo catalog you passed to the HodMockFactory does not have the ``halo_upid`` column.\n")
 
 class HodMockFactory(MockFactory):
