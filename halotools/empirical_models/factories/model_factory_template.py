@@ -254,6 +254,16 @@ class ModelFactory(object):
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering 
         such as the median computed from the collection of clustering measurements. 
 
+        The `compute_average_galaxy_clustering` is simply a convenience function, 
+        and is not intended for use in performance-critical applications such as MCMCs. 
+        In an MCMC, there is no need to repeatedly populate the same snapshot with the same 
+        set of model parameters; the primary purpose for this repetition is for smoothing out 
+        numerical noise when making plots and doing exploratory work. 
+        If you wish to use the 3d correlation function in a performance-critical application, 
+        see :ref:`galaxy_catalog_analysis_tutorial2` for a demonstration of how to 
+        call the `~halotools.mock_observables.tpcf` function once, 
+        directly on the mock galaxy catalog. 
+
         Parameters 
         ----------
         num_iterations : int, optional 
@@ -439,6 +449,17 @@ class ModelFactory(object):
         computes the galaxy-matter cross-correlation  
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering 
         such as the median computed from the collection of repeated measurements. 
+
+        The `compute_average_galaxy_matter_cross_clustering` is simply a convenience function, 
+        and is not intended for use in performance-critical applications such as MCMCs. 
+        In an MCMC, there is no need to repeatedly populate the same snapshot with the same 
+        set of model parameters; the primary purpose for this repetition is for smoothing out 
+        numerical noise when making plots and doing exploratory work. 
+        If you wish to use the 3d cross-correlation function in a performance-critical application, 
+        see :ref:`galaxy_catalog_analysis_tutorial2` for a demonstration of how to 
+        call the `~halotools.mock_observables.tpcf` function once, 
+        directly on the mock galaxy catalog, and then refer to the 
+        `~halotools.mock_observables.tpcf` docstring for how to use the cross-correlation feature. 
 
         Parameters 
         ----------
