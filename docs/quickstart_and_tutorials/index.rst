@@ -56,6 +56,7 @@ Tutorials
 
    tutorials/model_building/index
    tutorials/catalog_analysis/galcat_analysis/index
+   tutorials/catalog_analysis/halocat_analysis/index
 
 
 Developer Documentation
