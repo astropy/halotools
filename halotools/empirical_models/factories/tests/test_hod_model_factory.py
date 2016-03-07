@@ -90,7 +90,25 @@ class TestHodModelFactory(TestCase):
         assert model.mock.Num_ptcl_requirement == 0.
         assert np.any(model.mock.halo_table['halo_mvir'] < default_mvir_min)
 
+    def test_unavailable_haloprop(self):
+        halocat = FakeSim()
+        m = PrebuiltHodModelFactory('zheng07')
+        m._haloprop_list.append("Jose Canseco")
+        with pytest.raises(HalotoolsError) as err:
+            m.populate_mock(halocat = halocat)
+        substr = "this column is not available in the catalog you attempted to populate"
+        assert substr in err.value.message
+        assert "``Jose Canseco``" in err.value.message
 
+    def test_unavailable_upid(self):
+        halocat = FakeSim()
+        del halocat.halo_table['halo_upid']
+        m = PrebuiltHodModelFactory('zheng07')
+
+        with pytest.raises(HalotoolsError) as err:
+            m.populate_mock(halocat = halocat)
+        substr = "does not have the ``halo_upid`` column."
+        assert substr in err.value.message
 
 
 

@@ -19,6 +19,9 @@ from ...custom_exceptions import *
 __all__ = ['SubhaloMockFactory']
 __author__ = ['Andrew Hearin']
 
+unavailable_haloprop_msg = ("Your model requires that the ``%s`` key appear in the halo catalog,\n"
+    "but this column is not available in the catalog you attempted to populate.\n")
+
 
 class SubhaloMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
@@ -82,7 +85,10 @@ class SubhaloMockFactory(MockFactory):
 
         self.halo_table = Table()
         for key in self.additional_haloprops:
-            self.halo_table[key] = halo_table[key]
+            try:
+                self.halo_table[key] = halo_table[key]
+            except KeyError:
+                raise HalotoolsError(unavailable_haloprop_msg % key)
 
 
     def precompute_galprops(self):
