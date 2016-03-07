@@ -42,6 +42,10 @@ class CachedHaloCatalog(object):
 
     For a list of available snapshots provided by Halotools, 
     see :ref:`supported_sim_list`. 
+    For information about the subhalo vs. host halo nomenclature 
+    conventions used throughout Halotools, see :ref:`rockstar_subhalo_nomenclature`. 
+    For a thorough discussion of the meaning of each column in these halo catalogs, 
+    see the appendix of `Rodriguez Puebla et al 2016 <http://arxiv.org/abs/1602.04813>`_.
     """
     acceptable_kwargs = ('ptcl_version_name', 'fname', 'simname', 
         'halo_finder', 'redshift', 'version_name', 'dz_tol', 'update_cached_fname', 
@@ -153,6 +157,10 @@ class CachedHaloCatalog(object):
 
         $HOME/.astropy/cache/halotools/halo_table_cache_log.txt
 
+        See also 
+        ----------
+        :ref:`halo_catalog_analysis_quickstart`
+        :ref:`halo_catalog_analysis_tutorial` 
         """
         self._verify_acceptable_constructor_call(*args, **kwargs)
 
