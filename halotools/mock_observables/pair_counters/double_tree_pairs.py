@@ -147,6 +147,7 @@ def npairs(data1, data2, rbins, period = None,\
         
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
+    Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
     
     if verbose==True:
         print("volume 1 split {0},{1},{2} times along each dimension,\n"
@@ -154,7 +155,7 @@ def npairs(data1, data2, rbins, period = None,\
               double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
         print("volume 2 split {0},{1},{2} times along each dimension,\n"
               "resulting in {3} cells.".format(double_tree.num_x2divs,\
-              double_tree.num_y2divs,double_tree.num_z2divs,Ncell1))
+              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #create a function to call with only one argument
     engine = partial(_npairs_engine, 

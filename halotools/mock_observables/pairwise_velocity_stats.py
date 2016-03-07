@@ -416,6 +416,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
             else: 
                 D1D2=None
                 N1N2=None
+                S1S2=None
             if do_auto==True:
                 D2D2, S2S2, N2N2 = velocity_marked_npairs(sample2, sample2, rbins,\
                                      weights1=marks2, weights2=marks2,\
@@ -884,6 +885,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
             else: 
                 D1D2=None
                 N1N2=None
+                S1S2=None
             if do_auto==True:
                 D2D2, S2S2, N2N2 = xy_z_velocity_marked_npairs(sample2, sample2, rp_bins, pi_bins,\
                                      weights1=marks2, weights2=marks2,\
