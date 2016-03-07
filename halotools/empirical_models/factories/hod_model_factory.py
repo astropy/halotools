@@ -543,7 +543,7 @@ class HodModelFactory(ModelFactory):
         _gal_type_list = []
         for component_model in self.model_dictionary.values():
             _gal_type_list.append(component_model.gal_type)
-        self.gal_types = set(list(_gal_type_list))
+        self.gal_types = list(set(_gal_type_list))
 
 
     def set_primary_behaviors(self):
