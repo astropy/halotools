@@ -36,6 +36,13 @@ from ...custom_exceptions import *
 __all__ = ['HodMockFactory']
 __author__ = ['Andrew Hearin']
 
+unavailable_haloprop_msg = ("Your model requires that the ``%s`` key appear in the halo catalog,\n"
+    "but this column is not available in the catalog you attempted to populate.\n")
+
+missing_halo_upid_msg = ("All HOD-style models populate host halos with mock galaxies.\n"
+    "The way Halotools distinguishes host halos from subhalos is via the ``halo_upid`` column,\n"
+    "with halo_upid = -1 for host halos and !=-1 for subhalos.\n"
+    "The halo catalog you passed to the HodMockFactory does not have the ``halo_upid`` column.\n")
 
 class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
@@ -113,6 +120,11 @@ class HodMockFactory(MockFactory):
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
         """
+        try:
+            assert 'halo_upid' in halocat.halo_table.keys()
+        except AssertionError:
+            raise HalotoolsError(missing_halo_upid_msg)
+
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
         halo_table = SampleSelector.host_halo_selection(table = halocat.halo_table)
@@ -135,7 +147,10 @@ class HodMockFactory(MockFactory):
 
         self._orig_halo_table = Table()
         for key in self.additional_haloprops:
-            self._orig_halo_table[key] = halo_table[key][:]
+            try:
+                self._orig_halo_table[key] = halo_table[key][:]
+            except KeyError:
+                raise HalotoolsError(unavailable_haloprop_msg % key)
 
         self.model.build_lookup_tables()
 

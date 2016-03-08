@@ -10,7 +10,7 @@ from copy import copy
 from ...smhm_models import Behroozi10SmHm, Moster13SmHm
 from ...component_model_templates import BinaryGalpropInterpolModel
 
-from ...factories import SubhaloModelFactory
+from ...factories import SubhaloModelFactory, PrebuiltSubhaloModelFactory
 from ...composite_models.smhm_models.behroozi10 import behroozi10_model_dictionary
 
 
@@ -151,6 +151,16 @@ class TestSubhaloModelFactory(TestCase):
             model = SubhaloModelFactory()
         substr = "You did not pass any model features to the factory"
         assert substr in err.value.message
+
+    def test_unavailable_haloprop(self):
+        halocat = FakeSim()
+        m = PrebuiltSubhaloModelFactory('behroozi10')
+        m._haloprop_list.append("Jose Canseco")
+        with pytest.raises(HalotoolsError) as err:
+            m.populate_mock(halocat = halocat)
+        substr = "this column is not available in the catalog you attempted to populate"
+        assert substr in err.value.message
+        assert "``Jose Canseco``" in err.value.message
 
     def tearDown(self):
         pass
