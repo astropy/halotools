@@ -11,6 +11,7 @@ from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
 from ..pairs import xy_z_npairs as simp_xy_z_npairs
 
+from ...tests.cf_helpers import generate_locus_of_3d_points
 
 from ....custom_exceptions import HalotoolsError
 
@@ -245,6 +246,91 @@ def test_jnpairs_nonperiodic():
 
     for icell in xrange(1, grid_jackknife_ncells**3-1):
         assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
+
+
+# def npairs(data1, data2, rbins, period = None,\
+#            verbose = False, num_threads = 1,\
+#            approx_cell1_size = None, approx_cell2_size = None):
+
+def test_tight_locus1():
+    """ Verify that the pair counters return the correct results 
+    when operating on a tight locus of points. 
+
+    For this test, PBCs have no impact. 
+    """
+    npts1, npts2 = 100, 200
+    points1 = generate_locus_of_3d_points(npts1, 
+        xc=0.1, yc=0.1, zc=0.1)
+    points2 = generate_locus_of_3d_points(npts2, 
+        xc=0.1, yc=0.1, zc=0.25)
+    rbins = np.array([0.1, 0.2, 0.3])
+    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+
+    counts1 = npairs(points1, points2, rbins, num_threads='max')
+    counts2 = npairs(points1, points2, rbins, num_threads=1)
+    counts3 = npairs(points1, points2, rbins, period=1.)
+    counts4 = npairs(points1, points2, rbins, 
+        approx_cell1_size = [0.1, 0.1, 0.1])
+    counts5 = npairs(points1, points2, rbins, 
+        approx_cell1_size = [0.1, 0.1, 0.1], 
+        approx_cell2_size = [0.1, 0.1, 0.1])
+    counts6 = npairs(points1, points2, rbins, 
+        period=1, 
+        approx_cell1_size = [0.1, 0.1, 0.1], 
+        approx_cell2_size = [0.1, 0.1, 0.1])
+    counts7 = npairs(points1, points2, rbins, 
+        period=1, 
+        approx_cell1_size = [0.2, 0.2, 0.2], 
+        approx_cell2_size = [0.15, 0.15, 0.15])
+
+    assert np.all(counts1 == correct_result)
+    assert np.all(counts2 == correct_result)
+    assert np.all(counts3 == correct_result)
+    assert np.all(counts4 == correct_result)
+    assert np.all(counts5 == correct_result)
+    assert np.all(counts6 == correct_result)
+    assert np.all(counts7 == correct_result)
+
+
+def test_tight_locus2():
+    """ Verify that the pair counters return the correct results 
+    when operating on a tight locus of points. 
+
+    For this test, the PBC correction is important. 
+    """
+    npts1, npts2 = 100, 200
+    points1 = generate_locus_of_3d_points(npts1, 
+        xc=0.1, yc=0.1, zc=0.1)
+    points2 = generate_locus_of_3d_points(npts2, 
+        xc=0.1, yc=0.1, zc=0.95)
+    rbins = np.array([0.1, 0.2, 0.3])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
+
+    counts1 = npairs(points1, points2, rbins, 
+        num_threads='max', period=1)
+    counts2 = npairs(points1, points2, rbins, 
+        num_threads=1, period=1)
+    counts3 = npairs(points1, points2, rbins, 
+        approx_cell1_size = [0.1, 0.1, 0.1], period=1)
+    counts4 = npairs(points1, points2, rbins, 
+        approx_cell1_size = [0.1, 0.1, 0.1], 
+        approx_cell2_size = [0.1, 0.1, 0.1], period=1)
+    counts5 = npairs(points1, points2, rbins, period=1, 
+        approx_cell1_size = [0.1, 0.1, 0.1], 
+        approx_cell2_size = [0.1, 0.1, 0.1])
+    counts6 = npairs(points1, points2, rbins, period=1, 
+        approx_cell1_size = [0.2, 0.2, 0.2], 
+        approx_cell2_size = [0.15, 0.15, 0.15])
+
+    assert np.all(counts1 == correct_result)
+    assert np.all(counts2 == correct_result)
+    assert np.all(counts3 == correct_result)
+    assert np.all(counts4 == correct_result)
+    assert np.all(counts5 == correct_result)
+    assert np.all(counts6 == correct_result)
+
+
+
 
 
 
