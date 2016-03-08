@@ -28,10 +28,9 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
     period=None, num_threads=1,
     approx_cell1_size=None, approx_cellran_size=None):
     """
-    Calculate the void probability function (VPF), :math:`P_0(r)`.
-    
-    :math:`P_0(r)` is defined as the probability that randomly placed sphere of size 
-    :math:`r` contains zero points.
+    Calculate the void probability function (VPF), :math:`P_0(r)`, 
+    defined as the probability that a random 
+    sphere of radius *r* contains zero points in the input sample. 
     
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
@@ -47,8 +46,14 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
     rbins : float
         size of spheres to search for neighbors
     
-    n_ran : int
-        integer number of randoms to use to seeach for voids
+    n_ran : int, optional 
+        integer number of randoms to use to search for voids. 
+        If ``n_ran`` is not passed, you must pass ``random_sphere_centers``.
+
+    random_sphere_centers : array_like, optional 
+        Npts x 3 array of randomly selected positions to drop down spheres 
+        to use to measure the `void_prob_func`. If ``random_sphere_centers`` 
+        is not passed, ``n_ran`` must be passed. 
     
     period : array_like, optional 
         length 3 array defining axis-aligned periodic boundary conditions. If only
@@ -143,7 +148,7 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     Calculate the underdensity probability function (UPF), :math:`P_U(r)`.
     
     :math:`P_U(r)` is defined as the probability that a randomly placed sphere of size 
-    :math:`r` encompases a volume with less than a specified density.
+    :math:`r` encompases a volume with less than a specified number density.
 
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
@@ -159,8 +164,14 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     rbins : float
         size of spheres to search for neighbors
     
-    n_ran : int
-        integer number of randoms to use to search for voids
+    n_ran : int, optional 
+        integer number of randoms to use to search for voids. 
+        If ``n_ran`` is not passed, you must pass ``random_sphere_centers``.
+
+    random_sphere_centers : array_like, optional 
+        Npts x 3 array of randomly selected positions to drop down spheres 
+        to use to measure the `void_prob_func`. If ``random_sphere_centers`` 
+        is not passed, ``n_ran`` must be passed. 
     
     period : array_like, optional 
         length 3 array defining axis-aligned periodic boundary conditions. If only
