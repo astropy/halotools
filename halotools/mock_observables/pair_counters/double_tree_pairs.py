@@ -40,10 +40,21 @@ def npairs(data1, data2, rbins, period = None,\
            verbose = False, num_threads = 1,\
            approx_cell1_size = None, approx_cell2_size = None):
     """
-    Function counts the number of pairs of points as a function of the 3d spatial separation *r*. 
+    Function counts the number of pairs of points separated by a three-dimensional distance 
+    smaller than the input ``rbins``. 
         
-    Note that if data1 == data2 that the `npairs` function double-counts pairs. 
-    
+    Note that if data1 == data2 that the 
+    `~halotools.mock_observables.npairs` function double-counts pairs. 
+    If your science application requires data1==data2 inputs and also pairs 
+    to not be double-counted, simply divide the final counts by 2. 
+
+    A common variation of pair-counting calculations is to count pairs with 
+    separations *between* two different distances *r1* and *r2*. You can retrieve 
+    this information from the `~halotools.mock_observables.npairs` 
+    by taking `numpy.diff` of the returned array. 
+
+    See Notes section for further clarification. 
+
     Parameters
     ----------
     data1 : array_like
@@ -118,6 +129,12 @@ def npairs(data1, data2, rbins, period = None,\
     >>> data2 = np.vstack([x2, y2, z2]).T 
 
     >>> result = npairs(data1, data2, rbins, period = period)
+
+    Notes 
+    -----
+    One final point of clarification concerning double-counting may be in order. 
+    Suppose data1==data2 and rbins[0]==0. Then the returned value for this bin 
+    will be len(data1), since each data1 point has distance 0 from itself. 
     """
 
     ### Process the inputs with the helper function
@@ -469,8 +486,21 @@ def _jnpairs_engine(double_tree, weights1, weights2, jtags1, jtags2,
 def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_threads=1, 
                 approx_cell1_size = None, approx_cell2_size = None):
     """
-    Function counts the number of pairs of points as a function of projected separation :math:`r_{\\rm p}` and line-of-sight separation :math:`\\pi`. 
+    Function counts the number of pairs of points separated by less than 
+    projected separation :math:`r_{\\rm p}` and line-of-sight separation :math:`\\pi`.  
         
+    Note that if data1 == data2 that the 
+    `~halotools.mock_observables.xy_z_npairs` function double-counts pairs. 
+    If your science application requires data1==data2 inputs and also pairs 
+    to not be double-counted, simply divide the final counts by 2. 
+
+    A common variation of pair-counting calculations is to count pairs with 
+    separations *between* two different distances *r1* and *r2*. You can retrieve 
+    this information from the `~halotools.mock_observables.xy_z_npairs` 
+    by taking `numpy.diff` of the returned array. 
+
+    See Notes section for further clarification. 
+
     Parameters
     ----------
     data1 : array_like
@@ -552,6 +582,12 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     >>> data2 = np.vstack([x2, y2, z2]).T 
     
     >>> result = xy_z_npairs(data1, data2, rp_bins, pi_bins, period = period)
+
+    Notes 
+    -----
+    One final point of clarification concerning double-counting may be in order. 
+    Suppose data1==data2 and rbins[0]==0. Then the returned value for this bin 
+    will be len(data1), since each data1 point has distance 0 from itself. 
     """
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs = (
@@ -663,9 +699,23 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
                 verbose = False, num_threads = 1,\
                 approx_cell1_size = None, approx_cell2_size = None):
     """ 
-    Function counts the number of pairs as a function of radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`, where :math:`\\theta_{\\rm los}` is the line-of-sight angle between points and :math:`s^2 = r_{\\rm parallel}^2 + r_{\\rm perp}^2`. 
-    
-    
+    Function counts the number of pairs of points separated by less than 
+    radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`, 
+    where :math:`\\theta_{\\rm los}` is the line-of-sight angle 
+    between points and :math:`s^2 = r_{\\rm parallel}^2 + r_{\\rm perp}^2`. 
+        
+    Note that if data1 == data2 that the 
+    `~halotools.mock_observables.s_mu_npairs` function double-counts pairs. 
+    If your science application requires data1==data2 inputs and also pairs 
+    to not be double-counted, simply divide the final counts by 2. 
+
+    A common variation of pair-counting calculations is to count pairs with 
+    separations *between* two different distances *r1* and *r2*. You can retrieve 
+    this information from the `~halotools.mock_observables.s_mu_npairs` 
+    by taking `numpy.diff` of the returned array. 
+
+    See Notes section for further clarification. 
+
     Parameters
     ----------
     data1 : array_like
@@ -729,6 +779,10 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     because the pair counter has been optimized under the assumption that its 
     separation variable (in this case, :math:`\\mu`) *increases* 
     as :math:`\\theta_{\\rm los})` increases. 
+
+    One final point of clarification concerning double-counting may be in order. 
+    Suppose data1==data2 and rbins[0]==0. Then the returned value for this bin 
+    will be len(data1), since each data1 point has distance 0 from itself. 
     
     Returns
     -------
