@@ -53,6 +53,8 @@ def npairs(data1, data2, rbins, period = None,\
     this information from the `~halotools.mock_observables.npairs` 
     by taking `numpy.diff` of the returned array. 
 
+    See Notes section for further clarification. 
+
     Parameters
     ----------
     data1 : array_like
@@ -127,6 +129,12 @@ def npairs(data1, data2, rbins, period = None,\
     >>> data2 = np.vstack([x2, y2, z2]).T 
 
     >>> result = npairs(data1, data2, rbins, period = period)
+
+    Notes 
+    -----
+    One final point of clarification concerning double-counting may be in order. 
+    Suppose data1==data2 and rbins[0]==0. Then the returned value for this bin 
+    will be len(data1), since each data1 point has distance 0 from itself. 
     """
 
     ### Process the inputs with the helper function
@@ -491,6 +499,8 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     this information from the `~halotools.mock_observables.xy_z_npairs` 
     by taking `numpy.diff` of the returned array. 
 
+    See Notes section for further clarification. 
+
     Parameters
     ----------
     data1 : array_like
@@ -572,6 +582,12 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     >>> data2 = np.vstack([x2, y2, z2]).T 
     
     >>> result = xy_z_npairs(data1, data2, rp_bins, pi_bins, period = period)
+
+    Notes 
+    -----
+    One final point of clarification concerning double-counting may be in order. 
+    Suppose data1==data2 and rbins[0]==0. Then the returned value for this bin 
+    will be len(data1), since each data1 point has distance 0 from itself. 
     """
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs = (
@@ -698,6 +714,8 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     this information from the `~halotools.mock_observables.s_mu_npairs` 
     by taking `numpy.diff` of the returned array. 
 
+    See Notes section for further clarification. 
+
     Parameters
     ----------
     data1 : array_like
@@ -761,6 +779,10 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     because the pair counter has been optimized under the assumption that its 
     separation variable (in this case, :math:`\\mu`) *increases* 
     as :math:`\\theta_{\\rm los})` increases. 
+
+    One final point of clarification concerning double-counting may be in order. 
+    Suppose data1==data2 and rbins[0]==0. Then the returned value for this bin 
+    will be len(data1), since each data1 point has distance 0 from itself. 
     
     Returns
     -------
