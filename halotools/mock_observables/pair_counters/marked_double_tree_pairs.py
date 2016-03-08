@@ -37,6 +37,8 @@ def marked_npairs(data1, data2, rbins,
     The weight given to each pair is determined by the weights for a pair, 
     :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated 
     by the ``wfunc`` parameter, :math:`f(w_1,w_2)`.
+
+    Note that if data1 == data2 that the `marked_npairs` function double-counts pairs. 
     
     Parameters
     ----------

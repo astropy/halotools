@@ -42,6 +42,8 @@ def npairs(data1, data2, rbins, period = None,\
     """
     Function counts the number of pairs of points as a function of the 3d spatial separation *r*. 
         
+    Note that if data1 == data2 that the `npairs` function double-counts pairs. 
+    
     Parameters
     ----------
     data1 : array_like
