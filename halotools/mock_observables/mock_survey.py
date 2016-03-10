@@ -205,14 +205,14 @@ def ra_dec_z(x, v, cosmo=None):
     f = interp1d(xx, yy, kind='cubic')
     z_cos = f(r)
     redshift = z_cos+(vr/c_km_s)*(1.0+z_cos)
-
+    
     #calculate spherical coordinates
     theta = np.arccos(x[:,2]/r)
-    phi   = np.arccos(cp) #atan(y/x)
+    phi = np.arctan2(x[:,1],x[:,0])
     
     #convert spherical coordinates into ra,dec
     ra  = phi
-    dec = (np.pi/2.0) - theta
+    dec = theta - np.pi/2.0
     
     return ra, dec, redshift
     
