@@ -15,13 +15,13 @@ sample2 = np.random.random((Npts,3))
 randoms = np.random.random((Npts,3))
 period = np.array([1.0,1.0,1.0])
 rp_bins = np.linspace(0,0.3,5)
-pi_bins = np.linspace(0,0.3,5)
+pi_max = 0.3
 
 def test_wp_auto_nonperiodic():
     """
     test wp autocorrelation without periodic boundary conditions
     """
-    result = wp(sample1, rp_bins, pi_bins, sample2 = None, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = None, 
                   randoms=randoms, period = None, 
                   max_sample_size=int(1e4), estimator='Natural')
     
@@ -33,7 +33,7 @@ def test_wp_auto_periodic():
     """
     test wp autocorrelation with periodic boundary conditions
     """
-    result = wp(sample1, rp_bins, pi_bins, sample2 = None, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = None, 
                 randoms=None, period = period, 
                 max_sample_size=int(1e4), estimator='Natural')
     
@@ -45,7 +45,7 @@ def test_wp_cross_periodic():
     """
     test wp cross-correlation with periodic boundary conditions
     """
-    result = wp(sample1, rp_bins, pi_bins, sample2 = sample2, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = sample2, 
                 randoms=None, period = period, 
                 max_sample_size=int(1e4), estimator='Natural')
 
@@ -58,7 +58,7 @@ def test_wp_cross_nonperiodic():
     """
     test wp cross-correlation with periodic boundary conditions
     """
-    result = wp(sample1, rp_bins, pi_bins, sample2 = sample2, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = sample2, 
                 randoms=randoms, period = None, 
                 max_sample_size=int(1e4), estimator='Natural')
 

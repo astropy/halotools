@@ -23,7 +23,7 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
+def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,\
        max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,\
        approx_cellran_size=None):
@@ -56,9 +56,9 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         array of boundaries defining the bins perpendicular to the LOS in which 
         pairs are counted.
     
-    pi_bins : array_like
-        array of boundaries defining the bins parallel to the LOS in which 
-        pairs are counted.
+    pi_max : float
+        maximum LOS distance to to search for pairs when calculating math:`w_p`.
+        see Notes.
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-D positions of points.
@@ -95,7 +95,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
         will apportion the sample1 points into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use [max(rp_bins),max(rp_bins),max(pi_bins)] in each 
+        Default choice is to use [max(rp_bins),max(rp_bins),pi_max] in each 
         dimension, which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
@@ -135,7 +135,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     .. math::
         w_p(r_p) = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi
     
-    where :math:`\\pi_{\\rm max}` is maximum(``pi_bins``) and :math:`\\xi(r_p,\\pi)` 
+    where :math:`\\pi_{\\rm max}` is ``pi_max`` and :math:`\\xi(r_p,\\pi)` 
     is the redshift space correlation function.
     
     Notice that the results will generally be sensitive to the choice of ``pi_bins``, as
@@ -161,14 +161,18 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     >>> coords = np.vstack((x,y,z)).T
     
     >>> rp_bins = np.logspace(-2,-1,10)
-    >>> pi_bins = np.logspace(-2,-1,10)
-    >>> xi = wp(coords, rp_bins, pi_bins, period=period)
+    >>> pi_max = 0.1
+    >>> xi = wp(coords, rp_bins, pi_max, period=period)
     
     See also 
     --------
     :ref:`galaxy_catalog_analysis_tutorial4`
 
     """
+    
+    #define the volume to search for pairs
+    pi_max = float(pi_max)
+    pi_bins = np.array([0.0,pi_max])
     
     #process input parameters
     function_args = [sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,\
@@ -190,26 +194,29 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
                                  approx_cell2_size=approx_cell2_size,\
                                  approx_cellran_size=approx_cellran_size)
     
-    #integrate the redshift space TPCF to get w_p
-    def integrate_2D_xi(x,pi_bins):
-        return 2.0*np.sum(x*np.diff(pi_bins), axis=1)
-
     #return the results.
     if _sample1_is_sample2:
-        wp_D1D1 = integrate_2D_xi(result,pi_bins)
+        D1D1 = result[:,0]
+        wp_D1D1 = D1D1*pi_max
         return wp_D1D1
     else:
         if (do_auto==True) & (do_cross==True):
-            wp_D1D1 = integrate_2D_xi(result[0],pi_bins)
-            wp_D1D2 = integrate_2D_xi(result[1],pi_bins)
-            wp_D2D2 = integrate_2D_xi(result[2],pi_bins)
+            D1D1 = result[0][:,0]
+            D1D2 = result[1][:,0]
+            D2D2 = result[2][:,0]
+            wp_D1D1 = D1D1*pi_max
+            wp_D1D2 = D1D2*pi_max
+            wp_D2D2 = D2D2*pi_max
             return wp_D1D1, wp_D1D2, wp_D2D2
         elif (do_auto==True) & (do_cross==False):
-            wp_D1D1 = integrate_2D_xi(result[0],pi_bins)  
-            wp_D2D2 = integrate_2D_xi(result[1],pi_bins)
+            D1D1 = result[0][:,0]
+            D2D2 = result[1][:,0]
+            wp_D1D1 = D1D1*pi_max
+            wp_D2D2 = D2D2*pi_max
             return wp_D1D1, wp_D2D2
         elif (do_auto==False) & (do_cross==True):
-            wp_D1D2 = integrate_2D_xi(result,pi_bins)
+            D1D2 = result[:,0]
+            wp_D1D2 = D1D2*pi_max
             return wp_D1D2
 
 
