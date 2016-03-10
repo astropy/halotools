@@ -59,6 +59,7 @@ class TestHearin15(TestCase):
 		halocat = FakeSim(redshift = 2.)
 		model_highz.populate_mock(halocat)
 
+	@pytest.mark.skipif('not APH_MACHINE')
 	@pytest.mark.slow
 	def test_hearin15_fullpop(self):
 		halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0)
