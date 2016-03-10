@@ -197,26 +197,26 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
     #return the results.
     if _sample1_is_sample2:
         D1D1 = result[:,0]
-        wp_D1D1 = D1D1*pi_max
+        wp_D1D1 = 2.0*D1D1*pi_max
         return wp_D1D1
     else:
         if (do_auto==True) & (do_cross==True):
             D1D1 = result[0][:,0]
             D1D2 = result[1][:,0]
             D2D2 = result[2][:,0]
-            wp_D1D1 = D1D1*pi_max
-            wp_D1D2 = D1D2*pi_max
-            wp_D2D2 = D2D2*pi_max
+            wp_D1D1 = 2.0*D1D1*pi_max
+            wp_D1D2 = 2.0*D1D2*pi_max
+            wp_D2D2 = 2.0*D2D2*pi_max
             return wp_D1D1, wp_D1D2, wp_D2D2
         elif (do_auto==True) & (do_cross==False):
             D1D1 = result[0][:,0]
             D2D2 = result[1][:,0]
-            wp_D1D1 = D1D1*pi_max
-            wp_D2D2 = D2D2*pi_max
+            wp_D1D1 = 2.0*D1D1*pi_max
+            wp_D2D2 = 2.0*D2D2*pi_max
             return wp_D1D1, wp_D2D2
         elif (do_auto==False) & (do_cross==True):
             D1D2 = result[:,0]
-            wp_D1D2 = D1D2*pi_max
+            wp_D1D2 = 2.0*D1D2*pi_max
             return wp_D1D2
 
 
