@@ -65,13 +65,17 @@ star-forming populations.
 
 Calculate :math:`w_{\rm p}(r_{\rm p})`
 -------------------------------------------------------------
-When calculating :math:`w_{\rm p}`, we need to specify both the 
+The correlation function :math:`w_{\rm p}(r_{\rm p})` is 
+related to the full redshift-space correlation function :math:`\xi(r_{\rm p}, \pi)` 
+via the following projection integral:
+
+.. math:: 
+
+    w_{\rm p}(r_{\rm p}) \equiv \frac{1}{2\pi_{\rm max}}\int_{-\pi_{\rm max}}^{\pi_{\rm max}}{\rm d}\pi'\xi(r_{\rm p}, \pi')
+
+When calculating :math:`w_{\rm p}`, we therefore need to specify both the 
 projected separation bins :math:`r_{\rm p}` and the line-of-sight 
-separation bins :math:`\pi_{\rm los}`. Galaxy pairs will be counted in 
-2-d bins :math:`r_{\rm p}-\pi_{\rm los}`, and then in each 
-:math:`r_{\rm p}` bin the line-of-sight integral gives :math:`w_{\rm p}(r_{\rm p}`.
-Thus the maximum value you set for the :math:`\pi_{\rm los}` bins determines 
-:math:`pi_{\rm max}`. 
+projection distance :math:`\pi_{\rm max}`. 
 
 .. code:: python
 
@@ -80,13 +84,12 @@ Thus the maximum value you set for the :math:`\pi_{\rm los}` bins determines
 
     pi_max = 40.
     rp_bins = np.logspace(-1,1.25,15)
-    pi_bins = np.logspace(-1,np.log10(pi_max),15)
 
-    wp_all = wp(all_positions, rp_bins, pi_bins, 
+    wp_all = wp(all_positions, rp_bins, pi_max, 
         period=model.mock.Lbox, num_threads='max')
-    wp_red = wp(red_positions, rp_bins, pi_bins, 
+    wp_red = wp(red_positions, rp_bins, pi_max, 
         period=model.mock.Lbox, num_threads='max')
-    wp_blue = wp(blue_positions, rp_bins, pi_bins, 
+    wp_blue = wp(blue_positions, rp_bins, pi_max, 
         period=model.mock.Lbox, num_threads='max')
 
 Plot the results 
@@ -128,7 +131,7 @@ red-red, blue-blue, and red-blue clustering all in a single call to
 
 .. code:: python
 
-    wp_red_red, wp_red_blue, wp_blue_blue = wp(red_positions, rp_bins, pi_bins, 
+    wp_red_red, wp_red_blue, wp_blue_blue = wp(red_positions, rp_bins, pi_max, 
                                                sample2 = blue_positions, 
                                                period=model.mock.Lbox, num_threads='max', 
                                                do_auto = True, do_cross = True)
