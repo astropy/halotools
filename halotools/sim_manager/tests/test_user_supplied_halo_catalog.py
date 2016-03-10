@@ -96,7 +96,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 100, redshift = '1.0', 
+                Lbox = 200, particle_mass = 100, redshift = '', 
                 **self.good_halocat_args)
         substr = "The ``redshift`` metadata must be a float."
         assert substr in err.value.message

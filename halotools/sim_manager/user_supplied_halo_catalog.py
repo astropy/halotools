@@ -232,10 +232,10 @@ class UserSuppliedHaloCatalog(object):
                 "that are bound by 0 and the input ``Lbox``. \n")
             raise HalotoolsError(msg)
 
-        redshift = metadata_dict['redshift']
+        
         try:
-            assert type(redshift) == float
-        except AssertionError:
+            redshift = float(metadata_dict['redshift'])
+        except:
             msg = ("\nThe ``redshift`` metadata must be a float.\n")
             raise HalotoolsError(msg)
 
