@@ -93,7 +93,9 @@ in a mock galaxy catalog.
 
 >>> from halotools.empirical_models import PrebuiltSubhaloModelFactory
 >>> model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')
->>> model.populate_mock(simname = 'fake')
+>>> from halotools.sim_manager import FakeSim
+>>> halocat = FakeSim()
+>>> model.populate_mock(halocat)
 
 Our ``model`` now has a ``mock`` object attached to it with a ``galaxy_table`` 
 storing the mock galaxies in the form of an Astropy `~astropy.table.Table`. 

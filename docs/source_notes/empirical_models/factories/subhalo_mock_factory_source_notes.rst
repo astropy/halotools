@@ -65,7 +65,7 @@ by the `SubhaloModelFactory.populate_mock` method, which is just a convenience w
 
 .. code-block:: python 
 
-	behroozi10_model.populate_mock()
+	behroozi10_model.populate_mock(default_halocat)
 
 This is essentially equivalent to the three lines of code written above. The only difference is that 
 in the above line will create a ``mock`` attribute that is bound to ``behroozi10_model``; this ``mock`` 
@@ -131,13 +131,6 @@ See :ref:`model_feature_calling_sequence_mechanism` for details. Note how the us
 allows the `~SubhaloMockFactory` to call the appropriate method without knowing its name. This 
 high-level feature of python is what allows the factory work with any arbitrary set of component models. 
 
-Further Reading 
-=================
-
-Once you populate a mock, you can use the functions in the `~halotools.mock_observables` 
-sub-package to "observe" it. However, as described in :ref:`mock_observables_convenience_functions`, 
-there are a number of functions bound to the `~SubhaloMockFactory` instance 
-that provide convenient wrapper behavior around this sub-package. 
 
 
 

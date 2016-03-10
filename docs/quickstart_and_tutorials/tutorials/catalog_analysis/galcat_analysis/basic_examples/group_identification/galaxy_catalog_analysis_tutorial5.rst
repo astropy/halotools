@@ -27,7 +27,9 @@ halos for the bolshoi simulation, as this is the default halo catalog.
 
     from halotools.empirical_models import PrebuiltSubhaloModelFactory
     model = PrebuiltSubhaloModelFactory('behroozi10')
-    model.populate_mock(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    model.populate_mock(halocat)
 
 Our mock galaxies are stored in the ``galaxy_table`` of ``model.mock``
 in the form of an Astropy Table.

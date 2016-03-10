@@ -27,7 +27,9 @@ default halo catalog.
 
     from halotools.empirical_models import PrebuiltSubhaloModelFactory
     model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')
-    model.populate_mock(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    model.populate_mock(halocat)
 
 Extract subsamples of galaxies and dark matter particles 
 ------------------------------------------------------------------

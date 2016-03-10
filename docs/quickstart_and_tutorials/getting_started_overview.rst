@@ -127,7 +127,9 @@ Consider the HOD-style model used in `Zheng et al 2007 <http://arxiv.org/abs/ast
 
 >>> from halotools.empirical_models import PrebuiltHodModelFactory
 >>> zheng07_model = PrebuiltHodModelFactory('zheng07', threshold = -19.5, redshift = 0.5)
->>> zheng07_model.populate_mock(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+>>> from halotools.sim_manager import CachedHaloCatalog 
+>>> halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+>>> zheng07_model.populate_mock(halocat) # doctest: +SKIP
 >>> r, xi_gg = zheng07_model.compute_average_galaxy_clustering() # doctest: +SKIP
 
 As an additional example, consider the abundance matching-style model introduced in `Behroozi et al 2010 <http://arxiv.org/abs/1001.0015/>`_:

@@ -80,7 +80,9 @@ Source code for the ``zheng07`` model
 	# All composite models can directly populate N-body simulations 
 	# with mock galaxy catalogs using the populate_mock method:
 
-	model_instance.populate_mock(simname = 'fake')
+    from halotools.sim_manager import FakeSim
+    halocat = FakeSim()
+	model_instance.populate_mock(halocat)
 
 	# Setting simname to 'fake' populates a mock into a fake halo catalog 
 	# that is generated on-the-fly, but you can use the populate_mock 
