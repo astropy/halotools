@@ -142,7 +142,8 @@ class TestSubhaloModelFactory(TestCase):
         assert hasattr(model1, 'mean_stellar_mass')
 
         assert not hasattr(model1, 'mock')
-        model1.populate_mock(simname = 'fake')
+        halocat = FakeSim()
+        model1.populate_mock(halocat)
         assert hasattr(model1, 'mock')
         assert 'stellar_mass' in model1.mock.galaxy_table.keys()
 
@@ -157,7 +158,7 @@ class TestSubhaloModelFactory(TestCase):
         m = PrebuiltSubhaloModelFactory('behroozi10')
         m._haloprop_list.append("Jose Canseco")
         with pytest.raises(HalotoolsError) as err:
-            m.populate_mock(halocat = halocat)
+            m.populate_mock(halocat)
         substr = "this column is not available in the catalog you attempted to populate"
         assert substr in err.value.message
         assert "``Jose Canseco``" in err.value.message

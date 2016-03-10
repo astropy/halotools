@@ -160,7 +160,9 @@ class SubhaloModelFactory(ModelFactory):
         to create Monte Carlo realization of the model by populating any dark matter halo catalog 
         in your cache directory:
 
-        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+        >>> from halotools.sim_manager import CachedHaloCatalog 
+        >>> halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+        >>> model_instance.populate_mock(halocat) # doctest: +SKIP
 
         Your ``model_instance`` now has a ``mock`` attribute storing a synthetic galaxy 
         population. See the `~SubhaloModelFactory.populate_mock` docstring for details. 
@@ -815,7 +817,7 @@ class SubhaloModelFactory(ModelFactory):
         self.set_primary_behaviors()
         self.set_calling_sequence()
 
-    def populate_mock(self, **kwargs):
+    def populate_mock(self, halocat):
         """ Method used to populate a simulation using the model. 
 
         After calling this method, ``self`` will have a new ``mock`` attribute, 
@@ -824,29 +826,9 @@ class SubhaloModelFactory(ModelFactory):
 
         Parameters 
         ----------
-        halocat : object, optional 
+        halocat : object 
             Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
             or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
-            If you pass a ``halocat`` argument, do not pass additional arguments. 
-
-        simname : string, optional
-            Nickname of the simulation of the cached catalog. 
-            Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
-
-        halo_finder : string, optional
-            Nickname of the halo-finder, of the cached catalog, e.g. ``rockstar`` or ``bdm``. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
-
-        version_name : string, optional 
-            Nickname of the version of the cached halo catalog you want to populate. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
-
-        redshift : float, optional
-            Redshift of the cached catalog. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         See also 
         -----------
@@ -855,7 +837,7 @@ class SubhaloModelFactory(ModelFactory):
         :ref:`populating_mocks_with_alternate_sims_tutorial`
 
         """
-        ModelFactory.populate_mock(self, **kwargs)
+        ModelFactory.populate_mock(self, halocat)
 
     def _test_dictionary_consistency(self):
         """

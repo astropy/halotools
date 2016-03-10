@@ -12,6 +12,7 @@ from ..occupation_model_template import OccupationComponent
 from ... import model_defaults
 from ...factories import PrebuiltHodModelFactory, HodModelFactory
 
+from ....sim_manager import FakeSim
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestOccupationComponent']
@@ -139,7 +140,8 @@ class TestOccupationComponent(TestCase):
 
 		new_model = HodModelFactory(baseline_model_instance = zheng_model, 
 			centrals_occupation = occu_model)
-		new_model.populate_mock(simname = 'fake')
+		halocat = FakeSim()
+		new_model.populate_mock(halocat)
 		cenmask = new_model.mock.galaxy_table['gal_type'] == 'centrals'
 		assert len(new_model.mock.galaxy_table[cenmask]) > 0
 
@@ -172,7 +174,8 @@ class TestOccupationComponent(TestCase):
 		occ = MySatelliteOccupation(zheng_model.threshold)
 		new_model = HodModelFactory(baseline_model_instance = zheng_model, 
 			satellites_occupation = occ)
-		new_model.populate_mock(simname = 'fake')
+		halocat = FakeSim()
+		new_model.populate_mock(halocat)
 
 
 
@@ -198,7 +201,8 @@ class TestOccupationComponent(TestCase):
 			centrals_occupation = occu_model)
 		assert not hasattr(new_model, 'prim_haloprop_key')
 
-		new_model.populate_mock(simname = 'fake')
+		halocat = FakeSim()
+		new_model.populate_mock(halocat)
 
 
 	def tearDown(self):

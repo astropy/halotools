@@ -144,6 +144,7 @@ class SubhaloMockFactory(MockFactory):
                     "and returns a length-N array of strings.\n")
                 raise HalotoolsError(msg)
 
+
     def populate(self):
         """ Method populating subhalos with mock galaxies. 
 

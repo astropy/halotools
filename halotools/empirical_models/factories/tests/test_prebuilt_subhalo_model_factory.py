@@ -38,18 +38,19 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
 
     @pytest.mark.slow
     def test_fake_mock_population(self):
+        halocat = FakeSim()
         for modelname in PrebuiltSubhaloModelFactory.prebuilt_model_nickname_list:
             model = PrebuiltSubhaloModelFactory(modelname)
-            model.populate_mock(simname = 'fake')
-            model.populate_mock(simname = 'fake')
+            model.populate_mock(halocat)
+            model.populate_mock(halocat)
 
-            model2 = PrebuiltSubhaloModelFactory(modelname, redshift=2)
+            model2 = PrebuiltSubhaloModelFactory(modelname, redshift=2.)
             with pytest.raises(HalotoolsError) as err:
-                model2.populate_mock(simname = 'fake')
+                model2.populate_mock(halocat)
             substr = "Inconsistency between the model redshift"
             assert substr in err.value.message
-
-            model2.populate_mock(simname = 'fake', redshift = 2.)
+            halocat = FakeSim(redshift = 2.)
+            model2.populate_mock(halocat)
 
     @pytest.mark.slow
     def test_fake_mock_observations1(self):

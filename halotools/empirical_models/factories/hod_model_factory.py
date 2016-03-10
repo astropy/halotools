@@ -163,7 +163,9 @@ class HodModelFactory(ModelFactory):
         to create Monte Carlo realization of the model by populating any dark matter halo catalog 
         in your cache directory:
 
-        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+        >>> from halotools.sim_manager import CachedHaloCatalog 
+        >>> halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+        >>> model_instance.populate_mock(halocat) # doctest: +SKIP
 
         Your ``model_instance`` now has a ``mock`` attribute storing a synthetic galaxy 
         population. See the `~HodModelFactory.populate_mock` docstring for details. 
@@ -963,47 +965,60 @@ class HodModelFactory(ModelFactory):
             if not hasattr(self, method):
                 raise HalotoolsError(missing_method_msg2)
 
-    def populate_mock(self, **kwargs):
+    def populate_mock(self, halocat, **kwargs):
         """ Method used to populate a simulation using the model. 
 
-        After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``table`` bound to it containing the Monte Carlo 
+        After calling this method, the model instance will have a new ``mock`` attribute, 
+        which has a ``galaxy_table`` attribute bound to it containing the Monte Carlo 
         realization of the model. 
 
         Parameters 
         ----------
-        halocat : object, optional 
+        halocat : object 
             Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
             or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
-            If you pass a ``halocat`` argument, do not pass additional arguments. 
 
-        simname : string, optional
-            Nickname of the simulation of the cached catalog. 
-            Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
+        Num_ptcl_requirement : int, optional 
+            Requirement on the number of dark matter particles in the halo. 
+            The column defined by the ``halo_mass_column_key`` string will have a cut placed on it: 
+            all halos with halocat.halo_table[halo_mass_column_key] < Num_ptcl_requirement*halocat.particle_mass
+            will be thrown out immediately after reading the original halo catalog in memory. 
+            Default value is set in `~halotools.sim_defaults.Num_ptcl_requirement`. 
+            Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
 
-        halo_finder : string, optional
-            Nickname of the halo-finder, of the cached catalog, e.g. ``rockstar`` or ``bdm``. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
+        halo_mass_column_key : string, optional 
+            This string must be a column of the input halo catalog. 
+            The column defined by this string will have a cut placed on it: 
+            all halos with halocat.halo_table[halo_mass_column_key] < Num_ptcl_requirement*halocat.particle_mass
+            will be thrown out immediately after reading the original halo catalog in memory. 
+            Default is 'halo_mvir'. 
+            Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`. 
 
-        version_name : string, optional 
-            Nickname of the version of the cached halo catalog you want to populate. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
+        masking_function : function, optional 
+            Function object used to place a mask on the halo table prior to 
+            calling the mock generating functions. Calling signature of the 
+            function should be to accept a single positional argument storing 
+            a table, and returning a boolean numpy array that will be used 
+            as a fancy indexing mask. All masked halos will be ignored during 
+            mock population. Default is None. 
+            Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
 
-        redshift : float, optional
-            Redshift of the cached catalog. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
+        enforce_PBC : bool, optional 
+            If set to True, after galaxy positions are assigned the 
+            `model_helpers.enforce_periodicity_of_box` will re-map 
+            satellite galaxies whose positions spilled over the edge 
+            of the periodic box. Default is True. This variable should only 
+            ever be set to False when using the ``masking_function`` to 
+            populate a specific spatial subvolume, as in that case PBCs 
+            no longer apply. 
+            Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
 
         See also 
-        -----------
-        :ref:`basic_syntax_subhalo_mocks` 
-        
+        -----------        
         :ref:`populating_mocks_with_alternate_sims_tutorial`
 
         """
-        ModelFactory.populate_mock(self, **kwargs)
+        ModelFactory.populate_mock(self, halocat, **kwargs)
 
 
 ##########################################

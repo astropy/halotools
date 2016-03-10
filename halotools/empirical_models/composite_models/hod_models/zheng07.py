@@ -66,9 +66,11 @@ def zheng07_model_dictionary(
     >>> model_instance = factories.PrebuiltHodModelFactory('zheng07', threshold = -21)
 
     As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
-    you can populate a mock with one line of code: 
+    you can populate a mock by passing the model a halo catalog:
 
-    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0) # doctest: +SKIP
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim(redshift = model_instance.redshift) 
+    >>> model_instance.populate_mock(halocat)
 
     """
 

@@ -93,10 +93,12 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
 
     >>> model_instance = factories.PrebuiltHodModelFactory('hearin15', threshold = 11, redshift = 1)
 
-    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
-    you can populate a mock with one line of code: 
+    As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
+    you can populate a mock by passing the model a halo catalog:
 
-    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 1) # doctest: +SKIP
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim(redshift = model_instance.redshift) 
+    >>> model_instance.populate_mock(halocat)
 
     """     
     ##############################
