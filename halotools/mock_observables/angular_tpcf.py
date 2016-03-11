@@ -36,8 +36,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` argument.   
 
-    For thorough 
-    documentation of all features, see :ref:`angular_tpcf_usage_tutorial`. 
+    For a step-by-step tutorial, see :ref:`galaxy_catalog_analysis_tutorial9`. 
     
     Parameters 
     ----------
