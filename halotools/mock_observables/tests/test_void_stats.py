@@ -7,6 +7,9 @@ from ...custom_exceptions import HalotoolsError
 from ..void_stats import *
 from .cf_helpers import generate_locus_of_3d_points
 
+__all__ = ('test_vpf1', 'test_vpf2', 'test_vpf3', 'test_upf1', 
+    'test_upf2', 'test_upf3', 'test_upf4')
+
 def test_vpf1():
     """ Verify that the VPF raises no exceptions 
     for several reasonable choices of rbins. 

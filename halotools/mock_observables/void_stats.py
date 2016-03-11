@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-funcitons to measure void statistics
+functions to measure void statistics
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -42,7 +42,10 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
-    
+        See `~halotools.mock_observables.return_xyz_formatted_array` for 
+        a convenience function that can be used to transform a set of x, y, z 
+        1d arrays into the required form. 
+
     rbins : float
         size of spheres to search for neighbors
     
@@ -132,9 +135,6 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
                               approx_cell1_size = approx_cell1_size,\
                               approx_cell2_size = approx_cellran_size)
 
-    # mask = (result > 1)
-    # result = np.sum(mask, axis=0)
-    # return (n_ran - result)/n_ran
     num_empty_spheres = np.array(
         [sum(result[:,i] == 0) for i in xrange(result.shape[1])])
     return num_empty_spheres/n_ran
@@ -160,7 +160,10 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
-    
+        See `~halotools.mock_observables.return_xyz_formatted_array` for 
+        a convenience function that can be used to transform a set of x, y, z 
+        1d arrays into the required form. 
+
     rbins : float
         size of spheres to search for neighbors
     
