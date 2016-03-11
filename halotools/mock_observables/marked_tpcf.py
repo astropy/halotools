@@ -48,12 +48,12 @@ def marked_tpcf(sample1, rbins, sample2=None,
         Npts x 3 array containing 3-D positions of points.
     
     marks1 : array_like, optional
-        len(sample1) x N_marks array of marks.  The suplied marks array must have the 
+        len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``wfunc`` (see Notes for requirements).  If this
         parameter is not specified, it is set to numpy.ones((len(sample1), N_marks)).
         
     marks2 : array_like, optional
-        len(sample2) x N_marks array of marks.  The suplied marks array must have the 
+        len(sample2) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``wfunc`` (see Notes for requirements).  If this
         parameter is not specified, it is set to numpy.ones((len(sample2), N_marks)).
     
