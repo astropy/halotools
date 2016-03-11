@@ -47,7 +47,8 @@ missing_halo_upid_msg = ("All HOD-style models populate host halos with mock gal
 
 class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
-    population of mock galaxies based on an HOD-style model. 
+    population of mock galaxies based on an HOD-style model 
+    built by the `~halotools.empirical_models.HodModelFactory` class. 
 
     Can be thought of as a factory that takes a model  
     and simulation halocat as input, 

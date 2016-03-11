@@ -1048,6 +1048,37 @@ class HodModelFactory(ModelFactory):
             no longer apply. 
             Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
 
+        Examples 
+        ----------
+        Here we'll use a pre-built model to demonstrate basic usage. 
+        The syntax shown below is the same for all composite models, 
+        whether they are pre-built by Halotools or built by you with `HodModelFactory`. 
+
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `~halotools.empirical_models.HodMockFactory.populate` 
+        method bound to the ``mock``, which will repopulate the halo catalog 
+        with a new Monte Carlo realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['logMmin'] = 12.1
+        >>> model_instance.mock.populate()
+
         See also 
         -----------        
         :ref:`populating_mocks_with_alternate_sims_tutorial`
