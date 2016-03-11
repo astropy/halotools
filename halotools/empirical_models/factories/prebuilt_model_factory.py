@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Module storing the various factories used to build galaxy-halo models. 
+Module storing the factories used to generate 
+Halotools-provided composite models 
+of the galaxy-halo connection. 
 """
 
 __all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
