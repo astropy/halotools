@@ -2,6 +2,9 @@
 """
 Module used to construct mock galaxy populations 
 based on models that populate subhalos. 
+The mock factory only has knowledge of a simulation halocat 
+and composite model object, and provides an 
+abstract interface between the two. 
 
 """
 
