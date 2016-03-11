@@ -14,6 +14,23 @@ run this script with no arguments but throw the help flag:
 
 $ python scripts/download_additional_halocat.py -h
 
+This script will download your halo catalogs to the 
+following location on disk:
+
+$HOME/.astropy/cache/halotools/halo_catalogs/simname/halo_finder
+
+With each download, your cache log is updated so that Halotools creates 
+a persistent memory of where your simulations are located. 
+Your cache log is an ASCII file located here:
+
+$HOME/.astropy/cache/halotools/halo_table_cache_log.txt 
+
+Manually deleting a line from this log erases the memory 
+of the corresponding catalog. In case the cache log becomes corrupted 
+for any reason, you can attempt to rebuild it 
+by running the following script:
+
+$ python scripts/rebuild_halo_table_cache_log.py 
 
 """
 

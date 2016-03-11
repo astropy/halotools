@@ -1,6 +1,25 @@
 #!/usr/bin/env python
+"""
+Command-line script to download the default halo catalog. 
 
-"""Command-line script to download the default halo catalog"""
+Executing this script with no arguments will download 
+a pre-processed hdf5 file storing a z=0 rockstar-based 
+subhalo catalog from the Bolshoi simulation. The catalog 
+will be stored in the following location on disk: 
+$HOME/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar
+
+Executing this script also sets up your log of cached simulations. 
+The cache log is an ASCII file stored at the following location:
+$HOME/.astropy/cache/halotools/halo_table_cache_log.txt 
+
+Manually deleting a line from this log erases the memory 
+of the corresponding catalog. In case the cache log becomes corrupted 
+for any reason, you can attempt to rebuild it 
+by running the following script:
+
+$ python scripts/rebuild_halo_table_cache_log.py 
+
+"""
 
 import os
 from halotools.sim_manager import DownloadManager, sim_defaults
