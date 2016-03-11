@@ -109,7 +109,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     inds = np.arange(0,N)
     
     is_isolated = np.in1d(inds, i, invert=True)
-    
+
     return is_isolated
 
 
@@ -117,7 +117,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_thr
                           approx_cell1_size=None, approx_cell2_size=None):
     """
     Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    a cylinderical volume
+    a cylindrical volume
     
     Parameters
     ----------
@@ -131,7 +131,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_thr
         radius of the cylinder to seach for neighbors
     
     pi_max : float
-        half the legnth of the cylinder to seach for neighbors
+        half the length of the cylinder to seach for neighbors
     
     period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only
@@ -190,7 +190,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_thr
     """
     
     perp_distance_matrix, para_distance_matrix = \
-        xy_z_pair_matrix(sample1, sample1, rp_max, pi_max, period=period, 
+        xy_z_pair_matrix(sample1, sample2, rp_max, pi_max, period=period, 
                          approx_cell1_size = approx_cell1_size,
                          approx_cell2_size = approx_cell1_size)
     
@@ -203,7 +203,6 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_thr
     inds = np.arange(0,N)
     
     is_isolated = np.in1d(inds, i, invert=True)
-    
     return is_isolated
 
 
@@ -277,7 +276,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     different number of marks per point, N_marks.  The conditonal function gets passed 
     two vectors per pair, w1 and w2, of length N_marks and return a float.  
     
-    A pair pair is counted as a neighbor if the conditonal function evaulates as True.
+    A pair pair is counted as a neighbor if the conditonal function evaluates as True.
     
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:
@@ -288,7 +287,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\left \\{
                 \\begin{array}{ll}
                     True & : w_1[0] > w_2[0] \\\\
-                    False & : w_1[0] \\geq w_2[0] \\\\
+                    False & : w_1[0] \\leq w_2[0] \\\\
                 \\end{array}
                 \\right.
     
@@ -298,7 +297,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\left \\{
                 \\begin{array}{ll}
                     True & : w_1[0] < w_2[0] \\\\
-                    False & : w_1[0] \\leq w_2[0] \\\\
+                    False & : w_1[0] \\geq w_2[0] \\\\
                 \\end{array}
                 \\right.
     
@@ -322,7 +321,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance greater than (N_marks = 1)
+    #. tolerance greater than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -332,7 +331,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance less than (N_marks = 1)
+    #. tolerance less than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -406,7 +405,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         radius of the cylinder to seach for neighbors
     
     pi_max : float
-        half the legnth of the cylinder to seach for neighbors
+        half the length of the cylinder to seach for neighbors
     
     marks1 : array_like
         len(sample1) x N_marks array of marks.  The suplied marks array must have the 
@@ -471,7 +470,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\left \\{
                 \\begin{array}{ll}
                     True & : w_1[0] > w_2[0] \\\\
-                    False & : w_1[0] \\geq w_2[0] \\\\
+                    False & : w_1[0] \\leq w_2[0] \\\\
                 \\end{array}
                 \\right.
     
@@ -481,7 +480,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\left \\{
                 \\begin{array}{ll}
                     True & : w_1[0] < w_2[0] \\\\
-                    False & : w_1[0] \\leq w_2[0] \\\\
+                    False & : w_1[0] \\geq w_2[0] \\\\
                 \\end{array}
                 \\right.
     
@@ -556,7 +555,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     """
     
     perp_distance_matrix, para_distance_matrix = \
-        conditional_xy_z_pair_matrix(sample1, sample1, rp_max, pi_max,
+        conditional_xy_z_pair_matrix(sample1, sample2, rp_max, pi_max,
                          marks1, marks2, cond_func, 
                          period = period,
                          approx_cell1_size = approx_cell1_size,
