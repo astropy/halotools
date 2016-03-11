@@ -102,9 +102,39 @@ class MockFactory(object):
         model ``param_dict``. 
 
         For documentation on the `populate` method of subhalo-based models, 
-        see `halotools.empirical_models.SubhaloModelFactory.populate`; 
+        see `halotools.empirical_models.SubhaloMockFactory.populate`; 
         for HOD-style models 
-        see `halotools.empirical_models.HodModelFactory.populate`. 
+        see `halotools.empirical_models.HodMockFactory.populate`. 
+
+        Examples 
+        ----------
+        We'll use a pre-built HOD-style model to demonstrate basic usage. 
+        The same syntax applies to subhalo-based models. 
+        
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `populate` method bound to the ``mock``, 
+        which will repopulate the halo catalog with a new Monte Carlo 
+        realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['logMmin'] = 12.1
+        >>> model_instance.mock.populate()
 
         """
         raise NotImplementedError("All subclasses of MockFactory"

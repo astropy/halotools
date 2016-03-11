@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Module containing the `~halotools.empirical_models.HodMockFactory` class, 
+the primary class used to construct mock galaxy populations 
+based on HOD-style models. 
 
-Module used to construct mock galaxy populations based on HOD-style models. 
-The mock factory only has knowledge of a simulation halocat 
-and composite model object, and provides an 
-abstract interface between the two. 
-
+The `~halotools.empirical_models.HodMockFactory` class 
+provides an abstract interface between halo catalogs 
+and Halotools models. 
 """
 
 import numpy as np
@@ -181,9 +182,33 @@ class HodMockFactory(MockFactory):
             populate a specific spatial subvolume, as in that case PBCs 
             no longer apply. 
 
-        See also 
-        ---------
-        `halotools.empirical_models.ModelFactory.populate_mock`. 
+        Examples 
+        ----------
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `populate` method bound to the ``mock``, 
+        which will repopulate the halo catalog with a new Monte Carlo 
+        realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['logMmin'] = 12.1
+        >>> model_instance.mock.populate()
+
         """
         # The _testing_mode keyword is for unit-testing only 
         # it has been intentionally left out of the docstring

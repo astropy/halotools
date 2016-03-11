@@ -33,6 +33,13 @@ from ...custom_exceptions import *
 class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
+    See :ref:`hod_modeling_tutorial0` for an in-depth description 
+    of how to build HOD models, demonstrated by a 
+    sequence of increasingly complex examples. 
+    If you do not wish to build your own model but want to use one 
+    provided by Halotools, 
+    instead see `~halotools.empirical_models.PrebuiltHodModelFactory`. 
+
     The arguments passed to the `HodModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
     both of which have explicit examples provided below. 
@@ -55,8 +62,10 @@ class HodModelFactory(ModelFactory):
     the ``baseline_model_instance`` with new behavior. 
 
     Regardless what set of features you use to build your model, 
-    the returned object can be used to directly populate subhalos 
-    with mock galaxies, as shown in the example below. 
+    the returned object can be used to directly populate a halo catalog  
+    with mock galaxies using the 
+    `~halotools.empirical_models.HodModelFactory.populate_mock` method, 
+    as shown in the example below. 
     
     """
 

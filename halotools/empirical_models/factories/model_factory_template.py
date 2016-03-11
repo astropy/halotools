@@ -69,6 +69,10 @@ def _test_mock_consistency(mock,
 class ModelFactory(object):
     """ Abstract container class used to build 
     any composite model of the galaxy-halo connection. 
+
+    See `~halotools.empirical_models.SubhaloModelFactory` for 
+    subhalo-based models, and 
+    `~halotools.empirical_models.HodModelFactory` for HOD-style models. 
     """
 
     def __init__(self, input_model_dictionary, **kwargs):
@@ -177,6 +181,36 @@ class ModelFactory(object):
             populate a specific spatial subvolume, as in that case PBCs 
             no longer apply. 
             Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
+
+        Examples 
+        ----------
+        We'll use a pre-built HOD-style model to demonstrate basic usage. 
+        The same syntax applies to subhalo-based models. 
+        
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `populate` method bound to the ``mock``, 
+        which will repopulate the halo catalog with a new Monte Carlo 
+        realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['logMmin'] = 12.1
+        >>> model_instance.mock.populate()
 
         """
         if hasattr(self, 'redshift'):
