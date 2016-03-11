@@ -1,3 +1,8 @@
+""" This sub-package contains the functions 
+used to make astronomical observations on 
+mock galaxy populations, and also analyze halo catalogs 
+and other point data in periodic cubes. 
+"""
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)

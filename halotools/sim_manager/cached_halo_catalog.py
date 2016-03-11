@@ -1,3 +1,7 @@
+""" Module storing the `~halotools.sim_manager.CachedHaloCatalog`, 
+the class responsible for retrieving halo catalogs from shorthand 
+keyword inputs such as ``simname`` and ``redshift``. 
+"""
 import numpy as np
 import os
 from warnings import warn 
@@ -31,6 +35,9 @@ class CachedHaloCatalog(object):
     """
     Container class for the halo catalogs and particle data 
     that are stored in the Halotools cache log. 
+    `CachedHaloCatalog` is used to retrieve halo catalogs 
+    from shorthand keyword inputs such as 
+    ``simname``, ``halo_finder`` and ``redshift``. 
 
     The halos are stored in the ``halo_table`` attribute 
     in the form of an Astropy `~astropy.table.Table`. 
@@ -44,7 +51,7 @@ class CachedHaloCatalog(object):
     see :ref:`supported_sim_list`. 
     For information about the subhalo vs. host halo nomenclature 
     conventions used throughout Halotools, see :ref:`rockstar_subhalo_nomenclature`. 
-    For a thorough discussion of the meaning of each column in these halo catalogs, 
+    For a thorough discussion of the meaning of each column in the Rockstar halo catalogs, 
     see the appendix of `Rodriguez Puebla et al 2016 <http://arxiv.org/abs/1602.04813>`_.
     """
     acceptable_kwargs = ('ptcl_version_name', 'fname', 'simname', 
