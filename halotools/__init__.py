@@ -1,8 +1,8 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-
 """
-Halotools is a python package designed to analyze N-body simulations 
-and constrain models of cosmology and galaxy evolution. 
+Halotools is a specialized python package 
+for building and testing models of the galaxy-halo connection, 
+and analyzing catalogs of dark matter halos. 
 """
 
 # ----------------------------------------------------------------------------
