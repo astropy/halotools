@@ -1,6 +1,21 @@
 #!/usr/bin/env python
+"""Command-line script to download any 
+Halotools-provided halo catalog. 
 
-"""Command-line script to download the default halo catalog"""
+This script should be called with four positional arguments: 
+
+    1. simname 
+    2. halo_finder 
+    3. version_name
+    4. redshift 
+
+To see what options are available for download, 
+run this script with no arguments but throw the help flag:
+
+$ python scripts/download_additional_halocat.py -h
+
+
+"""
 
 import os
 from halotools.sim_manager import DownloadManager, sim_defaults
@@ -13,11 +28,13 @@ parser.add_argument("-overwrite",
     action="store_true")
 
 parser.add_argument("-ptcls_only", 
-    help="Only download the particle data of the snapshot. ", 
+    help=("Only download a random downsampling of 1e6 dark matter particles from the snapshot."
+        "Downsampled particles are necessary to calculate galaxy-galaxy lensing."), 
     action="store_true")
 
 parser.add_argument("-halos_only", 
-    help="Only download the halo catalog data of the snapshot. ", 
+    help=("Only download the halo catalog data of the snapshot, "
+        "and ignore the downsampled particle data. "), 
     action="store_true")
 
 parser.add_argument("simname", type = str, 
