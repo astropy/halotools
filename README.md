@@ -92,6 +92,14 @@ Halotools is a fully open-source package with contributing scientists spread acr
 
 ---
 
+## Staying up to date
+
+There is a Halotools google group that you can sign up for to receive notifications of new releases, and also to ask questions:
+
+https://groups.google.com/forum/#!forum/halotools
+
+---
+
 ## License 
 
 Halotools is licensed under a 3-clause BSD style license - see the licenses/LICENSE.rst file.
