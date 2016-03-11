@@ -37,6 +37,7 @@ galaxy clustering
    basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial2
    basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial3
    basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial4
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial9
 
 galaxy group identification
 -------------------------------
