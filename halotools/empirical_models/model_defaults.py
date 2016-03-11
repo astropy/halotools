@@ -1,11 +1,6 @@
 """
 Module expressing various default settings of the empirical modeling sub-package. 
 
-All values hard-coded here appear as unique variables throughout the entire Halotools code base. 
-This allows you to customize your default settings and be guaranteed that whatever changes you make 
-will correctly propagate to all relevant behavior. See the in-line comments in the 
-``halotools/empirical_models/model_defaults.py`` source code for 
-descriptions of the purpose of each variable defined in this module. 
 """
 
 __all__ = ['get_halo_boundary_key', 'get_halo_mass_key']
@@ -24,29 +19,6 @@ default_stellar_mass_threshold = 10.5
 # scipy method to raise an exception.
 default_tiny_poisson_fluctuation = 1.e-20
 
-# The numpy.digitize command has an annoying convention 
-# such that if the value of the array being digitized, x, 
-# is exactly equal to the bin boundary of the uppermost bin, 
-# then numpy.digitize returns an index greater than the number 
-# of bins. So by always setting the uppermost bin boundary to be 
-# slightly larger than the largest value of x, this never happens.
-default_bin_max_epsilon = 1.e-5
-
-
-### Default values specifying traditional quenching model
-# Used by models in the halo_occupation module
-
-default_profile_dict = {
-    'profile_abscissa' : [12,15], 
-    'profile_ordinates' : [0.5,1]
-}
-
-# Set the default binsize used in assigning types to halos
-default_halo_type_calculator_spacing=0.1
-
-# Set the default secondary halo parameter used to generate assembly bias
-default_assembias_key = 'halo_vmax'
-
 default_smhm_scatter = 0.2
 default_smhm_haloprop = 'halo_mpeak'
 default_binary_galprop_haloprop = default_smhm_haloprop
@@ -54,7 +26,7 @@ default_binary_galprop_haloprop = default_smhm_haloprop
 # At minimum, the following halo and galaxy properties 
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
-galprop_prefix = 'gal_'
+
 default_haloprop_list_inherited_by_mock = (
     ['halo_id', 'halo_x', 'halo_y', 'halo_z', 
     'halo_vx', 'halo_vy', 'halo_vz', 
