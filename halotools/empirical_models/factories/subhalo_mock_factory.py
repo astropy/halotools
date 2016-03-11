@@ -149,11 +149,16 @@ class SubhaloMockFactory(MockFactory):
 
 
     def populate(self):
-        """ Method populating subhalos with mock galaxies. 
+        """ 
+        Method populating subhalos with mock galaxies. 
+        By calling the `populate` method of your mock, you will repopulate 
+        the halo catalog with a new realization of the model based on 
+        whatever values of the model parameters are currently stored in the 
+        model ``param_dict``. 
 
-        Each method appearing in the ``_mock_generation_calling_sequence`` attribute 
-        of the composite model is called in sequence, always being passed the 
-        ``galaxy_table`` as the ``table`` argument. 
+        See also 
+        ---------
+        `halotools.empirical_models.ModelFactory.populate_mock`. 
         """
         self._allocate_memory()
 

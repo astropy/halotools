@@ -94,10 +94,18 @@ class MockFactory(object):
 
     @abstractmethod
     def populate(self, **kwargs):
-        """ Method populating halos with mock galaxies. 
+        """ 
+        Method populating halos with mock galaxies. 
+        By calling the `populate` method of your mock, you will repopulate 
+        the halo catalog with a new realization of the model based on 
+        whatever values of the model parameters are currently stored in the 
+        model ``param_dict``. 
 
-        The `populate` method of `MockFactory` 
-        has no implementation, it is simply a placeholder used for standardization. 
+        For documentation on the `populate` method of subhalo-based models, 
+        see `halotools.empirical_models.SubhaloModelFactory.populate`; 
+        for HOD-style models 
+        see `halotools.empirical_models.HodModelFactory.populate`. 
+
         """
         raise NotImplementedError("All subclasses of MockFactory"
         " must include a populate method")

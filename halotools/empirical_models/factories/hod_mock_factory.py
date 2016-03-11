@@ -155,7 +155,12 @@ class HodMockFactory(MockFactory):
         self.model.build_lookup_tables()
 
     def populate(self, **kwargs):
-        """ Method populating halos with mock galaxies. 
+        """ 
+        Method populating host halos with mock galaxies. 
+        By calling the `populate` method of your mock, you will repopulate 
+        the halo catalog with a new realization of the model based on 
+        whatever values of the model parameters are currently stored in the 
+        model ``param_dict``. 
 
         Parameters 
         ------------
@@ -175,6 +180,10 @@ class HodMockFactory(MockFactory):
             ever be set to False when using the ``masking_function`` to 
             populate a specific spatial subvolume, as in that case PBCs 
             no longer apply. 
+
+        See also 
+        ---------
+        `halotools.empirical_models.ModelFactory.populate_mock`. 
         """
         # The _testing_mode keyword is for unit-testing only 
         # it has been intentionally left out of the docstring

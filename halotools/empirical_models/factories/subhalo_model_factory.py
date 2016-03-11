@@ -525,7 +525,8 @@ class SubhaloModelFactory(ModelFactory):
 
 
     def update_param_dict_decorator(self, component_model, func_name):
-        """ Decorator used to propagate any possible changes in the composite model param_dict 
+        """ 
+        Decorator used to propagate any possible changes in the composite model param_dict 
         down to the appropriate component model param_dict. 
 
         The behavior of the methods bound to the composite model are decorated versions 
@@ -829,11 +830,28 @@ class SubhaloModelFactory(ModelFactory):
         self.set_calling_sequence()
 
     def populate_mock(self, halocat):
-        """ Method used to populate a simulation using the model. 
+        """ 
+        Method used to populate a simulation with a Monte Carlo realization of a model. 
 
-        After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``table`` bound to it containing the Monte Carlo 
-        realization of the model. 
+        After calling this method, the model instance will have a new ``mock`` attribute. 
+        You can then access the galaxy population via ``model.mock.galaxy_table``, 
+        an Astropy `~astropy.table.Table`. 
+
+        Calling `populate_mock` triggers a halo catalog pre-processing phase that 
+        only needs to be done once. After calling `populate_mock`, 
+        if you want to repopulate the halo catalog, you should use the 
+        `~halotools.empirical_models.MockFactory.populate` method 
+        bound to ``model.mock``. 
+
+        For example, if you are running an MCMC type analysis, 
+        you will choose your halo catalog and completeness cuts, and call 
+        `populate_mock` with the appropriate arguments. Thereafter, you can 
+        explore parameter space by changing the values stored in the 
+        ``param_dict`` dictionary attached to the model, and then calling the 
+        `~halotools.empirical_models.MockFactory.populate` method 
+        bound to ``model.mock``. Any changes to the ``param_dict`` of the 
+        model will automatically propagate into the behavior of 
+        the `~halotools.empirical_models.MockFactory.populate` method. 
 
         Parameters 
         ----------
