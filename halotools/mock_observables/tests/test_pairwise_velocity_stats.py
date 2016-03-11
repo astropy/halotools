@@ -7,6 +7,10 @@ from ...custom_exceptions import HalotoolsError
 from ..pairwise_velocity_stats import *
 from .cf_helpers import generate_locus_of_3d_points
 
+__all__ = ('test_mean_radial_velocity_vs_r_auto_consistency', 
+	'test_mean_radial_velocity_vs_r_cross_consistency', 
+	'test_radial_pvd_vs_r1', 'test_radial_pvd_vs_r_auto_consistency', 
+	'test_radial_pvd_vs_r_cross_consistency')
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_auto_consistency():

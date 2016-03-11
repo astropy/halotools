@@ -6,11 +6,10 @@ a set of points is isolated according to various criteria.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-####import modules########################################################################
+
 import numpy as np
 from .pair_counters.double_tree_pair_matrix import *
 from warnings import warn
-##########################################################################################
 
 
 __all__=['spherical_isolation', 'cylindrical_isolation',\

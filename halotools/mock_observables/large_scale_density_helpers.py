@@ -10,6 +10,7 @@ from ..custom_exceptions import *
 
 __all__ = ('_large_scale_density_spherical_volume_process_args', 
     '_large_scale_density_spherical_annulus_process_args')
+__author__ = ('Andrew Hearin', )
 
 
 def _large_scale_density_spherical_volume_process_args(

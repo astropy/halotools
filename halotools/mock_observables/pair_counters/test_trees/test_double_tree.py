@@ -14,7 +14,11 @@ class TestFlatRectanguloidDoubleTree(TestCase):
     """ Class providing tests of the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree`. 
     """
 
-    def setup_class(self):
+    def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
         pass
+
+    def tearDown(self):
+        pass
+

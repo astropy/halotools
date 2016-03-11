@@ -3,6 +3,8 @@
 import numpy as np 
 
 __all__ = ('periodic_3d_distance', )
+__author__ = ['Andrew Hearin']
+
 
 def periodic_3d_distance(x1, y1, z1, x2, y2, z2, Lbox):
     """

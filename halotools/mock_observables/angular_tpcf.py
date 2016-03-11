@@ -6,7 +6,7 @@ Calculate angular two point correlation functions.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-####import modules########################################################################
+
 import sys
 import numpy as np
 from math import pi, gamma
@@ -15,7 +15,7 @@ from .tpcf_estimators import *
 from ..utils.spherical_geometry import *
 from warnings import warn
 from .pair_counters.double_tree_pairs import npairs
-##########################################################################################
+
 
 
 __all__=['angular_tpcf']

@@ -16,6 +16,8 @@ from ..empirical_models import enforce_periodicity_of_box
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('mean_y_vs_x', 'return_xyz_formatted_array')
+__author__ = ['Andrew Hearin']
+
 
 def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
     """

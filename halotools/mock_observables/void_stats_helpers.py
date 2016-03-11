@@ -10,6 +10,7 @@ from ..custom_exceptions import *
 
 __all__ = ('_void_prob_func_process_args', 
     '_underdensity_prob_func_process_args')
+__author__ = ('Andrew Hearin', )
 
 def _void_prob_func_process_args(sample1, rbins, 
     n_ran, random_sphere_centers, period, num_threads,

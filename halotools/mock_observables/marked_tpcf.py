@@ -6,14 +6,13 @@ Calculate the marked two point correlation function, MCF.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-####import modules########################################################################
+
 import sys
 import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
 from .pair_counters.marked_double_tree_pairs import marked_npairs
 from .pair_counters.double_tree_pairs import npairs
-##########################################################################################
 
 
 __all__=['marked_tpcf']

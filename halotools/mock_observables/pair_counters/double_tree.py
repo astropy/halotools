@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Data structures used for efficient, cache-aware pairwise calculations on simulation boxes.
+Data structures used for efficient, 
+cache-aware pairwise calculations on simulation boxes.
 """
 
 import numpy as np
