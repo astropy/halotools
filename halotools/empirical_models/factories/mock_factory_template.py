@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 
-Module used to construct mock galaxy populations. 
-Each mock factory only has knowledge of a simulation halocat 
-and composite model object. 
-Currently only composite HOD models are supported. 
-
+Module containing the template class 
+`~halotools.empirical_models.MockFactory` used to 
+construct mock galaxy populations. 
+The mock factory only has knowledge of a simulation halocat 
+and composite model object, and provides an 
+abstract interface between the two. 
 """
 
 import numpy as np
