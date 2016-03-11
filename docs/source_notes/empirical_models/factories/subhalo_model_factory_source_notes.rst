@@ -188,7 +188,9 @@ the syntax for this is:
 .. code-block:: python
 
     model = SubhaloModelFactory(**model_dictionary)
-    model.populate_mock()
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog()
+    model.populate_mock(halocat)
 
 The `SubhaloModelFactory.populate_mock` method is just a 
 convenience wrapper around `SubhaloMockFactory.populate` method. 
@@ -210,8 +212,6 @@ Further reading
 ================
 
 Detailed documentation on the mock-population algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
-Instances of `~SubhaloModelFactory` have a number of bound methods that provide wrapper behavior around 
-the `~halotools.mock_observables` sub-package, as described in :ref:`mock_observables_convenience_functions`. 
 
 
 

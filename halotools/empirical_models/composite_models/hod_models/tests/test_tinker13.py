@@ -39,13 +39,7 @@ class TestTinker13(TestCase):
 	def test_tinker13_populate1(self):
 		model = PrebuiltHodModelFactory('tinker13')
 		fake_sim = FakeSim()
-		model.populate_mock(halocat = fake_sim)
-
-	@pytest.mark.slow
-	def test_tinker13_populate2(self):
-		model = PrebuiltHodModelFactory('tinker13')
-		fake_sim = FakeSim()
-		model.populate_mock(simname = 'fake')
+		model.populate_mock(fake_sim)
 
 	
 

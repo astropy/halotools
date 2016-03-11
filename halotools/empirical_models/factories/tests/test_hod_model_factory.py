@@ -32,43 +32,8 @@ class TestHodModelFactory(TestCase):
     def test_populate_mock1(self):
         model = PrebuiltHodModelFactory('zheng07')
         halocat = FakeSim()
+        model.populate_mock(halocat)
         model.populate_mock(halocat = halocat)
-        model.populate_mock(halocat = halocat)
-        model.populate_mock(simname = halocat.simname, 
-            redshift = halocat.redshift, 
-            halo_finder = halocat.halo_finder, 
-            version_name = halocat.version_name)
-
-        with pytest.raises(HalotoolsError) as err:
-            model.populate_mock(simname = 'bolshoi')
-        substr = "Inconsistency between the simname already bound to the existing mock"
-        assert substr in err.value.message
-
-        with pytest.raises(HalotoolsError) as err:
-            model.populate_mock(simname = halocat.simname, redshift = 4.)
-        substr = "Inconsistency between the redshift already bound to the existing mock"
-        assert substr in err.value.message
-
-        with pytest.raises(HalotoolsError) as err:
-            model.populate_mock(simname = halocat.simname, 
-                redshift = halocat.redshift, 
-                halo_finder = 'Jose Canseco')
-        substr = "Inconsistency between the halo-finder "
-        assert substr in err.value.message
-
-        with pytest.raises(HalotoolsError) as err:
-            model.populate_mock(simname = halocat.simname, 
-                redshift = halocat.redshift, 
-                halo_finder = halocat.halo_finder, 
-                version_name = 'mo biscuit')
-        substr = "Inconsistency between the version_name "
-        assert substr in err.value.message
-
-        halocat_redshift2 = FakeSim(redshift = 2.)
-        with pytest.raises(HalotoolsError) as err:
-            model.populate_mock(halocat = halocat_redshift2)
-        substr = "Inconsistency between the redshift already bound to the existing mock"
-        assert substr in err.value.message
 
     def test_Num_ptcl_requirement(self):
         """ Demonstrate that passing in varying values for 

@@ -74,7 +74,9 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
         Now that we have built an instance of a composite model, we can use it to 
         populate any simulation in the Halotools cache: 
 
-        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+        >>> from halotools.sim_manager import CachedHaloCatalog # doctest: +SKIP
+        >>> halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+        >>> model_instance.populate_mock(halocat) # doctest: +SKIP
 
         """
         input_model_dictionary, supplementary_kwargs = (

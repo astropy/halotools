@@ -5,6 +5,7 @@ from astropy.tests.helper import pytest
 from unittest import TestCase
 import warnings 
 
+from ...sim_manager import FakeSim
 from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestHodModelFactoryTutorial']
@@ -37,8 +38,8 @@ class TestHodModelFactoryTutorial(TestCase):
         # The model_instance is a composite model 
         # All composite models can directly populate N-body simulations 
         # with mock galaxy catalogs using the populate_mock method:
-
-        model_instance.populate_mock(simname = 'fake')
+        halocat = FakeSim()
+        model_instance.populate_mock(halocat)
 
         # Setting simname to 'fake' populates a mock into a fake halo catalog 
         # that is generated on-the-fly, but you can use the populate_mock 
@@ -124,7 +125,8 @@ class TestHodModelFactoryTutorial(TestCase):
         assert 'satellites_quiescent_ordinates_param1' in model_instance.param_dict.keys()
         assert 'satellites_quiescent_ordinates_param4' in model_instance.param_dict.keys()
 
-        model_instance.populate_mock(simname = 'fake')
+        halocat = FakeSim()
+        model_instance.populate_mock(halocat)
 
         assert 'quiescent' in model_instance.mock.galaxy_table.keys()
         assert set(model_instance.mock.galaxy_table['quiescent']) == {True, False}
@@ -192,7 +194,8 @@ class TestHodModelFactoryTutorial(TestCase):
 
         assert hasattr(new_model, 'assign_size_centrals')
 
-        new_model.populate_mock(simname = 'fake')
+        halocat = FakeSim()
+        new_model.populate_mock(halocat)
         assert 'galsize' in new_model.mock.galaxy_table.keys()
         assert len(set(new_model.mock.galaxy_table['galsize'])) > 0
 
@@ -253,7 +256,8 @@ class TestHodModelFactoryTutorial(TestCase):
         new_model = HodModelFactory(baseline_model_instance = zheng_model, 
             centrals_shape = cen_shape, satellites_shape = sat_shape)
 
-        new_model.populate_mock(simname = 'fake')
+        halocat = FakeSim()
+        new_model.populate_mock(halocat)
         assert 'axis_ratio' in new_model.mock.galaxy_table.keys()
         assert len(set(new_model.mock.galaxy_table['axis_ratio'])) > 1
 
@@ -347,8 +351,9 @@ class TestHodModelFactoryTutorial(TestCase):
 
         # We forgot to put 'halo_spin' in list_of_haloprops_needed, 
         # so attempting to populate a mock should raise an exception
+        halocat = FakeSim()
         with pytest.raises(KeyError) as err:
-            model.populate_mock(simname = 'fake')
+            model.populate_mock(halocat)
         assert "halo_spin" in err.value.message
 
     @pytest.mark.slow
@@ -405,7 +410,8 @@ class TestHodModelFactoryTutorial(TestCase):
                 'centrals_profile', 'centrals_shape', 'centrals_size')
             )
 
-        model.populate_mock(simname = 'fake')
+        halocat = FakeSim()
+        model.populate_mock(halocat)
 
 
 

@@ -59,7 +59,9 @@ Source code for the ``behroozi10`` model
 
 To use the model instance populate a fake simulation that is generated on-the-fly:
 
->>> model_instance.populate_mock(simname = 'fake')
+>>> from halotools.sim_manager import FakeSim
+>>> halocat = FakeSim()
+>>> model_instance.populate_mock(halocat)
 
 Setting simname to 'fake' populates a mock into a fake halo catalog 
 that is generated on-the-fly, but you can use the 
@@ -127,7 +129,9 @@ keyword attached to the `Behroozi10SmHm` controlling :math:`M_{\ast}`.
 
     sm_model =  Behroozi10SmHm(redshift = 0)
     model_instance = SubhaloModelFactory(mstar = sm_model)
-    model_instance.populate_mock(simname = 'fake')
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname = 'bolshoi')
+    model_instance.populate_mock(halocat)
     print(model_instance.mock.galaxy_table[0:5])
 
 .. parsed-literal::

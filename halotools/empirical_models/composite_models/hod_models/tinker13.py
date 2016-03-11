@@ -83,6 +83,13 @@ def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_th
     >>> for key in supplementary_dictionary: constructor_kwargs[key] = supplementary_dictionary[key]
     >>> model_instance = HodModelFactory(**constructor_kwargs)
 
+    As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
+    you can populate a mock by passing the model a halo catalog:
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim(redshift = model_instance.redshift) 
+    >>> model_instance.populate_mock(halocat)
+
     """
 
     # Build the occupation model

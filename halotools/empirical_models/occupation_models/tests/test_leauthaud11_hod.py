@@ -7,7 +7,7 @@ from .. import Leauthaud11Cens, Leauthaud11Sats
 
 from ...factories import HodModelFactory
 from ... import model_defaults
-
+from ....sim_manager import FakeSim
 
 __all__ = ['test_Leauthaud11Cens', 'test_Leauthaud11Sats']
 
@@ -101,37 +101,6 @@ def test_Leauthaud11Sats():
 	ncen11 = model11.central_occupation_model.mean_occupation(prim_haloprop = 5e12)
 	assert ncen10 > ncen105 > ncen11 
 
-# def test_fsat_mock():
-# 	"""
-# 	"""
-# 	model10 = Leauthaud11(threshold = 10)
-# 	model10.populate_mock()
-# 	model1125 = Leauthaud11(threshold = 11.25)
-# 	model1125.populate_mock(simname='multidark')
-
-# 	# mask10 = model10.mock.galaxy_table['gal_type'] == 'satellites'
-# 	# fsat10 = len(model10.mock.galaxy_table[mask10]) / float(len(model10.mock.galaxy_table))
-# 	mask1125 = model1125.mock.galaxy_table['gal_type'] == 'satellites'
-# 	fsat1125 = len(model1125.mock.galaxy_table[mask1125]) / float(len(model1125.mock.galaxy_table))
-# 	assert fsat1125 < 0.2
-
-# def test_number_density():
-
-# 	model1025 = Leauthaud11(threshold = 10.25)
-# 	model1025.populate_mock(simname='multidark')
-# 	model1125 = Leauthaud11(threshold = 11.25)
-# 	model1125.populate_mock(simname='multidark')
-
-# 	Vbox = 1000.**3.
-# 	ngals1025 = len(model1025.mock.galaxy_table)
-# 	number_density1025 = ngals1025/Vbox
-# 	approximate_density1025 = 0.00913414
-# 	assert np.allclose(approximate_density1025, number_density1025, rtol=0.2)
-
-# 	ngals1125 = len(model1125.mock.galaxy_table)
-# 	number_density1125 = ngals1125/Vbox
-# 	approximate_density1125 = 0.000224512
-# 	assert np.allclose(approximate_density1125, number_density1125, rtol=0.2)
 
 
 

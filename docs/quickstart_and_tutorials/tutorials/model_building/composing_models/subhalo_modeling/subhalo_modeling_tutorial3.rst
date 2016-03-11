@@ -83,7 +83,9 @@ and incorporate this feature into a composite model:
                                 size = galaxy_size)
 
     # Your new model can generate a mock in the same way as always
-    new_model.populate_mock(simname = 'bolshoi')
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname = 'bolshoi')
+    new_model.populate_mock(halocat)
 
 The **__init__** method of your component model 
 ===========================================================================

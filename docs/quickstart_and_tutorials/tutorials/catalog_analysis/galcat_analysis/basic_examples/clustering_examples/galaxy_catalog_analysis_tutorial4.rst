@@ -27,7 +27,9 @@ default halo catalog.
 
     from halotools.empirical_models import PrebuiltHodModelFactory
     model = PrebuiltHodModelFactory('tinker13', threshold = 10.25)
-    model.populate_mock(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    model.populate_mock(halocat)
 
 Extract subsamples of galaxy positions 
 ------------------------------------------------------------------

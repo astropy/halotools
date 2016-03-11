@@ -32,7 +32,9 @@ default halo catalog.
 
     from halotools.empirical_models import PrebuiltSubhaloModelFactory
     model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')
-    model.populate_mock(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    model.populate_mock(halocat)
 
 Now suppose the data we are interested in is complete for
 :math:`M_{\ast} > 10^{10}M_{\odot},` so we will make a cut on the mock.

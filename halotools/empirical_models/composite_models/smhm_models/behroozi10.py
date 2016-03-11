@@ -62,10 +62,12 @@ def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwar
     >>> model_dictionary = behroozi10_model_dictionary()
     >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
 
-    As with all composite model instances, you can now use the model to directly populate 
-    any Halotools-formatted halo catalog with mock galaxies:
+    As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
+    you can populate a mock by passing the model a halo catalog:
 
-    >>> model_instance.populate_mock(simname = 'bolshoi') # doctest: +SKIP
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim(redshift = model_instance.redshift) 
+    >>> model_instance.populate_mock(halocat)
 
     """
 

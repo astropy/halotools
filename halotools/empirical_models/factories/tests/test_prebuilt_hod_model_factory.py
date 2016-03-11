@@ -20,10 +20,11 @@ class TestPrebuiltHodModelFactory(TestCase):
     """
     @pytest.mark.slow
     def test_fake_mock_population(self):
+        halocat = FakeSim()
         for modelname in PrebuiltHodModelFactory.prebuilt_model_nickname_list:
             model = PrebuiltHodModelFactory(modelname)
-            model.populate_mock(simname = 'fake')
-        model.populate_mock(simname = 'fake')
+            model.populate_mock(halocat)
+        model.populate_mock(halocat)
 
     @pytest.mark.slow
     def test_fake_mock_observations1(self):

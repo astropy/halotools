@@ -10,7 +10,7 @@ from ...factories import HodModelFactory, SubhaloModelFactory
 from ...factories import PrebuiltHodModelFactory, PrebuiltSubhaloModelFactory
 
 from ....utils.table_utils import compute_conditional_percentiles
-from ....sim_manager import CachedHaloCatalog
+from ....sim_manager import CachedHaloCatalog, FakeSim
 from ....custom_exceptions import *
 
 ### Determine whether the machine is mine
@@ -30,76 +30,43 @@ __all__ = ('TestHearin15', )
 
 class TestHearin15(TestCase):
 
-	@pytest.mark.slow
-	@pytest.mark.skipif('not APH_MACHINE')
 	def setup_class(self):
+		pass
 
-		Npts = 1e4
-		mass = np.zeros(Npts) + 1e12
-		conc = np.random.random(Npts)
-		d = {'halo_mvir': mass, 'halo_nfw_conc': conc}
-		self.toy_halo_table = Table(d)
-		self.toy_halo_table['halo_nfw_conc_percentile'] = compute_conditional_percentiles(
-			table = self.toy_halo_table, 
-			prim_haloprop_key = 'halo_mvir', 
-			sec_haloprop_key = 'halo_nfw_conc', 
-			dlog10_prim_haloprop = 0.05)
-
-		highz_mask = self.toy_halo_table['halo_nfw_conc_percentile'] >= 0.5
-		self.highz_toy_halos = self.toy_halo_table[highz_mask]
-		self.lowz_toy_halos = self.toy_halo_table[np.invert(highz_mask)]
-
-		self.halocat = CachedHaloCatalog(preload_halo_table = True, redshift = 0.)
-
-		self.halocat2 = CachedHaloCatalog(preload_halo_table = True, redshift = 2.)
-
-	@pytest.mark.slow
-	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
 		model = PrebuiltHodModelFactory('hearin15')
-		model.populate_mock(halocat = self.halocat)
+		halocat = FakeSim()
+		model.populate_mock(halocat)
 
-	@pytest.mark.slow
-	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
 		model = PrebuiltHodModelFactory('leauthaud11')
-		model.populate_mock(halocat = self.halocat)
+		halocat = FakeSim()
+		model.populate_mock(halocat)
 
-	@pytest.mark.slow
-	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11b(self):
 
 		model = PrebuiltHodModelFactory('leauthaud11') 
+		halocat = FakeSim(redshift = 2.)
 		# Test that an attempt to repopulate with a different halocat raises an exception
 		with pytest.raises(HalotoolsError) as exc:
-			model.populate_mock(redshift=2) #default redshift != 2
+			model.populate_mock(halocat) #default redshift != 2
 
-	@pytest.mark.slow
-	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11c(self):
 
 		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
-		model_highz.populate_mock(halocat = self.halocat2)
+		halocat = FakeSim(redshift = 2.)
+		model_highz.populate_mock(halocat)
 
-	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
-	def test_Leauthaud11d(self):
-
-		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
-
-		with pytest.raises(HalotoolsError) as exc:
-			model_highz.populate_mock(redshift = 0.)
-		with pytest.raises(HalotoolsError) as exc:
-			model_highz.populate_mock(halocat = self.halocat)
-
 	@pytest.mark.slow
-	@pytest.mark.skipif('not APH_MACHINE')
-	def test_Leauthaud11e(self):
+	def test_hearin15_fullpop(self):
+		halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0)
+		model = PrebuiltHodModelFactory('hearin15', threshold = 11)
+		model.populate_mock(halocat)
+		del model
 
-		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
-		model_highz.populate_mock(redshift = 2.)
 
 
 

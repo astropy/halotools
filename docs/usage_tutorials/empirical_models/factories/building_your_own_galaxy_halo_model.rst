@@ -34,7 +34,9 @@ Halotools composite models are composed of a collection of independently defined
 
 After you instantiate a Halotools model factory, the resulting object has all the information it needs to generate  that can be directly compared to observational measurements. The set of methods bound to each composite model will vary depending on the features you choose. For example, if one of your chosen component models has a *quenched_fraction_vs_halo_mass* method, then so too will your composite model. However, composite models also have a uniform syntax for making mock catalogs. So no matter what features for your galaxies that you choose to model, *all* composite models have the following method:
 
->>> component_model.populate_mock(simname, redshift) # doctest: +SKIP
+>>> from halotools.sim_manager import CachedHaloCatalog
+>>> halocat = CachedHaloCatalog() # doctest: +SKIP
+>>> component_model.populate_mock(halocat) # doctest: +SKIP
 
 The ``populate_mock`` method can be used to generate a Monte Carlo realization of the galaxy distribution into *any* Halotools-formatted catalog, which includes the pre-processed catalogs provided by Halotools (see :ref:`working_with_halotools_provided_catalogs` for more information), or halo catalogs you provide yourself (see :ref:`working_with_alternative_catalogs` for more information). 
 
