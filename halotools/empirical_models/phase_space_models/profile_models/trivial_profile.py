@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the `TrivialProfile` class used to assign the positions of central galaxies to equal the positions of their host halos. 
+This module contains the `TrivialProfile` class 
+used to assign the positions of central galaxies 
+to equal the positions of their host halos. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
@@ -25,7 +27,8 @@ __author__ = ['Andrew Hearin']
 __all__ = ['TrivialProfile']
 
 class TrivialProfile(AnalyticDensityProf):
-    """ Profile of dark matter halos with all their mass concentrated at exactly the halo center. 
+    """ Profile of dark matter halos with 
+    all their mass concentrated at exactly the halo center. 
 
     """
     def __init__(self, 

@@ -15,7 +15,7 @@ from ...factories import PrebuiltHodModelFactory, HodModelFactory
 from ....sim_manager import FakeSim
 from ....custom_exceptions import HalotoolsError
 
-__all__ = ['TestOccupationComponent']
+__all__ = ('TestOccupationComponent', )
 
 
 class TestOccupationComponent(TestCase):

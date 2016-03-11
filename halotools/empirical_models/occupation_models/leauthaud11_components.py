@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-This module contains various component features used by 
-HOD-style models of the galaxy-halo connection. 
+This module contains the occupation component features used by 
+the HOD-style model introduced in Leauthaud et al. (2011) 
 
 """
 
-__all__ = (['Leauthaud11Cens', 'Leauthaud11Sats',  
-    'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats']
-    )
+__all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',  
+    'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
 
 from functools import partial
 from copy import copy

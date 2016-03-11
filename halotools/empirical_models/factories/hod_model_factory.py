@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Module storing the various factories used to build galaxy-halo models. 
+Module storing the `~halotools.empirical_models.HodModelFactory`, 
+the primary factory responsible for building 
+HOD-style models of the galaxy-halo connection. 
 """
 
 __all__ = ['HodModelFactory']

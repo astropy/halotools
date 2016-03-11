@@ -14,6 +14,7 @@ from ....sim_manager import sim_defaults
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['ConcMass']
+__author__ = ('Andrew Hearin', )
 
 class ConcMass(object):
     """ Container class for commonly used concentration-mass relations in the literature. 

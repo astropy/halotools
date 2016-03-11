@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Module containing classes used to model the mapping between 
-stellar mass and subtable. 
+Module containing classes used to model 
+stochasticity in the mapping between 
+stellar mass and halo properties. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
@@ -21,7 +22,8 @@ from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...sim_manager import sim_defaults 
 
 
-__all__ = ['LogNormalScatterModel']
+__all__ = ('LogNormalScatterModel', )
+__author__ = ('Andrew Hearin', )
 
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter 

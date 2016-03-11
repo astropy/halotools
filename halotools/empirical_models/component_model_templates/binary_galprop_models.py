@@ -5,7 +5,8 @@
 from __future__ import (
     division, print_function, absolute_import)
 
-__all__ = ['BinaryGalpropModel', 'BinaryGalpropInterpolModel']
+__all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
+__author__ = ('Andrew Hearin', )
 
 from functools import partial
 from copy import copy

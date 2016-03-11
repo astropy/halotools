@@ -13,7 +13,7 @@ from ... import model_defaults
 
 from ....custom_exceptions import HalotoolsError
 
-__all__ = ['TestZheng07Cens', 'TestZheng07Sats']
+__all__ = ('TestZheng07Cens', 'TestZheng07Sats')
 
 
 class TestZheng07Cens(TestCase):

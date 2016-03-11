@@ -25,7 +25,8 @@ from ...utils.array_utils import custom_len
 from ...sim_manager import sim_defaults 
 
 
-__all__ = ['PrimGalpropModel']
+__all__ = ('PrimGalpropModel', )
+__author__ = ('Andrew Hearin', )
 
 
 @six.add_metaclass(ABCMeta)

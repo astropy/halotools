@@ -97,9 +97,6 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
 
         The purpose for this distinction is to provide disambiguation for composite models 
         that use the `HaloMassInterpolQuenching` class for more than one galaxy population. 
-
-
-
         """
         quiescent_fraction_control_values = convert_to_ndarray(quiescent_fraction_control_values)
 

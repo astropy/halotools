@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-
-Module containing the HOD-style composite model based on Leauthaud et al. (2011).
-
+Module containing the subhalo-based composite model 
+based on the Behroozi et al. (2010) stellar-to-halo-mass relation. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
