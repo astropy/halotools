@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-
-Module containing some commonly used composite HOD models.
-
+Module containing a pre-built subhalo-based model 
+that has a binary quenching feature. 
 """
 from __future__ import (
     division, print_function, absolute_import)

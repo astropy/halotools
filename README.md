@@ -18,6 +18,15 @@ The code is publicly available at https://github.com/astropy/halotools.
 The latest build of the documentation can be found at http://halotools.readthedocs.org. The documentation includes installation instructions, quickstart guides and step-by-step tutorials. The *Basic features* section below gives an overview of the primary functionality of the package. 
 
 ---
+
+## Installation 
+
+You can find detailed installation instructions 
+in the Package Installation section of halotools.readthedocs.org. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with populating mock galaxy populations. 
+
+---
+
+
 ## Basic features
 
 Once you have installed the code and downloaded the default halo catalog (see the Getting Started guide in the documentation), you can use Halotools models to populate mock galaxy populations. 
@@ -89,6 +98,14 @@ Although the *sim_manager* provides an object-oriented framework for creating a 
 [![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
 Halotools is a fully open-source package with contributing scientists spread across many universities. The package is currently being prepared for its first official release, v0.1. Halotools is and will remain an evolving software package, but the API of the classes, methods and functions in v0.1 is stable. Please contact andrew.hearin@yale.edu with questions and comments about the code. 
+
+---
+
+## Staying up to date
+
+There is a Halotools google group that you can sign up for to receive notifications of new releases, and also to ask questions:
+
+https://groups.google.com/forum/#!forum/halotools
 
 ---
 

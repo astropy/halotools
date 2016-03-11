@@ -31,7 +31,10 @@ __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 __all__ = ['NFWProfile']
 
 class NFWProfile(AnalyticDensityProf, ConcMass):
-    """ Model for the spatial distribution of mass and/or galaxies residing in an NFW halo profile, based on Navarro, Frenk and White (1995), `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_.
+    """ Model for the spatial distribution of mass 
+    and/or galaxies residing in an NFW halo profile, 
+    based on Navarro, Frenk and White (1995), 
+    `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_.
 
     For a review of the mathematics underlying the NFW profile, 
     including descriptions of how the relevant equations are 
@@ -175,8 +178,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         Notes 
         -----
-
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
 
         """
         numerator = conc**3/(3.*self.g(conc))
@@ -223,7 +226,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
 
         """
         return AnalyticDensityProf.mass_density(self, radius, mass, conc)

@@ -5,7 +5,7 @@ calculate the galaxy-galaxy lensing signal.
 """
 
 from __future__ import division, print_function
-####import modules########################################################################
+
 import sys
 import numpy as np
 from math import pi, gamma
@@ -15,7 +15,7 @@ from scipy import integrate
 from .clustering_helpers import *
 from ..custom_exceptions import *
 from warnings import warn
-##########################################################################################
+
 
 __all__=['delta_sigma']
 __author__ = ['Duncan Campbell']

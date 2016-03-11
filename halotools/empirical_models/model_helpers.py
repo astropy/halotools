@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-
 This module contains general purpose helper functions 
-used by many of the hod model components.  
-
+used by many of the Halotools models.  
 """
 
 __all__ = (
     ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe', 
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 
+    'bind_default_kwarg_mixin_safe', 
     'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory']
     )
 
 __author__ = ['Andrew Hearin', 'Surhud More']
+
 import numpy as np
 from copy import copy
 from astropy.extern import six
@@ -162,7 +162,8 @@ def enforce_periodicity_of_box(coords, box_length,
         return coords % box_length
 
 
-def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abscissa):
+def piecewise_heaviside(bin_midpoints, bin_width, 
+    values_inside_bins, value_outside_bins, abscissa):
     """ Piecewise heaviside function. 
 
     The function returns values_inside_bins  

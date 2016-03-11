@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-
-Module containing the HOD-style composite model published in Zheng et al. (2007)
-
+Module containing the HOD-style composite model 
+published in Zheng et al. (2007), arXiv:0703457. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)

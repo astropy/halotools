@@ -1,6 +1,34 @@
 #!/usr/bin/env python
+"""
+Command-line script to rebuild the halo table cache log 
+in the event that the log is lost or becomes corrupted. 
 
-"""Command-line script to rebuild the halo table cache log"""
+The cache log is an ASCII file stored at the following location:
+$HOME/.astropy/cache/halotools/halo_table_cache_log.txt 
+
+This file is used by Halotools to create a persistent memory of 
+the locations of your halo catalogs on disk. If you accidentally 
+delete this file or edit it in a way that makes it unreadable 
+by Halotools, you can run this script to attempt to rebuild the log. 
+
+The first thing this script does is attempt to extract all directories 
+that may be listed in the existing log. This list of directories is 
+supplemented with the default location where halo catalogs are stored, 
+$HOME/.astropy/cache/halotools/halo_catalogs. 
+Then a list of absolute paths to potential halo catalogs 
+is built by searching for any hdf5 file appearing in any of 
+these directories or their subdirectories. Each such hdf5 file is 
+tested for compatibility with the Halotools catalog format. 
+Files passing all tests are added to a newly created log; 
+the names of files failing any test are added to the following ASCII file:
+
+$HOME/.astropy/cache/halotools/rejected_halo_table_filenames.txt 
+
+The previously existing log is saved to the following location 
+so that no information is destroyed in the rebuilding process:
+
+$HOME/.astropy/cache/halotools/corrupted_halo_table_cache_log.txt 
+"""
 
 import argparse, os, fnmatch
 from astropy.table import Table

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Module storing the various factories used to build galaxy-halo models. 
+Module storing the factories used to generate 
+Halotools-provided composite models 
+of the galaxy-halo connection. 
 """
 
 __all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
@@ -22,13 +24,11 @@ from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
-    """ Factory class providing instances of `SubhaloModelFactory` models 
-    that come prebuilt with Halotools. 
-    The list of available options are 
-
-    * 'behroozi10' (see `~halotools.empirical_models.behroozi10_model_dictionary`)
-    
-    * 'smhm_binary_sfr' (see `~halotools.empirical_models.smhm_binary_sfr_model_dictionary`)
+    """ 
+    Factory class providing instances of 
+    `SubhaloModelFactory` models that come prebuilt with Halotools. 
+    For documentation on the methods bound to `PrebuiltSubhaloModelFactory`, 
+    see the docstring of `~halotools.empirical_models.SubhaloModelFactory`. 
 
     """
     prebuilt_model_nickname_list = ['behroozi10']
@@ -40,7 +40,11 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
         model_nickname : string 
             String used to select the appropriate prebuilt 
             model_dictionary that will be used to build the instance. 
-            See the ``Examples`` below. 
+            See the ``Examples`` below. The list of available options are 
+
+            * 'behroozi10' (see :ref:`behroozi10_composite_model`)
+            
+            * 'smhm_binary_sfr' (see `~halotools.empirical_models.smhm_binary_sfr_model_dictionary`)
 
         galaxy_selection_func : function object, optional  
             Function object that imposes a cut on the mock galaxies. 
@@ -78,6 +82,13 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
         >>> halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
         >>> model_instance.populate_mock(halocat) # doctest: +SKIP
 
+        As described in the `~halotools.empirical_models.ModelFactory.populate_mock` 
+        docstring, calling the ``populate_mock`` method creates a ``mock`` attribute 
+        bound to your model_instance. After you initially populate a halo catalog 
+        using the `populate_mock` method, you can repopulate 
+        the halo catalog by calling the 
+        `~halotools.empirical_models.MockFactory.populate` method bound to 
+        ``model_instance.mock``. 
         """
         input_model_dictionary, supplementary_kwargs = (
             self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
@@ -133,30 +144,31 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
 
 
 class PrebuiltHodModelFactory(HodModelFactory):
-    """ Factory class providing instances of `HodModelFactory` models that come prebuilt with Halotools. 
-    The list of available options are 
-
-    * 'zheng07' (see :ref:`zheng07_composite_model` for a tutorial)
-    
-    * 'leauthaud11' (see `~halotools.empirical_models.leauthaud11_model_dictionary`)
-
-    * 'tinker13' (see `~halotools.empirical_models.tinker13_model_dictionary`)
-
-    * 'hearin15' (see `~halotools.empirical_models.hearin15_model_dictionary`)
-
+    """ 
+    Factory class providing instances of 
+    `HodModelFactory` models that come prebuilt with Halotools. 
+    For documentation on the methods bound to `PrebuiltHodModelFactory`, 
+    see the docstring of `~halotools.empirical_models.HodModelFactory`. 
     """
 
     prebuilt_model_nickname_list = ['zheng07', 'leauthaud11', 'tinker13', 'hearin15']
 
     def __init__(self, model_nickname, **kwargs):
         """
-
         Parameters
         ----------
         model_nickname : string 
             String used to select the appropriate prebuilt 
             model_dictionary that will be used to build the instance. 
-            See the ``Examples`` below. 
+            See the ``Examples`` below. The list of available options are 
+
+            * 'zheng07' (see :ref:`zheng07_composite_model` for a tutorial)
+            
+            * 'leauthaud11' (see :ref:`leauthaud11_composite_model`)
+
+            * 'tinker13' (see :ref:`tinker13_composite_model`)
+
+            * 'hearin15' (see :ref:`hearin15_composite_model`)
 
         halo_selection_func : function object, optional   
             Function object used to place a cut on the input ``table``. 
@@ -166,6 +178,37 @@ class PrebuiltHodModelFactory(HodModelFactory):
             the function output must be a length-N boolean array that will be used as a mask. 
             Halos that are masked will be entirely neglected during mock population.
 
+        Examples 
+        ---------
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+        Passing in `zheng07` as the ``model_nickname`` argument triggers the factory to 
+        call the `~halotools.empirical_models.zheng07_model_dictionary` function. 
+        When doing so, the remaining arguments that were passed to the 
+        `PrebuiltHodModelFactory` will in turn be passed on to 
+        `~halotools.empirical_models.zheng07_model_dictionary`. 
+
+        >>> model_instance = PrebuiltHodModelFactory('zheng07', threshold = -20)  
+
+        The same applies to all pre-built models. 
+
+        >>> model_instance = PrebuiltHodModelFactory('hearin15', threshold = 10.5, redshift = 2)
+
+        Once you have built an instance of a composite model, you can use it to 
+        populate any simulation in the Halotools cache: 
+
+        >>> from halotools.sim_manager import CachedHaloCatalog # doctest: +SKIP
+        >>> halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+        >>> model_instance.populate_mock(halocat) # doctest: +SKIP
+
+        As described in the `~halotools.empirical_models.ModelFactory.populate_mock` 
+        docstring, calling the ``populate_mock`` method creates a ``mock`` attribute 
+        bound to your model_instance. After you initially populate a halo catalog 
+        using the `populate_mock` method, you can repopulate 
+        the halo catalog by calling the 
+        `~halotools.empirical_models.MockFactory.populate` method bound to 
+        ``model_instance.mock``. 
         """
         input_model_dictionary, supplementary_kwargs = (
             self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)

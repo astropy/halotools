@@ -19,7 +19,7 @@ from .large_scale_density_helpers import *
 
 __all__ = ('large_scale_density_spherical_volume', 
     'large_scale_density_spherical_annulus')
-__author__ = ['Andrew Hearin']
+__author__ = ('Andrew Hearin', )
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
@@ -205,16 +205,5 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
         return number_density/mean_rho
     else:
         return number_density
-
-
-
-
-
-
-
-
-
-
-
 
 

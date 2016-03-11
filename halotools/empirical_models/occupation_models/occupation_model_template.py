@@ -5,8 +5,7 @@ HOD-style models of the galaxy-halo connection.
 
 """
 
-__all__ = (['OccupationComponent']
-    )
+__all__ = ('OccupationComponent', )
 
 from functools import partial
 from copy import copy

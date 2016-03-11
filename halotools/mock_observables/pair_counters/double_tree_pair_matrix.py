@@ -468,7 +468,7 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
         None, the weights are set to np.ones(*(N1,N_weights)*).
     
     cond_func_id : int, optional
-        conditonal function integer ID. Each conditional function requires a specific 
+        conditional function integer ID. Each conditional function requires a specific 
         number of weights per point, *N_weights*.  See the Notes for a description of
         available functions.
     
@@ -511,11 +511,11 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
     
     Points with zero seperation are considered a self-match, and do no count as neighbors.
     
-    There are multiple conditonal functions available.  In general, each requires a 
-    different number of marks per point, N_marks.  The conditonal function gets passed 
+    There are multiple conditional functions available.  In general, each requires a 
+    different number of marks per point, N_marks.  The conditional function gets passed 
     two vectors per pair, w1 and w2, of length N_marks and return a float.  
     
-    A pair pair is counted as a neighbor if the conditonal function evaulates as True.
+    A pair pair is counted as a neighbor if the conditional function evaulates as True.
     
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:
@@ -779,7 +779,7 @@ def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights
         None, the weights are set to np.ones(*(N1,N_weights)*).
     
     cond_func_id : int, optional
-        conditonal function integer ID. Each conditional function requires a specific 
+        conditional function integer ID. Each conditional function requires a specific 
         number of weights per point, *N_weights*.  See the Notes for a description of
         available functions.
     
@@ -825,11 +825,11 @@ def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights
     
     Points with zero seperation are considered a self-match, and do no count as neighbors.
     
-    There are multiple conditonal functions available.  In general, each requires a 
-    different number of marks per point, N_marks.  The conditonal function gets passed 
+    There are multiple conditional functions available.  In general, each requires a 
+    different number of marks per point, N_marks.  The conditional function gets passed 
     two vectors per pair, w1 and w2, of length N_marks and return a float.  
     
-    A pair pair is counted as a neighbor if the conditonal function evaulates as True.
+    A pair pair is counted as a neighbor if the conditional function evaulates as True.
     
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:

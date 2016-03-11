@@ -6,7 +6,7 @@ galaxy group classes
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-####import modules########################################################################
+
 import sys
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix, coo_matrix
@@ -24,7 +24,6 @@ if igraph_available==True: #there is another package called igraph--need to dist
 no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
                  "See http://igraph.org/ and note that there are two packages called \n"
                  "'igraph'.")
-##########################################################################################
 
 __all__=['FoFGroups']
 __author__ = ['Duncan Campbell']

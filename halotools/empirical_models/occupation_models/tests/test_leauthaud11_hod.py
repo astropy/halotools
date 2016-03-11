@@ -9,7 +9,7 @@ from ...factories import HodModelFactory
 from ... import model_defaults
 from ....sim_manager import FakeSim
 
-__all__ = ['test_Leauthaud11Cens', 'test_Leauthaud11Sats']
+__all__ = ('test_Leauthaud11Cens', 'test_Leauthaud11Sats')
 
 def test_Leauthaud11Cens():
 	""" Function to test 

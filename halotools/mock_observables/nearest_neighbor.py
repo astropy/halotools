@@ -6,14 +6,13 @@ find the nerest neighbor to a point under various definitions
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-####import modules########################################################################
+
 import numpy as np
 from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 from warnings import warn
 from ..custom_exceptions import *
 from scipy import sparse
 import time
-##########################################################################################
 
 
 __all__=['nearest_neighbor']

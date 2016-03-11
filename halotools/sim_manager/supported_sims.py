@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-
+""" Module containing container classes for 
+the simulations provided by Halotools. 
+The attributes of the classes defined below 
+are used to attach metadata to the Halotools-provided 
+halo catalogs as they are loaded into memory. 
+"""
 import numpy as np
 import os, sys, urllib2, fnmatch
 from warnings import warn 

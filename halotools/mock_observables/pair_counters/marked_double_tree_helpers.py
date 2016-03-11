@@ -15,6 +15,8 @@ from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ['_marked_npairs_process_weights','_velocity_marked_npairs_process_weights']
+__author__ = ['Duncan Campbell']
+
 
 def _marked_npairs_process_weights(data1, data2, weights1, weights2, wfunc):
     """

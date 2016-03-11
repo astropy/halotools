@@ -112,30 +112,6 @@ def test_Leauthaud11_composite():
 	assert ncen3 == ncen2
 	assert nsat3 == nsat2
 
-	# fakesim = FakeSim()
-	# model.populate_mock(halocat = fakesim)
-
-
-	"""
-	orig_logMmin_centrals = model.param_dict['logMmin']
-	model.param_dict['logMmin'] = 11.5
-	cenocc_new = model.mean_occupation_centrals(prim_haloprop=testmass1)
-	assert cenocc_new < cenocc_orig
-
-	testmass2 = 5.e12
-	satocc_orig = model.mean_occupation_satellites(prim_haloprop=testmass2)
-	model.param_dict['logM0'] = 11.4
-	satocc_new = model.mean_occupation_satellites(prim_haloprop=testmass2)
-	assert satocc_new < satocc_orig
-
-	# Test that we can recover our initial behavior
-	model.restore_init_param_dict()
-	assert model.param_dict['logMmin'] == orig_logMmin_centrals
-	cenocc_restored = model.mean_occupation_centrals(prim_haloprop=testmass1)
-	assert cenocc_restored == cenocc_orig
-	satocc_restored = model.mean_occupation_satellites(prim_haloprop=testmass2)
-	assert satocc_restored == satocc_orig
-	"""
 
 
 

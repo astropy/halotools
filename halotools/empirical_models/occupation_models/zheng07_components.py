@@ -5,9 +5,8 @@ used by the Zheng07 model.
 
 """
 
-__all__ = (
-	['Zheng07Cens','Zheng07Sats', 'AssembiasZheng07Cens', 'AssembiasZheng07Sats']
-    )
+__all__ = ('Zheng07Cens','Zheng07Sats', 
+    'AssembiasZheng07Cens', 'AssembiasZheng07Sats')
 
 from functools import partial
 from copy import copy

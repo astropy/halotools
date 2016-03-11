@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Module containing classes used to model the mapping between 
-stellar mass and subtable. 
+stellar mass and halo mass based on Moster et al. (2013). 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)

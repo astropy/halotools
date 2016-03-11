@@ -9,8 +9,6 @@ of the full phase space distribution of galaxies within their halos.
 
 Testing for this module is done in `~halotools.empirical_models.test_phase_space` module. 
 """
-# from __future__ import (
-#     division, print_function, absolute_import, unicode_literals)
 
 __author__ = ['Andrew Hearin']
 __all__ = ['MonteCarloGalProf']

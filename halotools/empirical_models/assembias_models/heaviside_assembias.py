@@ -2,10 +2,12 @@
 """
 This module contains the `~halotools.empirical_models.HeavisideAssembias` class. 
 The purpose of this class is to introduce step function-type assembly bias into 
-any method of any component model. 
+any method of any component model, as in 
+`Hearin et al 2015 decorated HODs <http://arxiv.org/abs/1512.03050>`_. 
 """
 
-__all__ = ['HeavisideAssembias']
+__all__ = ('HeavisideAssembias', )
+__author__  = ('Andrew Hearin', )
 
 import numpy as np 
 from warnings import warn 
@@ -380,6 +382,10 @@ class HeavisideAssembias(object):
 
         This method is used to introduce a boost/decrement of the baseline 
         function in a manner that preserves the all-halo result. 
+        Any function with a semi-bounded range can be decorated with 
+        `assembias_decorator`. The baseline behavior can be anything 
+        whatsoever, such as mean star formation rate or  
+        mean halo occupation, provided it has a semi-bounded range.   
 
         Parameters 
         -----------

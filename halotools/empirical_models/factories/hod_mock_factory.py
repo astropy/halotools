@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Module containing the `~halotools.empirical_models.HodMockFactory` class, 
+the primary class used to construct mock galaxy populations 
+based on HOD-style models. 
 
-Module used to construct mock galaxy populations. 
-Each mock factory only has knowledge of a simulation halocat 
-and composite model object. 
-Currently only composite HOD models are supported. 
-
+The `~halotools.empirical_models.HodMockFactory` class 
+provides an abstract interface between halo catalogs 
+and Halotools models. 
 """
 
 import numpy as np
@@ -46,7 +47,8 @@ missing_halo_upid_msg = ("All HOD-style models populate host halos with mock gal
 
 class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
-    population of mock galaxies based on an HOD-style model. 
+    population of mock galaxies based on an HOD-style model 
+    built by the `~halotools.empirical_models.HodModelFactory` class. 
 
     Can be thought of as a factory that takes a model  
     and simulation halocat as input, 
@@ -155,7 +157,12 @@ class HodMockFactory(MockFactory):
         self.model.build_lookup_tables()
 
     def populate(self, **kwargs):
-        """ Method populating halos with mock galaxies. 
+        """ 
+        Method populating host halos with mock galaxies. 
+        By calling the `populate` method of your mock, you will repopulate 
+        the halo catalog with a new realization of the model based on 
+        whatever values of the model parameters are currently stored in the 
+        model ``param_dict``. 
 
         Parameters 
         ------------
@@ -175,6 +182,34 @@ class HodMockFactory(MockFactory):
             ever be set to False when using the ``masking_function`` to 
             populate a specific spatial subvolume, as in that case PBCs 
             no longer apply. 
+
+        Examples 
+        ----------
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `populate` method bound to the ``mock``, 
+        which will repopulate the halo catalog with a new Monte Carlo 
+        realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['logMmin'] = 12.1
+        >>> model_instance.mock.populate()
+
         """
         # The _testing_mode keyword is for unit-testing only 
         # it has been intentionally left out of the docstring

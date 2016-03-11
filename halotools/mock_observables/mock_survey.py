@@ -6,13 +6,12 @@ create a mock redshift survey given a mock with galaxy positions and velocities.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-####import modules########################################################################
+
 import sys
 import numpy as np
 from scipy.interpolate import interp1d
 from astropy import cosmology
 from astropy.constants import c #the speed of light
-##########################################################################################
 
 
 __all__=['distant_observer_redshift', 'ra_dec_z']

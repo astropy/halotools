@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Module used to construct mock galaxy populations 
-based on models that populate subhalos. 
+Module containing the `~halotools.empirical_models.SubhaloMockFactory` class, 
+the primary class used to construct mock galaxy populations 
+based on subhalo-based models. 
+
+The `~halotools.empirical_models.SubhaloMockFactory` class 
+provides an abstract interface between halo catalogs 
+and Halotools models. 
 
 """
 
@@ -146,11 +151,40 @@ class SubhaloMockFactory(MockFactory):
 
 
     def populate(self):
-        """ Method populating subhalos with mock galaxies. 
+        """ 
+        Method populating subhalos with mock galaxies. 
+        By calling the `populate` method of your mock, you will repopulate 
+        the halo catalog with a new realization of the model based on 
+        whatever values of the model parameters are currently stored in the 
+        model ``param_dict``. 
 
-        Each method appearing in the ``_mock_generation_calling_sequence`` attribute 
-        of the composite model is called in sequence, always being passed the 
-        ``galaxy_table`` as the ``table`` argument. 
+        Examples 
+        ----------
+        >>> from halotools.empirical_models import PrebuiltSubhaloModelFactory
+        >>> model_instance = PrebuiltSubhaloModelFactory('behroozi10')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `populate` method bound to the ``mock``, 
+        which will repopulate the halo catalog with a new Monte Carlo 
+        realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['scatter_model_param1'] = 0.25
+        >>> model_instance.mock.populate()
+
         """
         self._allocate_memory()
 

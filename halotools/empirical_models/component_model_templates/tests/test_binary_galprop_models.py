@@ -15,7 +15,6 @@ __all__ = ['TestBinaryGalpropInterpolModel']
 
 
 class TestBinaryGalpropInterpolModel(TestCase):
-
     """ Class providing testing for the 
     `~halotools.empirical_models.BinaryGalpropInterpolModel`. 
     """

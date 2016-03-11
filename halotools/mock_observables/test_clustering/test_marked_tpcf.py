@@ -20,6 +20,10 @@ period = np.array([1.0,1.0,1.0])
 rbins = np.linspace(0,0.3,5)
 rmax = rbins.max()
 
+__all__ = ('test_marked_tpcf_auto_periodic', 
+    'test_marked_tpcf_auto_nonperiodic', 
+    'test_marked_tpcf_cross1', 'test_marked_tpcf_cross_consistency')
+
 def test_marked_tpcf_auto_periodic():
     """
     test marked_tpcf auto correlation with periodic boundary conditions

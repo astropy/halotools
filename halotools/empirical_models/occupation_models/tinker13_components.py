@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 This module contains various component features used by 
-HOD-style models of the galaxy-halo connection. 
-
+the HOD-style model introduced in Tinker et al. (2013) 
 """
 
-__all__ = (['Tinker13Cens', 'Tinker13QuiescentSats', 'Tinker13ActiveSats', 
-    'AssembiasTinker13Cens']
-    )
+__all__ = ('Tinker13Cens', 'Tinker13QuiescentSats', 
+    'Tinker13ActiveSats', 'AssembiasTinker13Cens')
 
 from functools import partial
 from copy import copy

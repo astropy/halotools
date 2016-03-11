@@ -15,6 +15,9 @@ from ....sim_manager import FakeSim
 from ....utils.table_utils import SampleSelector, compute_conditional_percentiles
 from ....utils.array_utils import custom_len
 
+__all__ = ('TestAssembias', )
+__author__ = ('Andrew Hearin', )
+
 class TestAssembias(TestCase):
     """
     """

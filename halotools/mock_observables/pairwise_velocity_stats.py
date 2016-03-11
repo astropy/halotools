@@ -5,13 +5,12 @@ Calculate pairwise velocity statistics.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-####import modules########################################################################
+
 import sys
 import numpy as np
 from math import pi, gamma
 from .pair_counters.marked_double_tree_pairs import velocity_marked_npairs, xy_z_velocity_marked_npairs
 from .pairwise_velocity_helpers import *
-##########################################################################################
 
 
 __all__=['mean_radial_velocity_vs_r', 'radial_pvd_vs_r',\

@@ -1,6 +1,38 @@
 #!/usr/bin/env python
+"""Command-line script to download any 
+Halotools-provided halo catalog. 
 
-"""Command-line script to download the default halo catalog"""
+This script should be called with four positional arguments: 
+
+    1. simname 
+    2. halo_finder 
+    3. version_name
+    4. redshift 
+
+To see what options are available for download, 
+run this script with no arguments but throw the help flag:
+
+$ python scripts/download_additional_halocat.py -h
+
+This script will download your halo catalogs to the 
+following location on disk:
+
+$HOME/.astropy/cache/halotools/halo_catalogs/simname/halo_finder
+
+With each download, your cache log is updated so that Halotools creates 
+a persistent memory of where your simulations are located. 
+Your cache log is an ASCII file located here:
+
+$HOME/.astropy/cache/halotools/halo_table_cache_log.txt 
+
+Manually deleting a line from this log erases the memory 
+of the corresponding catalog. In case the cache log becomes corrupted 
+for any reason, you can attempt to rebuild it 
+by running the following script:
+
+$ python scripts/rebuild_halo_table_cache_log.py 
+
+"""
 
 import os
 from halotools.sim_manager import DownloadManager, sim_defaults
@@ -13,11 +45,13 @@ parser.add_argument("-overwrite",
     action="store_true")
 
 parser.add_argument("-ptcls_only", 
-    help="Only download the particle data of the snapshot. ", 
+    help=("Only download a random downsampling of 1e6 dark matter particles from the snapshot."
+        "Downsampled particles are necessary to calculate galaxy-galaxy lensing."), 
     action="store_true")
 
 parser.add_argument("-halos_only", 
-    help="Only download the halo catalog data of the snapshot. ", 
+    help=("Only download the halo catalog data of the snapshot, "
+        "and ignore the downsampled particle data. "), 
     action="store_true")
 
 parser.add_argument("simname", type = str, 

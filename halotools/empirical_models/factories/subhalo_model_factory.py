@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Module storing the various factories used to build galaxy-halo models. 
+Module storing the 
+`~halotools.empirical_models.SubhaloModelFactory` class 
+that governs how all subhalo-based models are built.  
 """
 
 __all__ = ['SubhaloModelFactory']
@@ -25,7 +27,14 @@ from ...custom_exceptions import *
 
 class SubhaloModelFactory(ModelFactory):
     """ Class used to build models of the galaxy-halo connection 
-    in which galaxies live at the centers of subhalos.  
+    in which galaxies live at the centers of subhalos. 
+
+    See :ref:`subhalo_modeling_tutorial0` for an in-depth description 
+    of how to build subhalo-based models, demonstrated by a 
+    sequence of increasingly complex examples. 
+    If you do not wish to build your own model but want to use one 
+    provided by Halotools, 
+    instead see `~halotools.empirical_models.PrebuiltSubhaloModelFactory`. 
 
     The arguments passed to the `SubhaloModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
@@ -49,8 +58,10 @@ class SubhaloModelFactory(ModelFactory):
     the ``baseline_model_instance`` with new behavior. 
 
     Regardless what set of features you use to build your model, 
-    the returned object can be used to directly populate subhalos 
-    with mock galaxies, as shown in the example below. 
+    the returned object can be used to directly populate a halo catalog  
+    with mock galaxies using the 
+    `~halotools.empirical_models.SubhaloModelFactory.populate_mock` method, 
+    as shown in the example below. 
 
     """
 
@@ -523,8 +534,22 @@ class SubhaloModelFactory(ModelFactory):
 
 
     def update_param_dict_decorator(self, component_model, func_name):
-        """ Decorator used to propagate any possible changes in the composite model param_dict 
+        """ 
+        Decorator used to propagate any possible changes in the composite model param_dict 
         down to the appropriate component model param_dict. 
+
+        The behavior of the methods bound to the composite model are decorated versions 
+        of the methods defined in the component models. The decoration is done with 
+        `update_param_dict_decorator`. For each function that gets bound to the 
+        composite model, what this decorator does is search the param_dict of the 
+        component_model associated with the function, and update all matching keys 
+        in that param_dict with the param_dict of the composite. 
+        This way, all the user needs to do is make changes to the composite model 
+        param_dict. Then, when calling any method of the composite model, 
+        the changed values of the param_dict automatically propagate down 
+        to the component model before calling upon its behavior. 
+        This allows the composite_model to control behavior 
+        of functions that it does not define.  
 
         Parameters 
         -----------
@@ -814,17 +839,69 @@ class SubhaloModelFactory(ModelFactory):
         self.set_calling_sequence()
 
     def populate_mock(self, halocat):
-        """ Method used to populate a simulation using the model. 
+        """ 
+        Method used to populate a simulation with a Monte Carlo realization of a model. 
 
-        After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``table`` bound to it containing the Monte Carlo 
-        realization of the model. 
+        After calling this method, the model instance will have a new ``mock`` attribute. 
+        You can then access the galaxy population via ``model.mock.galaxy_table``, 
+        an Astropy `~astropy.table.Table`. 
+
+        Calling `populate_mock` triggers a halo catalog pre-processing phase that 
+        only needs to be done once. After calling `populate_mock`, 
+        if you want to repopulate the halo catalog, you should use the 
+        `~halotools.empirical_models.MockFactory.populate` method 
+        bound to ``model.mock``. 
+
+        For example, if you are running an MCMC type analysis, 
+        you will choose your halo catalog and completeness cuts, and call 
+        `populate_mock` with the appropriate arguments. Thereafter, you can 
+        explore parameter space by changing the values stored in the 
+        ``param_dict`` dictionary attached to the model, and then calling the 
+        `~halotools.empirical_models.MockFactory.populate` method 
+        bound to ``model.mock``. Any changes to the ``param_dict`` of the 
+        model will automatically propagate into the behavior of 
+        the `~halotools.empirical_models.MockFactory.populate` method. 
 
         Parameters 
         ----------
         halocat : object 
             Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
             or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+       Examples 
+        ----------
+        Here we'll use a pre-built model to demonstrate basic usage. 
+        The syntax shown below is the same for all composite models, 
+        whether they are pre-built by Halotools or built by you with `SubhaloModelFactory`. 
+
+        >>> from halotools.empirical_models import PrebuiltSubhaloModelFactory
+        >>> model_instance = PrebuiltSubhaloModelFactory('behroozi10')
+
+        Here we will use a fake simulation, but you can populate mocks 
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+        >>> model_instance.populate_mock(halocat)
+
+        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        You can call the `~halotools.empirical_models.SubhaloMockFactory.populate` 
+        method bound to the ``mock``, which will repopulate the halo catalog 
+        with a new Monte Carlo realization of the model. 
+
+        >>> model_instance.mock.populate()
+
+        If you want to change the behavior of your model, just change the 
+        values stored in the ``param_dict``. Differences in the parameter values 
+        will change the behavior of the mock-population. 
+
+        >>> model_instance.param_dict['scatter_model_param1'] = 0.25
+        >>> model_instance.mock.populate()
+
+        See also 
+        -----------        
+        :ref:`populating_mocks_with_alternate_sims_tutorial`
 
         See also 
         -----------
