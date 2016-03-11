@@ -601,6 +601,19 @@ class HodModelFactory(ModelFactory):
         """ Decorator used to propagate any possible changes in the composite model param_dict 
         down to the appropriate component model param_dict. 
 
+        The behavior of the methods bound to the composite model are decorated versions 
+        of the methods defined in the component models. The decoration is done with 
+        `update_param_dict_decorator`. For each function that gets bound to the 
+        composite model, what this decorator does is search the param_dict of the 
+        component_model associated with the function, and update all matching keys 
+        in that param_dict with the param_dict of the composite. 
+        This way, all the user needs to do is make changes to the composite model 
+        param_dict. Then, when calling any method of the composite model, 
+        the changed values of the param_dict automatically propagate down 
+        to the component model before calling upon its behavior. 
+        This allows the composite_model to control behavior 
+        of functions that it does not define.  
+
         Parameters 
         -----------
         component_model : obj 
