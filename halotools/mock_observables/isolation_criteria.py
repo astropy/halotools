@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
 """
-detemrine whether a set of points is isolated according to various criteria
+Functions used to determine whether 
+a set of points is isolated according to various criteria. 
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -25,7 +25,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
                         num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    a spherical volume.
+    an input spherical volume centered at each point in ``sample1``.
 
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
@@ -163,7 +163,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_thr
     
     Notes
     -----
-    Points with zero seperation are considered a self-match, and do no count as neighbors.
+    Points with zero seperation are considered a self-match, and do not count as neighbors.
     
     Examples
     --------
@@ -210,8 +210,14 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                         marks1, marks2, cond_func, period=None,
                         num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
-    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    a spherical volume that satisfies a user specified condition.
+    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2``, 
+    where various additional conditions may be applied to judge whether a matching point 
+    is considered to be a neighbor. For example, 
+    `conditional_spherical_isolation` can be used to identify galaxies as isolated 
+    if no other galaxy with a greater stellar mass lies within 500 kpc. 
+    Different additional criteria can be built up from different 
+    combinations of input ``marks`` and ``cond_func``. 
+    See the Examples section for further details.  
     
     Parameters
     ----------
@@ -225,13 +231,13 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         size of sphere to search for neighbors
     
     marks1 : array_like
-        len(sample1) x N_marks array of marks.  The suplied marks array must have the 
+        len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
         this parameter is not specified, it is set 
         to numpy.ones((len(sample1), N_marks)).
     
     marks2 : array_like
-        len(sample2) x N_marks array of marks.  The suplied marks array must have the 
+        len(sample2) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
         this parameter is not specified, it is set 
         to numpy.ones((len(sample1), N_marks)).
@@ -270,13 +276,18 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     
     Notes
     -----
-    Points with zero seperation are considered a self-match, and do no count as neighbors.
+    Points with zero seperation are considered a self-match, and do not count as neighbors.
     
-    There are multiple conditonal functions available.  In general, each requires a 
-    different number of marks per point, N_marks.  The conditonal function gets passed 
-    two vectors per pair, w1 and w2, of length N_marks and return a float.  
+    There are multiple conditional functions available.  In general, each requires a 
+    different number of marks per point, N_marks.  The conditional function gets passed 
+    two arrays per pair, w1 and w2, of length N_marks and return a float.  
+    You can pass in more than one piece of information about each point by choosing a 
+    the input ``marks`` arrays to be multi-dimensional of shape (N_points, N_marks). 
     
-    A pair pair is counted as a neighbor if the conditonal function evaluates as True.
+    One point is considered to be a neighbor of another 
+    if it lies within the enclosing sphere *and* 
+    if the conditional function ``cond_func`` evaluates as True 
+    when operating on the input ``marks`` data for that pair of points. 
     
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:
@@ -391,7 +402,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                           approx_cell1_size=None, approx_cell2_size=None):
     """
     Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` 
-    within a cylinderical volume that satisfies a user specified condition.
+    within a cylindrical volume that satisfies a user specified condition.
     
     Parameters
     ----------
@@ -408,13 +419,13 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         half the length of the cylinder to seach for neighbors
     
     marks1 : array_like
-        len(sample1) x N_marks array of marks.  The suplied marks array must have the 
+        len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
         this parameter is not specified, it is set 
         to numpy.ones((len(sample1), N_marks)).
     
     marks2 : array_like
-        len(sample2) x N_marks array of marks.  The suplied marks array must have the 
+        len(sample2) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
         this parameter is not specified, it is set 
         to numpy.ones((len(sample1), N_marks)).
@@ -453,13 +464,18 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     Notes
     -----
-    Points with zero seperation are considered a self-match, and do no count as neighbors.
+    Points with zero seperation are considered a self-match, and do not count as neighbors.
     
-    There are multiple conditonal functions available.  In general, each requires a 
-    different number of marks per point, N_marks.  The conditonal function gets passed 
-    two vectors per pair, w1 and w2, of length N_marks and return a float.  
+    There are multiple conditional functions available.  In general, each requires a 
+    different number of marks per point, N_marks.  The conditional function gets passed 
+    two arrays per pair, w1 and w2, of length N_marks and return a float.  
+    You can pass in more than one piece of information about each point by choosing a 
+    the input ``marks`` arrays to be multi-dimensional of shape (N_points, N_marks). 
     
-    A pair pair is counted as a neighbor if the conditonal function evaulates as True.
+    One point is considered to be a neighbor of another 
+    if the point lies within the enclosing cylinder *and* 
+    if the conditional function ``cond_func`` evaluates as True 
+    when operating on the input ``marks`` data for that pair of points. 
     
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:
