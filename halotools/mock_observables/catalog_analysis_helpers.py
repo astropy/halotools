@@ -106,6 +106,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     xyz-positions in the format used throughout
     the `~halotools.mock_observables` package. 
 
+    See :ref:`mock_obs_pos_formatting` for a tutorial. 
+
     Parameters 
     -----------
     x, y, z : sequence of arrays 

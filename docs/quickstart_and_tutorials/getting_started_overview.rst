@@ -36,19 +36,17 @@ First steps with Halotools
 
 Running the test suite
 ------------------------
-After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready:
 
-    python setup.py test
+After installing the code and its dependencies, navigate to some new working directory and execute the test suite. (This only needs to be done once per installed version.) 
 
-Depending on how you have configured your copy of the gcc compiler, Mac users may need to instead run 
+.. code:: python 
 
-    CC=clang python setup.py test 
+    import halotools
+    halotools.test()
 
-This will trigger Cython compilation of various package components, 
-and the execution of every function in the test suite of every sub-package, 
-generating a large number of compiler warnings that you can ignore. 
-Runtime for test suite execution typically takes less than a minute. 
-At the end, you will see a short summary of the outcome of the test suite. 
+The full test suite is memory intensive and takes several minutes to run. It will generate a few small, temporary dummy files that you can delete or just ignore. 
+
+See :ref:`verifying_your_installation` for details about the message that prints after you run the test suite. 
 
 .. _download_default_halos:
 
@@ -77,7 +75,7 @@ To see simple examples of how to manipulate the data stored in halo catalogs,
 see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
 
 If you wish to download alternate snapshots, you can either use the 
-`~halotools.sim_manager.DownloadManager`, or use the download_additional_halocat.py convenience script, which should be called with four arguments: simname, halo_finder, version_name and redshift. For example::
+`~halotools.sim_manager.DownloadManager`, or use the **download_additional_halocat.py** convenience script, which should be called with four positional arguments: *simname, halo_finder, version_name* and *redshift.* For example::
 
     python scripts/download_additional_halocat.py multidark rockstar most_recent 0.5
 
@@ -86,8 +84,8 @@ Choosing ``most_recent`` as the version_name automatically selects the most up-t
     python scripts/download_alternate_halocats.py --help
 
 
-Getting started with subpackages
-================================
+Getting started with galaxy/halo analysis
+===========================================
 
 Although the different sub-packages of Halotools are woven together for the specialized science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. The sections below give a broad-brush overview of the functionality of each sub-package as well as links to quickstart guides and tutorials containing more detailed instructions. 
 
@@ -132,13 +130,11 @@ Consider the HOD-style model used in `Zheng et al 2007 <http://arxiv.org/abs/ast
 >>> zheng07_model.populate_mock(halocat) # doctest: +SKIP
 >>> r, xi_gg = zheng07_model.compute_average_galaxy_clustering() # doctest: +SKIP
 
-As an additional example, consider the abundance matching-style model introduced in `Behroozi et al 2010 <http://arxiv.org/abs/1001.0015/>`_:
+The `~halotools.empirical_models.ModelFactory.compute_average_galaxy_clustering` of any model repeatedly populates a halo catalog with mock galaxies and returns the average clustering signal in each separation bin. As described in the docstring, this function has many optional keyword arguments. In the following example call, we'll show how to calculate the auto-clustering of centrals and satellites, as well as the cross-correlation between the two, using the maximum number of cores available on your machine. 
 
->>> from halotools.empirical_models import PrebuiltSubhaloModelFactory
->>> behroozi_model = PrebuiltSubhaloModelFactory('behroozi10', redshift = 0)
->>> r, xi_gm = behroozi_model.compute_average_galaxy_matter_cross_clustering() # doctest: +SKIP
+>>> r, xi_cc, xi_cs, xi_ss = zheng07_model.compute_average_galaxy_clustering(gal_type = 'centrals', include_crosscorr = True, num_iterations = 3, num_threads = 'max') # doctest: +SKIP
 
-For a comprehensive list of pre-built models provided by Halotools, see :ref:`preloaded_models_overview`. For an overview of how to get started with mock galaxy catalogs, see :ref:`mock_making_quickstart`. 
+For a comprehensive list of pre-built models provided by Halotools, see :ref:`preloaded_models_overview`. For a sequence of worked examples showing how to use Halotools to analyze mock galaxy catalogs, see :ref:`galaxy_catalog_analysis_tutorial`. 
 
 Designing your own galaxy-halo model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -172,7 +168,7 @@ To list a few examples of functions you can use the ``mock_observables`` sub-pac
 
     5. friends-of-friends group identification, `~halotools.mock_observables.FoFGroups`. 
 
-These functions take simple point data as input. This means that the ``mock_observables`` sub-package not only works with Halotools models and catalogs, but also equally well with hydrodynamical simulation outputs or mocks based on semi-analytic models that have no connection to Halotools. See `~halotools.mock_observables` for a comprehensive list of functions you can choose from. 
+These functions take simple point data as input. This means that the ``mock_observables`` sub-package not only works with Halotools models and catalogs, but also equally well with hydrodynamical simulation outputs or mocks based on semi-analytic models that have no connection to Halotools. See `~halotools.mock_observables` for a comprehensive list of functions you can choose from, and :ref:`galaxy_catalog_analysis_tutorial` for example usages with mock galaxy catalogs. 
 
 
 

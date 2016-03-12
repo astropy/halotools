@@ -413,10 +413,23 @@ class ModelFactory(object):
 
         Notes 
         -----
-        The `compute_average_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
+        The `compute_average_galaxy_clustering` method 
+        bound to mock instances is just a convenience wrapper 
         around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
         control over how your galaxy clustering signal is estimated, 
         see the `~halotools.mock_observables.tpcf` documentation. 
+
+        Note that there can be no guarantees that the 
+        `compute_average_galaxy_clustering` method bound to your model 
+        will terminate in a reasonable amount of time. For example, 
+        if you use a subhalo-based model that populates *every* subhalo 
+        in the catalog with a mock galaxy, then calling 
+        `compute_average_galaxy_clustering` on this model will attempt 
+        to compute a correlation function on hundreds of millions of points. 
+        In such cases, you are better off calling the 
+        `populate_mock` method and then calling the 
+        `~halotools.mock_observables.tpcf` after placing a cut on the 
+        ``galaxy_table``, as demonstrated in :ref:`galaxy_catalog_analysis_tutorial2`. 
         """
         if summary_statistic == 'mean':
             summary_func = np.mean 
@@ -614,6 +627,23 @@ class ModelFactory(object):
         around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
         control over how your galaxy clustering signal is estimated, 
         see the `~halotools.mock_observables.tpcf` documentation. 
+
+        Note that there can be no guarantees that the 
+        `compute_average_galaxy_matter_cross_clustering` method bound to your model 
+        will terminate in a reasonable amount of time. For example, 
+        if you use a subhalo-based model that populates *every* subhalo 
+        in the catalog with a mock galaxy, then calling 
+        `compute_average_galaxy_matter_cross_clustering` on this model will attempt 
+        to compute a correlation function on hundreds of millions of points. 
+        In such cases, you are better off calling the 
+        `populate_mock` method and then calling the 
+        `~halotools.mock_observables.tpcf` after placing a cut on the 
+        ``galaxy_table``, as demonstrated in :ref:`galaxy_catalog_analysis_tutorial3`. 
+        The only difference between this use-case and the one demonstrated in 
+        the tutorial is that here you will use the `~halotools.mock_observables.tpcf` 
+        to calculate the cross-correlation between dark matter particles and galaxies, 
+        rather than calling the `~halotools.mock_observables.delta_sigma` function. 
+
         """
         if summary_statistic == 'mean':
             summary_func = np.mean 

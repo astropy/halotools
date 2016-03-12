@@ -87,11 +87,9 @@ with fake simulation data via the ``halocat`` argument.
 
 See `ModelFactory.populate_mock` for information about how to  
 populate your model into different simulations.  
-See :ref:`mock_observation_quickstart` for a quick reference on 
-generating common model predictions such as galaxy clustering and lensing, 
-and :ref:`mock_observation_overview` for more detailed information on how the 
-`~halotools.mock_observables` sub-package can be used to study 
-a wide range of astronomical statistics predicted by your model. 
+See :ref:`galaxy_catalog_analysis_tutorial` for a sequence of worked examples 
+on how to use the `~halotools.mock_observables` sub-package 
+to study a wide range of astronomical statistics predicted by your model. 
 
 Studying the Tinker et al. (2013) Model Features 
 ===================================================
