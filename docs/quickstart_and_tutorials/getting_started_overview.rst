@@ -36,19 +36,17 @@ First steps with Halotools
 
 Running the test suite
 ------------------------
-After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready:
 
-    python setup.py test
+After installing the code and its dependencies, navigate to some new working directory and execute the test suite. (This only needs to be done once per installed version.) 
 
-Depending on how you have configured your copy of the gcc compiler, Mac users may need to instead run 
+.. code:: python 
 
-    CC=clang python setup.py test 
+    import halotools
+    halotools.test()
 
-This will trigger Cython compilation of various package components, 
-and the execution of every function in the test suite of every sub-package, 
-generating a large number of compiler warnings that you can ignore. 
-Runtime for test suite execution typically takes less than a minute. 
-At the end, you will see a short summary of the outcome of the test suite. 
+The full test suite is memory intensive and takes several minutes to run. It will generate a few small, temporary dummy files that you can delete or just ignore. 
+
+See :ref:`verifying_your_installation` for details about the message that prints after you run the test suite. 
 
 .. _download_default_halos:
 
@@ -77,7 +75,7 @@ To see simple examples of how to manipulate the data stored in halo catalogs,
 see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
 
 If you wish to download alternate snapshots, you can either use the 
-`~halotools.sim_manager.DownloadManager`, or use the download_additional_halocat.py convenience script, which should be called with four arguments: simname, halo_finder, version_name and redshift. For example::
+`~halotools.sim_manager.DownloadManager`, or use the **download_additional_halocat.py** convenience script, which should be called with four positional arguments: *simname, halo_finder, version_name* and *redshift.* For example::
 
     python scripts/download_additional_halocat.py multidark rockstar most_recent 0.5
 
