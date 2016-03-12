@@ -56,6 +56,12 @@ else:
     _text_type = str
     PY3 = True
 
+
+# What follows are several import statements meant to deal with install-time
+# issues with either missing or misbehaving pacakges (including making sure
+# setuptools itself is installed):
+
+
 # Some pre-setuptools checks to ensure that either distribute or setuptools >=
 # 0.7 is used (over pre-distribute setuptools) if it is available on the path;
 # otherwise the latest setuptools will be downloaded and bootstrapped with
@@ -84,16 +90,6 @@ except:
     from ez_setup import use_setuptools
     use_setuptools()
 
-from distutils import log
-from distutils.debug import DEBUG
-
-
-# In case it didn't successfully import before the ez_setup checks
-import pkg_resources
-
-from setuptools import Distribution
-from setuptools.package_index import PackageIndex
-from setuptools.sandbox import run_setup
 
 # Note: The following import is required as a workaround to
 # https://github.com/astropy/astropy-helpers/issues/89; if we don't import this
@@ -104,6 +100,37 @@ try:
     import setuptools.py31compat
 except ImportError:
     pass
+
+
+# matplotlib can cause problems if it is imported from within a call of
+# run_setup(), because in some circumstances it will try to write to the user's
+# home directory, resulting in a SandboxViolation.  See
+# https://github.com/matplotlib/matplotlib/pull/4165
+# Making sure matplotlib, if it is available, is imported early in the setup
+# process can mitigate this (note importing matplotlib.pyplot has the same
+# issue)
+try:
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot
+except:
+    # Ignore if this fails for *any* reason*
+    pass
+
+
+# End compatibility imports...
+
+
+# In case it didn't successfully import before the ez_setup checks
+import pkg_resources
+
+from setuptools import Distribution
+from setuptools.package_index import PackageIndex
+from setuptools.sandbox import run_setup
+
+from distutils import log
+from distutils.debug import DEBUG
+
 
 # TODO: Maybe enable checking for a specific version of astropy_helpers?
 DIST_NAME = 'astropy-helpers'
@@ -255,6 +282,19 @@ class _Bootstrapper(object):
         strategies = ['local_directory', 'local_file', 'index']
         dist = None
 
+        # First, remove any previously imported versions of astropy_helpers;
+        # this is necessary for nested installs where one package's installer
+        # is installing another package via setuptools.sandbox.run_setup, as in
+        # the case of setup_requires
+        for key in list(sys.modules):
+            try:
+                if key == PACKAGE_NAME or key.startswith(PACKAGE_NAME + '.'):
+                    del sys.modules[key]
+            except AttributeError:
+                # Sometimes mysterious non-string things can turn up in
+                # sys.modules
+                continue
+
         # Check to see if the path is a submodule
         self.is_submodule = self._check_submodule()
 
@@ -269,13 +309,31 @@ class _Bootstrapper(object):
                 "available and importable as a prerequisite to building "
                 "or installing this package.".format(PACKAGE_NAME))
 
+        # This is a bit hacky, but if astropy_helpers was loaded from a
+        # directory/submodule its Distribution object gets a "precedence" of
+        # "DEVELOP_DIST".  However, in other cases it gets a precedence of
+        # "EGG_DIST".  However, when activing the distribution it will only be
+        # placed early on sys.path if it is treated as an EGG_DIST, so always
+        # do that
+        dist = dist.clone(precedence=pkg_resources.EGG_DIST)
+
         # Otherwise we found a version of astropy-helpers, so we're done
         # Just active the found distribution on sys.path--if we did a
         # download this usually happens automatically but it doesn't hurt to
         # do it again
         # Note: Adding the dist to the global working set also activates it
-        # (makes it importable on sys.path) by default
-        pkg_resources.working_set.add(dist)
+        # (makes it importable on sys.path) by default.
+
+        try:
+            pkg_resources.working_set.add(dist, replace=True)
+        except TypeError:
+            # Some (much) older versions of setuptools do not have the
+            # replace=True option here.  These versions are old enough that all
+            # bets may be off anyways, but it's easy enough to work around just
+            # in case...
+            if dist.key in pkg_resources.working_set.by_key:
+                del pkg_resources.working_set.by_key[dist.key]
+            pkg_resources.working_set.add(dist)
 
     @property
     def config(self):
@@ -351,7 +409,7 @@ class _Bootstrapper(object):
     def get_index_dist(self):
         if not self.download:
             log.warn('Downloading {0!r} disabled.'.format(DIST_NAME))
-            return False
+            return None
 
         log.warn(
             "Downloading {0!r}; run setup.py with the --offline option to "
@@ -463,12 +521,10 @@ class _Bootstrapper(object):
     def _do_upgrade(self, dist):
         # Build up a requirement for a higher bugfix release but a lower minor
         # release (so API compatibility is guaranteed)
-        # sketchy version parsing--maybe come up with something a bit more
-        # robust for this
-        major, minor = (int(part) for part in dist.parsed_version[:2])
-        next_minor = '.'.join([str(major), str(minor + 1), '0'])
+        next_version = _next_version(dist.parsed_version)
+
         req = pkg_resources.Requirement.parse(
-            '{0}>{1},<{2}'.format(DIST_NAME, dist.version, next_minor))
+            '{0}>{1},<{2}'.format(DIST_NAME, dist.version, next_version))
 
         package_index = PackageIndex(index_url=self.index_url)
 
@@ -532,7 +588,7 @@ class _Bootstrapper(object):
             perl_warning = ('perl: warning: Falling back to the standard locale '
                             '("C").')
             if not stderr.strip().endswith(perl_warning):
-                # Some other uknown error condition occurred
+                # Some other unknown error condition occurred
                 log.warn('git submodule command failed '
                          'unexpectedly:\n{0}'.format(stderr))
                 return False
@@ -732,6 +788,40 @@ def run_cmd(cmd):
     return (p.returncode, stdout, stderr)
 
 
+def _next_version(version):
+    """
+    Given a parsed version from pkg_resources.parse_version, returns a new
+    version string with the next minor version.
+
+    Examples
+    ========
+    >>> _next_version(pkg_resources.parse_version('1.2.3'))
+    '1.3.0'
+    """
+
+    if hasattr(version, 'base_version'):
+        # New version parsing from setuptools >= 8.0
+        if version.base_version:
+            parts = version.base_version.split('.')
+        else:
+            parts = []
+    else:
+        parts = []
+        for part in version:
+            if part.startswith('*'):
+                break
+            parts.append(part)
+
+    parts = [int(p) for p in parts]
+
+    if len(parts) < 3:
+        parts += [0] * (3 - len(parts))
+
+    major, minor, micro = parts[:3]
+
+    return '{0}.{1}.{2}'.format(major, minor + 1, 0)
+
+
 class _DummyFile(object):
     """A noop writeable object."""
 
@@ -846,7 +936,7 @@ def use_astropy_helpers(**kwargs):
         that should be added to `sys.path` so that `astropy_helpers` can be
         imported from that path.
 
-        If the path is a git submodule it will automatically be initialzed
+        If the path is a git submodule it will automatically be initialized
         and/or updated.
 
         The path may also be to a ``.tar.gz`` archive of the astropy_helpers
