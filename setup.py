@@ -8,6 +8,15 @@ import sys
 if sys.version_info[0] >2:
     raise SystemError("You are using python 3.x, but currently Halotools is only 2.x compatible.")
 
+try:
+    import cython
+    if pkg_resources.parse_version(cython.__version__) < pkg_resources.parse_version('0.23'):
+        raise ImportError("Halotools requires Cython>=0.23, but your installed "
+                          "Cython is older.  Please upgrade before trying to "
+                          "build Halotools.")
+except ImportError:
+    pass  # Cython not installed, which is fine for release versions
+
 import ah_bootstrap
 from setuptools import setup
 
