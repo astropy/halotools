@@ -11,6 +11,7 @@ __pycache__
 *.cpp
 
 # Other generated files
+MANIFEST
 */version.py
 */cython_version.py
 htmlcov
