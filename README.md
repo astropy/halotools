@@ -20,7 +20,7 @@ The latest build of the documentation can be found at http://halotools.readthedo
 ## Installation 
 
 You can find detailed installation instructions 
-in the Package Installation section of halotools.readthedocs.org. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with populating mock galaxy populations. 
+in the *Package Installation* section of halotools.readthedocs.org. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations. 
 
 ---
 
@@ -30,14 +30,18 @@ in the Package Installation section of halotools.readthedocs.org. After installi
 Once you have installed the code and downloaded the default halo catalog (see the Getting Started guide in the documentation), you can use Halotools models to populate mock galaxy populations. 
 
 ``` 
+# Select a model 
 from halotools.empirical_models import PrebuiltHodModelFactory 
 model = PrebuiltHodModelFactory('zheng07')
 
+# Select a halo catlaog
 from halotools.sim_manager import CachedHaloCatalog
 halocat = CachedHaloCatalog(simname='bolshoi', redshift=0, halo_finder='rockstar')
+
+# populate the catalog with the model
 model.populate_mock(halocat)
 ```
-After calling populate_mock, your model will have a *mock* attribute storing your synthetic galaxy population. All Halotools models have a populate_mock method that works in this way, regardless of the features of the model. There are no restrictions on the simulation or halo-finder with which you can use the populate_mock method. 
+After calling *populate_mock*, your model will have a *mock* attribute storing your synthetic galaxy population. All Halotools models have a populate_mock method that works in this way, regardless of the features of the model. There are no restrictions on the simulation or halo-finder with which you can use the populate_mock method. 
 
 ### Creating alternate mocks
 
@@ -47,6 +51,7 @@ All Halotools models have a *param_dict* that controls the behavior of the model
 model.param_dict['logMmin'] = 12.1
 model.mock.populate()
 ```
+Note how much faster the call to *mock.populate* is relative to *model.populate_mock(halocat)*. This is due to a large amount of one-time-only pre-processing that is carried out upon creation of the first mock universe. 
 
 ### Modeling the galaxy-halo connection
 
@@ -54,7 +59,7 @@ The pre-built model factories give you a wide range of models to choose from, ea
 
 ### Making mock observations
 
-The *mock_observables* sub-package contains a wide variety of optimized functions that you can use to study your mock galaxy population. For example, you can calculate projected clustering via the *wp* function, identify friends-of-friends groups with *FoFGroups*, or galaxy-galaxy lensing with *delta_sigma*. 
+The *mock_observables* sub-package contains a wide variety of optimized functions that you can use to study your mock galaxy population. For example, you can calculate projected clustering via the *wp* function, identify friends-of-friends groups with *FoFGroups*, or compute galaxy-galaxy lensing with *delta_sigma*. 
 
 ```
 from halotools.mock_observables import wp
@@ -80,7 +85,7 @@ halocat = CachedHaloCatalog(simname = any_simname, redshift = any_redshift, halo
 print(halocat.halo_table[0:9])
 ```
 
-You are not limited to cache and use the halo catalogs pre-processed by Halotools. The *UserSuppliedHaloCatalog* allows you to use your own simulation data and transform it into a Halotools-formatted catalog in a simple way. 
+You are not limited to use the halo catalogs pre-processed by Halotools. The *UserSuppliedHaloCatalog* allows you to use your own simulation data and transform it into a Halotools-formatted catalog in a simple way. 
 
 ```
 from halotools.sim_manager import UserSuppliedHaloCatalog
@@ -99,11 +104,13 @@ Halotools is a fully open-source package with contributing scientists spread acr
 
 ---
 
-## Staying up to date
+## Asking questions and staying up-to-date
 
-There is a Halotools google group that you can sign up for to receive notifications of new releases, and also to ask questions:
+If you would like to receive notifications of new code releases, sign up for the google group 
 
 https://groups.google.com/forum/#!forum/halotools
+
+The google group also serves as a public forum for asking questions about the code. You are also welcome to contact Andrew Hearin directly by email or by tagging @aphearin on GitHub. 
 
 ---
 

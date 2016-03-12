@@ -86,8 +86,8 @@ Choosing ``most_recent`` as the version_name automatically selects the most up-t
     python scripts/download_alternate_halocats.py --help
 
 
-Getting started with subpackages
-================================
+Getting started with galaxy/halo analysis
+===========================================
 
 Although the different sub-packages of Halotools are woven together for the specialized science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. The sections below give a broad-brush overview of the functionality of each sub-package as well as links to quickstart guides and tutorials containing more detailed instructions. 
 
@@ -132,13 +132,11 @@ Consider the HOD-style model used in `Zheng et al 2007 <http://arxiv.org/abs/ast
 >>> zheng07_model.populate_mock(halocat) # doctest: +SKIP
 >>> r, xi_gg = zheng07_model.compute_average_galaxy_clustering() # doctest: +SKIP
 
-As an additional example, consider the abundance matching-style model introduced in `Behroozi et al 2010 <http://arxiv.org/abs/1001.0015/>`_:
+The `~halotools.empirical_models.ModelFactory.compute_average_galaxy_clustering` of any model repeatedly populates a halo catalog with mock galaxies and returns the average clustering signal in each separation bin. As described in the docstring, this function has many optional keyword arguments. In the following example call, we'll show how to calculate the auto-clustering of centrals and satellites, as well as the cross-correlation between the two, using the maximum number of cores available on your machine. 
 
->>> from halotools.empirical_models import PrebuiltSubhaloModelFactory
->>> behroozi_model = PrebuiltSubhaloModelFactory('behroozi10', redshift = 0)
->>> r, xi_gm = behroozi_model.compute_average_galaxy_matter_cross_clustering() # doctest: +SKIP
+>>> r, xi_cc, xi_cs, xi_ss = zheng07_model.compute_average_galaxy_clustering(gal_type = 'centrals', include_crosscorr = True, num_iterations = 3, num_threads = 'max') # doctest: +SKIP
 
-For a comprehensive list of pre-built models provided by Halotools, see :ref:`preloaded_models_overview`. For an overview of how to get started with mock galaxy catalogs, see :ref:`mock_making_quickstart`. 
+For a comprehensive list of pre-built models provided by Halotools, see :ref:`preloaded_models_overview`. For a sequence of worked examples showing how to use Halotools to analyze mock galaxy catalogs, see :ref:`galaxy_catalog_analysis_tutorial`. 
 
 Designing your own galaxy-halo model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -172,7 +170,7 @@ To list a few examples of functions you can use the ``mock_observables`` sub-pac
 
     5. friends-of-friends group identification, `~halotools.mock_observables.FoFGroups`. 
 
-These functions take simple point data as input. This means that the ``mock_observables`` sub-package not only works with Halotools models and catalogs, but also equally well with hydrodynamical simulation outputs or mocks based on semi-analytic models that have no connection to Halotools. See `~halotools.mock_observables` for a comprehensive list of functions you can choose from. 
+These functions take simple point data as input. This means that the ``mock_observables`` sub-package not only works with Halotools models and catalogs, but also equally well with hydrodynamical simulation outputs or mocks based on semi-analytic models that have no connection to Halotools. See `~halotools.mock_observables` for a comprehensive list of functions you can choose from, and :ref:`galaxy_catalog_analysis_tutorial` for example usages with mock galaxy catalogs. 
 
 
 

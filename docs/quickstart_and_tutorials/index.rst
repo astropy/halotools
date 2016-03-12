@@ -37,17 +37,6 @@ Halo catalog analysis
 
    quickstart_guides/halo_catalog_analysis_quickstart
 
-
-Testing model predictions 
-------------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   quickstart_guides/populating_mocks
-   quickstart_guides/mock_observables_quickstart
-
-
 Tutorials 
 =====================
 
