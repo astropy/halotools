@@ -13,7 +13,7 @@ By installing into a virtual environment, you will not change any of the
 packages that are already installed system-wide on your machine. We recommend that 
 you create the following environment that is specific to Halotools v0.1::
 
-	conda create -n halotools_v0.1 astropy=1.0.4 numpy=1.9.3 scipy=0.15.1 h5py=2.5.0 requests=2.9.1 beautifulsoup4=4.4.1 cython=0.23.4 python=2.7.11
+	conda create -n halotools_v0.1 astropy numpy scipy h5py requests beautifulsoup4 cython python=2.7.11
 
 In order to activate this environment::
 
@@ -21,8 +21,7 @@ In order to activate this environment::
 
 You may wish to add additional packages into this environment, depending on what else you want to use when working with Halotools. This can be done by tacking on additional package names when you create the environment, and/or by running *conda install pkg_name* after activating the environment. For example::
 
-	conda create -n halotools_v0.1 astropy=1.0.4 numpy=1.9.3 scipy=0.15.1 h5py=2.5.0 requests=2.9.1 beautifulsoup4=4.4.1 cython=0.23.4 python=2.7.11 ipython matplotlib
-
+	conda create -n halotools_v0.1 astropy numpy scipy h5py requests beautifulsoup4 cython python=2.7.11 ipython matplotlib
 
 Within the *halotools_v0.1* environment, you can install v0.1 of the Halotools using pip 
 and you should encounter no problems with package dependencies. 
