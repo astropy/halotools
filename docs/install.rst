@@ -5,29 +5,43 @@ Package Installation
 ************************
 
 To install Halotools, you can either use pip or clone the repo from GitHub and build the source code. 
+Either way, be sure to read the :ref:`halotools_dependencies` section prior to installation. 
+
+If you use `conda <https://www.continuum.io/downloads>`_ to manage 
+your python distribution and package dependencies, consider installing Halotools into a 
+virtual environment created by conda. Setting this up is completely straightforward and takes less than a minute, even if this is your first time using a virtual environment. 
+Using a virtual environment simplifies not just the current installation 
+but also package upgrades and your subsequent workflow. 
+You can find explicit instructions in the :ref:`installing_halotools_with_virtualenv` 
+section of the documentation. 
 
 Using pip
 ====================
 
-The simplest way to install the latest release of the code is with pip. 
+The simplest way to install the latest release of the code is with pip. Before installation, be sure you have installed the package dependencies described in the :ref:`halotools_dependencies` section. If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing with pip::
 
-The pip install option will become available very soon. 
+	pip install halotools
+
+This will install the latest release of the code, v0.1. If you want the latest master branch, you will need to build the code from source following the instructions in the next section. 
 
 Building from source 
 ====================
 
-The other option for installing Halotools is to clone the source code from github and call the setup file. *Before* doing this, be sure you have already installed the package dependencies described in the following section::
+If you don't install v0.1 using pip, you can instead clone the cource code and call the setup file. Before installation, be sure you have installed the package dependencies described in the :ref:`halotools_dependencies` section. If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before calling the final line below::
 
 	git clone https://github.com/astropy/halotools.git
 	cd halotools
+	git checkout v0.1
 	python setup.py install
 
-Note that installation from source compiles the code's Cython-based back-end, which will generate a large number of compiler warnings that you can ignore.
+This will install the v0.1 release of the code. If you prefer to use the most recent version of the code, skip the ``git checkout v0.1`` step; this will install the master branch of the code. While the features in v0.1 have a stable API, new features being developed in the master branch may not. Either way, the final step compiles the Cython-based back-end, which will generate a large number of compiler warnings that you can ignore. 
+
+.. _halotools_dependencies: 
 
 Dependencies
 ============
 
-If you installed v0.1 using pip, then most of your dependencies will be handled for you automatically. The only additional dependency you may need is:
+If you want to install v0.1 using pip, then most of your dependencies will be handled for you automatically. The only additional dependency you may need is:
 
 - `h5py <http://h5py.org/>`_: 2.5 or later
 
@@ -58,7 +72,7 @@ Any of the above can be installed with either pip or conda.
 Verifying your installation 
 ==============================
 
-After installing the code and its dependencies, navigate to some new working directory and execute the test suite. 
+After installing the code and its dependencies, navigate to some new working directory and execute the test suite. If you installed Halotools into a virtual environment as described in the :ref:`installing_halotools_with_virtualenv` section of the documentation, activate the environment before spawning a python session and executing the code below. 
 
 .. code:: python 
 
