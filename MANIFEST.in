@@ -5,7 +5,7 @@ include ez_setup.py
 include ah_bootstrap.py
 include setup.cfg
 
-recursive-include *.pyx *.pxd *.c *.cpp *.h
+recursive-include halotools *.pyx *.pxd *.c *.cpp *.h
 recursive-include docs *
 recursive-include licenses *
 recursive-include cextern *
