@@ -90,7 +90,7 @@ def group_member_generator(data, grouping_key, requested_columns,
 
     Then we loop over it:
     >>> result = np.zeros(len(halos))
-    ...     for first, last, member_props in group_gen: pass 
+    >>> for first, last, member_props in group_gen:  
     ...     masses = member_props[0]
     ...     host_mass = masses[0]
     ...     result[first:last] = host_mass
