@@ -137,10 +137,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
     
     where :math:`\\pi_{\\rm max}` is ``pi_max`` and :math:`\\xi(r_p,\\pi)` 
     is the redshift space correlation function.
-    
-    Notice that the results will generally be sensitive to the choice of ``pi_bins``, as
-    they indicate where to evalulate :math:`\\xi(r_p,\\pi)` and :math:`\\mathrm{d}\\pi`.
-    
+        
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
