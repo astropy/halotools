@@ -120,7 +120,7 @@ def group_member_generator(data, grouping_key, requested_columns,
     >>> for first, last, member_props in group_gen:
     ...     masses = member_props[0]
     ...     spins = member_props[1]
-    ...     mass_weighted_avg_spin = sum(masses*spins)/float(len(masses))
+    ...     mass_weighted_avg_spin = np.sum(masses*spins)/float(len(masses))
     ...     result[first:last] = mass_weighted_avg_spin
     >>> halos['halo_mass_weighted_avg_spin'] = result   
 
