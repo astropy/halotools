@@ -114,7 +114,7 @@ def per_object_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     return outer_counts
 
 
-cdef inline radial_binning(np.int_t* counts, np.float64_t* bins,\
+cdef inline void radial_binning(np.int_t* counts, np.float64_t* bins,\
                            np.float64_t d, np.int_t k):
     """
     real space radial binning function
