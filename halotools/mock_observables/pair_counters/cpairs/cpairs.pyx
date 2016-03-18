@@ -1402,7 +1402,7 @@ def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
 #### binning functions ####
 ###########################
 
-cdef inline radial_binning(np.int_t* counts, np.float64_t* bins,\
+cdef inline void radial_binning(np.int_t* counts, np.float64_t* bins,\
                            np.float64_t d, np.int_t k):
     """
     real space radial binning function
@@ -1414,7 +1414,7 @@ cdef inline radial_binning(np.int_t* counts, np.float64_t* bins,\
         if k<0: break
 
 
-cdef inline radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
+cdef inline void radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
                             np.float64_t d, np.int_t k,\
                             np.float64_t w1, np.float64_t w2):
     """
@@ -1427,7 +1427,7 @@ cdef inline radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
         if k<0: break
 
 
-cdef inline radial_jbinning(np.float64_t* counts, np.float64_t* bins,\
+cdef inline void radial_jbinning(np.float64_t* counts, np.float64_t* bins,\
                             np.float64_t d,\
                             np.int_t nbins_minus_one,\
                             np.int_t N_samples,\
@@ -1448,7 +1448,7 @@ cdef inline radial_jbinning(np.float64_t* counts, np.float64_t* bins,\
             if k<0: break
 
 
-cdef inline xy_z_binning(np.int_t* counts, np.float64_t* rp_bins,\
+cdef inline void xy_z_binning(np.int_t* counts, np.float64_t* rp_bins,\
                          np.float64_t* pi_bins, np.float64_t d_perp,\
                          np.float64_t d_para, np.int_t k,\
                          np.int_t npi_bins_minus_one):
@@ -1469,7 +1469,7 @@ cdef inline xy_z_binning(np.int_t* counts, np.float64_t* rp_bins,\
         if k<0: break
 
 
-cdef inline xy_z_wbinning(np.float64_t* counts, np.float64_t* rp_bins,\
+cdef inline void xy_z_wbinning(np.float64_t* counts, np.float64_t* rp_bins,\
                           np.float64_t* pi_bins, np.float64_t d_perp,\
                           np.float64_t d_para, np.int_t k,\
                           np.int_t npi_bins_minus_one, np.float64_t w1, np.float64_t w2):
@@ -1490,7 +1490,7 @@ cdef inline xy_z_wbinning(np.float64_t* counts, np.float64_t* rp_bins,\
         if k<0: break
 
 
-cdef inline xy_z_jbinning(np.float64_t* counts, np.float64_t* rp_bins,\
+cdef inline void xy_z_jbinning(np.float64_t* counts, np.float64_t* rp_bins,\
                           np.float64_t* pi_bins, np.float64_t d_perp,\
                           np.float64_t d_para,\
                           np.int_t nrp_bins_minus_one,\

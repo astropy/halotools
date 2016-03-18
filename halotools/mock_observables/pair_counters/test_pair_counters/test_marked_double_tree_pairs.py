@@ -57,6 +57,22 @@ def test_marked_npairs_periodic():
     
     assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
 
+def test_marked_npairs_parallelization():
+    """
+    Function tests marked_npairs with periodic boundary conditions.
+    """
+    
+    rbins = np.array([0.0,0.1,0.2,0.3])
+    
+    serial_result = marked_npairs(random_sample, random_sample, 
+        rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, wfunc=1)
+
+    parallel_result = marked_npairs(random_sample, random_sample, 
+        rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, wfunc=1, 
+        num_threads = 'max')
+    
+    assert np.allclose(serial_result,parallel_result,rtol=1e-09), "pair counts are incorrect"
+
 
 def test_marked_npairs_nonperiodic():
     """
@@ -88,10 +104,24 @@ def test_xy_z_marked_npairs_periodic():
     test_result = pure_python_xy_z_weighted_pairs(random_sample, random_sample, rp_bins, pi_bins,
         period=period, weights1=ran_weights1, weights2=ran_weights1)
     
-    print(test_result)
-    print(result)
-    
     assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
+
+def test_xy_z_marked_npairs_parallelization():
+    """
+    Function tests xy_z_marked_npairs with periodic boundary conditions.
+    """
+    
+    rp_bins = np.array([0.0,0.1,0.2,0.3])
+    pi_bins = np.array([0.0,0.1,0.2,0.3])
+    
+    serial_result = xy_z_marked_npairs(random_sample, random_sample, 
+        rp_bins, pi_bins, period=period, weights1=ran_weights1, weights2=ran_weights1, wfunc=1)
+
+    parallel_result = xy_z_marked_npairs(random_sample, random_sample, 
+        rp_bins, pi_bins, period=period, weights1=ran_weights1, weights2=ran_weights1, wfunc=1, 
+        num_threads = 'max')
+            
+    assert np.allclose(serial_result,parallel_result,rtol=1e-09), "pair counts are incorrect"
 
 
 def test_xy_z_marked_npairs_nonperiodic():

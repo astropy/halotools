@@ -587,7 +587,7 @@ def xy_z_velocity_marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1
 #### binning functions ####
 ###########################
 
-cdef inline radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
+cdef inline void radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
                             np.float64_t d, np.int_t k,\
                             np.float64_t* w1, np.float64_t* w2, f_type wfunc,\
                             np.float64_t* shift):
@@ -602,7 +602,7 @@ cdef inline radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
         if k<0: break
 
 
-cdef inline radial_velocity_wbinning(np.float64_t* counts1,\
+cdef inline void radial_velocity_wbinning(np.float64_t* counts1,\
                                      np.float64_t* counts2,\
                                      np.float64_t* counts3,\
                                      np.float64_t* bins, np.float64_t d, np.int_t k,\
@@ -622,7 +622,7 @@ cdef inline radial_velocity_wbinning(np.float64_t* counts1,\
         if k<0: break
 
 
-cdef inline xy_z_wbinning(np.float64_t* counts,
+cdef inline void xy_z_wbinning(np.float64_t* counts,
                           np.float64_t* rp_bins,
                           np.float64_t* pi_bins,
                           np.float64_t d_perp,
@@ -651,7 +651,7 @@ cdef inline xy_z_wbinning(np.float64_t* counts,
         if k<0: break
 
 
-cdef inline xy_z_velocity_wbinning(np.float64_t* counts1,
+cdef inline void xy_z_velocity_wbinning(np.float64_t* counts1,
                                    np.float64_t* counts2,
                                    np.float64_t* counts3,
                                    np.float64_t* rp_bins,
