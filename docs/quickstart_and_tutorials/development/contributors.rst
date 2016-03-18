@@ -24,9 +24,11 @@ Core package contributors
 * Duncan Campbell
 * Shany Danieli
 * Benedikt Diemer
+* Yu Feng
 * Andrew Hearin
 * Elise Jennings
 * Alexie Leauthaud
+* Yao-Yuan Mao
 * Surhud More
 * John Parejko
 * Manodeep Sinha
