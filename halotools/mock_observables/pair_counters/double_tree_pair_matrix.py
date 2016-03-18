@@ -197,7 +197,6 @@ def _pair_matrix_engine(double_tree, r_max, period, PBCs, icell1):
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
             
-    adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
                 
         #extract the points in the cell
@@ -411,9 +410,7 @@ def _xy_z_pair_matrix_engine(double_tree, rp_max, pi_max, period, PBCs, icell1):
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
     
-    adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
-        adj_cell_counter +=1
         
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
@@ -715,7 +712,6 @@ def _conditional_pair_matrix_engine(double_tree, weights1, weights2, r_max, peri
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
             
-    adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
                 
         #extract the points in the cell
@@ -1035,9 +1031,7 @@ def _conditional_xy_z_pair_matrix_engine(double_tree, weights1, weights2, rp_max
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
     
-    adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
-        adj_cell_counter +=1
         
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]

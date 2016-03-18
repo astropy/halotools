@@ -183,19 +183,19 @@ def npairs(data1, data2, rbins, period = None,\
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine,range(Ncell1))
+        cell1_chunk_list = np.array_split(xrange(Ncell1), num_threads)
+        result = pool.map(engine,cell1_chunk_list)
         pool.close()
-        counts = np.sum(result,axis=0)
+        counts = np.sum(np.array(result), axis=0)
     if num_threads == 1:
-        counts = np.sum(map(engine,range(Ncell1)),axis=0)
-    
+        counts = engine(xrange(Ncell1))
     if verbose==True:
         print("total run time: {0} seconds".format(time.time()-start))
     
     return counts
 
 
-def _npairs_engine(double_tree, rbins, period, PBCs, icell1):
+def _npairs_engine(double_tree, rbins, period, PBCs, cell1_list):
     """
     pair counting engine for npairs function.  This code calls a cython function.
     """
@@ -203,34 +203,34 @@ def _npairs_engine(double_tree, rbins, period, PBCs, icell1):
     
     counts = np.zeros(len(rbins))
     
-    #extract the points in the cell
-    s1 = double_tree.tree1.slice_array[icell1]
-    x_icell1, y_icell1, z_icell1 = (
-        double_tree.tree1.x[s1],
-        double_tree.tree1.y[s1],
-        double_tree.tree1.z[s1])
-        
-    xsearch_length = rbins[-1]
-    ysearch_length = rbins[-1]
-    zsearch_length = rbins[-1]
-    adj_cell_generator = double_tree.adjacent_cell_generator(
-        icell1, xsearch_length, ysearch_length, zsearch_length)
-            
-    adj_cell_counter = 0
-    for icell2, xshift, yshift, zshift in adj_cell_generator:
-                
+    for icell1 in cell1_list:
         #extract the points in the cell
-        s2 = double_tree.tree2.slice_array[icell2]
-        x_icell2 = double_tree.tree2.x[s2] + xshift
-        y_icell2 = double_tree.tree2.y[s2] + yshift 
-        z_icell2 = double_tree.tree2.z[s2] + zshift
+        s1 = double_tree.tree1.slice_array[icell1]
+        x_icell1, y_icell1, z_icell1 = (
+            double_tree.tree1.x[s1],
+            double_tree.tree1.y[s1],
+            double_tree.tree1.z[s1])
+            
+        xsearch_length = rbins[-1]
+        ysearch_length = rbins[-1]
+        zsearch_length = rbins[-1]
+        adj_cell_generator = double_tree.adjacent_cell_generator(
+            icell1, xsearch_length, ysearch_length, zsearch_length)
+                
+        for icell2, xshift, yshift, zshift in adj_cell_generator:
+                    
+            #extract the points in the cell
+            s2 = double_tree.tree2.slice_array[icell2]
+            x_icell2 = double_tree.tree2.x[s2] + xshift
+            y_icell2 = double_tree.tree2.y[s2] + yshift 
+            z_icell2 = double_tree.tree2.z[s2] + zshift
 
 
-        #use cython functions to do pair counting
-        counts += npairs_no_pbc(
-            x_icell1, y_icell1, z_icell1,
-            x_icell2, y_icell2, z_icell2,
-            rbins)
+            #use cython functions to do pair counting
+            counts += npairs_no_pbc(
+                x_icell1, y_icell1, z_icell1,
+                x_icell2, y_icell2, z_icell2,
+                rbins)
             
     return counts
 
@@ -423,10 +423,14 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        cell1_chunk_list = np.array_split(xrange(Ncell1), num_threads)
+        result = pool.map(engine,cell1_chunk_list)
         pool.close()
-    else:
-        counts = np.sum(map(engine,range(Ncell1)),axis=0)
+        counts = np.sum(np.array(result), axis=0)
+    if num_threads == 1:
+        counts = engine(xrange(Ncell1))
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
     
     return counts
 
@@ -434,51 +438,51 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
 ##########################################################################
 
 def _jnpairs_engine(double_tree, weights1, weights2, jtags1, jtags2, 
-    N_samples, rbins, period, PBCs, icell1):
+    N_samples, rbins, period, PBCs, cell1_list):
     """
     """
 
     counts = np.zeros((N_samples+1,len(rbins)))
     
-    #extract the points in the cell
-    s1 = double_tree.tree1.slice_array[icell1]
-    x_icell1, y_icell1, z_icell1 = (
-        double_tree.tree1.x[s1],
-        double_tree.tree1.y[s1],
-        double_tree.tree1.z[s1])
-
-    #extract the weights in the cell
-    w_icell1 = weights1[s1]
-        
-    #extract the jackknife tags in the cell
-    j_icell1 = jtags1[s1]
-
-    xsearch_length = rbins[-1]
-    ysearch_length = rbins[-1]
-    zsearch_length = rbins[-1]
-    adj_cell_generator = double_tree.adjacent_cell_generator(
-        icell1, xsearch_length, ysearch_length, zsearch_length)
-            
-    adj_cell_counter = 0
-    for icell2, xshift, yshift, zshift in adj_cell_generator:
-                
+    for icell1 in cell1_list:
         #extract the points in the cell
-        s2 = double_tree.tree2.slice_array[icell2]
-        x_icell2 = double_tree.tree2.x[s2] + xshift
-        y_icell2 = double_tree.tree2.y[s2] + yshift 
-        z_icell2 = double_tree.tree2.z[s2] + zshift
+        s1 = double_tree.tree1.slice_array[icell1]
+        x_icell1, y_icell1, z_icell1 = (
+            double_tree.tree1.x[s1],
+            double_tree.tree1.y[s1],
+            double_tree.tree1.z[s1])
 
         #extract the weights in the cell
-        w_icell2 = weights2[s2]
+        w_icell1 = weights1[s1]
             
         #extract the jackknife tags in the cell
-        j_icell2 = jtags2[s2]
+        j_icell1 = jtags1[s1]
 
-        #use cython functions to do pair counting
-        counts += jnpairs_no_pbc(x_icell1, y_icell1, z_icell1,
-            x_icell2, y_icell2, z_icell2,
-            w_icell1, w_icell2, j_icell1, j_icell2, 
-            N_samples+1, rbins)
+        xsearch_length = rbins[-1]
+        ysearch_length = rbins[-1]
+        zsearch_length = rbins[-1]
+        adj_cell_generator = double_tree.adjacent_cell_generator(
+            icell1, xsearch_length, ysearch_length, zsearch_length)
+                
+        for icell2, xshift, yshift, zshift in adj_cell_generator:
+                    
+            #extract the points in the cell
+            s2 = double_tree.tree2.slice_array[icell2]
+            x_icell2 = double_tree.tree2.x[s2] + xshift
+            y_icell2 = double_tree.tree2.y[s2] + yshift 
+            z_icell2 = double_tree.tree2.z[s2] + zshift
+
+            #extract the weights in the cell
+            w_icell2 = weights2[s2]
+                
+            #extract the jackknife tags in the cell
+            j_icell2 = jtags2[s2]
+
+            #use cython functions to do pair counting
+            counts += jnpairs_no_pbc(x_icell1, y_icell1, z_icell1,
+                x_icell2, y_icell2, z_icell2,
+                w_icell1, w_icell2, j_icell1, j_icell2, 
+                N_samples+1, rbins)
             
     return counts
 
@@ -645,14 +649,18 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        cell1_chunk_list = np.array_split(xrange(Ncell1), num_threads)
+        result = pool.map(engine,cell1_chunk_list)
         pool.close()
+        counts = np.sum(np.array(result), axis=0)
     if num_threads == 1:
-        counts = np.sum(map(engine,range(Ncell1)),axis=0)
+        counts = engine(xrange(Ncell1))
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
 
     return counts
 
-def _xy_z_npairs_engine(double_tree, rp_bins, pi_bins, period, PBCs, icell1):
+def _xy_z_npairs_engine(double_tree, rp_bins, pi_bins, period, PBCs, cell1_list):
     """
     pair counting engine for npairs function.  This code calls a cython function.
     """
@@ -660,38 +668,34 @@ def _xy_z_npairs_engine(double_tree, rp_bins, pi_bins, period, PBCs, icell1):
     
     counts = np.zeros((len(rp_bins),len(pi_bins)))
     
-    #extract the points in the cell
-    s1 = double_tree.tree1.slice_array[icell1]
-    x_icell1, y_icell1, z_icell1 = (
-        double_tree.tree1.x[s1],
-        double_tree.tree1.y[s1],
-        double_tree.tree1.z[s1])
-        
-    xsearch_length = rp_bins[-1]
-    ysearch_length = rp_bins[-1]
-    zsearch_length = pi_bins[-1]
-    adj_cell_generator = double_tree.adjacent_cell_generator(
-        icell1, xsearch_length, ysearch_length, zsearch_length)
-    
-    adj_cell_counter = 0
-    for icell2, xshift, yshift, zshift in adj_cell_generator:
-        adj_cell_counter +=1
-        
-        #ix, iy, iz = double_tree.tree2.cell_tuple_from_cell_idx(icell1)
-        #print(adj_cell_counter, icell1, icell2, xshift, yshift, zshift)
-        
+    for icell1 in cell1_list:
         #extract the points in the cell
-        s2 = double_tree.tree2.slice_array[icell2]
-        x_icell2 = double_tree.tree2.x[s2] + xshift
-        y_icell2 = double_tree.tree2.y[s2] + yshift 
-        z_icell2 = double_tree.tree2.z[s2] + zshift
-
-        #use cython functions to do pair counting
-        counts += xy_z_npairs_no_pbc(
-            x_icell1, y_icell1, z_icell1,
-            x_icell2, y_icell2, z_icell2,
-            rp_bins, pi_bins)
+        s1 = double_tree.tree1.slice_array[icell1]
+        x_icell1, y_icell1, z_icell1 = (
+            double_tree.tree1.x[s1],
+            double_tree.tree1.y[s1],
+            double_tree.tree1.z[s1])
             
+        xsearch_length = rp_bins[-1]
+        ysearch_length = rp_bins[-1]
+        zsearch_length = pi_bins[-1]
+        adj_cell_generator = double_tree.adjacent_cell_generator(
+            icell1, xsearch_length, ysearch_length, zsearch_length)
+        
+        for icell2, xshift, yshift, zshift in adj_cell_generator:
+                        
+            #extract the points in the cell
+            s2 = double_tree.tree2.slice_array[icell2]
+            x_icell2 = double_tree.tree2.x[s2] + xshift
+            y_icell2 = double_tree.tree2.y[s2] + yshift 
+            z_icell2 = double_tree.tree2.z[s2] + zshift
+
+            #use cython functions to do pair counting
+            counts += xy_z_npairs_no_pbc(
+                x_icell1, y_icell1, z_icell1,
+                x_icell2, y_icell2, z_icell2,
+                rp_bins, pi_bins)
+                
     return counts
 
 
@@ -861,14 +865,18 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        cell1_chunk_list = np.array_split(xrange(Ncell1), num_threads)
+        result = pool.map(engine,cell1_chunk_list)
         pool.close()
+        counts = np.sum(np.array(result), axis=0)
     if num_threads == 1:
-        counts = np.sum(map(engine,range(Ncell1)),axis=0)
+        counts = engine(xrange(Ncell1))
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
 
     return counts
 
-def _s_mu_npairs_engine(double_tree, s_bins, mu_bins, period, PBCs, icell1):
+def _s_mu_npairs_engine(double_tree, s_bins, mu_bins, period, PBCs, cell1_list):
     """
     pair counting engine for s_mu_npairs function.  This code calls a cython function.
     """
@@ -876,35 +884,35 @@ def _s_mu_npairs_engine(double_tree, s_bins, mu_bins, period, PBCs, icell1):
     
     counts = np.zeros((len(s_bins), len(mu_bins)))
     
-    #extract the points in the cell
-    s1 = double_tree.tree1.slice_array[icell1]
-    x_icell1, y_icell1, z_icell1 = (
-        double_tree.tree1.x[s1],
-        double_tree.tree1.y[s1],
-        double_tree.tree1.z[s1])
-        
-    xsearch_length = s_bins[-1]
-    ysearch_length = s_bins[-1]
-    zsearch_length = s_bins[-1]
-    adj_cell_generator = double_tree.adjacent_cell_generator(
-        icell1, xsearch_length, ysearch_length, zsearch_length)
-            
-    adj_cell_counter = 0
-    for icell2, xshift, yshift, zshift in adj_cell_generator:
-                
+    for icell1 in cell1_list:
         #extract the points in the cell
-        s2 = double_tree.tree2.slice_array[icell2]
-        x_icell2 = double_tree.tree2.x[s2] + xshift
-        y_icell2 = double_tree.tree2.y[s2] + yshift 
-        z_icell2 = double_tree.tree2.z[s2] + zshift
-        
-        
-        #use cython functions to do pair counting
-        counts += s_mu_npairs_no_pbc(
-            x_icell1, y_icell1, z_icell1,
-            x_icell2, y_icell2, z_icell2,
-            s_bins, mu_bins)
+        s1 = double_tree.tree1.slice_array[icell1]
+        x_icell1, y_icell1, z_icell1 = (
+            double_tree.tree1.x[s1],
+            double_tree.tree1.y[s1],
+            double_tree.tree1.z[s1])
             
+        xsearch_length = s_bins[-1]
+        ysearch_length = s_bins[-1]
+        zsearch_length = s_bins[-1]
+        adj_cell_generator = double_tree.adjacent_cell_generator(
+            icell1, xsearch_length, ysearch_length, zsearch_length)
+                
+        for icell2, xshift, yshift, zshift in adj_cell_generator:
+                    
+            #extract the points in the cell
+            s2 = double_tree.tree2.slice_array[icell2]
+            x_icell2 = double_tree.tree2.x[s2] + xshift
+            y_icell2 = double_tree.tree2.y[s2] + yshift 
+            z_icell2 = double_tree.tree2.z[s2] + zshift
+            
+            
+            #use cython functions to do pair counting
+            counts += s_mu_npairs_no_pbc(
+                x_icell1, y_icell1, z_icell1,
+                x_icell2, y_icell2, z_icell2,
+                s_bins, mu_bins)
+                
     return counts
 
 

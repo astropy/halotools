@@ -143,16 +143,20 @@ def marked_npairs(data1, data2, rbins,
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        cell1_chunk_list = np.array_split(xrange(Ncell1), num_threads)
+        result = pool.map(engine,cell1_chunk_list)
         pool.close()
-    else:
-        counts = np.sum(map(engine,range(Ncell1)),axis=0)
-    
+        counts = np.sum(np.array(result), axis=0)
+    if num_threads == 1:
+        counts = engine(xrange(Ncell1))
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
+
     return counts
 
 
 def _marked_npairs_engine(double_tree, weights1, weights2, 
-                    rbins, period, PBCs, wfunc, icell1):
+                    rbins, period, PBCs, wfunc, cell1_list):
     """
     private internal function for 
     `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`.
@@ -162,43 +166,43 @@ def _marked_npairs_engine(double_tree, weights1, weights2,
     
     counts = np.zeros(len(rbins))
     
-    #extract the points in the cell
-    s1 = double_tree.tree1.slice_array[icell1]
-    x_icell1, y_icell1, z_icell1 = (
-        double_tree.tree1.x[s1],
-        double_tree.tree1.y[s1],
-        double_tree.tree1.z[s1])
-
-    #extract the weights in the cell
-    w_icell1 = weights1[s1, :]
-
-    xsearch_length = rbins[-1]
-    ysearch_length = rbins[-1]
-    zsearch_length = rbins[-1]
-    adj_cell_generator = double_tree.adjacent_cell_generator(
-        icell1, xsearch_length, ysearch_length, zsearch_length)
-            
-    adj_cell_counter = 0
-    for icell2, xshift, yshift, zshift in adj_cell_generator:
-        
-        #set shift array as -1,1,0 depending on direction of/if cell shifted.
-        shift = np.array([xshift,yshift,zshift]).astype(float)
-        
+    for icell1 in cell1_list:
         #extract the points in the cell
-        s2 = double_tree.tree2.slice_array[icell2]
-        x_icell2 = double_tree.tree2.x[s2] + xshift
-        y_icell2 = double_tree.tree2.y[s2] + yshift 
-        z_icell2 = double_tree.tree2.z[s2] + zshift
+        s1 = double_tree.tree1.slice_array[icell1]
+        x_icell1, y_icell1, z_icell1 = (
+            double_tree.tree1.x[s1],
+            double_tree.tree1.y[s1],
+            double_tree.tree1.z[s1])
 
         #extract the weights in the cell
-        w_icell2 = weights2[s2, :]
+        w_icell1 = weights1[s1, :]
+
+        xsearch_length = rbins[-1]
+        ysearch_length = rbins[-1]
+        zsearch_length = rbins[-1]
+        adj_cell_generator = double_tree.adjacent_cell_generator(
+            icell1, xsearch_length, ysearch_length, zsearch_length)
+                
+        for icell2, xshift, yshift, zshift in adj_cell_generator:
             
-        #use cython functions to do pair counting
-        counts += marked_npairs_no_pbc(x_icell1, y_icell1, z_icell1,
-                                       x_icell2, y_icell2, z_icell2,
-                                       w_icell1, w_icell2, 
-                                       rbins, wfunc, shift)
+            #set shift array as -1,1,0 depending on direction of/if cell shifted.
+            shift = np.array([xshift,yshift,zshift]).astype(float)
             
+            #extract the points in the cell
+            s2 = double_tree.tree2.slice_array[icell2]
+            x_icell2 = double_tree.tree2.x[s2] + xshift
+            y_icell2 = double_tree.tree2.y[s2] + yshift 
+            z_icell2 = double_tree.tree2.z[s2] + zshift
+
+            #extract the weights in the cell
+            w_icell2 = weights2[s2, :]
+                
+            #use cython functions to do pair counting
+            counts += marked_npairs_no_pbc(x_icell1, y_icell1, z_icell1,
+                                           x_icell2, y_icell2, z_icell2,
+                                           w_icell1, w_icell2, 
+                                           rbins, wfunc, shift)
+                
     return counts
 
 
@@ -324,16 +328,20 @@ def xy_z_marked_npairs(data1, data2, rp_bins, pi_bins, period=None,
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        cell1_chunk_list = np.array_split(xrange(Ncell1), num_threads)
+        result = pool.map(engine,cell1_chunk_list)
         pool.close()
-    else:
-        counts = np.sum(map(engine,range(Ncell1)),axis=0)
-    
+        counts = np.sum(np.array(result), axis=0)
+    if num_threads == 1:
+        counts = engine(xrange(Ncell1))
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
+
     return counts
 
 
 def _xy_z_marked_npairs_engine(double_tree, weights1, weights2, 
-                               rp_bins, pi_bins, period, PBCs, wfunc, icell1):
+                               rp_bins, pi_bins, period, PBCs, wfunc, cell1_list):
     """
     private internal function for 
     `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.xy_z_marked_npairs`.
@@ -343,43 +351,43 @@ def _xy_z_marked_npairs_engine(double_tree, weights1, weights2,
     
     counts = np.zeros((len(rp_bins),len(pi_bins)))
     
-    #extract the points in the cell
-    s1 = double_tree.tree1.slice_array[icell1]
-    x_icell1, y_icell1, z_icell1 = (
-        double_tree.tree1.x[s1],
-        double_tree.tree1.y[s1],
-        double_tree.tree1.z[s1])
-    
-    #extract the weights in the cell
-    w_icell1 = weights1[s1, :]
-    
-    xsearch_length = rp_bins[-1]
-    ysearch_length = rp_bins[-1]
-    zsearch_length = pi_bins[-1]
-    adj_cell_generator = double_tree.adjacent_cell_generator(
-        icell1, xsearch_length, ysearch_length, zsearch_length)
-            
-    adj_cell_counter = 0
-    for icell2, xshift, yshift, zshift in adj_cell_generator:
-        
-        #set shift array as -1,1,0 depending on direction of/if cell shifted.
-        shift = np.array([xshift,yshift,zshift]).astype(float)
-        
+    for icell1 in cell1_list:
         #extract the points in the cell
-        s2 = double_tree.tree2.slice_array[icell2]
-        x_icell2 = double_tree.tree2.x[s2] + xshift
-        y_icell2 = double_tree.tree2.y[s2] + yshift 
-        z_icell2 = double_tree.tree2.z[s2] + zshift
+        s1 = double_tree.tree1.slice_array[icell1]
+        x_icell1, y_icell1, z_icell1 = (
+            double_tree.tree1.x[s1],
+            double_tree.tree1.y[s1],
+            double_tree.tree1.z[s1])
         
         #extract the weights in the cell
-        w_icell2 = weights2[s2, :]
+        w_icell1 = weights1[s1, :]
         
-        #use cython functions to do pair counting
-        counts += xy_z_marked_npairs_no_pbc(x_icell1, y_icell1, z_icell1,
-                                            x_icell2, y_icell2, z_icell2,
-                                            w_icell1, w_icell2, 
-                                            rp_bins, pi_bins, wfunc, shift)
+        xsearch_length = rp_bins[-1]
+        ysearch_length = rp_bins[-1]
+        zsearch_length = pi_bins[-1]
+        adj_cell_generator = double_tree.adjacent_cell_generator(
+            icell1, xsearch_length, ysearch_length, zsearch_length)
+                
+        for icell2, xshift, yshift, zshift in adj_cell_generator:
             
+            #set shift array as -1,1,0 depending on direction of/if cell shifted.
+            shift = np.array([xshift,yshift,zshift]).astype(float)
+            
+            #extract the points in the cell
+            s2 = double_tree.tree2.slice_array[icell2]
+            x_icell2 = double_tree.tree2.x[s2] + xshift
+            y_icell2 = double_tree.tree2.y[s2] + yshift 
+            z_icell2 = double_tree.tree2.z[s2] + zshift
+            
+            #extract the weights in the cell
+            w_icell2 = weights2[s2, :]
+            
+            #use cython functions to do pair counting
+            counts += xy_z_marked_npairs_no_pbc(x_icell1, y_icell1, z_icell1,
+                                                x_icell2, y_icell2, z_icell2,
+                                                w_icell1, w_icell2, 
+                                                rp_bins, pi_bins, wfunc, shift)
+                
     return counts
 
 
@@ -556,7 +564,6 @@ def _velocity_marked_npairs_engine(double_tree, weights1, weights2,
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
             
-    adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
         
         #set shift array as -1,1,0 depending on direction of/if cell shifted.
@@ -762,7 +769,6 @@ def _xy_z_velocity_marked_npairs_engine(double_tree, weights1, weights2,
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
             
-    adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
         
         #set shift array as -1,1,0 depending on direction of/if cell shifted.
