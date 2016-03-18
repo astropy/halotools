@@ -14,7 +14,7 @@ def get_extensions():
     include_dirs = ['numpy']
     libraries = []
     language ='c++'
-    extra_compile_args = []
+    extra_compile_args = ['-Ofast']
 
     extensions = []
     for name, source in zip(names, sources):
