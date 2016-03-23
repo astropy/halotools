@@ -161,7 +161,7 @@ def test_convert_to_ndarray11():
 def test_convert_to_ndarray12():
     """
     """
-    v = np.array(u'abc')
+    v = np.array('abc')
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
@@ -170,7 +170,7 @@ def test_convert_to_ndarray12():
 def test_convert_to_ndarray13():
     """
     """
-    v = u'abc'
+    v = 'abc'
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1

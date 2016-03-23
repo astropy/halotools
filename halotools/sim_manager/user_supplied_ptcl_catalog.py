@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-import os, sys, urllib2, fnmatch
+import os, sys, urllib.request, urllib.error, urllib.parse, fnmatch
 from warnings import warn 
 import datetime 
 
@@ -145,7 +145,7 @@ class UserSuppliedPtclCatalog(object):
         self.ptcl_table = Table(ptcl_table_dict)
 
         self._test_metadata_dict(**metadata_dict)
-        for key, value in metadata_dict.iteritems():
+        for key, value in metadata_dict.items():
             setattr(self, key, value)
 
 
@@ -164,7 +164,7 @@ class UserSuppliedPtclCatalog(object):
             assert Nptcls >= 1e4
             assert Nptcls == len(y)
             assert Nptcls == len(z)
-        except KeyError, AssertionError:
+        except KeyError as AssertionError:
             msg = ("\nThe UserSuppliedPtclCatalog requires ``x``, ``y`` and ``z`` keyword arguments,\n "
                 "each of which must store an ndarray of the same length Nptcls >= 1e4.\n")
             raise HalotoolsError(msg)

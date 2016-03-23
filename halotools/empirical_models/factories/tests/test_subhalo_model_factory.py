@@ -145,7 +145,7 @@ class TestSubhaloModelFactory(TestCase):
         halocat = FakeSim()
         model1.populate_mock(halocat)
         assert hasattr(model1, 'mock')
-        assert 'stellar_mass' in model1.mock.galaxy_table.keys()
+        assert 'stellar_mass' in list(model1.mock.galaxy_table.keys())
 
     def test_empty_arguments(self):
         with pytest.raises(HalotoolsError) as err:

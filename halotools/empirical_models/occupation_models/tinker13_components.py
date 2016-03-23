@@ -114,7 +114,7 @@ class Tinker13Cens(OccupationComponent):
         """
         """
         self.param_dict = {}
-        for key, value in self.smhm_model.param_dict.iteritems():
+        for key, value in self.smhm_model.param_dict.items():
             active_key = key + '_active'
             quiescent_key = key + '_quiescent'
             self.param_dict[active_key] = value
@@ -284,7 +284,7 @@ class Tinker13Cens(OccupationComponent):
 
     def _update_smhm_param_dict(self, sfr_key):
 
-        for key, value in self.param_dict.iteritems():
+        for key, value in self.param_dict.items():
             if sfr_key in key:
                 stripped_key = key[:-len(sfr_key)-1]
             else:
@@ -453,9 +453,9 @@ class Tinker13QuiescentSats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             function_name = "Tinker13QuiescentSats.mean_occupation"
@@ -493,7 +493,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         self.param_dict['betasat_quiescent'] = 0.62
         self.param_dict['alphasat_quiescent'] = 1.08
 
-        for key, value in self.smhm_model.param_dict.iteritems():
+        for key, value in self.smhm_model.param_dict.items():
             quiescent_key = key + '_quiescent'
             self.param_dict[quiescent_key] = value
 
@@ -510,7 +510,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         """ Private method to update the model parameters. 
 
         """
-        for key, value in self.param_dict.iteritems():
+        for key, value in self.param_dict.items():
             stripped_key = key[:-len('_quiescent')]
             if stripped_key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[stripped_key] = value
@@ -617,9 +617,9 @@ class Tinker13ActiveSats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             function_name = "Tinker13ActiveSats.mean_occupation"
@@ -653,7 +653,7 @@ class Tinker13ActiveSats(OccupationComponent):
         self.param_dict['betasat_active'] = 1.05
         self.param_dict['alphasat_active'] = 0.99
 
-        for key, value in self.smhm_model.param_dict.iteritems():
+        for key, value in self.smhm_model.param_dict.items():
             active_key = key + '_active'
             self.param_dict[active_key] = value
 
@@ -670,7 +670,7 @@ class Tinker13ActiveSats(OccupationComponent):
         """ Private method to update the model parameters. 
 
         """
-        for key, value in self.param_dict.iteritems():
+        for key, value in self.param_dict.items():
             stripped_key = key[:-len('_active')]
             if stripped_key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[stripped_key] = value

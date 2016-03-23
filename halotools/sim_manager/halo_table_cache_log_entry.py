@@ -256,7 +256,7 @@ class HaloTableCacheLogEntry(object):
 
         try:
             data = Table.read(self.fname, path='data')
-            for key in data.keys():
+            for key in list(data.keys()):
                 try:
                     assert key[0:5] == 'halo_'
                 except AssertionError:
@@ -276,7 +276,7 @@ class HaloTableCacheLogEntry(object):
 
         try:
             data = Table.read(self.fname, path='data')
-            keys = data.keys()
+            keys = list(data.keys())
             try:
                 assert 'halo_x' in keys
                 assert 'halo_y' in keys

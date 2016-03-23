@@ -6,7 +6,7 @@ are used to attach metadata to the Halotools-provided
 halo catalogs as they are loaded into memory. 
 """
 import numpy as np
-import os, sys, urllib2, fnmatch
+import os, sys, urllib.request, urllib.error, urllib.parse, fnmatch
 from warnings import warn 
 
 try:
@@ -22,7 +22,7 @@ except ImportError:
     HAS_REQUESTS = False
 
 import posixpath
-import urlparse
+import urllib.parse
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six

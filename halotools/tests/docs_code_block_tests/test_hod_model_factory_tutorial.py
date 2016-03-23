@@ -120,15 +120,15 @@ class TestHodModelFactoryTutorial(TestCase):
         assert hasattr(model_instance, 'mean_quiescent_fraction_centrals')
         assert hasattr(model_instance, 'mean_quiescent_fraction_satellites')
 
-        assert 'centrals_quiescent_ordinates_param1' in model_instance.param_dict.keys()
-        assert 'centrals_quiescent_ordinates_param2' in model_instance.param_dict.keys()
-        assert 'satellites_quiescent_ordinates_param1' in model_instance.param_dict.keys()
-        assert 'satellites_quiescent_ordinates_param4' in model_instance.param_dict.keys()
+        assert 'centrals_quiescent_ordinates_param1' in list(model_instance.param_dict.keys())
+        assert 'centrals_quiescent_ordinates_param2' in list(model_instance.param_dict.keys())
+        assert 'satellites_quiescent_ordinates_param1' in list(model_instance.param_dict.keys())
+        assert 'satellites_quiescent_ordinates_param4' in list(model_instance.param_dict.keys())
 
         halocat = FakeSim()
         model_instance.populate_mock(halocat)
 
-        assert 'quiescent' in model_instance.mock.galaxy_table.keys()
+        assert 'quiescent' in list(model_instance.mock.galaxy_table.keys())
         assert set(model_instance.mock.galaxy_table['quiescent']) == {True, False}
 
         cenmask = model_instance.mock.galaxy_table['gal_type'] == 'centrals'
@@ -196,7 +196,7 @@ class TestHodModelFactoryTutorial(TestCase):
 
         halocat = FakeSim()
         new_model.populate_mock(halocat)
-        assert 'galsize' in new_model.mock.galaxy_table.keys()
+        assert 'galsize' in list(new_model.mock.galaxy_table.keys())
         assert len(set(new_model.mock.galaxy_table['galsize'])) > 0
 
     @pytest.mark.slow
@@ -222,7 +222,7 @@ class TestHodModelFactoryTutorial(TestCase):
                     'disrupted_fraction_'+self.gal_type: 0.25})
 
             def assign_disrupted(self, **kwargs):
-                if 'table' in kwargs.keys():
+                if 'table' in list(kwargs.keys()):
                     table = kwargs['table']
                     halo_mass = table[self.prim_haloprop_key]
                 else:
@@ -232,7 +232,7 @@ class TestHodModelFactoryTutorial(TestCase):
                 randomizer = np.random.uniform(0, 1, len(halo_mass))
                 is_disrupted = randomizer < disrupted_fraction
 
-                if 'table' in kwargs.keys():
+                if 'table' in list(kwargs.keys()):
                     table['disrupted'][:] = is_disrupted
                 else:
                     return is_disrupted
@@ -258,10 +258,10 @@ class TestHodModelFactoryTutorial(TestCase):
 
         halocat = FakeSim()
         new_model.populate_mock(halocat)
-        assert 'axis_ratio' in new_model.mock.galaxy_table.keys()
+        assert 'axis_ratio' in list(new_model.mock.galaxy_table.keys())
         assert len(set(new_model.mock.galaxy_table['axis_ratio'])) > 1
 
-        assert 'disrupted' in new_model.mock.galaxy_table.keys()
+        assert 'disrupted' in list(new_model.mock.galaxy_table.keys())
         assert set(new_model.mock.galaxy_table['disrupted']) == {True, False}
 
         mask = new_model.mock.galaxy_table['disrupted'] == False

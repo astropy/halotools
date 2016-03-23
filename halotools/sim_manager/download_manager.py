@@ -24,7 +24,7 @@ except ImportError:
     raise HalotoolsError("Must have requests package installed to use the DownloadManager")
 
 import posixpath
-import urlparse
+import urllib.parse
 
 import os, fnmatch, re
 
@@ -217,7 +217,7 @@ class DownloadManager(object):
             msg = ("\nThere already exists a halo catalog in your cache log with \n"
                 "specifications that exactly match your inputs.\n")
             if overwrite == False:
-                if 'initial_download_script_msg' in kwargs.keys():
+                if 'initial_download_script_msg' in list(kwargs.keys()):
                     msg = kwargs['initial_download_script_msg']
                     raise HalotoolsError(msg % output_fname)
                 else:
@@ -260,7 +260,7 @@ class DownloadManager(object):
         # initial download script (hidden feature for developers only)
         if (overwrite == False) & (os.path.isfile(output_fname)):
 
-            if 'initial_download_script_msg' in kwargs.keys():
+            if 'initial_download_script_msg' in list(kwargs.keys()):
                 msg = kwargs['initial_download_script_msg']
             else:
                 msg = ("The following filename already exists "
@@ -274,8 +274,8 @@ class DownloadManager(object):
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download pre-processed "
-            "halo catalog = %.1f seconds\n" % runtime)
+        print(("\nTotal runtime to download pre-processed "
+            "halo catalog = %.1f seconds\n" % runtime))
 
 
         # overwrite the fname metadata so that 
@@ -346,7 +346,7 @@ class DownloadManager(object):
                 "You can accomplish this with the ``update_cached_file_location``"
                 "method \nof the HaloTableCache class.\n\n")
 
-        if 'initial_download_script_msg' in kwargs.keys():
+        if 'initial_download_script_msg' in list(kwargs.keys()):
             return new_log_entry
         else:
             print(success_msg)
@@ -500,7 +500,7 @@ class DownloadManager(object):
             msg = ("\nThere already exists a particle catalog in your cache log with \n"
                 "specifications that exactly match your inputs.\n")
             if overwrite == False:
-                if 'initial_download_script_msg' in kwargs.keys():
+                if 'initial_download_script_msg' in list(kwargs.keys()):
                     msg = kwargs['initial_download_script_msg']
                     raise HalotoolsError(msg % output_fname)
                 else:
@@ -543,7 +543,7 @@ class DownloadManager(object):
         # initial download script (hidden feature for developers only)
         if (overwrite == False) & (os.path.isfile(output_fname)):
 
-            if 'initial_download_script_msg' in kwargs.keys():
+            if 'initial_download_script_msg' in list(kwargs.keys()):
                 msg = kwargs['initial_download_script_msg']
             else:
                 msg = ("The following filename already exists "
@@ -608,7 +608,7 @@ class DownloadManager(object):
                 "You can accomplish this with the ``update_cached_file_location``"
                 "method \nof the PtclTableCache class.\n\n")
         
-        if 'initial_download_script_msg' in kwargs.keys():
+        if 'initial_download_script_msg' in list(kwargs.keys()):
             return new_log_entry
         else:
             print(success_msg)
@@ -764,7 +764,7 @@ class DownloadManager(object):
         >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
         """
-        if 'redshift' in kwargs.keys():
+        if 'redshift' in list(kwargs.keys()):
             msg = ("\nThe correct argument to use to specify the redshift \n"
                 "you are searching for is with the ``desired_redshift`` keyword, \n"
                 "not the ``redshift`` keyword.\n")
@@ -783,7 +783,7 @@ class DownloadManager(object):
                 raise HalotoolsError("\nIf input catalog_type is ``halos``, "
                     "must pass ``halo_finder`` argument")
         else:
-            if 'halo_finder' in kwargs.keys():
+            if 'halo_finder' in list(kwargs.keys()):
                 warn("There is no need to specify a halo-finder "
                     "when requesting particle data")
 
@@ -858,7 +858,7 @@ class DownloadManager(object):
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            dirpath = posixpath.dirname(urllib.parse.urlparse(a['href']).path)
             if dirpath and dirpath[0] != '/':
                 simloclist.append(baseurl + '/' + dirpath)
 
@@ -871,7 +871,7 @@ class DownloadManager(object):
         file_pattern = version_name
         all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*.hdf5')
 
-        if 'simname' in kwargs.keys():
+        if 'simname' in list(kwargs.keys()):
             simname = kwargs['simname']
             file_pattern = '*'+simname+'*'
             output = fnmatch.filter(all_ptcl_tables, file_pattern)
@@ -935,7 +935,7 @@ class DownloadManager(object):
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            dirpath = posixpath.dirname(urllib.parse.urlparse(a['href']).path)
             if dirpath and dirpath[0] != '/':
                 simloclist.append(baseurl + '/' + dirpath)
 
@@ -943,7 +943,7 @@ class DownloadManager(object):
         for simloc in simloclist:
             soup = BeautifulSoup(requests.get(simloc).text)
             for a in soup.find_all('a', href=True):
-                dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+                dirpath = posixpath.dirname(urllib.parse.urlparse(a['href']).path)
                 if dirpath and dirpath[0] != '/':
                     halocatloclist.append(simloc + '/' + dirpath)
 
@@ -959,16 +959,16 @@ class DownloadManager(object):
         # all_halocats a list of all pre-processed catalogs on the web
         # Now we apply our filter, if applicable
 
-        if ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
+        if ('simname' in list(kwargs.keys())) & ('halo_finder' in list(kwargs.keys())):
             simname = kwargs['simname']
             halo_finder = kwargs['halo_finder']
             file_pattern = '*'+simname+'/'+halo_finder+'/*' + file_pattern
             output = fnmatch.filter(all_halocats, file_pattern)
-        elif 'simname' in kwargs.keys():
+        elif 'simname' in list(kwargs.keys()):
             simname = kwargs['simname']
             file_pattern = '*'+simname+'/*' + file_pattern
             output = fnmatch.filter(all_halocats, file_pattern)
-        elif 'halo_finder' in kwargs.keys():
+        elif 'halo_finder' in list(kwargs.keys()):
             halo_finder = kwargs['halo_finder']
             file_pattern = '*/' + halo_finder + '/*' + file_pattern
             output = fnmatch.filter(all_halocats, file_pattern)

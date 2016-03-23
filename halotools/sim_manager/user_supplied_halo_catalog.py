@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-import os, sys, urllib2, fnmatch
+import os, sys, urllib.request, urllib.error, urllib.parse, fnmatch
 from warnings import warn 
 import datetime 
 
@@ -135,7 +135,7 @@ class UserSuppliedHaloCatalog(object):
         self.halo_table = Table(halo_table_dict)
 
         self._test_metadata_dict(**metadata_dict)
-        for key, value in metadata_dict.iteritems():
+        for key, value in metadata_dict.items():
             setattr(self, key, value)
 
         self._passively_bind_ptcl_table(**kwargs)
@@ -163,7 +163,7 @@ class UserSuppliedHaloCatalog(object):
             assert type(halo_id) is np.ndarray 
             Nhalos = custom_len(halo_id)
             assert Nhalos > 1
-        except KeyError, AssertionError:
+        except KeyError as AssertionError:
             msg = ("\nThe UserSuppliedHaloCatalog requires a ``halo_id`` keyword argument "
                 "storing an ndarray of length Nhalos > 1.\n")
             raise HalotoolsError(msg)
@@ -239,7 +239,7 @@ class UserSuppliedHaloCatalog(object):
             msg = ("\nThe ``redshift`` metadata must be a float.\n")
             raise HalotoolsError(msg)
 
-        for key, value in metadata_dict.iteritems():
+        for key, value in metadata_dict.items():
             if (type(value) == np.ndarray):
                 if custom_len(value) == len(self.halo_table['halo_id']):
                     msg = ("\nThe input ``" + key + "`` argument stores a length-Nhalos ndarray.\n"
@@ -381,7 +381,7 @@ class UserSuppliedHaloCatalog(object):
                 "and ``processing_notes``\nmust all be strings.")
             raise HalotoolsError(msg)
 
-        for key, value in additional_metadata.iteritems():
+        for key, value in additional_metadata.items():
             try:
                 _ = str(value)
             except:
@@ -416,7 +416,7 @@ class UserSuppliedHaloCatalog(object):
 
         f.attrs.create('processing_notes', str(processing_notes))
 
-        for key, value in additional_metadata.iteritems():
+        for key, value in additional_metadata.items():
             f.attrs.create(key, str(value))
 
         f.close()

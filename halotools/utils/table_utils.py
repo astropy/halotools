@@ -332,7 +332,7 @@ class SampleSelector(object):
             raise TypeError("Input table must be an Astropy Table instance")
 
         key = kwargs['key']
-        if key not in table.keys():
+        if key not in list(table.keys()):
             raise KeyError("Input key must be a column name of the input table")
         table.sort(key)
 
@@ -362,7 +362,7 @@ class SampleSelector(object):
 
 
         result = np.zeros(len(indices)-1, dtype=object)
-        for i, first_idx, last_idx in zip(range(len(result)), indices[:-1], indices[1:]):
+        for i, first_idx, last_idx in zip(list(range(len(result))), indices[:-1], indices[1:]):
             result[i] = table[first_idx:last_idx]
 
         return result

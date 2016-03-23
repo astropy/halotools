@@ -66,19 +66,19 @@ def broadcast_host_halo_property(table, halo_property_key,
         raise HalotoolsError(msg)
 
     try:
-        assert halo_property_key in table.keys()
-        assert 'halo_id' in table.keys()
+        assert halo_property_key in list(table.keys())
+        assert 'halo_id' in list(table.keys())
     except AssertionError:
         msg = ("\nThe input table does not the input ``halo_property_key`` = "+str(halo_property_key)+" column")
         raise HalotoolsError(msg)
 
     new_colname = halo_property_key + '_host_halo'
-    if (new_colname in table.keys()) & (delete_possibly_existing_column is False):
+    if (new_colname in list(table.keys())) & (delete_possibly_existing_column is False):
         msg = ("\nYour input table already has an existing new_colname column name.\n"
             "If you want to overwrite this column, "
             "you must set ``delete_possibly_existing_column`` to True.\n")
         raise HalotoolsError(msg)
-    elif (new_colname in table.keys()) & (delete_possibly_existing_column is True):
+    elif (new_colname in list(table.keys())) & (delete_possibly_existing_column is True):
         del table[new_colname]
 
 
@@ -124,18 +124,18 @@ def add_halo_hostid(table, delete_possibly_existing_column = False):
         raise HalotoolsError(msg)
 
     try:
-        assert 'halo_upid' in table.keys()
-        assert 'halo_id' in table.keys()
+        assert 'halo_upid' in list(table.keys())
+        assert 'halo_id' in list(table.keys())
     except AssertionError:
         msg = ("\nThe input table must have ``halo_upid`` and ``halo_id`` keys")
         raise HalotoolsError(msg)
 
-    if ('halo_hostid' in table.keys()) & (delete_possibly_existing_column is False):
+    if ('halo_hostid' in list(table.keys())) & (delete_possibly_existing_column is False):
         msg = ("\nYour input table already has an existing ``halo_hostid`` column name.\n"
             "If you want to overwrite this column, "
             "you must set ``delete_possibly_existing_column`` to True.\n")
         raise HalotoolsError(msg)
-    elif ('halo_hostid' in table.keys()) & (delete_possibly_existing_column is True):
+    elif ('halo_hostid' in list(table.keys())) & (delete_possibly_existing_column is True):
         del table['halo_hostid']
 
 

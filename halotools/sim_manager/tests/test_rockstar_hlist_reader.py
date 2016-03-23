@@ -25,7 +25,7 @@ except ImportError:
 # This will be used to select tests whose 
 # returned values depend on the configuration 
 # of my personal cache directory files
-aph_home = u'/Users/aphearin'
+aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
     APH_MACHINE = True

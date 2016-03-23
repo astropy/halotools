@@ -146,7 +146,7 @@ def group_member_generator(data, grouping_key, requested_columns,
         msg = ("\nThe input ``requested_columns`` must be an iterable sequence\n")
         raise TypeError(msg)
     except AssertionError:
-        if type(requested_columns) in (str, unicode):
+        if type(requested_columns) in (str, str):
             msg = ("\n Your input ``requested_columns`` should be a \n"
                 "list of strings, not a single string\n")
         else:

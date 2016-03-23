@@ -137,7 +137,7 @@ class HaloTableCache(object):
 
         for entry in self.log:
             yield_entry = True
-            for key in kwargs.keys():
+            for key in list(kwargs.keys()):
                 if key == 'redshift':
                     requested_redshift = float(kwargs[key])
                     redshift_of_entry = float(getattr(entry, key))

@@ -183,9 +183,9 @@ class ConcMass(object):
         """
 
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             raise HalotoolsError("Must pass one of the following keyword arguments "

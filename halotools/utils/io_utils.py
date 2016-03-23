@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from time import time
-import sys, urllib
+import sys, urllib.request, urllib.parse, urllib.error
 
 __all__ = ['file_len', 'download_file_from_url']
 
@@ -46,7 +46,7 @@ def download_file_from_url(url, fname):
             pass
         sys.stdout.flush()
 
-    urllib.urlretrieve(url, fname, reporthook)
+    urllib.request.urlretrieve(url, fname, reporthook)
 
 
 

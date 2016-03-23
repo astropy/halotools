@@ -156,11 +156,11 @@ def per_object_npairs(data1, data2, rbins, period = None,\
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine,range(Ncell1))
+        result = pool.map(engine,list(range(Ncell1)))
         pool.close()
         counts = np.vstack(result)
     if num_threads == 1:
-        result = map(engine,range(Ncell1))
+        result = list(map(engine,list(range(Ncell1))))
         counts = np.vstack(result)
     
     if verbose==True:

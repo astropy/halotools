@@ -130,9 +130,9 @@ class Zheng07Cens(OccupationComponent):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
@@ -305,7 +305,7 @@ class Zheng07Sats(OccupationComponent):
             self.central_occupation_model = Zheng07Cens(
                 prim_haloprop_key = prim_haloprop_key, 
                 threshold = threshold)
-            for key, value in self.central_occupation_model.param_dict.iteritems():
+            for key, value in self.central_occupation_model.param_dict.items():
                 self.param_dict[key] = value
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
@@ -360,14 +360,14 @@ class Zheng07Sats(OccupationComponent):
 
         """
         if self.modulate_with_cenocc is True:
-            for key, value in self.param_dict.iteritems():
+            for key, value in self.param_dict.items():
                 if key in self.central_occupation_model.param_dict:
                     self.central_occupation_model.param_dict[key] = value 
 
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"

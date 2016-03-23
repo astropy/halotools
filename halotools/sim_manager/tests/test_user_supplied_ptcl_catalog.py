@@ -29,7 +29,7 @@ from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 # This will be used to select tests whose 
 # returned values depend on the configuration 
 # of my personal cache directory files
-aph_home = u'/Users/aphearin'
+aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
     APH_MACHINE = True
@@ -253,9 +253,9 @@ class TestUserSuppliedPtclCatalog(TestCase):
         version_name = 'dummy_version_name'
         processing_notes = 'dummy processing notes'
 
-        assert 'x' in ptclcat.ptcl_table.keys()
-        assert 'y' in ptclcat.ptcl_table.keys()
-        assert 'z' in ptclcat.ptcl_table.keys()
+        assert 'x' in list(ptclcat.ptcl_table.keys())
+        assert 'y' in list(ptclcat.ptcl_table.keys())
+        assert 'z' in list(ptclcat.ptcl_table.keys())
 
         ptclcat.add_ptclcat_to_cache(
             fname, simname, version_name, processing_notes, overwrite = True)

@@ -68,7 +68,7 @@ class MockFactory(object):
         except KeyError:
             msg = ("\n``halocat`` and ``model`` are required ``MockFactory`` arguments\n")
             raise HalotoolsError(msg)
-        for key in halocat.__dict__.keys():
+        for key in list(halocat.__dict__.keys()):
             setattr(self, key, halocat.__dict__[key])
 
         try:

@@ -8,7 +8,7 @@ from unittest import TestCase
 import numpy as np
 from astropy.config.paths import _find_home 
 
-aph_home = u'/Users/aphearin'
+aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
     APH_MACHINE = True
@@ -31,7 +31,7 @@ class TestSupportedSims(TestCase):
         """
         """
 
-        for simname in self.adict.keys():
+        for simname in list(self.adict.keys()):
             alist = self.adict[simname]
             for a in alist:
                 z = 1/a - 1
@@ -51,7 +51,7 @@ class TestSupportedSims(TestCase):
         ``halo_rvir`` column never exeeds the number 50. This is a crude way of 
         ensuring that units are in Mpc/h, not kpc/h. 
         """
-        for simname in self.adict.keys():
+        for simname in list(self.adict.keys()):
             alist = self.adict[simname]
             a = alist[0]
             z = 1/a - 1

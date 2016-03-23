@@ -663,19 +663,19 @@ class RockstarHlistReader(TabularAsciiReader):
             f.attrs.create('processing_notes', str(self.processing_notes))
 
         # Store all the choices for row cuts as metadata
-        for haloprop_key, cut_value in self.row_cut_min_dict.iteritems():
+        for haloprop_key, cut_value in self.row_cut_min_dict.items():
             attrname = haloprop_key + '_row_cut_min'
             f.attrs.create(attrname, cut_value)
 
-        for haloprop_key, cut_value in self.row_cut_max_dict.iteritems():
+        for haloprop_key, cut_value in self.row_cut_max_dict.items():
             attrname = haloprop_key + '_row_cut_max'
             f.attrs.create(attrname, cut_value)
 
-        for haloprop_key, cut_value in self.row_cut_eq_dict.iteritems():
+        for haloprop_key, cut_value in self.row_cut_eq_dict.items():
             attrname = haloprop_key + '_row_cut_eq'
             f.attrs.create(attrname, cut_value)
 
-        for haloprop_key, cut_value in self.row_cut_neq_dict.iteritems():
+        for haloprop_key, cut_value in self.row_cut_neq_dict.items():
             attrname = haloprop_key + '_row_cut_neq'
             f.attrs.create(attrname, cut_value)
 
@@ -695,7 +695,7 @@ class RockstarHlistReader(TabularAsciiReader):
         more flexible. 
         """
         ### Add the halo_nfw_conc column
-        if ('halo_rvir' in self.halo_table.keys()) & ('halo_rs' in self.halo_table.keys()):
+        if ('halo_rvir' in list(self.halo_table.keys())) & ('halo_rs' in list(self.halo_table.keys())):
             self.halo_table['halo_nfw_conc'] = (
                 self.halo_table['halo_rvir'] / self.halo_table['halo_rs']
                 )

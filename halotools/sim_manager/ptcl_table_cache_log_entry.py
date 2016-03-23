@@ -229,7 +229,7 @@ class PtclTableCacheLogEntry(object):
         """
         try:
             data = Table.read(self.fname, path='data')
-            keys = data.keys()
+            keys = list(data.keys())
             try:
                 assert 'x' in keys
                 assert 'y' in keys

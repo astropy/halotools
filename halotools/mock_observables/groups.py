@@ -289,7 +289,7 @@ def _scipy_to_igraph(matrix, coords, directed=False):
     y = coords[:,1]
     z = coords[:,2]
     if igraph_available:
-        g = igraph.Graph(zip(sources, targets), n=matrix.shape[0], directed=directed,\
+        g = igraph.Graph(list(zip(sources, targets)), n=matrix.shape[0], directed=directed,\
                             edge_attrs={'weight': weights},\
                             vertex_attrs={'x':x, 'y':y, 'z':z })
         return g

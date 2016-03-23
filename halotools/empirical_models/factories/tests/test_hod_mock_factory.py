@@ -17,7 +17,7 @@ from ....sim_manager.fake_sim import FakeSimHalosNearBoundaries
 from ..prebuilt_model_factory import PrebuiltHodModelFactory
 from ....custom_exceptions import HalotoolsError
 
-aph_home = u'/Users/aphearin'
+aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
     APH_MACHINE = True
