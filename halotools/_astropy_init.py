@@ -10,7 +10,7 @@ except NameError:
     if version_info[0] >= 3:
         import builtins
     else:
-        import builtins as builtins
+        import __builtin__ as builtins
     builtins._ASTROPY_SETUP_ = False
 
 try:
