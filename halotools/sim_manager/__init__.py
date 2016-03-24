@@ -11,9 +11,9 @@ import os
 from astropy.config.paths import _find_home
 halotools_cache_dirname = os.path.join(_find_home(), '.astropy', 'cache', 'halotools')
 try:
-	os.makedirs(halotools_cache_dirname)
+    os.makedirs(halotools_cache_dirname)
 except OSError:
-	pass
+    pass
 
 from .supported_sims import *
 from .fake_sim import FakeSim

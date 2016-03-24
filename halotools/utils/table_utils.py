@@ -8,59 +8,58 @@ Modules performing small, commonly used tasks throughout the package.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-
-__all__ = ['SampleSelector']
-
 from math import ceil
 import numpy as np
-import collections
-from warnings import warn 
+from warnings import warn
 from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
 
+__all__ = ['SampleSelector']
+
+
 def compute_conditional_percentiles(**kwargs):
     """
-    In bins of the ``prim_haloprop``, compute the rank-order percentile 
-    of the input ``table`` based on the value of ``sec_haloprop``. 
+    In bins of the ``prim_haloprop``, compute the rank-order percentile
+    of the input ``table`` based on the value of ``sec_haloprop``.
 
     Parameters
     ----------
-    table : astropy table, optional 
+    table : astropy table, optional
         a keyword argument that stores halo catalog being used to make mock galaxy population
-        If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys 
-        must also be passed. If not passing a `table`, you must directly pass the 
-        `prim_haloprop` and `sec_haloprop` keyword arguments. 
+        If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys
+        must also be passed. If not passing a `table`, you must directly pass the
+        `prim_haloprop` and `sec_haloprop` keyword arguments.
 
-    prim_haloprop_key : string, optional 
-        Name of the column of the input ``table`` that will be used to access the 
-        primary halo property. `compute_conditional_percentiles` bins the ``table`` by 
-        ``prim_haloprop_key`` when computing the result. 
+    prim_haloprop_key : string, optional
+        Name of the column of the input ``table`` that will be used to access the
+        primary halo property. `compute_conditional_percentiles` bins the ``table`` by
+        ``prim_haloprop_key`` when computing the result.
 
-    sec_haloprop_key : string, optional 
-        Name of the column of the input ``table`` that will be used to access the 
-        secondary halo property. `compute_conditional_percentiles` bins the ``table`` by 
-        ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key`` 
-        to compute the ``prim_haloprop``-conditioned rank-order percentile. 
+    sec_haloprop_key : string, optional
+        Name of the column of the input ``table`` that will be used to access the
+        secondary halo property. `compute_conditional_percentiles` bins the ``table`` by
+        ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key``
+        to compute the ``prim_haloprop``-conditioned rank-order percentile.
 
-    prim_haloprop : array_like, optional 
-        Array storing the primary halo property used to bin the input points. 
-        If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`. 
+    prim_haloprop : array_like, optional
+        Array storing the primary halo property used to bin the input points.
+        If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`.
 
-    sec_haloprop : array_like, optional 
-        Array storing the secondary halo property used to define the conditional percentiles 
-        in each bin of `prim_haloprop`. 
+    sec_haloprop : array_like, optional
+        Array storing the secondary halo property used to define the conditional percentiles
+        in each bin of `prim_haloprop`.
 
-    prim_haloprop_bin_boundaries : array, optional 
-        Array defining the boundaries by which we will bin the input ``table``. 
-        Default is None, in which case the binning will be automatically determined using 
-        the ``dlog10_prim_haloprop`` keyword. 
+    prim_haloprop_bin_boundaries : array, optional
+        Array defining the boundaries by which we will bin the input ``table``.
+        Default is None, in which case the binning will be automatically determined using
+        the ``dlog10_prim_haloprop`` keyword.
 
-    dlog10_prim_haloprop : float, optional 
-        Logarithmic spacing of bins of the mass-like variable within which 
-        we will assign secondary property percentiles. Default is 0.2. 
+    dlog10_prim_haloprop : float, optional
+        Logarithmic spacing of bins of the mass-like variable within which
+        we will assign secondary property percentiles. Default is 0.2.
 
-    Examples 
+    Examples
     --------
     >>> from halotools.sim_manager import FakeSim
     >>> fakesim = FakeSim()
@@ -69,9 +68,9 @@ def compute_conditional_percentiles(**kwargs):
 
     Notes
     -----
-    The sign of the result is such that in bins of the primary property, 
-    *smaller* values of the secondary property 
-    receive *smaller* values of the returned percentile. 
+    The sign of the result is such that in bins of the primary property,
+    *smaller* values of the secondary property
+    receive *smaller* values of the returned percentile.
 
     """
 
@@ -101,24 +100,24 @@ def compute_conditional_percentiles(**kwargs):
         """
         Parameters
         ----------
-        prim_haloprop : array 
-            Array storing the value of the primary halo property column of the ``table`` 
-            passed to ``compute_conditional_percentiles``. 
+        prim_haloprop : array
+            Array storing the value of the primary halo property column of the ``table``
+            passed to ``compute_conditional_percentiles``.
 
-        prim_haloprop_bin_boundaries : array, optional 
-            Array defining the boundaries by which we will bin the input ``table``. 
-            Default is None, in which case the binning will be automatically determined using 
-            the ``dlog10_prim_haloprop`` keyword. 
+        prim_haloprop_bin_boundaries : array, optional
+            Array defining the boundaries by which we will bin the input ``table``.
+            Default is None, in which case the binning will be automatically determined using
+            the ``dlog10_prim_haloprop`` keyword.
 
-        dlog10_prim_haloprop : float, optional 
-            Logarithmic spacing of bins of the mass-like variable within which 
-            we will assign secondary property percentiles. Default is 0.2. 
+        dlog10_prim_haloprop : float, optional
+            Logarithmic spacing of bins of the mass-like variable within which
+            we will assign secondary property percentiles. Default is 0.2.
 
-        Returns 
+        Returns
         --------
-        output : array 
-            Numpy array of integers storing the bin index of the prim_haloprop bin 
-            to which each halo in the input table was assigned. 
+        output : array
+            Numpy array of integers storing the bin index of the prim_haloprop bin
+            to which each halo in the input table was assigned.
 
         """
         try:
@@ -135,13 +134,13 @@ def compute_conditional_percentiles(**kwargs):
             lg10_max_prim_haloprop = np.log10(np.max(prim_haloprop))+0.001
             num_prim_haloprop_bins = (lg10_max_prim_haloprop-lg10_min_prim_haloprop)/dlog10_prim_haloprop
             prim_haloprop_bin_boundaries = np.logspace(
-                lg10_min_prim_haloprop, lg10_max_prim_haloprop, 
+                lg10_min_prim_haloprop, lg10_max_prim_haloprop,
                 num=ceil(num_prim_haloprop_bins))
 
         # digitize the masses so that we can access them bin-wise
         output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
 
-        # Use the largest bin for any points larger than the largest bin boundary, 
+        # Use the largest bin for any points larger than the largest bin boundary,
         ### and raise a warning if such points are found
         Nbins = len(prim_haloprop_bin_boundaries)
         if Nbins in output:
@@ -180,7 +179,7 @@ def compute_conditional_percentiles(**kwargs):
 
         percentiles = np.zeros(num_in_bin)
         percentiles[ind_sorted] = (np.arange(num_in_bin) + 1.0) / float(num_in_bin)
-        
+
         # place the percentiles into the catalog
         output[indices_of_prim_haloprop_bin] = percentiles
 
@@ -190,14 +189,14 @@ def compute_conditional_percentiles(**kwargs):
 
 
 class SampleSelector(object):
-    """ Container class for commonly used sample selections. 
+    """ Container class for commonly used sample selections.
     """
 
     @staticmethod
     def host_halo_selection(return_subhalos=False, **kwargs):
-        """ Method divides sample in to host halos and subhalos, and returns 
-        either the hosts or the hosts and the subs depending 
-        on the value of the input ``return_subhalos``. 
+        """ Method divides sample in to host halos and subhalos, and returns
+        either the hosts or the hosts and the subs depending
+        on the value of the input ``return_subhalos``.
         """
         table = kwargs['table']
         mask = table['halo_upid'] == -1
@@ -207,46 +206,46 @@ class SampleSelector(object):
             return table[mask], table[~mask]
 
     @staticmethod
-    def property_range(lower_bound = -float("inf"), upper_bound = float("inf"), 
+    def property_range(lower_bound = -float("inf"), upper_bound = float("inf"),
         return_complement = False, host_halos_only=False, subhalos_only=False, **kwargs):
-        """ Method makes a cut on an input table column based on an input upper and lower bound, and 
-        returns the cut table. 
+        """ Method makes a cut on an input table column based on an input upper and lower bound, and
+        returns the cut table.
 
-        Parameters 
+        Parameters
         ----------
-        table : Astropy Table object, keyword argument 
+        table : Astropy Table object, keyword argument
 
-        key : string, keyword argument 
+        key : string, keyword argument
             Column name that will be used to apply the cut
 
-        lower_bound : float, optional keyword argument 
-            Minimum value for the input column of the returned table. Default is :math:`-\\infty`. 
+        lower_bound : float, optional keyword argument
+            Minimum value for the input column of the returned table. Default is :math:`-\\infty`.
 
-        upper_bound : float, optional keyword argument 
-            Maximum value for the input column of the returned table. Default is :math:`+\\infty`. 
+        upper_bound : float, optional keyword argument
+            Maximum value for the input column of the returned table. Default is :math:`+\\infty`.
 
-        return_complement : bool, optional keyword argument 
-            If True, `property_range` gives the table elements that do not pass the cut 
-            as the second return argument. Default is False. 
+        return_complement : bool, optional keyword argument
+            If True, `property_range` gives the table elements that do not pass the cut
+            as the second return argument. Default is False.
 
-        host_halos_only : bool, optional keyword argument 
-            If true, `property_range` will use the `host_halo_selection` method to 
-            make an additional cut on the sample so that only host halos are returned. 
+        host_halos_only : bool, optional keyword argument
+            If true, `property_range` will use the `host_halo_selection` method to
+            make an additional cut on the sample so that only host halos are returned.
             Default is False
 
-        subhalos_only : bool, optional keyword argument 
-            If true, `property_range` will use the `host_halo_selection` method to 
-            make an additional cut on the sample so that only subhalos are returned. 
+        subhalos_only : bool, optional keyword argument
+            If true, `property_range` will use the `host_halo_selection` method to
+            make an additional cut on the sample so that only subhalos are returned.
             Default is False
 
 
-        Returns 
+        Returns
         -------
         cut_table : Astropy Table object
 
-        Examples 
+        Examples
         ---------
-        To demonstrate the `property_range` method, we will start out by loading 
+        To demonstrate the `property_range` method, we will start out by loading
         a table of halos into memory using the `FakeSim` class:
 
         >>> from halotools.sim_manager import FakeSim
@@ -286,27 +285,27 @@ class SampleSelector(object):
 
     @staticmethod
     def split_sample(**kwargs):
-        """ Method divides a sample into subsamples based on the percentile ranking of a given property. 
+        """ Method divides a sample into subsamples based on the percentile ranking of a given property.
 
-        Parameters 
+        Parameters
         ----------
-        table : Astropy Table object, keyword argument 
+        table : Astropy Table object, keyword argument
 
-        key : string, keyword argument 
+        key : string, keyword argument
             Column name that will be used to define the percentiles
 
-        percentiles : array_like 
-            Sequence of percentiles used to define the returned subsamples. If ``percentiles`` 
-            has more than one element, the elements must be monotonically increasing. 
-            If ``percentiles`` is length-N, there will be N+1 returned subsamples. 
+        percentiles : array_like
+            Sequence of percentiles used to define the returned subsamples. If ``percentiles``
+            has more than one element, the elements must be monotonically increasing.
+            If ``percentiles`` is length-N, there will be N+1 returned subsamples.
 
-        Returns 
+        Returns
         -------
-        subsamples : list 
+        subsamples : list
 
-        Examples 
+        Examples
         --------
-        To demonstrate the `split_sample` method, we will start out by loading 
+        To demonstrate the `split_sample` method, we will start out by loading
         a table of halos into memory using the `FakeSim` class:
 
         >>> from halotools.sim_manager import FakeSim
@@ -357,7 +356,7 @@ class SampleSelector(object):
             print("Raise exception: too many percentile bins")
             idx_too_few = np.nanargmin(d)
             raise ValueError("The input percentiles spacing is too fine.\n"
-                "For example, there are no table elements in the percentile range (%.2f, %.2f)" % 
+                "For example, there are no table elements in the percentile range (%.2f, %.2f)" %
                   (percentiles[idx_too_few], percentiles[idx_too_few+1]))
 
 
@@ -367,7 +366,7 @@ class SampleSelector(object):
 
         return result
 
-            
+
 
 
 

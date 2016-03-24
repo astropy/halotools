@@ -48,24 +48,24 @@ class TestHodMockFactory(TestCase):
     def test_mock_population_mask(self):
         start = time()
 
-    	model = PrebuiltHodModelFactory('zheng07')
+        model = PrebuiltHodModelFactory('zheng07')
 
-    	f100x = lambda t: t['halo_x'] > 100
-    	f150z = lambda t: t['halo_z'] > 150
+        f100x = lambda t: t['halo_x'] > 100
+        f150z = lambda t: t['halo_z'] > 150
 
         halocat = FakeSim()
-    	model.populate_mock(halocat, masking_function = f100x)
-    	assert np.all(model.mock.galaxy_table['halo_x'] > 100)
-    	model.populate_mock(halocat)
-    	assert np.any(model.mock.galaxy_table['halo_x'] < 100)
-    	model.populate_mock(halocat, masking_function = f100x)
-    	assert np.all(model.mock.galaxy_table['halo_x'] > 100)
+        model.populate_mock(halocat, masking_function = f100x)
+        assert np.all(model.mock.galaxy_table['halo_x'] > 100)
+        model.populate_mock(halocat)
+        assert np.any(model.mock.galaxy_table['halo_x'] < 100)
+        model.populate_mock(halocat, masking_function = f100x)
+        assert np.all(model.mock.galaxy_table['halo_x'] > 100)
 
-    	model.populate_mock(halocat, masking_function = f150z)
-    	assert np.all(model.mock.galaxy_table['halo_z'] > 150)
-    	assert np.any(model.mock.galaxy_table['halo_x'] < 100)
-    	model.populate_mock(halocat)
-    	assert np.any(model.mock.galaxy_table['halo_z'] < 150)
+        model.populate_mock(halocat, masking_function = f150z)
+        assert np.all(model.mock.galaxy_table['halo_z'] > 150)
+        assert np.any(model.mock.galaxy_table['halo_x'] < 100)
+        model.populate_mock(halocat)
+        assert np.any(model.mock.galaxy_table['halo_z'] < 150)
 
         runtime = time() - start
 
@@ -91,7 +91,7 @@ class TestHodMockFactory(TestCase):
         model = PrebuiltHodModelFactory('zheng07')
         halocat = FakeSim()
         model.populate_mock(halocat)
-        
+
         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
         cens = model.mock.galaxy_table[cenmask]
         assert np.all(cens['halo_x'] == cens['x'])

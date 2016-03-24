@@ -183,7 +183,7 @@ class UserSuppliedPtclCatalog(object):
             {key: kwargs[key] for key in kwargs if key not in ptcl_table_dict}
             )
 
-    	return ptcl_table_dict, metadata_dict
+        return ptcl_table_dict, metadata_dict
 
     def _test_metadata_dict(self, **metadata_dict):
         try:

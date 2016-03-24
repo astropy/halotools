@@ -145,8 +145,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache1(self):
-    	""" Verify the overwrite requirement is enforced
-    	"""
+        """ Verify the overwrite requirement is enforced
+        """
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -172,8 +172,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache2(self):
-    	""" Verify that the appropriate message is issued when trying to save the file to a non-existent directory.
-    	""" 
+        """ Verify that the appropriate message is issued when trying to save the file to a non-existent directory.
+        """ 
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -189,8 +189,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache3(self):
-    	""" Verify that the .hdf5 extension requirement is enforced.
-    	"""
+        """ Verify that the .hdf5 extension requirement is enforced.
+        """
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -211,8 +211,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache4(self):
-    	""" Enforce string representation of positional arguments
-    	"""
+        """ Enforce string representation of positional arguments
+        """
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -226,7 +226,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         dummy_string = '  '
         class Dummy(object):
             pass
-            
+
             def __str__(self):
                 raise TypeError
         not_representable_as_string = Dummy()

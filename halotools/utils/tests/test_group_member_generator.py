@@ -2,25 +2,22 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-from copy import deepcopy 
 
 from collections import Counter
 
-import numpy as np 
+import numpy as np
 
 from astropy.tests.helper import pytest
-from astropy.table import Table 
 
 from ..group_member_generator import group_member_generator
 
 from ...sim_manager import FakeSim
 
-from ...custom_exceptions import HalotoolsError
-
 __all__ = ['TestGroupMemberGenerator']
 
+
 class TestGroupMemberGenerator(TestCase):
-    """ Class providing tests of the `~halotools.utils.aggregation`. 
+    """ Class providing tests of the `~halotools.utils.aggregation`.
     """
     def setUp(self):
         fake_sim = FakeSim()
@@ -28,14 +25,14 @@ class TestGroupMemberGenerator(TestCase):
         self.halo_table.sort('halo_hostid')
 
     def test_argument_checks1(self):
-        """ Verify that an informative exception is raised when 
-        passing in data that is not a table or structured array. 
+        """ Verify that an informative exception is raised when
+        passing in data that is not a table or structured array.
         """
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_mvir']
 
         with pytest.raises(TypeError) as err:
-            g = group_member_generator(4, 
+            g = group_member_generator(4,
                 grouping_key, requested_columns, data_is_already_sorted=False)
             for _ in g:
                 pass
@@ -43,14 +40,14 @@ class TestGroupMemberGenerator(TestCase):
         assert substr in err.value.message
 
     def test_argument_checks2(self):
-        """ Verify that an informative exception is raised when 
-        passing in a non-iterable for ``requested_columns``. 
+        """ Verify that an informative exception is raised when
+        passing in a non-iterable for ``requested_columns``.
         """
         grouping_key = 'halo_hostid'
         requested_columns = 5
 
         with pytest.raises(TypeError) as err:
-            g = group_member_generator(self.halo_table, 
+            g = group_member_generator(self.halo_table,
                 grouping_key, requested_columns, data_is_already_sorted=False)
             for _ in g:
                 pass
@@ -58,14 +55,14 @@ class TestGroupMemberGenerator(TestCase):
         assert substr in err.value.message
 
     def test_argument_checks3(self):
-        """ Verify that an informative exception is raised when 
-        passing in unacceptable ``requested_columns``. 
+        """ Verify that an informative exception is raised when
+        passing in unacceptable ``requested_columns``.
         """
         grouping_key = 'halo_hostid'
         requested_columns = ['Jose Canseco']
 
         with pytest.raises(KeyError) as err:
-            g = group_member_generator(self.halo_table, 
+            g = group_member_generator(self.halo_table,
                 grouping_key, requested_columns, data_is_already_sorted=False)
             for _ in g:
                 pass
@@ -73,14 +70,14 @@ class TestGroupMemberGenerator(TestCase):
         assert substr in err.value.message
 
     def test_argument_checks4(self):
-        """ Verify that an informative exception is raised when 
-        passing in unacceptable ``grouping_key``. 
+        """ Verify that an informative exception is raised when
+        passing in unacceptable ``grouping_key``.
         """
         grouping_key = 'Jose Canseco'
         requested_columns = ['halo_hostid']
 
         with pytest.raises(KeyError) as err:
-            g = group_member_generator(self.halo_table, 
+            g = group_member_generator(self.halo_table,
                 grouping_key, requested_columns, data_is_already_sorted=False)
             for _ in g:
                 pass
@@ -88,14 +85,14 @@ class TestGroupMemberGenerator(TestCase):
         assert substr in err.value.message
 
     def test_argument_checks5(self):
-        """ Verify that an informative exception is raised when 
-        passing in a single string for ``requested_columns``, rather than a list. 
+        """ Verify that an informative exception is raised when
+        passing in a single string for ``requested_columns``, rather than a list.
         """
         grouping_key = 'halo_hostid'
         requested_columns = 'Jose Canseco'
 
         with pytest.raises(KeyError) as err:
-            g = group_member_generator(self.halo_table, 
+            g = group_member_generator(self.halo_table,
                 grouping_key, requested_columns, data_is_already_sorted=False)
             for _ in g:
                 pass
@@ -103,14 +100,14 @@ class TestGroupMemberGenerator(TestCase):
         assert substr in err.value.message
 
     def test_argument_checks6(self):
-        """ Verify that an informative exception is raised when 
-        the input data is not appropriately sorted. 
+        """ Verify that an informative exception is raised when
+        the input data is not appropriately sorted.
         """
         grouping_key = 'halo_mvir'
         requested_columns = ['halo_mvir']
 
         with pytest.raises(ValueError) as err:
-            g = group_member_generator(self.halo_table, 
+            g = group_member_generator(self.halo_table,
                 grouping_key, requested_columns, data_is_already_sorted=False)
             for _ in g:
                 pass
@@ -118,12 +115,12 @@ class TestGroupMemberGenerator(TestCase):
         assert substr in err.value.message
 
     def test_function_correctness1(self):
-        """ Verify that the aggregation function can correctly compute 
-        and broadcast the result of a trivial group-wise function. 
+        """ Verify that the aggregation function can correctly compute
+        and broadcast the result of a trivial group-wise function.
         """
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_hostid']
-        gen = group_member_generator(self.halo_table, 
+        gen = group_member_generator(self.halo_table,
             grouping_key, requested_columns, data_is_already_sorted=False)
 
         result = np.zeros(len(self.halo_table))
@@ -133,14 +130,14 @@ class TestGroupMemberGenerator(TestCase):
         assert np.all(result == self.halo_table['halo_hostid'])
 
     def test_function_correctness2(self):
-        """ Verify that the aggregation function can correctly identify 
+        """ Verify that the aggregation function can correctly identify
         the first group member
         """
         self.halo_table.sort(keys=['halo_hostid', 'halo_upid'])
 
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_upid']
-        gen = group_member_generator(self.halo_table, 
+        gen = group_member_generator(self.halo_table,
             grouping_key, requested_columns, data_is_already_sorted=False)
 
         result = np.zeros(len(self.halo_table))
@@ -148,17 +145,17 @@ class TestGroupMemberGenerator(TestCase):
             first, last, group_array_list = group_data
             result[first:last] = group_array_list[0][0]
 
-        assert np.all(result == -1)        
-            
+        assert np.all(result == -1)
+
     def test_function_correctness3(self):
-        """ Verify that the aggregation function can correctly compute 
-        and broadcast the values of the group-wise host halo mass. 
+        """ Verify that the aggregation function can correctly compute
+        and broadcast the values of the group-wise host halo mass.
         """
         self.halo_table.sort(keys=['halo_hostid', 'halo_upid'])
-        
+
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_mvir']
-        gen = group_member_generator(self.halo_table, 
+        gen = group_member_generator(self.halo_table,
             grouping_key, requested_columns, data_is_already_sorted=False)
 
         result = np.zeros(len(self.halo_table))
@@ -167,18 +164,18 @@ class TestGroupMemberGenerator(TestCase):
             result[first:last] = group_array_list[0][0]
 
         host_mask = self.halo_table['halo_upid'] == -1
-        assert np.all(self.halo_table['halo_mvir'][host_mask] == result[host_mask])            
-        assert np.any(self.halo_table['halo_mvir'][~host_mask] != result[~host_mask])            
+        assert np.all(self.halo_table['halo_mvir'][host_mask] == result[host_mask])
+        assert np.any(self.halo_table['halo_mvir'][~host_mask] != result[~host_mask])
 
     def test_function_correctness4(self):
-        """ Verify that the aggregation function can correctly compute 
-        and broadcast the values of the group-wise mean mass-weighted spin. 
+        """ Verify that the aggregation function can correctly compute
+        and broadcast the values of the group-wise mean mass-weighted spin.
         """
         self.halo_table.sort(keys=['halo_hostid', 'halo_upid'])
-        
+
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_mvir', 'halo_spin']
-        gen = group_member_generator(self.halo_table, 
+        gen = group_member_generator(self.halo_table,
             grouping_key, requested_columns, data_is_already_sorted=False)
 
         result = np.zeros(len(self.halo_table))
