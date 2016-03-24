@@ -11,7 +11,7 @@ import collections
 from time import time
 import numpy as np
 
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 
 __all__ = ('TabularAsciiReader', )
 

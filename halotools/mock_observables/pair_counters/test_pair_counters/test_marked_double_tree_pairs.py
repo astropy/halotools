@@ -6,7 +6,7 @@ import pytest
 
 from copy import copy
 
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 
 from ..pairs import wnpairs as pure_python_weighted_pairs
 from ..pairs import xy_z_wnpairs as pure_python_xy_z_weighted_pairs

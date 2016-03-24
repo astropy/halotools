@@ -7,7 +7,7 @@ cache-aware pairwise calculations on simulation boxes.
 
 import numpy as np
 from math import floor
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 from ...custom_exceptions import *
 
 __all__ = ['FlatRectanguloidTree', 'FlatRectanguloidDoubleTree']

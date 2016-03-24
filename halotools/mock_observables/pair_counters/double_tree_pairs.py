@@ -19,7 +19,7 @@ import numpy as np
 import time
 import multiprocessing
 from functools import partial
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 
 from .double_tree import FlatRectanguloidDoubleTree
 from .double_tree_helpers import *

@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function,
 ####import modules########################################################################
 import numpy as np
 
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 
 from .pair_counters.double_tree_per_object_pairs import *
 from ..custom_exceptions import *

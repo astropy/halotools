@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 
 #load pair counters
 from ..double_tree_pairs import npairs, jnpairs, xy_z_npairs, s_mu_npairs

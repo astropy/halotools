@@ -9,7 +9,7 @@ from collections import Counter
 import numpy as np
 
 from astropy.tests.helper import pytest
-from astropy.extern.six import xrange as range
+from astropy.extern.six.moves import xrange as range
 
 from ..value_added_halo_table_functions import *
 
