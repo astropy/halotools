@@ -2,7 +2,6 @@ language: python
 
 python:
     - 2.7
-    - 3.3
     - 3.4
     - 3.5
 
@@ -49,6 +48,10 @@ matrix:
         # may run for a long time
         - python: 2.7
           env: SETUP_CMD='build_sphinx -w'
+
+        # Python3.3 is a bit old, thus conda doesn't have all version dependencies
+        - python: 3.3
+          env: CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         # Try Astropy development version
         - python: 2.7
