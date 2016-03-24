@@ -27,7 +27,7 @@ class TestHodModelFactory(TestCase):
         with pytest.raises(HalotoolsError) as err:
             model = HodModelFactory()
         substr = "You did not pass any model features to the factory"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_populate_mock1(self):
         model = PrebuiltHodModelFactory('zheng07')
@@ -62,8 +62,8 @@ class TestHodModelFactory(TestCase):
         with pytest.raises(HalotoolsError) as err:
             m.populate_mock(halocat = halocat)
         substr = "this column is not available in the catalog you attempted to populate"
-        assert substr in err.value.message
-        assert "``Jose Canseco``" in err.value.message
+        assert substr in err.value.args[0]
+        assert "``Jose Canseco``" in err.value.args[0]
 
     def test_unavailable_upid(self):
         halocat = FakeSim()
@@ -73,7 +73,7 @@ class TestHodModelFactory(TestCase):
         with pytest.raises(HalotoolsError) as err:
             m.populate_mock(halocat = halocat)
         substr = "does not have the ``halo_upid`` column."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
 

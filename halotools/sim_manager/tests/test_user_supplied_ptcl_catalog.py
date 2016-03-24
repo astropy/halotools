@@ -92,7 +92,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 Lbox = 200, particle_mass = 100, redshift = '', 
                 **self.good_ptclcat_args)
         substr = "The ``redshift`` metadata must be a float."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     def test_successful_load(self):
@@ -162,13 +162,13 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat.add_ptclcat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string)
         substr = "Either choose a different fname or set ``overwrite`` to True"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         with pytest.raises(HalotoolsError) as err:
             ptclcat.add_ptclcat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string, 
                 overwrite = True)
-        assert substr not in err.value.message
+        assert substr not in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache2(self):
@@ -185,7 +185,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat.add_ptclcat_to_cache(
                 basename, dummy_string, dummy_string, dummy_string, dummy_string)
         substr = "The directory you are trying to store the file does not exist."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache3(self):
@@ -207,7 +207,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 fname, dummy_string, dummy_string, dummy_string, 
                 overwrite = True)
         substr = "The fname must end with an ``.hdf5`` extension."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache4(self):
@@ -236,7 +236,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 fname, not_representable_as_string, dummy_string, dummy_string, 
                 overwrite = True)
         substr = "must all be strings."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
 

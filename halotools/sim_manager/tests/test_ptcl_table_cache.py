@@ -159,7 +159,7 @@ class TestPtclTableCache(TestCase):
         with pytest.raises(TypeError) as err:
             cache.add_entry_to_cache_log('abc', update_ascii = False)
         substr = "You can only add instances of PtclTableCacheLogEntry to the cache log"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_entry_to_cache_log2(self):
@@ -192,7 +192,7 @@ class TestPtclTableCache(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             cache.add_entry_to_cache_log(self.bad_log_entry, update_ascii = False)
         substr = "The input filename does not exist."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_remove_entry_from_cache_log1(self):
@@ -209,7 +209,7 @@ class TestPtclTableCache(TestCase):
         with pytest.raises(HalotoolsError) as err:
             cache.remove_entry_from_cache_log(*args, update_ascii = False)
         substr = "This entry does not appear in the log."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         cache.remove_entry_from_cache_log(*args, update_ascii = False, 
             raise_non_existence_exception = False)

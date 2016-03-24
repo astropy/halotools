@@ -37,7 +37,7 @@ class TestGroupMemberGenerator(TestCase):
             for _ in g:
                 pass
         substr = "The input ``data`` must be an Astropy Table or Numpy Structured Array"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_argument_checks2(self):
         """ Verify that an informative exception is raised when
@@ -52,7 +52,7 @@ class TestGroupMemberGenerator(TestCase):
             for _ in g:
                 pass
         substr = "The input ``requested_columns`` must be an iterable sequence"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_argument_checks3(self):
         """ Verify that an informative exception is raised when
@@ -67,7 +67,7 @@ class TestGroupMemberGenerator(TestCase):
             for _ in g:
                 pass
         substr = "Each element of the input ``requested_columns`` must be"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_argument_checks4(self):
         """ Verify that an informative exception is raised when
@@ -82,7 +82,7 @@ class TestGroupMemberGenerator(TestCase):
             for _ in g:
                 pass
         substr = "Input ``grouping_key`` must be a column name of the input ``data``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_argument_checks5(self):
         """ Verify that an informative exception is raised when
@@ -97,7 +97,7 @@ class TestGroupMemberGenerator(TestCase):
             for _ in g:
                 pass
         substr = "list of strings, not a single string"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_argument_checks6(self):
         """ Verify that an informative exception is raised when
@@ -112,7 +112,7 @@ class TestGroupMemberGenerator(TestCase):
             for _ in g:
                 pass
         substr = "Your input ``data`` must be sorted so that"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_function_correctness1(self):
         """ Verify that the aggregation function can correctly compute

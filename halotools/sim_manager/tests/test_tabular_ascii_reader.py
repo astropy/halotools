@@ -57,7 +57,7 @@ class TestTabularAsciiReader(TestCase):
                 os.path.basename(self.dummy_fname), 
                 columns_to_keep_dict = {'mass': (2, 'f4')})
         substr = 'is not a file'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_get_header_char(self):
         reader = TabularAsciiReader(
@@ -69,7 +69,7 @@ class TestTabularAsciiReader(TestCase):
                 columns_to_keep_dict = {'mass': (2, 'f4')}, 
                 header_char = '###')
         substr = 'must be a single string character'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_process_columns_to_keep(self):
 
@@ -78,21 +78,21 @@ class TestTabularAsciiReader(TestCase):
                 self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4', 'c')}, 
                 header_char = '*')
         substr = 'must be a two-element tuple.'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3.5, 'f4')}, 
                 header_char = '*')
         substr = 'The first element of the two-element tuple'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'Jose Canseco')}, 
                 header_char = '*')
         substr = 'The second element of the two-element tuple'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_verify_input_row_cuts(self):
 
@@ -123,21 +123,21 @@ class TestTabularAsciiReader(TestCase):
                 self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'mass': 8})
         substr = 'This will result in zero selected rows '
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         with pytest.raises(KeyError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (2, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
         substr = 'The ``vmax`` key does not appear in the input'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         with pytest.raises(KeyError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'vmax': (1, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
         substr = 'The ``mass`` key does not appear in the input'
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_verify_eq_neq_consistency(self):
 
@@ -146,7 +146,7 @@ class TestTabularAsciiReader(TestCase):
                 self.dummy_fname, columns_to_keep_dict = {'mvir': (2, 'f4')}, 
                 row_cut_eq_dict = {'mvir': 8}, row_cut_neq_dict = {'mvir': 8})
         substr = 'This will result in zero selected rows '
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_read_dummy_halo_catalog1(self):
         fname = 'abc'
@@ -155,7 +155,7 @@ class TestTabularAsciiReader(TestCase):
         with pytest.raises(IOError) as err:
             reader = TabularAsciiReader(fname, columns_to_keep_dict)
         substr = "is not a file"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_read_dummy_halo_catalog2(self):
         fname = self.dummy_fname
@@ -165,7 +165,7 @@ class TestTabularAsciiReader(TestCase):
         with pytest.raises(ValueError) as err:
             reader = TabularAsciiReader(fname, columns_to_keep_dict)
         substr = "appears more than once in your ``columns_to_keep_dict``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.slow
     def test_read_dummy_halo_catalog3(self):
@@ -178,7 +178,7 @@ class TestTabularAsciiReader(TestCase):
             reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict, 
                 row_cut_min_dict = row_cut_min_dict, row_cut_max_dict=row_cut_max_dict)
         substr = "This will result in zero selected rows and is not permissible."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.slow
     def test_read_dummy_halo_catalog4(self):
@@ -192,7 +192,7 @@ class TestTabularAsciiReader(TestCase):
             reader = TabularAsciiReader(self.dummy_fname, columns_to_keep_dict, 
                 row_cut_eq_dict = row_cut_eq_dict, row_cut_neq_dict=row_cut_neq_dict)
         substr = "This will result in zero selected rows and is not permissible."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.slow
     def test_read_dummy_halo_catalog5(self):
@@ -237,7 +237,7 @@ class TestTabularAsciiReader(TestCase):
         with pytest.raises(ValueError) as err:
             arr = reader.read_ascii(chunk_memory_size = 0)
         substr = "Must choose non-zero size for input ``chunk_memory_size``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def tearDown(self):
         try:

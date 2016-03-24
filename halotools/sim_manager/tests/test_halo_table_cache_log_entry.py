@@ -130,7 +130,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         with pytest.raises(TypeError) as err:
             _ = log_entry1 > 0
         substr = "You cannot compare the order"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_comparison_override3(self):

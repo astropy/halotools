@@ -298,7 +298,7 @@ def test_RR_precomputed_exception_handling1():
             approx_cell1_size = [rmax, rmax, rmax], 
             RR_precomputed = RR_precomputed)
     substr = "``RR_precomputed`` and ``NR_precomputed`` arguments, or neither\n"
-    assert substr in err.value.message
+    assert substr in err.value.args[0]
 
 
 def test_RR_precomputed_exception_handling2():
@@ -319,7 +319,7 @@ def test_RR_precomputed_exception_handling2():
             approx_cell1_size = [rmax, rmax, rmax], 
             RR_precomputed = RR_precomputed, NR_precomputed = NR_precomputed)
     substr = "\nLength of ``RR_precomputed`` must match length of ``rbins``\n"
-    assert substr in err.value.message
+    assert substr in err.value.args[0]
 
 
 def test_RR_precomputed_exception_handling3():
@@ -340,7 +340,7 @@ def test_RR_precomputed_exception_handling3():
             approx_cell1_size = [rmax, rmax, rmax], 
             RR_precomputed = RR_precomputed, NR_precomputed = NR_precomputed)
     substr = "the value of NR_precomputed must agree with the number of randoms"
-    assert substr in err.value.message
+    assert substr in err.value.args[0]
 
 
 @slow

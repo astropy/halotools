@@ -113,7 +113,7 @@ class TestRockstarHlistReader(TestCase):
                 redshift = 4, version_name = 'dummy', Lbox = 100, particle_mass = 1e8 
                 )
         substr = "at least have the following columns"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict2(self):
@@ -127,7 +127,7 @@ class TestRockstarHlistReader(TestCase):
                 redshift = 4, version_name = 'dummy', Lbox = 100, particle_mass = 1e8 
                 )
         substr = "at least have the following columns"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict3(self):
@@ -141,7 +141,7 @@ class TestRockstarHlistReader(TestCase):
                 redshift = 4, version_name = 'dummy', Lbox = 100, particle_mass = 1e8 
                 )
         substr = "at least have the following columns"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict4(self):
@@ -155,7 +155,7 @@ class TestRockstarHlistReader(TestCase):
                 redshift = 4, version_name = 'dummy', Lbox = 100, particle_mass = 1e8 
                 )
         substr = "appears more than once in your ``columns_to_keep_dict``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     @pytest.mark.slow
@@ -212,7 +212,7 @@ class TestRockstarHlistReader(TestCase):
                 simname = entry.simname, halo_finder = entry.halo_finder, redshift = entry.redshift, 
                 version_name = entry.version_name, Lbox = 250., particle_mass = 1.35e8)
         substr = "There is already an existing entry in the Halotools cache log"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.slow
     @pytest.mark.skipif('not HAS_H5PY')
@@ -236,7 +236,7 @@ class TestRockstarHlistReader(TestCase):
                 version_name = 'dummy', Lbox = 250., particle_mass = 1.35e8, 
                 )
         substr = "must begin with the substring ``halo_``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.slow
     @pytest.mark.skipif('not HAS_H5PY')

@@ -354,7 +354,7 @@ class TestHodModelFactoryTutorial(TestCase):
         halocat = FakeSim()
         with pytest.raises(KeyError) as err:
             model.populate_mock(halocat)
-        assert "halo_spin" in err.value.message
+        assert "halo_spin" in err.value.args[0]
 
     @pytest.mark.slow
     def test_hod_modeling_tutorial6(self):

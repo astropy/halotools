@@ -48,7 +48,7 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
             with pytest.raises(HalotoolsError) as err:
                 model2.populate_mock(halocat)
             substr = "Inconsistency between the model redshift"
-            assert substr in err.value.message
+            assert substr in err.value.args[0]
             halocat = FakeSim(redshift = 2.)
             model2.populate_mock(halocat)
 

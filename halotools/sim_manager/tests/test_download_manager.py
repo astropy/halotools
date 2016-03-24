@@ -278,7 +278,7 @@ class TestDownloadManager(TestCase):
             fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
                 halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'Jose Canseco')
         substr = "Input ``catalog_type`` must be either ``particles`` or ``halos``" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @remote_data
     def test_closest_ptcl_catalog_on_web(self):
@@ -322,7 +322,7 @@ class TestDownloadManager(TestCase):
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "no web locations" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     @remote_data
@@ -337,7 +337,7 @@ class TestDownloadManager(TestCase):
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "no halo catalogs meeting" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
@@ -351,7 +351,7 @@ class TestDownloadManager(TestCase):
                 version_name = sim_defaults.default_version_name, 
                 redshift = 0, overwrite=False)
         substr = "you must set the ``overwrite`` keyword argument to True" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @remote_data
     def test_download_processed_halo_table4(self):
@@ -364,7 +364,7 @@ class TestDownloadManager(TestCase):
                 version_name = sim_defaults.default_version_name, 
                 redshift = 0, overwrite=False, download_dirname = 'abc')
         substr = "Your input ``download_dirname`` is a non-existent path." 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
@@ -379,7 +379,7 @@ class TestDownloadManager(TestCase):
                 redshift = 11.7, dz_tol = 200, 
                 overwrite=True, download_dirname = 'std_cache_loc')
         substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @remote_data
     def test_download_processed_halo_table6(self):
@@ -393,7 +393,7 @@ class TestDownloadManager(TestCase):
                 redshift = 0.3, dz_tol = 0.001, 
                 overwrite=False, download_dirname = self.halocat_dir)
         substr = "The closest redshift for these catalogs is" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     @pytest.mark.skipif('not APH_MACHINE')
@@ -428,7 +428,7 @@ class TestDownloadManager(TestCase):
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "no web locations" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @remote_data
     def test_download_ptcl_table2(self):
@@ -441,7 +441,7 @@ class TestDownloadManager(TestCase):
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "There are no particle catalogs meeting your specifications"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
@@ -455,7 +455,7 @@ class TestDownloadManager(TestCase):
                 redshift = 0, 
                 download_dirname=self.halocat_dir)
         substr = "you must set the ``overwrite`` keyword argument to True."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @remote_data
     def test_download_ptcl_table4(self):
@@ -468,7 +468,7 @@ class TestDownloadManager(TestCase):
                 redshift = 0, 
                 download_dirname='abc')
         substr = "Your input ``download_dirname`` is a non-existent path."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @remote_data
     def test_download_ptcl_table5(self):
@@ -481,7 +481,7 @@ class TestDownloadManager(TestCase):
                 redshift = 0.2, dz_tol = 0.001,  
                 download_dirname=self.halocat_dir)
         substr = "The closest redshift for these catalogs is"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def tearDown(self):
         try:

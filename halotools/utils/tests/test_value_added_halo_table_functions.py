@@ -61,7 +61,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(4, 'xxx')
         substr = "The input ``table`` must be an Astropy `~astropy.table.Table` object"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         del t
 
@@ -72,7 +72,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(t, 'xxx')
         substr = "The input table does not the input ``halo_property_key``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         del t
 
@@ -85,7 +85,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(t, 'halo_mvir')
         substr = "Your input table already has an existing new_colname column name."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         broadcast_host_halo_property(t, 'halo_mvir', delete_possibly_existing_column = True)
 
@@ -97,7 +97,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             add_halo_hostid(5, delete_possibly_existing_column = False)
         substr = "The input ``table`` must be an Astropy `~astropy.table.Table` object"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_add_halo_hostid2(self):
         """
@@ -107,7 +107,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             add_halo_hostid(t, delete_possibly_existing_column = False)
         substr = "The input table must have ``halo_upid`` and ``halo_id`` keys"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_add_halo_hostid3(self):
         """
@@ -116,7 +116,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             add_halo_hostid(t, delete_possibly_existing_column = False)
         substr = "Your input table already has an existing ``halo_hostid`` column name."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         existing_halo_hostid = deepcopy(t['halo_hostid'].data)
         del t['halo_hostid']

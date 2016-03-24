@@ -57,13 +57,13 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             _ = CachedHaloCatalog('bolshoi')
         substr = "CachedHaloCatalog only accepts keyword arguments,"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_raises_bad_constructor_args_exception2(self):
         with pytest.raises(HalotoolsError) as err:
             _ = CachedHaloCatalog(z = 0.04)
         substr = "CachedHaloCatalog got an unexpected keyword"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     @pytest.mark.skipif('not APH_MACHINE')
@@ -144,7 +144,7 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
-        assert 'The following entries in the cache log' in err.value.message
+        assert 'The following entries in the cache log' in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_bad_catalog2(self):
@@ -155,7 +155,7 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
-        assert 'The following entries in the cache log' in err.value.message
+        assert 'The following entries in the cache log' in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_bad_catalog3(self):
@@ -165,8 +165,8 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'bdm', version_name = 'Jose Canseco')
-        assert 'The following entries in the cache log' in err.value.message
-        assert '(set by sim_defaults.default_redshift)' in err.value.message
+        assert 'The following entries in the cache log' in err.value.args[0]
+        assert '(set by sim_defaults.default_redshift)' in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_bad_catalog4(self):
@@ -176,8 +176,8 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'Jose Canseco')
-        assert 'The following entries in the cache log' in err.value.message
-        assert '(set by sim_defaults.default_version_name)' in err.value.message
+        assert 'The following entries in the cache log' in err.value.args[0]
+        assert '(set by sim_defaults.default_version_name)' in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_bad_catalog5(self):
@@ -186,8 +186,8 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'Jose Canseco')
-        assert 'There are no simulations matching your input simname' in err.value.message
-        assert '(set by sim_defaults.default_halo_finder)' in err.value.message
+        assert 'There are no simulations matching your input simname' in err.value.args[0]
+        assert '(set by sim_defaults.default_halo_finder)' in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_bad_catalog6(self):
@@ -198,7 +198,7 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(simname = 'Jose Canseco', 
                 halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
-        assert 'There are no simulations matching your input simname' in err.value.message
+        assert 'There are no simulations matching your input simname' in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_bad_catalog7(self):
@@ -207,8 +207,8 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(dz_tol = 100)
-        assert 'There are multiple entries in the cache log' in err.value.message
-        assert '(set by sim_defaults.default_simname)' in err.value.message
+        assert 'There are multiple entries in the cache log' in err.value.args[0]
+        assert '(set by sim_defaults.default_simname)' in err.value.args[0]
 
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
@@ -246,9 +246,9 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, simname = 'bolshoi')
         substr = "If you specify an input ``fname``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
         substr = "do not also specify ``simname``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments2(self):
@@ -259,9 +259,9 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, version_name = 'dummy')
         substr = "If you specify an input ``fname``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
         substr = "do not also specify ``version_name``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments3(self):
@@ -272,9 +272,9 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, halo_finder = 'dummy')
         substr = "If you specify an input ``fname``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
         substr = "do not also specify ``halo_finder``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments4(self):
@@ -285,9 +285,9 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, redshift = 0)
         substr = "If you specify an input ``fname``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
         substr = "do not also specify ``redshift``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments5(self):
@@ -296,7 +296,7 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, redshift = 0)
         substr = "non-existent path"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments6(self):
@@ -318,7 +318,7 @@ class TestCachedHaloCatalog(TestCase):
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = correct_fname)
-        print(err.value.message)
+        print(err.value.args[0])
 
         f = h5py.File(correct_fname)
         f.attrs['fname'] = correct_fname
@@ -397,8 +397,8 @@ class TestCachedHaloCatalog(TestCase):
                 halo_finder = 'rockstar', 
                 version_name = 'halotools_alpha_version2', redshift = 11.7632)
         substr = "The following input fname does not exist: "
-        assert substr in err.value.message
-        assert tmp_fname in err.value.message 
+        assert substr in err.value.args[0]
+        assert tmp_fname in err.value.args[0] 
         
         ######################################################
         ## Update the cache location using the CachedHaloCatalog
