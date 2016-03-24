@@ -1,76 +1,69 @@
-""" Module containing the UserSuppliedHaloCatalog class. 
+""" Module containing the UserSuppliedHaloCatalog class.
 """
 
 import numpy as np
-import os, sys, urllib.request, urllib.error, urllib.parse, fnmatch
-from warnings import warn 
-import datetime 
+import os
 
-from astropy import cosmology
-from astropy import units as u
+from warnings import warn
+import datetime
+
 from astropy.table import Table
 
-try:
-    import h5py
-except ImportError:
-    warn("Most of the functionality of the sim_manager "
-        "sub-package requires h5py to be installed,\n"
-        "which can be accomplished either with pip or conda")
-
-from .halo_table_cache import HaloTableCache 
+from .halo_table_cache import HaloTableCache
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
 from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
-from ..utils.array_utils import custom_len, convert_to_ndarray
+from ..utils.array_utils import custom_len
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('UserSuppliedHaloCatalog', )
 
-class UserSuppliedHaloCatalog(object):
-    """ Class used to transform a user-provided halo catalog 
-    into the standard form recognized by Halotools. 
 
-    See :ref:`user_supplied_halo_catalogs` for a tutorial on this class. 
-    
+class UserSuppliedHaloCatalog(object):
+    """ Class used to transform a user-provided halo catalog
+    into the standard form recognized by Halotools.
+
+    See :ref:`user_supplied_halo_catalogs` for a tutorial on this class.
+
     """
     def __init__(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ------------
-        **metadata : float or string 
-            Keyword arguments storing catalog metadata. 
-            The quantities `Lbox` and `particle_mass` 
-            are required and must be in Mpc/h and Msun/h units, respectively. 
-            `redshift` is also required metadata. 
-            See Examples section for further notes. 
+        **metadata : float or string
+            Keyword arguments storing catalog metadata.
+            The quantities `Lbox` and `particle_mass`
+            are required and must be in Mpc/h and Msun/h units, respectively.
+            `redshift` is also required metadata.
+            See Examples section for further notes.
 
-        **halo_catalog_columns : sequence of arrays 
-            Sequence of length-*Nhalos* arrays passed in as keyword arguments. 
+        **halo_catalog_columns : sequence of arrays
+            Sequence of length-*Nhalos* arrays passed in as keyword arguments.
 
-            Each key will be the column name attached to the input array. 
-            All keys must begin with the substring ``halo_`` to help differentiate 
-            halo property from mock galaxy properties. At a minimum, there must be a 
-            ``halo_id`` keyword argument storing a unique integer for each halo, 
-            as well as columns ``halo_x``, ``halo_y`` and ``halo_z``. 
-            There must also be some additional mass-like variable, 
+            Each key will be the column name attached to the input array.
+            All keys must begin with the substring ``halo_`` to help differentiate
+            halo property from mock galaxy properties. At a minimum, there must be a
+            ``halo_id`` keyword argument storing a unique integer for each halo,
+            as well as columns ``halo_x``, ``halo_y`` and ``halo_z``.
+            There must also be some additional mass-like variable,
             for which you can use any name that begins with ``halo_``
-            See Examples section for further notes. 
+            See Examples section for further notes.
 
-        user_supplied_ptclcat : table, optional 
-            Instance of the `~halotools.sim_manager.UserSuppliedPtclCatalog` class. 
-            If this keyword is passed, the `UserSuppliedHaloCatalog` instance 
-            will have a ``ptcl_table`` attribute bound to it storing dark matter particles 
-            randomly selected from the snapshot. At a minimum, the table must have 
-            columns ``x``, ``y`` and ``z``. Default is None. 
+        user_supplied_ptclcat : table, optional
+            Instance of the `~halotools.sim_manager.UserSuppliedPtclCatalog` class.
+            If this keyword is passed, the `UserSuppliedHaloCatalog` instance
+            will have a ``ptcl_table`` attribute bound to it storing dark matter particles
+            randomly selected from the snapshot. At a minimum, the table must have
+            columns ``x``, ``y`` and ``z``. Default is None.
 
-        Notes 
+        Notes
         -------
-        This class is tested by 
-        `~halotools.sim_manager.tests.test_user_supplied_halo_catalog.TestUserSuppliedHaloCatalog`. 
+        This class is tested by
+        `~halotools.sim_manager.tests.test_user_supplied_halo_catalog.TestUserSuppliedHaloCatalog`.
 
-        Examples 
+        Examples
         ----------
-        Here is an example using dummy data to show how to create a new `UserSuppliedHaloCatalog` 
+        Here is an example using dummy data to show how to create a new `UserSuppliedHaloCatalog`
         instance from from your own halo catalog. First the setup:
 
         >>> redshift = 0.0
@@ -87,7 +80,7 @@ class UserSuppliedHaloCatalog(object):
 
         >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
-        Your ``halo_catalog`` object can be used throughout the Halotools package. 
+        Your ``halo_catalog`` object can be used throughout the Halotools package.
         The halo catalog itself is stored in the ``halo_table`` attribute, with columns accessed as follows:
 
         >>> array_of_masses = halo_catalog.halo_table['halo_mvir']
@@ -104,19 +97,19 @@ class UserSuppliedHaloCatalog(object):
 
         >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
-        Similarly, if you wish to include additional columns for your halo catalog, 
+        Similarly, if you wish to include additional columns for your halo catalog,
         Halotools is able to tell the difference between metadata and columns of halo data:
 
         >>> spin = np.random.uniform(0, 0.2, num_halos)
         >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
-        If you want to store your halo catalog in the Halotools cache, 
-        use the `add_halocat_to_cache` method. 
+        If you want to store your halo catalog in the Halotools cache,
+        use the `add_halocat_to_cache` method.
 
-        You also have the option to supply a randomly selected downsample of dark matter particles 
-        via the ``user_supplied_ptclcat`` keyword. This keyword have an instance of the 
-        `~halotools.sim_manager.UserSuppliedPtclCatalog` class bound to it, which 
-        helps ensure consistency between the halo catalog and particles. 
+        You also have the option to supply a randomly selected downsample of dark matter particles
+        via the ``user_supplied_ptclcat`` keyword. This keyword have an instance of the
+        `~halotools.sim_manager.UserSuppliedPtclCatalog` class bound to it, which
+        helps ensure consistency between the halo catalog and particles.
 
         Here's an example of how to use this argument using some fake data:
 
@@ -141,26 +134,26 @@ class UserSuppliedHaloCatalog(object):
         self._passively_bind_ptcl_table(**kwargs)
 
     def _parse_constructor_kwargs(self, **kwargs):
-        """ Private method interprets constructor keyword arguments and returns two 
-        dictionaries. One stores the halo catalog columns, the other stores the metadata. 
+        """ Private method interprets constructor keyword arguments and returns two
+        dictionaries. One stores the halo catalog columns, the other stores the metadata.
 
-        Parameters 
+        Parameters
         ------------
-        **kwargs : keyword arguments passed to constructor 
+        **kwargs : keyword arguments passed to constructor
 
-        Returns 
+        Returns
         ----------
-        halo_table_dict : dictionary 
-            Keys are the names of the halo catalog columns, values are length-*Nhalos* ndarrays. 
+        halo_table_dict : dictionary
+            Keys are the names of the halo catalog columns, values are length-*Nhalos* ndarrays.
 
-        metadata_dict : dictionary 
-            Dictionary storing the catalog metadata. Keys will be attribute names bound 
-            to the `UserSuppliedHaloCatalog` instance. 
+        metadata_dict : dictionary
+            Dictionary storing the catalog metadata. Keys will be attribute names bound
+            to the `UserSuppliedHaloCatalog` instance.
         """
 
         try:
             halo_id = kwargs['halo_id']
-            assert type(halo_id) is np.ndarray 
+            assert type(halo_id) is np.ndarray
             Nhalos = custom_len(halo_id)
             assert Nhalos > 1
         except KeyError as AssertionError:
@@ -169,9 +162,9 @@ class UserSuppliedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         halo_table_dict = (
-            {key: kwargs[key] for key in kwargs 
-            if (type(kwargs[key]) is np.ndarray) 
-            and (custom_len(kwargs[key]) == Nhalos) 
+            {key: kwargs[key] for key in kwargs
+            if (type(kwargs[key]) is np.ndarray)
+            and (custom_len(kwargs[key]) == Nhalos)
             and (key[:5] == 'halo_')}
             )
         self._test_halo_table_dict(halo_table_dict)
@@ -181,16 +174,16 @@ class UserSuppliedHaloCatalog(object):
             if (key not in halo_table_dict) and (key != 'ptcl_table')}
             )
 
-        return halo_table_dict, metadata_dict 
+        return halo_table_dict, metadata_dict
 
 
     def _test_halo_table_dict(self, halo_table_dict):
         """
-        """ 
+        """
         try:
-            assert 'halo_x' in halo_table_dict 
-            assert 'halo_y' in halo_table_dict 
-            assert 'halo_z' in halo_table_dict 
+            assert 'halo_x' in halo_table_dict
+            assert 'halo_y' in halo_table_dict
+            assert 'halo_z' in halo_table_dict
             assert len(halo_table_dict) >= 5
         except AssertionError:
             msg = ("\nThe UserSuppliedHaloCatalog requires keyword arguments ``halo_x``, "
@@ -217,8 +210,8 @@ class UserSuppliedHaloCatalog(object):
         Lbox = metadata_dict['Lbox']
         try:
             x, y, z = (
-                self.halo_table['halo_x'], 
-                self.halo_table['halo_y'], 
+                self.halo_table['halo_x'],
+                self.halo_table['halo_y'],
                 self.halo_table['halo_z']
                 )
             assert np.all(x >= 0)
@@ -232,7 +225,7 @@ class UserSuppliedHaloCatalog(object):
                 "that are bound by 0 and the input ``Lbox``. \n")
             raise HalotoolsError(msg)
 
-        
+
         try:
             redshift = float(metadata_dict['redshift'])
         except:
@@ -270,7 +263,7 @@ class UserSuppliedHaloCatalog(object):
             except AssertionError:
                 msg = ("\nInconsistent values of Lbox between halo and particle catalogs:\n"
                     "For the halo catalog, Lbox = " + str(self.Lbox) + "\n"
-                    "For the ``user_supplied_ptclcat``, Lbox = " + 
+                    "For the ``user_supplied_ptclcat``, Lbox = " +
                     str(user_supplied_ptclcat.Lbox) + "\n\n")
                 raise HalotoolsError(msg)
 
@@ -279,7 +272,7 @@ class UserSuppliedHaloCatalog(object):
             except AssertionError:
                 msg = ("\nInconsistent values of particle_mass between halo and particle catalogs:\n"
                     "For the halo catalog, particle_mass = " + str(self.particle_mass) + "\n"
-                    "For the ``user_supplied_ptclcat``, particle_mass = " + 
+                    "For the ``user_supplied_ptclcat``, particle_mass = " +
                     str(user_supplied_ptclcat.particle_mass) + "\n\n")
                 raise HalotoolsError(msg)
 
@@ -290,7 +283,7 @@ class UserSuppliedHaloCatalog(object):
             except AssertionError:
                 msg = ("\nInconsistent values of redshift between halo and particle catalogs:\n"
                     "For the halo catalog, redshift = " + str(self.redshift) + "\n"
-                    "For the ``user_supplied_ptclcat``, redshift = " + 
+                    "For the ``user_supplied_ptclcat``, redshift = " +
                     str(user_supplied_ptclcat.redshift) + "\n\n")
                 raise HalotoolsError(msg)
 
@@ -300,51 +293,51 @@ class UserSuppliedHaloCatalog(object):
             pass
 
 
-    def add_halocat_to_cache(self, 
-        fname, simname, halo_finder, version_name, processing_notes, 
+    def add_halocat_to_cache(self,
+        fname, simname, halo_finder, version_name, processing_notes,
         overwrite = False, **additional_metadata):
         """
-        Parameters 
+        Parameters
         ------------
-        fname : string 
-            Absolute path of the file where you will store the halo catalog. 
-            Your filename must conclude with an `.hdf5` extension. 
+        fname : string
+            Absolute path of the file where you will store the halo catalog.
+            Your filename must conclude with an `.hdf5` extension.
 
-            The Halotools cache system will remember whatever location 
-            you choose, so try to choose a reasonably permanent resting place on disk. 
-            You can always relocate your catalog after caching it 
-            by following the :ref:`relocating_simulation_data` documentation page. 
+            The Halotools cache system will remember whatever location
+            you choose, so try to choose a reasonably permanent resting place on disk.
+            You can always relocate your catalog after caching it
+            by following the :ref:`relocating_simulation_data` documentation page.
 
-        simname : string 
-            Nickname of the simulation used as a shorthand way to keep track 
-            of the halo catalogs in your cache. 
+        simname : string
+            Nickname of the simulation used as a shorthand way to keep track
+            of the halo catalogs in your cache.
 
-        halo_finder : string 
-            Nickname of the halo-finder used to generate the hlist file from particle data. 
+        halo_finder : string
+            Nickname of the halo-finder used to generate the hlist file from particle data.
 
-        version_name : string 
-            Nickname of the version of the halo catalog. 
+        version_name : string
+            Nickname of the version of the halo catalog.
             The ``version_name`` is used as a bookkeeping tool in the cache log.
 
-        processing_notes : string 
-            String used to provide supplementary notes that will be attached to 
-            the hdf5 file storing your halo catalog. 
+        processing_notes : string
+            String used to provide supplementary notes that will be attached to
+            the hdf5 file storing your halo catalog.
 
-        overwrite : bool, optional 
-            If the chosen ``fname`` already exists, then you must set ``overwrite`` 
-            to True in order to write the file to disk. Default is False. 
+        overwrite : bool, optional
+            If the chosen ``fname`` already exists, then you must set ``overwrite``
+            to True in order to write the file to disk. Default is False.
 
-        **additional_metadata : sequence of strings, optional 
-            Each keyword of ``additional_metadata`` defines the name 
-            of a piece of metadata stored in the hdf5 file. The 
-            value bound to each key can be any string. When you load your 
-            cached halo catalog into memory, each piece of metadata 
-            will be stored as an attribute of the 
-            `~halotools.sim_manager.CachedHaloCatalog` instance. 
+        **additional_metadata : sequence of strings, optional
+            Each keyword of ``additional_metadata`` defines the name
+            of a piece of metadata stored in the hdf5 file. The
+            value bound to each key can be any string. When you load your
+            cached halo catalog into memory, each piece of metadata
+            will be stored as an attribute of the
+            `~halotools.sim_manager.CachedHaloCatalog` instance.
 
         """
         try:
-            import h5py 
+            import h5py
         except ImportError:
             msg = ("\nYou must have h5py installed if you want to \n"
                 "store your catalog in the Halotools cache. \n")
@@ -354,7 +347,7 @@ class UserSuppliedHaloCatalog(object):
         ## Perform some consistency checks in the fname
         if (os.path.isfile(fname)) & (overwrite == False):
             msg = ("\nYou attempted to store your halo catalog "
-                "in the following location: \n\n" + str(fname) + 
+                "in the following location: \n\n" + str(fname) +
                 "\n\nThis path points to an existing file. \n"
                 "Either choose a different fname or set ``overwrite`` to True.\n")
             raise HalotoolsError(msg)
@@ -394,7 +387,7 @@ class UserSuppliedHaloCatalog(object):
 
 
         ############################################################
-        ## Now write the file to disk and add the appropriate metadata 
+        ## Now write the file to disk and add the appropriate metadata
 
         self.halo_table.write(fname, path='data', overwrite = overwrite)
 
@@ -424,8 +417,8 @@ class UserSuppliedHaloCatalog(object):
         # Now that the file is on disk, add it to the cache
         cache = HaloTableCache()
 
-        log_entry = HaloTableCacheLogEntry(simname = simname, 
-            halo_finder = halo_finder, version_name = version_name, 
+        log_entry = HaloTableCacheLogEntry(simname = simname,
+            halo_finder = halo_finder, version_name = version_name,
             redshift = self.redshift, fname = fname)
 
         cache.add_entry_to_cache_log(log_entry, update_ascii = True)

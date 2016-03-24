@@ -4,36 +4,38 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from time import time
-import sys, urllib.request, urllib.parse, urllib.error
+import sys
+from astropy.extern.six.moves import urllib
 
 __all__ = ['file_len', 'download_file_from_url']
+
 
 def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
             pass
-    return i + 1    
-    
+    return i + 1
+
 
 def download_file_from_url(url, fname):
-    """ Function to download a file from the web to a specific location, 
-    and print a progress bar along the way. 
+    """ Function to download a file from the web to a specific location,
+    and print a progress bar along the way.
 
-    Parameters 
+    Parameters
     ----------
-    url : string 
-        web location of desired file, e.g., 
-        ``http://www.some.website.com/somefile.txt``. 
+    url : string
+        web location of desired file, e.g.,
+        ``http://www.some.website.com/somefile.txt``.
 
-    fname : string 
-        Location and filename to store the downloaded file, e.g., 
+    fname : string
+        Location and filename to store the downloaded file, e.g.,
         ``/Users/username/dirname/possibly_new_filename.txt``
     """
     start = time()
     print("\n... Downloading data from the following location: \n%s\n" % url)
-    print(" ... Saving the data with the following filename: \n%s\n" % fname) 
+    print(" ... Saving the data with the following filename: \n%s\n" % fname)
 
-    def reporthook(blocks_thus_far, bytes_per_block, file_size_in_bytes): 
+    def reporthook(blocks_thus_far, bytes_per_block, file_size_in_bytes):
         try:
             blocks_in_file = int(round(file_size_in_bytes/bytes_per_block))
             printout_condition = int(round(blocks_in_file/20))

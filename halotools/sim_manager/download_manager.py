@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Module storing the DownloadManager class responsible for 
-retrieving the Halotools-provided simulation data from the web 
-and storing it in the Halotools cache. 
+Module storing the DownloadManager class responsible for
+retrieving the Halotools-provided simulation data from the web
+and storing it in the Halotools cache.
 """
-
-__all__ = ('DownloadManager', )
 
 import numpy as np
 from warnings import warn
 from time import time
-from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
-from astropy.config.paths import _find_home
 
 try:
     from bs4 import BeautifulSoup
@@ -24,11 +20,12 @@ except ImportError:
     raise HalotoolsError("Must have requests package installed to use the DownloadManager")
 
 import posixpath
-import urllib.parse
+from astropy.extern.six.moves import urllib
 
-import os, fnmatch, re
+import os
+import fnmatch
 
-from ..sim_manager import sim_defaults, supported_sims 
+from ..sim_manager import sim_defaults, supported_sims
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
@@ -47,12 +44,16 @@ from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import custom_len
 from ..utils.io_utils import download_file_from_url
 
+
+__all__ = ('DownloadManager', )
+
 unsupported_simname_msg = "There are no web locations recognized by Halotools \n for simname ``%s``"
+
 
 class DownloadManager(object):
     """ Class used to scrape the web for simulation data and cache the downloaded catalogs.
 
-    For a list of available pre-processed halo catalogs provided by Halotools, 
+    For a list of available pre-processed halo catalogs provided by Halotools,
     see :ref:`supported_sim_list`.
     """
 
@@ -62,9 +63,9 @@ class DownloadManager(object):
         self.halo_table_cache = HaloTableCache()
         self.ptcl_table_cache = PtclTableCache()
 
-    def download_processed_halo_table(self, simname, halo_finder, redshift, 
-        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name, 
-        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False, 
+    def download_processed_halo_table(self, simname, halo_finder, redshift,
+        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name,
+        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False,
         **kwargs):
         """ Method to download one of the pre-processed binary files
         storing a reduced halo catalog.
@@ -77,21 +78,21 @@ class DownloadManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
         halo_finder : string
-            Nickname of the halo-finder, e.g. `rockstar` or `bdm`. 
+            Nickname of the halo-finder, e.g. `rockstar` or `bdm`.
 
         redshift : float
-            Redshift of the requested snapshot. 
-            Must match one of theavailable snapshots within dz_tol, 
+            Redshift of the requested snapshot.
+            Must match one of theavailable snapshots within dz_tol,
             or a prompt will be issued providing the nearest
             available snapshots to choose from.
 
-        version_name : string, optional 
-            Nickname of the version of the halo catalog used to differentiate 
-            between the same halo catalog processed in different ways. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
+        version_name : string, optional
+            Nickname of the version of the halo catalog used to differentiate
+            between the same halo catalog processed in different ways.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
 
-        download_dirname : str, optional 
-            Absolute path to the directory where you want to download the catalog. 
+        download_dirname : str, optional
+            Absolute path to the directory where you want to download the catalog.
             Default is `std_cache_loc`, which will store the catalog in the following directory:
             ``$HOME/.astropy/cache/halotools/halo_tables/simname/halo_finder/``
 
@@ -105,16 +106,16 @@ class DownloadManager(object):
             whether or not to overwrite the file. Default is False, in which case
             no download will occur if a pre-existing file is detected.
 
-        ignore_nearby_redshifts : bool, optional 
-            Flag used to determine whether nearby redshifts in cache will be ignored. 
-            If there are existing halo catalogs in the Halotools cache with matching 
-            ``simname``, ``halo_finder`` and ``version_name``, 
-            and if one or more of those catalogs has a redshift within ``dz_tol``, 
-            then the ignore_nearby_redshifts flag must be set to True in order 
-            for the new halo catalog to be stored in cache. 
-            Default is False. 
+        ignore_nearby_redshifts : bool, optional
+            Flag used to determine whether nearby redshifts in cache will be ignored.
+            If there are existing halo catalogs in the Halotools cache with matching
+            ``simname``, ``halo_finder`` and ``version_name``,
+            and if one or more of those catalogs has a redshift within ``dz_tol``,
+            then the ignore_nearby_redshifts flag must be set to True in order
+            for the new halo catalog to be stored in cache.
+            Default is False.
 
-        Examples 
+        Examples
         -----------
         >>> dman = DownloadManager()
         >>> simname = 'bolplanck'
@@ -127,28 +128,28 @@ class DownloadManager(object):
 
         $HOME/.astropy/cache/halotools/halo_catalogs/
         Use the download_dirname keyword argument to store the catalog in an alternate location.
-        Wherever you store it, after calling the `download_processed_halo_table` method 
+        Wherever you store it, after calling the `download_processed_halo_table` method
         you can load the catalog into memory as follows:
 
         >>> from halotools.sim_manager import CachedHaloCatalog
         >>> halocat = CachedHaloCatalog(simname = 'bolplanck', redshift = z) # doctest: +SKIP
 
-        Since you chose default values for the ``version_name`` and ``halo_finder``, 
-        it is not necessary to specify these keyword arguments. The ``halocat`` has 
-        metadata attached to it describing the simulation, snapshot, catalog processing notes, etc. 
-        The actual halos are stored in the form of an Astropy `~astropy.table.Table` data structure 
+        Since you chose default values for the ``version_name`` and ``halo_finder``,
+        it is not necessary to specify these keyword arguments. The ``halocat`` has
+        metadata attached to it describing the simulation, snapshot, catalog processing notes, etc.
+        The actual halos are stored in the form of an Astropy `~astropy.table.Table` data structure
         and can be accessed as follows:
 
         >>> halos = halocat.halo_table # doctest: +SKIP
         >>> array_of_masses = halos['halo_mvir'] # doctest: +SKIP
         >>> array_of_x_position = halos['halo_x'] # doctest: +SKIP
 
-        Notes 
+        Notes
         -------
-        If after downloading the catalog you decide that you want to move it 
-        to a new location on disk, you will need to be sure your cache directory 
-        is informed of the relocation. 
-        In this case, see :ref:`relocating_simulation_data` for instructions. 
+        If after downloading the catalog you decide that you want to move it
+        to a new location on disk, you will need to be sure your cache directory
+        is informed of the relocation.
+        In this case, see :ref:`relocating_simulation_data` for instructions.
 
         """
         self.halo_table_cache.update_log_from_current_ascii()
@@ -157,7 +158,7 @@ class DownloadManager(object):
         # Identify candidate file to download
 
         available_fnames_to_download = (
-            self._processed_halo_tables_available_for_download(simname = simname, 
+            self._processed_halo_tables_available_for_download(simname = simname,
                 halo_finder = halo_finder, version_name = version_name)
             )
 
@@ -183,13 +184,13 @@ class DownloadManager(object):
                 )
             raise HalotoolsError(msg % (simname, dz_tol, redshift, closest_redshift_string))
 
-        # At this point we have a candidate file to download that 
-        # matches the input specifications. 
+        # At this point we have a candidate file to download that
+        # matches the input specifications.
         ############################################################
 
         ############################################################
-        # Determine the download directory, 
-        # passively creating the necessary directory tree 
+        # Determine the download directory,
+        # passively creating the necessary directory tree
         if download_dirname == 'std_cache_loc':
             cache_basedir = os.path.dirname(self.halo_table_cache.cache_log_fname)
             download_dirname = os.path.join(cache_basedir, 'halo_catalogs', simname, halo_finder)
@@ -207,9 +208,9 @@ class DownloadManager(object):
         ############################################################
 
         ############################################################
-        # Now we check the cache log to see if there are any matching entries 
+        # Now we check the cache log to see if there are any matching entries
         exact_match_generator = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder, version_name = version_name, 
+            simname = simname, halo_finder = halo_finder, version_name = version_name,
             redshift = closest_redshift, dz_tol = 0.)
         exact_matches = list(exact_match_generator)
 
@@ -232,19 +233,19 @@ class DownloadManager(object):
                 warn(msg)
 
         close_match_generator = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder, version_name = version_name, 
+            simname = simname, halo_finder = halo_finder, version_name = version_name,
             redshift = closest_redshift, dz_tol = dz_tol)
         close_matches = list(close_match_generator)
 
-        if ((len(close_matches) > 0) 
-            & (len(exact_matches) == 0) 
+        if ((len(close_matches) > 0)
+            & (len(exact_matches) == 0)
             & (ignore_nearby_redshifts == False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
             msg += str(entry.fname) + "\n\n"
             msg += ("This log entry has exactly matching metadata "
-                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) 
+                "and a redshift within the input ``dz_tol`` = " + str(dz_tol)
                 +"\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
@@ -256,7 +257,7 @@ class DownloadManager(object):
 
         ############################################################
         # If the output_fname already exists, overwrite must be set to True
-        # A special message is printed if this exception is raised by the 
+        # A special message is printed if this exception is raised by the
         # initial download script (hidden feature for developers only)
         if (overwrite == False) & (os.path.isfile(output_fname)):
 
@@ -278,7 +279,7 @@ class DownloadManager(object):
             "halo catalog = %.1f seconds\n" % runtime))
 
 
-        # overwrite the fname metadata so that 
+        # overwrite the fname metadata so that
         # it is consistent with the downloaded location
         try:
             import h5py
@@ -305,7 +306,7 @@ class DownloadManager(object):
 
         self.halo_table_cache.add_entry_to_cache_log(new_log_entry)
 
-        # Print a special message if this download was triggered 
+        # Print a special message if this download was triggered
         # by the downloading script (hidden feature for developers only)
         try:
             success_msg = kwargs['success_msg']
@@ -313,7 +314,7 @@ class DownloadManager(object):
             args_msg = "simname = '" + str(new_log_entry.simname) + "'"
             args_msg += ", halo_finder = '" + str(new_log_entry.halo_finder) + "'"
             args_msg += ", version_name = '" + str(new_log_entry.version_name) + "'"
-            args_msg += ", redshift = " + str(new_log_entry.redshift) 
+            args_msg += ", redshift = " + str(new_log_entry.redshift)
 
             success_msg = ("\nThe halo catalog has been successfully downloaded "
                 "to the following location:\n" + str(output_fname) + "\n\n"
@@ -353,11 +354,11 @@ class DownloadManager(object):
 
 
 
-    def download_ptcl_table(self, simname, redshift, 
-        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_ptcl_version_name, 
-        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False, 
+    def download_ptcl_table(self, simname, redshift,
+        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_ptcl_version_name,
+        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False,
         **kwargs):
-        """ Method to download one of the binary files storing a 
+        """ Method to download one of the binary files storing a
         random downsampling of dark matter particles.
 
         Parameters
@@ -368,18 +369,18 @@ class DownloadManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
         redshift : float
-            Redshift of the requested snapshot. 
-            Must match one of theavailable snapshots within dz_tol, 
+            Redshift of the requested snapshot.
+            Must match one of theavailable snapshots within dz_tol,
             or a prompt will be issued providing the nearest
             available snapshots to choose from.
 
-        version_name : string, optional 
-            Nickname of the version of the halo catalog used to differentiate 
-            between the same halo catalog processed in different ways. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
+        version_name : string, optional
+            Nickname of the version of the halo catalog used to differentiate
+            between the same halo catalog processed in different ways.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
 
-        download_dirname : str, optional 
-            Absolute path to the directory where you want to download the catalog. 
+        download_dirname : str, optional
+            Absolute path to the directory where you want to download the catalog.
             Default is `std_cache_loc`, which will store the catalog in the following directory:
             ``$HOME/.astropy/cache/halotools/halo_tables/simname/halo_finder/``
 
@@ -393,16 +394,16 @@ class DownloadManager(object):
             whether or not to overwrite the file. Default is False, in which case
             no download will occur if a pre-existing file is detected.
 
-        ignore_nearby_redshifts : bool, optional 
-            Flag used to determine whether nearby redshifts in cache will be ignored. 
-            If there are existing halo catalogs in the Halotools cache with matching 
-            ``simname``, ``halo_finder`` and ``version_name``, 
-            and if one or more of those catalogs has a redshift within ``dz_tol``, 
-            then the ignore_nearby_redshifts flag must be set to True in order 
-            for the new halo catalog to be stored in cache. 
-            Default is False. 
+        ignore_nearby_redshifts : bool, optional
+            Flag used to determine whether nearby redshifts in cache will be ignored.
+            If there are existing halo catalogs in the Halotools cache with matching
+            ``simname``, ``halo_finder`` and ``version_name``,
+            and if one or more of those catalogs has a redshift within ``dz_tol``,
+            then the ignore_nearby_redshifts flag must be set to True in order
+            for the new halo catalog to be stored in cache.
+            Default is False.
 
-        Examples 
+        Examples
         -----------
         >>> dman = DownloadManager()
         >>> simname = 'bolplanck'
@@ -414,27 +415,27 @@ class DownloadManager(object):
 
         $HOME/.astropy/cache/halotools/particle_catalogs/
         Use the download_dirname keyword argument to store the catalog in an alternate location.
-        Wherever you store it, after calling the `download_ptcl_table` method 
+        Wherever you store it, after calling the `download_ptcl_table` method
         you can access particle data by loading the associated halo catalog into memory:
 
         >>> from halotools.sim_manager import CachedHaloCatalog
         >>> halocat = CachedHaloCatalog(simname = 'bolplanck', redshift = z, halo_finder = 'rockstar') # doctest: +SKIP
 
-        Since you chose default values for the ``version_name``, 
-        it is not necessary to specify that keyword arguments. The ``halocat`` has 
-        metadata attached to it describing the simulation, snapshot, catalog processing notes, etc. 
-        The actual particles are stored in the form of an Astropy `~astropy.table.Table` data structure 
+        Since you chose default values for the ``version_name``,
+        it is not necessary to specify that keyword arguments. The ``halocat`` has
+        metadata attached to it describing the simulation, snapshot, catalog processing notes, etc.
+        The actual particles are stored in the form of an Astropy `~astropy.table.Table` data structure
         and can be accessed as follows:
 
         >>> particles = halocat.ptcl_table # doctest: +SKIP
         >>> array_of_x_position = particles['x'] # doctest: +SKIP
 
-        Notes 
+        Notes
         -------
-        If after downloading the catalog you decide that you want to move it 
-        to a new location on disk, you will need to be sure your cache directory 
-        is informed of the relocation. 
-        In this case, see :ref:`relocating_simulation_data` for instructions. 
+        If after downloading the catalog you decide that you want to move it
+        to a new location on disk, you will need to be sure your cache directory
+        is informed of the relocation.
+        In this case, see :ref:`relocating_simulation_data` for instructions.
 
 
         """
@@ -466,13 +467,13 @@ class DownloadManager(object):
                 )
             raise HalotoolsError(msg % (simname, dz_tol, redshift, closest_redshift_string))
 
-        # At this point we have a candidate file to download that 
-        # matches the input specifications. 
+        # At this point we have a candidate file to download that
+        # matches the input specifications.
         ############################################################
 
         ############################################################
-        # Determine the download directory, 
-        # passively creating the necessary directory tree 
+        # Determine the download directory,
+        # passively creating the necessary directory tree
         if download_dirname == 'std_cache_loc':
             cache_basedir = os.path.dirname(self.ptcl_table_cache.cache_log_fname)
             download_dirname = os.path.join(cache_basedir, 'particle_catalogs', simname)
@@ -490,9 +491,9 @@ class DownloadManager(object):
         ############################################################
 
         ############################################################
-        # Now we check the cache log to see if there are any matching entries 
+        # Now we check the cache log to see if there are any matching entries
         exact_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
-            simname = simname, version_name = version_name, 
+            simname = simname, version_name = version_name,
             redshift = closest_redshift, dz_tol = 0.)
         exact_matches = list(exact_match_generator)
 
@@ -515,19 +516,19 @@ class DownloadManager(object):
                 warn(msg)
 
         close_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
-            simname = simname, version_name = version_name, 
+            simname = simname, version_name = version_name,
             redshift = closest_redshift, dz_tol = dz_tol)
         close_matches = list(close_match_generator)
 
-        if ((len(close_matches) > 0) 
-            & (len(exact_matches) == 0) 
+        if ((len(close_matches) > 0)
+            & (len(exact_matches) == 0)
             & (ignore_nearby_redshifts == False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
             msg += str(entry.fname) + "\n\n"
             msg += ("This log entry has exactly matching metadata "
-                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) 
+                "and a redshift within the input ``dz_tol`` = " + str(dz_tol)
                 +"\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
@@ -539,7 +540,7 @@ class DownloadManager(object):
 
         ############################################################
         # If the output_fname already exists, overwrite must be set to True
-        # A special message is printed if this exception is raised by the 
+        # A special message is printed if this exception is raised by the
         # initial download script (hidden feature for developers only)
         if (overwrite == False) & (os.path.isfile(output_fname)):
 
@@ -555,7 +556,7 @@ class DownloadManager(object):
 
         download_file_from_url(url, output_fname)
 
-        # overwrite the fname metadata so that 
+        # overwrite the fname metadata so that
         # it is consistent with the downloaded location
         try:
             import h5py
@@ -581,14 +582,14 @@ class DownloadManager(object):
 
         self.ptcl_table_cache.add_entry_to_cache_log(new_log_entry)
 
-        # Print a special message if this download was triggered 
+        # Print a special message if this download was triggered
         # by the downloading script (hidden feature for developers only)
         try:
             success_msg = kwargs['success_msg']
         except KeyError:
             args_msg = "simname = '" + str(new_log_entry.simname) + "'"
             args_msg += ", version_name = '" + str(new_log_entry.version_name) + "'"
-            args_msg += ", redshift = " + str(new_log_entry.redshift) 
+            args_msg += ", redshift = " + str(new_log_entry.redshift)
 
             success_msg = ("\nThe particle catalog has been successfully downloaded "
                 "to the following location:\n" + str(output_fname) + "\n\n"
@@ -607,7 +608,7 @@ class DownloadManager(object):
                 "as well as the``fname`` column of the corresponding entry in the log. \n"
                 "You can accomplish this with the ``update_cached_file_location``"
                 "method \nof the PtclTableCache class.\n\n")
-        
+
         if 'initial_download_script_msg' in list(kwargs.keys()):
             return new_log_entry
         else:
@@ -713,7 +714,7 @@ class DownloadManager(object):
 
         return output_fname, closest_available_redshift
 
-    def _closest_catalog_on_web(self, catalog_type, 
+    def _closest_catalog_on_web(self, catalog_type,
         simname, desired_redshift, **kwargs):
         """
         Parameters
@@ -734,10 +735,10 @@ class DownloadManager(object):
             Nickname of the halo-finder, e.g. ``rockstar``.
             Required when input ``catalog_type`` is ``halos``.
 
-        version_name : string, optional 
-            Nickname for the version of the catalog. 
+        version_name : string, optional
+            Nickname for the version of the catalog.
             Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module. 
+            Default is set by `~halotools.sim_manager.sim_defaults` module.
 
         Returns
         -------
@@ -751,14 +752,14 @@ class DownloadManager(object):
         --------
         >>> catman = DownloadManager()
 
-        Suppose you would like to download a pre-processed halo catalog 
+        Suppose you would like to download a pre-processed halo catalog
         for the Bolshoi-Planck simulation for z=0.5.
-        To identify the filename of the available catalog 
+        To identify the filename of the available catalog
         that most closely matches your needs:
 
         >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
-        You may also wish to have a collection of downsampled 
+        You may also wish to have a collection of downsampled
         dark matter particles to accompany this snapshot:
 
         >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
@@ -802,12 +803,12 @@ class DownloadManager(object):
 
         if catalog_type is 'particles':
             filename_list = (
-                self._ptcl_tables_available_for_download(simname = simname, 
+                self._ptcl_tables_available_for_download(simname = simname,
                     version_name = ptcl_version_name)
                 )
         elif catalog_type is 'halos':
             filename_list = (
-                self._processed_halo_tables_available_for_download(simname = simname, 
+                self._processed_halo_tables_available_for_download(simname = simname,
                     halo_finder = halo_finder, version_name = version_name)
                 )
 
@@ -817,7 +818,7 @@ class DownloadManager(object):
 
         return output_fname, actual_redshift
 
-    def _ptcl_tables_available_for_download(self, 
+    def _ptcl_tables_available_for_download(self,
         version_name = sim_defaults.default_ptcl_version_name, **kwargs):
         """ Method searches the appropriate web location and
         returns a list of the filenames of all reduced
@@ -835,10 +836,10 @@ class DownloadManager(object):
             Default is None, in which case `processed_halo_tables_in_cache`
             will not filter the returned list of filenames by ``simname``.
 
-        version_name : string, optional 
-            Nickname for the version of the catalog. 
+        version_name : string, optional
+            Nickname for the version of the catalog.
             Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module. 
+            Default is set by `~halotools.sim_manager.sim_defaults` module.
 
         Returns
         -------
@@ -906,11 +907,11 @@ class DownloadManager(object):
             Default is None, in which case `_processed_halo_tables_available_for_download`
             will not filter the returned list of filenames by ``halo_finder``.
 
-        version_name : string, optional 
-            Nickname for the version of the catalog. 
-            
+        version_name : string, optional
+            Nickname for the version of the catalog.
+
             Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module. 
+            Default is set by `~halotools.sim_manager.sim_defaults` module.
 
         Returns
         -------
