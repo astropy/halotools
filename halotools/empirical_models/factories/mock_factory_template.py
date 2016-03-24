@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 
-Module containing the template class 
-`~halotools.empirical_models.MockFactory` used to 
-construct mock galaxy populations. 
-The mock factory only has knowledge of a simulation halocat 
-and composite model object, and provides an 
-abstract interface between the two. 
+Module containing the template class
+`~halotools.empirical_models.MockFactory` used to
+construct mock galaxy populations.
+The mock factory only has knowledge of a simulation halocat
+and composite model object, and provides an
+abstract interface between the two.
 """
+from __future__ import absolute_import
 
 import numpy as np
 from multiprocessing import cpu_count
-from copy import copy, deepcopy
+from copy import copy
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-from astropy.table import Table 
+from abc import ABCMeta, abstractmethod
+from astropy.table import Table
 
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
@@ -26,35 +27,34 @@ try:
 except ImportError:
     HAS_MOCKOBS = False
 
-from ...sim_manager import sim_defaults
 from ...utils.array_utils import randomly_downsample_data
-from ...sim_manager import FakeSim
 from ...custom_exceptions import *
 
 
 __all__ = ['MockFactory']
 __author__ = ['Andrew Hearin']
 
+
 @six.add_metaclass(ABCMeta)
 class MockFactory(object):
-    """ Abstract base class responsible for populating a simulation 
+    """ Abstract base class responsible for populating a simulation
     with a synthetic galaxy population.
 
-    `MockFactory` is an abstract base class, and cannot be instantiated. 
-    Concrete sub-classes of `MockFactory` such as `HodMockFactory` and 
-    `SubhaloMockFactory` are the objects used 
-    to populate simulations with galaxies. 
+    `MockFactory` is an abstract base class, and cannot be instantiated.
+    Concrete sub-classes of `MockFactory` such as `HodMockFactory` and
+    `SubhaloMockFactory` are the objects used
+    to populate simulations with galaxies.
     """
     def __init__(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        halocat : object 
-            Object containing the halo catalog and other associated data.  
+        halocat : object
+            Object containing the halo catalog and other associated data.
             Produced by `~halotools.sim_manager.CachedHaloCatalog`
 
-        model : object 
-            A model built by a sub-class of `~halotools.empirical_models.ModelFactory`. 
+        model : object
+            A model built by a sub-class of `~halotools.empirical_models.ModelFactory`.
 
         """
 
@@ -74,12 +74,12 @@ class MockFactory(object):
         try:
             self.ptcl_table = halocat.ptcl_table # pre-retrieve the particles from disk, if available
         except:
-            pass   
-            
+            pass
+
         try:
-            self.gal_types = self.model.gal_types 
+            self.gal_types = self.model.gal_types
         except:
-            pass   
+            pass
 
         # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
@@ -87,51 +87,51 @@ class MockFactory(object):
 
         if hasattr(self.model, '_haloprop_list'):
             self.additional_haloprops.extend(self.model._haloprop_list)
-        # Eliminate any possible redundancies 
+        # Eliminate any possible redundancies
         self.additional_haloprops = list(set(self.additional_haloprops))
 
-        self.galaxy_table = Table() 
+        self.galaxy_table = Table()
 
     @abstractmethod
     def populate(self, **kwargs):
-        """ 
-        Method populating halos with mock galaxies. 
-        By calling the `populate` method of your mock, you will repopulate 
-        the halo catalog with a new realization of the model based on 
-        whatever values of the model parameters are currently stored in the 
-        model ``param_dict``. 
+        """
+        Method populating halos with mock galaxies.
+        By calling the `populate` method of your mock, you will repopulate
+        the halo catalog with a new realization of the model based on
+        whatever values of the model parameters are currently stored in the
+        model ``param_dict``.
 
-        For documentation on the `populate` method of subhalo-based models, 
-        see `halotools.empirical_models.SubhaloMockFactory.populate`; 
-        for HOD-style models 
-        see `halotools.empirical_models.HodMockFactory.populate`. 
+        For documentation on the `populate` method of subhalo-based models,
+        see `halotools.empirical_models.SubhaloMockFactory.populate`;
+        for HOD-style models
+        see `halotools.empirical_models.HodMockFactory.populate`.
 
-        Examples 
+        Examples
         ----------
-        We'll use a pre-built HOD-style model to demonstrate basic usage. 
-        The same syntax applies to subhalo-based models. 
-        
+        We'll use a pre-built HOD-style model to demonstrate basic usage.
+        The same syntax applies to subhalo-based models.
+
         >>> from halotools.empirical_models import PrebuiltHodModelFactory
         >>> model_instance = PrebuiltHodModelFactory('zheng07')
 
-        Here we will use a fake simulation, but you can populate mocks 
-        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or 
-        `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+        Here we will use a fake simulation, but you can populate mocks
+        using any instance of `~halotools.sim_manager.CachedHaloCatalog` or
+        `~halotools.sim_manager.UserSuppliedHaloCatalog`.
 
         >>> from halotools.sim_manager import FakeSim
         >>> halocat = FakeSim()
         >>> model_instance.populate_mock(halocat)
 
-        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
-        You can call the `populate` method bound to the ``mock``, 
-        which will repopulate the halo catalog with a new Monte Carlo 
-        realization of the model. 
+        Your ``model_instance`` now has a ``mock`` attribute bound to it.
+        You can call the `populate` method bound to the ``mock``,
+        which will repopulate the halo catalog with a new Monte Carlo
+        realization of the model.
 
         >>> model_instance.mock.populate()
 
-        If you want to change the behavior of your model, just change the 
-        values stored in the ``param_dict``. Differences in the parameter values 
-        will change the behavior of the mock-population. 
+        If you want to change the behavior of your model, just change the
+        values stored in the ``param_dict``. Differences in the parameter values
+        will change the behavior of the mock-population.
 
         >>> model_instance.param_dict['logMmin'] = 12.1
         >>> model_instance.mock.populate()
@@ -140,14 +140,14 @@ class MockFactory(object):
         raise NotImplementedError("All subclasses of MockFactory"
         " must include a populate method")
 
-    @property 
+    @property
     def number_density(self):
         """ Comoving number density of the mock galaxy catalog.
 
         Returns
         --------
-        number density : float 
-            Comoving number density in units of :math:`(h/Mpc)^{3}`. 
+        number density : float
+            Comoving number density in units of :math:`(h/Mpc)^{3}`.
 
         """
         ngals = len(self.galaxy_table)
@@ -156,75 +156,75 @@ class MockFactory(object):
 
     def compute_galaxy_clustering(self, include_crosscorr = False, **kwargs):
         """
-        Built-in method for all mock catalogs to compute the galaxy clustering signal. 
+        Built-in method for all mock catalogs to compute the galaxy clustering signal.
 
-        Parameters 
+        Parameters
         ----------
-        variable_galaxy_mask : scalar, optional 
-            Any value used to construct a mask to select a sub-population 
-            of mock galaxies. See examples below. 
+        variable_galaxy_mask : scalar, optional
+            Any value used to construct a mask to select a sub-population
+            of mock galaxies. See examples below.
 
-        include_crosscorr : bool, optional 
-            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask. 
-            If ``include_crosscorr`` is set to False (the default option), method will return 
-            the auto-correlation function of the subsample of galaxies determined by 
-            the input ``variable_galaxy_mask``. If ``include_crosscorr`` is True, 
-            method will return the auto-correlation of the subsample, 
-            the cross-correlation of the subsample and the complementary subsample, 
-            and the the auto-correlation of the complementary subsample, in that order. 
-            See examples below. 
+        include_crosscorr : bool, optional
+            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask.
+            If ``include_crosscorr`` is set to False (the default option), method will return
+            the auto-correlation function of the subsample of galaxies determined by
+            the input ``variable_galaxy_mask``. If ``include_crosscorr`` is True,
+            method will return the auto-correlation of the subsample,
+            the cross-correlation of the subsample and the complementary subsample,
+            and the the auto-correlation of the complementary subsample, in that order.
+            See examples below.
 
-        mask_function : array, optional 
-            Function object returning a masking array when operating on the galaxy_table. 
+        mask_function : array, optional
+            Function object returning a masking array when operating on the galaxy_table.
             More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
-            allows for the possibility of multiple simultaneous cuts. See examples below. 
+            allows for the possibility of multiple simultaneous cuts. See examples below.
 
-        rbins : array, optional 
-            Bins in which the correlation function will be calculated. 
-            Default is set in `~halotools.empirical_models.model_defaults` module. 
+        rbins : array, optional
+            Bins in which the correlation function will be calculated.
+            Default is set in `~halotools.empirical_models.model_defaults` module.
 
-        num_threads : int, optional 
-            Number of CPU cores to use in the calculation. 
-            Default is maximum number available. 
+        num_threads : int, optional
+            Number of CPU cores to use in the calculation.
+            Default is maximum number available.
 
-        Returns 
+        Returns
         --------
-        rbin_centers : array 
-            Midpoint of the bins used in the correlation function calculation 
+        rbin_centers : array
+            Midpoint of the bins used in the correlation function calculation
 
-        correlation_func : array 
-            If not using any mask (the default option), method returns the 
-            correlation function of the full mock galaxy catalog. 
+        correlation_func : array
+            If not using any mask (the default option), method returns the
+            correlation function of the full mock galaxy catalog.
 
-            If using a mask, and if ``include_crosscorr`` is False (the default option), 
-            method returns the correlation function of the subsample of galaxies determined by 
-            the input mask. 
+            If using a mask, and if ``include_crosscorr`` is False (the default option),
+            method returns the correlation function of the subsample of galaxies determined by
+            the input mask.
 
-            If using a mask, and if ``include_crosscorr`` is True, 
-            method will return the auto-correlation of the subsample, 
-            the cross-correlation of the subsample and the complementary subsample, 
-            and the the auto-correlation of the complementary subsample, in that order. 
-            See the example below. 
+            If using a mask, and if ``include_crosscorr`` is True,
+            method will return the auto-correlation of the subsample,
+            the cross-correlation of the subsample and the complementary subsample,
+            and the the auto-correlation of the complementary subsample, in that order.
+            See the example below.
 
-        Examples 
+        Examples
         --------
-        Compute two-point clustering of all galaxies in the mock: 
+        Compute two-point clustering of all galaxies in the mock:
 
         >>> r, clustering = mock.compute_galaxy_clustering() # doctest: +SKIP
 
-        Compute two-point clustering of central galaxies only: 
+        Compute two-point clustering of central galaxies only:
 
         >>> r, clustering = mock.compute_galaxy_clustering(gal_type = 'centrals') # doctest: +SKIP
 
-        Compute two-point clustering of quiescent galaxies, star-forming galaxies, 
-        as well as the cross-correlation: 
+        Compute two-point clustering of quiescent galaxies, star-forming galaxies,
+        as well as the cross-correlation:
 
         >>> r, quiescent_clustering, q_sf_cross_clustering, star_forming_clustering = mock.compute_galaxy_clustering(quiescent = True, include_crosscorr = True) # doctest: +SKIP
 
-        Finally, suppose we wish to ask a very targeted question about how some physical effect 
-        impacts the clustering of galaxies in a specific halo mass range. 
-        For example, suppose we wish to study the two-point function of satellite galaxies 
-        residing in cluster-mass halos. For this we can use the more flexible mask_function 
+        Finally, suppose we wish to ask a very targeted question about how some physical effect
+        impacts the clustering of galaxies in a specific halo mass range.
+        For example, suppose we wish to study the two-point function of satellite galaxies
+        residing in cluster-mass halos. For this we can use the more flexible mask_function
         option to select our population:
 
         >>> def my_masking_function(table): # doctest: +SKIP
@@ -232,12 +232,12 @@ class MockFactory(object):
         >>>     return result # doctest: +SKIP
         >>> r, cluster_sat_clustering = mock.compute_galaxy_clustering(mask_function = my_masking_function) # doctest: +SKIP
 
-        Notes 
+        Notes
         -----
-        The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
-        control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.tpcf` documentation. 
+        The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper
+        around the `~halotools.mock_observables.tpcf` function. If you wish for greater
+        control over how your galaxy clustering signal is estimated,
+        see the `~halotools.mock_observables.tpcf` documentation.
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_clustering method is only available "
@@ -266,85 +266,85 @@ class MockFactory(object):
             raise HalotoolsError(msg % (key, kwargs[key]))
 
         if include_crosscorr is False:
-            pos = three_dim_pos_bundle(table = self.galaxy_table, 
+            pos = three_dim_pos_bundle(table = self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
-                pos, rbins, period=self.Lbox, num_threads=num_threads, 
+                pos, rbins, period=self.Lbox, num_threads=num_threads,
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
             if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
                 msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
-                    "If this result is expected, you should not call the compute_galaxy_clustering" 
+                    "If this result is expected, you should not call the compute_galaxy_clustering"
                     "method with the %s keyword")
                 raise HalotoolsError(msg % (key, kwargs[key], key))
-            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
+            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             xi11, xi12, xi22 = mock_observables.tpcf(
-                sample1=pos, rbins=rbins, sample2=pos2, 
-                period=self.Lbox, num_threads=num_threads, 
+                sample1=pos, rbins=rbins, sample2=pos2,
+                period=self.Lbox, num_threads=num_threads,
                 approx_cell1_size = [rmax, rmax, rmax])
-            return rbin_centers, xi11, xi12, xi22 
+            return rbin_centers, xi11, xi12, xi22
 
 
     def compute_galaxy_matter_cross_clustering(self, include_complement = False, **kwargs):
         """
-        Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function. 
+        Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function.
 
-        Parameters 
+        Parameters
         ----------
-        variable_galaxy_mask : scalar, optional 
-            Any value used to construct a mask to select a sub-population 
-            of mock galaxies. See examples below. 
+        variable_galaxy_mask : scalar, optional
+            Any value used to construct a mask to select a sub-population
+            of mock galaxies. See examples below.
 
-        include_complement : bool, optional 
-            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask. 
-            If ``include_complement`` is set to False (the default option), method will return 
-            the cross-correlation function between a random downsampling of dark matter particles 
-            and the subsample of galaxies determined by 
-            the input ``variable_galaxy_mask``. If ``include_complement`` is True, 
-            method will also return the cross-correlation between the dark matter particles 
-            and the complementary subsample. See examples below. 
-
-        mask_function : array, optional 
-            Function object returning a masking array when operating on the galaxy_table. 
-            More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
-            allows for the possibility of multiple simultaneous cuts. See examples below. 
-
-        rbins : array, optional 
-            Bins in which the correlation function will be calculated. 
-            Default is set in `~halotools.empirical_models.model_defaults` module. 
-
-        num_threads : int, optional 
-            Number of CPU cores to use in the calculation. 
-            Default is maximum number available. 
-
-        Returns 
-        --------
-        rbin_centers : array 
-            Midpoint of the bins used in the correlation function calculation 
-
-        correlation_func : array 
-            If not using a mask (the default option), method returns the 
-            correlation function of the full mock galaxy catalog. 
-
-            If using a mask, and if ``include_complement`` is False (the default option), 
-            method returns the cross-correlation function between a random downsampling 
-            of dark matter particles and the subsample of galaxies determined by 
-            the input mask. 
-
-            If using a mask, and if ``include_complement`` is True, 
-            method will also return the cross-correlation between the dark matter particles 
+        include_complement : bool, optional
+            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask.
+            If ``include_complement`` is set to False (the default option), method will return
+            the cross-correlation function between a random downsampling of dark matter particles
+            and the subsample of galaxies determined by
+            the input ``variable_galaxy_mask``. If ``include_complement`` is True,
+            method will also return the cross-correlation between the dark matter particles
             and the complementary subsample. See examples below.
 
-        Examples 
+        mask_function : array, optional
+            Function object returning a masking array when operating on the galaxy_table.
+            More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
+            allows for the possibility of multiple simultaneous cuts. See examples below.
+
+        rbins : array, optional
+            Bins in which the correlation function will be calculated.
+            Default is set in `~halotools.empirical_models.model_defaults` module.
+
+        num_threads : int, optional
+            Number of CPU cores to use in the calculation.
+            Default is maximum number available.
+
+        Returns
         --------
-        Compute two-point clustering between all mock galaxies and dark matter particles: 
+        rbin_centers : array
+            Midpoint of the bins used in the correlation function calculation
+
+        correlation_func : array
+            If not using a mask (the default option), method returns the
+            correlation function of the full mock galaxy catalog.
+
+            If using a mask, and if ``include_complement`` is False (the default option),
+            method returns the cross-correlation function between a random downsampling
+            of dark matter particles and the subsample of galaxies determined by
+            the input mask.
+
+            If using a mask, and if ``include_complement`` is True,
+            method will also return the cross-correlation between the dark matter particles
+            and the complementary subsample. See examples below.
+
+        Examples
+        --------
+        Compute two-point clustering between all mock galaxies and dark matter particles:
 
         >>> r, galaxy_matter_clustering = mock.compute_galaxy_matter_cross_clustering() # doctest: +SKIP
 
-        Compute the same quantity but for central galaxies only: 
+        Compute the same quantity but for central galaxies only:
 
         >>> r, central_galaxy_matter_clusteringclustering = mock.compute_galaxy_matter_cross_clustering(gal_type = 'centrals') # doctest: +SKIP
 
@@ -352,10 +352,10 @@ class MockFactory(object):
 
         >>> r, quiescent_matter_clustering, star_forming_matter_clustering = mock.compute_galaxy_matter_cross_clustering(quiescent = True, include_complement = True) # doctest: +SKIP
 
-        Finally, suppose we wish to ask a very targeted question about how some physical effect 
-        impacts the clustering of galaxies in a specific halo mass range. 
-        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies 
-        residing in cluster-mass halos. For this we can use the more flexible mask_function 
+        Finally, suppose we wish to ask a very targeted question about how some physical effect
+        impacts the clustering of galaxies in a specific halo mass range.
+        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies
+        residing in cluster-mass halos. For this we can use the more flexible mask_function
         option to select our population:
 
         >>> def my_masking_function(table): # doctest: +SKIP
@@ -364,12 +364,12 @@ class MockFactory(object):
         >>> r, cluster_sat_clustering = mock.compute_galaxy_matter_cross_clustering(mask_function = my_masking_function) # doctest: +SKIP
 
 
-        Notes 
+        Notes
         -----
-        The `compute_galaxy_matter_cross_clustering` method bound to mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
-        control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.tpcf` documentation. 
+        The `compute_galaxy_matter_cross_clustering` method bound to mock instances is just a convenience wrapper
+        around the `~halotools.mock_observables.tpcf` function. If you wish for greater
+        control over how your galaxy clustering signal is estimated,
+        see the `~halotools.mock_observables.tpcf` documentation.
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_matter_cross_clustering method is only available "
@@ -381,7 +381,7 @@ class MockFactory(object):
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
         ptcl_table = randomly_downsample_data(self.ptcl_table, nptcl)
-        ptcl_pos = three_dim_pos_bundle(table = ptcl_table, 
+        ptcl_pos = three_dim_pos_bundle(table = ptcl_table,
             key1='x', key2='y', key3='z')
 
         try:
@@ -403,72 +403,72 @@ class MockFactory(object):
             raise HalotoolsError(msg % (key, kwargs[key]))
 
         if include_complement is False:
-            pos = three_dim_pos_bundle(table = self.galaxy_table, 
+            pos = three_dim_pos_bundle(table = self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
-                sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.Lbox, num_threads=num_threads, do_auto=False, 
+                sample1=pos, rbins=rbins, sample2=ptcl_pos,
+                period=self.Lbox, num_threads=num_threads, do_auto=False,
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
             if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
                 msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
-                    "If this result is expected, you should not call the compute_galaxy_clustering" 
+                    "If this result is expected, you should not call the compute_galaxy_clustering"
                     "method with the %s keyword")
                 raise HalotoolsError(msg % (key, kwargs[key], key))
-            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
+            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             clustering = mock_observables.tpcf(
-                sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.Lbox, num_threads=num_threads, do_auto=False, 
+                sample1=pos, rbins=rbins, sample2=ptcl_pos,
+                period=self.Lbox, num_threads=num_threads, do_auto=False,
                 approx_cell1_size = [rmax, rmax, rmax])
             clustering2 = mock_observables.tpcf(
-                sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
-                period=self.Lbox, num_threads=num_threads, do_auto=False, 
+                sample1=pos2, rbins=rbins, sample2=ptcl_pos,
+                period=self.Lbox, num_threads=num_threads, do_auto=False,
                 approx_cell1_size = [rmax, rmax, rmax])
-            return rbin_centers, clustering, clustering2 
+            return rbin_centers, clustering, clustering2
 
 
-    def compute_fof_group_ids(self, zspace = True, 
-        b_perp = model_defaults.default_b_perp, 
+    def compute_fof_group_ids(self, zspace = True,
+        b_perp = model_defaults.default_b_perp,
         b_para = model_defaults.default_b_para, **kwargs):
         """
-        Method computes the friends-of-friends group IDs of the 
-        mock galaxy catalog after (optionally) placing the mock into redshift space. 
+        Method computes the friends-of-friends group IDs of the
+        mock galaxy catalog after (optionally) placing the mock into redshift space.
 
-        Parameters 
+        Parameters
         ----------
-        zspace : bool, optional 
-            Boolean determining whether we apply redshift-space distortions to the 
-            positions of galaxies using the distant-observer approximation. 
-            Default is True. 
+        zspace : bool, optional
+            Boolean determining whether we apply redshift-space distortions to the
+            positions of galaxies using the distant-observer approximation.
+            Default is True.
 
-        b_perp : float, optional 
-            Maximum linking length in the perpendicular direction, 
-            normalized by the mean separation between galaxies. 
-            Default is set in `~halotools.empirical_models.model_defaults` module. 
+        b_perp : float, optional
+            Maximum linking length in the perpendicular direction,
+            normalized by the mean separation between galaxies.
+            Default is set in `~halotools.empirical_models.model_defaults` module.
 
-        b_para : float, optional 
-            Maximum linking length in the line-of-sight direction, 
-            normalized by the mean separation between galaxies. 
-            Default is set in `~halotools.empirical_models.model_defaults` module. 
+        b_para : float, optional
+            Maximum linking length in the line-of-sight direction,
+            normalized by the mean separation between galaxies.
+            Default is set in `~halotools.empirical_models.model_defaults` module.
 
-        num_threads : int, optional 
-            Number of CPU cores to use in the calculation. 
-            Default is maximum number available. 
+        num_threads : int, optional
+            Number of CPU cores to use in the calculation.
+            Default is maximum number available.
 
-        Returns 
+        Returns
         --------
-        ids : array 
-            Integer array containing the group ID of each mock galaxy. 
+        ids : array
+            Integer array containing the group ID of each mock galaxy.
 
-        Notes 
+        Notes
         -----
-        The `compute_fof_group_ids` method bound to mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.groups.FoFGroups` class. 
-        If you wish for greater control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.groups.FoFGroups.group_ids` documentation. 
+        The `compute_fof_group_ids` method bound to mock instances is just a convenience wrapper
+        around the `~halotools.mock_observables.groups.FoFGroups` class.
+        If you wish for greater control over how your galaxy clustering signal is estimated,
+        see the `~halotools.mock_observables.groups.FoFGroups.group_ids` documentation.
 
         """
         if HAS_MOCKOBS is False:
@@ -492,15 +492,15 @@ class MockFactory(object):
             z = model_helpers.enforce_periodicity_of_box(z, self.Lbox)
         pos = np.vstack((x, y, z)).T
 
-        group_finder = mock_observables.FoFGroups(positions=pos, 
-            b_perp = b_perp, b_para = b_para, 
+        group_finder = mock_observables.FoFGroups(positions=pos,
+            b_perp = b_perp, b_para = b_para,
             Lbox = self.Lbox, num_threads = num_threads)
 
         return group_finder.group_ids
 
-    @property 
+    @property
     def satellite_fraction(self):
-        """ Fraction of mock galaxies that are satellites. 
+        """ Fraction of mock galaxies that are satellites.
         """
         satmask = self.galaxy_table['gal_type'] != 'centrals'
         return len(self.galaxy_table[satmask]) / float(len(self.galaxy_table))
