@@ -5,32 +5,31 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from astropy.extern.six.moves import xrange as range
 
-#load pair counters
+# load pair counters
 from ..double_tree_pairs import npairs, jnpairs, xy_z_npairs, s_mu_npairs
-#load comparison simple pair counters
+# load comparison simple pair counters
 from ..pairs import npairs as simp_npairs
-from ..pairs import wnpairs as simp_wnpairs
 from ..pairs import xy_z_npairs as simp_xy_z_npairs
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
-from ....custom_exceptions import HalotoolsError
-
 import pytest
 slow = pytest.mark.slow
 
-__all__=['test_npairs_periodic','test_npairs_nonperiodic','test_xy_z_npairs_periodic',\
-         'test_xy_z_npairs_nonperiodic','test_s_mu_npairs_periodic',\
-         'test_s_mu_npairs_nonperiodic','test_jnpairs_periodic','test_jnpairs_nonperiodic']
+__all__ = ['test_npairs_periodic', 'test_npairs_nonperiodic',
+           'test_xy_z_npairs_periodic',
+           'test_xy_z_npairs_nonperiodic', 'test_s_mu_npairs_periodic',
+           'test_s_mu_npairs_nonperiodic', 'test_jnpairs_periodic',
+           'test_jnpairs_nonperiodic']
 
-#set up random points to test pair counters
+# set up random points to test pair counters
 np.random.seed(1)
 Npts = 1000
-random_sample = np.random.random((Npts,3))
-period = np.array([1.0,1.0,1.0])
-num_threads=2
+random_sample = np.random.random((Npts, 3))
+period = np.array([1.0, 1.0, 1.0])
+num_threads = 2
 
-#set up a regular grid of points to test pair counters
+# set up a regular grid of points to test pair counters
 Npts2 = 10
 epsilon = 0.001
 gridx = np.linspace(0, 1-epsilon, Npts2)
@@ -55,6 +54,7 @@ izz = izz.flatten()
 grid_indices = np.ravel_multi_index([ixx, iyy, izz],
     [grid_jackknife_ncells, grid_jackknife_ncells, grid_jackknife_ncells])
 grid_indices += 1
+
 
 def test_npairs_periodic():
     """
@@ -308,7 +308,7 @@ def test_tight_locus2():
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts1 = npairs(points1, points2, rbins,
-        num_threads='max', period=1)
+                     num_threads='max', period=1)
     counts2 = npairs(points1, points2, rbins,
         num_threads=1, period=1)
     counts3 = npairs(points1, points2, rbins,

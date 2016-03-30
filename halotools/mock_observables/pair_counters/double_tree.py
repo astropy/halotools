@@ -5,6 +5,7 @@ Data structures used for efficient,
 cache-aware pairwise calculations on simulation boxes.
 """
 
+from __future__ import division
 import numpy as np
 from math import floor
 from astropy.extern.six.moves import xrange as range
@@ -108,13 +109,13 @@ class FlatRectanguloidTree(object):
         self.yperiod = yperiod
         self.zperiod = zperiod
 
-        self.num_xdivs = int(round(xperiod/float(approx_xcell_size)))
-        self.num_ydivs = int(round(yperiod/float(approx_ycell_size)))
-        self.num_zdivs = int(round(zperiod/float(approx_zcell_size)))
+        self.num_xdivs = int(np.round(xperiod / approx_xcell_size))
+        self.num_ydivs = int(np.round(yperiod / approx_ycell_size))
+        self.num_zdivs = int(np.round(zperiod / approx_zcell_size))
 
-        self.xcell_size = self.xperiod/float(self.num_xdivs)
-        self.ycell_size = self.yperiod/float(self.num_ydivs)
-        self.zcell_size = self.zperiod/float(self.num_zdivs)
+        self.xcell_size = self.xperiod / self.num_xdivs
+        self.ycell_size = self.yperiod / self.num_ydivs
+        self.zcell_size = self.zperiod / self.num_zdivs
 
         # Build the tree
         idx_sorted, slice_array = self.compute_cell_structure(x, y, z)
@@ -160,9 +161,9 @@ class FlatRectanguloidTree(object):
 
         nxny = self.num_ydivs*self.num_zdivs
 
-        ix = cellID / nxny
+        ix = cellID // nxny
 
-        iy = (cellID - ix*nxny) / self.num_zdivs
+        iy = (cellID - ix*nxny) // self.num_zdivs
 
         iz = cellID - (ix*self.num_ydivs*self.num_zdivs) - (iy*self.num_zdivs)
 
@@ -190,9 +191,9 @@ class FlatRectanguloidTree(object):
             values of points residing in a given subvolume.
         """
 
-        ix = np.floor(x/self.xcell_size).astype(int)
-        iy = np.floor(y/self.ycell_size).astype(int)
-        iz = np.floor(z/self.zcell_size).astype(int)
+        ix = np.floor(x // self.xcell_size).astype(int)
+        iy = np.floor(y // self.ycell_size).astype(int)
+        iz = np.floor(z // self.zcell_size).astype(int)
 
         #take care of points right on the boundary
         ix = np.where(ix >= self.num_xdivs, self.num_xdivs-1, ix)
@@ -313,9 +314,9 @@ class FlatRectanguloidDoubleTree(object):
         self.y2cell_size = self.tree2.ycell_size
         self.z2cell_size = self.tree2.zcell_size
 
-        self.num_xcell2_per_xcell1 = self.num_x2divs/self.num_x1divs
-        self.num_ycell2_per_ycell1 = self.num_y2divs/self.num_y1divs
-        self.num_zcell2_per_zcell1 = self.num_z2divs/self.num_z1divs
+        self.num_xcell2_per_xcell1 = self.num_x2divs // self.num_x1divs
+        self.num_ycell2_per_ycell1 = self.num_y2divs // self.num_y1divs
+        self.num_zcell2_per_zcell1 = self.num_z2divs // self.num_z1divs
 
     def _check_sensible_constructor_inputs(self):
         """
@@ -368,17 +369,17 @@ class FlatRectanguloidDoubleTree(object):
         modified_z1_cellsize : float
         """
 
-        x1mult = int(floor(self.xperiod/float(approx_x1cell_size)))
-        y1mult = int(floor(self.yperiod/float(approx_y1cell_size)))
-        z1mult = int(floor(self.zperiod/float(approx_z1cell_size)))
+        x1mult = int(floor(self.xperiod / approx_x1cell_size))
+        y1mult = int(floor(self.yperiod / approx_y1cell_size))
+        z1mult = int(floor(self.zperiod / approx_z1cell_size))
 
         x1mult = min(max_cells_per_dimension, x1mult)
         y1mult = min(max_cells_per_dimension, y1mult)
         z1mult = min(max_cells_per_dimension, z1mult)
 
-        xsearch_mult = int(floor(self.xperiod/float(self.search_xlength)))
-        ysearch_mult = int(floor(self.yperiod/float(self.search_ylength)))
-        zsearch_mult = int(floor(self.zperiod/float(self.search_zlength)))
+        xsearch_mult = int(floor(self.xperiod / self.search_xlength))
+        ysearch_mult = int(floor(self.yperiod / self.search_ylength))
+        zsearch_mult = int(floor(self.zperiod / self.search_zlength))
 
         x1mult = min(x1mult, xsearch_mult)
         y1mult = min(y1mult, ysearch_mult)
@@ -388,9 +389,9 @@ class FlatRectanguloidDoubleTree(object):
         y1mult = max(3, y1mult)
         z1mult = max(3, z1mult)
 
-        modified_x1_cellsize = self.xperiod/float(x1mult)
-        modified_y1_cellsize = self.yperiod/float(y1mult)
-        modified_z1_cellsize = self.zperiod/float(z1mult)
+        modified_x1_cellsize = self.xperiod / x1mult
+        modified_y1_cellsize = self.yperiod / y1mult
+        modified_z1_cellsize = self.zperiod / z1mult
 
         return modified_x1_cellsize, modified_y1_cellsize, modified_z1_cellsize
 
@@ -430,9 +431,9 @@ class FlatRectanguloidDoubleTree(object):
         modified_z2_cellsize : float
         """
 
-        x2mult = int(round(self.tree1.xcell_size/float(approx_x2cell_size)))
-        y2mult = int(round(self.tree1.ycell_size/float(approx_y2cell_size)))
-        z2mult = int(round(self.tree1.zcell_size/float(approx_z2cell_size)))
+        x2mult = int(np.round(self.tree1.xcell_size / approx_x2cell_size))
+        y2mult = int(np.round(self.tree1.ycell_size / approx_y2cell_size))
+        z2mult = int(np.round(self.tree1.zcell_size / approx_z2cell_size))
 
         x2mult = max(1, x2mult)
         y2mult = max(1, y2mult)
@@ -442,9 +443,9 @@ class FlatRectanguloidDoubleTree(object):
         y2mult = min(max_cells_per_dimension, y2mult)
         z2mult = min(max_cells_per_dimension, z2mult)
 
-        modified_x2_cellsize = self.tree1.xcell_size/x2mult
-        modified_y2_cellsize = self.tree1.ycell_size/y2mult
-        modified_z2_cellsize = self.tree1.zcell_size/z2mult
+        modified_x2_cellsize = self.tree1.xcell_size / x2mult
+        modified_y2_cellsize = self.tree1.ycell_size / y2mult
+        modified_z2_cellsize = self.tree1.zcell_size / z2mult
 
         return modified_x2_cellsize, modified_y2_cellsize, modified_z2_cellsize
 
@@ -495,7 +496,7 @@ class FlatRectanguloidDoubleTree(object):
         of the current tree-1 cell in order to guarantee that all points
         inside the search length will be found.
         """
-        return int(np.ceil(search_length/float(cell_size)))
+        return int(np.ceil(search_length / cell_size))
 
     def nonPBC_generator(self, dim_idx, num_covering_steps, num_cell2_per_cell1):
         """

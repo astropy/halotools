@@ -512,7 +512,7 @@ class TabularAsciiReader(object):
 
         return array_chunk[mask]
 
-    def read_ascii(self, chunk_memory_size = 500.):
+    def read_ascii(self, chunk_memory_size=500):
         """ Method reads the input ascii and returns
         a structured Numpy array of the data
         that passes the row- and column-cuts.
@@ -538,11 +538,13 @@ class TabularAsciiReader(object):
         ----------
         data_chunk_generator
         """
-        print(("\n...Processing ASCII data of file: \n%s\n " % self.input_fname))
+        print(("\n...Processing ASCII data of file: \n%s\n "
+               % self.input_fname))
         start = time()
 
         file_size = os.path.getsize(self.input_fname)
-        chunk_memory_size *= 1e6 # convert to bytes to match units of file_size
+        # convert to bytes to match units of file_size
+        chunk_memory_size *= 1e6
         num_data_rows = self.data_len()
         print(("Total number of rows in detected data = %i" % num_data_rows))
 
@@ -551,11 +553,12 @@ class TabularAsciiReader(object):
         try:
             Nchunks = max(1, min(file_size / chunk_memory_size, num_data_rows))
         except ZeroDivisionError:
-            msg = ("\nMust choose non-zero size for input ``chunk_memory_size``")
+            msg = ("\nMust choose non-zero size for input "
+                   "``chunk_memory_size``")
             raise ValueError(msg)
 
-        num_rows_in_chunk = int(num_data_rows / float(Nchunks))
-        num_full_chunks = num_data_rows / num_rows_in_chunk
+        num_rows_in_chunk = num_data_rows // Nchunks
+        num_full_chunks = num_data_rows // num_rows_in_chunk
         num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk*Nchunks
 
         header_length = self.header_len()
@@ -568,7 +571,8 @@ class TabularAsciiReader(object):
                 _s = f.readline()
 
             for _i in range(num_full_chunks):
-                print(("... working on chunk "+str(_i)+" of "+str(num_full_chunks)))
+                print(("... working on chunk " + str(_i) +
+                       " of " + str(num_full_chunks)))
 
                 chunk_array = np.array(list(
                     self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt)
