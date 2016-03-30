@@ -111,7 +111,6 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     x, y, z : sequence of length-Npts arrays 
         Units of Mpc assuming h=1, as throughout Halotools. 
 
-
     velocity : array, optional 
         Length-Npts array of velocities in units of km/s 
         used to apply peculiar velocity distortions, e.g.,  
@@ -154,6 +153,11 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     >>> y = np.random.uniform(0, Lbox, npts)
     >>> z = np.random.uniform(0, Lbox, npts)
     >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox)
+
+    Now we will define an array of random velocities that we will use 
+    to apply z-space distortions to the z-dimension. For our random velocities 
+    we'll assume the values are drawn from a Gaussian centered at zero 
+    using `numpy.random.normal`. 
 
     >>> velocity = np.random.normal(loc=0, scale=100, size=npts)
     >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
