@@ -6,8 +6,6 @@ catalogs of galaxies/halos.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from copy import deepcopy 
-
 import numpy as np
 from scipy.stats import binned_statistic
 
@@ -165,8 +163,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
 
     a = 'velocity_distortion_dimension' in kwargs.keys()
     b = 'velocity' in kwargs.keys()
-    if bool(a+b)==True:
-        if bool(a*b)==False:
+    if bool(a+b) is True:
+        if bool(a*b) is False:
             msg = ("You must either both or none of the following keyword arguments: "
                 "``velocity_distortion_dimension`` and ``velocity``\n")
             raise KeyError(msg)
