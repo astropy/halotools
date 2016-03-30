@@ -6,8 +6,6 @@ catalogs of galaxies/halos.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from copy import deepcopy 
-
 import numpy as np
 from scipy.stats import binned_statistic
 
@@ -110,10 +108,12 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
 
     Parameters 
     -----------
-    x, y, z : sequence of arrays 
+    x, y, z : sequence of length-Npts arrays 
+        Units of Mpc assuming h=1, as throughout Halotools. 
 
     velocity : array, optional 
-        Array used to apply peculiar velocity distortions, e.g.,  
+        Length-Npts array of velocities in units of km/s 
+        used to apply peculiar velocity distortions, e.g.,  
         :math:`z_{\\rm dist} = z + v/H_{0}`. 
         Since Halotools workes exclusively in h=1 units, 
         in the above formula :math:`H_{0} = 100 km/s/Mpc`.
@@ -144,13 +144,31 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     --------
     pos : array_like 
         Numpy array with shape *(Npts, 3)*. 
+
+    Examples 
+    ---------
+    >>> npts = 100
+    >>> Lbox = 250.
+    >>> x = np.random.uniform(0, Lbox, npts)
+    >>> y = np.random.uniform(0, Lbox, npts)
+    >>> z = np.random.uniform(0, Lbox, npts)
+    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox)
+
+    Now we will define an array of random velocities that we will use 
+    to apply z-space distortions to the z-dimension. For our random velocities 
+    we'll assume the values are drawn from a Gaussian centered at zero 
+    using `numpy.random.normal`. 
+
+    >>> velocity = np.random.normal(loc=0, scale=100, size=npts)
+    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
+
     """
     posdict = {'x': np.copy(x), 'y': np.copy(y), 'z': np.copy(z)}
 
     a = 'velocity_distortion_dimension' in kwargs.keys()
     b = 'velocity' in kwargs.keys()
-    if bool(a+b)==True:
-        if bool(a*b)==False:
+    if bool(a+b) is True:
+        if bool(a*b) is False:
             msg = ("You must either both or none of the following keyword arguments: "
                 "``velocity_distortion_dimension`` and ``velocity``\n")
             raise KeyError(msg)
