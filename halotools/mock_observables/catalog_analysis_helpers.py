@@ -157,8 +157,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     >>> z = np.random.uniform(0, Lbox, npts)
     >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox)
 
-    >>> vz = np.random.normal(loc=0, scale=100, size=npts)
-    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = vz, velocity_distortion_dimension='z')
+    >>> velocity = np.random.normal(loc=0, scale=100, size=npts)
+    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
 
     """
     posdict = {'x': np.copy(x), 'y': np.copy(y), 'z': np.copy(z)}
