@@ -266,7 +266,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     If the ``period`` argument is passed in, all points' ith coordinate 
     must be between 0 and period[i].
     
-    For a higher-performance implementation of the wp function, 
+    For a higher-performance implementation of the tpcf function, 
     see the Corrfunc code written by Manodeep Sinha, available at 
     https://github.com/manodeep/Corrfunc. 
 
