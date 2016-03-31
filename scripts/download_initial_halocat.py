@@ -30,6 +30,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-overwrite", 
     help="Overwrite the existing halo catalog (if present)", 
     action="store_true")
+parser.add_argument("-dirname",
+    help="Absolute path to the dir to download the catalog. Default is std_cache_loc",
+    default='std_cache_loc')
 args = parser.parse_args()
 
 existing_fname_error_msg = ("\n\nThe following filename already exists "
@@ -75,13 +78,13 @@ if args.overwrite == False:
 ##################################################################
 ### Call the download methods
 
-new_halo_log_entry = downman.download_processed_halo_table(simname = simname, 
-    halo_finder = halo_finder, redshift = redshift, 
-    initial_download_script_msg = existing_fname_error_msg, 
-    overwrite = args.overwrite)
+new_halo_log_entry = downman.download_processed_halo_table(simname = simname,
+    halo_finder = halo_finder, redshift = redshift, download_dirname = args.dirname,
+        initial_download_script_msg = existing_fname_error_msg,
+            overwrite = args.overwrite)
 
-new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
-    redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
+new_ptcl_log_entry = downman.download_ptcl_table(simname = simname,
+    redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, download_dirname = args.dirname,
     initial_download_script_msg = existing_fname_error_msg)
 
 ##################################################################
