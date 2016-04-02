@@ -56,7 +56,7 @@ matrix:
         # Try Astropy development version
         - python: 2.7
           env: ASTROPY_VERSION=development
-        - python: 3.4
+        - python: 3.5
           env: ASTROPY_VERSION=development
 
         # Try numpy 1.10 - might want to switch this so that 1.10 is *default* and 1.9 is checked here down the road
