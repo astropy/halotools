@@ -62,10 +62,10 @@ class BinaryGalpropModel(object):
 
         self.prim_haloprop_key = prim_haloprop_key
 
-        if 'sec_haloprop_key' in kwargs.keys():
+        if 'sec_haloprop_key' in list(kwargs.keys()):
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
-        if 'new_haloprop_func_dict' in kwargs.keys():
+        if 'new_haloprop_func_dict' in list(kwargs.keys()):
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         # Enforce the requirement that sub-classes have been configured properly
@@ -241,7 +241,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             pass
 
         if self._interpol_method=='spline':
-            if 'input_spline_degree' in kwargs.keys():
+            if 'input_spline_degree' in list(kwargs.keys()):
                 self._input_spine_degree = kwargs['input_spline_degree']
             else:
                 self._input_spline_degree = 3
@@ -306,9 +306,9 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             prim_haloprop = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             prim_haloprop = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"

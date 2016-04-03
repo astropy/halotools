@@ -72,7 +72,7 @@ class LogNormalScatterModel(object):
         default_scatter = model_defaults.default_smhm_scatter
         self.prim_haloprop_key = prim_haloprop_key
 
-        if ('scatter_abscissa' in kwargs.keys()) and ('scatter_ordinates' in kwargs.keys()):
+        if ('scatter_abscissa' in list(kwargs.keys())) and ('scatter_ordinates' in list(kwargs.keys())):
             self.abscissa = convert_to_ndarray(kwargs['scatter_abscissa'])
             self.ordinates = convert_to_ndarray(kwargs['scatter_ordinates'])
         else:
@@ -104,9 +104,9 @@ class LogNormalScatterModel(object):
             at the input table. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"

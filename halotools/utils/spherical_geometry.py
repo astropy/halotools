@@ -101,6 +101,6 @@ def sample_spherical_surface(N_points):
     ran_ra = ran1
     ran_dec = ran2
 
-    coords = zip(ran_ra,ran_dec)
+    coords = list(zip(ran_ra,ran_dec))
 
     return coords

@@ -63,7 +63,7 @@ def _test_mock_consistency(mock,
         raise HalotoolsError(inconsistent_halo_finder_error_msg % (mock.halo_finder,halo_finder ))
     if version_name != mock.version_name:
         raise HalotoolsError(inconsistent_version_name_error_msg % (mock.version_name,version_name ))
-    print("version_name = %s" % version_name)
+    print(("version_name = %s" % version_name))
 
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):
@@ -276,7 +276,7 @@ class ModelFactory(object):
         def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
-            for key in self.param_dict.keys():
+            for key in list(self.param_dict.keys()):
                 if key in component_model.param_dict:
                     component_model.param_dict[key] = self.param_dict[key]
 
@@ -462,7 +462,7 @@ class ModelFactory(object):
         else:
             rbins = model_defaults.default_rbins
 
-        if 'include_crosscorr' in kwargs.keys():
+        if 'include_crosscorr' in list(kwargs.keys()):
             include_crosscorr = kwargs['include_crosscorr']
         else:
             include_crosscorr = False
@@ -676,7 +676,7 @@ class ModelFactory(object):
         else:
             rbins = model_defaults.default_rbins
 
-        if 'include_complement' in kwargs.keys():
+        if 'include_complement' in list(kwargs.keys()):
             include_complement = kwargs['include_complement']
         else:
             include_complement = False

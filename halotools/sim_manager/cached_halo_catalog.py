@@ -219,7 +219,7 @@ class CachedHaloCatalog(object):
             msg = ("\nCachedHaloCatalog only accepts keyword arguments, not position arguments. \n")
             raise HalotoolsError(msg)
 
-        for key in kwargs.keys():
+        for key in list(kwargs.keys()):
             try:
                 assert key in self.acceptable_kwargs
             except AssertionError:
@@ -541,10 +541,10 @@ class CachedHaloCatalog(object):
                 raise InvalidCacheLogEntry(self.log_entry._cache_safety_message)
 
     def _add_new_derived_columns(self, t):
-        if 'halo_hostid' not in t.keys():
+        if 'halo_hostid' not in list(t.keys()):
             add_halo_hostid(t)
 
-        if 'halo_mvir_host_halo' not in t.keys():
+        if 'halo_mvir_host_halo' not in list(t.keys()):
             broadcast_host_halo_property(t, 'halo_mvir')
 
     def _bind_additional_metadata(self):
@@ -556,7 +556,7 @@ class CachedHaloCatalog(object):
             raise InvalidCacheLogEntry(msg)
 
         f = self.h5py.File(self.log_entry.fname)
-        for attr_key in f.attrs.keys():
+        for attr_key in list(f.attrs.keys()):
             if attr_key == 'redshift':
                 setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))
             else:

@@ -35,7 +35,7 @@ def three_dim_pos_bundle(table, key1, key2, key3,
         Default is False. 
 
     """
-    if 'mask' in kwargs.keys():
+    if 'mask' in list(kwargs.keys()):
         mask = kwargs['mask']
         x, y, z = table[key1][mask], table[key2][mask], table[key3][mask]
         if return_complement is True:

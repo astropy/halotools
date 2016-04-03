@@ -201,7 +201,7 @@ class TestZheng07Cens(TestCase):
         with pytest.raises(HalotoolsError) as err:
             _ = self.default_model.mean_occupation(x = 4)
         substr = "You must pass either a ``table`` or ``prim_haloprop`` argument" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_get_published_parameters1(self):
         d1 = self.default_model.get_published_parameters(self.default_model.threshold)
@@ -211,7 +211,7 @@ class TestZheng07Cens(TestCase):
             d2 = self.default_model.get_published_parameters(self.default_model.threshold, 
                 publication='Parejko13')
         substr = "For Zheng07Cens, only supported best-fit models are currently Zheng et al. 2007"
-        assert substr == err.value.message
+        assert substr == err.value.args[0]
 
     def test_get_published_parameters3(self):
         with warnings.catch_warnings(record=True) as w:
@@ -412,7 +412,7 @@ class TestZheng07Sats(TestCase):
         with pytest.raises(HalotoolsError) as err:
             _ = self.default_model.mean_occupation(x = 4)
         substr = "You must pass either a ``table`` or ``prim_haloprop`` argument" 
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_get_published_parameters1(self):
         d1 = self.default_model.get_published_parameters(self.default_model.threshold)
@@ -422,7 +422,7 @@ class TestZheng07Sats(TestCase):
             d2 = self.default_model.get_published_parameters(self.default_model.threshold, 
                 publication='Parejko13')
         substr = "For Zheng07Sats, only supported best-fit models are currently Zheng et al. 2007"
-        assert substr == err.value.message
+        assert substr == err.value.args[0]
 
     def test_get_published_parameters3(self):
         with warnings.catch_warnings(record=True) as w:

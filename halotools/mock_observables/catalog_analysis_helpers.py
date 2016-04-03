@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" Common functions used when analyzing 
+""" Common functions used when analyzing
 catalogs of galaxies/halos.
 
 """
@@ -19,60 +19,60 @@ __author__ = ['Andrew Hearin']
 
 def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
     """
-    Estimate the mean value of the property *y* as a function of *x* 
-    for an input sample of galaxies/halos, 
-    optionally returning an error estimate. 
+    Estimate the mean value of the property *y* as a function of *x*
+    for an input sample of galaxies/halos,
+    optionally returning an error estimate.
 
-    The `mean_y_vs_x` function is just a convenience wrapper 
-    around `scipy.stats.binned_statistic` and `np.histogram`. 
+    The `mean_y_vs_x` function is just a convenience wrapper
+    around `scipy.stats.binned_statistic` and `np.histogram`.
 
-    See also :ref:`galaxy_catalog_analysis_tutorial1`. 
+    See also :ref:`galaxy_catalog_analysis_tutorial1`.
 
-    Parameters 
+    Parameters
     -----------
-    x : array_like 
-        Array storing values of the independent variable of the sample. 
+    x : array_like
+        Array storing values of the independent variable of the sample.
 
-    y : array_like 
-        Array storing values of the dependent variable of the sample. 
+    y : array_like
+        Array storing values of the dependent variable of the sample.
 
-    bins : array_like, optional 
-        Bins of the input *x*. 
-        Defaults are set by `scipy.stats.binned_statistic`.  
+    bins : array_like, optional
+        Bins of the input *x*.
+        Defaults are set by `scipy.stats.binned_statistic`.
 
-    error_estimator : string, optional 
-        If set to ``error_on_mean``, function will also return an array storing  
-        :math:`\\sigma_{y}/\\sqrt{N}`, where :math:`\\sigma_{y}` is the 
-        standard deviation of *y* in the bin 
-        and :math:`\\sqrt{N}` is the counts in each bin. 
+    error_estimator : string, optional
+        If set to ``error_on_mean``, function will also return an array storing
+        :math:`\\sigma_{y}/\\sqrt{N}`, where :math:`\\sigma_{y}` is the
+        standard deviation of *y* in the bin
+        and :math:`\\sqrt{N}` is the counts in each bin.
 
-        If set to ``variance``, function will also return an array storing  
-        :math:`\\sigma_{y}`. 
+        If set to ``variance``, function will also return an array storing
+        :math:`\\sigma_{y}`.
 
         Default is ``error_on_mean``
 
-    Returns 
+    Returns
     ----------
-    bin_midpoints : array_like 
-        Midpoints of the *x*-bins. 
+    bin_midpoints : array_like
+        Midpoints of the *x*-bins.
 
-    mean : array_like 
-        Mean of *y* estimated in bins 
+    mean : array_like
+        Mean of *y* estimated in bins
 
-    err : array_like 
+    err : array_like
         Error on *y* estimated in bins
 
-    Examples 
+    Examples
     ---------
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
-    >>> halos = halocat.halo_table 
+    >>> halos = halocat.halo_table
     >>> halo_mass, mean_spin, err = mean_y_vs_x(halos['halo_mvir'], halos['halo_spin'])
 
-    See also 
+    See also
     ---------
     :ref:`galaxy_catalog_analysis_tutorial1`
-    
+
     """
     try:
         assert error_estimator in ('error_on_mean', 'variance')
@@ -100,52 +100,52 @@ def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
     return bin_midpoints, mean, err
 
 def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
-    """ Returns a Numpy array of shape *(Npts, 3)* storing the 
+    """ Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
-    the `~halotools.mock_observables` package. 
+    the `~halotools.mock_observables` package.
 
-    See :ref:`mock_obs_pos_formatting` for a tutorial. 
+    See :ref:`mock_obs_pos_formatting` for a tutorial.
 
-    Parameters 
+    Parameters
     -----------
-    x, y, z : sequence of length-Npts arrays 
-        Units of Mpc assuming h=1, as throughout Halotools. 
+    x, y, z : sequence of length-Npts arrays
+        Units of Mpc assuming h=1, as throughout Halotools.
 
-    velocity : array, optional 
-        Length-Npts array of velocities in units of km/s 
-        used to apply peculiar velocity distortions, e.g.,  
-        :math:`z_{\\rm dist} = z + v/H_{0}`. 
-        Since Halotools workes exclusively in h=1 units, 
+    velocity : array, optional
+        Length-Npts array of velocities in units of km/s
+        used to apply peculiar velocity distortions, e.g.,
+        :math:`z_{\\rm dist} = z + v/H_{0}`.
+        Since Halotools workes exclusively in h=1 units,
         in the above formula :math:`H_{0} = 100 km/s/Mpc`.
 
-        If ``velocity`` argument is passed, 
-        ``velocity_distortion_dimension`` must also be passed. 
+        If ``velocity`` argument is passed,
+        ``velocity_distortion_dimension`` must also be passed.
 
-    velocity_distortion_dimension : string, optional 
-        If set to ``'x'``, ``'y'`` or ``'z'``, 
-        the requested dimension in the returned ``pos`` array 
-        will be distorted due to peculiar motion. 
-        For example, if ``velocity_distortion_dimension`` is ``z``, 
-        then ``pos`` can be treated as physically observed 
-        galaxy positions under the distant-observer approximation. 
-        Default is no distortions. 
+    velocity_distortion_dimension : string, optional
+        If set to ``'x'``, ``'y'`` or ``'z'``,
+        the requested dimension in the returned ``pos`` array
+        will be distorted due to peculiar motion.
+        For example, if ``velocity_distortion_dimension`` is ``z``,
+        then ``pos`` can be treated as physically observed
+        galaxy positions under the distant-observer approximation.
+        Default is no distortions.
 
-    mask : array_like, optional 
-        Boolean mask that can be used to select the positions 
-        of a subcollection of the galaxies stored in the ``galaxy_table``. 
+    mask : array_like, optional
+        Boolean mask that can be used to select the positions
+        of a subcollection of the galaxies stored in the ``galaxy_table``.
 
-    period : float, optional 
-        Length of the periodic box. Default is np.inf. 
+    period : float, optional
+        Length of the periodic box. Default is np.inf.
 
-        If period is not np.inf, then after applying peculiar velocity distortions 
-        the new coordinates will be remapped into the periodic box. 
+        If period is not np.inf, then after applying peculiar velocity distortions
+        the new coordinates will be remapped into the periodic box.
 
-    Returns 
+    Returns
     --------
-    pos : array_like 
-        Numpy array with shape *(Npts, 3)*. 
+    pos : array_like
+        Numpy array with shape *(Npts, 3)*.
 
-    Examples 
+    Examples
     ---------
     >>> npts = 100
     >>> Lbox = 250.
@@ -154,10 +154,10 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     >>> z = np.random.uniform(0, Lbox, npts)
     >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox)
 
-    Now we will define an array of random velocities that we will use 
-    to apply z-space distortions to the z-dimension. For our random velocities 
-    we'll assume the values are drawn from a Gaussian centered at zero 
-    using `numpy.random.normal`. 
+    Now we will define an array of random velocities that we will use
+    to apply z-space distortions to the z-dimension. For our random velocities
+    we'll assume the values are drawn from a Gaussian centered at zero
+    using `numpy.random.normal`.
 
     >>> velocity = np.random.normal(loc=0, scale=100, size=npts)
     >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
@@ -165,8 +165,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     """
     posdict = {'x': np.copy(x), 'y': np.copy(y), 'z': np.copy(z)}
 
-    a = 'velocity_distortion_dimension' in kwargs.keys()
-    b = 'velocity' in kwargs.keys()
+    a = 'velocity_distortion_dimension' in list(kwargs.keys())
+    b = 'velocity' in list(kwargs.keys())
     if bool(a+b) is True:
         if bool(a*b) is False:
             msg = ("You must either both or none of the following keyword arguments: "

@@ -314,7 +314,7 @@ def call_func_table(func_table, abscissa, func_indices):
     func_indices = convert_to_ndarray(func_indices)
     
     func_argsort = func_indices.argsort()
-    func_ranges = list(np.searchsorted(func_indices[func_argsort], range(len(func_table))))
+    func_ranges = list(np.searchsorted(func_indices[func_argsort], list(range(len(func_table)))))
     func_ranges.append(None)
     out = np.zeros_like(abscissa)
     for f, start, end in zip(func_table, func_ranges, func_ranges[1:]):
@@ -347,7 +347,7 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
     as attribute with the same name as the keyword. 
     """
     for key in required_kwargs:
-        if key in kwargs.keys():
+        if key in list(kwargs.keys()):
             setattr(obj, key, kwargs[key])
         else:
             class_name = obj.__class__.__name__

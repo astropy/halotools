@@ -1,8 +1,6 @@
 language: python
 
 python:
-    - 2.7
-    - 3.3
     - 3.4
     - 3.5
 
@@ -26,7 +24,7 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.9
+        - NUMPY_VERSION=1.10
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -40,6 +38,8 @@ env:
 
 matrix:
     include:
+        - python: 2.7
+          env: SETUP_CMD='egg_info'
 
         # Do a coverage test in Python 2.
         - python: 2.7
@@ -50,24 +50,24 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='build_sphinx -w'
 
+        # Python3.3 is a bit old, thus conda doesn't have all version dependencies including newer numpies
+        - python: 3.3
+          env: NUMPY_VERSION=1.9
+               CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
+
         # Try Astropy development version
         - python: 2.7
           env: ASTROPY_VERSION=development
-        - python: 3.4
+        - python: 3.5
           env: ASTROPY_VERSION=development
 
-        # Try numpy 1.10 - might want to switch this so that 1.10 is *default* and 1.9 is checked here down the road
+        # Try older numpy version
         - python: 2.7
-          env: NUMPY_VERSION=1.10
+          env: NUMPY_VERSION=1.9
 
         # try a version *without* h5py - we need this for readthedocs
         - python: 2.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
-
-    allow_failures:
-        - python: 3.3
-        - python: 3.4
-        - python: 3.5
 
 before_install:
 

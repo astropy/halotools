@@ -295,7 +295,7 @@ class SubhaloModelFactory(ModelFactory):
                 supplementary_kwargs['model_feature_calling_sequence'] = None
 
             new_model_dictionary = copy(baseline_model_dictionary)
-            for key, value in input_model_dictionary.iteritems():
+            for key, value in input_model_dictionary.items():
                 new_model_dictionary[key] = value
             return new_model_dictionary, supplementary_kwargs
 
@@ -333,7 +333,7 @@ class SubhaloModelFactory(ModelFactory):
         msg_conclusion = ("See the `~halotools.empirical_models.SubhaloModelFactory` "
             "docstring for further details.\n")
 
-        for feature_key, component_model in candidate_model_dictionary.iteritems():
+        for feature_key, component_model in candidate_model_dictionary.items():
             cl = component_model.__class__
             clname = cl.__name__
 
@@ -377,7 +377,7 @@ class SubhaloModelFactory(ModelFactory):
             model_feature_calling_sequence = list(supplementary_kwargs['model_feature_calling_sequence'])
             for model_feature in model_feature_calling_sequence:
                 try:
-                    assert model_feature in self._input_model_dictionary.keys()
+                    assert model_feature in list(self._input_model_dictionary.keys())
                 except AssertionError:
                     msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments you passed to the SubhaloModelFactory.\n"
@@ -446,7 +446,7 @@ class SubhaloModelFactory(ModelFactory):
         _attrs_repetition_check = []
 
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             # Ensure that all methods in the calling sequence are inherited
             try:
@@ -477,7 +477,7 @@ class SubhaloModelFactory(ModelFactory):
             "in more than one component model.\n You should rename this method in one of your "
             "component models to disambiguate.\n")
         repeated_method_list = ([methodname for methodname, count in 
-            collections.Counter(_method_repetition_check).items() if count > 1]
+            list(collections.Counter(_method_repetition_check).items()) if count > 1]
             )
         if repeated_method_list != []:
             example_repeated_methodname = repeated_method_list[0]
@@ -490,7 +490,7 @@ class SubhaloModelFactory(ModelFactory):
             "Only ignore this message if you are confident "
             "that this will not result in unintended behavior\n")
         repeated_attr_list = ([attr for attr, count in 
-            collections.Counter(_attrs_repetition_check).items() if count > 1]
+            list(collections.Counter(_attrs_repetition_check).items()) if count > 1]
             )
         if repeated_attr_list != []:
             example_repeated_attr = repeated_attr_list[0]
@@ -517,7 +517,7 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             for methodname in component_model._methods_to_inherit:
                 new_method_name = methodname
@@ -599,7 +599,7 @@ class SubhaloModelFactory(ModelFactory):
             "component models to disambiguate.\n")
 
         # The model dictionary is an OrderedDict that is already appropriately structured
-        feature_sequence = self.model_dictionary.keys()
+        feature_sequence = list(self.model_dictionary.keys())
 
         ###############
         # Loop over feature_sequence and successively append each component model's
@@ -627,7 +627,7 @@ class SubhaloModelFactory(ModelFactory):
         """ 
         """
 
-        zlist = list(model.redshift for model in self.model_dictionary.values() 
+        zlist = list(model.redshift for model in list(self.model_dictionary.values()) 
             if hasattr(model, 'redshift'))
 
         if len(set(zlist)) == 0:
@@ -636,7 +636,7 @@ class SubhaloModelFactory(ModelFactory):
             self.redshift = float(zlist[0])
         else:
             msg = ("Inconsistency between the redshifts of the component models:\n\n")
-            for modelname, model in self.model_dictionary.iteritems():
+            for modelname, model in self.model_dictionary.items():
                 clname = model.__class__.__name__
                 if hasattr(model, 'redshift'):
                     zs = str(model.redshift)
@@ -655,7 +655,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         haloprop_list = []
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             if hasattr(component_model, 'prim_haloprop_key'):
                 haloprop_list.append(component_model.prim_haloprop_key)
@@ -671,11 +671,11 @@ class SubhaloModelFactory(ModelFactory):
         """
         pub_list = []
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             try:
                 pubs = component_model.publications 
-                if type(pubs) in [str, unicode]:
+                if type(pubs) in [str, str]:
                     pub_list.append(pubs)
                 elif type(pubs) is list:
                     pub_list.extend(pubs)
@@ -700,7 +700,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         new_haloprop_func_dict = {}
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             # Haloprop function dictionaries
             if hasattr(component_model, 'new_haloprop_func_dict'):
@@ -708,8 +708,8 @@ class SubhaloModelFactory(ModelFactory):
                     set(component_model.new_haloprop_func_dict))
                 if dict_intersection == set():
                     new_haloprop_func_dict = dict(
-                        new_haloprop_func_dict.items() + 
-                        component_model.new_haloprop_func_dict.items()
+                        list(new_haloprop_func_dict.items()) + 
+                        list(component_model.new_haloprop_func_dict.items())
                         )
                 else:
                     example_repeated_element = list(dict_intersection)[0]
@@ -738,7 +738,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         self._suppress_repeated_param_warning = False
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
@@ -783,7 +783,7 @@ class SubhaloModelFactory(ModelFactory):
             "to any of your component models and set this variable to ``True``.\n")
 
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             if not hasattr(component_model, 'param_dict'):
                 component_model.param_dict = {}
@@ -795,7 +795,7 @@ class SubhaloModelFactory(ModelFactory):
                     if suppress_warning is False:
                         warn(msg % key)
 
-            for key, value in component_model.param_dict.iteritems():
+            for key, value in component_model.param_dict.items():
                 self.param_dict[key] = value
 
         self._init_param_dict = copy(self.param_dict)
@@ -815,7 +815,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         dtype_list = []
         # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        for feature, component_model in self.model_dictionary.items():
 
             # Column dtypes to add to mock galaxy_table
             if hasattr(component_model, '_galprop_dtypes_to_allocate'):
@@ -915,7 +915,7 @@ class SubhaloModelFactory(ModelFactory):
     def _test_dictionary_consistency(self):
         """
         """
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
             try:
                 assert hasattr(component_model, '_methods_to_inherit')
                 for methodname in component_model._methods_to_inherit:

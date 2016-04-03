@@ -38,7 +38,7 @@ class TestOccupationComponent(TestCase):
 		with pytest.raises(KeyError) as err:
 			model = MyOccupationComponent()
 		substr = 'gal_type'
-		assert substr in err.value.message
+		assert substr in err.value.args[0]
 
 	def test_required_kwargs2(self):
 
@@ -50,7 +50,7 @@ class TestOccupationComponent(TestCase):
 		with pytest.raises(KeyError) as err:
 			model = MyOccupationComponent()
 		substr = 'threshold'
-		assert substr in err.value.message
+		assert substr in err.value.args[0]
 
 	def test_required_kwargs3(self):
 
@@ -64,7 +64,7 @@ class TestOccupationComponent(TestCase):
 		with pytest.raises(KeyError) as err:
 			model = MyOccupationComponent()
 		substr = 'upper_occupation_bound'
-		assert substr in err.value.message
+		assert substr in err.value.args[0]
 
 	def test_required_methods1(self):
 
@@ -77,7 +77,7 @@ class TestOccupationComponent(TestCase):
 		with pytest.raises(SyntaxError) as err:
 			model = MyOccupationComponent()
 		substr = 'implement a method named mean_occupation'
-		assert substr in err.value.message
+		assert substr in err.value.args[0]
 
 	def test_required_methods2(self):
 
@@ -109,7 +109,7 @@ class TestOccupationComponent(TestCase):
 		with pytest.raises(HalotoolsError) as err:
 			_ = model.mc_occupation(prim_haloprop = 1e10)
 		substr = "write your own ``mc_occupation`` method that overrides the method "
-		assert substr in err.value.message
+		assert substr in err.value.args[0]
 
 	@pytest.mark.slow
 	def test_nonstandard_upper_occupation_bound2(self):

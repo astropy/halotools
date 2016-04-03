@@ -29,7 +29,7 @@ from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 # This will be used to select tests whose 
 # returned values depend on the configuration 
 # of my personal cache directory files
-aph_home = u'/Users/aphearin'
+aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
     APH_MACHINE = True
@@ -92,7 +92,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 Lbox = 200, particle_mass = 100, redshift = '', 
                 **self.good_ptclcat_args)
         substr = "The ``redshift`` metadata must be a float."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     def test_successful_load(self):
@@ -145,8 +145,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache1(self):
-    	""" Verify the overwrite requirement is enforced
-    	"""
+        """ Verify the overwrite requirement is enforced
+        """
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -162,18 +162,18 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat.add_ptclcat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string)
         substr = "Either choose a different fname or set ``overwrite`` to True"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         with pytest.raises(HalotoolsError) as err:
             ptclcat.add_ptclcat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string, 
                 overwrite = True)
-        assert substr not in err.value.message
+        assert substr not in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache2(self):
-    	""" Verify that the appropriate message is issued when trying to save the file to a non-existent directory.
-    	""" 
+        """ Verify that the appropriate message is issued when trying to save the file to a non-existent directory.
+        """ 
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -185,12 +185,12 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat.add_ptclcat_to_cache(
                 basename, dummy_string, dummy_string, dummy_string, dummy_string)
         substr = "The directory you are trying to store the file does not exist."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache3(self):
-    	""" Verify that the .hdf5 extension requirement is enforced.
-    	"""
+        """ Verify that the .hdf5 extension requirement is enforced.
+        """
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -207,12 +207,12 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 fname, dummy_string, dummy_string, dummy_string, 
                 overwrite = True)
         substr = "The fname must end with an ``.hdf5`` extension."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache4(self):
-    	""" Enforce string representation of positional arguments
-    	"""
+        """ Enforce string representation of positional arguments
+        """
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -226,7 +226,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         dummy_string = '  '
         class Dummy(object):
             pass
-            
+
             def __str__(self):
                 raise TypeError
         not_representable_as_string = Dummy()
@@ -236,7 +236,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 fname, not_representable_as_string, dummy_string, dummy_string, 
                 overwrite = True)
         substr = "must all be strings."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
 
@@ -253,9 +253,9 @@ class TestUserSuppliedPtclCatalog(TestCase):
         version_name = 'dummy_version_name'
         processing_notes = 'dummy processing notes'
 
-        assert 'x' in ptclcat.ptcl_table.keys()
-        assert 'y' in ptclcat.ptcl_table.keys()
-        assert 'z' in ptclcat.ptcl_table.keys()
+        assert 'x' in list(ptclcat.ptcl_table.keys())
+        assert 'y' in list(ptclcat.ptcl_table.keys())
+        assert 'z' in list(ptclcat.ptcl_table.keys())
 
         ptclcat.add_ptclcat_to_cache(
             fname, simname, version_name, processing_notes, overwrite = True)

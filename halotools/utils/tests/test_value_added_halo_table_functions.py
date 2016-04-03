@@ -2,15 +2,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-from copy import deepcopy 
+from copy import deepcopy
 
 from collections import Counter
-from copy import deepcopy 
 
-import numpy as np 
+import numpy as np
 
 from astropy.tests.helper import pytest
-from astropy.table import Table 
+from astropy.extern.six.moves import xrange as range
 
 from ..value_added_halo_table_functions import *
 
@@ -20,12 +19,13 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestValueAddedHaloTableFunctions']
 
+
 class TestValueAddedHaloTableFunctions(TestCase):
-    """ Class providing tests of the `~halotools.utils.value_added_halo_table_functions`. 
+    """ Class providing tests of the `~halotools.utils.value_added_halo_table_functions`.
     """
     def setUp(self):
         fake_sim = FakeSim()
-        self.table= fake_sim.halo_table
+        self.table = fake_sim.halo_table
 
     def test_broadcast_host_halo_mass1(self):
         """
@@ -33,7 +33,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         t = deepcopy(self.table)
         broadcast_host_halo_property(t, 'halo_mvir')
 
-        assert 'halo_mvir_host_halo' in t.keys()
+        assert 'halo_mvir_host_halo' in list(t.keys())
 
         hostmask = t['halo_hostid'] == t['halo_id']
         assert np.all(t['halo_mvir_host_halo'][hostmask] == t['halo_mvir'][hostmask])
@@ -42,12 +42,12 @@ class TestValueAddedHaloTableFunctions(TestCase):
         data = Counter(t['halo_hostid'])
         frequency_analysis = data.most_common()
 
-        for igroup in xrange(0, 10):
+        for igroup in range(0, 10):
             idx = np.where(t['halo_hostid'] == frequency_analysis[igroup][0])[0]
             idx_host = np.where(t['halo_id'] == frequency_analysis[igroup][0])[0]
             assert np.all(t['halo_mvir_host_halo'][idx] == t['halo_mvir'][idx_host])
 
-        for igroup in xrange(-10, -1):
+        for igroup in range(-10, -1):
             idx = np.where(t['halo_hostid'] == frequency_analysis[igroup][0])[0]
             idx_host = np.where(t['halo_id'] == frequency_analysis[igroup][0])[0]
             assert np.all(t['halo_mvir_host_halo'][idx] == t['halo_mvir'][idx_host])
@@ -61,7 +61,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(4, 'xxx')
         substr = "The input ``table`` must be an Astropy `~astropy.table.Table` object"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         del t
 
@@ -72,7 +72,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(t, 'xxx')
         substr = "The input table does not the input ``halo_property_key``"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         del t
 
@@ -85,10 +85,10 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(t, 'halo_mvir')
         substr = "Your input table already has an existing new_colname column name."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         broadcast_host_halo_property(t, 'halo_mvir', delete_possibly_existing_column = True)
-        
+
         del t
 
     def test_add_halo_hostid1(self):
@@ -97,7 +97,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             add_halo_hostid(5, delete_possibly_existing_column = False)
         substr = "The input ``table`` must be an Astropy `~astropy.table.Table` object"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_add_halo_hostid2(self):
         """
@@ -107,7 +107,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             add_halo_hostid(t, delete_possibly_existing_column = False)
         substr = "The input table must have ``halo_upid`` and ``halo_id`` keys"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_add_halo_hostid3(self):
         """
@@ -116,7 +116,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         with pytest.raises(HalotoolsError) as err:
             add_halo_hostid(t, delete_possibly_existing_column = False)
         substr = "Your input table already has an existing ``halo_hostid`` column name."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         existing_halo_hostid = deepcopy(t['halo_hostid'].data)
         del t['halo_hostid']

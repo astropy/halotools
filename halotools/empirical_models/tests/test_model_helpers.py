@@ -38,14 +38,14 @@ class TestModelHelpers(TestCase):
             newcoords = occuhelp.enforce_periodicity_of_box(x, box_length, 
                 check_multiple_box_lengths = True)
         substr = "There is at least one input point with a coordinate less than -Lbox"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         x = np.linspace(-box_length, 2.1*box_length, Npts)
         with pytest.raises(HalotoolsError) as err:
             newcoords = occuhelp.enforce_periodicity_of_box(x, box_length, 
                 check_multiple_box_lengths = True)
         substr = "There is at least one input point with a coordinate greater than 2*Lbox"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
         x = np.linspace(-box_length, 2*box_length, Npts)
         newcoords = occuhelp.enforce_periodicity_of_box(x, box_length, 
