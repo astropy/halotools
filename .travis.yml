@@ -25,7 +25,7 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.9
+        - NUMPY_VERSION=1.10
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -59,9 +59,9 @@ matrix:
         - python: 3.5
           env: ASTROPY_VERSION=development
 
-        # Try numpy 1.10 - might want to switch this so that 1.10 is *default* and 1.9 is checked here down the road
+        # Try older numpy version
         - python: 2.7
-          env: NUMPY_VERSION=1.10
+          env: NUMPY_VERSION=1.9
 
         # try a version *without* h5py - we need this for readthedocs
         - python: 2.7
