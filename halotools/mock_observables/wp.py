@@ -137,6 +137,10 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
     
     where :math:`\\pi_{\\rm max}` is ``pi_max`` and :math:`\\xi(r_p,\\pi)` 
     is the redshift space correlation function.
+
+    For a higher-performance implementation of the wp function, 
+    see the Corrfunc code written by Manodeep Sinha, available at 
+    https://github.com/manodeep/Corrfunc. 
         
     Examples
     --------
