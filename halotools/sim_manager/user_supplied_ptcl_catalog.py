@@ -3,14 +3,9 @@
 
 import numpy as np
 import os
-import sys
-from astropy.extern.six.moves import urllib
-import fnmatch
 from warnings import warn
 import datetime
 
-from astropy import cosmology
-from astropy import units as u
 from astropy.table import Table
 
 try:
@@ -24,7 +19,7 @@ from .ptcl_table_cache import PtclTableCache
 from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 from .halo_table_cache_log_entry import get_redshift_string
 
-from ..utils.array_utils import custom_len, convert_to_ndarray
+from ..utils.array_utils import custom_len
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('UserSuppliedPtclCatalog', )
@@ -87,7 +82,7 @@ class UserSuppliedPtclCatalog(object):
 
         Now we simply pass in both the metadata and the particle catalog columns as keyword arguments:
 
-        >>> ptcl_catalog = UserSuppliedPtclCatalog(redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, x = x, y = y, z = z, vx = vx, vy = vy, vz = vz, ptcl_ids = ptcl_ids)
+        >>> ptcl_catalog = UserSuppliedPtclCatalog(redshift=redshift, Lbox=Lbox, particle_mass=particle_mass, x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, ptcl_ids=ptcl_ids)
 
         Take note: it is important that the value of the input ``redshift`` matches
         whatever the redshift is of the associated halo catalog. Your ``redshift``
@@ -121,7 +116,7 @@ class UserSuppliedPtclCatalog(object):
         you load the associated halo catalog into memory. For example:
 
         >>> from halotools.sim_manager import CachedHaloCatalog
-        >>> halocat = CachedHaloCatalog(simname = my_simname, halo_finder = 'some halo-finder', version_name = 'some version-name', redshift = redshift, ptcl_version_name = my_version_name) # doctest: +SKIP
+        >>> halocat = CachedHaloCatalog(simname=my_simname, halo_finder='some halo-finder', version_name='some version-name', redshift=redshift, ptcl_version_name=my_version_name) # doctest: +SKIP
 
         Note the arguments passed to the `~halotools.sim_manager.CachedHaloCatalog` class.
         The ``version_name`` here refers to the *halos*, not the particles.
@@ -152,7 +147,6 @@ class UserSuppliedPtclCatalog(object):
         for key, value in metadata_dict.items():
             setattr(self, key, value)
 
-
     def _parse_constructor_kwargs(self, **kwargs):
         """
         """
@@ -168,20 +162,20 @@ class UserSuppliedPtclCatalog(object):
             assert Nptcls >= 1e4
             assert Nptcls == len(y)
             assert Nptcls == len(z)
-        except KeyError as AssertionError:
-            msg = ("\nThe UserSuppliedPtclCatalog requires ``x``, ``y`` and ``z`` keyword arguments,\n "
-                "each of which must store an ndarray of the same length Nptcls >= 1e4.\n")
+        except KeyError:
+            msg = ("\nThe UserSuppliedPtclCatalog requires ``x``, ``y`` and "
+                   "``z`` keyword arguments,\n each of which must store an "
+                   "ndarray of the same length Nptcls >= 1e4.\n")
+
             raise HalotoolsError(msg)
 
         ptcl_table_dict = (
             {key: kwargs[key] for key in kwargs
-            if (type(kwargs[key]) is np.ndarray)
-            and (custom_len(kwargs[key]) == Nptcls)}
-            )
+             if (type(kwargs[key]) is np.ndarray) and
+             (custom_len(kwargs[key]) == Nptcls)})
 
         metadata_dict = (
-            {key: kwargs[key] for key in kwargs if key not in ptcl_table_dict}
-            )
+            {key: kwargs[key] for key in kwargs if key not in ptcl_table_dict})
 
         return ptcl_table_dict, metadata_dict
 
@@ -193,9 +187,10 @@ class UserSuppliedPtclCatalog(object):
             assert custom_len(metadata_dict['particle_mass']) == 1
             assert 'redshift' in metadata_dict
         except AssertionError:
-            msg = ("\nThe UserSuppliedPtclCatalog requires "
-                "keyword arguments ``Lbox``, ``particle_mass`` and ``redshift``\n"
-                "storing scalars that will be interpreted as metadata about the particle catalog.\n")
+            msg = ("\nThe UserSuppliedPtclCatalog requires keyword arguments "
+                   "``Lbox``, ``particle_mass`` and ``redshift``\n"
+                   "storing scalars that will be interpreted as metadata "
+                   "about the particle catalog.\n")
             raise HalotoolsError(msg)
 
         Lbox = metadata_dict['Lbox']
@@ -205,8 +200,8 @@ class UserSuppliedPtclCatalog(object):
             x, y, z = (
                 self.ptcl_table['x'],
                 self.ptcl_table['x'],
-                self.ptcl_table['z']
-                )
+                self.ptcl_table['z'])
+
             assert np.all(x >= 0)
             assert np.all(x <= Lbox)
             assert np.all(y >= 0)
@@ -214,10 +209,9 @@ class UserSuppliedPtclCatalog(object):
             assert np.all(z >= 0)
             assert np.all(z <= Lbox)
         except AssertionError:
-            msg = ("The ``x``, ``y`` and ``z`` columns must only store arrays\n"
-                "that are bound by 0 and the input ``Lbox``. \n")
+            msg = ("The ``x``, ``y`` and ``z`` columns must only store "
+                   "arrays\n that are bound by 0 and the input ``Lbox``. \n")
             raise HalotoolsError(msg)
-
 
         try:
             redshift = float(metadata_dict['redshift'])
@@ -225,9 +219,9 @@ class UserSuppliedPtclCatalog(object):
             msg = ("\nThe ``redshift`` metadata must be a float.\n")
             raise HalotoolsError(msg)
 
+    def add_ptclcat_to_cache(self, fname, simname, version_name,
+                             processing_notes, overwrite=False):
 
-    def add_ptclcat_to_cache(self,
-        fname, simname, version_name, processing_notes, overwrite = False):
         """
         Parameters
         ------------
@@ -255,20 +249,14 @@ class UserSuppliedPtclCatalog(object):
             to True in order to write the file to disk. Default is False.
 
         """
-        try:
-            import h5py
-        except ImportError:
-            msg = ("\nYou must have h5py installed if you want to \n"
-                "store your catalog in the Halotools cache. \n")
-            raise HalotoolsError(msg)
 
         ############################################################
-        ## Perform some consistency checks in the fname
-        if (os.path.isfile(fname)) & (overwrite == False):
+        # Perform some consistency checks in the fname
+        if (os.path.isfile(fname)) & (overwrite is False):
             msg = ("\nYou attempted to store your particle catalog "
-                "in the following location: \n\n" + str(fname) +
-                "\n\nThis path points to an existing file. \n"
-                "Either choose a different fname or set ``overwrite`` to True.\n")
+                   "in the following location: \n\n" + str(fname) +
+                   "\n\nThis path points to an existing file. \n"
+                   "Either choose a different fname or set ``overwrite`` to True.\n")
             raise HalotoolsError(msg)
 
         try:
@@ -283,37 +271,38 @@ class UserSuppliedPtclCatalog(object):
             raise HalotoolsError(msg)
 
         ############################################################
-        ## Perform consistency checks on the remaining log entry attributes
+        # Perform consistency checks on the remaining log entry attributes
         try:
             _ = str(simname)
             _ = str(version_name)
             _ = str(processing_notes)
         except:
             msg = ("\nThe input ``simname``, ``version_name`` "
-                "and ``processing_notes``\nmust all be strings.")
+                   "and ``processing_notes``\nmust all be strings.")
             raise HalotoolsError(msg)
 
         ############################################################
-        ## Now write the file to disk and add the appropriate metadata
+        # Now write the file to disk and add the appropriate metadata
 
-        self.ptcl_table.write(fname, path='data', overwrite = overwrite)
+        self.ptcl_table.write(fname, path='data', overwrite=overwrite)
 
         f = h5py.File(fname)
 
-        redshift_string = str(get_redshift_string(self.redshift))
+        redshift_string = get_redshift_string(self.redshift)
 
-        f.attrs.create('simname', str(simname))
-        f.attrs.create('version_name', str(version_name))
-        f.attrs.create('redshift', redshift_string)
-        f.attrs.create('fname', str(fname))
+        f.attrs.create('simname', simname.encode('ascii'))
+        f.attrs.create('version_name', version_name.encode('ascii'))
+        f.attrs.create('redshift', redshift_string.encode('ascii'))
+        f.attrs.create('fname', fname.encode('ascii'))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
 
-        time_right_now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        time_right_now = datetime.datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S').encode('ascii')
         f.attrs.create('time_catalog_was_originally_cached', time_right_now)
 
-        f.attrs.create('processing_notes', str(processing_notes))
+        f.attrs.create('processing_notes', processing_notes.encode('ascii'))
 
         f.close()
 
@@ -322,24 +311,8 @@ class UserSuppliedPtclCatalog(object):
         cache = PtclTableCache()
 
         log_entry = PtclTableCacheLogEntry(
-            simname = simname, version_name = version_name,
-            redshift = self.redshift, fname = fname)
+            simname=simname, version_name=version_name,
+            redshift=self.redshift, fname=fname)
 
-        cache.add_entry_to_cache_log(log_entry, update_ascii = True)
+        cache.add_entry_to_cache_log(log_entry, update_ascii=True)
         self.log_entry = log_entry
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

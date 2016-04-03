@@ -25,7 +25,7 @@ from ..halo_table_cache import HaloTableCache
 
 from ...custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files
@@ -57,22 +57,23 @@ class TestHaloTableCache(TestCase):
             # Create a good halo catalog and log entry
             self.good_table = Table(
                 {'halo_id': [1, 2, 3],
-                'halo_x': [1, 2, 3],
-                'halo_y': [1, 2, 3],
-                'halo_z': [1, 2, 3],
-                'halo_mass': [1, 2, 3],
-                })
+                 'halo_x': [1, 2, 3],
+                 'halo_y': [1, 2, 3],
+                 'halo_z': [1, 2, 3],
+                 'halo_mass': [1, 2, 3],
+                 })
             self.good_table_fname = os.path.join(self.dummy_cache_baseloc,
-                'good_table.hdf5')
+                                                 'good_table.hdf5')
             self.good_table.write(self.good_table_fname, path='data')
 
-            self.good_log_entry = HaloTableCacheLogEntry('good_simname1',
-                'good_halo_finder', 'good_version_name',
+            self.good_log_entry = HaloTableCacheLogEntry(
+                'good_simname1', 'good_halo_finder', 'good_version_name',
                 get_redshift_string(0.0), self.good_table_fname)
 
             f = h5py.File(self.good_table_fname)
-            for attr in self.good_log_entry.log_attributes:
-                f.attrs.create(str(attr), str(getattr(self.good_log_entry, attr)))
+            for attr_name in self.good_log_entry.log_attributes:
+                attr = getattr(self.good_log_entry, attr_name).encode('ascii')
+                f.attrs.create(attr_name, attr)
             f.attrs.create('Lbox', 100.)
             f.attrs.create('particle_mass', 1e8)
             f.close()
@@ -81,16 +82,17 @@ class TestHaloTableCache(TestCase):
 
             self.good_table2 = deepcopy(self.good_table)
             self.good_table2_fname = os.path.join(self.dummy_cache_baseloc,
-                'good_table2.hdf5')
+                                                  'good_table2.hdf5')
             self.good_table2.write(self.good_table2_fname, path='data')
 
-            self.good_log_entry2 = HaloTableCacheLogEntry('good_simname2',
-                'good_halo_finder2', 'good_version_name',
+            self.good_log_entry2 = HaloTableCacheLogEntry(
+                'good_simname2', 'good_halo_finder2', 'good_version_name',
                 get_redshift_string(1.0), self.good_table2_fname)
 
             f = h5py.File(self.good_table2_fname)
-            for attr in self.good_log_entry2.log_attributes:
-                f.attrs.create(str(attr), str(getattr(self.good_log_entry2, attr)))
+            for attr_name in self.good_log_entry2.log_attributes:
+                attr = getattr(self.good_log_entry2, attr_name).encode('ascii')
+                f.attrs.create(attr_name, attr)
             f.attrs.create('Lbox', 100.)
             f.attrs.create('particle_mass', 1e8)
             f.close()

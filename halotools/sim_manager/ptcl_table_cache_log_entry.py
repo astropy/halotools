@@ -1,15 +1,15 @@
-from collections import OrderedDict
 import os
-from astropy.table import Table 
-import numpy as np 
+from astropy.table import Table
+import numpy as np
 
-from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
+from ..custom_exceptions import HalotoolsError
 from .halo_table_cache_log_entry import get_redshift_string
 
 __all__ = ('PtclTableCacheLogEntry', )
 
+
 class PtclTableCacheLogEntry(object):
-    """ Object serving as an entry in the `~halotools.sim_manager.PtclTableCache`. 
+    """ Object serving as an entry in the `~halotools.sim_manager.PtclTableCache`.
     """
 
     log_attributes = ['simname', 'version_name', 'redshift', 'fname']
@@ -18,49 +18,50 @@ class PtclTableCacheLogEntry(object):
 
     def __init__(self, simname, version_name, redshift, fname):
         """
-        Parameters 
+        Parameters
         -----------
-        simname : string 
-            Nickname of the simulation used as a shorthand way to keep track 
-            of the particle catalogs in your cache. The simnames processed by Halotools are 
-            'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
+        simname : string
+            Nickname of the simulation used as a shorthand way to keep track
+            of the particle catalogs in your cache. The simnames processed
+            by Halotools are 'bolshoi', 'bolplanck', 'consuelo' and
+            'multidark'.
 
-        version_name : string 
-            Nickname of the version of the particle catalog. 
+        version_name : string
+            Nickname of the version of the particle catalog.
 
-        redshift : string or float  
-            Redshift of the particle catalog, rounded to 4 decimal places. 
+        redshift : string or float
+            Redshift of the particle catalog, rounded to 4 decimal places.
 
-        fname : string 
-            Name of the hdf5 file storing the table of particles. 
+        fname : string
+            Name of the hdf5 file storing the table of particles.
 
-        Notes 
+        Notes
         ------
-        This class overrides the python built-in comparison functions __eq__, __lt__, etc. 
-        Equality holds only if all of the four constructor inputs are equal. 
-        Two class instances are compared by using a dictionary order 
-        defined by the same sequence as the constructor input positional arguments. 
+        This class overrides the python built-in comparison functions __eq__, __lt__, etc.
+        Equality holds only if all of the four constructor inputs are equal.
+        Two class instances are compared by using a dictionary order
+        defined by the same sequence as the constructor input positional arguments.
 
-        See also 
+        See also
         ----------
-        `~halotools.sim_manager.tests.TestPtclTableCacheLogEntry`. 
+        `~halotools.sim_manager.tests.TestPtclTableCacheLogEntry`.
         """
         try:
             import h5py
             self.h5py = h5py
         except ImportError:
             msg = ("\nMust have the h5py package installed \n"
-                "to instantiate the PtclTableCacheLogEntry class.\n")
+                   "to instantiate the PtclTableCacheLogEntry class.\n")
             raise HalotoolsError(msg)
 
         self.simname = simname
         self.version_name = version_name
         self.redshift = get_redshift_string(redshift)
         self.fname = fname
-    
+
     def __eq__(self, other):
         if type(other) is type(self):
-            comparison_generator = (getattr(self, attr) == getattr(other, attr) 
+            comparison_generator = (getattr(self, attr) == getattr(other, attr)
                 for attr in PtclTableCacheLogEntry.log_attributes)
             return False not in tuple(comparison_generator)
         else:
@@ -89,7 +90,7 @@ class PtclTableCacheLogEntry(object):
     def __hash__(self):
         return hash(self._key)
 
-    def __str__(self): 
+    def __str__(self):
 
         msg = "("
         for attr in PtclTableCacheLogEntry.log_attributes:
@@ -99,40 +100,40 @@ class PtclTableCacheLogEntry(object):
 
     @property
     def _key(self):
-        """ Private property needed for the python built-in ``set`` 
-        function to operate properly with the custom-defined 
-        comparison methods. 
+        """ Private property needed for the python built-in ``set``
+        function to operate properly with the custom-defined
+        comparison methods.
         """
-        return (type(self), self.simname, 
-            self.version_name, 
+        return (type(self), self.simname,
+            self.version_name,
             self.redshift, self.fname)
 
-    @property 
+    @property
     def safe_for_cache(self):
-        """ Boolean determining whether the 
-        `~halotools.sim_manager.PtclTableCacheLogEntry` instance stores a valid 
-        particle catalog that can safely be added to the cache for future use. 
-        `safe_for_cache` is implemented as a property method, so that each request 
-        performs all the checks from scratch. A log entry is considered valid 
+        """ Boolean determining whether the
+        `~halotools.sim_manager.PtclTableCacheLogEntry` instance stores a valid
+        particle catalog that can safely be added to the cache for future use.
+        `safe_for_cache` is implemented as a property method, so that each request
+        performs all the checks from scratch. A log entry is considered valid
         if it passes the following tests:
 
-        1. The file exists. 
+        1. The file exists.
 
-        2. The filename has .hdf5 extension. 
+        2. The filename has .hdf5 extension.
 
-        3. The hdf5 file has ``simname``, ``version_name``, ``redshift``, ``fname``, ``Lbox`` and ``particle_mass`` metadata attributes. 
+        3. The hdf5 file has ``simname``, ``version_name``, ``redshift``, ``fname``, ``Lbox`` and ``particle_mass`` metadata attributes.
 
-        4. Each value in the above metadata is consistent with the corresponding value bound to the `~halotools.sim_manager.PtclTableCacheLogEntry` instance. 
+        4. Each value in the above metadata is consistent with the corresponding value bound to the `~halotools.sim_manager.PtclTableCacheLogEntry` instance.
 
-        5. The particle table data can be read in using the `~astropy.table.Table.read` method of the `~astropy.table.Table` class. 
+        5. The particle table data can be read in using the `~astropy.table.Table.read` method of the `~astropy.table.Table` class.
 
         6. The particle table has the following columns ``x``, ``y``, ``z``.
 
-        7. Values for each of the ``x``, ``y``, ``z`` columns are all in the range [0, Lbox]. 
+        7. Values for each of the ``x``, ``y``, ``z`` columns are all in the range [0, Lbox].
 
-        Note in particular that `safe_for_cache` performs no checks whatsoever concerning 
-        the other log entries that may or may not be stored in the cache. Such checks are 
-        the responsibility of the `~halotools.sim_manager.PtclTableCacheCache` class. 
+        Note in particular that `safe_for_cache` performs no checks whatsoever concerning
+        the other log entries that may or may not be stored in the cache. Such checks are
+        the responsibility of the `~halotools.sim_manager.PtclTableCacheCache` class.
 
         """
         self._cache_safety_message = "The particle catalog is safe to add to the cache log."
@@ -148,19 +149,20 @@ class PtclTableCacheLogEntry(object):
             return False
         else:
 
-            verification_sequence = ('_verify_h5py_extension', 
-                '_verify_hdf5_has_complete_metadata', 
-                '_verify_metadata_consistency', 
-                '_verify_table_read', 
-                '_verify_has_required_data_columns', 
-                '_verify_all_positions_inside_box')
+            verification_sequence = ('_verify_h5py_extension',
+                                     '_verify_hdf5_has_complete_metadata',
+                                     '_verify_metadata_consistency',
+                                     '_verify_table_read',
+                                     '_verify_has_required_data_columns',
+                                     '_verify_all_positions_inside_box')
 
             for verification_function in verification_sequence:
                 func = getattr(self, verification_function)
                 msg, num_failures = func(msg, num_failures)
-            
-            if num_failures > 0: self._cache_safety_message = message_preamble + msg
-                
+
+            if num_failures > 0:
+                self._cache_safety_message = message_preamble + msg
+
             self._num_failures = num_failures
             return num_failures == 0
 
@@ -177,24 +179,28 @@ class PtclTableCacheLogEntry(object):
             pass
         return msg, num_failures
 
-
     def _verify_metadata_consistency(self, msg, num_failures):
-        """ Enforce that the hdf5 metadata agrees with the 
-        values in the log entry. 
+        """ Enforce that the hdf5 metadata agrees with the
+        values in the log entry.
 
-        Note that we actually accept floats for the redshift hdf5 metadata, 
-        even though this should technically be a string. 
+        Note that we actually accept floats for the redshift hdf5 metadata,
+        even though this should technically be a string.
         """
 
         try:
             f = self.h5py.File(self.fname)
-            
+
             for key in PtclTableCacheLogEntry.log_attributes:
                 try:
 
                     metadata = f.attrs[key]
                     if key != 'redshift':
-                        assert metadata == getattr(self, key)
+                        # In python3 some of the metadata are stored as
+                        # bytes rather than strings, check for both
+                        try:
+                            assert metadata == getattr(self, key)
+                        except AssertionError:
+                            assert metadata == getattr(self, key).encode('ascii')
                     else:
                         metadata = float(get_redshift_string(metadata))
                         assert metadata == float(getattr(self, key))
@@ -212,7 +218,7 @@ class PtclTableCacheLogEntry(object):
 
                     pass
         except IOError:
-            
+
             pass
 
         finally:
@@ -243,7 +249,7 @@ class PtclTableCacheLogEntry(object):
         except:
             pass
 
-        return msg, num_failures 
+        return msg, num_failures
 
     def _verify_all_positions_inside_box(self, msg, num_failures):
         """
@@ -274,7 +280,7 @@ class PtclTableCacheLogEntry(object):
         except:
             pass
 
-        return msg, num_failures 
+        return msg, num_failures
 
     def _verify_file_exists(self, msg, num_failures):
         """
@@ -312,7 +318,7 @@ class PtclTableCacheLogEntry(object):
             else:
                 missing_metadata = required_set - actual_set
                 num_failures += 1
-                msg += (str(num_failures) + 
+                msg += (str(num_failures) +
                     ". The hdf5 file is missing the following metadata:\n")
                 for elt in missing_metadata:
                     msg += "``"+elt + "``\n"
@@ -320,7 +326,7 @@ class PtclTableCacheLogEntry(object):
 
         except IOError:
             num_failures += 1
-            msg += (str(num_failures) + 
+            msg += (str(num_failures) +
                 ". Attempting to access the hdf5 metadata raised an exception.\n\n")
             pass
 
@@ -332,9 +338,3 @@ class PtclTableCacheLogEntry(object):
                 pass
 
         return msg, num_failures
-
-
-
-
-
-

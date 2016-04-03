@@ -387,54 +387,41 @@ class UserSuppliedHaloCatalog(object):
 
 
         ############################################################
-        ## Now write the file to disk and add the appropriate metadata
+        # Now write the file to disk and add the appropriate metadata
 
-        self.halo_table.write(fname, path='data', overwrite = overwrite)
+        self.halo_table.write(fname, path='data', overwrite=overwrite)
 
         f = h5py.File(fname)
 
-        redshift_string = str(get_redshift_string(self.redshift))
+        redshift_string = get_redshift_string(self.redshift)
 
-        f.attrs.create('simname', str(simname))
-        f.attrs.create('halo_finder', str(halo_finder))
-        f.attrs.create('version_name', str(version_name))
-        f.attrs.create('redshift', redshift_string)
-        f.attrs.create('fname', str(fname))
+        f.attrs.create('simname', simname.encode('ascii'))
+        f.attrs.create('halo_finder', halo_finder.encode('ascii'))
+        f.attrs.create('version_name', version_name.encode('ascii'))
+        f.attrs.create('redshift', redshift_string.encode('ascii'))
+        f.attrs.create('fname', fname.encode('ascii'))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
 
-        time_right_now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        time_right_now = datetime.datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S').encode('ascii')
+
         f.attrs.create('time_catalog_was_originally_cached', time_right_now)
 
-        f.attrs.create('processing_notes', str(processing_notes))
+        f.attrs.create('processing_notes', processing_notes.encode('ascii'))
 
         for key, value in additional_metadata.items():
-            f.attrs.create(key, str(value))
+            f.attrs.create(key, value.encode('ascii'))
 
         f.close()
         ############################################################
         # Now that the file is on disk, add it to the cache
         cache = HaloTableCache()
 
-        log_entry = HaloTableCacheLogEntry(simname = simname,
-            halo_finder = halo_finder, version_name = version_name,
-            redshift = self.redshift, fname = fname)
+        log_entry = HaloTableCacheLogEntry(
+            simname=simname, halo_finder=halo_finder,
+            version_name=version_name, redshift=self.redshift, fname=fname)
 
-        cache.add_entry_to_cache_log(log_entry, update_ascii = True)
+        cache.add_entry_to_cache_log(log_entry, update_ascii=True)
         self.log_entry = log_entry
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
