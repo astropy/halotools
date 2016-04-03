@@ -1,7 +1,6 @@
 language: python
 
 python:
-    - 2.7
     - 3.4
     - 3.5
 
@@ -39,6 +38,8 @@ env:
 
 matrix:
     include:
+        - python: 2.7
+          env: SETUP_CMD='egg_info'
 
         # Do a coverage test in Python 2.
         - python: 2.7
@@ -49,9 +50,10 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='build_sphinx -w'
 
-        # Python3.3 is a bit old, thus conda doesn't have all version dependencies
+        # Python3.3 is a bit old, thus conda doesn't have all version dependencies including newer numpies
         - python: 3.3
-          env: CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
+          env: NUMPY_VERSION=1.9
+               CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         # Try Astropy development version
         - python: 2.7
@@ -66,11 +68,6 @@ matrix:
         # try a version *without* h5py - we need this for readthedocs
         - python: 2.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
-
-    allow_failures:
-        - python: 3.3
-        - python: 3.4
-        - python: 3.5
 
 before_install:
 
