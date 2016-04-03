@@ -4,29 +4,28 @@
 
 from astropy.tests.pytest_plugins import *
 
-## Uncomment the following line to treat all DeprecationWarnings as
-## exceptions
-# enable_deprecations_as_exceptions()
+# Uncomment the following line to treat all DeprecationWarnings as
+# exceptions
+enable_deprecations_as_exceptions()
 
+# Uncomment and customize the following lines to add/remove entries from
+# the list of packages for which version numbers are displayed when running
+# the tests. Making it pass for KeyError is essential in some cases when
+# the package uses other astropy affiliated packages.
+try:
+    PYTEST_HEADER_MODULES['Astropy'] = 'astropy'
+    del PYTEST_HEADER_MODULES['Pandas']
+except (NameError, KeyError):  # NameError is needed to support Astropy < 1.0
+    pass
 
-# def pytest_addoption_decorator(func):
+# Uncomment the following lines to display the version number of the
+# package rather than the version number of Astropy in the top line when
+# running the tests.
+import os
 
-#     def wrapper(parser):
-#         baseline_behavior = func(parser)
+# This is to figure out the affiliated package version, rather than
+# using Astropy's
+from . import version
 
-#         parser.addoption('--slow', action='store_true', default=False,
-#             help='Also run slow tests')
-
-#     return wrapper
-# pytest_addoption = pytest_addoption_decorator(pytest_addoption)
-
-# import pytest
-
-# def pytest_addoption(parser):
-#     parser.addoption('--slow', action='store_true', default=False,
-#                       help='Also run slow tests')
-
-# def pytest_runtest_setup(item):
-#     """Skip tests if they are marked as slow and --slow is not given"""
-#     if getattr(item.obj, 'slow', None) and not item.config.getvalue('slow'):
-#         pytest.skip('slow tests not requested')
+packagename = os.path.basename(os.path.dirname(__file__))
+TESTED_VERSIONS[packagename] = version.version
