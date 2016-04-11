@@ -137,7 +137,7 @@ class PtclTableCache(object):
                     yield_entry *=  abs(redshift_of_entry - requested_redshift) <= dz_tol
                 else:
                     yield_entry *= kwargs[key] == getattr(entry, key)
-            if yield_entry is True:
+            if bool(yield_entry) is True:
                 yield entry
 
     def add_entry_to_cache_log(self, log_entry, update_ascii=True):
