@@ -37,7 +37,7 @@ def test_Moster13SmHm_initialization():
 
 	keys = ['m10', 'm11', 'n10', 'n11', 'beta10', 'beta11', 'gamma10', 'gamma11', 'scatter_model_param1']
 	for key in keys:
-		assert key in default_model.param_dict.keys()
+		assert key in list(default_model.param_dict.keys())
 	assert default_model.param_dict['scatter_model_param1'] == model_defaults.default_smhm_scatter
 
 	default_scatter_dict = {'scatter_model_param1': model_defaults.default_smhm_scatter}

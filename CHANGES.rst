@@ -1,7 +1,7 @@
 0.2 (unreleased)
 ----------------
 
-- No changes yet
+- Halotools is now Python 3.x compatible
 
 0.1 (2016-03-13)
 ----------------

@@ -26,7 +26,7 @@ from .....custom_exceptions import HalotoolsError
 # returned values depend on the configuration 
 # of my personal cache directory files
 from astropy.config.paths import _find_home 
-aph_home = u'/Users/aphearin'
+aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
     APH_MACHINE = True

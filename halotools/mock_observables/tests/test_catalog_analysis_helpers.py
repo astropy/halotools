@@ -44,7 +44,7 @@ class TestCatalogAnalysisHelpers(TestCase):
                 self.halo_table['halo_mvir'], self.halo_table['halo_spin'], 
                 error_estimator = 'Jose Canseco')
         substr = "Input ``error_estimator`` must be either"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_return_xyz_formatted_array1(self):
         x, y, z = (self.halo_table['halo_x'], 

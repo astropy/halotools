@@ -99,15 +99,15 @@ class Moster13SmHm(PrimGalpropModel):
         """
 
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``table`` or ``prim_haloprop``")
 
-        if 'redshift' in kwargs.keys():
+        if 'redshift' in list(kwargs.keys()):
             redshift = kwargs['redshift']
         elif hasattr(self, 'redshift'):
             redshift = self.redshift

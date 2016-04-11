@@ -95,9 +95,9 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
             )
 
         super_class_kwargs = {}
-        for key, value in input_model_dictionary.iteritems():
+        for key, value in input_model_dictionary.items():
             super_class_kwargs[key] = value
-        for key, value in supplementary_kwargs.iteritems():
+        for key, value in supplementary_kwargs.items():
             super_class_kwargs[key] = value
 
         SubhaloModelFactory.__init__(self, **super_class_kwargs)
@@ -215,9 +215,9 @@ class PrebuiltHodModelFactory(HodModelFactory):
             )
 
         super_class_kwargs = {}
-        for key, value in input_model_dictionary.iteritems():
+        for key, value in input_model_dictionary.items():
             super_class_kwargs[key] = value
-        for key, value in supplementary_kwargs.iteritems():
+        for key, value in supplementary_kwargs.items():
             super_class_kwargs[key] = value
 
         HodModelFactory.__init__(self, **super_class_kwargs)

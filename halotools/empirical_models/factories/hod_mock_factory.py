@@ -123,7 +123,7 @@ class HodMockFactory(MockFactory):
 
         """
         try:
-            assert 'halo_upid' in halocat.halo_table.keys()
+            assert 'halo_upid' in list(halocat.halo_table.keys())
         except AssertionError:
             raise HalotoolsError(missing_halo_upid_msg)
 
@@ -141,7 +141,7 @@ class HodMockFactory(MockFactory):
         ### Create new columns of the halo catalog, if applicable
         try:
             d = self.model.new_haloprop_func_dict
-            for new_haloprop_key, new_haloprop_func in d.iteritems():
+            for new_haloprop_key, new_haloprop_func in d.items():
                 halo_table[new_haloprop_key] = new_haloprop_func(table = halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
@@ -358,7 +358,7 @@ class HodMockFactory(MockFactory):
             galprops_assigned_to_halo_table_by_func = occupation_func._galprop_dtypes_to_allocate.names
             self.additional_haloprops.extend(galprops_assigned_to_halo_table_by_func)
             
-        self.Ngals = np.sum(self._total_abundance.values())
+        self.Ngals = np.sum(list(self._total_abundance.values()))
 
         # Allocate memory for all additional halo properties, 
         # including profile parameters of the halos such as 'conc_NFWmodel'

@@ -18,6 +18,7 @@ from .. import model_defaults, model_helpers
 from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
+import collections
 
 class HeavisideAssembias(object):
     """ Class used as an orthogonal mix-in to introduce step function-style 
@@ -159,12 +160,12 @@ class HeavisideAssembias(object):
         if 'splitting_model' in kwargs:
             self.splitting_model = kwargs['splitting_model']
             func = getattr(self.splitting_model, kwargs['splitting_method_name'])
-            if callable(func):
+            if isinstance(func, collections.Callable):
                 self._input_split_func = func
             else:
                 raise HalotoolsError("Input ``splitting_model`` must have a callable function "
                     "named ``%s``" % kwargs['splitting_method_name'])
-        elif 'split_abscissa' in kwargs.keys():
+        elif 'split_abscissa' in list(kwargs.keys()):
             if custom_len(kwargs['split_abscissa']) != custom_len(split):
                 raise HalotoolsError("``split`` and ``split_abscissa`` must have the same length")
             self._split_abscissa = kwargs['split_abscissa']
@@ -471,7 +472,7 @@ class HeavisideAssembias(object):
                     type1_mask = table[halo_type_key][no_edge_mask] == halo_type1_val
 
                 # the value of sec_haloprop_percentile is already stored as a column of the table
-                elif self.sec_haloprop_key + '_percentile' in table.keys():
+                elif self.sec_haloprop_key + '_percentile' in list(table.keys()):
                     no_edge_percentiles = table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
                     type1_mask = no_edge_percentiles > no_edge_split
                 else:

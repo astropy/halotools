@@ -161,8 +161,8 @@ class MonteCarloGalProf(object):
                         )
                     if runtime > 5:
                         modelname = self.__class__.__name__
-                        print("\n...Building lookup tables for the %s radial profile." % modelname)
-                        print("    (This will take about %.0f seconds, and only needs to be done once)" % runtime)
+                        print(("\n...Building lookup tables for the %s radial profile." % modelname))
+                        print(("    (This will take about %.0f seconds, and only needs to be done once)" % runtime))
 
             profile_params_dimensions = [len(profile_params) for profile_params in profile_params_list]
             self.rad_prof_func_table = np.array(func_table).reshape(profile_params_dimensions)
@@ -496,7 +496,7 @@ class MonteCarloGalProf(object):
                 # profile_params = kwargs['profile_params']
                 halo_radius = convert_to_ndarray(kwargs['halo_radius'])
                 assert len(halo_radius) == len(profile_params[0])
-            except KeyError, AssertionError:
+            except KeyError as AssertionError:
                 raise HalotoolsError("\nIf not passing a ``table`` keyword argument "
                     "to mc_pos, must pass the following keyword arguments:\n"
                     "``profile_params``, ``halo_radius``.")
@@ -613,7 +613,7 @@ class MonteCarloGalProf(object):
         virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
-        if 'seed' in kwargs.keys():
+        if 'seed' in list(kwargs.keys()):
             np.random.seed(kwargs['seed'])
 
         radial_velocities = np.random.normal(scale = radial_dispersions)

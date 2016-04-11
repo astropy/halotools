@@ -33,7 +33,7 @@ class TestFakeSim(TestCase):
 	def test_attrs(self):
 		keylist = ['halo_hostid']
 		for key in keylist:
-			assert key in self.fake_sim.halo_table.keys()
+			assert key in list(self.fake_sim.halo_table.keys())
 
 	def tearDown(self):
 		del self.fake_sim
@@ -47,7 +47,7 @@ class TestFakeSimHalosNearBoundaries(TestCase):
 	def test_attrs(self):
 		keylist = ['halo_hostid']
 		for key in keylist:
-			assert key in self.fake_sim.halo_table.keys()
+			assert key in list(self.fake_sim.halo_table.keys())
 
 	def test_positions(self):
 		assert not np.any( (self.fake_sim.halo_table['halo_x'] > 1) & 

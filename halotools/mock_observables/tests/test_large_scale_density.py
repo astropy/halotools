@@ -21,19 +21,19 @@ def test_large_scale_density_spherical_volume_exception_handling():
 		result = large_scale_density_spherical_volume(
 			sample, tracers, radius)
 	substr = "If period is None, you must pass in ``sample_volume``."
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 	with pytest.raises(HalotoolsError) as err:
 		result = large_scale_density_spherical_volume(
 			sample, tracers, radius, period=[1,1])
 	substr = "Input ``period`` must either be a float or length-3 sequence"
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 	with pytest.raises(HalotoolsError) as err:
 		result = large_scale_density_spherical_volume(
 			sample, tracers, radius, period=1, sample_volume=0.4)
 	substr = "If period is not None, do not pass in sample_volume"
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 def test_large_scale_density_spherical_volume1():
 	"""
@@ -77,25 +77,25 @@ def test_large_scale_density_spherical_annulus_exception_handling():
 		result = large_scale_density_spherical_annulus(
 			sample, tracers, inner_radius, outer_radius)
 	substr = "If period is None, you must pass in ``sample_volume``."
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 	with pytest.raises(HalotoolsError) as err:
 		result = large_scale_density_spherical_annulus(
 			sample, tracers, inner_radius, outer_radius, period=[1,1])
 	substr = "Input ``period`` must either be a float or length-3 sequence"
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 	with pytest.raises(HalotoolsError) as err:
 		result = large_scale_density_spherical_annulus(
 			sample, tracers, inner_radius, outer_radius, period=1, sample_volume=0.4)
 	substr = "If period is not None, do not pass in sample_volume"
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 	with pytest.raises(HalotoolsError) as err:
 		result = large_scale_density_spherical_annulus(
 			sample, tracers, 0.5, outer_radius, period=1, sample_volume=0.4)
 	substr = "Input ``outer_radius`` must be larger than input ``inner_radius``"
-	assert substr in err.value.message
+	assert substr in err.value.args[0]
 
 def test_large_scale_density_spherical_annulus1():
 	"""

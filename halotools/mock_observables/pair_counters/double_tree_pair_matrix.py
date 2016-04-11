@@ -147,10 +147,10 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     #do the pair counting
     if num_threads>1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine,range(Ncell1))
+        result = pool.map(engine,list(range(Ncell1)))
         pool.close()
     if num_threads==1:
-        result = map(engine,range(Ncell1))
+        result = list(map(engine,list(range(Ncell1))))
     
     #arrays to store result
     d = np.zeros((0,), dtype='float')
@@ -356,10 +356,10 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     #do the pair counting
     if num_threads>1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine,range(Ncell1))
+        result = pool.map(engine,list(range(Ncell1)))
         pool.close()
     if num_threads==1:
-        result = map(engine,range(Ncell1))
+        result = list(map(engine,list(range(Ncell1))))
     
     #arrays to store result
     d_perp = np.zeros((0,), dtype='float')
@@ -659,10 +659,10 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
     #do the pair counting
     if num_threads>1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine,range(Ncell1))
+        result = pool.map(engine,list(range(Ncell1)))
         pool.close()
     if num_threads==1:
-        result = map(engine,range(Ncell1))
+        result = list(map(engine,list(range(Ncell1))))
     
     #arrays to store result
     d = np.zeros((0,), dtype='float')
@@ -974,10 +974,10 @@ def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights
     #do the pair counting
     if num_threads>1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine,range(Ncell1))
+        result = pool.map(engine,list(range(Ncell1)))
         pool.close()
     if num_threads==1:
-        result = map(engine,range(Ncell1))
+        result = list(map(engine,list(range(Ncell1))))
     
     #arrays to store result
     d_perp = np.zeros((0,), dtype='float')

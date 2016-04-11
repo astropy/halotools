@@ -77,7 +77,7 @@ class Leauthaud11Cens(OccupationComponent):
         self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
-        for key, value in self.smhm_model.param_dict.iteritems():
+        for key, value in self.smhm_model.param_dict.items():
             self.param_dict[key] = value
 
         self._methods_to_inherit = (
@@ -128,8 +128,8 @@ class Leauthaud11Cens(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
-        for key, value in self.param_dict.iteritems():
-            if key in self.smhm_model.param_dict.keys():
+        for key, value in self.param_dict.items():
+            if key in list(self.smhm_model.param_dict.keys()):
                 self.smhm_model.param_dict[key] = value 
 
         logmstar = np.log10(self.smhm_model.mean_stellar_mass(
@@ -161,7 +161,7 @@ class Leauthaud11Cens(OccupationComponent):
             Array containing stellar masses living in the input table. 
         """
 
-        for key, value in self.param_dict.iteritems():
+        for key, value in self.param_dict.items():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value 
         return self.smhm_model.mean_stellar_mass(redshift = self.redshift, **kwargs)
@@ -180,7 +180,7 @@ class Leauthaud11Cens(OccupationComponent):
         log_halo_mass : array_like 
             Array containing 10-base logarithm of halo mass in h=1 solar mass units. 
         """
-        for key, value in self.param_dict.iteritems():
+        for key, value in self.param_dict.items():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value 
         return self.smhm_model.mean_log_halo_mass(log_stellar_mass, 
@@ -268,9 +268,9 @@ class Leauthaud11Sats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in kwargs.keys():
+        if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in kwargs.keys():
+        elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
             function_name = "Leauthaud11Sats.mean_occupation"
@@ -301,7 +301,7 @@ class Leauthaud11Sats(OccupationComponent):
         self.param_dict['betacut'] = -0.13
         self.param_dict['betasat'] = 0.859
 
-        for key, value in self.central_occupation_model.param_dict.iteritems():
+        for key, value in self.central_occupation_model.param_dict.items():
             self.param_dict[key] = value
 
         self._update_satellite_params()
@@ -311,7 +311,7 @@ class Leauthaud11Sats(OccupationComponent):
         """ Private method to update the model parameters. 
 
         """
-        for key, value in self.param_dict.iteritems():
+        for key, value in self.param_dict.items():
             if key in self.central_occupation_model.param_dict:
                 self.central_occupation_model.param_dict[key] = value
 

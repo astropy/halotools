@@ -65,7 +65,7 @@ class TestBinaryGalpropInterpolModel(TestCase):
                 galprop_abscissa = [12, 12], galprop_ordinates = [0.5, 0.9], 
                 prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
         substr = "Your input ``galprop_abscissa`` cannot have any repeated values"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
     def test_ordinates_check(self):
         with pytest.raises(HalotoolsError) as err:
@@ -73,7 +73,7 @@ class TestBinaryGalpropInterpolModel(TestCase):
                 galprop_abscissa = [12, 13], galprop_ordinates = [0.5, 1.9], 
                 prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
         substr = "All values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive."
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
     def test_galprop_ordinates_consistency(self):
@@ -82,7 +82,7 @@ class TestBinaryGalpropInterpolModel(TestCase):
                 galprop_abscissa = [12, 13], galprop_ordinates = [0.5, 0.7, 0.9], 
                 prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
         substr = "Input ``galprop_abscissa`` and ``galprop_ordinates`` must have the same length"
-        assert substr in err.value.message
+        assert substr in err.value.args[0]
 
 
 

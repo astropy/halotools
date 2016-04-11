@@ -298,7 +298,7 @@ class HodModelFactory(ModelFactory):
                 supplementary_kwargs['model_feature_calling_sequence'] = None
 
             new_model_dictionary = copy(baseline_model_dictionary)
-            for key, value in input_model_dictionary.iteritems():
+            for key, value in input_model_dictionary.items():
                 new_model_dictionary[key] = value
             return new_model_dictionary, supplementary_kwargs
 
@@ -361,7 +361,7 @@ class HodModelFactory(ModelFactory):
             model_feature_calling_sequence = list(supplementary_kwargs['model_feature_calling_sequence'])
             for model_feature in model_feature_calling_sequence:
                 try:
-                    assert model_feature in self._input_model_dictionary.keys()
+                    assert model_feature in list(self._input_model_dictionary.keys())
                 except AssertionError:
                     msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments you passed to the HodModelFactory.\n"
@@ -550,7 +550,7 @@ class HodModelFactory(ModelFactory):
         model components with explicit dependence on the central population. 
         """
         _gal_type_list = []
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
             _gal_type_list.append(component_model.gal_type)
         self.gal_types = list(set(_gal_type_list))
 
@@ -571,7 +571,7 @@ class HodModelFactory(ModelFactory):
         `set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
             gal_type = component_model.gal_type
             feature_name = component_model.feature_name
 
@@ -654,7 +654,7 @@ class HodModelFactory(ModelFactory):
         the phase space component models. 
         """
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
             if hasattr(component_model, 'build_lookup_tables'):
                 component_model.build_lookup_tables()
 
@@ -697,7 +697,7 @@ class HodModelFactory(ModelFactory):
             "simply attach a _suppress_repeated_param_warning attribute \n"
             "to any of your component models and set this variable to ``True``.\n")
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             if not hasattr(component_model, 'param_dict'):
                 component_model.param_dict = {}
@@ -707,7 +707,7 @@ class HodModelFactory(ModelFactory):
                     if suppress_warning is False:
                         warn(msg % key)
 
-            for key, value in component_model.param_dict.iteritems():
+            for key, value in component_model.param_dict.items():
                 self.param_dict[key] = value
 
         self._init_param_dict = copy(self.param_dict)
@@ -727,7 +727,7 @@ class HodModelFactory(ModelFactory):
         """ 
         """
 
-        zlist = list(model.redshift for model in self.model_dictionary.values() 
+        zlist = list(model.redshift for model in list(self.model_dictionary.values()) 
             if hasattr(model, 'redshift'))
 
         if len(set(zlist)) == 0:
@@ -736,7 +736,7 @@ class HodModelFactory(ModelFactory):
             self.redshift = float(zlist[0])
         else:
             msg = ("Inconsistency between the redshifts of the component models:\n\n")
-            for model in self.model_dictionary.values():
+            for model in list(self.model_dictionary.values()):
                 gal_type = model.gal_type
                 clname = model.__class__.__name__
                 if hasattr(model, 'redshift'):
@@ -757,7 +757,7 @@ class HodModelFactory(ModelFactory):
         a corresponding column storing the halo property inherited by the mock galaxy. 
         """
         haloprop_list = []
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             if hasattr(component_model, 'prim_haloprop_key'):
                 haloprop_list.append(component_model.prim_haloprop_key)
@@ -773,7 +773,7 @@ class HodModelFactory(ModelFactory):
         """
         prof_param_keys = []
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
             if hasattr(component_model, 'prof_param_keys'):
                 prof_param_keys.extend(component_model.prof_param_keys)
 
@@ -783,7 +783,7 @@ class HodModelFactory(ModelFactory):
         """
         """
         pub_list = []
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             if hasattr(component_model, 'publications'):
                 pub_list.extend(component_model.publications)
@@ -804,7 +804,7 @@ class HodModelFactory(ModelFactory):
         :ref:`galprop_dtypes_to_allocate_mechanism` 
         """
         dtype_list = []
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             # Column dtypes to add to mock galaxy_table
             if hasattr(component_model, '_galprop_dtypes_to_allocate'):
@@ -823,7 +823,7 @@ class HodModelFactory(ModelFactory):
         """
         new_haloprop_func_dict = {}
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
             feature_name, gal_type = component_model.feature_name, component_model.gal_type
 
             # Haloprop function dictionaries
@@ -832,8 +832,8 @@ class HodModelFactory(ModelFactory):
                     set(component_model.new_haloprop_func_dict))
                 if dict_intersection == set():
                     new_haloprop_func_dict = dict(
-                        new_haloprop_func_dict.items() + 
-                        component_model.new_haloprop_func_dict.items()
+                        list(new_haloprop_func_dict.items()) + 
+                        list(component_model.new_haloprop_func_dict.items())
                         )
                 else:
                     example_repeated_element = list(dict_intersection)[0]
@@ -862,7 +862,7 @@ class HodModelFactory(ModelFactory):
         """
         self._suppress_repeated_param_warning = False
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
@@ -889,7 +889,7 @@ class HodModelFactory(ModelFactory):
         even if these lists were forgotten or irrelevant to that particular component. 
         """
 
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             # Ensure that all methods in the calling sequence are inherited
             try:
@@ -966,7 +966,7 @@ class HodModelFactory(ModelFactory):
             "which determines which methods of the component model are inherited by the composite model.\n"
             "The former must be a subset of the latter. However, for ``gal_type`` = %s,\n"
             "the following method was not inherited:\n%s")
-        for component_model in self.model_dictionary.values():
+        for component_model in list(self.model_dictionary.values()):
 
             mock_generation_methods = set(component_model._mock_generation_calling_sequence)
             inherited_methods = set(component_model._methods_to_inherit)

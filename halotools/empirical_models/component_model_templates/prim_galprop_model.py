@@ -96,7 +96,7 @@ class PrimGalpropModel(object):
         if 'redshift' in kwargs:
             self.redshift = float(max(0, kwargs['redshift']))
 
-        if 'new_haloprop_func_dict' in kwargs.keys():
+        if 'new_haloprop_func_dict' in list(kwargs.keys()):
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         self.scatter_model = scatter_model(
@@ -133,7 +133,7 @@ class PrimGalpropModel(object):
         of the scatter model, and then call the `mean_scatter` method of 
         the scatter model. 
         """
-        for key in self.scatter_model.param_dict.keys():
+        for key in list(self.scatter_model.param_dict.keys()):
             self.scatter_model.param_dict[key] = self.param_dict[key]
 
         return self.scatter_model.mean_scatter(**kwargs)
@@ -143,7 +143,7 @@ class PrimGalpropModel(object):
         of the scatter model, and then call the `scatter_realization` method of 
         the scatter model. 
         """
-        for key in self.scatter_model.param_dict.keys():
+        for key in list(self.scatter_model.param_dict.keys()):
             self.scatter_model.param_dict[key] = self.param_dict[key]
 
         return self.scatter_model.scatter_realization(**kwargs)
@@ -160,7 +160,7 @@ class PrimGalpropModel(object):
 
         scatter_param_dict = self.scatter_model.param_dict
 
-        for key, value in scatter_param_dict.iteritems():
+        for key, value in scatter_param_dict.items():
             self.param_dict[key] = value
 
     def _mc_galprop(self, include_scatter = True, **kwargs):
@@ -193,7 +193,7 @@ class PrimGalpropModel(object):
         """
 
         # Interpret the inputs to determine the appropriate redshift
-        if 'redshift' not in kwargs.keys():
+        if 'redshift' not in list(kwargs.keys()):
             if hasattr(self, 'redshift'):
                 kwargs['redshift'] = self.redshift
             else:
