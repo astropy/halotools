@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial9:
 
-Example 9: Angular galaxy clustering
-====================================
+Galaxy Catalog Analysis Example: Angular galaxy clustering
+============================================================
 
 In this example, we'll show how to calculate :math:`w(\theta),` the
 angular clustering of a mock galaxy catalog. Since cosmological

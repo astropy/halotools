@@ -33,7 +33,7 @@ class TestGroupMemberGenerator(TestCase):
 
         with pytest.raises(TypeError) as err:
             g = group_member_generator(4,
-                grouping_key, requested_columns, data_is_already_sorted=False)
+                grouping_key, requested_columns)
             for _ in g:
                 pass
         substr = "The input ``data`` must be an Astropy Table or Numpy Structured Array"
@@ -48,7 +48,7 @@ class TestGroupMemberGenerator(TestCase):
 
         with pytest.raises(TypeError) as err:
             g = group_member_generator(self.halo_table,
-                grouping_key, requested_columns, data_is_already_sorted=False)
+                grouping_key, requested_columns)
             for _ in g:
                 pass
         substr = "The input ``requested_columns`` must be an iterable sequence"
@@ -63,7 +63,7 @@ class TestGroupMemberGenerator(TestCase):
 
         with pytest.raises(KeyError) as err:
             g = group_member_generator(self.halo_table,
-                grouping_key, requested_columns, data_is_already_sorted=False)
+                grouping_key, requested_columns)
             for _ in g:
                 pass
         substr = "Each element of the input ``requested_columns`` must be"
@@ -78,7 +78,7 @@ class TestGroupMemberGenerator(TestCase):
 
         with pytest.raises(KeyError) as err:
             g = group_member_generator(self.halo_table,
-                grouping_key, requested_columns, data_is_already_sorted=False)
+                grouping_key, requested_columns)
             for _ in g:
                 pass
         substr = "Input ``grouping_key`` must be a column name of the input ``data``"
@@ -93,7 +93,7 @@ class TestGroupMemberGenerator(TestCase):
 
         with pytest.raises(KeyError) as err:
             g = group_member_generator(self.halo_table,
-                grouping_key, requested_columns, data_is_already_sorted=False)
+                grouping_key, requested_columns)
             for _ in g:
                 pass
         substr = "list of strings, not a single string"
@@ -108,7 +108,7 @@ class TestGroupMemberGenerator(TestCase):
 
         with pytest.raises(ValueError) as err:
             g = group_member_generator(self.halo_table,
-                grouping_key, requested_columns, data_is_already_sorted=False)
+                grouping_key, requested_columns)
             for _ in g:
                 pass
         substr = "Your input ``data`` must be sorted so that"
@@ -121,7 +121,7 @@ class TestGroupMemberGenerator(TestCase):
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_hostid']
         gen = group_member_generator(self.halo_table,
-            grouping_key, requested_columns, data_is_already_sorted=False)
+            grouping_key, requested_columns)
 
         result = np.zeros(len(self.halo_table))
         for group_data in gen:
@@ -138,7 +138,7 @@ class TestGroupMemberGenerator(TestCase):
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_upid']
         gen = group_member_generator(self.halo_table,
-            grouping_key, requested_columns, data_is_already_sorted=False)
+            grouping_key, requested_columns)
 
         result = np.zeros(len(self.halo_table))
         for group_data in gen:
@@ -156,7 +156,7 @@ class TestGroupMemberGenerator(TestCase):
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_mvir']
         gen = group_member_generator(self.halo_table,
-            grouping_key, requested_columns, data_is_already_sorted=False)
+            grouping_key, requested_columns)
 
         result = np.zeros(len(self.halo_table))
         for group_data in gen:
@@ -176,7 +176,7 @@ class TestGroupMemberGenerator(TestCase):
         grouping_key = 'halo_hostid'
         requested_columns = ['halo_mvir', 'halo_spin']
         gen = group_member_generator(self.halo_table,
-            grouping_key, requested_columns, data_is_already_sorted=False)
+            grouping_key, requested_columns)
 
         result = np.zeros(len(self.halo_table))
         for group_data in gen:

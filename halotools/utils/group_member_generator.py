@@ -5,15 +5,11 @@ the primary engine of the group aggregation calculations.
 """
 
 import numpy as np 
-from astropy.table import Table 
-
 from .array_utils import array_is_monotonic
-from ..custom_exceptions import HalotoolsError
 
 __all__ = ('group_member_generator', )
 
-def group_member_generator(data, grouping_key, requested_columns, 
-    data_is_already_sorted=False):
+def group_member_generator(data, grouping_key, requested_columns):
     """
     Generator used to loop over grouped data and yield 
     requested properties of members of a group. 
