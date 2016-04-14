@@ -80,7 +80,7 @@ def npairs(data1, data2, rbins, period=None):
     dd.sort()
     #count number less than r
     n = np.zeros((rbins.size,), dtype=np.int)
-    for i in range(rbins.size): #this is ugly... is there a sexier way?
+    for i in range(rbins.size): 
         if rbins[i]>np.min(period)/2.0:
             print("Warning: counting pairs with seperations larger than period/2 is awkward.")
             print("r=", rbins[i], "  min(period)/2=",np.min(period)/2.0)
@@ -257,7 +257,7 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
         
     #count number less than r
     n = np.zeros((r.size,), dtype=np.float64)
-    for i in range(r.size): #this is ugly... is there a sexier way?
+    for i in range(r.size): 
         if r[i]>np.min(period)/2:
             print("Warning: counting pairs with seperations larger than period/2 is awkward.")
             print("r=", r[i], "  min(period)/2=",np.min(period)/2)
@@ -404,7 +404,7 @@ def pairs(data1, r, data2=None, period=None):
     
     #work with arrays!
     data1 = np.asarray(data1)
-    if data2==None:
+    if data2 is None:
         data2 = np.asarray(data1)
         self_match=False
     else:
@@ -439,10 +439,10 @@ def pairs(data1, r, data2=None, period=None):
     
     spairs = set()
     for i in range(len(pairs)):
-        if self_match==False:
+        if self_match is False:
             if pairs[i,0] != pairs[i,1]:
                 spairs.add((min(pairs[i]),max(pairs[i])))
-        if self_match==True:
+        if self_match is True:
             spairs.add((min(pairs[i]),max(pairs[i])))
     
     return spairs

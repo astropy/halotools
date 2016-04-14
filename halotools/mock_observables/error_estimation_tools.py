@@ -11,7 +11,7 @@ __author__ = ('Duncan Campbell', )
 
 import numpy as np
 from ..utils.array_utils import convert_to_ndarray
-from ..custom_exceptions import *
+from ..custom_exceptions import HalotoolsError
 from warnings import warn
 
 

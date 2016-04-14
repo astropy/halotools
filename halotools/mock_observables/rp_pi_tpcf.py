@@ -7,11 +7,10 @@ Calculate the redshift space two point correltion function
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 ####import modules########################################################################
-import sys
 import numpy as np
-from math import pi, gamma
-from .clustering_helpers import *
-from .tpcf_estimators import *
+from math import pi
+from .clustering_helpers import _rp_pi_tpcf_process_args
+from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .pair_counters.double_tree_pairs import xy_z_npairs
 ##########################################################################################
 
@@ -24,9 +23,9 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 
 def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
-                        period=None, do_auto=True, do_cross=True, estimator='Natural',
-                        num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
-                        approx_cell2_size = None, approx_cellran_size = None):
+        period=None, do_auto=True, do_cross=True, estimator='Natural',
+        num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
+        approx_cell2_size = None, approx_cellran_size = None):
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`
     
@@ -171,16 +170,16 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     
     """
     
-    function_args = [sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,\
-                     do_cross, estimator, num_threads, max_sample_size,\
-                     approx_cell1_size, approx_cell2_size, approx_cellran_size]
+    function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
+        do_cross, estimator, num_threads, max_sample_size,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size)
     
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
     
-    def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
-                      PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
-                      approx_cell1_size, approx_cell2_size, approx_cellran_size):
+    def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
+            PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+            approx_cell1_size, approx_cell2_size, approx_cellran_size):
         """
         Count random pairs.  There are two high level branches:
             1. w/ or wo/ PBCs and randoms.
@@ -200,28 +199,28 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         
         #No PBCs, randoms must have been provided.
         if randoms is not None:
-            if do_RR==True:
-                RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period,\
-                                 num_threads=num_threads,\
-                                 approx_cell1_size=approx_cellran_size,\
-                                 approx_cell2_size=approx_cellran_size)
+            if do_RR is True:
+                RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, 
+                    period=period,num_threads=num_threads,
+                    approx_cell1_size=approx_cellran_size,
+                    approx_cell2_size=approx_cellran_size)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
-            if do_DR==True:
-                D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period,\
-                                  num_threads=num_threads,\
-                                  approx_cell1_size=approx_cell1_size,\
-                                  approx_cell2_size=approx_cellran_size)
+            if do_DR is True:
+                D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, 
+                    period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell1_size,
+                    approx_cell2_size=approx_cellran_size)
                 D1R = np.diff(np.diff(D1R,axis=0),axis=1)
             else: D1R=None
             if _sample1_is_sample2: #calculating the cross-correlation
                 D2R = None
             else:
-                if do_DR==True:
-                    D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period,\
-                                      num_threads=num_threads,\
-                                      approx_cell1_size=approx_cell2_size,\
-                                      approx_cell2_size=approx_cellran_size)
+                if do_DR is True:
+                    D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, 
+                        period=period, num_threads=num_threads,
+                        approx_cell1_size=approx_cell2_size,
+                        approx_cell2_size=approx_cellran_size)
                     D2R = np.diff(np.diff(D2R,axis=0),axis=1)
                 else: D2R=None
             
@@ -253,33 +252,32 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
             
             return D1R, D2R, RR
     
-    def pair_counts(sample1, sample2, rp_bins, pi_bins, period,\
-                    N_thread, do_auto, do_cross, _sample1_is_sample2,\
-                    approx_cell1_size, approx_cell2_size):
+    def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
+            N_thread, do_auto, do_cross, _sample1_is_sample2,
+            approx_cell1_size, approx_cell2_size):
         """
         Count data pairs.
         """
-        D1D1 = xy_z_npairs(sample1, sample1, rp_bins, pi_bins, period=period,\
-                           num_threads=num_threads,\
-                           approx_cell1_size=approx_cell1_size,\
-                           approx_cell2_size=approx_cell1_size)
+        D1D1 = xy_z_npairs(sample1, sample1, rp_bins, pi_bins, period=period,
+            num_threads=num_threads,approx_cell1_size=approx_cell1_size,
+            approx_cell2_size=approx_cell1_size)
         D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
         if _sample1_is_sample2:
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            if do_cross==True:
-                D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period,\
-                                  num_threads=num_threads,\
-                                  approx_cell1_size=approx_cell1_size,\
-                                  approx_cell2_size=approx_cell2_size)
+            if do_cross is True:
+                D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period,
+                    num_threads=num_threads,
+                    approx_cell1_size=approx_cell1_size,
+                    approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
             else: D1D2=None
-            if do_auto==True:
-                D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period,\
-                                   num_threads=num_threads,\
-                                   approx_cell1_size=approx_cell2_size,\
-                                   approx_cell2_size=approx_cell2_size)
+            if do_auto is True:
+                D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, 
+                    period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cell2_size)
                 D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
             else: D2D2=None
         
@@ -298,27 +296,27 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         NR = N1
     
     #count pairs
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins, period,\
-                                 num_threads, do_auto, do_cross, _sample1_is_sample2,\
-                                 approx_cell1_size, approx_cell2_size)
+    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins, 
+        period, num_threads, do_auto, do_cross, 
+        _sample1_is_sample2,approx_cell1_size, approx_cell2_size)
     
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
-                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
-                                 approx_cell1_size, approx_cell2_size, approx_cellran_size)
+    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rp_bins, pi_bins, 
+        period, PBCs, num_threads, do_RR, do_DR, 
+        _sample1_is_sample2, approx_cell1_size, approx_cell2_size, approx_cellran_size)
     
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
     else:
-        if (do_auto==True) & (do_cross==True): 
+        if (do_auto is True) & (do_cross is True): 
             xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
             return xi_11, xi_12, xi_22
-        elif (do_cross==True):
+        elif (do_cross is True):
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             return xi_12
-        elif (do_auto==True):
+        elif (do_auto is True):
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11

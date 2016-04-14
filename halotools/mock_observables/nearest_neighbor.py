@@ -8,11 +8,9 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
-from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
-from warnings import warn
-from ..custom_exceptions import *
+from .pair_counters.double_tree_pair_matrix import pair_matrix
+from ..custom_exceptions import HalotoolsError
 from scipy import sparse
-import time
 
 
 __all__=['nearest_neighbor']
@@ -114,10 +112,11 @@ def nearest_neighbor(sample1, sample2, r_max, period=None, nth_nearest=1,
     
     r_max = float(r_max)
     
-    distance_matrix = pair_matrix(sample1, sample2, r_max, period=period,
-                                  approx_cell1_size = approx_cell1_size,
-                                  approx_cell2_size = approx_cell2_size,
-                                  num_threads = num_threads)
+    distance_matrix = pair_matrix(
+        sample1, sample2, r_max, period=period,
+        approx_cell1_size = approx_cell1_size,
+        approx_cell2_size = approx_cell2_size,
+        num_threads = num_threads)
     
     result = _nth_matrix_minimum(distance_matrix, nth_nearest, axis=0)
     
