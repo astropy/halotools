@@ -9,14 +9,16 @@ from __future__ import division
 import numpy as np
 from math import floor
 from astropy.extern.six.moves import xrange as range
-from ...custom_exceptions import *
+
+from ...custom_exceptions import HalotoolsError
 
 __all__ = ['FlatRectanguloidTree', 'FlatRectanguloidDoubleTree']
 __author__ = ['Andrew Hearin', 'Duncan Campbell']
 
 
 class FlatRectanguloidTree(object):
-    """ Flat, rectangular tree structure for the simulation box used by the `~halotools.mock_observables` sub-package.
+    """ Flat, rectangular tree structure for the simulation box 
+    used by the `~halotools.mock_observables` sub-package.
 
     The simulation box is divided into rectanguloid cells whose edges
     and faces are aligned with the x-, y- and z-axes of the box.
@@ -217,7 +219,9 @@ class FlatRectanguloidTree(object):
 
 
 class FlatRectanguloidDoubleTree(object):
-    """ Double tree structure built up from two instances of `~halotools.mock_observables.pair_counters.FlatRectanguloidTree` used by the `~halotools.mock_observables` sub-package.
+    """ Double tree structure built up from two instances 
+    of `~halotools.mock_observables.pair_counters.FlatRectanguloidTree` 
+    used by the `~halotools.mock_observables` sub-package.
     """
 
     def __init__(self, x1, y1, z1, x2, y2, z2,

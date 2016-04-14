@@ -8,12 +8,13 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
-from .pair_counters.double_tree_pair_matrix import *
-from warnings import warn
 
+from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
+from .pair_counters.double_tree_pair_matrix import conditional_pair_matrix
+from .pair_counters.double_tree_pair_matrix import conditional_xy_z_pair_matrix
 
-__all__=['spherical_isolation', 'cylindrical_isolation',\
-         'conditional_spherical_isolation','conditional_cylindrical_isolation']
+__all__=('spherical_isolation', 'cylindrical_isolation',
+    'conditional_spherical_isolation','conditional_cylindrical_isolation')
 __author__ = ['Duncan Campbell']
 
 
@@ -188,10 +189,9 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_thr
     >>> is_isolated = cylindrical_isolation(coords, coords, rp_max, pi_max, period=period)
     """
     
-    perp_distance_matrix, para_distance_matrix = \
-        xy_z_pair_matrix(sample1, sample2, rp_max, pi_max, period=period, 
-                         approx_cell1_size = approx_cell1_size,
-                         approx_cell2_size = approx_cell1_size)
+    perp_distance_matrix, para_distance_matrix = xy_z_pair_matrix(
+        sample1, sample2, rp_max, pi_max, period=period, 
+        approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell1_size)
     
     distance_matrix = np.sqrt(perp_distance_matrix**2 + para_distance_matrix**2)
     
@@ -380,10 +380,9 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     """
     
     
-    distance_matrix = conditional_pair_matrix(sample1, sample2, r_max,
-                                              marks1, marks2, cond_func, period=period,
-                                              approx_cell1_size = approx_cell1_size,
-                                              approx_cell2_size = approx_cell1_size)
+    distance_matrix = conditional_pair_matrix(
+        sample1, sample2, r_max, marks1, marks2, cond_func, period=period, 
+        approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell1_size)
     
     i ,j = distance_matrix.nonzero()
     
@@ -569,12 +568,9 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     >>> is_isolated = conditional_cylindrical_isolation(coords, coords, rp_max, pi_max, marks, marks, cond_func, period=period)
     """
     
-    perp_distance_matrix, para_distance_matrix = \
-        conditional_xy_z_pair_matrix(sample1, sample2, rp_max, pi_max,
-                         marks1, marks2, cond_func, 
-                         period = period,
-                         approx_cell1_size = approx_cell1_size,
-                         approx_cell2_size = approx_cell1_size)
+    perp_distance_matrix, para_distance_matrix = conditional_xy_z_pair_matrix(
+        sample1, sample2, rp_max, pi_max, marks1, marks2, cond_func, period = period,
+        approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell1_size)
     
     distance_matrix = np.sqrt(perp_distance_matrix**2 + para_distance_matrix**2)
     

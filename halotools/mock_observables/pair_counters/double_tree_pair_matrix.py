@@ -6,21 +6,25 @@ caclulate the pairwise distances in cuboid volumes using
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 import numpy as np
 import time
 import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
+
 from .double_tree_helpers import (_set_approximate_cell_sizes, 
     _set_approximate_xy_z_cell_sizes, _enclose_in_box)
-from .double_tree import *
-from .cpairs.pairwise_distances import *
-from .marked_cpairs.conditional_pairwise_distances import *
-from ...custom_exceptions import *
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
+from .double_tree import FlatRectanguloidDoubleTree
+from .cpairs.pairwise_distances import pairwise_distance_no_pbc, pairwise_xy_z_distance_no_pbc
+from .marked_cpairs.conditional_pairwise_distances import conditional_pairwise_distance_no_pbc
+from .marked_cpairs.conditional_pairwise_distances import conditional_pairwise_xy_z_distance_no_pbc
 
-__all__=['pair_matrix', 'xy_z_pair_matrix',\
-         'conditional_pair_matrix','conditional_xy_z_pair_matrix']
+from ...custom_exceptions import HalotoolsError
+from ...utils.array_utils import convert_to_ndarray
+
+__all__=('pair_matrix', 'xy_z_pair_matrix',
+    'conditional_pair_matrix','conditional_xy_z_pair_matrix')
 __author__=['Duncan Campbell']
 
 
@@ -113,7 +117,7 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     xperiod, yperiod, zperiod = period
     r_max = float(r_max)
     
-    if verbose==True:
+    if verbose is True:
         print("running on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         start = time.time()
@@ -133,13 +137,13 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
     Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
     
-    if verbose==True:
+    if verbose is True:
         print("volume 1 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x1divs,\
-              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+              "resulting in {3} cells.".format(double_tree.num_x1divs,
+                double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
         print("volume 2 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x2divs,\
-              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
+              "resulting in {3} cells.".format(double_tree.num_x2divs,
+                double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #create a function to call with only one argument
     engine = partial(_pair_matrix_engine, double_tree, r_max, period, PBCs)
@@ -167,7 +171,7 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
-    if verbose==True:
+    if verbose is True:
         print("total run time: {0} seconds".format(time.time()-start))
     
     return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1),len(data2)))
@@ -207,9 +211,9 @@ def _pair_matrix_engine(double_tree, r_max, period, PBCs, icell1):
         
         j_min = s2.start
         
-        dd, ii_inds, jj_inds = pairwise_distance_no_pbc(x_icell1, y_icell1, z_icell1,\
-                                                        x_icell2, y_icell2, z_icell2,\
-                                                        r_max)
+        dd, ii_inds, jj_inds = pairwise_distance_no_pbc(
+            x_icell1, y_icell1, z_icell1, 
+            x_icell2, y_icell2, z_icell2, r_max)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
@@ -222,8 +226,9 @@ def _pair_matrix_engine(double_tree, r_max, period, PBCs, icell1):
     return d, i_inds, j_inds
 
 
-def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
-                     num_threads=1, approx_cell1_size = None, approx_cell2_size = None):
+def xy_z_pair_matrix(data1, data2, rp_max, pi_max, 
+    period=None, verbose=False, num_threads=1, 
+    approx_cell1_size = None, approx_cell2_size = None):
     """
     Calculate the distance to all pairs with perpendicular seperations less than or 
     equal to ``rp_max`` and parallel seperations ``pi_max`` in redshift space.
@@ -322,7 +327,7 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     rp_max = float(rp_max)
     pi_max = float(pi_max)
     
-    if verbose==True:
+    if verbose is True:
         print("running on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         start = time.time()
@@ -342,13 +347,13 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
     Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
     
-    if verbose==True:
+    if verbose is True:
         print("volume 1 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x1divs,\
-              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+              "resulting in {3} cells.".format(double_tree.num_x1divs,
+                double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
         print("volume 2 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x2divs,\
-              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
+              "resulting in {3} cells.".format(double_tree.num_x2divs,
+                double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #create a function to call with only one argument
     engine = partial(_xy_z_pair_matrix_engine, double_tree, rp_max, pi_max, period, PBCs)
@@ -378,7 +383,7 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
-    if verbose==True:
+    if verbose is True:
         print("total run time: {0} seconds".format(time.time()-start))
     
     return coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))),\
@@ -420,10 +425,10 @@ def _xy_z_pair_matrix_engine(double_tree, rp_max, pi_max, period, PBCs, icell1):
         
         j_min = s2.start
         
-        dd_perp, dd_para, ii_inds, jj_inds = pairwise_xy_z_distance_no_pbc(\
-                                                 x_icell1, y_icell1, z_icell1,\
-                                                 x_icell2, y_icell2, z_icell2,\
-                                                 rp_max, pi_max)
+        dd_perp, dd_para, ii_inds, jj_inds = pairwise_xy_z_distance_no_pbc(
+            x_icell1, y_icell1, z_icell1,
+            x_icell2, y_icell2, z_icell2,
+            rp_max, pi_max)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
@@ -441,7 +446,8 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
                             period=None, verbose=False, num_threads=1,
                             approx_cell1_size = None, approx_cell2_size = None):
     """
-    Calculate the distance to all pairs with seperations less than ``r_max`` that pass a user specified condition.
+    Calculate the distance to all pairs with seperations less than ``r_max`` 
+    that pass a user specified condition.
     
     Parameters
     ----------
@@ -621,7 +627,7 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
     
     weights1, weights2 = _process_weights(weights1, weights2, cond_func_id, data1, data2)
     
-    if verbose==True:
+    if verbose is True:
         print("running on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         start = time.time()
@@ -641,20 +647,21 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
     Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
     
-    if verbose==True:
+    if verbose is True:
         print("volume 1 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x1divs,\
-              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+              "resulting in {3} cells.".format(double_tree.num_x1divs,
+                double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
         print("volume 2 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x2divs,\
-              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
+              "resulting in {3} cells.".format(double_tree.num_x2divs,
+                double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #sort the weights arrays
     weights1 = np.ascontiguousarray(weights1[double_tree.tree1.idx_sorted, :])
     weights2 = np.ascontiguousarray(weights2[double_tree.tree2.idx_sorted, :])
     
     #create a function to call with only one argument
-    engine = partial(_conditional_pair_matrix_engine, double_tree, weights1, weights2, r_max, period, PBCs, cond_func_id)
+    engine = partial(_conditional_pair_matrix_engine, 
+        double_tree, weights1, weights2, r_max, period, PBCs, cond_func_id)
     
     #do the pair counting
     if num_threads>1:
@@ -679,13 +686,14 @@ def conditional_pair_matrix(data1, data2, r_max, weights1, weights2, cond_func_i
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
-    if verbose==True:
+    if verbose is True:
         print("total run time: {0} seconds".format(time.time()-start))
     
     return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 
 
-def _conditional_pair_matrix_engine(double_tree, weights1, weights2, r_max, period, PBCs, cond_func_id, icell1):
+def _conditional_pair_matrix_engine(double_tree, weights1, weights2, 
+    r_max, period, PBCs, cond_func_id, icell1):
     """
     pair counting engine for npairs function.  This code calls a cython function.
     """
@@ -725,9 +733,10 @@ def _conditional_pair_matrix_engine(double_tree, weights1, weights2, r_max, peri
         
         j_min = s2.start
         
-        dd, ii_inds, jj_inds = conditional_pairwise_distance_no_pbc(x_icell1, y_icell1, z_icell1,\
-                                                                    x_icell2, y_icell2, z_icell2,\
-                                                                    r_max, w_icell1, w_icell2, cond_func_id)
+        dd, ii_inds, jj_inds = conditional_pairwise_distance_no_pbc(
+            x_icell1, y_icell1, z_icell1,
+            x_icell2, y_icell2, z_icell2,
+            r_max, w_icell1, w_icell2, cond_func_id)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
@@ -740,9 +749,9 @@ def _conditional_pair_matrix_engine(double_tree, weights1, weights2, r_max, peri
     return d, i_inds, j_inds
 
 
-def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights2,
-                     cond_func_id, period=None, verbose=False,\
-                     num_threads=1, approx_cell1_size = None, approx_cell2_size = None):
+def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, 
+        weights1, weights2, cond_func_id, period=None, verbose=False,
+        num_threads=1, approx_cell1_size = None, approx_cell2_size = None):
     """
     Calculate the distance to all pairs with perpendicular seperations less than or 
     equal to ``rp_max`` and parallel seperations ``pi_max`` in redshift space  that 
@@ -936,7 +945,7 @@ def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights
     
     weights1, weights2 = _process_weights(weights1, weights2, cond_func_id, data1, data2)
     
-    if verbose==True:
+    if verbose is True:
         print("running on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         start = time.time()
@@ -948,28 +957,29 @@ def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
     
     double_tree = FlatRectanguloidDoubleTree(x1, y1, z1, x2, y2, z2,
-                      approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
-                      approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
-                      rp_max, rp_max, pi_max, xperiod, yperiod,zperiod, PBCs=PBCs)
+        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
+        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+        rp_max, rp_max, pi_max, xperiod, yperiod,zperiod, PBCs=PBCs)
     
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
     Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
     
-    if verbose==True:
+    if verbose is True:
         print("volume 1 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x1divs,\
-              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+              "resulting in {3} cells.".format(double_tree.num_x1divs,
+                double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
         print("volume 2 split {0},{1},{2} times along each dimension,\n"
-              "resulting in {3} cells.".format(double_tree.num_x2divs,\
-              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
+              "resulting in {3} cells.".format(double_tree.num_x2divs,
+                double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #sort the weights arrays
     weights1 = np.ascontiguousarray(weights1[double_tree.tree1.idx_sorted, :])
     weights2 = np.ascontiguousarray(weights2[double_tree.tree2.idx_sorted, :])
     
     #create a function to call with only one argument
-    engine = partial(_conditional_xy_z_pair_matrix_engine, double_tree, weights1, weights2, rp_max, pi_max, period, PBCs, cond_func_id)
+    engine = partial(_conditional_xy_z_pair_matrix_engine, 
+        double_tree, weights1, weights2, rp_max, pi_max, period, PBCs, cond_func_id)
     
     #do the pair counting
     if num_threads>1:
@@ -996,14 +1006,15 @@ def conditional_xy_z_pair_matrix(data1, data2, rp_max, pi_max, weights1, weights
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
-    if verbose==True:
+    if verbose is True:
         print("total run time: {0} seconds".format(time.time()-start))
     
     return coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))),\
            coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 
 
-def _conditional_xy_z_pair_matrix_engine(double_tree, weights1, weights2, rp_max, pi_max, period, PBCs, cond_func_id, icell1):
+def _conditional_xy_z_pair_matrix_engine(double_tree, weights1, weights2, 
+    rp_max, pi_max, period, PBCs, cond_func_id, icell1):
     """
     pair counting engine for xy_z_fof_npairs function.  This code calls a cython function.
     """
@@ -1044,11 +1055,10 @@ def _conditional_xy_z_pair_matrix_engine(double_tree, weights1, weights2, rp_max
         
         j_min = s2.start
         
-        dd_perp, dd_para, ii_inds, jj_inds = conditional_pairwise_xy_z_distance_no_pbc(\
-                                                 x_icell1, y_icell1, z_icell1,\
-                                                 x_icell2, y_icell2, z_icell2,\
-                                                 rp_max, pi_max,
-                                                 w_icell1, w_icell2, cond_func_id)
+        dd_perp, dd_para, ii_inds, jj_inds = conditional_pairwise_xy_z_distance_no_pbc(
+            x_icell1, y_icell1, z_icell1,
+            x_icell2, y_icell2, z_icell2,
+            rp_max, pi_max, w_icell1, w_icell2, cond_func_id)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min

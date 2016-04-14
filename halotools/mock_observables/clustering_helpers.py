@@ -9,18 +9,15 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count 
-from .tpcf_estimators import _list_estimators, _TP_estimator_requirements
-from ..custom_exceptions import *
+from .tpcf_estimators import _list_estimators
+from ..custom_exceptions import HalotoolsError
 from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['_tpcf_process_args',\
-           '_tpcf_jackknife_process_args',\
-           '_rp_pi_tpcf_process_args',
-           '_s_mu_tpcf_process_args',\
-           '_marked_tpcf_process_args',\
-           '_delta_sigma_process_args',\
-           '_tpcf_one_two_halo_decomp_process_args',\
-           '_angular_tpcf_process_args']
+__all__ = ('_tpcf_process_args', '_tpcf_jackknife_process_args',
+    '_rp_pi_tpcf_process_args', '_s_mu_tpcf_process_args',
+    '_marked_tpcf_process_args', '_delta_sigma_process_args',
+    '_tpcf_one_two_halo_decomp_process_args',
+    '_angular_tpcf_process_args')
 __author__=['Duncan Campbell', 'Andrew Hearin']
 
 
@@ -42,7 +39,7 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross is False
         else: 
             _sample1_is_sample2 = False
     else: 
@@ -120,7 +117,7 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
         msg = ('\n `sample1` and `sample2` must have same dimension.')
         raise HalotoolsError(msg)
     
-    if (randoms is None) & (PBCs == False):
+    if (randoms is None) & (PBCs is False):
         msg = ('\n If no PBCs are specified, randoms must be provided.')
         raise HalotoolsError(msg)
     
@@ -168,8 +165,9 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
            _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed
 
 
-def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period, do_auto,\
-                                 do_cross, estimator, num_threads, max_sample_size):
+def _tpcf_jackknife_process_args(sample1, randoms, rbins, 
+    Nsub, sample2, period, do_auto, do_cross, 
+    estimator, num_threads, max_sample_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.jackknife_tpcf`. 
@@ -184,17 +182,21 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period,
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross is False
         else: 
             _sample1_is_sample2 = False
     else: 
         sample2 = sample1
         _sample1_is_sample2 = True
-    
+
+    if period is None:
+        PBCs = False
+    else:
+        PBCs = True
     #process randoms parameter
     if np.shape(randoms) == (1,):
         N_randoms = randoms[0]
-        if PBCs == True:
+        if PBCs is True:
             randoms = np.random.random((N_randoms,3))*period
         else:
             msg = ("\n When no `period` parameter is passed, \n"
@@ -281,7 +283,7 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period,
         msg = ('\n Sample1 and sample2 must have same dimension.')
         raise HalotoolsError(msg)
     
-    if (randoms is None) & (PBCs == False):
+    if (randoms is None) & (PBCs is False):
         msg = ('\n If no PBCs are specified, randoms must be provided.')
         raise HalotoolsError(msg)
     
@@ -302,11 +304,9 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period,
            num_threads, _sample1_is_sample2, PBCs
 
 
-def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
-                                      period, do_auto, do_cross, estimator,\
-                                      num_threads, max_sample_size,
-                                      approx_cell1_size, approx_cell2_size,\
-                                      approx_cellran_size):
+def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size, 
+    approx_cell1_size, approx_cell2_size,approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.redshift_space_tpcf`. 
@@ -322,7 +322,7 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross is False
         else: 
             _sample1_is_sample2 = False
     else: 
@@ -421,7 +421,7 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
         msg = ('\n `sample1` and `sample2` must have same dimension.\n')
         raise HalotoolsError(msg)
     
-    if (randoms is None) & (PBCs == False):
+    if (randoms is None) & (PBCs is False):
         msg = ('\n If no PBCs are specified, randoms must be provided.\n')
         raise HalotoolsError(msg)
     
@@ -442,11 +442,9 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
            do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
-def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
-                            period, do_auto, do_cross, estimator,\
-                            num_threads, max_sample_size,
-                            approx_cell1_size, approx_cell2_size,\
-                            approx_cellran_size):
+def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+    approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.s_mu_tpcf`. 
@@ -461,7 +459,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross is False
         else: 
             _sample1_is_sample2 = False
     else: 
@@ -521,7 +519,6 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
     theta = np.arccos(mu_bins)
     mu_bins = np.sin(theta)[::-1] #must be increasing, remember to reverse result.
     
-    mu_max = np.max(mu_bins)
     try:
         assert mu_bins.ndim == 1
         assert len(mu_bins) > 1
@@ -564,7 +561,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
         msg = ('\n `sample1` and `sample2` must have same dimension.\n')
         raise HalotoolsError(msg)
     
-    if (randoms is None) & (PBCs == False):
+    if (randoms is None) & (PBCs is False):
         msg = ('\n If no PBCs are specified, randoms must be provided.\n')
         raise HalotoolsError(msg)
     
@@ -585,10 +582,9 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
            do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
-def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
-                              period, do_auto, do_cross, num_threads,\
-                              max_sample_size, wfunc, normalize_by,\
-                              iterations, randomize_marks):
+def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
+    period, do_auto, do_cross, num_threads, max_sample_size, 
+    wfunc, normalize_by, iterations, randomize_marks):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.marked_tpcf`. 
@@ -604,7 +600,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross is False
         else: 
             _sample1_is_sample2 = False
     else: 
@@ -760,8 +756,8 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
            num_threads, wfunc, normalize_by, _sample1_is_sample2, PBCs, randomize_marks
 
 
-def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
-                              estimator, num_threads, approx_cell1_size, approx_cell2_size):
+def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, 
+    period,estimator, num_threads, approx_cell1_size, approx_cell2_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.delta_sigma`. 
@@ -771,7 +767,6 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
     particles = convert_to_ndarray(particles)
     
     rp_bins = convert_to_ndarray(rp_bins)
-    rp_max = np.max(rp_bins)
     try:
         assert rp_bins.ndim == 1
         assert len(rp_bins) > 1
@@ -813,11 +808,9 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
 
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
-                                           sample2, sample2_host_halo_id, randoms,
-                                           period, do_auto, do_cross, estimator,
-                                           num_threads, max_sample_size,
-                                           approx_cell1_size, approx_cell2_size,
-                                           approx_cellran_size):
+    sample2, sample2_host_halo_id, randoms,
+    period, do_auto, do_cross, estimator,num_threads, max_sample_size, 
+    approx_cell1_size, approx_cell2_size,approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.tpcf_one_two_halo_decomp`. 
@@ -834,7 +827,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross=False
         else: 
             _sample1_is_sample2 = False
     else: 
@@ -923,7 +916,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         msg = ('\n `sample1` and `sample2` must have same dimension.')
         raise HalotoolsError(msg)
     
-    if (randoms is None) & (PBCs == False):
+    if (randoms is None) & (PBCs is False):
         msg = ('\n If no PBCs are specified, randoms must be provided.')
         raise HalotoolsError(msg)
     
@@ -945,8 +938,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
 
 
 def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms, 
-                               do_auto, do_cross, estimator, num_threads,
-                               max_sample_size):
+    do_auto, do_cross, estimator, num_threads, max_sample_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.angular_tpcf`. 
@@ -961,7 +953,7 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-correlation will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross=False
         else: 
             _sample1_is_sample2 = False
     else: 

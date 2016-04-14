@@ -10,11 +10,9 @@ __all__ = ['_TP_estimator', '_list_estimators', '_TP_estimator_requirements']
 __author__=['Duncan Campbell']
 
 import numpy as np
-from warnings import warn
-from multiprocessing import cpu_count 
 
-from ..custom_exceptions import *
-from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
+from ..custom_exceptions import HalotoolsError
+from ..utils.array_utils import convert_to_ndarray
 
 
 def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):

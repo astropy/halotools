@@ -8,12 +8,10 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 ####import modules########################################################################
 import numpy as np
-from .pair_counters.double_tree_per_object_pairs import *
-from ..custom_exceptions import *
-from warnings import warn
 
-from ..utils import convert_to_ndarray
-from .large_scale_density_helpers import *
+from .pair_counters.double_tree_per_object_pairs import per_object_npairs
+from .large_scale_density_helpers import _large_scale_density_spherical_volume_process_args
+from .large_scale_density_helpers import _large_scale_density_spherical_annulus_process_args
 ##########################################################################################
 
 

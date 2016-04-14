@@ -7,20 +7,18 @@ galaxy group classes
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import sys
 import numpy as np
-from scipy.sparse import csgraph, csr_matrix, coo_matrix
-from math import pi, gamma
-from ..custom_exceptions import *
-from .pair_counters.double_tree_pair_matrix import *
+from scipy.sparse import csgraph, csr_matrix
+from ..custom_exceptions import HalotoolsError
+from .pair_counters.double_tree_pair_matrix import xy_z_pair_matrix
 
 igraph_available=True
 try: import igraph
 except ImportError:
     igraph_available=False
-if igraph_available==True: #there is another package called igraph--need to distinguish.
+if igraph_available is True: #there is another package called igraph--need to distinguish.
     if not hasattr(igraph,'Graph'):
-        igraph_available==False
+        igraph_available is False
 no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
                  "See http://igraph.org/ and note that there are two packages called \n"
                  "'igraph'.")
@@ -38,8 +36,7 @@ class FoFGroups(object):
         Build FoF groups in redshift space assuming the distant observer approximation.
         
         The first two dimensions (x, y) define the plane for perpendicular distances. 
-        The third dimension (z) is used for line-of-sight distances.  This is the 
-        "distant observer" approximation.
+        The third dimension (z) is used for line-of-sight distances.  
         See the :ref:`mock_obs_pos_formatting` documentation page for 
         instructions on how to transform your coordinate position arrays into the 
         format accepted by the ``positions`` argument.   
@@ -59,10 +56,10 @@ class FoFGroups(object):
             Normalized to the mean separation between galaxies. 
         
         period : array_like, optional
-            length 3 array defining axis-aligned periodic boundary conditions.
+            length 3 array defining periodic boundary conditions.
         
         Lbox : array_like, optional
-            length 3 array defining cuboid boundaries of the simulation box.
+            length 3 array defining boundaries of the simulation box.
         
         num_threads : int, optional
             number of threads to use in calculation. Default is 1. A string 'max' may be 
@@ -126,10 +123,9 @@ class FoFGroups(object):
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
         self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
         
-        self.m_perp, self.m_para = xy_z_pair_matrix(self.positions, self.positions,\
-                                                    self.d_perp, self.d_para,\
-                                                    period=self.period,\
-                                                    num_threads=num_threads)
+        self.m_perp, self.m_para = xy_z_pair_matrix(
+            self.positions, self.positions, self.d_perp, self.d_para,
+            period=self.period,num_threads=num_threads)
         
         self.m = self.m_perp.multiply(self.m_perp)+self.m_para.multiply(self.m_para)
         self.m = self.m.sqrt()
@@ -149,15 +145,14 @@ class FoFGroups(object):
         
         """
         if getattr(self,'_group_ids',None) is None:
-            self._n_groups, self._group_ids = csgraph.connected_components(\
-                                                  self.m_perp, directed=False,\
-                                                  return_labels=True)
+            self._n_groups, self._group_ids = csgraph.connected_components(
+                self.m_perp, directed=False,return_labels=True)
         return self._group_ids
     
     @property
     def n_groups(self):
         """
-        Calculate the total number of groups, including 1 member groups
+        Calculate the total number of groups, including 1-member groups
         
         Returns
         -------
@@ -166,15 +161,15 @@ class FoFGroups(object):
         
         """
         if getattr(self,'_n_groups',None) is None:
-            self._n_groups = csgraph.connected_components(self.m_perp, directed=False,\
-                                                          return_labels=False)
+            self._n_groups = csgraph.connected_components(self.m_perp, 
+                directed=False,return_labels=False)
         return self._n_groups
     
     def create_graph(self):
         """
         Create graph from FoF sparse matrix (requires igraph package).
         """
-        if igraph_available==True:
+        if igraph_available is True:
             self.g = _scipy_to_igraph(self.m, self.positions, directed=False)
         else: raise HalotoolsError(no_igraph_msg)
     
@@ -188,7 +183,7 @@ class FoFGroups(object):
             the 'degree' of galaxies in groups
         
         """
-        if igraph_available==True:
+        if igraph_available is True:
             self.degree = self.g.degree()
             return self.degree
         else: raise HalotoolsError(no_igraph_msg)
@@ -202,7 +197,7 @@ class FoFGroups(object):
         betweeness : np.array
             the 'betweenness' of galaxies in groups
         """
-        if igraph_available==True:
+        if igraph_available is True:
             self.betweenness = self.g.betweenness()
             return self.betweenness
         else: raise HalotoolsError(no_igraph_msg)
@@ -211,7 +206,7 @@ class FoFGroups(object):
         """
         Return the multiplicity of galaxies' group (requires igraph package).
         """
-        if igraph_available==True:
+        if igraph_available is True:
             clusters = self.g.clusters()
             mltp = np.array(clusters.sizes())
             self.multiplicity = mltp[self.group_ids]
@@ -229,7 +224,7 @@ class FoFGroups(object):
             indicated by their index.
         
         """
-        if igraph_available==True:
+        if igraph_available is True:
             self.edges = np.asarray(self.g.get_edgelist())
             return self.edges
         else: raise HalotoolsError(no_igraph_msg)
@@ -254,7 +249,7 @@ class FoFGroups(object):
         parallel distance between galaixes.
         
         """
-        if igraph_available==True:
+        if igraph_available is True:
             edges = self.g.es()
             lens = edges.get_attribute_values('weight')
             self.edge_lengths = np.array(lens)
@@ -289,11 +284,13 @@ def _scipy_to_igraph(matrix, coords, directed=False):
     y = coords[:,1]
     z = coords[:,2]
     if igraph_available:
-        g = igraph.Graph(list(zip(sources, targets)), n=matrix.shape[0], directed=directed,\
-                            edge_attrs={'weight': weights},\
-                            vertex_attrs={'x':x, 'y':y, 'z':z })
+        g = igraph.Graph(list(zip(sources, targets)), 
+            n=matrix.shape[0], directed=directed,
+            edge_attrs={'weight': weights},
+            vertex_attrs={'x':x, 'y':y, 'z':z })
         return g
-    else:  raise HalotoolsError(no_igraph_msg)
+    else:
+        raise HalotoolsError(no_igraph_msg)
     
     
     
