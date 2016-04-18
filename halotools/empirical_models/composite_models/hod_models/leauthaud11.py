@@ -7,16 +7,9 @@ Module containing the HOD-style composite model based on Leauthaud et al. (2011)
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
-import numpy as np
-
 from ... import model_defaults
 from ...occupation_models import leauthaud11_components 
-from ... import factories
-from ...smhm_models import Behroozi10SmHm
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-
-from ....sim_manager import FakeSim, sim_defaults
-
 
 __all__ = ['leauthaud11_model_dictionary']
     
@@ -65,20 +58,21 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
 
     Examples 
     --------
-
+    >>> from halotools.empirical_models import HodModelFactory
     >>> model_dictionary = leauthaud11_model_dictionary()
-    >>> model_instance = factories.HodModelFactory(**model_dictionary)
+    >>> model_instance = HodModelFactory(**model_dictionary)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold and redshift:
 
     >>> model_dictionary = leauthaud11_model_dictionary(threshold = 11, redshift = 1)
-    >>> model_instance = factories.HodModelFactory(**model_dictionary)
+    >>> model_instance = HodModelFactory(**model_dictionary)
 
     For this model, you can also use the following syntax candy, 
     which accomplishes the same task as the above:
 
-    >>> model_instance = factories.PrebuiltHodModelFactory('leauthaud11', threshold = 11, redshift = 1)
+    >>> from halotools.empirical_models import PrebuiltHodModelFactory
+    >>> model_instance = PrebuiltHodModelFactory('leauthaud11', threshold = 11, redshift = 1)
 
     As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
     you can populate a mock by passing the model a halo catalog:

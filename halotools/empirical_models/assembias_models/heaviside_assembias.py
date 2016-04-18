@@ -11,7 +11,6 @@ __author__  = ('Andrew Hearin', )
 
 import numpy as np 
 from warnings import warn 
-from time import time
 
 from .. import model_defaults, model_helpers
 
@@ -204,7 +203,8 @@ class HeavisideAssembias(object):
             abscissa = [2]
 
         if custom_len(abscissa) != custom_len(strength):
-            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abscissa`` must have the same length")
+            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abscissa`` "
+                "must have the same length")
 
         self._assembias_strength_abscissa = abscissa
         for ipar, val in enumerate(strength):
@@ -264,7 +264,7 @@ class HeavisideAssembias(object):
         """
 
         if hasattr(self, '_input_split_func'):
-            result = self._input_split_func(table = table)
+            result = self._input_split_func(prim_haloprop = prim_haloprop)
 
             if np.any(result < 0):
                 msg = ("The input split_func passed to the HeavisideAssembias class"
@@ -282,7 +282,6 @@ class HeavisideAssembias(object):
                 np.log10(self._split_abscissa), self._split_ordinates, k=3)
             result = spline_function(np.log10(prim_haloprop))
         else:
-            model_abscissa = self._split_abscissa
             spline_function = model_helpers.custom_spline(
                 self._split_abscissa, self._split_ordinates, k=3)
             result = spline_function(prim_haloprop)

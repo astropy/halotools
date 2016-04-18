@@ -7,15 +7,9 @@ Module containing some commonly used composite HOD models.
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
-import numpy as np
-
-from ... import factories, model_defaults
-from ...occupation_models import leauthaud11_components 
 from ... import factories
+from ...occupation_models import leauthaud11_components 
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-
-from ....sim_manager import FakeSim, sim_defaults
-
 
 __all__ = ['hearin15_model_dictionary']
 
@@ -131,10 +125,6 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     # Build the profile model
     satellites_profile = NFWPhaseSpace(**kwargs) 
     satellites_profile._suppress_repeated_param_warning = True   
-
-    composite_model = factories.HodModelFactory(centrals_occupation = centrals_occupation, 
-        centrals_profile = centrals_profile, satellites_occupation = satellites_occupation, 
-        satellites_profile = satellites_profile)
 
     return ({'centrals_occupation': centrals_occupation, 
         'centrals_profile': centrals_profile, 

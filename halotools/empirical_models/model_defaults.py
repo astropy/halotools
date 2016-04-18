@@ -5,9 +5,7 @@ Module expressing various default settings of the empirical modeling sub-package
 
 __all__ = ['get_halo_boundary_key', 'get_halo_mass_key']
 
-import os, sys
 import numpy as np
-from astropy import cosmology
 
 # Default thresholds for mocks
 default_luminosity_threshold = -20
