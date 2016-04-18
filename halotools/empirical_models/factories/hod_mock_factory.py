@@ -123,6 +123,11 @@ class HodMockFactory(MockFactory):
         cutoff_mvir = self.Num_ptcl_requirement*self.particle_mass
         mass_cut = halo_table[self.halo_mass_column_key] > cutoff_mvir
         halo_table = halo_table[mass_cut]
+        if len(halo_table) == 0:
+            msg = ("Your mass cut resulted in zero halos in the halo catalog.\n"
+                "This is not permissible, and indicates a problem in either \n"
+                "the processing of the halo catalog or in the value of ``Num_ptcl_requirement``.\n")
+            raise HalotoolsError(msg)
 
         ############################################################
 
