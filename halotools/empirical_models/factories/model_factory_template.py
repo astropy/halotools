@@ -7,22 +7,15 @@ __all__ = ['ModelFactory']
 __author__ = ['Andrew Hearin']
 
 import numpy as np
-from copy import copy
-from functools import partial
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-from warnings import warn 
+from abc import ABCMeta
 
-from .hod_mock_factory import HodMockFactory
-from .subhalo_mock_factory import SubhaloMockFactory
 
-from .. import model_helpers
 from .. import model_defaults 
 
 from ...sim_manager import CachedHaloCatalog, FakeSim
 from ...sim_manager import sim_defaults
-from ...utils.array_utils import custom_len
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 inconsistent_redshift_error_msg = ("Inconsistency between the redshift "
     "already bound to the existing mock = ``%f`` "

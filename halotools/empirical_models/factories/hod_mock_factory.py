@@ -10,28 +10,16 @@ and Halotools models.
 """
 
 import numpy as np
-from multiprocessing import cpu_count
 from copy import copy 
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.table import Table 
 
 from .mock_factory_template import MockFactory
-from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
-from .. import model_helpers, model_defaults
-
-try:
-    from ... import mock_observables
-    HAS_MOCKOBS = True
-except ImportError:
-    HAS_MOCKOBS = False
+from .. import model_helpers
 
 from ...sim_manager import sim_defaults
-from ...utils.array_utils import randomly_downsample_data
 from ...utils.table_utils import SampleSelector
-from ...sim_manager import FakeSim
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 
 __all__ = ['HodMockFactory']

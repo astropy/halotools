@@ -11,14 +11,13 @@ and Halotools models.
 """
 
 import numpy as np
-from copy import copy 
 
 from astropy.table import Table 
 
 from .mock_factory_template import MockFactory
 
-from .. import model_helpers, model_defaults
-from ...custom_exceptions import *
+from .. import model_defaults
+from ...custom_exceptions import HalotoolsError
 
 
 __all__ = ['SubhaloMockFactory']

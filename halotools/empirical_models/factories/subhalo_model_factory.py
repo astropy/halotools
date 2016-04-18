@@ -8,7 +8,6 @@ that governs how all subhalo-based models are built.
 __all__ = ['SubhaloModelFactory']
 __author__ = ['Andrew Hearin']
 
-import numpy as np
 from copy import copy
 from warnings import warn 
 import collections 
@@ -16,12 +15,9 @@ import collections
 from ..factories import ModelFactory, SubhaloMockFactory
 
 from .. import model_helpers
-from .. import model_defaults 
 
-from ...sim_manager import FakeSim, CachedHaloCatalog
 from ...sim_manager import sim_defaults
-from ...utils.array_utils import custom_len
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 
 
@@ -381,7 +377,8 @@ class SubhaloModelFactory(ModelFactory):
                 except AssertionError:
                     msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments you passed to the SubhaloModelFactory.\n"
-                    "For every element of the input ``model_feature_calling_sequence``, there must be a corresponding \n"
+                    "For every element of the input ``model_feature_calling_sequence``, "
+                    "there must be a corresponding \n"
                     "keyword argument to which a component model instance is bound.\n")
                     raise HalotoolsError(msg % model_feature)
         except TypeError:
@@ -459,7 +456,9 @@ class SubhaloModelFactory(ModelFactory):
                 inherited_methods = []
                 component_model._methods_to_inherit = []
 
-            missing_methods = set(mock_making_methods) - set(inherited_methods).intersection(set(mock_making_methods))
+            missing_methods = (
+                set(mock_making_methods) - 
+                set(inherited_methods).intersection(set(mock_making_methods)))
             for methodname in missing_methods:
                 component_model._methods_to_inherit.append(methodname)
 
@@ -921,11 +920,14 @@ class SubhaloModelFactory(ModelFactory):
                 for methodname in component_model._methods_to_inherit:
                     assert hasattr(component_model, methodname)
             except AssertionError:
-                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
-                    "but the instance does not have a properly defined ``_methods_to_inherit`` attribute.\n"
+                clname = component_model.__name__
+                msg = ("You bound an instance of the ``"+clname+"`` to this keyword,\n"
+                    "but the instance does not have "
+                    "a properly defined ``_methods_to_inherit`` attribute.\n"
                     "At a minimum, all component models must have this attribute, \n"
                     "even if there is only an empty list bound to it.\n"
-                    "Any items in this list must be names of methods bound to the component model.\n" + msg_conclusion)
-                raise HalotoolsError(msg % feature_key)
+                    "Any items in this list must be names of methods bound to "
+                    "the component model.\n")
+                raise HalotoolsError(msg)
 
 

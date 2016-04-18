@@ -8,20 +8,9 @@ of the galaxy-halo connection.
 __all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
 __author__ = ['Andrew Hearin']
 
-import numpy as np
-from copy import copy
-from warnings import warn 
-import collections 
-
 from ..factories import SubhaloModelFactory, HodModelFactory
 
-from .. import model_helpers
-from .. import model_defaults 
-
-from ...sim_manager import sim_defaults
-from ...sim_manager import FakeSim
-from ...utils.array_utils import custom_len
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
     """ 
