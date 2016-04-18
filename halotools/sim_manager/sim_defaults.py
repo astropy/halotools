@@ -9,11 +9,7 @@ descriptions of the purpose of each variable defined in this module.
 
 """
 
-import os, sys
-import numpy as np
 from astropy import cosmology
-
-from ..custom_exceptions import UnsupportedSimError, HalotoolsCacheError
 
 # Set the default argument for the CachedHaloCatalog class. 
 # Any combination of simname, halo-finder and redshift may be chosen, 

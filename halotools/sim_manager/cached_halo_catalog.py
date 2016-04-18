@@ -2,7 +2,6 @@
 the class responsible for retrieving halo catalogs from shorthand 
 keyword inputs such as ``simname`` and ``redshift``. 
 """
-import numpy as np
 import os
 from warnings import warn 
 from copy import deepcopy 
@@ -23,7 +22,6 @@ from ..utils import broadcast_host_halo_property, add_halo_hostid
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
 from .halo_table_cache_log_entry import get_redshift_string
-from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
 from ..custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
@@ -318,7 +316,7 @@ class CachedHaloCatalog(object):
             overwrite_fname_metadata = False)
 
         if log_entry.fname != fname:
-            if self._update_cached_fname == True:
+            if self._update_cached_fname is True:
                 old_fname = deepcopy(log_entry.fname)
                 log_entry = (
                     self.halo_table_cache.determine_log_entry_from_fname(fname, 
@@ -533,7 +531,7 @@ class CachedHaloCatalog(object):
         try:
             return self._halo_table
         except AttributeError:
-            if self.log_entry.safe_for_cache == True:
+            if self.log_entry.safe_for_cache is True:
                 self._halo_table = Table.read(self.fname, path='data')
                 self._add_new_derived_columns(self._halo_table)
                 return self._halo_table
@@ -599,7 +597,8 @@ class CachedHaloCatalog(object):
     @property 
     def ptcl_table(self):
         """
-        Astropy `~astropy.table.Table` object storing a collection of ~1e6 randomly selected dark matter particles. 
+        Astropy `~astropy.table.Table` object storing 
+        a collection of ~1e6 randomly selected dark matter particles. 
         """
         try:
             return self._ptcl_table
@@ -612,7 +611,7 @@ class CachedHaloCatalog(object):
                     )
                 ptcl_log_entry = self.ptcl_log_entry
 
-            if ptcl_log_entry.safe_for_cache == True:
+            if ptcl_log_entry.safe_for_cache is True:
                 self._ptcl_table = Table.read(ptcl_log_entry.fname, path='data')
                 return self._ptcl_table
             else:

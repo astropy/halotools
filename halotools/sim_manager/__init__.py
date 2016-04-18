@@ -15,10 +15,9 @@ try:
 except OSError:
     pass
 
-from .supported_sims import *
 from .fake_sim import FakeSim
 
-from .download_manager import *
+from .download_manager import DownloadManager
 
 from .cached_halo_catalog import CachedHaloCatalog
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog

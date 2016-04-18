@@ -9,14 +9,9 @@ publicly available Rockstar hlist files and store them in cache.
 __all__ = ('RockstarHlistReader', )
 
 import os
-import gzip
 
-from time import time
-import numpy as np
 from warnings import warn 
 from astropy.table import Table
-from astropy.table import vstack as table_vstack 
-from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 
 import datetime
 
@@ -409,7 +404,7 @@ class RockstarHlistReader(TabularAsciiReader):
                 "in the Halotools cache log\n"
                 "that exactly matches the filename and "
                 "metadata of the file you intend to write.\n")
-            if self.overwrite == True:
+            if self.overwrite is True:
                 msg += ("Because you have set ``overwrite`` to True, "
                     "\ncalling the read_and_store_halocat_in_cache "
                     "method will overwrite the existing file and log entry.\n")
@@ -430,7 +425,7 @@ class RockstarHlistReader(TabularAsciiReader):
                 raise HalotoolsError(msg)
         # there are no exact matches, but there may accidentally be nearby redshifts
         else:
-            if self.ignore_nearby_redshifts == False:
+            if self.ignore_nearby_redshifts is False:
                 pass
             else:
                 closely_matching_catalogs = list(
@@ -604,7 +599,7 @@ class RockstarHlistReader(TabularAsciiReader):
         for key in columns_to_convert_from_kpc_to_mpc:
             self.halo_table[key] /= 1000.
 
-        if add_supplementary_halocat_columns == True: 
+        if add_supplementary_halocat_columns is True: 
             self.add_supplementary_halocat_columns()
 
         if write_to_disk is True: 
@@ -613,13 +608,13 @@ class RockstarHlistReader(TabularAsciiReader):
         else:
             self._file_has_been_written_to_disk = False
 
-        if update_cache_log == True:
-            if self._file_has_been_written_to_disk == True: 
+        if update_cache_log is True:
+            if self._file_has_been_written_to_disk is True: 
                 self.update_cache_log()
             else:
                 msg = ("\nYou set update_cache_log to True but the \n"
                     "newly processed halo_table has not yet been written to disk.\n")
-                if write_to_disk == False:
+                if write_to_disk is False:
                     msg += ("This is because you set write_to_disk to False, \n"
                         "in which case the read_halocat method "
                         "will not automatically update the cache.\n")
@@ -659,7 +654,7 @@ class RockstarHlistReader(TabularAsciiReader):
         time_right_now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         f.attrs.create('time_of_catalog_production', time_right_now)
 
-        if self.processing_notes != None:
+        if self.processing_notes is not None:
             f.attrs.create('processing_notes', str(self.processing_notes))
 
         # Store all the choices for row cuts as metadata
