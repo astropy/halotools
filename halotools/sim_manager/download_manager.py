@@ -9,6 +9,8 @@ import numpy as np
 from warnings import warn
 from time import time
 
+from ..custom_exceptions import HalotoolsError, HalotoolsCacheError
+
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -31,7 +33,6 @@ from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
 from .halo_table_cache_log_entry import get_redshift_string
 
-from ..custom_exceptions import *
 
 try:
     import h5py
@@ -217,7 +218,7 @@ class DownloadManager(object):
         if len(exact_matches) > 0:
             msg = ("\nThere already exists a halo catalog in your cache log with \n"
                 "specifications that exactly match your inputs.\n")
-            if overwrite == False:
+            if overwrite is False:
                 if 'initial_download_script_msg' in list(kwargs.keys()):
                     msg = kwargs['initial_download_script_msg']
                     raise HalotoolsError(msg % output_fname)
@@ -239,7 +240,7 @@ class DownloadManager(object):
 
         if ((len(close_matches) > 0)
             & (len(exact_matches) == 0)
-            & (ignore_nearby_redshifts == False)):
+            & (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
@@ -259,7 +260,7 @@ class DownloadManager(object):
         # If the output_fname already exists, overwrite must be set to True
         # A special message is printed if this exception is raised by the
         # initial download script (hidden feature for developers only)
-        if (overwrite == False) & (os.path.isfile(output_fname)):
+        if (overwrite is False) & (os.path.isfile(output_fname)):
 
             if 'initial_download_script_msg' in list(kwargs.keys()):
                 msg = kwargs['initial_download_script_msg']
@@ -298,7 +299,7 @@ class DownloadManager(object):
                 output_fname)
             )
 
-        if new_log_entry.safe_for_cache == False:
+        if new_log_entry.safe_for_cache is False:
             msg = ("\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
                 "and contact the Halotools developers.\n"+ output_fname)
@@ -500,7 +501,7 @@ class DownloadManager(object):
         if len(exact_matches) > 0:
             msg = ("\nThere already exists a particle catalog in your cache log with \n"
                 "specifications that exactly match your inputs.\n")
-            if overwrite == False:
+            if overwrite is False:
                 if 'initial_download_script_msg' in list(kwargs.keys()):
                     msg = kwargs['initial_download_script_msg']
                     raise HalotoolsError(msg % output_fname)
@@ -522,7 +523,7 @@ class DownloadManager(object):
 
         if ((len(close_matches) > 0)
             & (len(exact_matches) == 0)
-            & (ignore_nearby_redshifts == False)):
+            & (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
@@ -542,7 +543,7 @@ class DownloadManager(object):
         # If the output_fname already exists, overwrite must be set to True
         # A special message is printed if this exception is raised by the
         # initial download script (hidden feature for developers only)
-        if (overwrite == False) & (os.path.isfile(output_fname)):
+        if (overwrite is False) & (os.path.isfile(output_fname)):
 
             if 'initial_download_script_msg' in list(kwargs.keys()):
                 msg = kwargs['initial_download_script_msg']
@@ -574,7 +575,7 @@ class DownloadManager(object):
                 output_fname)
             )
 
-        if new_log_entry.safe_for_cache == False:
+        if new_log_entry.safe_for_cache is False:
             msg = ("\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
                 "and contact the Halotools developers.\n"+ output_fname)

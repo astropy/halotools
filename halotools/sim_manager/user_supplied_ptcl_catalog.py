@@ -1,6 +1,5 @@
 """ Module containing the UserSuppliedPtclCatalog class.
 """
-
 import numpy as np
 import os
 from warnings import warn
@@ -130,7 +129,8 @@ class UserSuppliedPtclCatalog(object):
         that Halotools uses for its catalogs. This will help avoid future confusion over the
         where the cached particle catalog came from.
 
-        The particle catalog itself is stored in the ``ptcl_table`` attribute, with columns accessed as follows:
+        The particle catalog itself is stored in the ``ptcl_table`` attribute, 
+        with columns accessed as follows:
 
         >>> array_of_x_positions = halocat.ptcl_table['x'] # doctest: +SKIP
 

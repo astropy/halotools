@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-import os, shutil
-import numpy as np
+import os
+import shutil
 from unittest import TestCase
-import warnings
 from astropy.tests.helper import pytest 
 from astropy.table import Table 
 

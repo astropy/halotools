@@ -156,7 +156,7 @@ class UserSuppliedHaloCatalog(object):
             assert type(halo_id) is np.ndarray
             Nhalos = custom_len(halo_id)
             assert Nhalos > 1
-        except KeyError as AssertionError:
+        except KeyError:
             msg = ("\nThe UserSuppliedHaloCatalog requires a ``halo_id`` keyword argument "
                 "storing an ndarray of length Nhalos > 1.\n")
             raise HalotoolsError(msg)
@@ -345,7 +345,7 @@ class UserSuppliedHaloCatalog(object):
 
         ############################################################
         ## Perform some consistency checks in the fname
-        if (os.path.isfile(fname)) & (overwrite == False):
+        if (os.path.isfile(fname)) & (overwrite is False):
             msg = ("\nYou attempted to store your halo catalog "
                 "in the following location: \n\n" + str(fname) +
                 "\n\nThis path points to an existing file. \n"

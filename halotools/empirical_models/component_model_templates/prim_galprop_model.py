@@ -9,19 +9,14 @@ from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
 import numpy as np
-from scipy.interpolate import UnivariateSpline
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-from astropy import cosmology
+from abc import ABCMeta
 from warnings import warn
-from functools import partial
 
 from . import LogNormalScatterModel
 
 from .. import model_defaults
-from .. import model_helpers as model_helpers
 
-from ...utils.array_utils import custom_len
 from ...sim_manager import sim_defaults 
 
 

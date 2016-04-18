@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import os, shutil
+import os
+import shutil
 import numpy as np
 from unittest import TestCase
 from astropy.tests.helper import pytest 

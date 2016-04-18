@@ -5,13 +5,10 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-
-
 __all__ = (['custom_len', 'find_idx_nearest_val', 
     'randomly_downsample_data', 'array_is_monotonic', 'convert_to_ndarray'])
 
 import numpy as np
-import collections
 from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
@@ -46,7 +43,7 @@ def convert_to_ndarray(x, dt = None):
 
     """
     if dt is not None:
-        if type(dt) != type(np.dtype):
+        if type(dt) is not type(np.dtype):
             raise HalotoolsError("The input dt must be a numpy dtype object")
 
     if type(x) is np.ndarray:

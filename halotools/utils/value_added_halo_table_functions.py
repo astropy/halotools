@@ -1,22 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-
 Common functions applied to halo catalogs. 
-
 """
 
 from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+    unicode_literals)
 
 import numpy as np
-from warnings import warn
-
 from astropy.table import Table 
 
 from .group_member_generator import group_member_generator
 
 from ..custom_exceptions import HalotoolsError 
-
 
 __all__ = ('broadcast_host_halo_property', 'add_halo_hostid')
 
@@ -69,7 +63,7 @@ def broadcast_host_halo_property(table, halo_property_key,
         assert halo_property_key in list(table.keys())
         assert 'halo_id' in list(table.keys())
     except AssertionError:
-        msg = ("\nThe input table does not the input ``halo_property_key`` = "+str(halo_property_key)+" column")
+        msg = ("\nThe input table does not the input ``halo_property_key``"" = "+str(halo_property_key)+" column")
         raise HalotoolsError(msg)
 
     new_colname = halo_property_key + '_host_halo'

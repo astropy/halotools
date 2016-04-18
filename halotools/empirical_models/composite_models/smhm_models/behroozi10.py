@@ -6,10 +6,7 @@ based on the Behroozi et al. (2010) stellar-to-halo-mass relation.
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
-import numpy as np
-
 from ...smhm_models import Behroozi10SmHm
-from ... import factories 
 
 from ....sim_manager import sim_defaults
 
@@ -58,8 +55,9 @@ def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwar
     that can be passed to the `~halotools.empirical_models.SubhaloModelFactory` to build the 
     `behroozi10` composite model with default settings: 
 
+    >>> from halotools.empirical_models import SubhaloModelFactory
     >>> model_dictionary = behroozi10_model_dictionary()
-    >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
+    >>> model_instance = SubhaloModelFactory(**model_dictionary)
 
     As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
     you can populate a mock by passing the model a halo catalog:

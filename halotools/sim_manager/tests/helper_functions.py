@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 from __future__ import (absolute_import, division, print_function)
 
-from unittest import TestCase
-from astropy.tests.helper import pytest 
-import warnings, os
-
+import os
 import numpy as np 
-from copy import copy, deepcopy 
 
 from astropy.table import Table
 from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home 
-
-from ...custom_exceptions import HalotoolsError
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -26,7 +20,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('add_new_row_to_cache_log', 'create_dummy_halo_table_cache_log' )
+__all__ = ('add_new_row_to_cache_log', )
 
 dummy_cache_baseloc = os.path.join(detected_home, 'Desktop', 'tmp_dummy_cache')
 cache_basename = 'halo_table_cache_log.txt'

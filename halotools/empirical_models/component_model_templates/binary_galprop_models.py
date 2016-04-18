@@ -8,13 +8,9 @@ from __future__ import (
 __all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
 __author__ = ('Andrew Hearin', )
 
-from functools import partial
-from copy import copy
 import numpy as np
-from scipy.interpolate import UnivariateSpline as spline
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-import warnings
+from abc import ABCMeta
 
 from .. import model_defaults
 from .. import model_helpers

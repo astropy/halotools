@@ -129,10 +129,12 @@ class ConcMass(object):
             msg = ("\nIf you are using the ``direct_from_halo_catalog`` concentration-mass model,\n"
                 "you must pass a ``concentration_key`` keyword argument to the ConcMass constructor\n"
                 "that corresponds to a key in the input ``table``. \n"
-                "For all Halotools-provided processed halo catalogs, the appropriate key is ``halo_nfw_conc``,\n"
+                "For all Halotools-provided processed halo catalogs, "
+                "the appropriate key is ``halo_nfw_conc``,\n"
                 "which is the default choice for this model.\n"
                 "However, if you are using a halo catalog of your own, \n"
-                "you must make sure that you specify the appropriate ``concentration_key`` for your catalog.\n"
+                "you must make sure that you specify the appropriate "
+                "``concentration_key`` for your catalog.\n"
                 "The current ConcMass instance is set to use %s as the ``concentration_key``, \n"
                 "which does not correspond to a column of the input ``table``.\n")
             raise HalotoolsError(msg % key)

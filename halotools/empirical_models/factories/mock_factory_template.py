@@ -28,7 +28,7 @@ except ImportError:
     HAS_MOCKOBS = False
 
 from ...utils.array_utils import randomly_downsample_data
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 
 __all__ = ['MockFactory']
@@ -262,8 +262,8 @@ class MockFactory(object):
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
         if len(self.galaxy_table['x'][mask]) == 0:
-            msg = ("Zero mock galaxies have ``%s`` = ``%s``")
-            raise HalotoolsError(msg % (key, kwargs[key]))
+            msg = "Zero mock galaxies pass your cuts"
+            raise HalotoolsError(msg)
 
         if include_crosscorr is False:
             pos = three_dim_pos_bundle(table = self.galaxy_table,
@@ -275,10 +275,10 @@ class MockFactory(object):
         else:
             # Verify that the complementary mask is non-trivial
             if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
-                msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
+                msg = ("All mock galaxies pass your cut.\n"
                     "If this result is expected, you should not call the compute_galaxy_clustering"
-                    "method with the %s keyword")
-                raise HalotoolsError(msg % (key, kwargs[key], key))
+                    "method with the include_complement keyword")
+                raise HalotoolsError(msg)
             pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             xi11, xi12, xi22 = mock_observables.tpcf(
@@ -399,8 +399,8 @@ class MockFactory(object):
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
         if len(self.galaxy_table['x'][mask]) == 0:
-            msg = ("Zero mock galaxies have ``%s`` = ``%s``")
-            raise HalotoolsError(msg % (key, kwargs[key]))
+            msg = "Zero mock galaxies pass your cut"
+            raise HalotoolsError(msg)
 
         if include_complement is False:
             pos = three_dim_pos_bundle(table = self.galaxy_table,
@@ -413,10 +413,10 @@ class MockFactory(object):
         else:
             # Verify that the complementary mask is non-trivial
             if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
-                msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
+                msg = ("All mock galaxies pass your cut.\n"
                     "If this result is expected, you should not call the compute_galaxy_clustering"
-                    "method with the %s keyword")
-                raise HalotoolsError(msg % (key, kwargs[key], key))
+                    "method with the include_complement keyword")
+                raise HalotoolsError(msg)
             pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             clustering = mock_observables.tpcf(

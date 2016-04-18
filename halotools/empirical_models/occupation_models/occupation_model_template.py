@@ -7,26 +7,15 @@ HOD-style models of the galaxy-halo connection.
 
 __all__ = ('OccupationComponent', )
 
-from functools import partial
-from copy import copy
 import numpy as np
-import math
-from scipy.special import erf 
 from scipy.stats import poisson
-from scipy.optimize import brentq
-from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-import warnings
+from abc import ABCMeta
 
 from .. import model_defaults, model_helpers
-from ..assembias_models import HeavisideAssembias
-from ..model_helpers import bounds_enforcing_decorator_factory
 
 from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentiles
-from ...  import sim_manager
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
 class OccupationComponent(object):

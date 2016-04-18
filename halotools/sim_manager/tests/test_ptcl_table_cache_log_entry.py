@@ -3,13 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 from astropy.tests.helper import pytest 
-import warnings, os, shutil
-
-import numpy as np 
-from copy import copy, deepcopy 
+import os
+import shutil
 
 from astropy.table import Table
-from astropy.table import vstack as table_vstack
 
 try:
     import h5py 
@@ -95,7 +92,7 @@ class TestPtclTableCacheLogEntry(TestCase):
     def test_scenario0(self):
         num_scenario = 0
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "The input filename does not exist." in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -105,7 +102,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         with open(self.fnames[num_scenario], 'w') as f:
             f.write('abc')
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" in log_entry._cache_safety_message
 
@@ -116,7 +113,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         with open(self.fnames[num_scenario], 'w') as f:
             f.write('abc')
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" not in log_entry._cache_safety_message
         assert "access the hdf5 metadata raised an exception." in log_entry._cache_safety_message
@@ -136,7 +133,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.close()
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
         assert "missing the following metadata" in log_entry._cache_safety_message
 
@@ -157,7 +154,7 @@ class TestPtclTableCacheLogEntry(TestCase):
             f.attrs[attr] = getattr(log_entry, attr)
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "``particle_mass``" in log_entry._cache_safety_message
 
         f = h5py.File(self.fnames[num_scenario])
@@ -189,19 +186,19 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "does not match" in log_entry._cache_safety_message
 
         f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = 1.3390001
         f.close()
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "does not match" not in log_entry._cache_safety_message
 
         f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = '1.3390001'
         f.close()
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "does not match" not in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -226,7 +223,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         substr = "must at a minimum have the following columns"
         assert substr in log_entry._cache_safety_message
 
@@ -249,7 +246,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         substr = "must be bounded by [0, Lbox]."
         assert substr in log_entry._cache_safety_message
 
@@ -273,7 +270,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == True, log_entry._cache_safety_message
+        assert log_entry.safe_for_cache is True, log_entry._cache_safety_message
         substr =  "The particle catalog is safe to add to the cache log." 
         assert substr in log_entry._cache_safety_message
 

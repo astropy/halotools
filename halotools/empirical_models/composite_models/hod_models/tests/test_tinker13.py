@@ -3,13 +3,9 @@
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
-import numpy as np
-from astropy.table import Table
-
 from ....factories import PrebuiltHodModelFactory
 
 from .....sim_manager import FakeSim
-from .....custom_exceptions import *
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 

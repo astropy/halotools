@@ -2,16 +2,11 @@
 
 from unittest import TestCase
 import pytest
-import numpy as np
-from astropy.table import Table
 
-from ...composite_models import *
-from ...factories import HodModelFactory, SubhaloModelFactory
-from ...factories import PrebuiltHodModelFactory, PrebuiltSubhaloModelFactory
+from ...factories import PrebuiltHodModelFactory
 
-from ....utils.table_utils import compute_conditional_percentiles
 from ....sim_manager import CachedHaloCatalog, FakeSim
-from ....custom_exceptions import *
+from ....custom_exceptions import HalotoolsError
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 

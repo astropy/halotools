@@ -13,7 +13,6 @@ from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
 import numpy as np 
-from astropy import units as u
 
 from .conc_mass_models import ConcMass
 from .profile_model_template import AnalyticDensityProf
@@ -257,7 +256,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def cumulative_mass_PDF(self, scaled_radius, conc):
         """
-        Analytical result for the fraction of the total mass enclosed within dimensionless radius of an NFW halo, 
+        Analytical result for the fraction of the total mass 
+        enclosed within dimensionless radius of an NFW halo, 
 
         :math:`P_{\\rm NFW}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
         
@@ -415,7 +415,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         return AnalyticDensityProf.circular_velocity(self, radius, total_mass, conc)
 
     def rmax(self, total_mass, conc):
-        """ Radius at which the halo attains its maximum circular velocity, :math:`R_{\\rm max}^{\\rm NFW} = 2.16258R_{\Delta}/c`. 
+        """ Radius at which the halo attains its maximum circular velocity, 
+        :math:`R_{\\rm max}^{\\rm NFW} = 2.16258R_{\Delta}/c`. 
 
         Parameters 
         ----------
@@ -441,7 +442,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         return 2.16258*scale_radius
 
     def vmax(self, total_mass, conc):
-        """ Maximum circular velocity of the halo profile, :math:`V_{\\rm max}^{\\rm NFW} = V_{\\rm cir}^{\\rm NFW}(r = 2.16258R_{\Delta}/c)`. 
+        """ Maximum circular velocity of the halo profile, 
+        :math:`V_{\\rm max}^{\\rm NFW} = V_{\\rm cir}^{\\rm NFW}(r = 2.16258R_{\Delta}/c)`. 
 
         Parameters 
         ----------

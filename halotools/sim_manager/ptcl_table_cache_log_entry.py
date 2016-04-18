@@ -1,3 +1,5 @@
+"""
+"""
 import os
 from astropy.table import Table
 import numpy as np
@@ -138,7 +140,8 @@ class PtclTableCacheLogEntry(object):
         """
         self._cache_safety_message = "The particle catalog is safe to add to the cache log."
 
-        message_preamble = ("The particle catalog and/or its associated metadata fail the following tests:\n\n")
+        message_preamble = ("The particle catalog and/or its associated metadata "
+            "fail the following tests:\n\n")
 
         msg, num_failures = '', 0
         msg, num_failures = self._verify_file_exists(msg, num_failures)

@@ -6,14 +6,11 @@ published in Zheng et al. (2007), arXiv:0703457.
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
-import numpy as np
-
 from ... import model_defaults
 from ...occupation_models import zheng07_components
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-from ... import factories
 
-from ....sim_manager import FakeSim, sim_defaults
+from ....sim_manager import sim_defaults
 
 
 __all__ = ['zheng07_model_dictionary']
@@ -61,8 +58,8 @@ def zheng07_model_dictionary(
 
     Examples 
     --------
-
-    >>> model_instance = factories.PrebuiltHodModelFactory('zheng07', threshold = -21)
+    >>> from halotools.empirical_models import PrebuiltHodModelFactory
+    >>> model_instance = PrebuiltHodModelFactory('zheng07', threshold = -21)
 
     As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
     you can populate a mock by passing the model a halo catalog:
@@ -74,9 +71,6 @@ def zheng07_model_dictionary(
     """
 
     ####################################
-    ### Build subpopulation dictionary for centrals
-    subpopulation_dictionary_centrals = {}
-
     # Build the `occupation` feature
     centrals_occupation = zheng07_components.Zheng07Cens(
         threshold = threshold, redshift = redshift)
@@ -85,9 +79,6 @@ def zheng07_model_dictionary(
     centrals_profile = TrivialPhaseSpace(redshift = redshift, **kwargs)
 
     ####################################
-    ### Build subpopulation dictionary for satellites
-    subpopulation_dictionary_satellites = {}
-
     # Build the occupation model
     satellites_occupation = zheng07_components.Zheng07Sats(
         threshold = threshold, redshift = redshift, **kwargs)

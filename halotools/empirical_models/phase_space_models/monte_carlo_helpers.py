@@ -21,7 +21,7 @@ from time import time
 from ..model_helpers import custom_spline, call_func_table
 from .. import model_defaults
 
-from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError 
 
 
@@ -164,7 +164,7 @@ class MonteCarloGalProf(object):
                         print(("\n...Building lookup tables for the %s radial profile." % modelname))
                         print(("    (This will take about %.0f seconds, and only needs to be done once)" % runtime))
 
-            profile_params_dimensions = [len(profile_params) for profile_params in profile_params_list]
+            profile_params_dimensions = [len(p) for p in profile_params_list]
             self.rad_prof_func_table = np.array(func_table).reshape(profile_params_dimensions)
             self.vel_prof_func_table = np.array(velocity_func_table).reshape(profile_params_dimensions)
 
@@ -496,7 +496,7 @@ class MonteCarloGalProf(object):
                 # profile_params = kwargs['profile_params']
                 halo_radius = convert_to_ndarray(kwargs['halo_radius'])
                 assert len(halo_radius) == len(profile_params[0])
-            except KeyError as AssertionError:
+            except KeyError:
                 raise HalotoolsError("\nIf not passing a ``table`` keyword argument "
                     "to mc_pos, must pass the following keyword arguments:\n"
                     "``profile_params``, ``halo_radius``.")

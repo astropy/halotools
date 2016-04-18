@@ -4,7 +4,6 @@ algorithm for reading a very large ascii file that stores tabular data
 of a data type that is known in advance.
 
 """
-
 import os
 import gzip
 import collections

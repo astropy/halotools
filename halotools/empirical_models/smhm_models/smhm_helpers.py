@@ -1,4 +1,4 @@
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 from ...sim_manager import sim_defaults
 from warnings import warn
 

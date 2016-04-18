@@ -6,14 +6,8 @@ of galaxies within their halos.
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
-import numpy as np 
-from scipy.integrate import quad as quad_integration
-from scipy.special import spence 
-
 from astropy.extern import six 
 from abc import ABCMeta, abstractmethod
-
-from ....utils.array_utils import convert_to_ndarray
 
 __author__ = ['Andrew Hearin']
 

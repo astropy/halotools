@@ -6,19 +6,11 @@ that has a binary quenching feature.
 from __future__ import (
     division, print_function, absolute_import)
 
-import numpy as np
-
-from ... import factories, model_defaults
-from ...occupation_models import occupation_model_template as occu_template
-from ...occupation_models import zheng07_components
-from ...occupation_models import leauthaud11_components 
-from ...occupation_models import tinker13_components 
-
-from ...smhm_models import Moster13SmHm, Behroozi10SmHm
+from ... import model_defaults
+from ...smhm_models import Behroozi10SmHm
 from ...component_model_templates import BinaryGalpropInterpolModel
-from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
-from ....sim_manager import FakeSim, sim_defaults
+from ....sim_manager import sim_defaults
 
 
 __all__ = ['smhm_binary_sfr_model_dictionary']
@@ -89,8 +81,9 @@ def smhm_binary_sfr_model_dictionary(
 
     Examples 
     --------
+    >>> from halotools.empirical_models import SubhaloModelFactory
     >>> model_dictionary = smhm_binary_sfr_model_dictionary()
-    >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
+    >>> model_instance = SubhaloModelFactory(**model_dictionary)
 
 
     """

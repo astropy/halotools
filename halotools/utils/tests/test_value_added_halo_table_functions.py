@@ -11,7 +11,7 @@ import numpy as np
 from astropy.tests.helper import pytest
 from astropy.extern.six.moves import xrange as range
 
-from ..value_added_halo_table_functions import *
+from ..value_added_halo_table_functions import broadcast_host_halo_property, add_halo_hostid
 
 from ...sim_manager import FakeSim
 

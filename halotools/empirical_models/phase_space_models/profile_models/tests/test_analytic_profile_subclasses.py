@@ -2,20 +2,12 @@
 from __future__ import (absolute_import, division, print_function, 
     unicode_literals)
 
-import numpy as np 
 
 from unittest import TestCase
-import pytest 
 
-from astropy.cosmology import WMAP9, Planck13, FLRW
-from astropy import units as u
-
-from ..profile_helpers import *
+from astropy.cosmology import WMAP9, FLRW
 
 from ... import profile_models
-
-from .....custom_exceptions import HalotoolsError
-
 
 __all__ = ['TestAnalyticDensityProf']
 

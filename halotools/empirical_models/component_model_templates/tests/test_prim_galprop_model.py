@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 import numpy as np
 from astropy.table import Table
-from copy import copy, deepcopy
-
-from astropy.tests.helper import pytest
-from astropy.table import Table 
-
 from unittest import TestCase
-import warnings 
 
 from ..prim_galprop_model import PrimGalpropModel
 
-from ....sim_manager import FakeSim
-from ....custom_exceptions import HalotoolsError
 
-__all__ = ['TestBinaryGalpropInterpolModel']
+__all__ = ['TestPrimGalpropModel']
 
 
 class TestPrimGalpropModel(TestCase):

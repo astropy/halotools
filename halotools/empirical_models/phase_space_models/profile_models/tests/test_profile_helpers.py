@@ -10,7 +10,8 @@ import pytest
 from astropy.cosmology import WMAP9, Planck13
 from astropy import units as u
 
-from ..profile_helpers import *
+from ..profile_helpers import density_threshold, delta_vir
+from ..profile_helpers import halo_radius_to_halo_mass, halo_mass_to_halo_radius
 from .....custom_exceptions import HalotoolsError
 
 __all__ = ['TestProfileHelpers']

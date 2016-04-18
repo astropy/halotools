@@ -2,10 +2,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import warnings, os, shutil
+import os
+import shutil
 
 from astropy.config.paths import _find_home 
-from astropy.tests.helper import remote_data, pytest
+from astropy.tests.helper import pytest
 
 try:
     import h5py 
@@ -23,7 +24,7 @@ from astropy.table import Table
 from ..user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 from ..ptcl_table_cache import PtclTableCache
 
-from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
+from ...custom_exceptions import HalotoolsError
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 

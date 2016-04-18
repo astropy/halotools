@@ -10,25 +10,16 @@ __author__ = ['Andrew Hearin']
 
 import numpy as np
 from copy import copy
-from functools import partial
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
 from warnings import warn 
 import collections 
 
 from .model_factory_template import ModelFactory
 from .hod_mock_factory import HodMockFactory
-from .subhalo_mock_factory import SubhaloMockFactory
 
 from .. import model_helpers
-from .. import model_defaults 
 
-from ...sim_manager import CachedHaloCatalog, FakeSim
 from ...sim_manager import sim_defaults
-
-
-from ...utils.array_utils import custom_len
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 
 
@@ -365,7 +356,8 @@ class HodModelFactory(ModelFactory):
                 except AssertionError:
                     msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments you passed to the HodModelFactory.\n"
-                    "For every element of the input ``model_feature_calling_sequence``, there must be a corresponding \n"
+                    "For every element of the input ``model_feature_calling_sequence``, "
+                    "there must be a corresponding \n"
                     "keyword argument to which a component model instance is bound.\n")
                     raise HalotoolsError(msg % model_feature)
         except TypeError:
@@ -446,14 +438,19 @@ class HodModelFactory(ModelFactory):
             except AssertionError:
                 msg = ("\nThe ``%s`` component model instance has ``gal_type`` = %s.\n"
                     "However, you used a keyword argument = ``%s`` when passing this component model \n"
-                    "to the constructor of the HodModelFactory, \nfrom which it was inferred that your intended"
-                    "``gal_type`` = %s, which is inconsistent.\nIf this inferred ``gal_type`` seems incorrect,\n"
+                    "to the constructor of the HodModelFactory, "
+                    "\nfrom which it was inferred that your intended"
+                    "``gal_type`` = %s, which is inconsistent.\n"
+                    "If this inferred ``gal_type`` seems incorrect,\n"
                     "please raise an Issue on https://github.com/astropy/halotools.\n"
-                    "Otherwise, either change the ``%s`` keyword argument to conform to the Halotools convention \n"
-                    "to use keyword arguments that are composed of a ``gal_type`` and ``feature_name`` substring,\n"
+                    "Otherwise, either change the ``%s`` keyword argument "
+                    "to conform to the Halotools convention \n"
+                    "to use keyword arguments that are composed of a "
+                    "``gal_type`` and ``feature_name`` substring,\n"
                     "separated by a '_', in that order.\n")
                 raise HalotoolsError(msg % 
-                    (component_model_class_name, component_model_gal_type, model_feature_calling_sequence_element, 
+                    (component_model_class_name, component_model_gal_type, 
+                        model_feature_calling_sequence_element, 
                         gal_type, model_feature_calling_sequence_element))
 
             try:
@@ -462,13 +459,17 @@ class HodModelFactory(ModelFactory):
                 msg = ("\nThe ``%s`` component model instance has ``feature_name`` = %s.\n"
                     "However, you used a keyword argument = ``%s`` when passing this component model \n"
                     "to the constructor of the HodModelFactory, \nfrom which it was inferred that your intended"
-                    "``feature_name`` = %s, which is inconsistent.\nIf this inferred ``feature_name`` seems incorrect,\n"
+                    "``feature_name`` = %s, which is inconsistent.\n"
+                    "If this inferred ``feature_name`` seems incorrect,\n"
                     "please raise an Issue on https://github.com/astropy/halotools.\n"
-                    "Otherwise, either change the ``%s`` keyword argument to conform to the Halotools convention \n"
-                    "to use keyword arguments that are composed of a ``gal_type`` and ``feature_name`` substring,\n"
+                    "Otherwise, either change the ``%s`` keyword argument "
+                    "to conform to the Halotools convention \n"
+                    "to use keyword arguments that are composed of a "
+                    "``gal_type`` and ``feature_name`` substring,\n"
                     "separated by a '_', in that order.\n")
                 raise HalotoolsError(msg % 
-                    (component_model_class_name, component_model_feature_name, model_feature_calling_sequence_element, 
+                    (component_model_class_name, component_model_feature_name, 
+                        model_feature_calling_sequence_element, 
                         feature_name, model_feature_calling_sequence_element))
 
 
@@ -902,7 +903,8 @@ class HodModelFactory(ModelFactory):
                 inherited_methods = []
                 component_model._methods_to_inherit = []
 
-            missing_methods = set(mock_making_methods) - set(inherited_methods).intersection(set(mock_making_methods))
+            missing_methods = (set(mock_making_methods) - 
+                set(inherited_methods).intersection(set(mock_making_methods)))
             for methodname in missing_methods:
                 component_model._methods_to_inherit.append(methodname)
 
@@ -957,11 +959,14 @@ class HodModelFactory(ModelFactory):
                 threshold_msg = ''
                 for gal_type in self.gal_types:
                     threshold_msg += '\n' + gal_type + ' threshold = ' + str(getattr(self, 'threshold_' + gal_type))
-                msg = ("Inconsistency in the threshold of the component occupation models:\n" + threshold_msg + "\n")
+                msg = ("Inconsistency in the threshold of the "
+                    "component occupation models:\n" + threshold_msg + "\n")
                 raise HalotoolsError(msg)
 
-        missing_method_msg1 = ("\nAll component models have a ``_mock_generation_calling_sequence`` attribute,\n"
-            "which is a list of method names that are called by the ``populate_mock`` method of the mock factory.\n"
+        missing_method_msg1 = ("\nAll component models have a "
+            "``_mock_generation_calling_sequence`` attribute,\n"
+            "which is a list of method names that are called by the "
+            "``populate_mock`` method of the mock factory.\n"
             "All component models also have a ``_methods_to_inherit`` attribute, \n"
             "which determines which methods of the component model are inherited by the composite model.\n"
             "The former must be a subset of the latter. However, for ``gal_type`` = %s,\n"
@@ -976,11 +981,15 @@ class HodModelFactory(ModelFactory):
                 some_missing_method = list(missing_methods)[0]
                 raise HalotoolsError(missing_method_msg1 % (component_model.gal_type, some_missing_method))
 
-        missing_method_msg2 = ("\nAll component models have a ``_mock_generation_calling_sequence`` attribute,\n"
-            "which is a list of method names that are called by the ``populate_mock`` method of the mock factory.\n"
-            "The HodModelFactory builds a composite ``_mock_generation_calling_sequence`` from each of these lists.\n"
+        missing_method_msg2 = ("\nAll component models have a "
+            "``_mock_generation_calling_sequence`` attribute,\n"
+            "which is a list of method names that are called by the "
+            "``populate_mock`` method of the mock factory.\n"
+            "The HodModelFactory builds a composite ``_mock_generation_calling_sequence`` "
+            "from each of these lists.\n"
             "However, the following method does not appear to have been created during this process:\n%s\n"
-            "This is likely a bug in Halotools - please raise an Issue on https://github.com/astropy/halotools\n")
+            "This is likely a bug in Halotools - "
+            "please raise an Issue on https://github.com/astropy/halotools\n")
         for method in self._mock_generation_calling_sequence:
             if not hasattr(self, method):
                 raise HalotoolsError(missing_method_msg2)

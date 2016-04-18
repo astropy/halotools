@@ -6,7 +6,6 @@ used to provide convenience wrappers for mock objects
 """
 
 import numpy as np 
-from warnings import warn
 
 from ...custom_exceptions import HalotoolsError
 

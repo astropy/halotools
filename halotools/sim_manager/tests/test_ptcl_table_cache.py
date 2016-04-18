@@ -147,7 +147,6 @@ class TestPtclTableCache(TestCase):
         entry = self.good_log_entry
         fname = entry.fname
         f = h5py.File(fname)
-        tmp = deepcopy(f.attrs['version_name'])
         del f.attrs['version_name']
         f.close()
         result = cache.determine_log_entry_from_fname(fname)

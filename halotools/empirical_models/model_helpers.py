@@ -14,9 +14,6 @@ __all__ = (
 __author__ = ['Andrew Hearin', 'Surhud More']
 
 import numpy as np
-from copy import copy
-from astropy.extern import six
-from abc import ABCMeta
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
 from warnings import warn 
@@ -442,7 +439,8 @@ def custom_incomplete_gamma(a, x):
     
     For the case covered by scipy, a > 0, scipy is called. Otherwise the gamma function 
     recurrence relations are called, extending the scipy behavior. The only other difference from the 
-    scipy function is that in `custom_incomplete_gamma` only supports the case where the input ``a`` is a scalar.
+    scipy function is that in `custom_incomplete_gamma` only supports 
+    the case where the input ``a`` is a scalar.
     
     Parameters
     -----------

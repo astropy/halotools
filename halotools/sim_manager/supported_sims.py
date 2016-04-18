@@ -5,24 +5,10 @@ The attributes of the classes defined below
 are used to attach metadata to the Halotools-provided
 halo catalogs as they are loaded into memory.
 """
-try:
-    from bs4 import BeautifulSoup
-    HAS_SOUP = True
-except ImportError:
-    HAS_SOUP = False
-
-try:
-    import requests
-    HAS_REQUESTS = True
-except ImportError:
-    HAS_REQUESTS = False
 
 from abc import ABCMeta
 from astropy.extern import six
 from astropy import cosmology
-
-from ..custom_exceptions import *
-
 
 __all__ = ('NbodySimulation',
            'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo')
