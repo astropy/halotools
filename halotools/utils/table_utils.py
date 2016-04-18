@@ -6,7 +6,7 @@ Modules performing small, commonly used tasks throughout the package.
 """
 
 from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+    unicode_literals)
 
 from math import ceil
 import numpy as np
@@ -156,7 +156,8 @@ def compute_conditional_percentiles(**kwargs):
     compute_prim_haloprop_bins_dict = {}
     compute_prim_haloprop_bins_dict['prim_haloprop'] = prim_haloprop
     try:
-        compute_prim_haloprop_bins_dict['prim_haloprop_bin_boundaries'] = kwargs['prim_haloprop_bin_boundaries']
+        compute_prim_haloprop_bins_dict['prim_haloprop_bin_boundaries'] = (
+            kwargs['prim_haloprop_bin_boundaries'])
     except KeyError:
         pass
     try:

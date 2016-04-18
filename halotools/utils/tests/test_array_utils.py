@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import numpy as np 
-from astropy.table import Table 
 
 from .. import array_utils
 
@@ -102,7 +101,7 @@ def test_convert_to_ndarray5():
     zarr = array_utils.convert_to_ndarray(z)
     assert type(zarr) == np.ndarray
     assert len(zarr) == 1
-    assert zarr[0] == None
+    assert zarr[0] is None
 
 def test_convert_to_ndarray6():
     """

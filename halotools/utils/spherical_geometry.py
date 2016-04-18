@@ -1,12 +1,11 @@
-#Duncan Campbell
-#August 27, 2014
-#Yale University
-
+"""
+"""
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 __all__=['spherical_to_cartesian','chord_to_cartesian','sample_spherical_surface']
+__author__ = ('Duncan Campbell', )
 
 def spherical_to_cartesian(ra, dec):
     """
@@ -62,7 +61,7 @@ def chord_to_cartesian(theta, radians=True):
     
     theta = np.asarray(theta)
     
-    if radians==False: 
+    if radians is False: 
         theta = np.radians(theta)
     
     C = 2.0*np.sin(theta/2.0)
@@ -86,7 +85,7 @@ def sample_spherical_surface(N_points):
     """
 
     from numpy import random
-    from numpy import sin, cos, arccos
+    from numpy import arccos
     from math import pi
 
     ran1 = random.rand(N_points) #oversample, to account for box sample  
