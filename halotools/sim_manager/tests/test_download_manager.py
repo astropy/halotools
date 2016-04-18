@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 
-import os, fnmatch, shutil
+import os
+import shutil
 import numpy as np
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
@@ -11,7 +12,7 @@ from unittest import TestCase
 from ..download_manager import DownloadManager
 from ..halo_table_cache import HaloTableCache 
 from .. import sim_defaults 
-from ...custom_exceptions import UnsupportedSimError, HalotoolsError
+from ...custom_exceptions import HalotoolsError
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -171,7 +172,7 @@ class TestDownloadManager(TestCase):
 
 
     @remote_data
-    def test_ptcl_tables_available_for_download(self):
+    def test_ptcl_tables_available_for_download2(self):
         """ Test that there is exactly one ptcl_table available for Bolshoi. 
         """
         x = self.downman._ptcl_tables_available_for_download(simname = 'bolshoi')

@@ -3,13 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 from astropy.tests.helper import pytest 
-import warnings, os, shutil
+import os 
+import shutil
 
 import numpy as np 
-from copy import copy, deepcopy 
+from copy import deepcopy 
 
 from astropy.table import Table
-from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home 
 
@@ -151,7 +151,7 @@ class TestHaloTableCacheLogEntry(TestCase):
     def test_scenario0(self):
         num_scenario = 0
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "The input filename does not exist." in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -161,7 +161,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         with open(self.fnames[num_scenario], 'w') as f:
             f.write('abc')
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" in log_entry._cache_safety_message
 
@@ -172,7 +172,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         with open(self.fnames[num_scenario], 'w') as f:
             f.write('abc')
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" not in log_entry._cache_safety_message
         assert "access the hdf5 metadata raised an exception." in log_entry._cache_safety_message
@@ -192,7 +192,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.close()
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
         assert "missing the following metadata" in log_entry._cache_safety_message
 
@@ -213,7 +213,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             f.attrs[attr] = getattr(log_entry, attr)
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "``particle_mass``" in log_entry._cache_safety_message
 
         f = h5py.File(self.fnames[num_scenario])
@@ -245,19 +245,19 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "does not match" in log_entry._cache_safety_message
 
         f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = 1.3390001
         f.close()
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "does not match" not in log_entry._cache_safety_message
 
         f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = '1.3390001'
         f.close()
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "does not match" not in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -279,11 +279,11 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must begin with the following five characters" in log_entry._cache_safety_message
 
         self.table2.write(self.fnames[num_scenario], path='data', overwrite=True)
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must begin with the following five characters" not in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -305,12 +305,12 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must begin with the following five characters:" in log_entry._cache_safety_message
         assert "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``" in log_entry._cache_safety_message
 
         self.table2.write(self.fnames[num_scenario], path='data', overwrite=True)
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must begin with the following five characters:" not in log_entry._cache_safety_message
         assert "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``" in log_entry._cache_safety_message
 
@@ -333,7 +333,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must begin with the following five characters:" not in log_entry._cache_safety_message
         assert "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``" not in log_entry._cache_safety_message
         assert "must be bounded by [0, Lbox]" in log_entry._cache_safety_message
@@ -347,7 +347,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must be bounded by [0, Lbox]" not in log_entry._cache_safety_message
         assert "must contain a unique set of integers" in log_entry._cache_safety_message
 
@@ -374,7 +374,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must contain a unique set of integers" in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -399,7 +399,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == False
+        assert log_entry.safe_for_cache is False
         assert "must be less than 50" in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -421,7 +421,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['particle_mass'] = 1.e8
         f.close()
 
-        assert log_entry.safe_for_cache == True
+        assert log_entry.safe_for_cache is True
         assert "The halo catalog is safe to add to the cache log." == log_entry._cache_safety_message
 
     def tearDown(self):

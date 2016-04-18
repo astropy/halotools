@@ -2,7 +2,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import warnings, os, shutil
+import os
+import shutil
 
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
