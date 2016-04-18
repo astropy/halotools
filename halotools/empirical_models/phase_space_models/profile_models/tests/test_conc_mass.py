@@ -5,16 +5,12 @@ from __future__ import (absolute_import, division, print_function,
 __all__ = ['TestConcMass']
 
 import numpy as np
-from astropy import cosmology
 from astropy.table import Table
 from unittest import TestCase
-import pytest 
 
 from ..conc_mass_models import ConcMass
 
 from .... import model_defaults
-
-from .....sim_manager import FakeSim
 
 class TestConcMass(TestCase):
     """ Tests of `~halotools.empirical_models.ConcMass` class.  

@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-import pytest
 from unittest import TestCase
 import numpy as np 
 from astropy.table import Table 
@@ -8,8 +6,6 @@ from astropy.table import Table
 from ..nfw_phase_space import NFWPhaseSpace
 from ..profile_models.tests import analytic_nfw_density_outer_shell_normalization
 from ..profile_models.tests import monte_carlo_density_outer_shell_normalization
-
-from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestNFWPhaseSpace']
 

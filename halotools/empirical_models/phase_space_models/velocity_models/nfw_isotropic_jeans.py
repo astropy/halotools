@@ -8,10 +8,6 @@ from __future__ import (
 
 import numpy as np 
 from scipy.integrate import quad as quad_integration
-from scipy.special import spence 
-
-from astropy.extern import six 
-from abc import ABCMeta, abstractmethod
 
 from .isotropic_jeans_model_template import IsotropicJeansVelocity
 

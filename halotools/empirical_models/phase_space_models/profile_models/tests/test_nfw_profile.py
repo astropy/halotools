@@ -7,14 +7,11 @@ import numpy as np
 from unittest import TestCase
 import pytest 
 
-from astropy.cosmology import WMAP9, Planck13
-from astropy import units as u
+from astropy.cosmology import WMAP9
 
-from ..profile_helpers import *
 from ..nfw_profile import NFWProfile
 
-from .....custom_exceptions import HalotoolsError
-from .....utils.array_utils import array_is_monotonic, convert_to_ndarray
+from .....utils.array_utils import array_is_monotonic
 
 
 __all__ = (

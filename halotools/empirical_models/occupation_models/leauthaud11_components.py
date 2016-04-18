@@ -8,29 +8,18 @@ the HOD-style model introduced in Leauthaud et al. (2011)
 __all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',  
     'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
 
-from functools import partial
-from copy import copy
 import numpy as np
 import math
 from scipy.special import erf 
-from scipy.stats import poisson
-from scipy.optimize import brentq
-from scipy.interpolate import InterpolatedUnivariateSpline as spline
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-import warnings
 
 from .occupation_model_template import OccupationComponent 
 
-from .. import model_defaults, model_helpers
+from .. import model_defaults
 from ..smhm_models import Behroozi10SmHm
 from ..assembias_models import HeavisideAssembias
-from ..model_helpers import bounds_enforcing_decorator_factory
 
-from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentiles
-from ...  import sim_manager
-from ...custom_exceptions import *
+from ... import sim_manager
+from ...custom_exceptions import HalotoolsModelInputError 
 
 class Leauthaud11Cens(OccupationComponent):
     """ HOD-style model for any central galaxy occupation that derives from 

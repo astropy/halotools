@@ -7,17 +7,9 @@ the HOD-style model introduced in Tinker et al. (2013)
 __all__ = ('Tinker13Cens', 'Tinker13QuiescentSats', 
     'Tinker13ActiveSats', 'AssembiasTinker13Cens')
 
-from functools import partial
-from copy import copy
 import numpy as np
 import math
 from scipy.special import erf 
-from scipy.stats import poisson
-from scipy.optimize import brentq
-from scipy.interpolate import InterpolatedUnivariateSpline as spline
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-import warnings
 
 from .occupation_model_template import OccupationComponent 
 
@@ -28,9 +20,8 @@ from ..assembias_models import HeavisideAssembias
 from ..model_helpers import bounds_enforcing_decorator_factory
 
 from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentiles
-from ...  import sim_manager
-from ...custom_exceptions import *
+from ... import sim_manager
+from ...custom_exceptions import HalotoolsError, HalotoolsModelInputError
 
 
 
@@ -211,7 +202,8 @@ class Tinker13Cens(OccupationComponent):
             if type(sfr_designation) == str:
                 sfr_designation = np.repeat(sfr_designation, custom_len(prim_haloprop))
                 if sfr_designation[0] not in ['active', 'quiescent']:
-                    msg = ("The only acceptable values of ``sfr_designation`` are ``active`` or ``quiescent``")
+                    msg = ("The only acceptable values of "
+                        "``sfr_designation`` are ``active`` or ``quiescent``")
                     raise HalotoolsError(msg)
 
         if 'table' in kwargs:

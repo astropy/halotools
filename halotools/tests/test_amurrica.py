@@ -2,9 +2,10 @@
 are used throughout the package. 
 """ 
 
-import os, fnmatch
+import os
+import fnmatch
 
-from ..custom_exceptions import AmurricaError, HalotoolsError
+from ..custom_exceptions import AmurricaError
 from . import usa
 
 def source_code_string_generator(fname):

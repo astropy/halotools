@@ -7,18 +7,12 @@ import numpy as np
 from unittest import TestCase
 import pytest 
 
-from astropy.cosmology import WMAP9, Planck13
-from astropy import units as u
-
-from .. import profile_helpers
 from ..nfw_profile import NFWProfile
 
 from .... import model_defaults 
 
 from .....sim_manager import CachedHaloCatalog
 from .....utils import table_utils
-from .....utils.array_utils import convert_to_ndarray
-from .....custom_exceptions import HalotoolsError
 
 
 ### Determine whether the machine is mine

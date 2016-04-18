@@ -8,28 +8,16 @@ used by the Zheng07 model.
 __all__ = ('Zheng07Cens','Zheng07Sats', 
     'AssembiasZheng07Cens', 'AssembiasZheng07Sats')
 
-from functools import partial
-from copy import copy
 import numpy as np
-import math
 from scipy.special import erf 
-from scipy.stats import poisson
-from scipy.optimize import brentq
-from scipy.interpolate import InterpolatedUnivariateSpline as spline
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 from .occupation_model_template import OccupationComponent
 
-from .. import model_defaults, model_helpers
+from .. import model_defaults
 from ..assembias_models import HeavisideAssembias
-from ..model_helpers import bounds_enforcing_decorator_factory
 
-from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentiles
-from ...  import sim_manager
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
 
 
@@ -116,7 +104,8 @@ class Zheng07Cens(OccupationComponent):
         For illustration purposes, we'll use a fake halo catalog rather than a 
         (much larger) full one:
 
-        >>> fake_sim = sim_manager.FakeSim()
+        >>> from halotools.sim_manager import FakeSim
+        >>> fake_sim = FakeSim()
         >>> mean_ncen = cen_model.mean_occupation(table=fake_sim.halo_table)
 
         Notes 
@@ -355,7 +344,8 @@ class Zheng07Sats(OccupationComponent):
         For illustration purposes, we'll use a fake halo catalog rather than a 
         (much larger) full one:
 
-        >>> fake_sim = sim_manager.FakeSim()
+        >>> from halotools.sim_manager import FakeSim
+        >>> fake_sim = FakeSim()
         >>> mean_nsat = sat_model.mean_occupation(table=fake_sim.halo_table)
 
         """

@@ -18,11 +18,9 @@ from .monte_carlo_helpers import MonteCarloGalProf
 
 from .. import model_defaults
 
-from ...sim_manager import sim_defaults
-
-
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
-    """ Model for the phase space distribution of mass and/or galaxies in isotropic Jeans equilibrium in an NFW halo profile, based on Navarro, Frenk and White (1995).
+    """ Model for the phase space distribution of mass and/or galaxies 
+    in isotropic Jeans equilibrium in an NFW halo profile, based on Navarro, Frenk and White (1995).
 
     For a review of the mathematics underlying the NFW profile, 
     including descriptions of how the relevant equations are 
@@ -73,7 +71,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         if 'concentration_binning' in kwargs:
             cmin, cmax, dc = kwargs['concentration_binning']
-        elif high_precision == True:
+        elif high_precision is True:
             cmin, cmax, dc = (
                 model_defaults.min_permitted_conc, 
                 model_defaults.max_permitted_conc,
@@ -112,7 +110,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
 
     def mc_generate_nfw_phase_space_points(self, Ngals = 1e4, conc=5, mass = 1e12, verbose=True):
-        """ Stand-alone convenience function for returning a Monte Carlo realization of points in the phase space of an NFW halo in isotropic Jeans equilibrium.
+        """ Stand-alone convenience function for returning 
+        a Monte Carlo realization of points in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
         Parameters 
         -----------
@@ -263,7 +262,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         Notes 
         -----
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
 
         """
         return NFWProfile.dimensionless_mass_density(self, scaled_radius, conc)
@@ -308,7 +308,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
 
         """
         return NFWProfile.mass_density(self, radius, mass, conc)
@@ -337,7 +338,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
     def cumulative_mass_PDF(self, scaled_radius, conc):
         """
-        Analytical result for the fraction of the total mass enclosed within dimensionless radius of an NFW halo, 
+        Analytical result for the fraction of the total mass 
+        enclosed within dimensionless radius of an NFW halo, 
 
         :math:`P_{\\rm NFW}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
         
@@ -375,7 +377,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
 
         """     
         return NFWProfile.cumulative_mass_PDF(self, scaled_radius, conc)
@@ -418,7 +421,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
 
         """
         return NFWProfile.enclosed_mass(self, radius, total_mass, conc)
@@ -489,7 +493,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_vmax` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_vmax` function. 
         """    
         return NFWProfile.circular_velocity(self, radius, total_mass, conc)
 
@@ -524,8 +529,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_vmax` function, 
-        and also the `~halotools.empirical_models.test_halo_catalog_nfw_consistency.TestHaloCatNFWConsistency.test_vmax_consistency` function. 
+        This method is tested by 
+        `~halotools.empirical_models.test_nfw_profile.TestNFWProfile.test_vmax` function, 
+        and also the 
+        `~halotools.empirical_models.test_halo_catalog_nfw_consistency.TestHaloCatNFWConsistency.test_vmax_consistency` function. 
 
         """
         return NFWProfile.vmax(self, total_mass, conc)
@@ -692,7 +699,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
+        This method is tested by the 
+        `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
         """
         return MonteCarloGalProf._mc_dimensionless_radial_distance(
             self, concentration_array, **kwargs)
@@ -716,7 +724,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
+        This method is tested by the 
+        `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
 
         """
         return MonteCarloGalProf.mc_unit_sphere(self, Npts, **kwargs)

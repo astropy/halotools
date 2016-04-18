@@ -2,19 +2,14 @@
 from __future__ import (absolute_import, division, print_function, 
     unicode_literals)
 
-import numpy as np 
-
 from unittest import TestCase
-import pytest 
 
-from astropy.cosmology import WMAP9, Planck13
-from astropy import units as u
+from astropy.cosmology import WMAP9
 
 from ..trivial_profile import TrivialProfile
 
 from .... import model_defaults 
 
-from .....custom_exceptions import HalotoolsError
 from .....sim_manager import sim_defaults
 
 
