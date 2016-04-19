@@ -122,12 +122,25 @@ class HodMockFactory(MockFactory):
         # make a (possibly trivial) completeness cut 
         cutoff_mvir = self.Num_ptcl_requirement*self.particle_mass
         mass_cut = halo_table[self.halo_mass_column_key] > cutoff_mvir
+        max_column_value = np.max(halo_table[self.halo_mass_column_key])
         halo_table = halo_table[mass_cut]
         if len(halo_table) == 0:
-            msg = ("Your mass cut resulted in zero halos in the halo catalog.\n"
-                "This is not permissible, and indicates a problem in either \n"
-                "the processing of the halo catalog or in the value of ``Num_ptcl_requirement``.\n")
-            raise HalotoolsError(msg)
+            msg = ("During the pre-processing phase of HOD mock-making \n"
+                "controlled by the `preprocess_halo_catalog` method of the HodMockFactory,\n"
+                "a cut on halo completeness is made. The column used in this cut\n"
+                "is determined by the value of the halo_mass_column_key string \n"
+                "passed to the HodMockFactory constructor, which in this case was ``%s``.\n"
+                "The largest value of this column in the uncut catalog is %.2e.\n"
+                "Your mass cut of M > %.2e resulted in zero halos in the halo catalog;\n"
+                "for reference, your halo catalog has a particle mass of m_p = %.2e.\n"
+                "Such a cut is not permissible. \nThis could indicate a problem in "
+                "the processing of the halo catalog,\n"
+                "for example, an incorrect column number and/or dtype.\n"
+                "Alternatively, the value of Num_ptcl_requirement = %.2e \n"
+                "that was passed to the HodMockFactory constructor could be the problem.\n")
+            raise HalotoolsError(msg % (
+                self.halo_mass_column_key, max_column_value, cutoff_mvir, 
+                self.particle_mass, self.Num_ptcl_requirement))
 
         ############################################################
 
