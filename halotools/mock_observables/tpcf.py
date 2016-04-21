@@ -4,15 +4,13 @@
 Calculate two point correlation functions.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 ####import modules########################################################################
-import sys
 import numpy as np
-from math import pi, gamma
-from .clustering_helpers import *
-from .tpcf_estimators import *
-from .pair_counters.double_tree_pairs import npairs
+from math import gamma
+from .clustering_helpers import _tpcf_process_args
+from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .pair_counters import npairs_3d
 from warnings import warn
 ##########################################################################################
 
@@ -23,9 +21,9 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
-def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
-                  do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,\
-                  approx_cell2_size , approx_cellran_size):
+def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
+    do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
+    approx_cell2_size , approx_cellran_size):
     """
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
@@ -45,15 +43,15 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
     
     #randoms provided, so calculate random pair counts.
     if randoms is not None:
-        if do_RR==True:
-            RR = npairs(randoms, randoms, rbins, period=period,
+        if do_RR is True:
+            RR = npairs_3d(randoms, randoms, rbins, period=period,
                         num_threads=num_threads,
                         approx_cell1_size=approx_cellran_size,
                         approx_cell2_size=approx_cellran_size)
             RR = np.diff(RR)
         else: RR=None
-        if do_DR==True:
-            D1R = npairs(sample1, randoms, rbins, period=period,
+        if do_DR is True:
+            D1R = npairs_3d(sample1, randoms, rbins, period=period,
                          num_threads=num_threads,
                          approx_cell1_size=approx_cell1_size,
                          approx_cell2_size=approx_cellran_size
@@ -63,8 +61,8 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
         if _sample1_is_sample2:
             D2R = None
         else:
-            if do_DR==True:
-                D2R = npairs(sample2, randoms, rbins, period=period,
+            if do_DR is True:
+                D2R = npairs_3d(sample2, randoms, rbins, period=period,
                              num_threads=num_threads,
                              approx_cell1_size=approx_cell2_size,
                              approx_cell2_size=approx_cellran_size)
@@ -106,8 +104,8 @@ def _pair_counts(sample1, sample2, rbins,
     """
     Count data-data pairs.
     """
-    if do_auto==True:
-        D1D1 = npairs(sample1, sample1, rbins, period=period, 
+    if do_auto is True:
+        D1D1 = npairs_3d(sample1, sample1, rbins, period=period, 
             num_threads=num_threads,
             approx_cell1_size=approx_cell1_size,
             approx_cell2_size=approx_cell1_size)
@@ -120,15 +118,15 @@ def _pair_counts(sample1, sample2, rbins,
         D1D2 = D1D1
         D2D2 = D1D1
     else:
-        if do_cross==True:
-            D1D2 = npairs(sample1, sample2, rbins, period=period,
+        if do_cross is True:
+            D1D2 = npairs_3d(sample1, sample2, rbins, period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
             D1D2 = np.diff(D1D2)
         else: D1D2=None
-        if do_auto==True:
-            D2D2 = npairs(sample2, sample2, rbins, period=period,
+        if do_auto is True:
+            D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
@@ -255,7 +253,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.npairs`.  This pair counter is optimized 
+    `~halotools.mock_observables.npairs_3d`.  This pair counter is optimized 
     to work on points distributed in a rectangular cuboid volume, e.g. a simulation box.  
     This optimization restricts this function to work on 3-D point distributions.
     
@@ -367,15 +365,15 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
     else:
-        if (do_auto==True) & (do_cross==True):
+        if (do_auto is True) & (do_cross is True):
             xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
             return xi_11, xi_12, xi_22
-        elif (do_cross==True):
+        elif (do_cross is True):
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             return xi_12
-        elif (do_auto==True):
+        elif (do_auto is True):
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11, xi_22

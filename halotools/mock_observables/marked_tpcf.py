@@ -4,13 +4,12 @@
 Calculate the marked two point correlation function, MCF.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from .clustering_helpers import _marked_tpcf_process_args
 from .pair_counters.marked_double_tree_pairs import marked_npairs
-from .pair_counters.double_tree_pairs import npairs
+from .pair_counters import npairs_3d
 
 
 __all__=['marked_tpcf']
@@ -146,7 +145,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     
     If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{XX} \\equiv \\mathrm{DD}`
     is calculated by counting total number of pairs using 
-    `~halotools.mock_observables.pair_counters.marked_double_pairs.npairs`.
+    `~halotools.mock_observables.pair_counters.npairs_3d`.
     This is:
     
     .. math::
@@ -371,7 +370,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
         Count data-data pairs.
         """
         if do_auto is True:
-            D1D1 = npairs(sample1, sample1, rbins, period=period, num_threads=num_threads,
+            D1D1 = npairs_3d(sample1, sample1, rbins, period=period, num_threads=num_threads,
                           approx_cell1_size=approx_cell1_size,
                           approx_cell2_size=approx_cell1_size)
             D1D1 = np.diff(D1D1)
@@ -384,14 +383,14 @@ def marked_tpcf(sample1, rbins, sample2=None,
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = npairs(sample1, sample2, rbins, period=period,
+                D1D2 = npairs_3d(sample1, sample2, rbins, period=period,
                               num_threads=num_threads,
                               approx_cell1_size=approx_cell1_size,
                               approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = npairs(sample2, sample2, rbins, period=period,
+                D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
                               num_threads=num_threads,
                               approx_cell1_size=approx_cell2_size,
                               approx_cell2_size=approx_cell2_size)
@@ -424,11 +423,11 @@ def marked_tpcf(sample1, rbins, sample2=None,
                     do_auto, do_cross,marks1, marks2, wfunc,
                     _sample1_is_sample2,permutate1, permutate2, randomize_marks)
             #take mean of the iterations
-            R1R1_err = np.std(R1R1, axis=0)
+            # R1R1_err = np.std(R1R1, axis=0)
             R1R1 = np.median(R1R1, axis=0)
-            R1R2_err = np.std(R1R2, axis=0)
+            # R1R2_err = np.std(R1R2, axis=0)
             R1R2 = np.median(R1R2, axis=0)
-            R2R2_err = np.std(R2R2, axis=0)
+            # R2R2_err = np.std(R2R2, axis=0)
             R2R2 = np.median(R2R2, axis=0)
         else:
             #get arrays to randomize marks
