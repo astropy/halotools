@@ -86,7 +86,7 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
             assert array_is_monotonic(rbins, strict = True) == 1
     except AssertionError:
         msg = ("\n Input ``rbins`` must be a monotonically increasing \n"
-               "1-D array with at least two entries")
+               "1-D array with at least two entries.")
         raise HalotoolsError(msg)
         
     #Process period entry and check for consistency.
@@ -131,7 +131,7 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
     available_estimators = _list_estimators()
     if estimator not in available_estimators:
         msg = ("\n Input `estimator` must be one of the following: \n"
-               "{0}".value(available_estimators))
+               "{0}".format(available_estimators))
         raise HalotoolsError(msg)
     
     if ((RR_precomputed is not None) | (NR_precomputed is not None)):
@@ -160,6 +160,8 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
             msg = ("If passing in randoms and also NR_precomputed, \n"
                 "the value of NR_precomputed must agree with the number of randoms\n")
             raise HalotoolsError(msg)
+
+    assert np.all(rbins > 0.), "All values of input ``rbins`` must be positive"
 
     return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
            _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed

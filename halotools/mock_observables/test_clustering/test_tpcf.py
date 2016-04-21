@@ -3,18 +3,18 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
-import sys
 from multiprocessing import cpu_count 
 
 from ..tpcf import tpcf
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 
+import warnings 
 import pytest
 slow = pytest.mark.slow
 
-__all__=['test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',\
-         'test_tpcf_sample_size_limit',\
-         'test_tpcf_randoms', 'test_tpcf_period_API', 'test_tpcf_cross_consistency_w_auto']
+__all__ = ('test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',
+    'test_tpcf_sample_size_limit','test_tpcf_randoms', 
+    'test_tpcf_period_API', 'test_tpcf_cross_consistency_w_auto')
 
 """
 Note that these are almost all unit-tests.  Non tirival tests are a little heard to think
@@ -28,10 +28,9 @@ def test_tpcf_auto():
     """
 
     sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     #with randoms
@@ -46,7 +45,7 @@ def test_tpcf_auto():
     result = tpcf(sample1, rbins, sample2 = None, 
                   randoms=None, period = period, 
                   max_sample_size=int(1e4), estimator='Natural', 
-                  approx_cell1_size = [rmax, rmax, rmax])
+                  approx_cell1_size = [rmax, rmax, rmax], num_threads = 'max')
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 
@@ -60,7 +59,7 @@ def test_tpcf_cross():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     #with randoms
@@ -86,8 +85,7 @@ def test_tpcf_estimators():
     sample1 = np.random.random((100,3))
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
-    period = np.array([1,1,1])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     result_1 = tpcf(sample1, rbins, sample2 = sample2, 
@@ -118,7 +116,7 @@ def test_tpcf_estimators():
 
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_2)==3, "wrong number of  correlation functions returned erroneously."
+    assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_3)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_4)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_5)==3, "wrong number of correlation functions returned erroneously."
@@ -132,8 +130,7 @@ def test_tpcf_sample_size_limit():
     sample1 = np.random.random((1000,3))
     sample2 = np.random.random((1000,3))
     randoms = np.random.random((1000,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     result_1 = tpcf(sample1, rbins, sample2 = sample2, 
@@ -153,7 +150,7 @@ def test_tpcf_randoms():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     #No PBCs w/ randoms
@@ -199,7 +196,7 @@ def test_tpcf_period_API():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     result_1 = tpcf(sample1, rbins, sample2 = sample2,
@@ -237,7 +234,7 @@ def test_tpcf_cross_consistency_w_auto():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((300,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     #with out randoms
@@ -287,12 +284,12 @@ def test_RR_precomputed_exception_handling1():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     RR_precomputed = rmax
     with pytest.raises(HalotoolsError) as err:
-        result_1 = tpcf(sample1, rbins, sample2 = sample2,
+        _ = tpcf(sample1, rbins, sample2 = sample2,
             randoms=randoms, period = period, 
             max_sample_size=int(1e4), estimator='Natural', 
             approx_cell1_size = [rmax, rmax, rmax], 
@@ -307,13 +304,13 @@ def test_RR_precomputed_exception_handling2():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     RR_precomputed = rbins[:-2]
     NR_precomputed = randoms.shape[0]
     with pytest.raises(HalotoolsError) as err:
-        result_1 = tpcf(sample1, rbins, sample2 = sample2,
+        _ = tpcf(sample1, rbins, sample2 = sample2,
             randoms=randoms, period = period, 
             max_sample_size=int(1e4), estimator='Natural', 
             approx_cell1_size = [rmax, rmax, rmax], 
@@ -328,13 +325,13 @@ def test_RR_precomputed_exception_handling3():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     RR_precomputed = rbins[:-1]
     NR_precomputed = 5
     with pytest.raises(HalotoolsError) as err:
-        result_1 = tpcf(sample1, rbins, sample2 = sample2,
+        _ = tpcf(sample1, rbins, sample2 = sample2,
             randoms=randoms, period = period, 
             max_sample_size=int(1e4), estimator='Natural', 
             approx_cell1_size = [rmax, rmax, rmax], 
@@ -359,7 +356,7 @@ def test_RR_precomputed_natural_estimator_auto():
     sample2 = sample1
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     approx_cell1_size = [rmax, rmax, rmax]
@@ -440,7 +437,7 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     sample2 = sample1
     randoms = np.random.random((100,3))
     period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0,0.3,5)
+    rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
     approx_cell1_size = [rmax, rmax, rmax]
@@ -463,7 +460,7 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     PBCs = True
     num_threads = cpu_count()
     do_DD, do_DR, do_RR = True, True, True  
-    do_auto, do_cross = True, False      
+    do_auto, do_cross = True, False
 
     from ..tpcf import _random_counts, _pair_counts
 
@@ -510,22 +507,72 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     assert np.all(result_with_RR_precomputed == normal_result)
 
 
+def test_tpcf_raises_warning_for_large_samples():
+    sample1 = np.random.random((1000,3))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0.001,0.3,5)
 
+    substr = "`sample1` exceeds `max_sample_size`"
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        normal_result = tpcf(sample1, rbins, period = period, 
+            max_sample_size=int(1e2))
+        assert substr in str(w[-1].message)
+        
+def test_tpcf_raises_exception_for_non_monotonic_rbins():
+    sample1 = np.random.random((1000,3))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(10,0.3,5)
 
+    with pytest.raises(HalotoolsError) as err:
+        normal_result = tpcf(sample1, rbins, period = period)
+    substr = "Input ``rbins`` must be a monotonically increasing"
+    assert substr in err.value.args[0]
 
+def test_tpcf_raises_exception_for_large_search_length():
+    sample1 = np.random.random((1000,3))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0.1,0.5,5)
 
+    with pytest.raises(HalotoolsError) as err:
+        normal_result = tpcf(sample1, rbins, period = period)
+    substr = "The maximum length over which you search for pairs"
+    assert substr in err.value.args[0]
 
+def test_tpcf_raises_exception_for_incompatible_data_shapes():
+    sample1 = np.random.random((1000,3))
+    sample2 = np.random.random((1000,2))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0.1,0.3,5)
 
+    with pytest.raises(HalotoolsError) as err:
+        normal_result = tpcf(sample1, rbins, sample2 = sample2, period = period)
+    substr = "`sample1` and `sample2` must have same dimension"
+    assert substr in err.value.args[0]
 
+def test_tpcf_raises_exception_for_bad_do_auto_instructions():
+    sample1 = np.random.random((1000,3))
+    sample2 = np.random.random((1000,3))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0.1,0.3,5)
 
+    with pytest.raises(HalotoolsError) as err:
+        normal_result = tpcf(sample1, rbins, sample2 = sample2, period = period, 
+            do_auto = 'Jose Canseco')
+    substr = "`do_auto` and `do_cross` keywords must be of type boolean"
+    assert substr in err.value.args[0]
 
+def test_tpcf_raises_exception_for_unavailable_estimator():
+    sample1 = np.random.random((1000,3))
+    sample2 = np.random.random((1000,3))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0.1,0.3,5)
 
-
-
-
-
-
-
+    with pytest.raises(HalotoolsError) as err:
+        normal_result = tpcf(sample1, rbins, period = period, 
+            estimator = 'Jose Canseco')
+    substr = "Input `estimator` must be one of the following"
+    assert substr in err.value.args[0]
 
 
 
