@@ -7,5 +7,6 @@ from .double_tree_per_object_pairs import *
 from .marked_double_tree_pairs import *
 from .double_tree import *
 from .double_tree_pair_matrix import *
-from .npairs_3d import npairs_3d
 from .rectangular_mesh import RectangularDoubleMesh
+from .npairs_3d import npairs_3d
+from .npairs_projected import npairs_projected
