@@ -140,6 +140,7 @@ def npairs_3d(data1, data2, rbins, period = None,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         cell1_chunk_list = np.array_split(np.arange(double_mesh.mesh1.ncells), num_threads)
+        print(cell1_chunk_list)
         cell1_tuples = list([(x[0], x[-1]+1) for x in cell1_chunk_list])
         result = pool.map(engine,cell1_tuples)
         counts = np.sum(np.array(result), axis=0)
