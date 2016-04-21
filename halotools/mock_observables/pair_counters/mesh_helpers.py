@@ -100,7 +100,34 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, peri
     return approx_cell1_size, approx_cell2_size
 
 def _cell1_parallelization_indices(ncells, num_threads):
-    """
+    """ Return a list of tuples that will be passed to multiprocessing.pool.map 
+    to count pairs in parallel. Each tuple has two entries storing the first and last 
+    cell_id that will be looped over in the outermost loop in the pair-counting engine. 
+
+    Parameters 
+    -----------
+    ncells : int
+        Total number of cells in the 3d mesh
+
+    num_threads : int 
+        Number of cores requested to perform the pair-counting in parallel
+
+    Returns 
+    -------
+    num_threads : int 
+        Number of threads to use when counting pairs. Only differs from the 
+        input value for the case where the input num_threads > ncells
+
+    list_of_tuples : list 
+        List of two-element tuples containing the first and last values of icell1 
+        that will be looped over in the outermost loop of the pair-counters. 
+
+    Notes 
+    ------
+    Care is taken to avoid the problem of potentially having more threads available than cells. 
+    In the serial case, the returned list of tuples is a one-element list containing (0, ncells). 
+    If there are two cores available, cell1_tuples = [(0, ncells/2), (ncells/2, ncells)]
+
     """
     if num_threads == 1:
         return 1, [(0, ncells)]

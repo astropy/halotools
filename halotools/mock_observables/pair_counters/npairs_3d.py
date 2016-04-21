@@ -137,8 +137,10 @@ def npairs_3d(data1, data2, rbins, period = None,
         double_mesh, data1[:,0], data1[:,1], data1[:,2], 
         data2[:,0], data2[:,1], data2[:,2], rbins)
 
+    # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
+
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
