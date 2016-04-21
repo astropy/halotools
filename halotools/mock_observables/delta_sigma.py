@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
-
 """
 calculate the galaxy-galaxy lensing signal.
 """
-
-
-
-import sys
 import numpy as np
-from math import pi, gamma
 from .tpcf import tpcf
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
-from .clustering_helpers import *
-from ..custom_exceptions import *
+from .clustering_helpers import _delta_sigma_process_args
+from ..custom_exceptions import HalotoolsError
 from warnings import warn
 
 
@@ -155,10 +149,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     """
     
     #process the input parameters
-    function_args = [galaxies, particles, rp_bins, pi_max, period, estimator,\
-                     num_threads, approx_cell1_size, approx_cell2_size]
-    galaxies, particles, rp_bins, period, num_threads, PBCs =\
-        _delta_sigma_process_args(*function_args)
+    function_args = (galaxies, particles, rp_bins, pi_max, period, estimator,
+        num_threads, approx_cell1_size, approx_cell2_size)
+    galaxies, particles, rp_bins, period, num_threads, PBCs = _delta_sigma_process_args(
+        *function_args)
     
     mean_rho = len(particles)/period.prod() #number density of particles
     
@@ -181,15 +175,15 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
             raise HalotoolsError(msg)
     
     #define radial bins using either log or linear spacing
-    if log_bins==True:
+    if log_bins is True:
         rbins = np.logspace(np.log10(rp_min), np.log10(rmax), n_bins)
     else: 
         rbins = np.linspace(rp_min, rmax, n_bins)
     
     #calculate the cross-correlation between galaxies and particles
-    xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,\
-              do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads,\
-              approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell2_size)
+    xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,
+        do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads,
+        approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell2_size)
     
     #Check to see if xi ever is equal to -1
     #if so, there are radial bins with 0 matter particles.
