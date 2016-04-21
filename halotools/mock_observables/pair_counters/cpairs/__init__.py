@@ -5,3 +5,4 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from .cpairs import *
 from .per_object_cpairs import *
 from .pairwise_distances import *
+from .npairs_3d_engine import npairs_3d_engine
