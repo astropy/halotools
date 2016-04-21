@@ -303,6 +303,53 @@ def test_npairs_projected_brute_force_periodic():
     assert np.all(test_result==result), msg
 
 
+def test_sensible_num_threads():
+    npts1, npts2 = 100, 100
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+
+    rp_bins = np.array((0.05, 0.15, 0.3))
+    pi_max = 0.1
+
+    with pytest.raises(ValueError) as err:
+        result = npairs_projected(data1, data2, rp_bins, pi_max, period=1, 
+            num_threads = "Cuba Gooding Jr.")
+    substr = "Input ``num_threads`` argument must be an integer or the string 'max'" 
+    assert substr in err.value.args[0]
+
+def test_sensible_rp_bins():
+    npts1, npts2 = 100, 100
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+
+    rp_bins = 0.1
+    pi_max = 0.1
+
+    with pytest.raises(ValueError) as err:
+        result = npairs_projected(data1, data2, rp_bins, pi_max, period=1)
+    substr = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries" 
+    assert substr in err.value.args[0]
+
+def test_sensible_period():
+    npts1, npts2 = 100, 100
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    rp_bins = np.array((0.05, 0.15, 0.3))
+    pi_max = 0.1
+
+    with pytest.raises(ValueError) as err:
+        result = npairs_projected(data1, data2, rp_bins, pi_max, period=np.inf)
+    substr = "Input ``period`` must be a bounded positive number in all dimensions" 
+    assert substr in err.value.args[0]
+
+
+
+
+
+
+
+
+
 
 
 
