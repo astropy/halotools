@@ -13,7 +13,7 @@ from ...utils.array_utils import convert_to_ndarray
 
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
-__all__ = ('_set_approximate_cell_sizes')
+__all__ = ('_set_approximate_cell_sizes', '_cell1_parallelization_indices')
 
 def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
     """
@@ -99,3 +99,15 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, peri
 
     return approx_cell1_size, approx_cell2_size
 
+def _cell1_parallelization_indices(ncells, num_threads):
+    """
+    """
+    if num_threads == 1:
+        return 1, [(0, ncells)]
+    elif num_threads > ncells:
+        return ncells, [(a, a+1) for a in np.arange(ncells)]
+    else:
+        list_with_possibly_empty_arrays = np.array_split(np.arange(ncells), num_threads)
+        list_of_nonempty_arrays = [a for a in list_with_possibly_empty_arrays if len(a) > 0]
+        list_of_tuples = [(x[0], x[0] + len(x)) for x in list_of_nonempty_arrays]
+        return num_threads, list_of_tuples

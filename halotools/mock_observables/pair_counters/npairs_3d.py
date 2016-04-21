@@ -9,7 +9,7 @@ from functools import partial
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 from .rectangular_mesh import RectangularDoubleMesh
-from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box
+from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import npairs_3d_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
 
@@ -137,16 +137,15 @@ def npairs_3d(data1, data2, rbins, period = None,
         double_mesh, data1[:,0], data1[:,1], data1[:,2], 
         data2[:,0], data2[:,1], data2[:,2], rbins)
 
+    num_threads, cell1_tuples = _cell1_parallelization_indices(
+        double_mesh.mesh1.ncells, num_threads)
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        cell1_chunk_list = np.array_split(np.arange(double_mesh.mesh1.ncells), num_threads)
-        print(cell1_chunk_list)
-        cell1_tuples = list([(x[0], x[-1]+1) for x in cell1_chunk_list])
-        result = pool.map(engine,cell1_tuples)
+        result = pool.map(engine, cell1_tuples)
         counts = np.sum(np.array(result), axis=0)
         pool.close()
     else:
-        counts = engine((0, double_mesh.mesh1.ncells))
+        counts = engine(cell1_tuples[0])
 
     return counts
 
