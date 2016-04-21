@@ -248,7 +248,7 @@ class TestHodModelFactoryTutorial(TestCase):
             def disrupted_fraction_vs_halo_mass(self, mass):
                 bool_mask = mass > self.param_dict['max_disruption_mass_'+self.gal_type]
                 val = self.param_dict['disrupted_fraction_'+self.gal_type]
-                return np.where(bool_mask is True, 0, val)
+                return np.where(bool_mask == True, 0, val)
 
         cen_shape = Shape('centrals', 'halo_mvir')
         sat_shape = Shape('satellites', 'halo_m200b')
@@ -265,7 +265,7 @@ class TestHodModelFactoryTutorial(TestCase):
         assert 'disrupted' in list(new_model.mock.galaxy_table.keys())
         assert set(new_model.mock.galaxy_table['disrupted']) == {True, False}
 
-        mask = new_model.mock.galaxy_table['disrupted'] is False
+        mask = new_model.mock.galaxy_table['disrupted'] == False
         np.testing.assert_allclose(
             new_model.mock.galaxy_table['axis_ratio'][mask], 0.3)
         assert np.all(new_model.mock.galaxy_table['axis_ratio'] >= 0)
@@ -273,7 +273,7 @@ class TestHodModelFactoryTutorial(TestCase):
 
         cenmask = new_model.mock.galaxy_table['gal_type'] == 'centrals'
         cens = new_model.mock.galaxy_table[cenmask]
-        cens_disrupted_mask = cens['disrupted'] is True
+        cens_disrupted_mask = cens['disrupted'] == True
         disrupted_cens = cens[cens_disrupted_mask]
         try:
             assert (disrupted_cens['halo_mvir'].max() <= 
@@ -284,7 +284,7 @@ class TestHodModelFactoryTutorial(TestCase):
             pass
 
         sats = new_model.mock.galaxy_table[~cenmask]
-        sats_disrupted_mask = sats['disrupted'] is True
+        sats_disrupted_mask = sats['disrupted'] == True
         disrupted_sats = sats[sats_disrupted_mask]
         try:
             assert (
