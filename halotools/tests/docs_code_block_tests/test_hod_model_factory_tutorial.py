@@ -240,7 +240,7 @@ class TestHodModelFactoryTutorial(TestCase):
 
             def assign_axis_ratio(self, **kwargs):
                 table = kwargs['table']
-                mask = table['disrupted'] is True
+                mask = table['disrupted'] == True
                 num_disrupted = len(table['disrupted'][mask])
                 table['axis_ratio'][mask] = np.random.random(num_disrupted)
                 table['axis_ratio'][~mask] = 0.3
