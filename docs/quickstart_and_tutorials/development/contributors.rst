@@ -25,6 +25,7 @@ Core package contributors
 * Shany Danieli
 * Benedikt Diemer
 * Yu Feng
+* Nathan Goldbaum
 * Andrew Hearin
 * Elise Jennings
 * Alexie Leauthaud
@@ -32,6 +33,7 @@ Core package contributors
 * Surhud More
 * John Parejko
 * Manodeep Sinha
+* Brigitta Sipocz
 * Kevin Tan
 * Erik Tollerud
 * Doug Watson
