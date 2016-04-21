@@ -46,8 +46,8 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
-    cdef long first_cell1_element = cell1_tuple[0]
-    cdef long last_cell1_element = cell1_tuple[1]
+    cdef cnp.int64_t first_cell1_element = cell1_tuple[0]
+    cdef cnp.int64_t last_cell1_element = cell1_tuple[1]
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
