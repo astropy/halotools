@@ -279,6 +279,29 @@ def test_parallel():
     assert np.all(serial_result == parallel_result7)
 
 
+def test_npairs_projected_brute_force_periodic():
+    """
+    Function tests npairs with periodic boundary conditions.
+    """
+    Npts = 1000
+    random_sample = np.random.random((Npts, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rp_bins = np.array([0.001,0.1,0.2,0.3])
+    pi_max = 0.1
+    pi_bins = [0, pi_max]
+
+    result = npairs_projected(random_sample, random_sample, rp_bins, pi_max, 
+        period=period)
+
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(rp_bins),), msg
+
+    test_result = pure_python_brute_force_npairs_projected(
+        random_sample, random_sample, rp_bins, pi_bins, period=period)
+
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(test_result==result), msg
+
 
 
 
