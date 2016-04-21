@@ -7,12 +7,11 @@ Calculate one and two halo two point correlation functions.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 ####import modules########################################################################
-import sys
 import numpy as np
-from math import pi, gamma
-from .clustering_helpers import *
-from .tpcf_estimators import *
-from .pair_counters.double_tree_pairs import npairs
+from math import gamma
+from .clustering_helpers import _tpcf_one_two_halo_decomp_process_args
+from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .pair_counters import npairs_3d
 from .pair_counters.marked_double_tree_pairs import marked_npairs
 from warnings import warn
 ##########################################################################################
@@ -190,9 +189,9 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     _tpcf_one_two_halo_decomp_process_args(*function_args)
     
     
-    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
-                      do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,\
-                      approx_cell2_size , approx_cellran_size):
+    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
+        do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
+        approx_cell2_size , approx_cellran_size):
         """
         Count random pairs.  There are two high level branches:
             1. w/ or wo/ PBCs and randoms.
@@ -212,15 +211,15 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         
         #randoms provided, so calculate random pair counts.
         if randoms is not None:
-            if do_RR==True:
-                RR = npairs(randoms, randoms, rbins, period=period,
+            if do_RR is True:
+                RR = npairs_3d(randoms, randoms, rbins, period=period,
                             num_threads=num_threads,
                             approx_cell1_size=approx_cellran_size,
                             approx_cell2_size=approx_cellran_size)
                 RR = np.diff(RR)
             else: RR=None
-            if do_DR==True:
-                D1R = npairs(sample1, randoms, rbins, period=period,
+            if do_DR is True:
+                D1R = npairs_3d(sample1, randoms, rbins, period=period,
                              num_threads=num_threads,
                              approx_cell1_size=approx_cell1_size,
                              approx_cell2_size=approx_cellran_size
@@ -230,8 +229,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             if _sample1_is_sample2:
                 D2R = None
             else:
-                if do_DR==True:
-                    D2R = npairs(sample2, randoms, rbins, period=period,
+                if do_DR is True:
+                    D2R = npairs_3d(sample2, randoms, rbins, period=period,
                                  num_threads=num_threads,
                                  approx_cell1_size=approx_cell2_size,
                                  approx_cell2_size=approx_cellran_size)
@@ -266,8 +265,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             return D1R, D2R, RR
     
     
-    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
-                    do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2):
+    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+        do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2):
         """
         Count weighted data pairs.
         """
@@ -276,11 +275,10 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         marks1 = np.vstack((marks1,np.ones(len(marks1)))).T
         marks2 = np.vstack((marks2,np.ones(len(marks2)))).T
         
-        if do_auto==True:
-            D1D1 = marked_npairs(sample1, sample1, rbins,\
-                                 weights1=marks1, weights2=marks1,\
-                                 wfunc = wfunc,\
-                                 period=period, num_threads=num_threads)
+        if do_auto is True:
+            D1D1 = marked_npairs(sample1, sample1, rbins,
+                weights1=marks1, weights2=marks1,
+                wfunc = wfunc, period=period, num_threads=num_threads)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -290,18 +288,16 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            if do_cross==True:
-                D1D2 = marked_npairs(sample1, sample2, rbins,\
-                                     weights1=marks1, weights2=marks2,\
-                                     wfunc = wfunc,\
-                                     period=period, num_threads=num_threads)
+            if do_cross is True:
+                D1D2 = marked_npairs(sample1, sample2, rbins,
+                    weights1=marks1, weights2=marks2,
+                    wfunc = wfunc, period=period, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
-            if do_auto==True:
-                D2D2 = marked_npairs(sample2, sample2, rbins,\
-                                     weights1=marks2, weights2=marks2,\
-                                     wfunc = wfunc,\
-                                     period=period, num_threads=num_threads)
+            if do_auto is True:
+                D2D2 = marked_npairs(sample2, sample2, rbins,
+                    weights1=marks2, weights2=marks2,
+                    wfunc = wfunc, period=period, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
         
@@ -323,16 +319,16 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     #calculate 1-halo pairs
     wfunc=3
     one_halo_D1D1,one_halo_D1D2, one_halo_D2D2 =\
-        marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
-                           do_auto, do_cross, sample1_host_halo_id,\
-                           sample2_host_halo_id, wfunc, _sample1_is_sample2)
+        marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+            do_auto, do_cross, sample1_host_halo_id,
+            sample2_host_halo_id, wfunc, _sample1_is_sample2)
     
     #calculate 2-halo pairs 
     wfunc=4
     two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 =\
-        marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
-                           do_auto, do_cross, sample1_host_halo_id,\
-                           sample2_host_halo_id, wfunc, _sample1_is_sample2)
+        marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+            do_auto, do_cross, sample1_host_halo_id,
+            sample2_host_halo_id, wfunc, _sample1_is_sample2)
     
     #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
@@ -362,7 +358,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return one_halo_xi_11, two_halo_xi_11
     else:
-        if (do_auto==True) & (do_cross==True): 
+        if (do_auto is True) & (do_cross is True): 
             one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
             one_halo_xi_12 = _TP_estimator(one_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             one_halo_xi_22 = _TP_estimator(one_halo_D2D2,D2R,RR,N2,N2,NR,NR,estimator)
@@ -371,11 +367,11 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             two_halo_xi_22 = _TP_estimator(two_halo_D2D2,D2R,RR,N2,N2,NR,NR,estimator)
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_12,\
                    two_halo_xi_12, one_halo_xi_22, two_halo_xi_22
-        elif (do_cross==True):
+        elif (do_cross is True):
             one_halo_xi_12 = _TP_estimator(one_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             two_halo_xi_12 = _TP_estimator(two_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             return one_halo_xi_12, two_halo_xi_12
-        elif (do_auto==True):
+        elif (do_auto is True):
             one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             one_halo_xi_22 = _TP_estimator(one_halo_D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,D1R,N1,N1,NR,NR,estimator)

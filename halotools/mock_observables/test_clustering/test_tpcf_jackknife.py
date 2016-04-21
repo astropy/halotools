@@ -3,13 +3,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
-import sys
 import pytest 
 
 from ..tpcf_jackknife import tpcf_jackknife
 from ..tpcf import tpcf
 
-import pytest
 slow = pytest.mark.slow
 
 __all__=['test_tpcf_jackknife_corr_func', 'test_tpcf_jackknife_cov_matrix']
@@ -19,7 +17,7 @@ Npts=100
 sample1 = np.random.random((Npts,3))
 randoms = np.random.random((Npts*10,3))
 period = np.array([1.0,1.0,1.0])
-rbins = np.linspace(0.0,0.3,5).astype(float)
+rbins = np.linspace(0.001,0.3,5).astype(float)
 rmax = rbins.max()
 
 @pytest.mark.slow

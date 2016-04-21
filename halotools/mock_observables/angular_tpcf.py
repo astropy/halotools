@@ -4,19 +4,15 @@
 Calculate angular two point correlation functions.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (
+    absolute_import, division, print_function,unicode_literals)
 
-import sys
 import numpy as np
-from math import pi, gamma
-from .clustering_helpers import *
-from .tpcf_estimators import *
-from ..utils.spherical_geometry import *
+from .clustering_helpers import _angular_tpcf_process_args
+from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
+from ..utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesian
 from warnings import warn
-from .pair_counters.double_tree_pairs import npairs
-
-
+from .pair_counters import npairs_3d
 
 __all__=['angular_tpcf']
 __author__ = ['Duncan Campbell']
@@ -26,8 +22,8 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 
 def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
-                 do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-                 max_sample_size=int(1e6)):
+    do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+    max_sample_size=int(1e6)):
     """ 
     Calculate the angular two-point correlation function, :math:`w(\\theta)`.
     
@@ -102,7 +98,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     Notes
     -----
-    Pairs are counted using `~halotools.mock_observables.pair_counters.npairs`.
+    Pairs are counted using `~halotools.mock_observables.npairs_3d`.
     
     Examples
     --------
@@ -121,8 +117,8 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     """
     
     #check input arguments using clustering helper functions
-    function_args = [sample1, theta_bins, sample2, randoms, do_auto, do_cross,\
-                     estimator, num_threads, max_sample_size]
+    function_args = (sample1, theta_bins, sample2, randoms, do_auto, do_cross,
+        estimator, num_threads, max_sample_size)
     
     #pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
@@ -143,8 +139,8 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         x,y,z = spherical_to_cartesian(randoms[:,0], randoms[:,1])
         randoms = np.vstack((x,y,z)).T
     
-    def random_counts(sample1, sample2, randoms, chord_bins, num_threads,\
-                      do_RR, do_DR, _sample1_is_sample2):
+    def random_counts(sample1, sample2, randoms, chord_bins, 
+        num_threads,do_RR, do_DR, _sample1_is_sample2):
         """
         Count random pairs.
         """
@@ -157,21 +153,21 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         
         #randoms provided, so calculate random pair counts.
         if randoms is not None:
-            if do_RR==True:
-                RR = npairs(randoms, randoms, chord_bins,
+            if do_RR is True:
+                RR = npairs_3d(randoms, randoms, chord_bins,
                             num_threads=num_threads)
                 RR = np.diff(RR)
             else: RR=None
-            if do_DR==True:
-                D1R = npairs(sample1, randoms, chord_bins,
+            if do_DR is True:
+                D1R = npairs_3d(sample1, randoms, chord_bins,
                              num_threads=num_threads)
                 D1R = np.diff(D1R)
             else: D1R=None
             if _sample1_is_sample2:
                 D2R = None
             else:
-                if do_DR==True:
-                    D2R = npairs(sample2, randoms, chord_bins,
+                if do_DR is True:
+                    D2R = npairs_3d(sample2, randoms, chord_bins,
                                  num_threads=num_threads)
                     D2R = np.diff(D2R)
                 else: D2R=None
@@ -201,14 +197,14 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             
             return D1R, D2R, RR
     
-    def pair_counts(sample1, sample2, chord_bins, N_thread, do_auto, do_cross,\
-                    _sample1_is_sample2):
+    def pair_counts(sample1, sample2, chord_bins, 
+        N_thread, do_auto, do_cross,_sample1_is_sample2):
         """
         Count data-data pairs.
         """
         
-        if do_auto==True:
-            D1D1 = npairs(sample1, sample1, chord_bins, num_threads=num_threads)
+        if do_auto is True:
+            D1D1 = npairs_3d(sample1, sample1, chord_bins, num_threads=num_threads)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -218,12 +214,12 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            if do_cross==True:
-                D1D2 = npairs(sample1, sample2, chord_bins, num_threads=num_threads)
+            if do_cross is True:
+                D1D2 = npairs_3d(sample1, sample2, chord_bins, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
-            if do_auto==True:
-                D2D2 = npairs(sample2, sample2, rbins, num_threads=num_threads)
+            if do_auto is True:
+                D2D2 = npairs_3d(sample2, sample2, chord_bins, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
         
@@ -271,15 +267,15 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
     else:
-        if (do_auto==True) & (do_cross==True): 
+        if (do_auto is True) & (do_cross is True): 
             xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
             return xi_11, xi_12, xi_22
-        elif (do_cross==True):
+        elif (do_cross is True):
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             return xi_12
-        elif (do_auto==True):
+        elif (do_auto is True):
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11, xi_22

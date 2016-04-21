@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count 
-from ..custom_exceptions import *
+from ..custom_exceptions import HalotoolsError
 from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ['_pairwise_velocity_stats_process_args','_process_radial_bins','_process_rp_bins']
@@ -40,7 +40,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2,
             msg = ("\n Warning: `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-function will be returned.\n")
             warn(msg)
-            do_cross==False
+            do_cross = False
         else: 
             _sample1_is_sample2 = False
     else: 

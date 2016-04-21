@@ -6,7 +6,6 @@ from unittest import TestCase
 import warnings 
 
 from ...sim_manager import FakeSim
-from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestHodModelFactoryTutorial']
 
@@ -57,8 +56,10 @@ class TestHodModelFactoryTutorial(TestCase):
         another_sats_prof_model = NFWPhaseSpace()
 
         from ...empirical_models import HaloMassInterpolQuenching
-        sat_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-        cen_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+            [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
 
         model_instance = HodModelFactory(
             centrals_occupation = another_cens_occ_model, 

@@ -4,14 +4,11 @@
 functions to calculate clustering statistics, e.g. two point correlation functions.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 ####import modules########################################################################
-import sys
 import numpy as np
-from math import pi, gamma
 
-from .clustering_helpers import *
+from .clustering_helpers import _rp_pi_tpcf_process_args
 from .rp_pi_tpcf import rp_pi_tpcf
 ##########################################################################################
 
@@ -23,10 +20,10 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
-       do_auto=True, do_cross=True, estimator='Natural', num_threads=1,\
-       max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,\
-       approx_cellran_size=None):
+def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
+    do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+    max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,
+    approx_cellran_size=None):
     """ 
     Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
     where :math:`r_p` is the seperation perpendicular to the line-of-sight (LOS).
@@ -176,9 +173,9 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
     pi_bins = np.array([0.0,pi_max])
     
     #process input parameters
-    function_args = [sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,\
-                     do_cross, estimator, num_threads, max_sample_size,\
-                     approx_cell1_size, approx_cell2_size, approx_cellran_size]
+    function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
+        do_cross, estimator, num_threads, max_sample_size,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size)
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
     
@@ -186,14 +183,14 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
         sample2=None
     
     #pass the arguments into the redshift space TPCF function
-    result = rp_pi_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,\
-                                 sample2 = sample2, randoms=randoms,\
-                                 period = period, do_auto=do_auto, do_cross=do_cross,\
-                                 estimator=estimator, num_threads=num_threads,\
-                                 max_sample_size=max_sample_size,\
-                                 approx_cell1_size=approx_cell1_size,\
-                                 approx_cell2_size=approx_cell2_size,\
-                                 approx_cellran_size=approx_cellran_size)
+    result = rp_pi_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,
+        sample2 = sample2, randoms=randoms,
+        period = period, do_auto=do_auto, do_cross=do_cross,
+        estimator=estimator, num_threads=num_threads,
+        max_sample_size=max_sample_size,
+        approx_cell1_size=approx_cell1_size,
+        approx_cell2_size=approx_cell2_size,
+        approx_cellran_size=approx_cellran_size)
     
     #return the results.
     if _sample1_is_sample2:
@@ -201,7 +198,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
         wp_D1D1 = 2.0*D1D1*pi_max
         return wp_D1D1
     else:
-        if (do_auto==True) & (do_cross==True):
+        if (do_auto is True) & (do_cross is True):
             D1D1 = result[0][:,0]
             D1D2 = result[1][:,0]
             D2D2 = result[2][:,0]
@@ -209,13 +206,13 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
             wp_D1D2 = 2.0*D1D2*pi_max
             wp_D2D2 = 2.0*D2D2*pi_max
             return wp_D1D1, wp_D1D2, wp_D2D2
-        elif (do_auto==True) & (do_cross==False):
+        elif (do_auto is True) & (do_cross is False):
             D1D1 = result[0][:,0]
             D2D2 = result[1][:,0]
             wp_D1D1 = 2.0*D1D1*pi_max
             wp_D2D2 = 2.0*D2D2*pi_max
             return wp_D1D1, wp_D2D2
-        elif (do_auto==False) & (do_cross==True):
+        elif (do_auto is False) & (do_cross is True):
             D1D2 = result[:,0]
             wp_D1D2 = 2.0*D1D2*pi_max
             return wp_D1D2

@@ -13,8 +13,8 @@ from libcpp.vector cimport vector
 
 from .distances cimport *
 
-__all__ = ['pairwise_distance_no_pbc', 'pairwise_distance_pbc',\
-           'pairwise_xy_z_distance_no_pbc', 'pairwise_xy_z_distance_pbc']
+__all__ = ('pairwise_distance_no_pbc', 'pairwise_distance_pbc',
+    'pairwise_xy_z_distance_no_pbc', 'pairwise_xy_z_distance_pbc')
 __author__=['Duncan Campbell']
 
 
@@ -105,8 +105,9 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         for j in range(0,Nj):
                         
             #calculate the square distance
-            d = square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\
-                                x_icell2[j],y_icell2[j],z_icell2[j])
+            d = square_distance(
+                x_icell1[i],y_icell1[i],z_icell1[i],
+                x_icell2[j],y_icell2[j],z_icell2[j])
                         
             #add distance to result
             if d<=max_r:
@@ -115,8 +116,8 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                 j_ind.push_back(j)
                 n = n+1
     
-    return np.sqrt(distances).astype(float), np.array(i_ind).astype(int),\
-           np.array(j_ind).astype(int)
+    return (np.sqrt(distances).astype(float), 
+        np.array(i_ind).astype(int),np.array(j_ind).astype(int))
 
 
 @cython.boundscheck(False)
@@ -212,9 +213,10 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         for j in range(0,Nj):
                         
             #calculate the square distance
-            d = periodic_square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\
-                                         x_icell2[j],y_icell2[j],z_icell2[j],\
-                                         <np.float64_t*> period.data)
+            d = periodic_square_distance(
+                x_icell1[i],y_icell1[i],z_icell1[i],
+                x_icell2[j],y_icell2[j],z_icell2[j],
+                <np.float64_t*> period.data)
                         
             #add distance to result
             if d<=max_r:
@@ -223,20 +225,21 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                 j_ind.push_back(j)
                 n = n+1
     
-    return np.sqrt(distances).astype(float), np.array(i_ind).astype(int),\
-           np.array(j_ind).astype(int)
+    return (np.sqrt(distances).astype(float), 
+        np.array(i_ind).astype(int), np.array(j_ind).astype(int))
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] y_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] z_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] x_icell2,
-                                  np.ndarray[np.float64_t, ndim=1] y_icell2,
-                                  np.ndarray[np.float64_t, ndim=1] z_icell2,
-                                  np.float64_t max_rp, np.float64_t max_pi):
+def pairwise_xy_z_distance_no_pbc(
+    np.ndarray[np.float64_t, ndim=1] x_icell1,
+    np.ndarray[np.float64_t, ndim=1] y_icell1,
+    np.ndarray[np.float64_t, ndim=1] z_icell1,
+    np.ndarray[np.float64_t, ndim=1] x_icell2,
+    np.ndarray[np.float64_t, ndim=1] y_icell2,
+    np.ndarray[np.float64_t, ndim=1] z_icell2,
+    np.float64_t max_rp, np.float64_t max_pi):
     """
     Calculate the limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`.
     
@@ -324,8 +327,9 @@ def pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         for j in range(0,Nj):
                         
             #calculate the square distance
-            d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
-                                          x_icell2[j], y_icell2[j])
+            d_perp = perp_square_distance(
+                x_icell1[i], y_icell1[i],
+                x_icell2[j], y_icell2[j])
             d_para = para_square_distance(z_icell1[i], z_icell2[j])
                         
             #add distance to result
@@ -336,21 +340,23 @@ def pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                 j_ind.push_back(j)
                 n = n+1
     
-    return np.sqrt(perp_distances).astype(float), np.sqrt(para_distances).astype(float),\
-           np.array(i_ind).astype(int), np.array(j_ind).astype(int)
+    return (np.sqrt(perp_distances).astype(float), 
+        np.sqrt(para_distances).astype(float),
+        np.array(i_ind).astype(int), np.array(j_ind).astype(int))
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def pairwise_xy_z_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                               np.ndarray[np.float64_t, ndim=1] y_icell1,
-                               np.ndarray[np.float64_t, ndim=1] z_icell1,
-                               np.ndarray[np.float64_t, ndim=1] x_icell2,
-                               np.ndarray[np.float64_t, ndim=1] y_icell2,
-                               np.ndarray[np.float64_t, ndim=1] z_icell2,
-                               np.ndarray[np.float64_t, ndim=1] period,
-                               np.float64_t max_rp, np.float64_t max_pi):
+def pairwise_xy_z_distance_pbc(
+    np.ndarray[np.float64_t, ndim=1] x_icell1,
+    np.ndarray[np.float64_t, ndim=1] y_icell1,
+    np.ndarray[np.float64_t, ndim=1] z_icell1,
+    np.ndarray[np.float64_t, ndim=1] x_icell2,
+    np.ndarray[np.float64_t, ndim=1] y_icell2,
+    np.ndarray[np.float64_t, ndim=1] z_icell2,
+    np.ndarray[np.float64_t, ndim=1] period,
+    np.float64_t max_rp, np.float64_t max_pi):
     
     """
     Calculate the limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`, with periodic boundary conditions (PBC).
@@ -443,12 +449,12 @@ def pairwise_xy_z_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         for j in range(0,Nj):
                         
             #calculate the square distance
-            d_perp = periodic_perp_square_distance(x_icell1[i],y_icell1[i],\
-                                                   x_icell2[j],y_icell2[j],\
-                                                   <np.float64_t*>period.data)
-            d_para = periodic_para_square_distance(z_icell1[i],\
-                                                   z_icell2[j],\
-                                                   <np.float64_t*>period.data)
+            d_perp = periodic_perp_square_distance(
+                x_icell1[i],y_icell1[i],
+                x_icell2[j],y_icell2[j],
+                <np.float64_t*>period.data)
+            d_para = periodic_para_square_distance(
+                z_icell1[i], z_icell2[j],<np.float64_t*>period.data)
                         
             #add distance to result
             if (d_perp<=max_rp) & (d_para<=max_pi):
@@ -458,8 +464,8 @@ def pairwise_xy_z_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                 j_ind.push_back(j)
                 n = n+1
     
-    return np.sqrt(perp_distances).astype(float), np.sqrt(para_distances).astype(float),\
-           np.array(i_ind).astype(int), np.array(j_ind).astype(int)
-    
+    return (np.sqrt(perp_distances).astype(float), 
+        np.sqrt(para_distances).astype(float),
+        np.array(i_ind).astype(int), np.array(j_ind).astype(int))
     
     

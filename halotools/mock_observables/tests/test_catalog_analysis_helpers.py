@@ -2,14 +2,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-from copy import deepcopy 
-
-from collections import Counter
 
 import numpy as np 
 
 from astropy.tests.helper import pytest
-from astropy.table import Table 
 
 from .. import catalog_analysis_helpers as cat_helpers
 
@@ -17,7 +13,7 @@ from ...sim_manager import FakeSim
 
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ['TestCatalogAnalysisHelpers']
+__all__ = ('TestCatalogAnalysisHelpers', )
 
 class TestCatalogAnalysisHelpers(TestCase):
     """ Class providing tests of the `~halotools.mock_observables.catalog_analysis_helpers`. 
