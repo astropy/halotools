@@ -52,7 +52,7 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rbins = len(rbins)
-    cdef cnp.ndarray[cnp.int64_t, ndim=1] counts = np.zeros(num_rbins, dtype=int)
+    cdef cnp.int64_t[:] counts = np.zeros(num_rbins, dtype=np.int64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
@@ -180,7 +180,7 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
                                         k=k-1
                                         if k<0: break
                                         
-    return counts
+    return np.array(counts)
 
 
 
