@@ -27,4 +27,4 @@ def test_npairs_xy_z_tight_locus_xy1():
     pi_bins = np.array([0, np.max(rp_bins)])
 
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
-    # assert np.all(result[1,:] == [0, npts1*npts2, npts1*npts2])
+    assert np.all(result[:,1] == [0, npts1*npts2, npts1*npts2])

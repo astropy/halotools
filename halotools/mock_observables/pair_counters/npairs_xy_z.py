@@ -113,6 +113,8 @@ def npairs_xy_z(data1, data2, rp_bins, pi_bins, period = None,
     >>> data2 = np.vstack([x2, y2, z2]).T
 
     >>> result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period = period)
+    >>> assert result.shape == (15, 3)
+    >>> print(result)
 
     """
 
@@ -157,7 +159,7 @@ def npairs_xy_z(data1, data2, rp_bins, pi_bins, period = None,
     else:
         counts = engine(cell1_tuples[0])
 
-    return counts
+    return np.array(counts)
 
 def _npairs_xy_z_process_args(data1, data2, rp_bins, pi_bins, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
