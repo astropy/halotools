@@ -26,4 +26,4 @@ from .nearest_neighbor import *
 from .void_stats import *
 from .catalog_analysis_helpers import *
 from .distances import *
-from .pair_counters import npairs_3d, npairs_projected
+from .pair_counters import npairs_3d, npairs_projected, npairs_xy_z
