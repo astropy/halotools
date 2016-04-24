@@ -113,8 +113,6 @@ def npairs_xy_z(data1, data2, rp_bins, pi_bins, period = None,
     >>> data2 = np.vstack([x2, y2, z2]).T
 
     >>> result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period = period)
-    >>> assert result.shape == (15, 3)
-    >>> print(result)
 
     """
 
@@ -223,9 +221,11 @@ def _npairs_xy_z_process_args(data1, data2, rp_bins, pi_bins, period,
 
     try:
         assert pi_max > 0.
-        assert pi_max < period[2]/3.
+        min_required_pi_max = period[2]/3.
+        assert pi_max < min_required_pi_max
     except:
-        msg = ("Input ``pi_max`` must be a positive scalar less than period[2]/3")
+        msg = ("Input ``pi_max`` = %.2f must be a "
+            "positive scalar less than period[2]/3 = %.2f" % (pi_max, min_required_pi_max))
         raise ValueError(msg)
 
     if approx_cell1_size is None:
