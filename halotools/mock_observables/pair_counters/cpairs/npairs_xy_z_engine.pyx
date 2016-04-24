@@ -59,7 +59,7 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rp_bins = len(rp_bins)
     cdef int num_pi_bins = len(pi_bins)
-    cdef cnp.ndarray[cnp.int64_t, ndim=1] counts = np.zeros(num_rp_bins, dtype=int)
+    cdef cnp.int64_t[:,:] counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.int64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
@@ -182,16 +182,17 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     dxy_sq = dx*dx + dy*dy
                                     dz_sq = dz*dz
 
+                                    k = num_rp_bins-1
                                     while dxy_sq<=rp_bins_squared[k]:
                                         g = num_pi_bins-1
                                         while dz_sq<=pi_bins_squared[g]:
-                                            counts[k*num_pi_bins+g] += 1
+                                            counts[k,g] += 1
                                             g=g-1
                                             if g<0: break
                                         k=k-1
                                         if k<0: break
                                         
-    return counts
+    return np.array(counts)
 
 
 
