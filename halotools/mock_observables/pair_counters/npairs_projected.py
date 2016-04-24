@@ -177,7 +177,7 @@ def _npairs_projected_process_args(data1, data2, rp_bins, pi_max, period,
     y2 = data2[:,1]
     z2 = data2[:,2]
 
-    rp_bins = convert_to_ndarray(rp_bins)
+    rp_bins = np.atleast_1d(rp_bins).astype('f8')
     try:
         assert rp_bins.ndim == 1
         assert len(rp_bins) > 1

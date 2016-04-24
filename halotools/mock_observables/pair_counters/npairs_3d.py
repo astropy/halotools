@@ -169,7 +169,7 @@ def _npairs_3d_process_args(data1, data2, rbins, period,
     x2 = data2[:,0]
     y2 = data2[:,1]
     z2 = data2[:,2]
-    rbins = convert_to_ndarray(rbins)
+    rbins = np.atleast_1d(rbins).astype('f8')
     
     rmax = np.max(rbins)
     
