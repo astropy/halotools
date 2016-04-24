@@ -98,7 +98,8 @@ def test_rectangular_mesh_pairs_tight_locus_z2():
 
 def test_rectangular_mesh_pairs_tight_locus_cell1_sizes():
     """ Verify that the pair counters return the correct results
-    when operating on a tight locus of points.
+    when operating on a tight locus of points, regardless of how the 
+    cell sizes are set. 
 
     For this test, PBCs have no impact.
     """
