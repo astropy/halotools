@@ -46,7 +46,7 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
     zmax = np.max([np.max(z1),np.max(z2)])
     
     xyzmin = np.min([xmin,ymin,zmin])
-    xyzmax = np.min([xmax,ymax,zmax])-xyzmin
+    xyzmax = np.max([xmax,ymax,zmax])-xyzmin
     
     x1 = x1 - xyzmin
     y1 = y1 - xyzmin
