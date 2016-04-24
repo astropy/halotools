@@ -128,7 +128,7 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rp_max, period)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size

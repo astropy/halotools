@@ -64,7 +64,7 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
             
     return x1, y1, z1, x2, y2, z2, Lbox
 
-def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period):
+def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
     """
     process the approximate cell size parameters.  
     If either is set to None, apply default settings.
@@ -73,7 +73,6 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, peri
     #################################################
     ### Set the approximate cell sizes of the trees
     if approx_cell1_size is None:
-        #approx_cell1_size = np.array([rmax, rmax, rmax])
         approx_cell1_size = period/10.0
     else:
         approx_cell1_size = convert_to_ndarray(approx_cell1_size)

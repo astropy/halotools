@@ -121,7 +121,7 @@ def npairs_3d(data1, data2, rbins, period = None,
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
