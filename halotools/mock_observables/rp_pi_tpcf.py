@@ -11,7 +11,7 @@ import numpy as np
 from math import pi
 from .clustering_helpers import _rp_pi_tpcf_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
-from .pair_counters.double_tree_pairs import xy_z_npairs
+from .pair_counters import npairs_xy_z
 ##########################################################################################
 
 
@@ -133,7 +133,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.xy_z_npairs`.  This pair 
+    `~halotools.mock_observables.pair_counters.npairs_xy_z`.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
@@ -200,14 +200,14 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         #No PBCs, randoms must have been provided.
         if randoms is not None:
             if do_RR is True:
-                RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, 
+                RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins, 
                     period=period,num_threads=num_threads,
                     approx_cell1_size=approx_cellran_size,
                     approx_cell2_size=approx_cellran_size)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
             if do_DR is True:
-                D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, 
+                D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins, 
                     period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell1_size,
                     approx_cell2_size=approx_cellran_size)
@@ -217,7 +217,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                 D2R = None
             else:
                 if do_DR is True:
-                    D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, 
+                    D2R = npairs_xy_z(sample2, randoms, rp_bins, pi_bins, 
                         period=period, num_threads=num_threads,
                         approx_cell1_size=approx_cell2_size,
                         approx_cell2_size=approx_cellran_size)
@@ -258,7 +258,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         """
         Count data pairs.
         """
-        D1D1 = xy_z_npairs(sample1, sample1, rp_bins, pi_bins, period=period,
+        D1D1 = npairs_xy_z(sample1, sample1, rp_bins, pi_bins, period=period,
             num_threads=num_threads,approx_cell1_size=approx_cell1_size,
             approx_cell2_size=approx_cell1_size)
         D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
@@ -267,14 +267,14 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period,
+                D1D2 = npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
                     num_threads=num_threads,
                     approx_cell1_size=approx_cell1_size,
                     approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, 
+                D2D2 = npairs_xy_z(sample2, sample2, rp_bins, pi_bins, 
                     period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cell2_size)

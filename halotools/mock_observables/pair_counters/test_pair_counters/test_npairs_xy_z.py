@@ -6,7 +6,7 @@ import numpy as np
 import pytest 
 
 from ..npairs_xy_z import npairs_xy_z
-from ..pairs import xy_z_npairs as pure_python_brute_force_xy_z_npairs
+from ..pairs import xy_z_npairs as pure_python_brute_force_npairs_xy_z
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 from ...tests.cf_helpers import generate_3d_regular_mesh
@@ -163,7 +163,7 @@ def test_npairs_xy_z_tight_locus_cell1_cell2_sizes():
         approx_cell1_size = [0.1, 0.2, 0.3], approx_cell2_size = [0.23, 0.32, 0.11])
     assert np.all(result3[:,1] == [0, npts1*npts2, npts1*npts2])
 
-def test_rectangular_mesh_pairs1():
+def test_npairs_xy_z_mesh1():
     """ Verify that `halotools.mock_observables.npairs_projected` returns 
     the correct counts for two regularly spaced grids of points in the limit 
     where pi_max << grid_spacing
@@ -215,9 +215,9 @@ def test_parallel():
     assert np.all(serial_result == parallel_result2)
     assert np.all(serial_result == parallel_result7)
 
-def test_xy_z_npairs_brute_force_periodic():
+def test_npairs_xy_z_brute_force_periodic():
     """
-    test xy_z_npairs with periodic boundary conditions.
+    test npairs_xy_z with periodic boundary conditions.
     """
     npts1, npts2 = 100, 90
     data1 = np.random.random((npts1, 3))
@@ -227,14 +227,14 @@ def test_xy_z_npairs_brute_force_periodic():
     pi_bins = np.arange(0,0.31,0.1)
 
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
-    test_result = pure_python_brute_force_xy_z_npairs(data1, data2, rp_bins, pi_bins, period=1)
+    test_result = pure_python_brute_force_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
 
     assert np.shape(result)==(len(rp_bins),len(pi_bins))
     assert np.all(result == test_result)
 
-def test_xy_z_npairs_brute_force_non_periodic():
+def test_npairs_xy_z_brute_force_non_periodic():
     """
-    test xy_z_npairs with periodic boundary conditions.
+    test npairs_xy_z with periodic boundary conditions.
     """
     npts1, npts2 = 100, 90
     data1 = np.random.random((npts1, 3))
@@ -244,7 +244,7 @@ def test_xy_z_npairs_brute_force_non_periodic():
     pi_bins = np.arange(0,0.31,0.1)
 
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins)
-    test_result = pure_python_brute_force_xy_z_npairs(data1, data2, rp_bins, pi_bins)
+    test_result = pure_python_brute_force_npairs_xy_z(data1, data2, rp_bins, pi_bins)
 
     assert np.shape(result)==(len(rp_bins),len(pi_bins))
     assert np.all(result == test_result)
