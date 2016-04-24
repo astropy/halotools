@@ -156,7 +156,7 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
     else:
         counts = engine(cell1_tuples[0])
 
-    return counts
+    return np.array(counts)
 
 def _npairs_projected_process_args(data1, data2, rp_bins, pi_max, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
