@@ -29,7 +29,7 @@ def test_npairs_xy_z_tight_locus_xy1():
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
     assert np.all(result[:,1] == [0, npts1*npts2, npts1*npts2])
 
-def test_xy_z_npairs_periodic():
+def test_xy_z_npairs_brute_force_periodic():
     """
     test xy_z_npairs with periodic boundary conditions.
     """
@@ -42,6 +42,23 @@ def test_xy_z_npairs_periodic():
 
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
     test_result = pure_python_brute_force_xy_z_npairs(data1, data2, rp_bins, pi_bins, period=1)
+
+    assert np.shape(result)==(len(rp_bins),len(pi_bins))
+    assert np.all(result == test_result)
+
+def test_xy_z_npairs_brute_force_non_periodic():
+    """
+    test xy_z_npairs with periodic boundary conditions.
+    """
+    npts1, npts2 = 100, 90
+    data1 = np.random.random((npts1, 3))
+    data2 = np.random.random((npts2, 3))
+
+    rp_bins = np.arange(0,0.31,0.1)
+    pi_bins = np.arange(0,0.31,0.1)
+
+    result = npairs_xy_z(data1, data2, rp_bins, pi_bins)
+    test_result = pure_python_brute_force_xy_z_npairs(data1, data2, rp_bins, pi_bins)
 
     assert np.shape(result)==(len(rp_bins),len(pi_bins))
     assert np.all(result == test_result)
