@@ -11,20 +11,18 @@ import numpy as np
 cimport numpy as np
 from .distances cimport *
 
-__all__ = ['npairs_no_pbc',\
+__all__ = ('npairs_no_pbc',\
            'npairs_pbc',\
            'wnpairs_no_pbc',\
            'wnpairs_pbc',\
            'jnpairs_no_pbc',\
            'jnpairs_pbc',\
-           'xy_z_npairs_no_pbc',\
-           'xy_z_npairs_pbc',\
            'xy_z_wnpairs_no_pbc',\
            'xy_z_wnpairs_pbc',\
            'xy_z_jnpairs_no_pbc',\
            'xy_z_jnpairs_pbc',\
            's_mu_npairs_no_pbc',\
-           's_mu_npairs_pbc']
+           's_mu_npairs_pbc')
 
 __author__=['Duncan Campbell']
 
@@ -620,183 +618,6 @@ def jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
 
     return counts
 
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-def xy_z_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                       np.ndarray[np.float64_t, ndim=1] y_icell1,
-                       np.ndarray[np.float64_t, ndim=1] z_icell1,
-                       np.ndarray[np.float64_t, ndim=1] x_icell2,
-                       np.ndarray[np.float64_t, ndim=1] y_icell2,
-                       np.ndarray[np.float64_t, ndim=1] z_icell2,
-                       np.ndarray[np.float64_t, ndim=1] rp_bins,
-                       np.ndarray[np.float64_t, ndim=1] pi_bins):
-    """
-    Calculate the number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`.
-    
-    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
-    
-    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
-    account for the PBC.
-    
-    Parameters
-    ----------
-    x_icell1 : numpy.array
-         array of x positions of lenght N1 (data1)
-    
-    y_icell1 : numpy.array
-         array of y positions of lenght N1 (data1)
-    
-    z_icell1 : numpy.array
-         array of z positions of lenght N1 (data1)
-    
-    x_icell2 : numpy.array
-         array of x positions of lenght N2 (data2)
-    
-    y_icell2 : numpy.array
-         array of y positions of lenght N2 (data2)
-    
-    z_icell2 : numpy.array
-         array of z positions of lenght N2 (data2)
-    
-    rp_bins : numpy.array
-        array defining projected seperation in which to sum the pair counts
-    
-    pi_bins : numpy.array
-        array defining parallel seperation in which to sum the pair counts
-    
-    Returns
-    -------
-    result : numpy.ndarray
-        2-D array of pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
-    """
-    
-    #c definitions
-    cdef int nrp_bins = len(rp_bins)
-    cdef int npi_bins = len(pi_bins)
-    cdef int nrp_bins_minus_one = len(rp_bins) -1
-    cdef int npi_bins_minus_one = len(pi_bins) -1
-    cdef np.ndarray[np.int_t, ndim=2] counts =\
-        np.zeros((nrp_bins, npi_bins), dtype=np.int)
-    cdef double d_perp, d_para
-    cdef int i, j
-    cdef int Ni = len(x_icell1)
-    cdef int Nj = len(x_icell2)
-    
-    #square the distance bins to avoid taking a square root in a tight loop
-    rp_bins = rp_bins**2
-    pi_bins = pi_bins**2
-    
-    #loop over points in grid1's cell
-    for i in range(0,Ni):
-                
-        #loop over points in grid2's cell
-        for j in range(0,Nj):
-                    
-            #calculate the square distance
-            d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
-                                          x_icell2[j], y_icell2[j])
-            d_para = para_square_distance(z_icell1[i], z_icell2[j])
-                        
-            #calculate counts in bins
-            xy_z_binning(<np.int_t*>counts.data,\
-                         <np.float64_t*>rp_bins.data,\
-                         <np.float64_t*>pi_bins.data,\
-                         d_perp, d_para, nrp_bins_minus_one, npi_bins_minus_one)
-        
-    return counts
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-def xy_z_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                    np.ndarray[np.float64_t, ndim=1] y_icell1,
-                    np.ndarray[np.float64_t, ndim=1] z_icell1,
-                    np.ndarray[np.float64_t, ndim=1] x_icell2,
-                    np.ndarray[np.float64_t, ndim=1] y_icell2,
-                    np.ndarray[np.float64_t, ndim=1] z_icell2,
-                    np.ndarray[np.float64_t, ndim=1] rp_bins,
-                    np.ndarray[np.float64_t, ndim=1] pi_bins,
-                    np.ndarray[np.float64_t, ndim=1] period):
-    """
-    Calculate the number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`, with periodic boundary conditions (PBC).
-    
-    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
-    
-    Parameters
-    ----------
-    x_icell1 : numpy.array
-         array of x positions of lenght N1 (data1)
-    
-    y_icell1 : numpy.array
-         array of y positions of lenght N1 (data1)
-    
-    z_icell1 : numpy.array
-         array of z positions of lenght N1 (data1)
-    
-    x_icell2 : numpy.array
-         array of x positions of lenght N2 (data2)
-    
-    y_icell2 : numpy.array
-         array of y positions of lenght N2 (data2)
-    
-    z_icell2 : numpy.array
-         array of z positions of lenght N2 (data2)
-    
-    rp_bins : numpy.array
-        array defining projected seperation in which to sum the pair counts
-    
-    pi_bins : numpy.array
-        array defining parallel seperation in which to sum the pair counts
-    
-    period : numpy.array
-        array defining axis-aligned periodic boundary conditions.
-    
-    Returns
-    -------
-    result : numpy.ndarray
-        2-D array of pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
-    """
-    
-    #c definitions
-    cdef int nrp_bins = len(rp_bins)
-    cdef int npi_bins = len(pi_bins)
-    cdef int nrp_bins_minus_one = len(rp_bins) -1
-    cdef int npi_bins_minus_one = len(pi_bins) -1
-    cdef np.ndarray[np.int_t, ndim=2] counts =\
-        np.zeros((nrp_bins, npi_bins), dtype=np.int)
-    cdef double d_perp, d_para
-    cdef int i, j
-    cdef int Ni = len(x_icell1)
-    cdef int Nj = len(x_icell2)
-    
-    #square the distance bins to avoid taking a square root in a tight loop
-    rp_bins = rp_bins**2
-    pi_bins = pi_bins**2
-    
-    #loop over points in grid1's cell
-    for i in range(0,Ni):
-                
-        #loop over points in grid2's cell
-        for j in range(0,Nj):
-                    
-            #calculate the square distance
-            d_perp = periodic_perp_square_distance(x_icell1[i],y_icell1[i],\
-                                                   x_icell2[j],y_icell2[j],\
-                                                   <np.float64_t*>period.data)
-            d_para = periodic_para_square_distance(z_icell1[i],\
-                                                   z_icell2[j],\
-                                                   <np.float64_t*>period.data)
-                        
-            #calculate counts in bins
-            xy_z_binning(<np.int_t*>counts.data,\
-                         <np.float64_t*>rp_bins.data,\
-                         <np.float64_t*>pi_bins.data,\
-                         d_perp, d_para, nrp_bins_minus_one, npi_bins_minus_one)
-        
-    return counts
 
 
 @cython.boundscheck(False)

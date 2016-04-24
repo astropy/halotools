@@ -6,19 +6,14 @@ import numpy as np
 from astropy.extern.six.moves import xrange as range
 
 # load pair counters
-from ..double_tree_pairs import jnpairs, xy_z_npairs, s_mu_npairs
+from ..double_tree_pairs import jnpairs, s_mu_npairs
 from ....mock_observables import npairs_3d
 # load comparison simple pair counters
-from ..pairs import npairs as simp_npairs
-from ..pairs import xy_z_npairs as simp_xy_z_npairs
-
-from ...tests.cf_helpers import generate_locus_of_3d_points
 
 import pytest
 slow = pytest.mark.slow
 
-__all__ = ('test_xy_z_npairs_periodic', 'test_xy_z_npairs_nonperiodic', 
-    'test_s_mu_npairs_periodic', 'test_s_mu_npairs_nonperiodic', 
+__all__ = ('test_s_mu_npairs_periodic', 'test_s_mu_npairs_nonperiodic', 
     'test_jnpairs_periodic', 'test_jnpairs_nonperiodic')
 
 # set up random points to test pair counters
@@ -53,49 +48,6 @@ izz = izz.flatten()
 grid_indices = np.ravel_multi_index([ixx, iyy, izz],
     [grid_jackknife_ncells, grid_jackknife_ncells, grid_jackknife_ncells])
 grid_indices += 1
-
-
-def test_xy_z_npairs_periodic():
-    """
-    test xy_z_npairs with periodic boundary conditions.
-    """
-
-    rp_bins = np.arange(0,0.31,0.1)
-    pi_bins = np.arange(0,0.31,0.1)
-
-    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=period,\
-                         num_threads=num_threads)
-
-    msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(len(rp_bins),len(pi_bins)), msg
-
-    test_result = simp_xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins,\
-                                   period=period)
-
-    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
-    assert np.all(result == test_result), msg
-
-
-def test_xy_z_npairs_nonperiodic():
-    """
-    test xy_z_npairs without periodic boundary conditions.
-    """
-
-    rp_bins = np.arange(0,0.31,0.1)
-    pi_bins = np.arange(0,0.31,0.1)
-
-    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=None,\
-                         num_threads=num_threads)
-
-    msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(len(rp_bins),len(pi_bins)), msg
-
-    test_result = simp_xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins,\
-                                   period=None)
-
-    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
-    assert np.all(result == test_result), msg
-
 
 def test_s_mu_npairs_periodic():
     """
