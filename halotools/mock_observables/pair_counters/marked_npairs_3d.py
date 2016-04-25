@@ -172,8 +172,6 @@ def marked_npairs_3d(data1, data2, rbins,
 
     return np.array(counts)
 
-
-
 def _marked_npairs_process_weights(data1, data2, weights1, weights2, weight_func_id):
     """
     process weights and associated arguments for
