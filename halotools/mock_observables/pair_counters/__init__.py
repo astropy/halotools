@@ -11,3 +11,4 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .npairs_3d import npairs_3d
 from .npairs_projected import npairs_projected
 from .npairs_xy_z import npairs_xy_z
+from .marked_npairs_3d import marked_npairs_3d
