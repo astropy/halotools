@@ -8,4 +8,5 @@ from .pairwise_distances import *
 from .npairs_3d_engine import npairs_3d_engine
 from .npairs_projected_engine import npairs_projected_engine
 from .npairs_xy_z_engine import npairs_xy_z_engine
+from .npairs_jackknife_3d_engine import npairs_jackknife_3d_engine
 
