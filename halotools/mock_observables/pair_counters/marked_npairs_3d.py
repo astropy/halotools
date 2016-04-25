@@ -118,10 +118,6 @@ def marked_npairs_3d(data1, data2, rbins,
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
-    #sort the weights arrays
-    weights1 = np.ascontiguousarray(weights1[double_mesh.tree1.idx_sorted, :])
-    weights2 = np.ascontiguousarray(weights2[double_mesh.tree2.idx_sorted, :])
-
 
 
 def _marked_npairs_process_weights(data1, data2, weights1, weights2, wfunc):
