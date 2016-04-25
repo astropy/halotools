@@ -53,7 +53,7 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rbins = len(rbins)
-    cdef cnp.float64_t[:,:] counts = np.zeros((N_samples, num_rbins), dtype=np.float64)
+    cdef cnp.float64_t[:,:] counts = np.zeros((N_samples+1, num_rbins), dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
