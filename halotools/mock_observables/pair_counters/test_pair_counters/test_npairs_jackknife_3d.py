@@ -5,7 +5,6 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 
 # load pair counters
-from ..double_tree_pairs import jnpairs
 from ..npairs_jackknife_3d import npairs_jackknife_3d
 # load comparison simple pair counters
 
@@ -66,12 +65,6 @@ def test_npairs_jackknife_3d_periodic():
         jtags1=jtags1, jtags2=jtags1, N_samples=10,
         weights1=weights1, weights2=weights1, num_threads=num_threads)
 
-    old_result = jnpairs(random_sample, random_sample, rbins, period=period,
-        jtags1=jtags1, jtags2=jtags1, N_samples=10,
-        weights1=weights1, weights2=weights1, num_threads=num_threads)
-
-    # assert np.all(result == old_result)
-
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
 
@@ -82,11 +75,6 @@ def test_npairs_jackknife_3d_periodic():
         jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
         num_threads=num_threads)
 
-    old_grid_result = jnpairs(grid_points, grid_points, rbins, period=period,
-        jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
-        num_threads=num_threads)
-
-    assert np.all(grid_result == old_grid_result)
 
     for icell in range(1, grid_jackknife_ncells**3-1):
         assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
