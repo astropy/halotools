@@ -150,10 +150,6 @@ def marked_npairs_3d(data1, data2, rbins,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(marked_npairs_3d_engine, 
-        double_mesh, data1[:,0], data1[:,1], data1[:,2], 
-        data2[:,0], data2[:,1], data2[:,2], rbins)
-
     engine = partial(marked_npairs_3d_engine, double_mesh, 
         x1in, y1in, z1in, x2in, y2in, z2in, 
         weights1, weights2, weight_func_id, rbins)
