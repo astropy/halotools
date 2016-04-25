@@ -121,7 +121,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.marked_npairs`.
+    `~halotools.mock_observables.pair_counters.marked_npairs_3d`.
     This pair counter is optimized to work on points distributed in a rectangular  
     volume, e.g. a simulation box.  This optimization restricts this function to work on 
     3-D point distributions.
