@@ -208,7 +208,7 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     w2 = w_icell2[j]
                                     j2 = j_icell2[j]
 
-                                    for s in range(N_samples):
+                                    for s in range(N_samples+1):
                                         k = num_rbins-1
                                         while dsq<=rbins_squared[k]:
                                             counts[s,k] += jweight(s, j1, j2, w1, w2)
