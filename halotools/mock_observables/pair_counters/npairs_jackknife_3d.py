@@ -153,7 +153,7 @@ def npairs_jackknife_3d(data1, data2, rbins, period=None, weights1=None, weights
 
     # Process the input weights and jackknife-tags with the helper function
     weights1, weights2, jtags1, jtags2 = (
-        _jnpairs_process_weights_jtags(data1, data2,
+        _npairs_jackknife_3d_process_weights_jtags(data1, data2,
             weights1, weights2, jtags1, jtags2, N_samples))
 
     ### Compute the estimates for the cell sizes
@@ -190,7 +190,7 @@ def npairs_jackknife_3d(data1, data2, rbins, period=None, weights1=None, weights
     return np.array(counts)
 
 
-def _jnpairs_process_weights_jtags(data1, data2, weights1, weights2, jtags1, jtags2, N_samples):
+def _npairs_jackknife_3d_process_weights_jtags(data1, data2, weights1, weights2, jtags1, jtags2, N_samples):
     """
     """
 

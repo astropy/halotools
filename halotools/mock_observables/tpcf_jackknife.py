@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from .clustering_helpers import _tpcf_jackknife_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
-from .pair_counters.double_tree_pairs import jnpairs
+from .pair_counters import npairs_jackknife_3d
 from .error_estimation_tools import jackknife_covariance_matrix, cuboid_subvolume_labels
 ##########################################################################################
 
@@ -139,7 +139,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     Notes
     -----
     The jackknife sampling of pair counts is done internally in 
-    `~halotools.mock_observables.pair_counters.jnpairs`.
+    `~halotools.mock_observables.pair_counters.npairs_jackknife_3d`.
     
     Pairs are counted such that when 'removing' subvolume :math:`k`, and counting a 
     pair in subvolumes :math:`i` and :math:`j`:
@@ -223,7 +223,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         Count jackknife data pairs: DD
         """
         if do_auto is True:
-            D1D1 = jnpairs(sample1, sample1, rbins, period=period,
+            D1D1 = npairs_jackknife_3d(sample1, sample1, rbins, period=period,
                 jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
                 num_threads=num_threads)
             D1D1 = np.diff(D1D1,axis=1)
@@ -236,13 +236,13 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = jnpairs(sample1, sample2, rbins, period=period,
+                D1D2 = npairs_jackknife_3d(sample1, sample2, rbins, period=period,
                     jtags1=j_index_1, jtags2=j_index_2,
                     N_samples=N_sub_vol, num_threads=num_threads)
                 D1D2 = np.diff(D1D2,axis=1)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = jnpairs(sample2, sample2, rbins, period=period,
+                D2D2 = npairs_jackknife_3d(sample2, sample2, rbins, period=period,
                     jtags1=j_index_2, jtags2=j_index_2,
                     N_samples=N_sub_vol, num_threads=num_threads)
                 D2D2 = np.diff(D2D2,axis=1)
@@ -256,13 +256,13 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         """
         
         if do_DR is True:
-            DR = jnpairs(sample, randoms, rbins, period=period,
+            DR = npairs_jackknife_3d(sample, randoms, rbins, period=period,
                 jtags1=j_index, jtags2=j_index_randoms,
                 N_samples=N_sub_vol, num_threads=num_threads)
             DR = np.diff(DR,axis=1)
         else: DR=None
         if do_RR is True:
-            RR = jnpairs(randoms, randoms, rbins, period=period,
+            RR = npairs_jackknife_3d(randoms, randoms, rbins, period=period,
                 jtags1=j_index_randoms, jtags2=j_index_randoms,
                 N_samples=N_sub_vol, num_threads=num_threads)
             RR = np.diff(RR,axis=1)
