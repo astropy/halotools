@@ -3,18 +3,16 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
-from astropy.extern.six.moves import xrange as range
 
 # load pair counters
-from ..double_tree_pairs import jnpairs, s_mu_npairs
+from ..double_tree_pairs import s_mu_npairs
 from ....mock_observables import npairs_3d
 # load comparison simple pair counters
 
 import pytest
 slow = pytest.mark.slow
 
-__all__ = ('test_s_mu_npairs_periodic', 'test_s_mu_npairs_nonperiodic', 
-    'test_jnpairs_periodic', 'test_jnpairs_nonperiodic')
+__all__ = ('test_s_mu_npairs_periodic', 'test_s_mu_npairs_nonperiodic')
 
 # set up random points to test pair counters
 np.random.seed(1)
@@ -97,70 +95,5 @@ def test_s_mu_npairs_nonperiodic():
 
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(result == test_result), msg
-
-
-def test_jnpairs_periodic():
-    """
-    test jnpairs with periodic boundary conditions.
-    """
-
-    rbins = np.array([0.0,0.1,0.2,0.3])
-
-    #define the jackknife sample labels
-    Npts = len(random_sample)
-    N_jsamples=10
-    jtags1 = np.sort(np.random.random_integers(1, N_jsamples, size=Npts))
-
-    #define weights
-    weights1 = np.random.random(Npts)
-
-    result = jnpairs(random_sample, random_sample, rbins, period=period,\
-                     jtags1=jtags1, jtags2=jtags1, N_samples=10,\
-                     weights1=weights1, weights2=weights1, num_threads=num_threads)
-
-    msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
-
-    # Now verify that when computing jackknife pairs on a regularly spaced grid,
-    # the counts in all subvolumes are identical
-
-    grid_result = jnpairs(grid_points, grid_points, rbins, period=period,
-        jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
-        num_threads=num_threads)
-
-    for icell in range(1, grid_jackknife_ncells**3-1):
-        assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
-
-
-def test_jnpairs_nonperiodic():
-    """
-    test jnpairs without periodic boundary conditions.
-    """
-
-    rbins = np.array([0.0,0.1,0.2,0.3])
-
-    #define the jackknife sample labels
-    Npts = len(random_sample)
-    N_jsamples=10
-    jtags1 = np.sort(np.random.random_integers(1, N_jsamples, size=Npts))
-
-    #define weights
-    weights1 = np.random.random(Npts)
-
-    result = jnpairs(random_sample, random_sample, rbins, period=None,\
-                     jtags1=jtags1, jtags2=jtags1, N_samples=10,\
-                     weights1=weights1, weights2=weights1, num_threads=num_threads)
-
-    msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
-
-    grid_result = jnpairs(grid_points, grid_points, rbins, period=None,
-        jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
-        num_threads=num_threads)
-
-    for icell in range(1, grid_jackknife_ncells**3-1):
-        assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
-
-
 
 
