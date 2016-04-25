@@ -12,7 +12,7 @@ from math import gamma
 from .clustering_helpers import _tpcf_one_two_halo_decomp_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .pair_counters import npairs_3d
-from .pair_counters.marked_double_tree_pairs import marked_npairs
+from .pair_counters import marked_npairs_3d
 from warnings import warn
 ##########################################################################################
 
@@ -148,7 +148,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.marked_npairs`.  
+    `~halotools.mock_observables.pair_counters.marked_npairs_3d`.  
     This pair counter is optimized to work on points distributed in a rectangular cuboid 
     volume, e.g. a simulation box.  This optimization restricts this function to work 
     on 3-D point distributions.
@@ -266,7 +266,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2):
+        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
         """
         Count weighted data pairs.
         """
@@ -276,9 +276,9 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         marks2 = np.vstack((marks2,np.ones(len(marks2)))).T
         
         if do_auto is True:
-            D1D1 = marked_npairs(sample1, sample1, rbins,
+            D1D1 = marked_npairs_3d(sample1, sample1, rbins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc, period=period, num_threads=num_threads)
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -289,15 +289,15 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = marked_npairs(sample1, sample2, rbins,
+                D1D2 = marked_npairs_3d(sample1, sample2, rbins,
                     weights1=marks1, weights2=marks2,
-                    wfunc = wfunc, period=period, num_threads=num_threads)
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = marked_npairs(sample2, sample2, rbins,
+                D2D2 = marked_npairs_3d(sample2, sample2, rbins,
                     weights1=marks2, weights2=marks2,
-                    wfunc = wfunc, period=period, num_threads=num_threads)
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
         
@@ -317,18 +317,18 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         NR = N1
     
     #calculate 1-halo pairs
-    wfunc=3
+    weight_func_id=3
     one_halo_D1D1,one_halo_D1D2, one_halo_D2D2 =\
         marked_pair_counts(sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
-            sample2_host_halo_id, wfunc, _sample1_is_sample2)
+            sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
     
     #calculate 2-halo pairs 
-    wfunc=4
+    weight_func_id=4
     two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 =\
         marked_pair_counts(sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
-            sample2_host_halo_id, wfunc, _sample1_is_sample2)
+            sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
     
     #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
