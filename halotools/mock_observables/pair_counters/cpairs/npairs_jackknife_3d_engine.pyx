@@ -188,7 +188,7 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                         j_icell2 = jtags2[ifirst2:ilast2]
 
                         Nj = ilast2 - ifirst2
-                        #loop over points in cell1 points
+                        #loop over points in cell1
                         if Nj > 0:
                             for i in range(0,Ni):
                                 x1tmp = x_icell1[i] - x2shift
@@ -197,7 +197,7 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
 
                                 w1 = w_icell1[i]
                                 j1 = j_icell1[i]
-                                #loop over points in cell2 points
+                                #loop over points in cell2
                                 for j in range(0,Nj):
                                     #calculate the square distance
                                     dx = x1tmp - x_icell2[j]
