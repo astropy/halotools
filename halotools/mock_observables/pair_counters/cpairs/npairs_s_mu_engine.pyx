@@ -187,14 +187,14 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     #transform to s and mu
                                     s = np.sqrt(dz_sq + dxy_sq)
                                     if s!=0: 
-                                        mu = np.sqrt(dxy_sq)/s
+                                        mu = np.sqrt(dz_sq)/s
                                     else:
                                         mu=0.0
 
                                     k = num_s_bins-1
-                                    while s<=s_bins_squared[k]:
+                                    while s<=s_bins[k]:
                                         g = num_mu_bins-1
-                                        while mu<=mu_bins_squared[g]:
+                                        while mu<=mu_bins[g]:
                                             counts[k,g] += 1
                                             g=g-1
                                             if g<0: break
