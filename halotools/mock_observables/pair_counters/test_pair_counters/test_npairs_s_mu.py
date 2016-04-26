@@ -11,7 +11,7 @@ from ....mock_observables import npairs_3d
 import pytest
 slow = pytest.mark.slow
 
-__all__ = ('test_s_mu_npairs_periodic', 'test_s_mu_npairs_nonperiodic')
+__all__ = ('test_npairs_s_mu_periodic', 'test_npairs_s_mu_nonperiodic')
 
 # set up random points to test pair counters
 np.random.seed(1)
@@ -46,9 +46,9 @@ grid_indices = np.ravel_multi_index([ixx, iyy, izz],
     [grid_jackknife_ncells, grid_jackknife_ncells, grid_jackknife_ncells])
 grid_indices += 1
 
-def test_s_mu_npairs_periodic():
+def test_npairs_s_mu_periodic():
     """
-    test s_mu_npairs with periodic boundary conditions.
+    test npairs_s_mu with periodic boundary conditions.
     """
 
     s_bins = np.array([0.0,0.1,0.2,0.3])
@@ -72,9 +72,9 @@ def test_s_mu_npairs_periodic():
     assert np.all(result == test_result), msg
 
 
-def test_s_mu_npairs_nonperiodic():
+def test_npairs_s_mu_nonperiodic():
     """
-    test s_mu_npairs without periodic boundary conditions.
+    test npairs_s_mu without periodic boundary conditions.
     """
 
     s_bins = np.array([0.0,0.1,0.2,0.3])

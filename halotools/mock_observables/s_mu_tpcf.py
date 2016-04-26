@@ -11,7 +11,7 @@ import numpy as np
 
 from .clustering_helpers import _s_mu_tpcf_process_args
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .pair_counters.double_tree_pairs import s_mu_npairs
+from .pair_counters import npairs_s_mu
 ##########################################################################################
 
 
@@ -150,7 +150,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         \\mu = \\cos(\\theta_{\\rm LOS}) \\equiv r_{\\parallel}/s.
     
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.s_mu_npairs`.  This pair 
+    `~halotools.mock_observables.pair_counters.npairs_s_mu`.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
@@ -225,14 +225,14 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         #PBCs and randoms.
         if randoms is not None:
             if do_RR is True:
-                RR = s_mu_npairs(randoms, randoms, s_bins, mu_bins, period=period,
+                RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
                                  num_threads=num_threads,
                                  approx_cell1_size=approx_cellran_size,
                                  approx_cell2_size=approx_cellran_size)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
             if do_DR is True:
-                D1R = s_mu_npairs(sample1, randoms, s_bins, mu_bins, period=period,
+                D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
                                   num_threads=num_threads,
                                   approx_cell1_size=approx_cell1_size,
                                   approx_cell2_size=approx_cellran_size)
@@ -242,7 +242,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
                 D2R = None
             else:
                 if do_DR is True:
-                    D2R = s_mu_npairs(sample2, randoms, s_bins, mu_bins, period=period,
+                    D2R = npairs_s_mu(sample2, randoms, s_bins, mu_bins, period=period,
                                       num_threads=num_threads,
                                       approx_cell1_size=approx_cell2_size,
                                       approx_cell2_size=approx_cellran_size)
@@ -286,7 +286,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         Count data pairs.
         """
         if do_auto is True:
-            D1D1 = s_mu_npairs(sample1, sample1, s_bins, mu_bins, period=period, 
+            D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_bins, period=period, 
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell1_size)
@@ -300,14 +300,14 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = s_mu_npairs(sample1, sample2, s_bins, mu_bins, 
+                D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_bins, 
                     period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell1_size,
                     approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = s_mu_npairs(sample2, sample2, s_bins, mu_bins, period=period,
+                D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
                     num_threads=num_threads,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cell2_size)
