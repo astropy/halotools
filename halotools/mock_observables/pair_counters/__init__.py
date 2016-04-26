@@ -13,3 +13,4 @@ from .npairs_projected import npairs_projected
 from .npairs_xy_z import npairs_xy_z
 from .marked_npairs_3d import marked_npairs_3d
 from .npairs_jackknife_3d import npairs_jackknife_3d
+from .npairs_s_mu import npairs_s_mu
