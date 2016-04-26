@@ -117,8 +117,6 @@ def per_object_npairs(data1, data2, rbins, period=None,
     rmax = np.max(rbins)
 
     if verbose==True:
-        print("running double_tree_pairs.xy_z_npairs on {0} x {1}\n"
-              "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         start = time.time()
 
     ### Compute the estimates for the cell sizes
