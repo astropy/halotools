@@ -9,20 +9,17 @@ control flow on function arguments, bounds-checking and exception-handling.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from time import time
 from warnings import warn 
 from copy import copy 
-import sys
 import multiprocessing
-from functools import partial
 
-from ...custom_exceptions import *
+from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = (
-    ['_npairs_process_args', '_enclose_in_box', '_set_approximate_cell_sizes', 
-    '_jnpairs_process_weights_jtags', '_xy_z_npairs_process_args', '_set_approximate_xy_z_cell_sizes']
-    )
+__all__ = ('_npairs_process_args', '_enclose_in_box', '_set_approximate_cell_sizes', 
+    '_jnpairs_process_weights_jtags', '_xy_z_npairs_process_args', 
+    '_set_approximate_xy_z_cell_sizes')
+
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 def _npairs_process_args(data1, data2, rbins, period, 

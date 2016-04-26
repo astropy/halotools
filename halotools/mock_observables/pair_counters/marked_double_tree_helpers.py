@@ -214,7 +214,7 @@ def _velocity_marked_npairs_process_weights(data1, data2, weights1, weights2, wf
 
 def _func_signature_int_from_wfunc(wfunc):
     """
-    return the function signiture available weighting functions
+    return the function signature available weighting functions
     """
     
     if type(wfunc) != int:

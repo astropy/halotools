@@ -5,15 +5,21 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 cimport numpy as cnp
 cimport cython 
-from libc.math cimport ceil 
+from libc.math cimport ceil
+
+from .marking_functions cimport *
+from .custom_marking_func cimport custom_func
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
-__all__ = ('npairs_3d_engine', )
+__all__ = ('marked_npairs_3d_engine', )
+
+ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cell1_tuple):
+def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+    weights1in, weights2in, weight_func_idin, rbins, cell1_tuple):
     """ Cython engine for counting pairs of points as a function of three-dimensional separation. 
 
     Parameters 
@@ -26,6 +32,13 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
 
     x2in, y2in, z2in : arrays 
         Numpy arrays storing Cartesian coordinates of points in sample 2
+
+    weight_func_id : int, optional
+        weighting function integer ID. 
+
+    weights1in : array 
+
+    weights2in : array 
 
     rbins : array
         Boundaries defining the bins in which pairs are counted.
@@ -41,7 +54,12 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
         Integer array of length len(rbins) giving the number of pairs 
         separated by a distance less than the corresponding entry of ``rbins``. 
 
-    """    
+    """
+    cdef int weight_func_id = weight_func_idin
+
+    cdef f_type wfunc
+    wfunc = return_weighting_function(weight_func_id)
+
     cdef cnp.float64_t[:] rbins_squared = rbins*rbins
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
@@ -52,7 +70,7 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rbins = len(rbins)
-    cdef cnp.int64_t[:] counts = np.zeros(num_rbins, dtype=np.int64)
+    cdef cnp.float64_t[:] counts = np.zeros(num_rbins, dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
@@ -60,6 +78,8 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
     cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted])
     cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted])
     cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted])
+    cdef cnp.float64_t[:, :] weights1 = np.ascontiguousarray(weights1in[double_mesh.mesh1.idx_sorted,:])
+    cdef cnp.float64_t[:, :] weights2 = np.ascontiguousarray(weights2in[double_mesh.mesh2.idx_sorted,:])
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices)
@@ -91,20 +111,27 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
     cdef int num_y2_per_y1 = num_y2divs // num_y1divs
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
-    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq
+    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq, weight
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
     cdef int Ni, Nj, i, j, k, l
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
     cdef cnp.float64_t[:] y_icell1, y_icell2
     cdef cnp.float64_t[:] z_icell1, z_icell2
+    cdef cnp.float64_t[:,:] w_icell1, w_icell2
 
     for icell1 in range(first_cell1_element, last_cell1_element):
+
         ifirst1 = cell1_indices[icell1]
         ilast1 = cell1_indices[icell1+1]
+
+        #extract the points in cell1
         x_icell1 = x1[ifirst1:ilast1]
         y_icell1 = y1[ifirst1:ilast1]
         z_icell1 = z1[ifirst1:ilast1]
+
+        #extract the weights in cell1
+        w_icell1 = weights1[ifirst1:ilast1,:]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -155,9 +182,13 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
                         ifirst2 = cell2_indices[icell2]
                         ilast2 = cell2_indices[icell2+1]
 
+                        #extract the points in cell2
                         x_icell2 = x2[ifirst2:ilast2]
                         y_icell2 = y2[ifirst2:ilast2]
                         z_icell2 = z2[ifirst2:ilast2]
+
+                        #extract the weights in cell2
+                        w_icell2 = weights2[ifirst2:ilast2,:]
 
                         Nj = ilast2 - ifirst2
                         #loop over points in cell1 points
@@ -174,13 +205,42 @@ def npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins, cel
                                     dz = z1tmp - z_icell2[j]
                                     dsq = dx*dx + dy*dy + dz*dz
 
+                                    weight = wfunc(&w_icell1[i,0], &w_icell2[j,0])
                                     k = num_rbins-1
                                     while dsq <= rbins_squared[k]:
-                                        counts[k] += 1
+                                        counts[k] += weight
                                         k=k-1
                                         if k<0: break
                                         
     return np.array(counts)
 
 
-
+cdef f_type return_weighting_function(weight_func_id):
+    """
+    returns a pointer to the user-specified weighting function.
+    """
+    
+    if weight_func_id==0:
+        return custom_func
+    elif weight_func_id==1:
+        return mweights
+    elif weight_func_id==2:
+        return sweights
+    elif weight_func_id==3:
+        return eqweights
+    elif weight_func_id==4:
+        return ineqweights
+    elif weight_func_id==5:
+        return gweights
+    elif weight_func_id==6:
+        return lweights
+    elif weight_func_id==7:
+        return tgweights
+    elif weight_func_id==8:
+        return tlweights
+    elif weight_func_id==9:
+        return tweights
+    elif weight_func_id==10:
+        return exweights
+    else:
+        raise ValueError('marking function does not exist')
