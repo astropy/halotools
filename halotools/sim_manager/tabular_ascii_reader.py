@@ -556,8 +556,8 @@ class TabularAsciiReader(object):
                    "``chunk_memory_size``")
             raise ValueError(msg)
 
-        num_rows_in_chunk = num_data_rows // Nchunks
-        num_full_chunks = num_data_rows // num_rows_in_chunk
+        num_rows_in_chunk = int(num_data_rows // Nchunks)
+        num_full_chunks = int(num_data_rows // num_rows_in_chunk)
         num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk*Nchunks
 
         header_length = self.header_len()
