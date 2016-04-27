@@ -13,7 +13,7 @@ from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 from .pair_counters.double_tree_pair_matrix import conditional_pair_matrix
 from .pair_counters.double_tree_pair_matrix import conditional_xy_z_pair_matrix
 
-__all__=('spherical_isolation', 'cylindrical_isolation',
+__all__ = ('spherical_isolation', 'cylindrical_isolation',
     'conditional_spherical_isolation','conditional_cylindrical_isolation')
 __author__ = ['Duncan Campbell']
 
