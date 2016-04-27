@@ -8,10 +8,17 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
+from functools import partial 
+import multiprocessing 
 
+from .pair_counters.rectangular_mesh import RectangularDoubleMesh
 from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 from .pair_counters.double_tree_pair_matrix import conditional_pair_matrix
 from .pair_counters.double_tree_pair_matrix import conditional_xy_z_pair_matrix
+from .pair_counters.cpairs import spherical_isolation_engine
+from .pair_counters.mesh_helpers import (
+    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
+from ..utils.array_utils import convert_to_ndarray, custom_len
 
 __all__ = ('spherical_isolation', 'cylindrical_isolation',
     'conditional_spherical_isolation','conditional_cylindrical_isolation')
@@ -111,6 +118,120 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     is_isolated = np.in1d(inds, i, invert=True)
 
     return is_isolated
+
+def overhauled_spherical_isolation(sample1, sample2, r_max, period=None,
+    num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+    """
+    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
+    an input spherical volume centered at each point in ``sample1``.
+
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+
+    Parameters
+    ----------
+    sample1 : array_like
+        N1pts x 3 numpy array containing 3-D positions of points.
+    
+    sample2 : array_like
+        N2pts x 3 numpy array containing 3-D positions of points.
+    
+    r_max : float
+        size of sphere to search for neighbors
+    
+    period : array_like, optional
+        length 3 array defining axis-aligned periodic boundary conditions. If only
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
+    
+    num_threads : int, optional
+        number of 'threads' to use in the pair counting.  if set to 'max', use all 
+        available cores.  num_threads=0 is the default.
+    
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use *max(rbins)* in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+    
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details.
+    
+    Returns
+    -------
+    has_neighbor : numpy.array
+        array of booleans indicating if the point as a neighbor.
+    
+    Notes
+    -----
+    Points with zero seperation are considered a self-match, and do no count as neighbors.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    >>> r_max = 0.05
+    >>> is_isolated = overhauled_spherical_isolation(coords, coords, r_max, period=period)
+    """
+    ### Process the inputs with the helper function
+    result = _spherical_isolation_process_args(sample1, sample2, r_max, period,
+            num_threads, approx_cell1_size, approx_cell2_size)
+    x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
+    r_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    xperiod, yperiod, zperiod = period 
+
+    search_xlength, search_ylength, search_zlength = r_max, r_max, r_max 
+
+    ### Compute the estimates for the cell sizes
+    approx_cell1_size, approx_cell2_size = (
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
+        )
+    approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+    approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
+
+    # Build the rectangular mesh
+    double_mesh = RectangularDoubleMesh(x1in, y1in, z1in, x2in, y2in, z2in,
+        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
+        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
+        search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
+
+    # Create a function object that has a single argument, for parallelization purposes
+    engine = partial(spherical_isolation_engine, 
+        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
+        sample2[:,0], sample2[:,1], sample2[:,2], r_max)
+
+    # Calculate the cell1 indices that will be looped over by the engine
+    num_threads, cell1_tuples = _cell1_parallelization_indices(
+        double_mesh.mesh1.ncells, num_threads)
+
+    if num_threads > 1:
+        pool = multiprocessing.Pool(num_threads)
+        result = pool.map(engine, cell1_tuples)
+        counts = np.sum(np.array(result), axis=0)
+        pool.close()
+    else:
+        counts = engine(cell1_tuples[0])
 
 
 def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_threads=1,
@@ -584,4 +705,68 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     return is_isolated
     
+def _spherical_isolation_process_args(data1, data2, r_max, period, 
+    num_threads, approx_cell1_size, approx_cell2_size):
+    """
+    """
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if not isinstance(num_threads,int):
+            msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
+            raise ValueError(msg)
     
+    # Passively enforce that we are working with ndarrays
+    x1 = data1[:,0]
+    y1 = data1[:,1]
+    z1 = data1[:,2]
+    x2 = data2[:,0]
+    y2 = data2[:,1]
+    z2 = data2[:,2]
+        
+    # Set the boolean value for the PBCs variable
+    if period is None:
+        PBCs = False
+        x1, y1, z1, x2, y2, z2, period = (
+            _enclose_in_box(x1, y1, z1, x2, y2, z2, 
+                min_size=[r_max*3.0,r_max*3.0,r_max*3.0]))
+    else:
+        PBCs = True
+        period = convert_to_ndarray(period).astype(float)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise ValueError(msg)
+
+    try:
+        assert r_max < period[0]/3.
+        assert r_max < period[1]/3.
+        assert r_max < period[2]/3.
+    except AssertionError:
+        msg = ("Input ``r_max`` must be less than input period/3 in all dimensions.")
+        raise ValueError(msg)
+
+    if approx_cell1_size is None:
+        approx_cell1_size = [r_max, r_max, r_max]
+    elif custom_len(approx_cell1_size) == 1:
+        approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
+    if approx_cell2_size is None:    
+        approx_cell2_size = [r_max, r_max, r_max]
+    elif custom_len(approx_cell2_size) == 1:
+        approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
+        
+    return (x1, y1, z1, x2, y2, z2, 
+        r_max, period, num_threads, PBCs, 
+        approx_cell1_size, approx_cell2_size)
+
+
+
+
+
+
+
+
