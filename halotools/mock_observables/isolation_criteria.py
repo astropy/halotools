@@ -233,6 +233,8 @@ def overhauled_spherical_isolation(sample1, sample2, r_max, period=None,
     else:
         counts = engine(cell1_tuples[0])
 
+    return np.array(counts, dtype=bool)
+
 
 def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_threads=1,
                           approx_cell1_size=None, approx_cell2_size=None):

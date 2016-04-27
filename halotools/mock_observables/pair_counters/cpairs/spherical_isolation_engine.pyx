@@ -155,7 +155,7 @@ def spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
 
 
                                         
-    return np.array(has_neighbor)
+    return np.where(np.array(has_neighbor) == 1, 0, 1)
 
 
 
