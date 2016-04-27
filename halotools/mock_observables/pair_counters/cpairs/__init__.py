@@ -10,3 +10,4 @@ from .npairs_jackknife_3d_engine import npairs_jackknife_3d_engine
 from .npairs_s_mu_engine import npairs_s_mu_engine
 from .npairs_per_object_3d_engine import npairs_per_object_3d_engine
 from .spherical_isolation_engine import spherical_isolation_engine
+from .cylindrical_isolation_engine import cylindrical_isolation_engine
