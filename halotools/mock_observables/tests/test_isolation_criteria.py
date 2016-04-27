@@ -4,7 +4,7 @@ import numpy as np
 
 from ..isolation_criteria import (spherical_isolation, cylindrical_isolation,
     conditional_spherical_isolation,conditional_cylindrical_isolation, overhauled_spherical_isolation)
-from .cf_helpers import generate_locus_of_3d_points
+from .cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
 __all__ = ['test_spherical_isolation_criteria1']
 
@@ -31,6 +31,109 @@ def test_spherical_isolation_criteria3():
     assert np.all(iso == False)
     iso2 = overhauled_spherical_isolation(sample1, sample2, r_max)
     assert np.all(iso2 == True)
+
+def test_spherical_isolation_grid1():
+    sample1 = generate_3d_regular_mesh(5)
+    sample2 = generate_3d_regular_mesh(5)
+    r_max = 0.1
+
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max, period=1)
+    assert np.all(iso == False)
+
+    iso2 = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso2 == False)
+
+def test_spherical_isolation_grid2():
+    sample1 = generate_3d_regular_mesh(5)
+    sample2 = generate_3d_regular_mesh(10)
+
+    r_max = 0.001
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max, period=1)
+    assert np.all(iso == True)
+
+    r_max = 0.2
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max, period=1)
+    assert np.all(iso == False)
+
+    r_max = 0.001
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso == True)
+
+    r_max = 0.2
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso == False)
+
+def test_shifted_randoms():
+    npts = 1e3
+    sample1 = np.random.random((npts, 3))
+    epsilon = 0.001
+    sample2 = sample1 + epsilon
+
+    r_max = epsilon/10.
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso == True)
+
+    r_max = 2*epsilon
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso == False)
+
+def test_shifted_mesh():
+    npts = 1e3
+    sample1 = generate_3d_regular_mesh(10)
+    epsilon = 0.001
+    sample2 = sample1 + epsilon
+
+    r_max = epsilon/10.
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso == True)
+
+    r_max = 2*epsilon
+    iso = overhauled_spherical_isolation(sample1, sample2, r_max)
+    assert np.all(iso == False)
+
+# def test_mesh_plus_locus():
+#     sample2 = generate_3d_regular_mesh(5) # coords are 0.1, 0.3, 0.5, 0.7, 0.9
+#     npts2 = 100
+#     sample1a = sample2 + 0.05
+#     sample1b = generate_locus_of_3d_points(npts2, xc = 0.125, yc = 0.125, zc = 0.125)
+#     sample1 = np.concatenate((sample1a, sample1b))
+
+#     epsilon = 0.0001
+#     new = overhauled_spherical_isolation(sample1, sample2, epsilon, period=1)
+#     old = spherical_isolation(sample1, sample2, epsilon, period=1)
+#     assert np.all(old == new)
+
+#     epsilon = 0.1
+#     new = overhauled_spherical_isolation(sample1, sample2, epsilon, period=1)
+#     old = spherical_isolation(sample1, sample2, epsilon, period=1)
+#     assert np.all(old == new)
+
+
+# def test_comparison():
+#     npts = 40
+#     sample1 = np.random.random((npts, 3))
+#     sample2 = np.random.random((npts, 3))
+#     r_max = 0.1
+
+#     old = spherical_isolation(sample1, sample2, r_max)
+#     new = overhauled_spherical_isolation(sample1, sample2, r_max)
+#     mask = old != new
+
+#     old_disagrees = old[mask]
+#     new_disagrees = new[mask]
+
+#     print("Values of old_iso where there is disagreement") 
+#     print(old_disagrees)
+#     print("\n")
+#     print("Values of new_iso where there is disagreement") 
+#     print(new_disagrees)
+
+#     assert np.all(old == new)
+
+
+
+    # iso2 = overhauled_spherical_isolation(sample1, sample2, r_max)
+    # assert np.all(iso2 == False), "new method gives incorrect results for regular mesh" 
 
 # def test_cylindrical_isolation1():
 #     """ For two tight localizations of points right on top of each other, 
