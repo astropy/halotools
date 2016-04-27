@@ -5,17 +5,23 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 cimport numpy as cnp
 cimport cython 
-from libc.math cimport ceil 
+from libc.math cimport ceil
+
+from .marking_functions cimport *
+from .custom_marking_func cimport custom_func
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
-__all__ = ('npairs_xy_z_engine', )
+__all__ = ('marked_npairs_xy_z_engine', )
+
+ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
-    rp_bins, pi_bins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of projected separation. 
+def marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+    weights1in, weights2in, weight_func_idin, rp_bins, pi_bins, cell1_tuple):
+    """ Cython engine for counting pairs of points 
+    as a function of three-dimensional separation. 
 
     Parameters 
     ------------
@@ -28,13 +34,20 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     x2in, y2in, z2in : arrays 
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
+    weight_func_id : int, optional
+        weighting function integer ID. 
+
+    weights1in : array 
+
+    weights2in : array 
+
     rp_bins : array_like
         numpy array of boundaries defining the bins of separation in the xy-plane 
         :math:`r_{\\rm p}` in which pairs are counted.
 
     pi_bins : numpy.array
         array defining parallel seperation in which to sum the pair counts
- 
+
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in 
         double_mesh.mesh1 that will be looped over. Intended for use with 
@@ -46,7 +59,12 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         Integer array of length len(rp_bins) giving the number of pairs 
         separated by a distance less than the corresponding entry of ``rp_bins``. 
 
-    """    
+    """
+    cdef int weight_func_id = weight_func_idin
+
+    cdef f_type wfunc
+    wfunc = return_weighting_function(weight_func_id)
+
     cdef cnp.float64_t[:] rp_bins_squared = rp_bins*rp_bins
     cdef cnp.float64_t[:] pi_bins_squared = pi_bins*pi_bins
     cdef cnp.float64_t xperiod = double_mesh.xperiod
@@ -59,7 +77,7 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rp_bins = len(rp_bins)
     cdef int num_pi_bins = len(pi_bins)
-    cdef cnp.int64_t[:,:] counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.int64)
+    cdef cnp.float64_t[:,:] counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.int64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
@@ -67,6 +85,8 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted])
     cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted])
     cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted])
+    cdef cnp.float64_t[:, :] weights1 = np.ascontiguousarray(weights1in[double_mesh.mesh1.idx_sorted,:])
+    cdef cnp.float64_t[:, :] weights2 = np.ascontiguousarray(weights2in[double_mesh.mesh2.idx_sorted,:])
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices)
@@ -98,20 +118,27 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_y2_per_y1 = num_y2divs // num_y1divs
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
-    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq
+    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq, weight
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
-    cdef int Ni, Nj, i, j, k, l, g, max_k
+    cdef int Ni, Nj, i, j, k, l, g
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
     cdef cnp.float64_t[:] y_icell1, y_icell2
     cdef cnp.float64_t[:] z_icell1, z_icell2
+    cdef cnp.float64_t[:,:] w_icell1, w_icell2
 
     for icell1 in range(first_cell1_element, last_cell1_element):
+
         ifirst1 = cell1_indices[icell1]
         ilast1 = cell1_indices[icell1+1]
+
+        #extract the points in cell1
         x_icell1 = x1[ifirst1:ilast1]
         y_icell1 = y1[ifirst1:ilast1]
         z_icell1 = z1[ifirst1:ilast1]
+
+        #extract the weights in cell1
+        w_icell1 = weights1[ifirst1:ilast1,:]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -162,9 +189,13 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                         ifirst2 = cell2_indices[icell2]
                         ilast2 = cell2_indices[icell2+1]
 
+                        #extract the points in cell2
                         x_icell2 = x2[ifirst2:ilast2]
                         y_icell2 = y2[ifirst2:ilast2]
                         z_icell2 = z2[ifirst2:ilast2]
+
+                        #extract the weights in cell2
+                        w_icell2 = weights2[ifirst2:ilast2,:]
 
                         Nj = ilast2 - ifirst2
                         #loop over points in cell1 points
@@ -182,11 +213,12 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     dxy_sq = dx*dx + dy*dy
                                     dz_sq = dz*dz
 
+                                    weight = wfunc(&w_icell1[i,0], &w_icell2[j,0])
                                     k = num_rp_bins-1
                                     while dxy_sq<=rp_bins_squared[k]:
                                         g = num_pi_bins-1
                                         while dz_sq<=pi_bins_squared[g]:
-                                            counts[k,g] += 1
+                                            counts[k,g] += weight
                                             g=g-1
                                             if g<0: break
                                         k=k-1
@@ -195,4 +227,32 @@ def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     return np.array(counts)
 
 
-
+cdef f_type return_weighting_function(weight_func_id):
+    """
+    returns a pointer to the user-specified weighting function.
+    """
+    
+    if weight_func_id==0:
+        return custom_func
+    elif weight_func_id==1:
+        return mweights
+    elif weight_func_id==2:
+        return sweights
+    elif weight_func_id==3:
+        return eqweights
+    elif weight_func_id==4:
+        return ineqweights
+    elif weight_func_id==5:
+        return gweights
+    elif weight_func_id==6:
+        return lweights
+    elif weight_func_id==7:
+        return tgweights
+    elif weight_func_id==8:
+        return tlweights
+    elif weight_func_id==9:
+        return tweights
+    elif weight_func_id==10:
+        return exweights
+    else:
+        raise ValueError('marking function does not exist')
