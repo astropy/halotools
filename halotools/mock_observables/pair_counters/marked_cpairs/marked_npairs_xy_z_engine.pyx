@@ -77,7 +77,7 @@ def marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rp_bins = len(rp_bins)
     cdef int num_pi_bins = len(pi_bins)
-    cdef cnp.float64_t[:,:] counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.int64)
+    cdef cnp.float64_t[:,:] counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])

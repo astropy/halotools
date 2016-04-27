@@ -130,7 +130,7 @@ def marked_npairs_xy_z(data1, data2, rp_bins, pi_bins,
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(marked_npairs_xy_z_engine, double_mesh, 
         x1in, y1in, z1in, x2in, y2in, z2in, 
-        weights1, weights2, weight_func_id, rp_bins)
+        weights1, weights2, weight_func_id, rp_bins, pi_bins)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
