@@ -100,7 +100,7 @@ def test_large_scale_density_spherical_annulus_exception_handling():
 def test_large_scale_density_spherical_annulus1():
     """
     """
-    npts1, npts2 = 100, 200
+    npts1, npts2 = 10, 200
     sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     tracers = generate_locus_of_3d_points(npts2, xc=0.15, yc=0.1, zc=0.1)
     inner_radius, outer_radius = 0.04, 0.1
@@ -109,7 +109,7 @@ def test_large_scale_density_spherical_annulus1():
 
     environment_volume = (4/3.)*np.pi*(outer_radius**3 - inner_radius**3)
     correct_answer = 200/environment_volume
-    print(result[::10,0])
+    print(result)
     print(correct_answer)
     assert np.allclose(result, correct_answer, rtol=0.001)
 

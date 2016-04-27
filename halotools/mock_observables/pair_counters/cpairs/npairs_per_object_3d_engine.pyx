@@ -184,7 +184,7 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
 
                                 # update the outer counts
                                 for k in range(0, num_rbins):
-                                    outer_counts[i, k] = inner_counts[k]
+                                    outer_counts[ifirst1 + i, k] += inner_counts[k]
                                     inner_counts[k] = 0 #re-zero the inner counts
                                         
     return np.array(outer_counts)
