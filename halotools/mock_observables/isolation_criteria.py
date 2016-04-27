@@ -19,10 +19,10 @@ from .pair_counters.cpairs import spherical_isolation_engine
 from .pair_counters.mesh_helpers import (
     _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
 
-from .pair_counters.marked_npairs_3d import _marked_npairs_process_weights
 from .pair_counters.marked_cpairs import marked_spherical_isolation_engine
 
 from ..utils.array_utils import convert_to_ndarray, custom_len
+from ..custom_exceptions import HalotoolsError
 
 __all__ = ('spherical_isolation', 'cylindrical_isolation',
     'conditional_spherical_isolation','conditional_cylindrical_isolation')
@@ -704,8 +704,7 @@ def overhauled_conditional_spherical_isolation(sample1, sample2, r_max,
     search_xlength, search_ylength, search_zlength = r_max, r_max, r_max 
 
     # Process the input weights and with the helper function
-    marks1, marks2 = _marked_npairs_process_weights(sample1, sample2,
-            marks1, marks2, cond_func)
+    marks1, marks2 = _conditional_isolation_process_weights(sample1, sample2, marks1, marks2, cond_func)
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -988,7 +987,128 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
         approx_cell1_size, approx_cell2_size)
 
 
+def _conditional_isolation_process_weights(data1, data2, weights1, weights2, cond_func):
+    """
+    process weights and associated arguments for
+    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`
+    """
+    
+    correct_num_weights = _func_signature_int_from_cond_func(cond_func)
+    npts_data1 = np.shape(data1)[0]
+    npts_data2 = np.shape(data2)[0]
+    correct_shape1 = (npts_data1, correct_num_weights)
+    correct_shape2 = (npts_data2, correct_num_weights)
+    
+    ### Process the input weights1
+    _converted_to_2d_from_1d = False
+    # First convert weights1 into a 2-d ndarray
+    if weights1 is None:
+        weights1 = np.ones((npts_data1, 1), dtype = np.float64)
+    else:
+        weights1 = convert_to_ndarray(weights1)
+        weights1 = weights1.astype("float64")
+        if weights1.ndim == 1:
+            _converted_to_2d_from_1d = True
+            npts1 = len(weights1)
+            weights1 = weights1.reshape((npts1, 1))
+        elif weights1.ndim == 2:
+            pass
+        else:
+            ndim1 = weights1.ndim
+            msg = ("\n You must either pass in a 1-D or 2-D array \n"
+                   "for the input `weights1`. Instead, an array of \n"
+                   "dimension %i was received.")
+            raise HalotoolsError(msg % ndim1)
+    
+    npts_weights1 = np.shape(weights1)[0]
+    num_weights1 = np.shape(weights1)[1]
+    # At this point, weights1 is guaranteed to be a 2-d ndarray
+    ### now we check its shape
+    print(np.shape(weights1))
+    print(correct_shape1)
+    if np.shape(weights1) != correct_shape1:
+        if _converted_to_2d_from_1d is True:
+            msg = ("\n You passed in a 1-D array for `weights1` that \n"
+                   "does not have the correct length. The number of \n"
+                   "points in `data1` = %i, while the number of points \n"
+                   "in your input 1-D `weights1` array = %i")
+            raise HalotoolsError(msg % (npts_data1, npts_weights1))
+        else:
+            msg = ("\n You passed in a 2-D array for `weights1` that \n"
+                   "does not have a consistent shape with `data1`. \n"
+                   "`data1` has length %i. The input value of `cond_func` = %i \n"
+                   "For this value of `cond_func`, there should be %i weights \n"
+                   "per point. The shape of your input `weights1` is (%i, %i)\n")
+            raise HalotoolsError(msg % 
+                (npts_data1, cond_func, correct_num_weights, npts_weights1, num_weights1))
+    
+    ### Process the input weights2
+    _converted_to_2d_from_1d = False
+    # Now convert weights2 into a 2-d ndarray
+    if weights2 is None:
+        weights2 = np.ones((npts_data2, 1), dtype = np.float64)
+    else:
+        weights2 = convert_to_ndarray(weights2)
+        weights2 = weights2.astype("float64")
+        if weights2.ndim == 1:
+            _converted_to_2d_from_1d = True
+            npts2 = len(weights2)
+            weights2 = weights2.reshape((npts2, 1))
+        elif weights2.ndim == 2:
+            pass
+        else:
+            ndim2 = weights2.ndim
+            msg = ("\n You must either pass in a 1-D or 2-D array \n"
+                   "for the input `weights2`. Instead, an array of \n"
+                   "dimension %i was received.")
+            raise HalotoolsError(msg % ndim2)
+    
+    npts_weights2 = np.shape(weights2)[0]
+    num_weights2 = np.shape(weights2)[1]
+    # At this point, weights2 is guaranteed to be a 2-d ndarray
+    ### now we check its shape
+    if np.shape(weights2) != correct_shape2:
+        if _converted_to_2d_from_1d is True:
+            msg = ("\n You passed in a 1-D array for `weights2` that \n"
+                   "does not have the correct length. The number of \n"
+                   "points in `data2` = %i, while the number of points \n"
+                   "in your input 1-D `weights2` array = %i")
+            raise HalotoolsError(msg % (npts_data2, npts_weights2))
+        else:
+            msg = ("\n You passed in a 2-D array for `weights2` that \n"
+                   "does not have a consistent shape with `data2`. \n"
+                   "`data2` has length %i. The input value of `cond_func` = %i \n"
+                   "For this value of `cond_func`, there should be %i weights \n"
+                   "per point. The shape of your input `weights2` is (%i, %i)\n")
+            raise HalotoolsError(msg % 
+                (npts_data2, cond_func, correct_num_weights, npts_weights2, num_weights2))
+    
+    return weights1, weights2
 
+def _func_signature_int_from_cond_func(cond_func):
+    """
+    Return the function signature available weighting functions. 
+    """
+    
+    if type(cond_func) != int:
+        msg = "\n cond_func parameter must be an integer ID of a weighting function."
+        raise ValueError(msg)
+    
+    if cond_func == 1:
+        return 1
+    elif cond_func == 2:
+        return 1
+    elif cond_func == 3:
+        return 1
+    elif cond_func == 4:
+        return 1
+    elif cond_func == 5:
+        return 2
+    elif cond_func == 6:
+        return 2
+    else:
+        msg = ("The value ``cond_func`` = %i is not recognized")
+        raise HalotoolsError(msg % cond_func)
 
 
 
