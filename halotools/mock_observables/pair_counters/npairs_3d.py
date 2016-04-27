@@ -149,7 +149,7 @@ def npairs_3d(data1, data2, rbins, period = None,
     else:
         counts = engine(cell1_tuples[0])
 
-    return np.array(counts, dtype=bool)
+    return np.array(counts)
 
 def _npairs_3d_process_args(data1, data2, rbins, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
