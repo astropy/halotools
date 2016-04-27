@@ -22,8 +22,7 @@ ctypedef double (*f_type)(np.float64_t* w1, np.float64_t* w2, np.float64_t* shif
 ctypedef void (*ff_type)(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift, double *result1, double *result2, double *result3)
 
 __author__ = ['Duncan Campbell']
-__all__ = ('xy_z_marked_npairs_no_pbc', 
-  'velocity_marked_npairs_no_pbc', 'xy_z_velocity_marked_npairs_no_pbc')
+__all__ = ('velocity_marked_npairs_no_pbc', 'xy_z_velocity_marked_npairs_no_pbc')
 
 
 #############################
@@ -34,155 +33,17 @@ __all__ = ('xy_z_marked_npairs_no_pbc',
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def xy_z_marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                              np.ndarray[np.float64_t, ndim=1] y_icell1,
-                              np.ndarray[np.float64_t, ndim=1] z_icell1,
-                              np.ndarray[np.float64_t, ndim=1] x_icell2,
-                              np.ndarray[np.float64_t, ndim=1] y_icell2,
-                              np.ndarray[np.float64_t, ndim=1] z_icell2,
-                              np.ndarray[np.float64_t, ndim=2] w_icell1,
-                              np.ndarray[np.float64_t, ndim=2] w_icell2,
-                              np.ndarray[np.float64_t, ndim=1] rp_bins,
-                              np.ndarray[np.float64_t, ndim=1] pi_bins,
-                              np.int_t weight_func_id,
-                              np.ndarray[np.float64_t, ndim=1] shift
-                             ):
-    """    
-    Calculate the number of weighted pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.
-    
-    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
-    
-    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
-    account for the PBC.
-    
-    Parameters
-    ----------
-    x_icell1 : numpy.array
-         array of x positions of lenght N1 (data1)
-    
-    y_icell1 : numpy.array
-         array of y positions of lenght N1 (data1)
-    
-    z_icell1 : numpy.array
-         array of z positions of lenght N1 (data1)
-    
-    x_icell2 : numpy.array
-         array of x positions of lenght N2 (data2)
-    
-    y_icell2 : numpy.array
-         array of y positions of lenght N2 (data2)
-    
-    z_icell2 : numpy.array
-         array of z positions of lenght N2 (data2)
-    
-    w_icell1 : numpy.ndarray
-        2-D array of weights of length N1 and depth >=1 (dependent on wfunc)
-    
-    w_icell2 : numpy.ndarray
-        2-D array of weights of length N2 and depth >=1 (dependent on wfunc)
-    
-    rp_bins : numpy.array
-        array defining projected seperation in which to sum the pair counts
-    
-    pi_bins : numpy.array
-        array defining parallel seperation in which to sum the pair counts
-    
-    weight_func_id : int
-        integer ID of weighting function to use.
-    
-    shift : numpy.array
-         Length-3 vector indicating the amount the points in data2 have been shifted in 
-         each dimension to faciliate the use with PBCs (usually 0.0 or +-Lbox).
-    
-    Returns
-    -------
-    result :  numpy.array
-        2-D array of weighted pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
-        The exact values depend on ``weight_func_id`` 
-        (which weighting function was chosen).
-    
-    Examples
-    --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    unit cube. 
-    
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
-    
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
-    
-    >>> weights = np.random.random(Npts)
-    
-    Count the number of weighted pairs that can be formed amongst these random points:
-    
-    >>> rp_bins = np.linspace(0,0.25,10)
-    >>> pi_bins = np.linspace(0,0.5,10)
-    >>> shift = np.array([0.0,0.0,0.0])
-    >>> counts = xy_z_marked_npairs_no_pbc(x,y,z,x,y,z,rp_bins,pi_bins,weights,weights,1,shift)
-    """
-    
-    #c definitions
-    cdef int nrp_bins = len(rp_bins)
-    cdef int npi_bins = len(pi_bins)
-    cdef int nrp_bins_minus_one = len(rp_bins) -1
-    cdef int npi_bins_minus_one = len(pi_bins) -1
-    cdef int n_weights1 = np.shape(w_icell1)[1]
-    cdef int n_weights2 = np.shape(w_icell2)[1]
-    cdef np.ndarray[np.float64_t, ndim=2] counts =\
-        np.zeros((nrp_bins, npi_bins), dtype=np.float64)
-    cdef double d_perp, d_para
-    cdef int i, j
-    cdef int Ni = len(x_icell1)
-    cdef int Nj = len(x_icell2)
-    cdef f_type wfunc
-    
-    #square the distance bins to avoid taking a square root in a tight loop
-    rp_bins = rp_bins**2
-    pi_bins = pi_bins**2
-    
-    #choose weighting function
-    wfunc = return_weighting_function(weight_func_id)
-    
-    #loop over points in grid1's cell
-    for i in range(0,Ni):
-        
-        #loop over points in grid2's cell
-        for j in range(0,Nj):
-            
-            #calculate the square distance
-            d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
-                                          x_icell2[j], y_icell2[j])
-            d_para = para_square_distance(z_icell1[i], z_icell2[j])
-            
-            xy_z_wbinning(<np.float64_t*>counts.data,\
-                          <np.float64_t*>rp_bins.data,\
-                          <np.float64_t*>pi_bins.data,
-                          d_perp, d_para,\
-                          nrp_bins_minus_one, npi_bins_minus_one,\
-                          &w_icell1[i,0],&w_icell2[j,0],\
-                          <f_type>wfunc, <np.float64_t*>shift.data)
-    
-    return counts
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
 def velocity_marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] y_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] z_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] x_icell2,
-                                  np.ndarray[np.float64_t, ndim=1] y_icell2,
-                                  np.ndarray[np.float64_t, ndim=1] z_icell2,
-                                  np.ndarray[np.float64_t, ndim=2] w_icell1,
-                                  np.ndarray[np.float64_t, ndim=2] w_icell2,
-                                  np.ndarray[np.float64_t, ndim=1] rbins,
-                                  np.int_t weight_func_id,
-                                  np.ndarray[np.float64_t, ndim=1] shift
-                                  ):
+    np.ndarray[np.float64_t, ndim=1] y_icell1,
+    np.ndarray[np.float64_t, ndim=1] z_icell1,
+    np.ndarray[np.float64_t, ndim=1] x_icell2,
+    np.ndarray[np.float64_t, ndim=1] y_icell2,
+    np.ndarray[np.float64_t, ndim=1] z_icell2,
+    np.ndarray[np.float64_t, ndim=2] w_icell1,
+    np.ndarray[np.float64_t, ndim=2] w_icell2,
+    np.ndarray[np.float64_t, ndim=1] rbins,
+    np.int_t weight_func_id,
+    np.ndarray[np.float64_t, ndim=1] shift):
     """
     Calculate the number of velocity weighted pairs with seperations greater than or equal to r, :math:`W(>r)`.
     
@@ -310,18 +171,17 @@ def velocity_marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
 @cython.wraparound(False)
 @cython.nonecheck(False)
 def xy_z_velocity_marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                                       np.ndarray[np.float64_t, ndim=1] y_icell1,
-                                       np.ndarray[np.float64_t, ndim=1] z_icell1,
-                                       np.ndarray[np.float64_t, ndim=1] x_icell2,
-                                       np.ndarray[np.float64_t, ndim=1] y_icell2,
-                                       np.ndarray[np.float64_t, ndim=1] z_icell2,
-                                       np.ndarray[np.float64_t, ndim=2] w_icell1,
-                                       np.ndarray[np.float64_t, ndim=2] w_icell2,
-                                       np.ndarray[np.float64_t, ndim=1] rp_bins,
-                                       np.ndarray[np.float64_t, ndim=1] pi_bins,
-                                       np.int_t weight_func_id,
-                                       np.ndarray[np.float64_t, ndim=1] shift
-                                       ):
+    np.ndarray[np.float64_t, ndim=1] y_icell1,
+    np.ndarray[np.float64_t, ndim=1] z_icell1,
+    np.ndarray[np.float64_t, ndim=1] x_icell2,
+    np.ndarray[np.float64_t, ndim=1] y_icell2,
+    np.ndarray[np.float64_t, ndim=1] z_icell2,
+    np.ndarray[np.float64_t, ndim=2] w_icell1,
+    np.ndarray[np.float64_t, ndim=2] w_icell2,
+    np.ndarray[np.float64_t, ndim=1] rp_bins,
+    np.ndarray[np.float64_t, ndim=1] pi_bins,
+    np.int_t weight_func_id,
+    np.ndarray[np.float64_t, ndim=1] shift):
     """
     Calculate the number of velocity weighted pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.
     
