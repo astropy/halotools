@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function,
 ####import modules########################################################################
 import numpy as np
 
-from .pair_counters.double_tree_per_object_pairs import per_object_npairs
+from .pair_counters import npairs_per_object_3d
 from .large_scale_density_helpers import _large_scale_density_spherical_volume_process_args
 from .large_scale_density_helpers import _large_scale_density_spherical_annulus_process_args
 ##########################################################################################
@@ -99,7 +99,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
             sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = per_object_npairs(sample, tracers, rbins, period = period,
+    _ = npairs_per_object_3d(sample, tracers, rbins, period = period,
         num_threads = num_threads, approx_cell1_size = approx_cell1_size)
     result = _[:,0]
 
@@ -191,7 +191,7 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
             period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = per_object_npairs(sample, tracers, rbins, period = period,
+    _ = npairs_per_object_3d(sample, tracers, rbins, period = period,
         num_threads = num_threads, approx_cell1_size = approx_cell1_size)
     result = np.diff(_, axis=1)
 
