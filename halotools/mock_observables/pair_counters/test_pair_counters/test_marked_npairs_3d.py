@@ -124,9 +124,7 @@ def test_marked_npairs_3d_wfuncs_signatures():
 
     # Now loop over all all available weight_func_id indices
     for wfunc_index in range(1, num_wfuncs):
-        print("Working on wfunc_index = %i" % wfunc_index)
         signature = _func_signature_int_from_wfunc(wfunc_index)
-        print("Signature = %i" % signature)
         weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
         result = marked_npairs_3d(random_sample, random_sample, rbins, period=period,
             weights1=weights, weights2=weights, weight_func_id=wfunc_index,
