@@ -11,11 +11,9 @@ import numpy as np
 
 from astropy.extern.six.moves import xrange as range
 
-from .pair_counters.double_tree_per_object_pairs import *
-from ..custom_exceptions import *
+from .pair_counters import npairs_per_object_3d
 
-from ..utils import convert_to_ndarray
-from .void_stats_helpers import *
+from .void_stats_helpers import _underdensity_prob_func_process_args, _void_prob_func_process_args
 ##########################################################################################
 
 
@@ -132,10 +130,10 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         _void_prob_func_process_args(sample1, rbins, n_ran, random_sphere_centers,
             period, num_threads, approx_cell1_size, approx_cellran_size))
 
-    result = per_object_npairs(random_sphere_centers, sample1, rbins, period = period,\
-                              num_threads = num_threads,\
-                              approx_cell1_size = approx_cell1_size,\
-                              approx_cell2_size = approx_cellran_size)
+    result = npairs_per_object_3d(random_sphere_centers, sample1, rbins, 
+        period = period, num_threads = num_threads, 
+        approx_cell1_size = approx_cell1_size, 
+        approx_cell2_size = approx_cellran_size)
 
     num_empty_spheres = np.array(
         [sum(result[:,i] == 0) for i in range(result.shape[1])])
@@ -257,10 +255,10 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
             period, sample_volume, u,
             num_threads, approx_cell1_size, approx_cellran_size))
 
-    result = per_object_npairs(random_sphere_centers, sample1, rbins, period = period,\
-                               num_threads = num_threads,\
-                               approx_cell1_size = approx_cell1_size,\
-                               approx_cell2_size = approx_cellran_size)
+    result = npairs_per_object_3d(random_sphere_centers, sample1, rbins, 
+        period = period, num_threads = num_threads, 
+        approx_cell1_size = approx_cell1_size,
+        approx_cell2_size = approx_cellran_size)
 
     # calculate the number of galaxies as a
     # function of r that corresponds to the
