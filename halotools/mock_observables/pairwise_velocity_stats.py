@@ -370,16 +370,16 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        wfunc, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1, S1S1, N1N1 = velocity_marked_npairs(
+            D1D1, S1S1, N1N1 = velocity_marked_npairs_3d(
                 sample1, sample1, rbins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc,
+                weight_func_id = weight_func_id,
                 period=period, num_threads=num_threads,
                 approx_cell1_size = approx_cell1_size,
                 approx_cell2_size = approx_cell1_size)
@@ -403,10 +403,10 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
             S2S2 = S1S1
         else:
             if do_cross==True:
-                D1D2, S1S2, N1N2 = velocity_marked_npairs(
+                D1D2, S1S2, N1N2 = velocity_marked_npairs_3d(
                     sample1, sample2, rbins,
                     weights1=marks1, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell1_size,
                     approx_cell2_size = approx_cell2_size)
@@ -418,9 +418,9 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
                 N1N2=None
                 S1S2=None
             if do_auto is True:
-                D2D2, S2S2, N2N2 = velocity_marked_npairs(sample2, sample2, rbins,
+                D2D2, S2S2, N2N2 = velocity_marked_npairs_3d(sample2, sample2, rbins,
                     weights1=marks2, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell2_size,
                     approx_cell2_size = approx_cell2_size)
@@ -433,11 +433,11 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
     
-    wfunc = 13
+    weight_func_id = 13
     V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross,
-        marks1, marks2, wfunc,
+        marks1, marks2, weight_func_id,
         _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
     
