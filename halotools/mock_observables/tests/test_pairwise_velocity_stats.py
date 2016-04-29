@@ -2,9 +2,9 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np 
 from astropy.tests.helper import pytest
-from ...custom_exceptions import HalotoolsError
 
-from ..pairwise_velocity_stats import *
+from ..pairwise_velocity_stats import (mean_radial_velocity_vs_r, radial_pvd_vs_r, 
+    mean_los_velocity_vs_rp, los_pvd_vs_rp)
 from .cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_radial_velocity_vs_r_auto_consistency', 
