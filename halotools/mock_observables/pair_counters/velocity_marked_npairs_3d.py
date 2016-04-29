@@ -140,18 +140,15 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine, cell1_tuples)
-        counts1, counts2, counts3 = (result[:,0],result[:,1],result[:,2])
+        result = np.array(pool.map(engine, cell1_tuples))
+        counts1, counts2, counts3 = result[:,0], result[:,1], result[:,2]
         counts1 = np.sum(counts1,axis=0)
         counts2 = np.sum(counts2,axis=0)
         counts3 = np.sum(counts3,axis=0)
         pool.close()
     else:
-        result = engine(cell1_tuples[0])
-        counts1, counts2, counts3 = (result[:,0],result[:,1],result[:,2])
-        counts1 = np.sum(counts1,axis=0)
-        counts2 = np.sum(counts2,axis=0)
-        counts3 = np.sum(counts3,axis=0)
+        result = np.array(engine(cell1_tuples[0]))
+        counts1, counts2, counts3 = result[:,0], result[:,1], result[:,2]
 
     return counts1, counts2, counts3
 
