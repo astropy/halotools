@@ -150,10 +150,14 @@ def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
                                     dxy_sq = dx*dx + dy*dy
                                     dz_sq = dz*dz
                                     
-                                    if (dxy_sq < rp_max_squared) & (dz_sq < pi_max_squared):
-                                        has_neighbor[current_data1_index] = 1
+                                    if (dxy_sq < rp_max_squared) & (dz_sq < pi_max_squared) & ((dz_sq + dxy_sq)>0.0):
+                                    
+                                        has_neighbor[ifirst1+i] = 1
                                         break
     
-    return np.where(np.array(has_neighbor) == 1, 0, 1)
+    new_has_neighbor = np.array(has_neighbor)
+    new_has_neighbor = new_has_neighbor[double_mesh.mesh1.idx_sorted]
+    is_isolated = np.where(new_has_neighbor == 1, 0, 1)
     
+    return is_isolated
     

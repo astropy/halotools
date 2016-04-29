@@ -207,11 +207,15 @@ def marked_cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
                                     
                                     weight = wfunc(&w_icell1[i,0], &w_icell2[j,0])
                                     
-                                    if (dxy_sq < rp_max_squared) & (dz_sq < pi_max_squared) & (weight == 1):
-                                        has_neighbor[current_data1_index] = 1
+                                    if (dxy_sq < rp_max_squared) & (dz_sq < pi_max_squared) & (weight == 1) & ((dz_sq + dxy_sq)>0.0):
+                                        has_neighbor[ifirst1+i] = 1
                                         break 
     
-    return np.where(np.array(has_neighbor) == 1, 0, 1)
+    new_has_neighbor = np.array(has_neighbor)
+    new_has_neighbor = new_has_neighbor[double_mesh.mesh1.idx_sorted]
+    is_isolated = np.where(new_has_neighbor == 1, 0, 1)
+    
+    return is_isolated
 
 
 cdef f_type return_conditional_function(cond_func_id):
