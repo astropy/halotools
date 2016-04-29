@@ -6,6 +6,8 @@ import numpy as np
 cimport numpy as cnp
 cimport cython 
 from libc.math cimport ceil
+from .isolation_criteria_marking_functions cimport (gt_cond, lt_cond, 
+    eq_cond, neq_cond, lg_cond, tg_cond)
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('marked_cylindrical_isolation_engine', )
@@ -211,55 +213,6 @@ def marked_cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
     
     return np.where(np.array(has_neighbor) == 1, 0, 1)
 
-
-### conditional functions ###
-cdef bint gt_cond(cnp.float64_t* w1, cnp.float64_t* w2):
-    """
-    1
-    """
-    cdef bint result
-    result = (w1[0]>w2[0])
-    return result
-
-cdef bint lt_cond(cnp.float64_t* w1, cnp.float64_t* w2):
-    """
-    2
-    """
-    cdef bint result
-    result = (w1[0]<w2[0])
-    return result
-
-cdef bint eq_cond(cnp.float64_t* w1, cnp.float64_t* w2):
-    """
-    3
-    """
-    cdef bint result
-    result = (w1[0]==w2[0])
-    return result
-
-cdef bint neq_cond(cnp.float64_t* w1, cnp.float64_t* w2):
-    """
-    4
-    """
-    cdef bint result
-    result = (w1[0]!=w2[0])
-    return result
-
-cdef bint tg_cond(cnp.float64_t* w1, cnp.float64_t* w2):
-    """
-    5
-    """
-    cdef bint result
-    result = (w1[0]>(w2[0]+w1[1]))
-    return result
-
-cdef bint lg_cond(cnp.float64_t* w1, cnp.float64_t* w2):
-    """
-    6
-    """
-    cdef bint result
-    result = (w1[0]<(w2[0]+w1[1]))
-    return result
 
 cdef f_type return_conditional_function(cond_func_id):
     """
