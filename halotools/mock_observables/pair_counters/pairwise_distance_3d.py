@@ -12,6 +12,7 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_3d_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
+from scipy.sparse import coo_matrix
 
 __all__ = ('pairwise_distance_3d', )
 
@@ -136,10 +137,9 @@ def pairwise_distance_3d(data1, data2, rmax, period = None,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        result = np.sum(np.array(result), axis=0)
         pool.close()
     else:
-        result = engine(cell1_tuples[0])
+        result = [engine(cell1_tuples[0])]
     
     #unpack result
     d = np.zeros((0,), dtype='float')
@@ -151,10 +151,6 @@ def pairwise_distance_3d(data1, data2, rmax, period = None,
         d = np.append(d,result[i][0])
         i_inds = np.append(i_inds,result[i][1])
         j_inds = np.append(j_inds,result[i][2])
-    
-    #re-sort the result (it was sorted to make in continuous over the cell structure)
-    i_inds = double_tree.tree1.idx_sorted[i_inds]
-    j_inds = double_tree.tree2.idx_sorted[j_inds]
     
     return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 

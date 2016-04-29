@@ -12,6 +12,7 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_xy_z_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
+from scipy.sparse import coo_matrix
 
 __all__ = ('pairwise_distance_xy_z', )
 
@@ -85,7 +86,8 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     
     >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
     >>> period = [Lbox, Lbox, Lbox]
-    >>> rmax = 1.0
+    >>> rp_max = 1.0
+    >>> pi_max = 2.0
     
     >>> x1 = np.random.uniform(0, Lbox, Npts1)
     >>> y1 = np.random.uniform(0, Lbox, Npts1)
@@ -101,7 +103,7 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     >>> data1 = np.vstack([x1, y1, z1]).T
     >>> data2 = np.vstack([x2, y2, z2]).T
     
-    >>> dist_matrix = pairwise_distance_xy_z(data1, data2, rmax, period = period)
+    >>> perp_dist_matrix, para_dist_matrix = pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = period)
     
     """
     
@@ -139,10 +141,9 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        result = np.sum(np.array(result), axis=0)
         pool.close()
     else:
-        result = engine(cell1_tuples[0])
+        result = [engine(cell1_tuples[0])]
     
     #unpack result
     d_perp = np.zeros((0,), dtype='float')
@@ -156,10 +157,6 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
         d_para = np.append(d_para,result[i][1])
         i_inds = np.append(i_inds,result[i][2])
         j_inds = np.append(j_inds,result[i][3])
-    
-    #re-sort the result (it was sorted to make in continuous over the cell structure)
-    i_inds = double_tree.tree1.idx_sorted[i_inds]
-    j_inds = double_tree.tree2.idx_sorted[j_inds]
     
     return coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))), coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 

@@ -12,3 +12,4 @@ from .npairs_per_object_3d_engine import npairs_per_object_3d_engine
 from .spherical_isolation_engine import spherical_isolation_engine
 from .cylindrical_isolation_engine import cylindrical_isolation_engine
 from .pairwise_distance_3d_engine import pairwise_distance_3d_engine
+from .pairwise_distance_xy_z_engine import pairwise_distance_xy_z_engine

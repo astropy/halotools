@@ -188,5 +188,11 @@ def pairwise_distance_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                         distances.push_back(dsq)
                                         i_ind.push_back(ifirst1 + i)
                                         j_ind.push_back(ifirst2 + j)
-                                        
-    return (np.sqrt(distances).astype(float), np.array(i_ind).astype(int), np.array(j_ind).astype(int))
+    
+    #input points were sorted.  return the indices of the unsorted arrays
+    i_ind = np.array(i_ind).astype(int)
+    i_ind = double_mesh.mesh1.idx_sorted[i_ind]
+    j_ind = np.array(j_ind).astype(int)
+    j_ind = double_mesh.mesh2.idx_sorted[j_ind]
+    
+    return (np.sqrt(distances).astype(float), i_ind, j_ind)
