@@ -454,20 +454,23 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     #return results
     if _sample1_is_sample2:
         sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-        return sigma_11
+        return np.where(np.isfinite(sigma_11), sigma_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True): 
             sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
             sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
             sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
-            return sigma_11, sigma_12, sigma_22
+            return (np.where(np.isfinite(sigma_11), sigma_11, 0.), 
+            np.where(np.isfinite(sigma_12), sigma_12, 0.), 
+            np.where(np.isfinite(sigma_22), sigma_22, 0.))
         elif (do_cross is True):
             sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
-            return sigma_12
+            return np.where(np.isfinite(sigma_12), sigma_12, 0.)
         elif (do_auto is True):
             sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
             sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
-            return sigma_11, sigma_22
+            return (np.where(np.isfinite(sigma_11), sigma_11, 0.), 
+                np.where(np.isfinite(sigma_22), sigma_22, 0.))
 
 
 def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
