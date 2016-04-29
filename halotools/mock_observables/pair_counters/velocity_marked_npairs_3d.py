@@ -151,23 +151,6 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
 
     return counts1, counts2, counts3
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _velocity_marked_npairs_3d_process_weights(data1, data2, weights1, weights2, weight_func_id):
     """
     process weights and associated arguments for

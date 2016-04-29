@@ -7,8 +7,7 @@ Calculate pairwise velocity statistics.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from .pair_counters.marked_double_tree_pairs import (
-    velocity_marked_npairs, xy_z_velocity_marked_npairs)
+from .pair_counters.marked_double_tree_pairs import xy_z_velocity_marked_npairs
 from .pairwise_velocity_helpers import (_pairwise_velocity_stats_process_args, 
     _process_radial_bins, _process_rp_bins)
 
