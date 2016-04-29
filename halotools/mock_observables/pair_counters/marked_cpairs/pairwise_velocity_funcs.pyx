@@ -61,8 +61,8 @@ cdef void relative_radial_velocity_weights(np.float64_t* w1,
     
     #if shift[i]<0 or shift[i]>0 return -1, else return 1
     cdef float xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
-    cdef float yshift = -1.0*(shift[1]!=0.0) + (shift[0]==0.0)
-    cdef float zshift = -1.0*(shift[2]!=0.0) + (shift[0]==0.0)
+    cdef float yshift = -1.0*(shift[1]!=0.0) + (shift[1]==0.0)
+    cdef float zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
     
     cdef float dvx, dvy, dvz, result
     

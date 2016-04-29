@@ -113,7 +113,9 @@ def velocity_marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq, weight
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
-    cdef cnp.float64_t holder1, holder2, holder3 
+    cdef cnp.float64_t holder1 = 0.
+    cdef cnp.float64_t holder2 = 0.
+    cdef cnp.float64_t holder3 = 0.
     cdef int Ni, Nj, i, j, k, l
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -215,12 +217,12 @@ def velocity_marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
                                     while dsq <= rbins_squared[k]:
                                         counts1[k] += holder1
                                         counts2[k] += holder2
-                                        counts3[k] += 1
+                                        counts3[k] += holder3
                                         k=k-1
                                         if k<0: break
                                         
     return np.array(counts1), np.array(counts2), np.array(counts3)
-
+    
 
 cdef f_type return_velocity_weighting_function(weight_func_id):
     """

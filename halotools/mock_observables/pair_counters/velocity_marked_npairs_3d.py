@@ -147,8 +147,7 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
         counts3 = np.sum(counts3,axis=0)
         pool.close()
     else:
-        result = np.array(engine(cell1_tuples[0]))
-        counts1, counts2, counts3 = result[:,0], result[:,1], result[:,2]
+        counts1, counts2, counts3  = np.array(engine(cell1_tuples[0]))
 
     return counts1, counts2, counts3
 

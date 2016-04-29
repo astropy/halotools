@@ -319,14 +319,17 @@ def test_mean_radial_velocity_vs_r_parallel1():
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
 
     rbins = np.array([0, 0.1, 0.3])
-    s1s1_serial, s1s2_serial, s2s2_serial = mean_radial_velocity_vs_r(sample1, velocities1, rbins, 
-        sample2 = sample2, velocities2 = velocities2, num_threads = 1)
 
     s1s1_parallel, s1s2_parallel, s2s2_parallel = mean_radial_velocity_vs_r(sample1, velocities1, rbins, 
-        sample2 = sample2, velocities2 = velocities2, num_threads = 2)
+        sample2 = sample2, velocities2 = velocities2, num_threads = 2, period=1)
 
-    assert np.allclose(s1s1_serial, s1s1_parallel, rtol = 0.0001)
-    assert np.allclose(s1s2_serial, s1s2_parallel, rtol = 0.0001)
-    assert np.allclose(s2s2_serial, s2s2_parallel, rtol = 0.0001)
+    s1s1_serial, s1s2_serial, s2s2_serial = mean_radial_velocity_vs_r(sample1, velocities1, rbins, 
+        sample2 = sample2, velocities2 = velocities2, num_threads = 1, period=1)
+
+    assert np.all(s1s1_serial[np.isfinite(s1s1_serial)] == s1s1_parallel[np.isfinite(s1s1_parallel)])
+    assert np.all(s1s2_serial[np.isfinite(s1s2_serial)] == s1s2_parallel[np.isfinite(s1s2_parallel)])
+    assert np.all(s2s2_serial[np.isfinite(s2s2_serial)] == s2s2_parallel[np.isfinite(s2s2_parallel)])
+
+
 
 

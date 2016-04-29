@@ -61,8 +61,8 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
     
     #if shift[i]<0 or shift[i]>0 return -1, else return 1
     cdef cnp.float64_t xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
-    cdef cnp.float64_t yshift = -1.0*(shift[1]!=0.0) + (shift[0]==0.0)
-    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[0]==0.0)
+    cdef cnp.float64_t yshift = -1.0*(shift[1]!=0.0) + (shift[1]==0.0)
+    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
     
     cdef cnp.float64_t dvx, dvy, dvz, result
     
