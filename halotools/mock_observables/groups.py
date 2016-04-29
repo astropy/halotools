@@ -10,7 +10,8 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix
 from ..custom_exceptions import HalotoolsError
-from .pair_counters.double_tree_pair_matrix import xy_z_pair_matrix
+#from .pair_counters.double_tree_pair_matrix import xy_z_pair_matrix
+from .pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
 
 igraph_available=True
 try: import igraph
@@ -37,11 +38,12 @@ class FoFGroups(object):
         
         The first two dimensions (x, y) define the plane for perpendicular distances. 
         The third dimension (z) is used for line-of-sight distances.  
+        
         See the :ref:`mock_obs_pos_formatting` documentation page for 
         instructions on how to transform your coordinate position arrays into the 
         format accepted by the ``positions`` argument.   
         See also :ref:`galaxy_catalog_analysis_tutorial5`. 
-
+        
         Parameters
         ----------
         positions : array_like
@@ -123,7 +125,7 @@ class FoFGroups(object):
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
         self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
         
-        self.m_perp, self.m_para = xy_z_pair_matrix(
+        self.m_perp, self.m_para = pairwise_distance_xy_z(
             self.positions, self.positions, self.d_perp, self.d_para,
             period=self.period,num_threads=num_threads)
         
