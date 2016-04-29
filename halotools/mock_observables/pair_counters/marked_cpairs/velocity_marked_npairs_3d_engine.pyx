@@ -120,7 +120,7 @@ def velocity_marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
     cdef cnp.float64_t[:] y_icell1, y_icell2
     cdef cnp.float64_t[:] z_icell1, z_icell2
     cdef cnp.float64_t[:,:] w_icell1, w_icell2
-    cdef cnp.float64_t[:] shift
+    cdef cnp.float64_t[:] shift = np.zeros(3, dtype=np.float64)
 
     for icell1 in range(first_cell1_element, last_cell1_element):
 
