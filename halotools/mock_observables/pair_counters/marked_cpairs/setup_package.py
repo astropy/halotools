@@ -6,7 +6,10 @@ SOURCES = ("marked_cpairs.pyx", "weighting_functions.pyx",
     "custom_weighting_func.pyx",
     "pairwise_velocity_funcs.pyx","distances.pyx", 
     "conditional_pairwise_distances.pyx", "marked_npairs_3d_engine.pyx", 
-    "isolation_criteria_marking_functions.pyx")
+    "isolation_criteria_marking_functions.pyx", 
+    "velocity_marked_npairs_3d_engine.pyx", 
+    "velocity_marking_functions.pyx")
+
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
