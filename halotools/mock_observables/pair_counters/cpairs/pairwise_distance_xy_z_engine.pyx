@@ -30,10 +30,10 @@ def pairwise_distance_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
         Numpy arrays storing Cartesian coordinates of points in sample 2
     
     rp_max : array
-        maximum xy-projected seperation distance to search for and return pairs
+        maximum xy-projected separation distance to search for and return pairs
     
     pi_max : array
-        maximum z seperation distance to search for and return pairs
+        maximum z separation distance to search for and return pairs
     
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in 
