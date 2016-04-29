@@ -5,7 +5,8 @@ PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ("distances.pyx", "pairwise_distances.pyx",
     "npairs_3d_engine.pyx", "npairs_projected_engine.pyx", 
     "npairs_xy_z_engine.pyx", "npairs_jackknife_3d_engine.pyx", "npairs_s_mu_engine.pyx", 
-    "spherical_isolation_engine.pyx")
+    "spherical_isolation_engine.pyx","cylindrical_isolation_engine.pyx",
+    "pairwise_distance_3d_engine.pyx","pairwise_distance_xy_z_engine.pyx")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
