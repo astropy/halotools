@@ -17,3 +17,5 @@ from .npairs_per_object_3d import npairs_per_object_3d
 from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
 from .pairwise_distance_3d import pairwise_distance_3d
 from .pairwise_distance_xy_z import pairwise_distance_xy_z
+from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
+from .velocity_marked_npairs_xy_z import velocity_marked_npairs_xy_z
