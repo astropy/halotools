@@ -75,7 +75,7 @@ def npairs_s_mu(data1, data2, s_bins, mu_bins, period = None,
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree`
+        the `~halotools.mock_observables.pair_counters.RectangularDoubleMesh`
         will apportion the ``data`` points into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use 1/10 of the box size in each dimension,

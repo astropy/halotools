@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix
 from ..custom_exceptions import HalotoolsError
-#from .pair_counters.double_tree_pair_matrix import xy_z_pair_matrix
 from .pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
 
 igraph_available=True
