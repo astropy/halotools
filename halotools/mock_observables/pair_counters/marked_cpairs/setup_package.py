@@ -2,8 +2,7 @@ from distutils.extension import Extension
 import os
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ("weighting_functions.pyx", 
-    "custom_weighting_func.pyx",
+SOURCES = ("custom_weighting_func.pyx",
     "pairwise_velocity_funcs.pyx","distances.pyx", 
     "conditional_pairwise_distances.pyx", "marked_npairs_3d_engine.pyx", 
     "isolation_criteria_marking_functions.pyx", 
