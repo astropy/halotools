@@ -748,7 +748,7 @@ def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period,
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2, 
-                min_size=[r_max*3.0,r_max*3.0,r_max*3.0]))
+                min_size=[rp_max*3.0,rp_max*3.0,rp_max*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)
