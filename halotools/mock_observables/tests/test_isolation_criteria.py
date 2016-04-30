@@ -33,15 +33,24 @@ def test_spherical_isolation_criteria3():
     assert np.all(iso2 == True)
 
 def test_spherical_isolation_grid1():
-    sample1 = generate_3d_regular_mesh(5)
-    sample2 = generate_3d_regular_mesh(5)
+    """ Create a regular grid inside the unit box with points on each of the following 
+    nodes: 0.1, 0.3, 0.5, 0.7, 0.9. Demonstrate that all points in such a sample 
+    are isolated if r_max < 0.2, regardless of periodic boundary conditions. 
+    """
+    sample1 = generate_3d_regular_mesh(5) 
+
     r_max = 0.1
+    iso = spherical_isolation(sample1, sample1, r_max)
+    assert np.all(iso == True)
+    iso = spherical_isolation(sample1, sample1, r_max, period=1)
+    assert np.all(iso == True)
 
-    iso = spherical_isolation(sample1, sample2, r_max, period=1)
-    assert np.all(iso == False)
-
-    iso2 = spherical_isolation(sample1, sample2, r_max)
+    r_max = 0.25
+    iso2 = spherical_isolation(sample1, sample1, r_max)
     assert np.all(iso2 == False)
+    iso2 = spherical_isolation(sample1, sample1, r_max, period=1)
+    assert np.all(iso2 == False)
+
 
 def test_spherical_isolation_grid2():
     sample1 = generate_3d_regular_mesh(5)
