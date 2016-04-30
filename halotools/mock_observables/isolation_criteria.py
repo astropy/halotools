@@ -12,14 +12,12 @@ from functools import partial
 import multiprocessing 
 
 from .pair_counters.rectangular_mesh import RectangularDoubleMesh
-from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
-from .pair_counters.double_tree_pair_matrix import conditional_pair_matrix
-from .pair_counters.double_tree_pair_matrix import conditional_xy_z_pair_matrix
 from .pair_counters.cpairs import spherical_isolation_engine, cylindrical_isolation_engine
 from .pair_counters.mesh_helpers import (
     _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
 
-from .pair_counters.marked_cpairs import marked_spherical_isolation_engine, marked_cylindrical_isolation_engine
+from .pair_counters.marked_cpairs import (
+    marked_spherical_isolation_engine, marked_cylindrical_isolation_engine)
 
 from ..utils.array_utils import convert_to_ndarray, custom_len
 from ..custom_exceptions import HalotoolsError
