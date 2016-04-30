@@ -7,7 +7,6 @@ Calculate pairwise velocity statistics.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from .pair_counters.marked_double_tree_pairs import xy_z_velocity_marked_npairs
 from .pair_counters import velocity_marked_npairs_xy_z
 from .pairwise_velocity_helpers import (_pairwise_velocity_stats_process_args, 
     _process_radial_bins, _process_rp_bins)
@@ -560,7 +559,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     :math:`\\bar{v}_{z12}(r_p)` is the mean of this quantity in projected radial bins.
     
     Pairs and radial velocities are calculated using 
-    `~halotools.mock_observables.pair_counters.xy_z_velocity_marked_npairs`.
+    `~halotools.mock_observables.pair_counters.velocity_marked_npairs_xy_z`.
     
     Examples
     --------
@@ -769,7 +768,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     projected radial bins.
     
     Pairs and radial velocities are calculated using 
-    `~halotools.mock_observables.pair_counters.xy_z_velocity_marked_npairs`.
+    `~halotools.mock_observables.pair_counters.velocity_marked_npairs_xy_z`.
     
     Examples
     --------
