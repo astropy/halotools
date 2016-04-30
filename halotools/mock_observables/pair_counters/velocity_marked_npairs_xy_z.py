@@ -109,10 +109,10 @@ def velocity_marked_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=None,
         of pairs. The exact values depend on ``weight_func_id``
         (which weighting function was chosen).
     """
-    result = _npairs_xy_z_process_args(data1, data2, rp_bins, period,
+    result = _npairs_xy_z_process_args(data1, data2, rp_bins, pi_bins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rp_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
 
     rmax = np.max(rp_bins)
@@ -139,7 +139,7 @@ def velocity_marked_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=None,
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(velocity_marked_npairs_xy_z_engine, double_mesh, 
         x1in, y1in, z1in, x2in, y2in, z2in, 
-        weights1, weights2, weight_func_id, rp_bins)
+        weights1, weights2, weight_func_id, rp_bins, pi_bins)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(

@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from .pair_counters.marked_double_tree_pairs import xy_z_velocity_marked_npairs
+from .pair_counters import velocity_marked_npairs_xy_z
 from .pairwise_velocity_helpers import (_pairwise_velocity_stats_process_args, 
     _process_radial_bins, _process_rp_bins)
 
@@ -608,16 +609,16 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        wfunc, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1, dummy, N1N1 = xy_z_velocity_marked_npairs(
+            D1D1, dummy, N1N1 = velocity_marked_npairs_xy_z(
                 sample1, sample1, rp_bins, pi_bins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc,
+                weight_func_id = weight_func_id,
                 period=period, num_threads=num_threads,
                 approx_cell1_size = approx_cell1_size,
                 approx_cell2_size = approx_cell1_size)
@@ -638,10 +639,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
             N2N2 = N1N1
         else:
             if do_cross is True:
-                D1D2, dummy, N1N2 = xy_z_velocity_marked_npairs(
+                D1D2, dummy, N1N2 = velocity_marked_npairs_xy_z(
                     sample1, sample2, rp_bins, pi_bins,
                     weights1=marks1, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell1_size,
                     approx_cell2_size = approx_cell2_size)
@@ -653,10 +654,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                 D1D2=None
                 N1N2=None
             if do_auto is True:
-                D2D2, dummy, N2N2 = xy_z_velocity_marked_npairs(
+                D2D2, dummy, N2N2 = velocity_marked_npairs_xy_z(
                     sample2, sample2, rp_bins, pi_bins,
                     weights1=marks2, weights2=marks2,
-                    wfunc = wfunc, period=period, num_threads=num_threads,
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell2_size,
                     approx_cell2_size = approx_cell2_size)
                 D2D2 = np.diff(D2D2,axis=1)[:,0]
@@ -671,11 +672,11 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     
     #count the sum of radial velocities and number of pairs
-    wfunc = 14
+    weight_func_id = 14
     V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 =\
         marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period,
             num_threads, do_auto, do_cross,
-            marks1, marks2, wfunc,_sample1_is_sample2,
+            marks1, marks2, weight_func_id,_sample1_is_sample2,
             approx_cell1_size, approx_cell2_size)
     
     #return results: the sum of radial velocities divided by the number of pairs
