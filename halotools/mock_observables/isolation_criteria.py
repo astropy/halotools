@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 """
-Functions used to determine whether 
-a set of points is isolated according to various criteria. 
+Module containing functions used to determine whether 
+a set of points are isolated according to various criteria.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from functools import partial 
@@ -22,12 +20,10 @@ from .pair_counters.marked_pair_counting_engines import (
 from ..utils.array_utils import convert_to_ndarray, custom_len
 from ..custom_exceptions import HalotoolsError
 
-__all__ = ('spherical_isolation', 
-           'cylindrical_isolation',
-           'conditional_spherical_isolation',
-           'conditional_cylindrical_isolation')
-__author__ = ['Duncan Campbell', 'Andrew Hearin']
+__all__ = ('spherical_isolation', 'cylindrical_isolation',
+    'conditional_spherical_isolation', 'conditional_cylindrical_isolation')
 
+__author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
@@ -54,44 +50,45 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         size of sphere to search for neighbors
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
     
     num_threads : int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  num_threads=0 is the default.
-    
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
+        
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-    
+
     approx_cell2_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details.
+        ``approx_cell1_size`` for details. 
     
     Returns
     -------
     is_isolated : numpy.array
         array of booleans indicating if the point is isolated.
-    
-    Notes
-    -----
-    Points with zero seperation are considered a self-match, and do no count as neighbors.
-    
+        
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    For demonstration purposes we create a randomly distributed set of points ``sample1``. 
+    We will use the `~halotools.mock_observables.spherical_isolation` function to determine 
+    which points in ``sample1`` are a distance ``r_max`` greater than all other points in the sample.
     
     >>> Npts = 1000
     >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> period = Lbox
     
     >>> x = np.random.random(Npts)
     >>> y = np.random.random(Npts)
@@ -101,10 +98,31 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
-    
+    >>> sample1 = np.vstack((x,y,z)).T
+
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
+    convenience function for this same purpose, which provides additional wrapper 
+    behavior around `numpy.vstack` such as placing points into redshift-space. 
+
+    Now we will call `spherical_isolation` with ``sample2`` set to ``sample1``:
+
     >>> r_max = 0.05
-    >>> is_isolated = spherical_isolation(coords, coords, r_max, period=period)
+    >>> is_isolated = spherical_isolation(sample1, sample1, r_max, period=period)
+
+    In the next example that follows, ``sample2`` will be a different set of points 
+    from ``sample1``, so we will determine which points in ``sample1`` are located 
+    greater than distance ``r_max`` away from all points in ``sample2``. 
+
+    >>> sample2 = np.random.random((Npts, 3))
+    >>> is_isolated = spherical_isolation(sample1, sample2, r_max, period=period)
+
+    Notes
+    -----
+    There is one edge-case of all the isolation criteria functions worthy of special mention. 
+    Suppose there exists a point *p* in ``sample1`` with the exact same spatial coordinates 
+    as one or more points in ``sample2``. The matching point(s) in ``sample2`` will **not** 
+    be considered neighbors of *p*. 
+
     """
     ### Process the inputs with the helper function
     result = _spherical_isolation_process_args(sample1, sample2, r_max, period,
@@ -172,61 +190,87 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         radius of the cylinder to seach for neighbors
     
     pi_max : float
-        half the length of the cylinder to seach for neighbors
+        half-length of the cylinder to seach for neighbors
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
     
     num_threads : int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  num_threads=0 is the default.
-    
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
+        
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-    
+
     approx_cell2_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details.
-    
+        ``approx_cell1_size`` for details. 
+        
     Returns
     -------
     is_isolated : numpy.array
         array of booleans indicating if the point is isolated.
-    
-    Notes
-    -----
-    Points with zero seperation are considered a self-match, and do not count as neighbors.
-    
+        
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    First we create a randomly distributed set of points ``sample1``, together with 
+    random z-velocities for those points. We will then place ``sample1`` into redshift-space 
+    using the `~halotools.mock_observables.return_xyz_formatted_array` function. 
+    We will use the `~halotools.mock_observables.cylindrical_isolation` function to determine 
+    which points in ``sample1`` have zero neighbors inside a cylinder of radius 
+    ``rp_max`` and half-length ``pi_max``. 
     
     >>> Npts = 1000
     >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
-    
+    >>> period = Lbox
     >>> x = np.random.random(Npts)
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
+    >>> vz = np.random.normal(loc = 0, scale = 100, size = Npts)
     
-    We transform our *x, y, z* points into the array shape used by the pair-counter by 
-    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
-    is used throughout the `~halotools.mock_observables` sub-package:
+    We place our points into redshift-space, formatting the result into the 
+    appropriately shaped array used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> from halotools.mock_observables import return_xyz_formatted_array
+    >>> sample1 = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = vz, velocity_distortion_dimension='z')
     
+    Now we will call `cylindrical_isolation` with ``sample2`` set to ``sample1``:
+
     >>> rp_max = 0.05
     >>> pi_max = 0.1
-    >>> is_isolated = cylindrical_isolation(coords, coords, rp_max, pi_max, period=period)
+    >>> is_isolated = cylindrical_isolation(sample1, sample1, rp_max, pi_max, period=period)
+
+    In the next example that follows, ``sample2`` will be a different set of points 
+    from ``sample1``, so we will determine which points in ``sample1`` 
+    have a neighbor in ``sample2`` located inside a cylinder of radius ``rp_max`` 
+    and half-length ``pi_max``. 
+
+    >>> x2 = np.random.random(Npts)
+    >>> y2 = np.random.random(Npts)
+    >>> z2 = np.random.random(Npts)
+    >>> vz2 = np.random.normal(loc = 0, scale = 100, size = Npts)
+    >>> sample2 = return_xyz_formatted_array(x2, y2, z2, period = Lbox, velocity = vz2, velocity_distortion_dimension='z')
+
+    >>> is_isolated = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=period)
+
+    Notes
+    -----
+    There is one edge-case of all the isolation criteria functions worthy of special mention. 
+    Suppose there exists a point *p* in ``sample1`` with the exact same spatial coordinates 
+    as one or more points in ``sample2``. The matching point(s) in ``sample2`` will **not** 
+    be considered neighbors of *p*. 
     """
     
     ### Process the inputs with the helper function
@@ -342,7 +386,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     
     Notes
     -----
-    Points with zero seperation are considered a self-match, and do not count as neighbors.
+    Points with zero separation are considered a self-match, and do not count as neighbors.
     
     There are multiple conditional functions available.  In general, each requires a 
     different number of marks per point, N_marks.  The conditional function gets passed 
@@ -565,7 +609,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     Notes
     -----
-    Points with zero seperation are considered a self-match, and do not count as neighbors.
+    Points with zero separation are considered a self-match, and do not count as neighbors.
     
     There are multiple conditional functions available.  In general, each requires a 
     different number of marks per point, N_marks.  The conditional function gets passed 
