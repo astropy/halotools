@@ -48,7 +48,8 @@ class FoFGroups(object):
         ----------
         positions : array_like
             Npts x 3 numpy array containing 3-D positions of galaxies. 
-        
+            Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
         b_perp : float
             Maximum linking length in the perpendicular direction, 
             normalized to the mean separation between galaxies. 
@@ -61,13 +62,14 @@ class FoFGroups(object):
             Length-3 sequence defining the periodic boundary conditions 
             in each dimension. If you instead provide a single scalar, Lbox, 
             period is assumed to be the same in all Cartesian directions. 
-        
+            Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
         Lbox : array_like, optional
             length 3 array defining boundaries of the simulation box.
         
         num_threads : int, optional
             Number of threads to use in calculation, where parallelization is performed 
-            using the python ``multiprocessing`` module. Default is 1 for a purely 
+            using the python ``multiprocessing`` module. Default is 1 for a purely serial 
             calculation, in which case a multiprocessing Pool object will 
             never be instantiated. A string 'max' may be used to indicate that 
             the pair counters should use all available cores on the machine.

@@ -156,11 +156,16 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
-    
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     rbins : array_like
-        array of boundaries defining the real space radial bins in which pairs are 
-        counted.
-    
+        array of boundaries defining the real space radial bins in which pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like, optional
         Npts x 3 array containing 3-D positions of points. 
         Passing ``sample2`` as an input permits the calculation of 
@@ -179,7 +184,8 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         period is assumed to be the same in all Cartesian directions. 
         If set to None (the default option), PBCs are set to infinity, 
         in which case ``randoms`` must be provided. 
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     do_auto : boolean, optional
         Boolean determines whether the auto-correlation function will 
         be calculated and returned. Default is True. 
@@ -196,7 +202,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
         calculation, in which case a multiprocessing Pool object will 
         never be instantiated. A string 'max' may be used to indicate that 
         the pair counters should use all available cores on the machine.

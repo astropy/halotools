@@ -43,21 +43,25 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-    
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
     
     r_max : float
         size of sphere to search for neighbors
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
         calculation, in which case a multiprocessing Pool object will 
         never be instantiated. A string 'max' may be used to indicate that 
         the pair counters should use all available cores on the machine.
@@ -184,21 +188,26 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-    
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
     
     rp_max : float
         radius of the cylinder to seach for neighbors
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     pi_max : float
         half-length of the cylinder to seach for neighbors
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 
@@ -341,13 +350,15 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
     
     r_max : float
         size of sphere to search for neighbors
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     marks1 : array_like
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
@@ -368,7 +379,8 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 
@@ -593,16 +605,20 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-    
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
     
     rp_max : float
         radius of the cylinder to seach for neighbors
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     pi_max : float
         half the length of the cylinder to seach for neighbors
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     marks1 : array_like
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
@@ -623,7 +639,8 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 

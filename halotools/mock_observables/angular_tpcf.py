@@ -67,7 +67,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
         calculation, in which case a multiprocessing Pool object will 
         never be instantiated. A string 'max' may be used to indicate that 
         the pair counters should use all available cores on the machine.

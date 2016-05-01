@@ -38,25 +38,30 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     ----------
     galaxies : array_like
         Ngal x 3 numpy array containing 3-d positions of galaxies.
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     particles : array_like
         Npart x 3 numpy array containing 3-d positions of particles.
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     rp_bins : array_like
         array of projected radial boundaries defining the bins in which the result is 
         calculated.  The minimum of rp_bins must be > 0.0.
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     pi_max: float
         maximum integration parameter, :math:`\\pi_{\\rm max}` 
         (see notes for more details).
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
         If set to None (the default option), PBCs are set to infinity, 
         in which case ``randoms`` must be provided. 
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     log_bins : boolean, optional
         integration parameter (see notes for more details).
     
@@ -70,7 +75,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
         calculation, in which case a multiprocessing Pool object will 
         never be instantiated. A string 'max' may be used to indicate that 
         the pair counters should use all available cores on the machine.
