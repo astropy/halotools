@@ -665,7 +665,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance greater than (N_marks = 1)
+    #. tolerance greater than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -675,7 +675,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance less than (N_marks = 1)
+    #. tolerance less than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
