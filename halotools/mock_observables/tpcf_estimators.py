@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """
 private functions related to estimating the two point correltion function.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 __all__ = ['_TP_estimator', '_list_estimators', '_TP_estimator_requirements']
-__author__=['Duncan Campbell']
+__author__ = ['Duncan Campbell']
 
 import numpy as np
 
