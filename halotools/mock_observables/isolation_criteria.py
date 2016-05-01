@@ -12,7 +12,7 @@ from functools import partial
 import multiprocessing 
 
 from .pair_counters.rectangular_mesh import RectangularDoubleMesh
-from .pair_counters.cpairs import spherical_isolation_engine, cylindrical_isolation_engine
+from .pair_counters.pair_counting_engines import spherical_isolation_engine, cylindrical_isolation_engine
 from .pair_counters.mesh_helpers import (
     _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
 
