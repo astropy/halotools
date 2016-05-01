@@ -34,14 +34,15 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
     an input spherical volume centered at each point in ``sample1``.
 
-    See the :ref:`mock_obs_pos_formatting` documentation page for 
-    instructions on how to transform your coordinate position arrays into the 
-    format accepted by the ``sample1`` and ``sample2`` arguments.   
-
     Parameters
     ----------
     sample1 : array_like
         N1pts x 3 numpy array containing 3-D positions of points.
+        
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
     
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
@@ -173,15 +174,16 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     """
     Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
     an input cylindrical volume centered at each point in ``sample1``.
-    
-    See the :ref:`mock_obs_pos_formatting` documentation page for 
-    instructions on how to transform your coordinate position arrays into the 
-    format accepted by the ``sample1`` and ``sample2`` arguments.   
-    
+        
     Parameters
     ----------
     sample1 : array_like
         N1pts x 3 numpy array containing 3-D positions of points.
+
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
     
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
@@ -321,7 +323,8 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     marks1, marks2, cond_func, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
-    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2``, 
+    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
+    an input spherical volume centered at each point in ``sample1``, 
     where various additional conditions may be applied to judge whether a matching point 
     is considered to be a neighbor. For example, 
     `conditional_spherical_isolation` can be used to identify galaxies as isolated 
@@ -334,6 +337,10 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     ----------
     sample1 : array_like
         N1pts x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
     
     sample2 : array_like
         N2pts x 3 numpy array containing 3-D positions of points.
@@ -356,29 +363,33 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     cond_func : int
         Integer ID indicating which conditional function should be used.  See notes for a 
         list of available conditional functions.
-    
+        
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
     
     num_threads : int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  num_threads=0 is the default.
-    
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
+        
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-    
+
     approx_cell2_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details.
-    
+        ``approx_cell1_size`` for details. 
+        
     Returns
     -------
     is_isolated : numpy.array
@@ -386,19 +397,22 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     
     Notes
     -----
-    Points with zero separation are considered a self-match, and do not count as neighbors.
-    
+    The `~halotools.mock_observables.conditional_spherical_isolation` function only differs 
+    from the `~halotools.mock_observables.spherical_isolation` function in the treatment of 
+    the input marks. In order for a point *p2* in ``sample2`` with mark :math:`w_{2}` 
+    to be considered a neighbor of a point *p1* in ``sample1`` with mark :math:`w_{1}`, 
+    two following conditions must be met:
+
+    #. *p2* must lie within a distance ``r_max`` of *p1*, and 
+
+    #. the input conditional marking function :math:`f(w_{1}, w_{2})` must return *True*.  
+
     There are multiple conditional functions available.  In general, each requires a 
     different number of marks per point, N_marks.  The conditional function gets passed 
-    two arrays per pair, w1 and w2, of length N_marks and return a float.  
+    two arrays per pair, *w1* and *w2*, of length N_marks and return a boolean.  
     You can pass in more than one piece of information about each point by choosing a 
     the input ``marks`` arrays to be multi-dimensional of shape (N_points, N_marks). 
-    
-    One point is considered to be a neighbor of another 
-    if it lies within the enclosing sphere *and* 
-    if the conditional function ``cond_func`` evaluates as True 
-    when operating on the input ``marks`` data for that pair of points. 
-    
+        
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:
     
@@ -464,30 +478,41 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
-    
+    In this first example, we will show how to calculate the following notion of 
+    galaxy isolation. A galaxy is isolated if there are zero other *more massive* 
+    galaxies within 5 Mpc. 
+
+    First we create a random distribution of points inside the unit box: 
+
     >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
-    
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> Lbox = 250.
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
     
-    Create random weights:
+    Now we will choose random stellar masses for our galaxies:
     
-    >>> marks = np.random.random(Npts)
+    >>> stellar_mass = np.random.uniform(1e10, 1e12, Npts)
+
+    Referring to the Notes above for the definitions of the conditional marking functions, 
+    we see that for this particular isolation criteria the appropriate ``cond_func`` is 1. 
     
-    >>> r_max = 0.05
+    >>> r_max = 5.0
     >>> cond_func = 1
-    >>> is_isolated = conditional_spherical_isolation(coords, coords, r_max, marks, marks, cond_func, period=period)
+
+    Since we are interested in whether a point in ``sample1`` is isolated from other points 
+    in ``sample1``, we set ``sample2`` to ``sample1`` and both ``marks1`` and ``marks2`` 
+    equal to ``stellar_mass``. 
+
+    >>> is_isolated = conditional_spherical_isolation(sample1, sample1, r_max, stellar_mass, stellar_mass, cond_func, period=250)
+
+    
     """
     ### Process the inputs with the helper function
     result = _spherical_isolation_process_args(sample1, sample2, r_max, period,
