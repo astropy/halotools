@@ -1,23 +1,19 @@
-# -*- coding: utf-8 -*-
-
 """
-functions to measure void statistics
+Module containing the `~halotools.mock_observables.void_prob_func` 
+and `~halotools.mock_observables.underdensity_prob_func` used to calculate void statistics. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-####import modules########################################################################
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 
 from astropy.extern.six.moves import xrange as range
 
 from .pair_counters import npairs_per_object_3d
-
 from .void_stats_helpers import _underdensity_prob_func_process_args, _void_prob_func_process_args
-##########################################################################################
 
 
-__all__=['void_prob_func', 'underdensity_prob_func']
+__all__ = ['void_prob_func', 'underdensity_prob_func']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
@@ -41,13 +37,16 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
-        See `~halotools.mock_observables.return_xyz_formatted_array` for
-        a convenience function that can be used to transform a set of x, y, z
-        1d arrays into the required form.
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     rbins : float
         size of spheres to search for neighbors
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     n_ran : int, optional
         integer number of randoms to use to search for voids.
@@ -59,30 +58,35 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         is not passed, ``n_ran`` must be passed.
 
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If set to None, PBCs are set to infinity. Even in this case, it is still necessary
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None, PBCs are set to infinity. In this case, it is still necessary
         to drop down randomly placed spheres in order to compute the VPF. To do so,
         the spheres will be dropped inside a cubical box whose sides are defined by
         the smallest/largest coordinate distance of the input ``sample1``.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     num_threads : int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all
-        available cores.  num_threads=0 is the default.
-
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
+    
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
 
-    approx_cellran_size : array_like, optional
-        Analogous to ``approx_cell1_size``, but for used for randoms.  See comments for
-        ``approx_cell1_size`` for details.
+    approx_cellran_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns
     -------
@@ -158,13 +162,16 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
-        See `~halotools.mock_observables.return_xyz_formatted_array` for
-        a convenience function that can be used to transform a set of x, y, z
-        1d arrays into the required form.
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     rbins : float
         size of spheres to search for neighbors
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     n_ran : int, optional
         integer number of randoms to use to search for voids.
@@ -176,15 +183,20 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
         is not passed, ``n_ran`` must be passed.
 
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If set to None, PBCs are set to infinity. Even in this case, it is still necessary
-        to drop down randomly placed spheres in order to compute the VPF. To do so,
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None, PBCs are set to infinity, in which case ``sample_volume`` 
+        must be specified so that the global mean density can be estimated. 
+        In this case, it is still necessary
+        to drop down randomly placed spheres in order to compute the UPF. To do so,
         the spheres will be dropped inside a cubical box whose sides are defined by
         the smallest/largest coordinate distance of the input ``sample1``.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     sample_volume : float, optional
         If period is set to None, you must specify the effective volume of the sample.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     u : float, optional
         density threshold in units of the mean object density
