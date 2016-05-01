@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
 """
-calculate the galaxy-galaxy lensing signal.
+Module containing the `~halotools.mock_observables.delta_sigma` function used to 
+calculate galaxy-galaxy lensing. 
 """
 import numpy as np
-from .tpcf import tpcf
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
-from .clustering_helpers import _delta_sigma_process_args
-from ..custom_exceptions import HalotoolsError
 from warnings import warn
 
+from .tpcf import tpcf
+from .clustering_helpers import _delta_sigma_process_args
 
-__all__=['delta_sigma']
+from ..custom_exceptions import HalotoolsError
+
+__all__ = ['delta_sigma']
 __author__ = ['Duncan Campbell']
 
 
@@ -39,7 +40,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         Ngal x 3 numpy array containing 3-d positions of galaxies.
     
     particles : array_like
-        Npart x 3 numpy array containing 3-d positions of partciles.
+        Npart x 3 numpy array containing 3-d positions of particles.
     
     rp_bins : array_like
         array of projected radial boundaries defining the bins in which the result is 
@@ -49,9 +50,12 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         maximum integration parameter, :math:`\\pi_{\\rm max}` 
         (see notes for more details).
     
-    period : array_like
-        Length-3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
+    period : array_like, optional
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
     
     log_bins : boolean, optional
         integration parameter (see notes for more details).
@@ -60,25 +64,29 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         integration parameter (see notes for more details).
     
     estimator : string, optional
-        The estimator used to caclulate the galaxy-matter cross correlation.
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
-    
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
+
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
         
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-    
+
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for ``particles``.  See comments for 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
     
     Returns 
