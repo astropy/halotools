@@ -37,7 +37,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     Parameters
     ----------
     sample1 : array_like
-        N1pts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
 
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
@@ -47,7 +47,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     sample2 : array_like
-        N2pts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 numpy array containing 3-D positions of points.
     
     r_max : float
         size of sphere to search for neighbors
@@ -182,7 +182,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     Parameters
     ----------
     sample1 : array_like
-        N1pts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
 
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
@@ -192,7 +192,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     sample2 : array_like
-        N2pts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 numpy array containing 3-D positions of points.
     
     rp_max : float
         radius of the cylinder to seach for neighbors
@@ -345,7 +345,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     Parameters
     ----------
     sample1 : array_like
-        N1pts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
@@ -353,7 +353,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     sample2 : array_like
-        N2pts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 numpy array containing 3-D positions of points.
     
     r_max : float
         size of sphere to search for neighbors
@@ -599,7 +599,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     Parameters
     ----------
     sample1 : array_like
-        N1pts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
 
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
@@ -609,7 +609,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     sample2 : array_like
-        N2pts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 numpy array containing 3-D positions of points.
     
     rp_max : float
         radius of the cylinder to seach for neighbors

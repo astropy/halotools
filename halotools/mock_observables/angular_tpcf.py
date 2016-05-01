@@ -37,17 +37,17 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 2 numpy array containing ra,dec positions of points in degrees.
+        Npts1 x 2 numpy array containing ra,dec positions of points in degrees.
     
     theta_bins : array_like
         array of boundaries defining the angular distance bins in which pairs are 
         counted.
     
     sample2 : array_like, optional
-        Npts x 2 array containing ra,dec positions of points in degrees.
+        Npts2 x 2 array containing ra,dec positions of points in degrees.
     
     randoms : array_like, optional
-        Npts x 2 array containing ra,dec positions of points in degrees.  If no randoms 
+        Nran x 2 array containing ra,dec positions of points in degrees.  If no randoms 
         are provided analytic randoms are used (only valid for for continuous all-sky 
         converage).
     

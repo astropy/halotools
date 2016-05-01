@@ -1,21 +1,19 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate the redshift space two point correltion function
+Module containing the `~halotools.mock_observables.rp_pi_tpcf` function used to 
+calculate the redshift-space two-point correlation function in 3d. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-####import modules########################################################################
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 from math import pi
+
 from .clustering_helpers import _rp_pi_tpcf_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .pair_counters import npairs_xy_z
-##########################################################################################
 
 
-__all__=['rp_pi_tpcf']
+__all__ = ['rp_pi_tpcf']
 __author__ = ['Duncan Campbell']
 
 
@@ -29,13 +27,13 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`
     
-    Calclulate the correlation function as a function of pair seperation perpendicular to 
-    the line-of-sight(LOS) and parallel to the LOS.
+    Calculate the correlation function as a function of pair separation perpendicular to 
+    the line-of-sight (LOS) and parallel to the LOS.
     
     The first two dimensions (x, y) define the plane for perpendicular distances. 
-    The third dimension (z) is used for parallel distances.  i.e. x,y positions are on 
-    the plane of the sky, and z is the radial distance coordinate.  This is the 'distant 
-    observer' approximation.
+    The third dimension (z) is used for parallel distances,  i.e. x,y positions are on 
+    the plane of the sky, and z is the radial distance coordinate.  
+    This is the 'distant observer' approximation.
     
     Example calls to this function appear in the documentation below. 
     See the :ref:`mock_obs_pos_formatting` documentation page for 
@@ -46,61 +44,86 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which 
         pairs are counted.
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     pi_bins : array_like
         array of boundaries defining the p radial bins parallel to the LOS in which 
         pairs are counted.
-    
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-D positions of points.  If no ``randoms`` are 
-        provided analytic randoms are used (only valid for periodic boundary conditions).
+        Nran x 3 array containing 3-D positions of randomly distributed points. 
+        If no randoms are provided (the default option), 
+        calculation of the tpcf can proceed using analytical randoms 
+        (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
-    
-    estimator : string, optional
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
-        do auto-correlation?
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
+    
+    estimator : string, optional
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
     
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        If sample size exceeds ``max_sample_size``, the sample will be randomly down-sampled 
-        such that the subsample is equal to ``max_sample_size``.
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
 
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
     
     approx_cellran_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for ``randoms``.  See comments for 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
         ``approx_cell1_size`` for details. 
 
     Returns 
@@ -132,16 +155,9 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.npairs_xy_z`.  This pair 
-    counter is optimized to work on points distributed in a rectangular cuboid volume, 
-    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
-    point distributions.
-    
-    If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
-    necessary, as the geometry is very simple, and the monte carlo integration that 
-    randoms are used for in complex geometries can be done analytically.
-    
-    If the ``period`` argument is passed in, all points' ith coordinate 
+    `~halotools.mock_observables.pair_counters.npairs_xy_z`.  
+        
+    If the ``period`` argument is passed in, the ith coordinate of all points
     must be between 0 and period[i].
     
     Examples
@@ -162,7 +178,11 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     is used throughout the `~halotools.mock_observables` sub-package:
     
     >>> coords = np.vstack((x,y,z)).T
-    
+
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
+    convenience function for this same purpose, which provides additional wrapper 
+    behavior around `numpy.vstack` such as placing points into redshift-space. 
+
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> pi_bins = np.logspace(-2,-1,10)
     >>> xi = rp_pi_tpcf(coords, rp_bins, pi_bins, period=period)

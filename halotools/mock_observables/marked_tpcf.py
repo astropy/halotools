@@ -33,7 +33,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
@@ -45,7 +45,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points. 
+        Npts2 x 3 array containing 3-D positions of points. 
         Passing ``sample2`` as an input permits the calculation of 
         the cross-correlation function. Default is None, in which case only the 
         auto-correlation function will be calculated. 

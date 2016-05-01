@@ -38,14 +38,14 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
     Parameters 
     ------------
     sample : array_like 
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample`` and ``tracers`` arguments.   
 
     tracers : array_like 
-        Npts x 3 numpy array containing 3-D positions of tracers.
+        Npts2 x 3 numpy array containing 3-D positions of tracers.
 
     radius : float 
         Radius of the sphere used to define the volume inside which the 
@@ -138,14 +138,14 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
     Parameters 
     ------------
     sample : array_like 
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample`` and ``tracers`` arguments.   
 
     tracers : array_like 
-        Npts x 3 numpy array containing 3-D positions of tracers.
+        Npts2 x 3 numpy array containing 3-D positions of tracers.
 
     inner_radius, outer_radius : float, float
         Radii of the annulus used to define the volume inside which the 
