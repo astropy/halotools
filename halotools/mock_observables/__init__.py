@@ -3,7 +3,7 @@ used to make astronomical observations on
 mock galaxy populations, and also analyze halo catalogs 
 and other point data in periodic cubes. 
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import as _absolute_import
 
 from .tpcf import *
 from .tpcf_jackknife import *
