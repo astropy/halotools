@@ -247,14 +247,15 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         .. math::
             1 + \\xi(r) \\equiv \\mathrm{DD}(r) / \\mathrm{RR}(r),
         
-        if ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(r)` is the number
+        If ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(r)` is the number
         of sample pairs with separations equal to :math:`r`, calculated by the pair 
         counter.  :math:`\\mathrm{RR}(r)` is the number of random pairs with separations 
         equal to :math:`r`, and is counted internally using "analytic randoms" if 
         ``randoms`` is set to None (see notes for an explanation), otherwise it is 
         calculated using the pair counter.
         
-        If ``sample2`` is passed as input (and if ``sample2`` is not exactly the same as ``sample1``), 
+        If ``sample2`` is passed as input 
+        (and if ``sample2`` is not exactly the same as ``sample1``), 
         then three arrays of length *len(rbins)-1* are returned:
         
         .. math::

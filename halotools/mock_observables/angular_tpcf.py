@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate angular two point correlation functions.
+Module containing the `~halotools.mock_observables.angular_tpcf` function used to 
+calculate galaxy clustering as a function of angular separation. 
 """
 
-from __future__ import (
-    absolute_import, division, print_function,unicode_literals)
+from __future__ import absolute_import, division, print_function,unicode_literals
 
 import numpy as np
+from warnings import warn
+
 from .clustering_helpers import _angular_tpcf_process_args
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from ..utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesian
-from warnings import warn
 from .pair_counters import npairs_3d
+
+from ..utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesian
 
 __all__=['angular_tpcf']
 __author__ = ['Duncan Campbell']
@@ -48,26 +48,35 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     
     randoms : array_like, optional
         Npts x 2 array containing ra,dec positions of points in degrees.  If no randoms 
-        are provided analytic randoms are used (only valid for for continious all-sky 
-        converaeg).
+        are provided analytic randoms are used (only valid for for continuous all-sky 
+        converage).
     
     do_auto : boolean, optional
-        do auto-correlation(s)?
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
     
     estimator : string, optional
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
-    
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
+
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter. If 
-        sample size exeeds max_sample_size, the sample will be randomly down-sampled such
-        that the subsample is equal to ``max_sample_size``. 
+        Defines maximum size of the sample that will be passed to the pair counter. 
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
     Returns 
     -------
@@ -78,23 +87,24 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         .. math::
             1 + w(\\theta) \\equiv \\mathrm{DD}(\\theta) / \\mathrm{RR}(\\theta),
         
-        if ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(\\theta)` is the number
-        of sample pairs with seperations equal to :math:`\\theta`, calculated by the pair 
+        If ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(\\theta)` is the number
+        of sample pairs with separations equal to :math:`\\theta`, calculated by the pair 
         counter.  :math:`\\mathrm{RR}(\\theta)` is the number of random pairs with 
-        seperations equal to :math:`\\theta`, and is counted internally using 
+        separations equal to :math:`\\theta`, and is counted internally using 
         "analytic randoms" if ``randoms`` is set to None (see notes for an explanation), 
         otherwise it is calculated using the pair counter.
         
-        If ``sample2`` is passed as input (and not exactly the same as ``sample1``), 
-        three arrays of length *len(theta_bins)-1* are returned:
+        If ``sample2`` is passed as input 
+        (and if ``sample2`` is not exactly the same as ``sample1``), 
+        then three arrays of length *len(rbins)-1* are returned:
         
         .. math::
             w_{11}(\\theta), w_{12}(\\theta), w_{22}(\\theta),
         
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and 
-        ``sample2``, and the autocorrelation of ``sample2``, respectively. If 
-        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are 
-        returned.
+        ``sample2``, and the autocorrelation of ``sample2``, respectively. 
+        If ``do_auto`` or ``do_cross`` is set to False, 
+        the appropriate sequence of results is returned.
 
     Notes
     -----
@@ -112,8 +122,9 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     >>> theta_bins = np.logspace(-2,1,10)
     >>> w = angular_tpcf(angular_coords, theta_bins)
     
-    The result should be consistent with zero correlation at all *theta* within 
-    statistical errors
+    See also 
+    --------
+    :ref:`galaxy_catalog_analysis_tutorial9`
     """
     
     #check input arguments using clustering helper functions
