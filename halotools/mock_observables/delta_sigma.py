@@ -68,9 +68,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         to indicate that the pair counters should use all available cores on the machine.
         
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``galaxies`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 

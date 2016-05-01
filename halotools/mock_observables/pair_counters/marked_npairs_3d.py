@@ -170,8 +170,6 @@ def marked_npairs_3d(data1, data2, rbins,
 
 def _marked_npairs_process_weights(data1, data2, weights1, weights2, weight_func_id):
     """
-    process weights and associated arguments for
-    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`
     """
     
     correct_num_weights = _func_signature_int_from_wfunc(weight_func_id)

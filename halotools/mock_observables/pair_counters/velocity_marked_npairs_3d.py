@@ -153,8 +153,6 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
 
 def _velocity_marked_npairs_3d_process_weights(data1, data2, weights1, weights2, weight_func_id):
     """
-    process weights and associated arguments for
-    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.velocity_marked_npairs`
     """
     
     correct_num_weights = _func_signature_int_from_vel_weight_func_id(weight_func_id)

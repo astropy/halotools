@@ -70,16 +70,15 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         number of 'threads' to use in the pair counting.  if set to 'max', use all
         available cores.  num_threads=0 is the default.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree`
-        will apportion the ``sample1`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use *max(rbins)* in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use *max(rbins)* in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
     approx_cellran_size : array_like, optional
         Analogous to ``approx_cell1_size``, but for used for randoms.  See comments for
@@ -194,16 +193,15 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
         number of 'threads' to use in the pair counting.  if set to 'max', use all
         available cores.  num_threads=0 is the default.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree`
-        will apportion the ``sample1`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use *max(rbins)* in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use *max(rbins)* in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
     approx_cellran_size : array_like, optional
         Analogous to ``approx_cell1_size``, but for used for randoms.  See comments for

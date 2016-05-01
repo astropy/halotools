@@ -78,16 +78,15 @@ def velocity_marked_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=None,
         number of 'threads' to use in the pair counting.  if set to 'max', use all
         available cores.  num_threads=0 is the default.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree`
-        will apportion the ``data`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use 1/10 of the box size in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use *max(rbins)* in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
     approx_cell2_size : array_like, optional
         See comments for ``approx_cell1_size``.
@@ -160,8 +159,6 @@ def velocity_marked_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=None,
 
 def _velocity_marked_npairs_xy_z_process_weights(data1, data2, weights1, weights2, weight_func_id):
     """
-    process weights and associated arguments for
-    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.velocity_marked_npairs`
     """
     
     correct_num_weights = _func_signature_int_from_vel_weight_func_id(weight_func_id)

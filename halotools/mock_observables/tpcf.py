@@ -191,9 +191,8 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         that the subsample is equal to ``max_sample_size``. 
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 

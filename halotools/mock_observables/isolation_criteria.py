@@ -62,9 +62,8 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         available cores.  num_threads=0 is the default.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -184,9 +183,8 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         available cores.  num_threads=0 is the default.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -324,9 +322,8 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         available cores.  num_threads=0 is the default.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -548,9 +545,8 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         available cores.  num_threads=0 is the default.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -764,7 +760,8 @@ def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period,
         assert rp_max < period[1]/3.
         assert pi_max < period[2]/3.
     except AssertionError:
-        msg = ("Input ``rp_max`` and ``pi_max`` must both be less than input period in the first two and third dimensions respectively.")
+        msg = ("Input ``rp_max`` and ``pi_max`` must both be less than "
+            "input period in the first two and third dimensions respectively.")
         raise ValueError(msg)
     
     if approx_cell1_size is None:
@@ -783,8 +780,6 @@ def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period,
 
 def _conditional_isolation_process_weights(data1, data2, weights1, weights2, cond_func):
     """
-    process weights and associated arguments for
-    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`
     """
     
     correct_num_weights = _func_signature_int_from_cond_func(cond_func)

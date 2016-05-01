@@ -65,9 +65,8 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
         available cores.  num_threads=0 is the default.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -156,9 +155,8 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
         available cores.  num_threads=0 is the default.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
