@@ -1,6 +1,6 @@
 """
 Module containing the `~halotools.mock_observables.tpcf` function used to 
-calculate galaxy clustering in 3d. 
+calculate the two-point correlation function in 3d (aka galaxy clustering). 
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals

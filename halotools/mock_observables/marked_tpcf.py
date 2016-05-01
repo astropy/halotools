@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate the marked two point correlation function, MCF.
+Module containing the `~halotools.mock_observables.marked_tpcf` function used to 
+calculate the marked two-point correlation function. 
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+
 from .clustering_helpers import _marked_tpcf_process_args
 from .pair_counters import npairs_3d, marked_npairs_3d
 
 
-__all__=['marked_tpcf']
+__all__ = ['marked_tpcf']
 __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
@@ -34,13 +34,21 @@ def marked_tpcf(sample1, rbins, sample2=None,
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     rbins : array_like
-        array of boundaries defining the real space radial bins in which pairs are 
-        counted.
+        array of boundaries defining the real space radial bins in which pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points.
+        Npts x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     marks1 : array_like, optional
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
@@ -53,23 +61,34 @@ def marked_tpcf(sample1, rbins, sample2=None,
         parameter is not specified, it is set to numpy.ones((len(sample2), N_marks)).
     
     period : array_like, optional
-        length 3 array defining periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
-        do auto-correlation?
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
     
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is equal to max_sample_size.
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
     weight_func_id : int, optional
         Integer ID indicating which marking function should be used. 
@@ -122,9 +141,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
     -----
     Pairs are counted using 
     `~halotools.mock_observables.pair_counters.marked_npairs_3d`.
-    This pair counter is optimized to work on points distributed in a rectangular  
-    volume, e.g. a simulation box.  This optimization restricts this function to work on 
-    3-D point distributions.
+
+    If the ``period`` argument is passed in, the ith coordinate of all points
+    must be between 0 and period[i].
     
     ``normalize_by`` indicates how to calculate :math:`\\mathrm{XX}`.  If ``normalize_by``
     is 'random_marks', then :math:`\\mathrm{XX} \\equiv \\mathcal{RR}`, and 
@@ -140,7 +159,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
     calculation of this sum can be done multiple times, by setting the ``iterations`` 
     parameter. The mean of the sum is then taken amongst iterations and used in the 
     calculation.
-    
     
     If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{XX} \\equiv \\mathrm{DD}`
     is calculated by counting total number of pairs using 
