@@ -3,9 +3,7 @@ used to make astronomical observations on
 mock galaxy populations, and also analyze halo catalogs 
 and other point data in periodic cubes. 
 """
-# Licensed under a 3-clause BSD style license - see LICENSE.rst
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from .tpcf import *
 from .tpcf_jackknife import *
@@ -26,4 +24,4 @@ from .void_stats import *
 from .catalog_analysis_helpers import *
 from .distances import *
 from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z, 
-	marked_npairs_3d, marked_npairs_xy_z)
+    marked_npairs_3d, marked_npairs_xy_z)
