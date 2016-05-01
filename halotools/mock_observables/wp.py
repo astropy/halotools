@@ -1,19 +1,17 @@
-# -*- coding: utf-8 -*-
-
 """
-functions to calculate clustering statistics, e.g. two point correlation functions.
+Module containing the `~halotools.mock_observables.wp` function used to 
+calculate the projected two-point correlation function (aka projected galaxy clustering). 
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-####import modules########################################################################
+
 import numpy as np
 
 from .clustering_helpers import _rp_pi_tpcf_process_args
 from .rp_pi_tpcf import rp_pi_tpcf
-##########################################################################################
 
 
-__all__=['wp']
+__all__ = ['wp']
 __author__ = ['Duncan Campbell']
 
 
@@ -26,72 +24,99 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     approx_cellran_size=None):
     """ 
     Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
-    where :math:`r_p` is the seperation perpendicular to the line-of-sight (LOS).
-    
-    Calculation of :math:`w_{p}(r_p)` requires the user to supply bins in :math:`\\pi`,
-    the seperation parallel to the line of sight, and the result will in general depend 
-    on both the binning and the maximum :math:`\\pi` seperation integrated over.  See 
-    notes for further details.
-    
+    where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS).
+        
     The first two dimensions define the plane for perpendicular distances.  The third 
-    dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
-    sky, and z is the redshift coordinate. This is the 'distant observer' approximation.
-    
-    Example calls to this function appear in the documentation below. 
+    dimension is used for parallel distances, i.e. x,y positions are on the plane of the
+    sky, and z is the redshift coordinate. This is the 'distant observer' approximation. 
+
+    Note in particular that the `~halotools.mock_observables.wp` function does not 
+    accept angular coordinates for the input ``sample1`` or ``sample2``. If you 
+    are trying to calculate projected galaxy clustering from a set of observational data, 
+    the `~halotools.mock_observables.wp` function is not what you want. 
+    To perform such a calculation, refer to the appropriate function of the Corrfunc code 
+    written by Manodeep Sinha, available at https://github.com/manodeep/Corrfunc, 
+    which *can* be used to calculate projected clustering from a set of observational data. 
+
+    Example calls to the `~halotools.mock_observables.wp` function appear in the documentation below. 
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments. 
       
-    See also :ref:`galaxy_catalog_analysis_tutorial4`. 
+    See also :ref:`galaxy_catalog_analysis_tutorial4` for a step-by-step tutorial on 
+    how to use this function on a mock galaxy catalog. 
 
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points. 
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     rp_bins : array_like
-        array of boundaries defining the bins perpendicular to the LOS in which 
+        array of boundaries defining the radial bins perpendicular to the LOS in which 
         pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     pi_max : float
-        maximum LOS distance to to search for pairs when calculating math:`w_p`.
-        see Notes.
-    
+        maximum LOS distance defining the projection integral length-scale in the z-dimension. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-D positions of points.
+        Nran x 3 array containing 3-D positions of randomly distributed points. 
+        If no randoms are provided (the default option), 
+        calculation of the tpcf can proceed using analytical randoms 
+        (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        Length-k array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
-        If none, PBCs are set to infinity.
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
-        do auto-correlation?  Default is True.
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?  Default is True.
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
     
     estimator : string, optional
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
     
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        
-        If sample size exceeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample is equal to max_sample_size.
-    
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
+
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
@@ -110,7 +135,6 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     correlation_function(s) : numpy.array
         *len(rp_bins)-1* length array containing the correlation function :math:`w_p(r_p)` 
         computed in each of the bins defined by input ``rp_bins``.
-        
         
         If ``sample2`` is not None (and not exactly the same as ``sample1``), 
         three arrays of length *len(rp_bins)-1* are returned: 
@@ -156,7 +180,11 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     is used throughout the `~halotools.mock_observables` sub-package:
     
     >>> coords = np.vstack((x,y,z)).T
-    
+
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
+    convenience function for this same purpose, which provides additional wrapper 
+    behavior around `numpy.vstack` such as placing points into redshift-space. 
+
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> pi_max = 0.1
     >>> xi = wp(coords, rp_bins, pi_max, period=period)
