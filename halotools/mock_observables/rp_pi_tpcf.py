@@ -1,6 +1,6 @@
 """
 Module containing the `~halotools.mock_observables.rp_pi_tpcf` function used to 
-calculate the redshift-space two-point correlation function in 3d. 
+calculate the redshift-space two-point correlation function in 3d, :math:`\\xi(r_{p}, \\pi)`
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
