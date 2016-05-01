@@ -4,7 +4,7 @@ Functions to assist in error estimation of mock observations.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__all__ = ['jackknife_covariance_matrix','cubical_subvolume_labels']
+__all__ = ['jackknife_covariance_matrix','cuboid_subvolume_labels']
 __author__ = ('Duncan Campbell', )
 
 import numpy as np
@@ -13,7 +13,7 @@ from warnings import warn
 from ..utils.array_utils import convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
-def cubical_subvolume_labels(sample, Nsub, Lbox):
+def cuboid_subvolume_labels(sample, Nsub, Lbox):
     """
     Return integer labels indicating which cubical subvolume of a larger cubical volume a 
     set of points occupy.
@@ -65,7 +65,7 @@ def cubical_subvolume_labels(sample, Nsub, Lbox):
     Divide the volume into cubes with legnth 0.25 on a side.
     
     >>> Nsub = [4,4,4]
-    >>> labels = cubical_subvolume_labels(coords, Nsub, Lbox)
+    >>> labels = cuboid_subvolume_labels(coords, Nsub, Lbox)
     """
     
     #process inputs and check for consistency
