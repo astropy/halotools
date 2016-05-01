@@ -11,7 +11,7 @@ from .npairs_xy_z import _npairs_xy_z_process_args
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .rectangular_mesh import RectangularDoubleMesh
 
-from .marked_cpairs import marked_npairs_xy_z_engine 
+from .marked_pair_counting_engines import marked_npairs_xy_z_engine 
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 

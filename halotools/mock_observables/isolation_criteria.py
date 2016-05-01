@@ -16,7 +16,7 @@ from .pair_counters.cpairs import spherical_isolation_engine, cylindrical_isolat
 from .pair_counters.mesh_helpers import (
     _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
 
-from .pair_counters.marked_cpairs import (
+from .pair_counters.marked_pair_counting_engines import (
     marked_spherical_isolation_engine, marked_cylindrical_isolation_engine)
 
 from ..utils.array_utils import convert_to_ndarray, custom_len

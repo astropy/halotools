@@ -7,7 +7,7 @@ from .npairs_3d import _npairs_3d_process_args
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .rectangular_mesh import RectangularDoubleMesh
 
-from .marked_cpairs import velocity_marked_npairs_3d_engine 
+from .marked_pair_counting_engines import velocity_marked_npairs_3d_engine 
 
 from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError 
