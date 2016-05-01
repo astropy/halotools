@@ -500,17 +500,26 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     
     >>> stellar_mass = np.random.uniform(1e10, 1e12, Npts)
 
-    Referring to the Notes above for the definitions of the conditional marking functions, 
-    we see that for this particular isolation criteria the appropriate ``cond_func`` is 1. 
-    
-    >>> r_max = 5.0
-    >>> cond_func = 1
-
     Since we are interested in whether a point in ``sample1`` is isolated from other points 
     in ``sample1``, we set ``sample2`` to ``sample1`` and both ``marks1`` and ``marks2`` 
     equal to ``stellar_mass``. 
 
-    >>> is_isolated = conditional_spherical_isolation(sample1, sample1, r_max, stellar_mass, stellar_mass, cond_func, period=Lbox)
+    >>> sample2 = sample1
+    >>> marks1 = stellar_mass
+    >>> marks2 = stellar_mass
+
+    Referring to the Notes above for the definitions of the conditional marking functions, 
+    we see that for this particular isolation criteria the appropriate ``cond_func`` is 2. 
+    The reason is that this function only evaluates to *True* for those points in ``sample2`` 
+    that are more massive than the ``sample1`` point under consideration. Thus the only 
+    relevant points to consider as candidate neighbors are the more massive ones; all other 
+    ``sample2`` points will be disregarded irrespective of their distance from the 
+    ``sample1`` point under consideration.
+    
+    >>> r_max = 5.0
+    >>> cond_func = 2
+
+    >>> is_isolated = conditional_spherical_isolation(sample1, sample2, r_max, marks1, marks2, cond_func, period=Lbox)
 
     """
     ### Process the inputs with the helper function
@@ -748,6 +757,14 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     >>> stellar_mass = np.random.uniform(1e10, 1e12, Npts)
 
+    Since we are interested in whether a point in ``sample1`` is isolated from other points 
+    in ``sample1``, we set ``sample2`` to ``sample1`` and both ``marks1`` and ``marks2`` 
+    equal to ``stellar_mass``. 
+
+    >>> sample2 = sample1
+    >>> marks1 = stellar_mass
+    >>> marks2 = stellar_mass
+
     All units in Halotools assume *h=1*, with lengths always in Mpc/h, so we have:
 
     >>> rp_max = 0.75
@@ -759,13 +776,15 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     >>> pi_max = 500./H0
     
     Referring to the Notes above for the definitions of the conditional marking functions, 
-    we see that for this particular isolation criteria the appropriate ``cond_func`` is 1. 
-    And since we are interested in whether a point in ``sample1`` is isolated from other points 
-    in ``sample1``, we set ``sample2`` to ``sample1`` and both ``marks1`` and ``marks2`` 
-    equal to ``stellar_mass``. 
+    we see that for this particular isolation criteria the appropriate ``cond_func`` is 2. 
+    The reason is that this function only evaluates to *True* for those points in ``sample2`` 
+    that are more massive than the ``sample1`` point under consideration. Thus the only 
+    relevant points to consider as candidate neighbors are the more massive ones; all other 
+    ``sample2`` points will be disregarded irrespective of their distance from the 
+    ``sample1`` point under consideration.
 
-    >>> cond_func = 1
-    >>> is_isolated = conditional_cylindrical_isolation(sample1, sample1, rp_max, pi_max, stellar_mass, stellar_mass, cond_func, period=Lbox)
+    >>> cond_func = 2
+    >>> is_isolated = conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max, marks1, marks2, cond_func, period=Lbox)
     """
     
     ### Process the inputs with the helper function
