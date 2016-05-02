@@ -54,9 +54,9 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
     """
     
     #calculate radial vector between points
-    cdef cnp.float64_t rx = w1[0] - (w2[0] + shift[0])
-    cdef cnp.float64_t ry = w1[1] - (w2[1] + shift[1])
-    cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
+    cdef cnp.float64_t rx = w1[0] - w2[0]
+    cdef cnp.float64_t ry = w1[1] - w2[1]
+    cdef cnp.float64_t rz = w1[2] - w2[2]
     cdef cnp.float64_t norm = np.sqrt(rx*rx + ry*ry + rz*rz)
     
     #if shift[i]<0 or shift[i]>0 return -1, else return 1
