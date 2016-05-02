@@ -129,12 +129,7 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
     cdef cnp.float64_t ry = w1[1] - (w2[1] + shift[1])
     cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
     cdef cnp.float64_t norm = np.sqrt(rx*rx + ry*ry + rz*rz)
-    
-    #if shift[i]<0 or shift[i]>0 return -1, else return 1
-    cdef cnp.float64_t xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
-    cdef cnp.float64_t yshift = -1.0*(shift[1]!=0.0) + (shift[1]==0.0)
-    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
-    
+        
     cdef cnp.float64_t dvx, dvy, dvz, result
     
     if norm==0:
@@ -148,7 +143,7 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
         dvz = (w1[5] - w2[5])
         
         #the radial component of the velocity difference
-        result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm - w1[6]*w2[6]
+        result = (dvx*rx + dvy*ry + dvz*rz)/norm - w1[6]*w2[6]
         
         result1[0] = result #radial velocity
         result2[0] = result*result #radial velocity squared
@@ -189,17 +184,19 @@ cdef void relative_los_velocity_weights(cnp.float64_t* w1,
         1.0 (pairs involved, but also kind-of a dummy)
     
     """
-    #if shift[i]<0 or shift[i]>0 return -1, else return 1
-    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
+    #calculate radial vector between points
+    # Note that due to the application of the shift, 
+    #   when PBCs are applied, rx, ry, rz has its normal sign flipped
     cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
+    cdef cnp.float64_t norm = abs(rz)
+
     cdef cnp.float64_t dvz
 
     if rz == 0:
         dvz = -abs(w1[5] - w2[5])
     else:
-        dvz = (w1[5] - w2[5])*zshift*rz/abs(rz)
+        dvz = (w1[5] - w2[5])*rz/norm
 
-    # cdef cnp.float64_t dvz = np.fabs(w1[0] - w2[0])
     result1[0] = dvz #LOS velocity
     result2[0] = 0.0 #unused value
     result3[0] = 1.0 #number of pairs
