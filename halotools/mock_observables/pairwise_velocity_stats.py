@@ -601,8 +601,8 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     pi_bins = np.array([0.0,pi_max])
     
     #create marks for the marked pair counter.
-    marks1 = velocities1[:,2] #z-component of velocity
-    marks2 = velocities2[:,2] #z-component of velocity
+    marks1 = np.vstack((sample1.T, velocities1.T)).T
+    marks2 = np.vstack((sample2.T, velocities2.T)).T
     
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
@@ -833,9 +833,9 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     #build the marks.
     shift1 = np.repeat(std_v1,len(sample1))
     shift2 = np.repeat(std_v2,len(sample2))
-    marks1 = np.vstack((velocities1[:,2], shift1)).T #z-component of the velocity
-    marks2 = np.vstack((velocities2[:,2], shift2)).T #z-component of the velocity
-    
+    marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
+    marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
+
     
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
         do_auto, do_cross, marks1, marks2,

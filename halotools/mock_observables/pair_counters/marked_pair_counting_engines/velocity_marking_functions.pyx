@@ -8,9 +8,9 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 cimport numpy as cnp
 
-__all__= ("relative_radial_velocity_weights", "radial_velocity_weights",
+__all__= ("relative_radial_velocity_weights",
     "radial_velocity_variance_counter_weights",
-    "relative_los_velocity_weights", "los_velocity_weights",
+    "relative_los_velocity_weights",
     "los_velocity_variance_counter_weights")
 
 __author__ = ("Duncan Campbell", "Andrew Hearin")
@@ -38,7 +38,7 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
         w2[3:6] vx, vy, vz velocities
     
     shift : pointer to an array
-        Legnth-3 array storing the amount the points were shifted in each spatial 
+        Length-3 array storing the amount the points were shifted in each spatial 
         dimension.  This is used when doing pair counts on periodic boxes and the 
         points have been preshifted.
     
@@ -77,78 +77,12 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
        dvz = (w1[5] - w2[5])
        
        #the radial component of the velocity difference
-       #result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm
-       result = (dvx*rx + dvy*ry + dvz*rz)/norm
+       result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm
        
        result1[0] = result #radial velocity
        result2[0] = 0.0 #unused value
        result3[0] = 1.0 #number of pairs
 
-
-cdef void radial_velocity_weights(cnp.float64_t* w1,
-                                  cnp.float64_t* w2,
-                                  cnp.float64_t* shift,
-                                  cnp.float64_t* result1,
-                                  cnp.float64_t* result2,
-                                  cnp.float64_t* result3):
-    """
-    Calculate the radial velocity between two points.
-    
-    Parameters
-    ----------
-    w1 : pointer to an array
-        weights array associated with data1.
-        w1[0:2] x,y,z positions
-        w1[3:6] vx, vy, vz velocities
-    
-    w2 : pointer to an array
-        weights array associated with data2
-        w2[0:2] x,y,z positions
-        w2[3:6] vx, vy, vz velocities
-    
-    shift : pointer to an array
-        Legnth-3 array storing the amount the points were shifted in each spatial 
-        dimension.  This is used when doing pair counts on periodic boxes and the 
-        points have been preshifted.
-    
-    result1 : pointer to a double
-        radial velocity, v_r1 * v_r2
-        
-    result2 : pointer to a double
-        0.0 (dummy)
-        
-    result3 : pointer to a double
-        1.0 (pairs involved, but also kind-of a dummy)
-    
-    """
-    
-    #calculate radial vector between points
-    cdef cnp.float64_t rx = w1[0] - (w2[0] + shift[0])
-    cdef cnp.float64_t ry = w1[1] - (w2[1] + shift[1])
-    cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
-    cdef cnp.float64_t norm = np.sqrt(rx*rx + ry*ry + rz*rz)
-
-    #if shift[i]<0 or shift[i]>0 return -1, else return 1
-    cdef cnp.float64_t xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
-    cdef cnp.float64_t yshift = -1.0*(shift[1]!=0.0) + (shift[1]==0.0)
-    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
-    
-    cdef cnp.float64_t dvx, dvy, dvz, resulta, resultb
-    
-    if norm==0:
-        result1[0] = 0.0 #radial velocity
-        result2[0] = 0.0 #unused value
-        result3[0] = 1.0 #number of pairs
-    else:        
-       #the radial component of the velocities
-       #resulta = (xshift*w1[3]*rx + yshift*w1[4]*ry + zshift*w1[5]*rz)/norm
-       #resultb = (xshift*w2[3]*rx + yshift*w2[4]*ry + zshift*w2[5]*rz)/norm
-       resulta = (w1[3]*rx + w1[4]*ry + w1[5]*rz)/norm
-       resultb = (w2[3]*rx + w2[4]*ry + w2[5]*rz)/norm
-       
-       result1[0] = resulta*resultb #radial velocity
-       result2[0] = 0.0 #unused value
-       result3[0] = 1.0 #number of pairs
 
 
 cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
@@ -168,16 +102,16 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
         weights array associated with data1.
         w1[0:2] x,y,z positions
         w1[3:6] vx, vy, vz velocities
-        w1[7] offset
+        w1[6] offset
     
     w2 : pointer to an array
         weights array associated with data2
         w2[0:2] x,y,z positions
         w2[3:6] vx, vy, vz velocities
-        w2[7] offset
+        w2[6] offset
     
     shift : pointer to an array
-        Legnth-3 array storing the amount the points were shifted in each spatial 
+        Length-3 array storing the amount the points were shifted in each spatial 
         dimension.  This is used when doing pair counts on periodic boxes and the 
         points have been preshifted.
     
@@ -216,8 +150,7 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
         dvz = (w1[5] - w2[5])
         
         #the radial component of the velocity difference
-        #result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm - w1[6]*w2[6]
-        result = (dvx*rx + dvy*ry + dvz*rz)/norm - w1[6]*w2[6]
+        result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm - w1[6]*w2[6]
         
         result1[0] = result #radial velocity
         result2[0] = result*result #radial velocity squared
@@ -244,7 +177,7 @@ cdef void relative_los_velocity_weights(cnp.float64_t* w1,
         w2[0] vz velocities
     
     shift : pointer to an array
-        Legnth-3 array storing the amount the points were shifted in each spatial 
+        Length-3 array storing the amount the points were shifted in each spatial 
         dimension.  This is used when doing pair counts on periodic boxes and the 
         points have been preshifted.
     
@@ -258,49 +191,18 @@ cdef void relative_los_velocity_weights(cnp.float64_t* w1,
         1.0 (pairs involved, but also kind-of a dummy)
     
     """
-    
-    cdef cnp.float64_t dvz = np.fabs(w1[0] - w2[0])
+    #if shift[i]<0 or shift[i]>0 return -1, else return 1
+    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
+    cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
+    cdef cnp.float64_t dvz
+
+    if rz == 0:
+        dvz = -abs(w1[5] - w2[5])
+    else:
+        dvz = (w1[5] - w2[5])*zshift*rz/abs(rz)
+
+    # cdef cnp.float64_t dvz = np.fabs(w1[0] - w2[0])
     result1[0] = dvz #LOS velocity
-    result2[0] = 0.0 #unused value
-    result3[0] = 1.0 #number of pairs
-
-
-cdef void los_velocity_weights(cnp.float64_t* w1,
-                               cnp.float64_t* w2,
-                               cnp.float64_t* shift,
-                               cnp.float64_t* result1,
-                               cnp.float64_t* result2,
-                               cnp.float64_t* result3):
-    """
-    Calculate the line-of-sight (LOS) velocity between two points.
-    
-    Parameters
-    ----------
-    w1 : pointer to an array
-        weights array associated with data1.
-        w1[0] vz velocities
-    
-    w2 : pointer to an array
-        weights array associated with data2
-        w2[0] vz velocities
-    
-    shift : pointer to an array
-        Legnth-3 array storing the amount the points were shifted in each spatial 
-        dimension.  This is used when doing pair counts on periodic boxes and the 
-        points have been preshifted.
-    
-    result1 : pointer to a double
-        LOS velocity v_z1 * v_z2
-        
-    result2 : pointer to a double
-        0.0 (dummy)
-        
-    result3 : pointer to a double
-        1.0 (pairs involved, but also kind-of a dummy)
-    
-    """
-    
-    result1[0] = w1[0]*w2[0] #LOS velocity
     result2[0] = 0.0 #unused value
     result3[0] = 1.0 #number of pairs
 
@@ -327,7 +229,7 @@ cdef void los_velocity_variance_counter_weights(cnp.float64_t* w1,
         w2[0] vz velocities
     
     shift : pointer to an array
-        Legnth-3 array storing the amount the points were shifted in each spatial 
+        Length-3 array storing the amount the points were shifted in each spatial 
         dimension.  This is used when doing pair counts on periodic boxes and the 
         points have been preshifted.
     
@@ -341,10 +243,23 @@ cdef void los_velocity_variance_counter_weights(cnp.float64_t* w1,
         1.0 (pairs involved, but also kind-of a dummy)
     
     """
-    
-    cdef cnp.float64_t dvz = np.fabs(w1[0] - w2[0]) - w1[1]*w2[1]
-    
-    result1[0] = dvz #LOS velocity
-    result2[0] = dvz*dvz #LOS velocity squared
-    result3[0] = 1.0 #number of pairs
+    cdef cnp.float64_t result
 
+    cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
+    cdef cnp.float64_t dvz = (w1[5] - w2[5])
+
+    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)  
+    
+    if rz==0:
+        result = -abs(dvz) - w1[6]*w2[6]
+
+        result1[0] = result #radial velocity
+        result2[0] = result*result
+        result3[0] = 1.0 #number of pairs
+    else:        
+        #the radial component of the velocity difference
+        result = zshift*dvz*rz/abs(rz) - w1[6]*w2[6]
+        
+        result1[0] = result #radial velocity
+        result2[0] = result*result #radial velocity squared
+        result3[0] = 1.0 #number of pairs

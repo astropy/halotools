@@ -105,8 +105,20 @@ def test_mean_radial_velocity_vs_r_correctness2a():
     assert np.allclose(s2s2[0], 0, rtol=0.01)
 
     assert np.allclose(s1s1[1], 0, rtol=0.01)
-    assert np.allclose(s1s2[1], -50, rtol=0.01)
+    assert np.allclose(s1s2[1], 50, rtol=0.01)
     assert np.allclose(s2s2[1], 0, rtol=0.01)
+
+
+    s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins, 
+        sample2 = sample2, velocities2 = velocities2)
+    assert np.allclose(s1s1[0], 0, rtol=0.01)
+    assert np.allclose(s1s2[0], 0, rtol=0.01)
+    assert np.allclose(s2s2[0], 0, rtol=0.01)
+
+    assert np.allclose(s1s1[1], 0, rtol=0.01)
+    assert np.allclose(s1s2[1], 0, rtol=0.01)
+    assert np.allclose(s2s2[1], 0, rtol=0.01)
+
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_correctness2b():
@@ -137,7 +149,7 @@ def test_mean_radial_velocity_vs_r_correctness2b():
     s1s1 = mean_radial_velocity_vs_r(sample, velocities, rbins, period=1)
 
     assert np.allclose(s1s1[0], 0, rtol=0.01)
-    assert np.allclose(s1s1[1], -50, rtol=0.01)
+    assert np.allclose(s1s1[1], 50, rtol=0.01)
 
 
 @pytest.mark.slow
@@ -173,7 +185,7 @@ def test_mean_radial_velocity_vs_r_correctness3a():
     assert np.allclose(s2s2[0], 0, rtol=0.01)
 
     assert np.allclose(s1s1[1], 0, rtol=0.01)
-    assert np.allclose(s1s2[1], 50, rtol=0.01)
+    assert np.allclose(s1s2[1], -50, rtol=0.01)
     assert np.allclose(s2s2[1], 0, rtol=0.01)
 
 @pytest.mark.slow
@@ -208,7 +220,7 @@ def test_mean_radial_velocity_vs_r_correctness3b():
     s1s1 = mean_radial_velocity_vs_r(sample, velocities, rbins, period=1)
 
     assert np.allclose(s1s1[0], 0, rtol=0.01)
-    assert np.allclose(s1s1[1], 50, rtol=0.01)
+    assert np.allclose(s1s1[1], -50, rtol=0.01)
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel1():
