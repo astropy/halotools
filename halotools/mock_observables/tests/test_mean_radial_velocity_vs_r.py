@@ -13,11 +13,14 @@ __all__ = ('test_mean_radial_velocity_vs_r_correctness1a',
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_correctness1a():
     """ Create two tight localizations of points, 
-    one at (0.5, 0.5, 0.1), the other at (0.5, 0.5, 0.2). 
-    The first set of points is moving at -50 in the z-direction, 
-    the second set of points is at rest. 
+    one at (0.5, 0.5, 0.1), the other at (0.5, 0.5, 0.25). 
+    The first set of points is moving at +50 in the z-direction, 
+    upwards towards the second set of points, which is at rest. 
 
-    In this example PBCs are irrelevant and we pass in a sample2
+    PBCs are set to infinity and we pass in a sample2 as an independent set.
+
+    Verify that the `~halotools.mock_observables.mean_radial_velocity_vs_r` function 
+    correctly identifies the radial component of the relative velocity to be -50. 
     """
     np.random.seed(43)
 
