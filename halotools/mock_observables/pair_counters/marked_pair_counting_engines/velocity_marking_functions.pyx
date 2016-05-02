@@ -52,18 +52,14 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
         1.0 (pairs involved, but also kind-of a dummy)
     
     """
-    
     #calculate radial vector between points
-    cdef cnp.float64_t rx = w1[0] - w2[0]
-    cdef cnp.float64_t ry = w1[1] - w2[1]
-    cdef cnp.float64_t rz = w1[2] - w2[2]
+    # Note that due to the application of the shift, 
+    #   when PBCs are applied, rx, ry, rz has its normal sign flipped
+    cdef cnp.float64_t rx = w1[0] - (w2[0] + shift[0])
+    cdef cnp.float64_t ry = w1[1] - (w2[1] + shift[1])
+    cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
     cdef cnp.float64_t norm = np.sqrt(rx*rx + ry*ry + rz*rz)
-    
-    #if shift[i]<0 or shift[i]>0 return -1, else return 1
-    cdef cnp.float64_t xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
-    cdef cnp.float64_t yshift = -1.0*(shift[1]!=0.0) + (shift[1]==0.0)
-    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)
-    
+        
     cdef cnp.float64_t dvx, dvy, dvz, result
     
     if norm==0.0:
@@ -77,7 +73,9 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
        dvz = (w1[5] - w2[5])
        
        #the radial component of the velocity difference
-       result = (xshift*dvx*rx + yshift*dvy*ry + zshift*dvz*rz)/norm
+       # Since rx, ry, rz have a flipped sign for PBC case, 
+       #    the following definition requires no further modification
+       result = (dvx*rx + dvy*ry + dvz*rz)/norm
        
        result1[0] = result #radial velocity
        result2[0] = 0.0 #unused value
