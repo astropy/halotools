@@ -211,11 +211,20 @@ def marked_cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
                                         has_neighbor[ifirst1+i] = 1
                                         break 
     
+    #turn result into numpy array
     new_has_neighbor = np.array(has_neighbor)
-    new_has_neighbor = new_has_neighbor[double_mesh.mesh1.idx_sorted]
-    is_isolated = np.where(new_has_neighbor == 1, 0, 1)
+
+    #invert result to get isolate galaxies
+    is_isolated = (new_has_neighbor == 0)
+
+    #points were sorted, so undo this operation
+    is_isolated = double_mesh.mesh1.idx_sorted[is_isolated]
+
+    new_is_isolated = np.zeros(Npts1)
+    new_is_isolated[is_isolated] = 1
     
-    return is_isolated
+    return new_is_isolated
+
 
 
 cdef f_type return_conditional_function(cond_func_id):
