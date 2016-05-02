@@ -229,11 +229,11 @@ def _npairs_xy_z_process_args(data1, data2, rp_bins, pi_bins, period,
         raise ValueError(msg)
 
     if approx_cell1_size is None:
-        approx_cell1_size = [rp_max, rp_max, rp_max]
+        approx_cell1_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:    
-        approx_cell2_size = [rp_max, rp_max, rp_max]
+        approx_cell2_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
 

@@ -251,13 +251,35 @@ class RectangularDoubleMesh(object):
     def _check_sensible_constructor_inputs(self):
         try:
             assert self.search_xlength <= self.xperiod/3.
+        except AssertionError:
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "You tried to search for pairs out to a length of search_xlength = %.2f,\n"
+                "but the size of your box in this dimension is xperiod = %.2f.\n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n" % (self.search_xlength, self.xperiod))
+            raise ValueError(msg)
+
+        try:
             assert self.search_ylength <= self.yperiod/3.
+        except AssertionError:
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "You tried to search for pairs out to a length of search_ylength = %.2f,\n"
+                "but the size of your box in this dimension is yperiod = %.2f.\n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n" % (self.search_ylength, self.yperiod))
+            raise ValueError(msg)
+
+        try:
             assert self.search_zlength <= self.zperiod/3.
         except AssertionError:
             msg = ("\n The maximum length over which you search for pairs of points \n"
                 "cannot be larger than Lbox/3 in any dimension. \n"
+                "You tried to search for pairs out to a length of search_zlength = %.2f,\n"
+                "but the size of your box in this dimension is zperiod = %.2f.\n"
                 "If you need to count pairs on these length scales, \n"
-                "you should use a larger simulation.\n")
+                "you should use a larger simulation.\n" % (self.search_zlength, self.zperiod))
             raise ValueError(msg)
 
 

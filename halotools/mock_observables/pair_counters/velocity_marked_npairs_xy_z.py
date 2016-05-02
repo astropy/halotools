@@ -114,8 +114,9 @@ def velocity_marked_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=None,
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
 
-    rmax = np.max(rp_bins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    rp_max = np.max(rp_bins)
+    pi_max = np.max(pi_bins)
+    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
 
     # Process the input weights and with the helper function
     weights1, weights2 = (
