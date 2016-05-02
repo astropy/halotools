@@ -434,7 +434,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
     
-    weight_func_id = 13
+    weight_func_id = 12
     V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross,
@@ -669,7 +669,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     
     #count the sum of radial velocities and number of pairs
-    weight_func_id = 14
+    weight_func_id = 13
     V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 =\
         marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period,
             num_threads, do_auto, do_cross,
@@ -909,7 +909,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
     
-    weight_func_id = 16
+    weight_func_id = 14
     V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
         sample1, sample2, rp_bins, pi_bins, period,
         num_threads, do_auto, do_cross, 

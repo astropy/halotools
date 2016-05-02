@@ -247,7 +247,7 @@ def _velocity_marked_npairs_3d_process_weights(data1, data2, weights1, weights2,
 
 def _func_signature_int_from_vel_weight_func_id(weight_func_id):
     """
-    return the function signiture available velocity weighting functions.
+    return the function signature available velocity weighting functions.
     """
     if type(weight_func_id) != int:
         msg = "\n weight_func_id parameter must be an integer ID of a weighting function."
@@ -256,14 +256,10 @@ def _func_signature_int_from_vel_weight_func_id(weight_func_id):
     elif weight_func_id == 11:
         return 6
     elif weight_func_id == 12:
-        return 6
-    elif weight_func_id == 13:
         return 7
-    elif weight_func_id == 14:
+    elif weight_func_id == 13:
         return 6
-    elif weight_func_id == 15:
-        return 1
-    elif weight_func_id == 16:
+    elif weight_func_id == 14:
         return 7
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")

@@ -231,11 +231,11 @@ cdef f_type return_velocity_weighting_function(weight_func_id):
 
     if weight_func_id==11:
         return relative_radial_velocity_weights
-    if weight_func_id==13:
+    if weight_func_id==12:
         return radial_velocity_variance_counter_weights
-    if weight_func_id==14:
+    if weight_func_id==13:
         return relative_los_velocity_weights
-    if weight_func_id==16:
+    if weight_func_id==14:
         return los_velocity_variance_counter_weights
     else:
         raise ValueError('weighting function does not exist')
