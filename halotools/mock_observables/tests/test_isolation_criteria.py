@@ -150,6 +150,25 @@ def test_cylindrical_isolation3():
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
     assert np.all(iso == True)
 
+def test_cylindrical_isolation_indices():
+    """ Create two regular meshes such that all points in the meshes are isolated from each other. 
+    Insert a single point into mesh1 that is immediately adjacent to one of the points in mesh2.
+    Verify that there is only a single isolated point and that it has the correct index. 
+    """
+
+    sample1_mesh = generate_3d_regular_mesh(5) # 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(10) # 0.05, 0.15, 0.25, 0.35, ..., 0.95
+
+    insertion_idx = 5
+    sample1 = np.insert(sample1_mesh, insertion_idx*3, [0.06, 0.06, 0.06]).reshape((len(sample1_mesh)+1, 3))
+
+    rp_max, pi_max = 0.025, 0.025
+    iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
+    correct_result = np.ones(len(iso))
+    correct_result[insertion_idx] = 0
+    assert np.all(iso == correct_result)
+
+
 def test_conditional_spherical_isolation_cond_func1():
     sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
     sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
