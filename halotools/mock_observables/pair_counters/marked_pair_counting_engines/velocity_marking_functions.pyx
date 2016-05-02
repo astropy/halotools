@@ -238,23 +238,19 @@ cdef void los_velocity_variance_counter_weights(cnp.float64_t* w1,
         1.0 (pairs involved, but also kind-of a dummy)
     
     """
-    cdef cnp.float64_t result
-
+    #calculate radial vector between points
+    # Note that due to the application of the shift, 
+    #   when PBCs are applied, rx, ry, rz has its normal sign flipped
     cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
-    cdef cnp.float64_t dvz = (w1[5] - w2[5])
+    cdef cnp.float64_t norm = abs(rz)
 
-    cdef cnp.float64_t zshift = -1.0*(shift[2]!=0.0) + (shift[2]==0.0)  
-    
-    if rz==0:
-        result = -abs(dvz) - w1[6]*w2[6]
+    cdef cnp.float64_t dvz
 
-        result1[0] = result #radial velocity
-        result2[0] = result*result
-        result3[0] = 1.0 #number of pairs
-    else:        
-        #the radial component of the velocity difference
-        result = zshift*dvz*rz/abs(rz) - w1[6]*w2[6]
-        
-        result1[0] = result #radial velocity
-        result2[0] = result*result #radial velocity squared
-        result3[0] = 1.0 #number of pairs
+    if rz == 0:
+        dvz = -abs(w1[5] - w2[5]) - w1[6]*w2[6]
+    else:
+        dvz = (w1[5] - w2[5])*rz/norm - w1[6]*w2[6]
+            
+    result1[0] = dvz #radial velocity
+    result2[0] = dvz*dvz #radial velocity squared
+    result3[0] = 1.0 #number of pairs
