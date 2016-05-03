@@ -85,7 +85,7 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
 
     rp_bins, pi_max = np.array([0, 0.1, 0.2, 0.3]), 0.1
 
-    ###########
+    ############################################
     # Run the test with PBCs turned off
     s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max, 
         sample2 = sample2, velocities2 = velocities2, do_auto = False)
@@ -106,7 +106,7 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
     assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01) 
 
 
-    # ###########
+    # ############################################
     # # Run the test with PBCs operative
     s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max, 
         sample2 = sample2, velocities2 = velocities2, do_auto = False, period=1)
