@@ -149,9 +149,9 @@ class RectangularMesh(object):
         self.yperiod = yperiod
         self.zperiod = zperiod
 
-        self.num_xdivs = max(int(round(xperiod / approx_xcell_size)), 1)
-        self.num_ydivs = max(int(round(yperiod / approx_ycell_size)), 1)
-        self.num_zdivs = max(int(round(zperiod / approx_zcell_size)), 1)
+        self.num_xdivs = max(int(np.round(xperiod / approx_xcell_size)), 1)
+        self.num_ydivs = max(int(np.round(yperiod / approx_ycell_size)), 1)
+        self.num_zdivs = max(int(np.round(zperiod / approx_zcell_size)), 1)
         self.ncells = self.num_xdivs*self.num_ydivs*self.num_zdivs
 
         self.xcell_size = self.xperiod / float(self.num_xdivs)
