@@ -15,8 +15,49 @@ __all__ = ('spherical_isolation_engine', )
 @cython.nonecheck(False)
 def spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, r_max, cell1_tuple):
     """
+    Cython engine for determining if points in 'sample 1' are isolated, meaning no 
+    neighbors within a spherical volume, with respect to points in 'sample 2'.
+    
+    Parameters
+    ----------
+    double_mesh : object 
+        Instance of `~halotools.mock_observables.RectangularDoubleMesh`
+    
+    x1in : numpy.array
+        array storing Cartesian x-coordinates of points of 'sample 1'
+        
+    y1in : numpy.array
+        array storing Cartesian y-coordinates of points of 'sample 1'
+        
+    z1in : numpy.array
+        array storing Cartesian z-coordinates of points of 'sample 1'
+        
+    x2in : numpy.array
+        array storing Cartesian x-coordinates of points of 'sample 2'
+        
+    y2in : numpy.array
+        array storing Cartesian y-coordinates of points of 'sample 2'
+        
+    z2in : numpy.array
+        array storing Cartesian z-coordinates of points of 'sample 2'
+        
+    r_max : numpy.array
+        array storing the radial distance to search for neighbors around each point
+        in 'sample 1'
+        
+    cell1_tuple : tuple
+        Two-element tuple defining the first and last cells in 
+        double_mesh.mesh1 that will be looped over. Intended for use with 
+        python multiprocessing. 
+        
+    Returns
+    -------
+    is_isolated : numpy.array
+        boolean array indicating if each point in 'sample 1' is isolated
     """
-    cdef cnp.float64_t r_max_squared = r_max*r_max
+    
+    r_max_squared_tmp = r_max*r_max
+    cdef cnp.float64_t[:] r_max_squared = np.ascontiguousarray(r_max_squared_tmp[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -66,7 +107,7 @@ def spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, r_max_squaredtmp 
     cdef int Ni, Nj, i, j, k, l, current_data1_index
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -141,6 +182,8 @@ def spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
+                                r_max_squaredtmp = r_max_squared[ifirst1+i]
+                                
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance
@@ -149,7 +192,7 @@ def spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                                     dz = z1tmp - z_icell2[j]
                                     dsq = dx*dx + dy*dy + dz*dz
 
-                                    if (dsq < r_max_squared) & (dsq > 0.0):
+                                    if (dsq < r_max_squaredtmp) & (dsq > 0.0):
                                         has_neighbor[ifirst1+i] = 1
                                         break
     

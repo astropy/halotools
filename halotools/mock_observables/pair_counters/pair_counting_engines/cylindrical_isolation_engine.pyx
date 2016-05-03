@@ -15,9 +15,56 @@ __all__ = ('cylindrical_isolation_engine', )
 @cython.nonecheck(False)
 def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rp_max, pi_max, cell1_tuple):
     """
+    Cython engine for determining if points in 'sample 1' are isolated, meaning no 
+    neighbors within a cylinderical volume, with respect to points in 'sample 2'.
+    
+    Parameters
+    ----------
+    double_mesh : object 
+        Instance of `~halotools.mock_observables.RectangularDoubleMesh`
+    
+    x1in : numpy.array
+        array storing Cartesian x-coordinates of points of 'sample 1'
+        
+    y1in : numpy.array
+        array storing Cartesian y-coordinates of points of 'sample 1'
+        
+    z1in : numpy.array
+        array storing Cartesian z-coordinates of points of 'sample 1'
+        
+    x2in : numpy.array
+        array storing Cartesian x-coordinates of points of 'sample 2'
+        
+    y2in : numpy.array
+        array storing Cartesian y-coordinates of points of 'sample 2'
+        
+    z2in : numpy.array
+        array storing Cartesian z-coordinates of points of 'sample 2'
+        
+    rp_max : numpy.array
+        array storing the x-y projected radial distance, radius of cylinder, to search 
+        for neighbors around each point in 'sample 1'
+        
+    pi_max : numpy.array
+        array storing the z distance, half the length of a cylinder, to search 
+        for neighbors around each point in 'sample 1'
+        
+    cell1_tuple : tuple
+        Two-element tuple defining the first and last cells in 
+        double_mesh.mesh1 that will be looped over. Intended for use with 
+        python multiprocessing. 
+        
+    Returns
+    -------
+    is_isolated : numpy.array
+        boolean array indicating if each point in 'sample 1' is isolated
     """
-    cdef cnp.float64_t rp_max_squared = rp_max*rp_max
-    cdef cnp.float64_t pi_max_squared = pi_max*pi_max
+    
+    rp_max_squared_tmp = rp_max*rp_max
+    cdef cnp.float64_t[:] rp_max_squared = np.ascontiguousarray(rp_max_squared_tmp[double_mesh.mesh1.idx_sorted])
+    pi_max_squared_tmp = pi_max*pi_max
+    cdef cnp.float64_t[:] pi_max_squared = np.ascontiguousarray(pi_max_squared_tmp[double_mesh.mesh1.idx_sorted])
+    
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -67,7 +114,7 @@ def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
     
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, rp_max_squaredtmp, pi_max_squaredtmp 
     cdef int Ni, Nj, i, j, k, l, current_data1_index
     
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -141,6 +188,9 @@ def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
+                                rp_max_squaredtmp = rp_max_squared[ifirst1+i]
+                                pi_max_squaredtmp = pi_max_squared[ifirst1+i]
+                                
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance
@@ -150,7 +200,7 @@ def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
                                     dxy_sq = dx*dx + dy*dy
                                     dz_sq = dz*dz
                                     
-                                    if (dxy_sq < rp_max_squared) & (dz_sq < pi_max_squared) & ((dz_sq + dxy_sq)>0.0):
+                                    if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp) & ((dz_sq + dxy_sq)>0.0):
                                     
                                         has_neighbor[ifirst1+i] = 1
                                         break
@@ -169,9 +219,3 @@ def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
     
     return new_is_isolated
 
-
-
-
-
-
-    

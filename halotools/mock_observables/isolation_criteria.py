@@ -4,61 +4,58 @@ a set of points are isolated according to various criteria.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 from functools import partial 
 import multiprocessing 
-
 from .pair_counters.rectangular_mesh import RectangularDoubleMesh
 from .pair_counters.pair_counting_engines import spherical_isolation_engine, cylindrical_isolation_engine
-from .pair_counters.mesh_helpers import (
-    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
-
 from .pair_counters.marked_pair_counting_engines import (
     marked_spherical_isolation_engine, marked_cylindrical_isolation_engine)
-
+from .pair_counters.mesh_helpers import (
+    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
 from ..utils.array_utils import convert_to_ndarray, custom_len
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('spherical_isolation', 'cylindrical_isolation',
-    'conditional_spherical_isolation', 'conditional_cylindrical_isolation')
+           'conditional_spherical_isolation', 'conditional_cylindrical_isolation')
 
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
-
+np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
 def spherical_isolation(sample1, sample2, r_max, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
-    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    an input spherical volume centered at each point in ``sample1``.
-
+    Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
+    neighbor in ``sample2`` within an user specified spherical volume centered at each 
+    point in ``sample1``.
+    
     Parameters
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-
+        
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-
+        
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+        
     sample2 : array_like
         Npts2 x 3 numpy array containing 3-D positions of points.
-    
-    r_max : float
-        size of sphere to search for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+        
+    r_max : array_like
+        radius of spheres to search for neighbors around galaxies in ``sample1``.
+        If a single float is given, r_max is assumed to be the same for each galaxy in
+        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+        
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+        
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely serial 
@@ -75,21 +72,22 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-
+        
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
         ``approx_cell1_size`` for details. 
-    
+        
     Returns
     -------
     is_isolated : numpy.array
-        array of booleans indicating if the point is isolated.
-        
+        array of booleans indicating if each point in `sample1` is isolated.
+    
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points ``sample1``. 
-    We will use the `~halotools.mock_observables.spherical_isolation` function to determine 
-    which points in ``sample1`` are a distance ``r_max`` greater than all other points in the sample.
+    For demonstration purposes we create a randomly distributed set of points ``sample1``.
+    We will use the `~halotools.mock_observables.spherical_isolation` function to 
+    determine which points in ``sample1`` are a distance ``r_max`` greater than all 
+    other points in the sample.
     
     >>> Npts = 1000
     >>> Lbox = 1.0
@@ -100,43 +98,44 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     >>> z = np.random.random(Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
-    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
     
     >>> sample1 = np.vstack((x,y,z)).T
-
-    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
+    
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array`
     convenience function for this same purpose, which provides additional wrapper 
     behavior around `numpy.vstack` such as placing points into redshift-space. 
-
+    
     Now we will call `spherical_isolation` with ``sample2`` set to ``sample1``:
-
+    
     >>> r_max = 0.05
     >>> is_isolated = spherical_isolation(sample1, sample1, r_max, period=period)
-
+    
     In the next example that follows, ``sample2`` will be a different set of points 
     from ``sample1``, so we will determine which points in ``sample1`` are located 
     greater than distance ``r_max`` away from all points in ``sample2``. 
-
+    
     >>> sample2 = np.random.random((Npts, 3))
     >>> is_isolated = spherical_isolation(sample1, sample2, r_max, period=period)
-
+    
     Notes
     -----
     There is one edge-case of all the isolation criteria functions worthy of special mention. 
     Suppose there exists a point *p* in ``sample1`` with the exact same spatial coordinates 
     as one or more points in ``sample2``. The matching point(s) in ``sample2`` will **not** 
     be considered neighbors of *p*. 
-
+    
     """
+    
     ### Process the inputs with the helper function
     result = _spherical_isolation_process_args(sample1, sample2, r_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    r_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    r_max, max_r_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
     
-    search_xlength, search_ylength, search_zlength = r_max, r_max, r_max 
+    search_xlength, search_ylength, search_zlength = max_r_max, max_r_max, max_r_max 
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -176,38 +175,41 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
 def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
-    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    an input cylindrical volume centered at each point in ``sample1``.
+    Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
+    neighbor in ``sample2`` within an user specified cylindrical volume centered at each 
+    point in ``sample1``.
         
     Parameters
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-
+    
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-
+    
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    
     sample2 : array_like
         Npts2 x 3 numpy array containing 3-D positions of points.
     
-    rp_max : float
-        radius of the cylinder to seach for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
-    pi_max : float
-        half-length of the cylinder to seach for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    rp_max : array_like
+        radius of the cylinder to search for neighbors around galaxies in ``sample1``.
+        If a single float is given, ``rp_max`` is assumed to be the same for each galaxy in
+        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+    
+    pi_max : array_like
+        half the length of cylinders to search for neighbors around galaxies in ``sample1``.
+        If a single float is given, ``pi_max`` is assumed to be the same for each galaxy in
+        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+    
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 
@@ -232,7 +234,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     Returns
     -------
     is_isolated : numpy.array
-        array of booleans indicating if the point is isolated.
+        array of booleans indicating if each point in `sample1` is isolated.
         
     Examples
     --------
@@ -258,24 +260,24 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     >>> sample1 = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = vz, velocity_distortion_dimension='z')
     
     Now we will call `cylindrical_isolation` with ``sample2`` set to ``sample1``:
-
+    
     >>> rp_max = 0.05
     >>> pi_max = 0.1
     >>> is_isolated = cylindrical_isolation(sample1, sample1, rp_max, pi_max, period=period)
-
+    
     In the next example that follows, ``sample2`` will be a different set of points 
     from ``sample1``, so we will determine which points in ``sample1`` 
     have a neighbor in ``sample2`` located inside a cylinder of radius ``rp_max`` 
     and half-length ``pi_max``. 
-
+    
     >>> x2 = np.random.random(Npts)
     >>> y2 = np.random.random(Npts)
     >>> z2 = np.random.random(Npts)
     >>> vz2 = np.random.normal(loc = 0, scale = 100, size = Npts)
     >>> sample2 = return_xyz_formatted_array(x2, y2, z2, period = Lbox, velocity = vz2, velocity_distortion_dimension='z')
-
+    
     >>> is_isolated = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=period)
-
+    
     Notes
     -----
     There is one edge-case of all the isolation criteria functions worthy of special mention. 
@@ -288,10 +290,10 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     result = _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rp_max, pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
     
-    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
+    search_xlength, search_ylength, search_zlength = max_rp_max, max_rp_max, max_pi_max 
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -332,15 +334,17 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     marks1, marks2, cond_func, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
-    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    an input spherical volume centered at each point in ``sample1``, 
-    where various additional conditions may be applied to judge whether a matching point 
-    is considered to be a neighbor. For example, 
-    `conditional_spherical_isolation` can be used to identify galaxies as isolated 
-    if no other galaxy with a greater stellar mass lies within 500 kpc. 
-    Different additional criteria can be built up from different 
-    combinations of input ``marks`` and ``cond_func``. 
-    See the Examples section for further details.  
+    Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
+    neighbor in ``sample2`` within an user specified spherical volume centered at each 
+    point in ``sample1``, where various additional conditions may be applied to judge 
+    whether a matching point is considered to be a neighbor. 
+    
+    For example, `conditional_spherical_isolation` can be used to identify galaxies as 
+    isolated if no other galaxy with a greater stellar mass lies within 500 kpc. 
+    Different additional criteria can be built up from different combinations of 
+    input ``marks1``, ``marks2`` and ``cond_func``.
+    
+    See the Examples section for further details.
     
     Parameters
     ----------
@@ -351,14 +355,15 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    
     sample2 : array_like
         Npts2 x 3 numpy array containing 3-D positions of points.
     
-    r_max : float
-        size of sphere to search for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    r_max : array_like
+        radius of spheres to search for neighbors around galaxies in ``sample1``.
+        If a single float is given, ``r_max`` is assumed to be the same for each galaxy in
+        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+    
     marks1 : array_like
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
@@ -380,7 +385,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 
@@ -397,15 +402,15 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-
+    
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
         ``approx_cell1_size`` for details. 
         
     Returns
     -------
     is_isolated : numpy.array
-        array of booleans indicating if the point is isolated.
+        array of booleans indicating if each point in `sample1` is isolated.
     
     Notes
     -----
@@ -414,17 +419,17 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     the input marks. In order for a point *p2* in ``sample2`` with mark :math:`w_{2}` 
     to be considered a neighbor of a point *p1* in ``sample1`` with mark :math:`w_{1}`, 
     two following conditions must be met:
-
+    
     #. *p2* must lie within a distance ``r_max`` of *p1*, and 
-
+    
     #. the input conditional marking function :math:`f(w_{1}, w_{2})` must return *True*.  
-
+    
     There are multiple conditional functions available.  In general, each requires a 
     different number of marks per point, N_marks.  The conditional function gets passed 
     two arrays per pair, *w1* and *w2*, of length N_marks and return a boolean.  
     You can pass in more than one piece of information about each point by choosing a 
     the input ``marks`` arrays to be multi-dimensional of shape (N_points, N_marks). 
-        
+    
     The available marking functions, ``cond_func`` and the associated integer 
     ID numbers are:
     
@@ -493,9 +498,9 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     In this first example, we will show how to calculate the following notion of 
     galaxy isolation. A galaxy is isolated if there are zero other *more massive* 
     galaxies within 5 Mpc. 
-
+    
     First we create a random distribution of points inside the box: 
-
+    
     >>> Npts = 1000
     >>> Lbox = 250.
     >>> x = np.random.uniform(0, Lbox, Npts)
@@ -511,15 +516,15 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     Now we will choose random stellar masses for our galaxies:
     
     >>> stellar_mass = np.random.uniform(1e10, 1e12, Npts)
-
+    
     Since we are interested in whether a point in ``sample1`` is isolated from other points 
     in ``sample1``, we set ``sample2`` to ``sample1`` and both ``marks1`` and ``marks2`` 
     equal to ``stellar_mass``. 
-
+    
     >>> sample2 = sample1
     >>> marks1 = stellar_mass
     >>> marks2 = stellar_mass
-
+    
     Referring to the Notes above for the definitions of the conditional marking functions, 
     we see that for this particular isolation criteria the appropriate ``cond_func`` is 2. 
     The reason is that this function only evaluates to *True* for those points in ``sample2`` 
@@ -530,18 +535,19 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     
     >>> r_max = 5.0
     >>> cond_func = 2
-
+    
     >>> is_isolated = conditional_spherical_isolation(sample1, sample2, r_max, marks1, marks2, cond_func, period=Lbox)
-
+    
     """
+    
     ### Process the inputs with the helper function
     result = _spherical_isolation_process_args(sample1, sample2, r_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    r_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    r_max, max_r_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
 
-    search_xlength, search_ylength, search_zlength = r_max, r_max, r_max 
+    search_xlength, search_ylength, search_zlength = max_r_max, max_r_max, max_r_max 
 
     # Process the input weights and with the helper function
     marks1, marks2 = _conditional_isolation_process_weights(sample1, sample2, marks1, marks2, cond_func)
@@ -585,40 +591,44 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                           marks1, marks2, cond_func, period=None, num_threads=1,
                           approx_cell1_size=None, approx_cell2_size=None):
     """
-    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
-    an input cylindrical volume centered at each point in ``sample1``, 
-    where various additional conditions may be applied to judge whether a matching point 
-    is considered to be a neighbor. For example, 
-    `conditional_cylindrical_isolation` can be used to identify galaxies as isolated 
-    if no other galaxy with a greater stellar mass lies within 500 kpc. 
-    Different additional criteria can be built up from different 
-    combinations of input ``marks`` and ``cond_func``. 
-    See the Examples section for further details.  
+    Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
+    neighbor in ``sample2`` within an user specified cylindrical volume centered at each 
+    point in ``sample1``, where various additional conditions may be applied to judge 
+    whether a matching point is considered to be a neighbor. 
+    
+    For example, `conditional_cylindrical_isolation` can be used to identify galaxies as 
+    isolated if no other galaxy with a greater stellar mass lies within a projcted 500 kpc
+    and line-of-sight 3 Mpc.  Different additional criteria can be built up from 
+    different combinations of input ``marks1``, ``marks2`` and ``cond_func``.
+    
+    See the Examples section for further details.
     
     
     Parameters
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-
+    
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
-
+    
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    
     sample2 : array_like
         Npts2 x 3 numpy array containing 3-D positions of points.
     
-    rp_max : float
-        radius of the cylinder to seach for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    rp_max : array_like
+        radius of the cylinder to search for neighbors around galaxies in ``sample1``.
+        If a single float is given, ``rp_max`` is assumed to be the same for each galaxy in
+        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+    
     pi_max : float
-        half the length of the cylinder to seach for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+        half the length of cylinders to search for neighbors around galaxies in ``sample1``.
+        If a single float is given, ``pi_max`` is assumed to be the same for each galaxy in
+        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+    
     marks1 : array_like
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
         appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
@@ -640,7 +650,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-
+    
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 
@@ -665,7 +675,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     Returns
     -------
     is_isolated : numpy.array
-        array of booleans indicating if the point is isolated.
+        array of booleans indicating if each point in `sample1` is isolated.
     
     Notes
     -----
@@ -674,11 +684,11 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     the input marks. In order for a point *p2* in ``sample2`` with mark :math:`w_{2}` 
     to be considered a neighbor of a point *p1* in ``sample1`` with mark :math:`w_{1}`, 
     two following conditions must be met:
-
+    
     #. *p2* must lie within an xy-distance ``rp_max`` and a z-distance ``pi_max`` of *p1*, and
-
+    
     #. the input conditional marking function :math:`f(w_{1}, w_{2})` must return *True*.  
-
+    
     There are multiple conditional functions available.  In general, each requires a 
     different number of marks per point, N_marks.  The conditional function gets passed 
     two arrays per pair, w1 and w2, of length N_marks and return a float.  
@@ -756,7 +766,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     galaxies within a projected distance of 750 kpc and a z-distance of 500 km/s. 
     
     First we create a random distribution of points inside the box, and also random z-velocities. 
-
+    
     >>> Npts = 1000
     >>> Lbox = 250.
     >>> x = np.random.uniform(0, Lbox, Npts)
@@ -769,26 +779,26 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     >>> from halotools.mock_observables import return_xyz_formatted_array
     >>> sample1 = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = vz, velocity_distortion_dimension='z')
-
+    
     Now we will choose random stellar masses for our galaxies:
     
     >>> stellar_mass = np.random.uniform(1e10, 1e12, Npts)
-
+    
     Since we are interested in whether a point in ``sample1`` is isolated from other points 
     in ``sample1``, we set ``sample2`` to ``sample1`` and both ``marks1`` and ``marks2`` 
     equal to ``stellar_mass``. 
-
+    
     >>> sample2 = sample1
     >>> marks1 = stellar_mass
     >>> marks2 = stellar_mass
-
+    
     All units in Halotools assume *h=1*, with lengths always in Mpc/h, so we have:
-
+    
     >>> rp_max = 0.75
-
+    
     Since *h=1* implies :math:`H_{0} = 100`km/s/Mpc, our 500 km/s velocity criteria 
     gets transformed into a z-dimension length criteria as:
-
+    
     >>> H0 = 100.0
     >>> pi_max = 500./H0
     
@@ -799,7 +809,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     relevant points to consider as candidate neighbors are the more massive ones; all other 
     ``sample2`` points will be disregarded irrespective of their distance from the 
     ``sample1`` point under consideration.
-
+    
     >>> cond_func = 2
     >>> is_isolated = conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max, marks1, marks2, cond_func, period=Lbox)
     """
@@ -808,10 +818,10 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     result = _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rp_max, pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
     
-    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
+    search_xlength, search_ylength, search_zlength = max_rp_max, max_rp_max, max_pi_max 
     
     # Process the input weights and with the helper function
     marks1, marks2 = _conditional_isolation_process_weights(sample1, sample2, marks1, marks2, cond_func)
@@ -854,6 +864,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
 def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period, 
     num_threads, approx_cell1_size, approx_cell2_size):
     """
+    private function to process the arguents for cylindrical isolation functions
     """
     if num_threads is not 1:
         if num_threads=='max':
@@ -869,13 +880,39 @@ def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period,
     x2 = data2[:,0]
     y2 = data2[:,1]
     z2 = data2[:,2]
-        
+    
+    N1 = len(x1)
+    
+    rp_max = convert_to_ndarray(rp_max).astype(float)
+    if len(rp_max) == 1:
+        rp_max = np.array([rp_max[0]]*N1)
+    try:
+        assert np.all(rp_max < np.inf)
+        assert np.all(rp_max > 0)
+    except AssertionError:
+        msg = "Input ``rp_max`` must be an array of bounded positive numbers."
+        raise ValueError(msg)
+    
+    max_rp_max = np.amax(rp_max)
+    
+    pi_max = convert_to_ndarray(pi_max).astype(float)
+    if len(pi_max) == 1:
+        pi_max = np.array([pi_max[0]]*N1)
+    try:
+        assert np.all(pi_max < np.inf)
+        assert np.all(pi_max > 0)
+    except AssertionError:
+        msg = "Input ``pi_max`` must be an array of bounded positive numbers."
+        raise ValueError(msg)
+    
+    max_pi_max = np.amax(pi_max)
+    
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2, 
-                min_size=[rp_max*3.0,rp_max*3.0,rp_max*3.0]))
+                min_size=[max_rp_max*3.0,max_rp_max*3.0,max_pi_max*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)
@@ -889,30 +926,31 @@ def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period,
             raise ValueError(msg)
     
     try:
-        assert rp_max < period[0]/3.
-        assert rp_max < period[1]/3.
-        assert pi_max < period[2]/3.
+        assert max_rp_max < period[0]/3.
+        assert max_rp_max < period[1]/3.
+        assert max_pi_max < period[2]/3.
     except AssertionError:
         msg = ("Input ``rp_max`` and ``pi_max`` must both be less than "
             "input period in the first two and third dimensions respectively.")
         raise ValueError(msg)
     
     if approx_cell1_size is None:
-        approx_cell1_size = [rp_max, rp_max, pi_max]
+        approx_cell1_size = [max_rp_max, max_rp_max, max_pi_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:    
-        approx_cell2_size = [rp_max, rp_max, pi_max]
+        approx_cell2_size = [max_rp_max, max_rp_max, max_pi_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
     
     return (x1, y1, z1, x2, y2, z2, 
-        rp_max, pi_max, period, num_threads, PBCs, 
+        rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs, 
         approx_cell1_size, approx_cell2_size)
 
 
 def _conditional_isolation_process_weights(data1, data2, weights1, weights2, cond_func):
     """
+    private function to process the arguents for conditional isolation functions
     """
     
     correct_num_weights = _func_signature_int_from_cond_func(cond_func)
@@ -1010,6 +1048,7 @@ def _conditional_isolation_process_weights(data1, data2, weights1, weights2, con
 def _spherical_isolation_process_args(data1, data2, r_max, period, 
     num_threads, approx_cell1_size, approx_cell2_size):
     """
+    private function to process the arguents for spherical isolation functions
     """
     if num_threads is not 1:
         if num_threads=='max':
@@ -1025,13 +1064,27 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
     x2 = data2[:,0]
     y2 = data2[:,1]
     z2 = data2[:,2]
-        
+    
+    N1 = len(x1)
+    
+    r_max = convert_to_ndarray(r_max).astype(float)
+    if len(r_max) == 1:
+        r_max = np.array([r_max[0]]*N1)
+    try:
+        assert np.all(r_max < np.inf)
+        assert np.all(r_max > 0)
+    except AssertionError:
+        msg = "Input ``r_max`` must be an array of bounded positive numbers."
+        raise ValueError(msg)
+    
+    max_r_max = np.amax(r_max)
+    
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2, 
-                min_size=[r_max*3.0,r_max*3.0,r_max*3.0]))
+                min_size=[max_r_max*3.0,max_r_max*3.0,max_r_max*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)
@@ -1045,24 +1098,24 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
             raise ValueError(msg)
 
     try:
-        assert r_max < period[0]/3.
-        assert r_max < period[1]/3.
-        assert r_max < period[2]/3.
+        assert max_r_max < period[0]/3.
+        assert max_r_max < period[1]/3.
+        assert max_r_max < period[2]/3.
     except AssertionError:
-        msg = ("Input ``r_max`` must be less than input period/3 in all dimensions.")
+        msg = ("Input ``max(r_max)`` must be less than input period/3 in all dimensions.")
         raise ValueError(msg)
 
     if approx_cell1_size is None:
-        approx_cell1_size = [r_max, r_max, r_max]
+        approx_cell1_size = [max_r_max, max_r_max, max_r_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:    
-        approx_cell2_size = [r_max, r_max, r_max]
+        approx_cell2_size = [max_r_max, max_r_max, max_r_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
         
     return (x1, y1, z1, x2, y2, z2, 
-        r_max, period, num_threads, PBCs, 
+        r_max, max_r_max, period, num_threads, PBCs, 
         approx_cell1_size, approx_cell2_size)
 
 

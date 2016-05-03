@@ -19,47 +19,66 @@ ctypedef bint (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
 @cython.nonecheck(False)
 def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     weights1in, weights2in, weight_func_idin, r_max, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation. 
-
-    Parameters 
-    ------------
+    """
+    Cython engine for determining if points in 'sample 1' are isolated, meaning no 
+    neighbors within a spherical volume, with respect to points in 'sample 2', where
+    points are counted as neighbors if and only if a weighting function dependant on 
+    weights for each point in sample 1 and sample 2 evaulates to true.
+    
+    Parameters
+    ----------
     double_mesh : object 
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
-
-    x1in, y1in, z1in : arrays 
-        Numpy arrays storing Cartesian coordinates of points in sample 1
-
-    x2in, y2in, z2in : arrays 
-        Numpy arrays storing Cartesian coordinates of points in sample 2
-
-    weight_func_id : int, optional
-        weighting function integer ID. 
-
-    weights1in : array 
-
-    weights2in : array 
-
-    rbins : array
-        Boundaries defining the bins in which pairs are counted.
-
+    
+    x1in : numpy.array
+        array storing Cartesian x-coordinates of points of 'sample 1'
+        
+    y1in : numpy.array
+        array storing Cartesian y-coordinates of points of 'sample 1'
+        
+    z1in : numpy.array
+        array storing Cartesian z-coordinates of points of 'sample 1'
+        
+    x2in : numpy.array
+        array storing Cartesian x-coordinates of points of 'sample 2'
+        
+    y2in : numpy.array
+        array storing Cartesian y-coordinates of points of 'sample 2'
+        
+    z2in : numpy.array
+        array storing Cartesian z-coordinates of points of 'sample 2'
+        
+    weights1in : numpy.ndarray
+        array storing weight(s) for each point in 'sample 1'
+        
+    weights2in : numpy.ndarray
+        array storing weight(s) for each point in 'sample 2'
+        
+    weight_func_idin : int
+        integer ID of weighting function (conditional function) to be used
+        
+    r_max : numpy.array
+        array storing the radial distance to search for neighbors around each point
+        in 'sample 1'
+        
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in 
         double_mesh.mesh1 that will be looped over. Intended for use with 
         python multiprocessing. 
-
-    Returns 
-    --------
-    counts : array 
-        Integer array of length len(rbins) giving the number of pairs 
-        separated by a distance less than the corresponding entry of ``rbins``. 
-
+        
+    Returns
+    -------
+    is_isolated : numpy.array
+        boolean array indicating if each point in 'sample 1' is isolated
     """
+    
     cdef int weight_func_id = weight_func_idin
 
     cdef f_type wfunc
     wfunc = return_conditional_function(weight_func_id)
 
-    cdef cnp.float64_t r_max_squared = r_max*r_max
+    r_max_squared_tmp = r_max*r_max
+    cdef cnp.float64_t[:] r_max_squared = np.ascontiguousarray(r_max_squared_tmp[double_mesh.mesh1.idx_sorted])
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -111,7 +130,7 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq, weight
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, r_max_squaredtmp 
     cdef int Ni, Nj, i, j, k, l, current_data1_index
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -197,7 +216,8 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
-
+                                r_max_squaredtmp = r_max_squared[ifirst1+i]
+                                
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance
@@ -208,7 +228,7 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
 
                                     weight = wfunc(&w_icell1[i,0], &w_icell2[j,0])
 
-                                    if (dsq < r_max_squared) & (weight == 1) & (dsq > 0.0):
+                                    if (dsq < r_max_squaredtmp) & (weight == 1) & (dsq > 0.0):
                                         has_neighbor[ifirst1+i] = 1
                                         break 
                                         
@@ -225,7 +245,6 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
     new_is_isolated[is_isolated] = 1
     
     return new_is_isolated
-
 
 
 cdef f_type return_conditional_function(cond_func_id):
