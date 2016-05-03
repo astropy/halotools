@@ -17,6 +17,151 @@ __all__ = ('test_mean_radial_velocity_vs_r_correctness1',
 
 fixed_seed = 43
 
+def pure_python_mean_radial_velocity_vs_r(
+    sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox = None):
+    """ Brute force pure python function calculating mean radial velocities 
+    in a single bin of separation. 
+    """ 
+    if Lbox is None:
+        xperiod, yperiod, zperiod = np.inf, np.inf, np.inf 
+    else:
+        xperiod, yperiod, zperiod = Lbox, Lbox, Lbox 
+
+    npts1, npts2 = len(sample1), len(sample2)
+
+    running_tally = []
+    for i in range(npts1):
+        for j in range(npts2):
+            dx = sample1[i,0] - sample2[j,0]
+            dy = sample1[i,1] - sample2[j,1]
+            dz = sample1[i,2] - sample2[j,2]
+            dvx = velocities1[i,0] - velocities2[j,0]
+            dvy = velocities1[i,1] - velocities2[j,1]
+            dvz = velocities1[i,2] - velocities2[j,2]
+
+            xsign_flip, ysign_flip, zsign_flip = 1, 1, 1
+            if dx > xperiod/2.:
+                dx = xperiod - dx
+                xsign_flip = -1
+            elif dx < -xperiod/2.:
+                dx = -(xperiod + dx)
+                xsign_flip = -1
+
+            if dy > yperiod/2.:
+                dy = yperiod - dy
+                ysign_flip = -1
+            elif dy < -yperiod/2.:
+                dy = -(yperiod + dy)
+                ysign_flip = -1
+
+            if dz > zperiod/2.:
+                dz = zperiod - dz
+                zsign_flip = -1
+            elif dz < -zperiod/2.:
+                dz = -(zperiod + dz)
+                zsign_flip = -1
+
+            d = np.sqrt(dx*dx + dy*dy + dz*dz)
+
+            if (d > rmin) & (d < rmax):
+                vrad = (dx*dvx*xsign_flip + dy*dvy*ysign_flip + dz*dvz*zsign_flip)/d
+                running_tally.append(vrad)
+
+    if len(running_tally) > 0:
+        return np.mean(running_tally)
+    else:
+        return 0.
+
+def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
+    """ This function tests that the 
+    `~halotools.mock_observables.mean_radial_velocity_vs_r` function returns 
+    results that agree with a brute force pure python implementation 
+    for a random distribution of points, both with and without PBCs. 
+    """
+
+    npts = 99
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts, 3))
+        sample2 = np.random.random((npts, 3))
+        velocities1 = np.random.uniform(-10, 10, npts*3).reshape((npts, 3))
+        velocities2 = np.random.uniform(-10, 10, npts*3).reshape((npts, 3))
+
+    rbins = np.array([0, 0.1, 0.2, 0.3])
+
+    ###########
+    # Run the test with PBCs turned off
+    s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins, 
+        sample2 = sample2, velocities2 = velocities2)
+
+    rmin, rmax = rbins[0], rbins[1]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rbins[1], rbins[2]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rbins[2], rbins[3]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01) 
+
+    ###########
+    # Run the test with PBCs operative
+    s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins, 
+        sample2 = sample2, velocities2 = velocities2, period=1)
+
+    rmin, rmax = rbins[0], rbins[1]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rbins[1], rbins[2]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rbins[2], rbins[3]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01) 
+
+def test_pure_python():
+    """ Verify that the brute-force pairwise velocity function returns the 
+    correct result for an analytically calculable case. 
+    """
+    correct_relative_velocity = -25
+
+    npts = 100
+
+    xc1, yc1, zc1 = 0.95, 0.5, 0.5
+    xc2, yc2, zc2 = 0.05, 0.5, 0.5
+
+    sample1 = generate_locus_of_3d_points(npts, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
+    
+    velocities1 = np.zeros(npts*3).reshape(npts, 3)
+    velocities2 = np.zeros(npts*3).reshape(npts, 3)
+    velocities1[:,0] = 50.
+    velocities2[:,0] = 25.
+
+    rbins = np.array([0, 0.05, 0.3])
+
+    msg = "pure python result is incorrect"
+
+    rmin, rmax = rbins[0], rbins[1]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
+    assert pure_python_s1s2 == 0, msg
+
+    rmin, rmax = rbins[1], rbins[2]
+    pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
+    assert np.allclose(pure_python_s1s2, correct_relative_velocity, rtol = 0.01), msg
+
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_correctness1():
     """ This function tests that the 

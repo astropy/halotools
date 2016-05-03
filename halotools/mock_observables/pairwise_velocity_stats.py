@@ -235,9 +235,9 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
             M_22 = V2V2/N2N2
             return (np.where(np.isfinite(M_11), M_11, 0.), 
                 np.where(np.isfinite(M_12), M_12, 0.), np.where(np.isfinite(M_22), M_22, 0.))
-        elif (do_cross is True):
+        elif do_cross is True:
             M_12 = V1V2/N1N2
-            return np.where(np.isfinite(M_12), M_12, 0.),
+            return np.where(np.isfinite(M_12), M_12, 0.)
         elif (do_auto is True):
             M_11 = V1V1/N1N1
             M_22 = V2V2/N2N2 
