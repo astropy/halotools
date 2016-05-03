@@ -77,18 +77,18 @@ def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
     cdef cnp.float64_t[:,:] counts2 = np.zeros((num_rp_bins, num_pi_bins), dtype=np.float64)
     cdef cnp.float64_t[:,:] counts3 = np.zeros((num_rp_bins, num_pi_bins), dtype=np.float64)
 
-    cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] z1 = np.ascontiguousarray(z1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted])
-    cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted])
-    cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted])
-    cdef cnp.float64_t[:, :] weights1 = np.ascontiguousarray(weights1in[double_mesh.mesh1.idx_sorted,:])
-    cdef cnp.float64_t[:, :] weights2 = np.ascontiguousarray(weights2in[double_mesh.mesh2.idx_sorted,:])
+    cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] z1 = np.ascontiguousarray(z1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:, :] weights1 = np.ascontiguousarray(weights1in[double_mesh.mesh1.idx_sorted,:], dtype=np.float64)
+    cdef cnp.float64_t[:, :] weights2 = np.ascontiguousarray(weights2in[double_mesh.mesh2.idx_sorted,:], dtype=np.float64)
 
     cdef cnp.int64_t icell1, icell2
-    cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices)
-    cdef cnp.int64_t[:] cell2_indices = np.ascontiguousarray(double_mesh.mesh2.cell_id_indices)
+    cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices, dtype=np.int64)
+    cdef cnp.int64_t[:] cell2_indices = np.ascontiguousarray(double_mesh.mesh2.cell_id_indices, dtype=np.int64)
 
     cdef cnp.int64_t ifirst1, ilast1, ifirst2, ilast2
 

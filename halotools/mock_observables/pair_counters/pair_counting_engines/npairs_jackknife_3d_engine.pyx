@@ -55,15 +55,15 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_rbins = len(rbins)
     cdef cnp.float64_t[:,:] counts = np.zeros((N_samples+1, num_rbins), dtype=np.float64)
 
-    cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] z1 = np.ascontiguousarray(z1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted])
-    cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted])
-    cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted])
+    cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] z1 = np.ascontiguousarray(z1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
-    cdef cnp.float64_t[:] weights1 = np.ascontiguousarray(weights1in[double_mesh.mesh1.idx_sorted])
-    cdef cnp.float64_t[:] weights2 = np.ascontiguousarray(weights2in[double_mesh.mesh2.idx_sorted])
+    cdef cnp.float64_t[:] weights1 = np.ascontiguousarray(weights1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] weights2 = np.ascontiguousarray(weights2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.int64_t[:] jtags1 = np.ascontiguousarray(jtags1in[double_mesh.mesh1.idx_sorted], dtype=np.int64)
     cdef cnp.int64_t[:] jtags2 = np.ascontiguousarray(jtags2in[double_mesh.mesh2.idx_sorted], dtype=np.int64)
 
