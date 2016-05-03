@@ -17,7 +17,7 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 __all__ = ('velocity_marked_npairs_3d', )
 
-def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
+def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
     weights1 = None, weights2 = None,
     weight_func_id = 0, verbose = False, num_threads = 1,
     approx_cell1_size = None, approx_cell2_size = None):
@@ -30,23 +30,28 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
 
     Parameters
     ----------
-    data1 : array_like
-        *N1* by 3 array of 3-D positions.  If the ``period`` parameter is set, each
-        component of the coordinates should be bounded between zero and the corresponding
-        periodic boundary.
+    sample1 : array_like
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    data2 : array_like
-        *N2* by 3 array of 3-D positions.  If the ``period`` parameter is set, each
-        component of the coordinates should be bounded between zero and the corresponding
-        periodic boundary.
+    sample2 : array_like
+        Npts2 x 3 array containing 3-D positions of points. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     rbins : array_like
-        numpy array of length Nrbins+1 defining the boundaries of bins in which
-        pairs are counted.
+        array of boundaries defining the real space radial bins in which pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, the period is assumed to be np.array([Lbox]*3).
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     weights1 : array_like, optional
         Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
@@ -67,22 +72,25 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
         If True, print out information and progress.
 
     num_threads : int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all
-        available cores.  num_threads=0 is the default.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.RectangularDoubleMesh`
-        will apportion the ``data`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use 1/10 of the box size in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use Lbox/10 in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
-    approx_cell2_size : array_like, optional
-        See comments for ``approx_cell1_size``.
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns
     -------
@@ -102,7 +110,7 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
         (which weighting function was chosen).
     """
 
-    result = _npairs_3d_process_args(data1, data2, rbins, period,
+    result = _npairs_3d_process_args(sample1, sample2, rbins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
@@ -113,7 +121,7 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
 
     # Process the input weights and with the helper function
     weights1, weights2 = (
-        _velocity_marked_npairs_3d_process_weights(data1, data2,
+        _velocity_marked_npairs_3d_process_weights(sample1, sample2,
             weights1, weights2, weight_func_id))
 
     ### Compute the estimates for the cell sizes
@@ -151,21 +159,21 @@ def velocity_marked_npairs_3d(data1, data2, rbins, period=None,
 
     return counts1, counts2, counts3
 
-def _velocity_marked_npairs_3d_process_weights(data1, data2, weights1, weights2, weight_func_id):
+def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
     """
     """
     
     correct_num_weights = _func_signature_int_from_vel_weight_func_id(weight_func_id)
-    npts_data1 = np.shape(data1)[0]
-    npts_data2 = np.shape(data2)[0]
-    correct_shape1 = (npts_data1, correct_num_weights)
-    correct_shape2 = (npts_data2, correct_num_weights)
+    npts_sample1 = np.shape(sample1)[0]
+    npts_sample2 = np.shape(sample2)[0]
+    correct_shape1 = (npts_sample1, correct_num_weights)
+    correct_shape2 = (npts_sample2, correct_num_weights)
     
     ### Process the input weights1
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
     if weights1 is None:
-        weights1 = np.ones((npts_data1, 1), dtype = np.float64)
+        weights1 = np.ones((npts_sample1, 1), dtype = np.float64)
     else:
         weights1 = convert_to_ndarray(weights1)
         weights1 = weights1.astype("float64")
@@ -190,23 +198,23 @@ def _velocity_marked_npairs_3d_process_weights(data1, data2, weights1, weights2,
         if _converted_to_2d_from_1d is True:
             msg = ("\n You passed in a 1-D array for `weights1` that \n"
                    "does not have the correct length. The number of \n"
-                   "points in `data1` = %i, while the number of points \n"
+                   "points in `sample1` = %i, while the number of points \n"
                    "in your input 1-D `weights1` array = %i")
-            raise HalotoolsError(msg % (npts_data1, npts_weights1))
+            raise HalotoolsError(msg % (npts_sample1, npts_weights1))
         else:
             msg = ("\n You passed in a 2-D array for `weights1` that \n"
-                   "does not have a consistent shape with `data1`. \n"
-                   "`data1` has length %i. The input value of `weight_func_id` = %i \n"
+                   "does not have a consistent shape with `sample1`. \n"
+                   "`sample1` has length %i. The input value of `weight_func_id` = %i \n"
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights1` is (%i, %i)\n")
             raise HalotoolsError(msg % 
-                (npts_data1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
+                (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
     
     ### Process the input weights2
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
     if weights2 is None:
-        weights2 = np.ones((npts_data2, 1), dtype = np.float64)
+        weights2 = np.ones((npts_sample2, 1), dtype = np.float64)
     else:
         weights2 = convert_to_ndarray(weights2)
         weights2 = weights2.astype("float64")
@@ -231,17 +239,17 @@ def _velocity_marked_npairs_3d_process_weights(data1, data2, weights1, weights2,
         if _converted_to_2d_from_1d is True:
             msg = ("\n You passed in a 1-D array for `weights2` that \n"
                    "does not have the correct length. The number of \n"
-                   "points in `data2` = %i, while the number of points \n"
+                   "points in `sample2` = %i, while the number of points \n"
                    "in your input 1-D `weights2` array = %i")
-            raise HalotoolsError(msg % (npts_data2, npts_weights2))
+            raise HalotoolsError(msg % (npts_sample2, npts_weights2))
         else:
             msg = ("\n You passed in a 2-D array for `weights2` that \n"
-                   "does not have a consistent shape with `data2`. \n"
-                   "`data2` has length %i. The input value of `weight_func_id` = %i \n"
+                   "does not have a consistent shape with `sample2`. \n"
+                   "`sample2` has length %i. The input value of `weight_func_id` = %i \n"
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights2` is (%i, %i)\n")
             raise HalotoolsError(msg % 
-                (npts_data2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
+                (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
     
     return weights1, weights2
 

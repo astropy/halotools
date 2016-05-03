@@ -16,7 +16,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_
 
 __all__ = ('npairs_projected', )
 
-def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
+def npairs_projected(sample1, sample2, rp_bins, pi_max, period = None,
     verbose = False, num_threads = 1,
     approx_cell1_size = None, approx_cell2_size = None):
     """
@@ -24,9 +24,9 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
     less than the input ``rp_bins`` and separation in the z-dimension less than 
     the input ``pi_max``. 
 
-    Note that if data1 == data2 that the
+    Note that if sample1 == sample2 that the
     `~halotools.mock_observables.npairs_projected` function double-counts pairs.
-    If your science application requires data1==data2 inputs and also pairs
+    If your science application requires sample1==sample2 inputs and also pairs
     to not be double-counted, simply divide the final counts by 2.
 
     A common variation of pair-counting calculations is to count pairs with
@@ -36,52 +36,53 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
 
     Parameters
     ----------
-    data1 : array_like
-        N1 by 3 numpy array of 3-dimensional positions.
-        Values of each dimension should be between zero and the corresponding dimension
-        of the input period.
+    sample1 : array_like
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    data2 : array_like
-        N2 by 3 numpy array of 3-dimensional positions.
-        Values of each dimension should be between zero and the corresponding dimension
-        of the input period.
+    sample2 : array_like, optional
+        Npts2 x 3 array containing 3-D positions of points. 
 
     rp_bins : array_like
-        numpy array of boundaries defining the bins of separation in the xy-plane 
-        :math:`r_{\\rm p}` in which pairs are counted.
+        array of boundaries defining the radial bins perpendicular to the LOS in which 
+        pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     pi_max : float 
         Maximum value in the z-dimension over which pairs will be counted. 
 
     period : array_like, optional
-        Length-3 array defining the periodic boundary conditions.
-        If only one number is specified, the enclosing volume is assumed to
-        be a periodic cube (by far the most common case).
-        If period is set to None, the default option,
-        PBCs are set to infinity.
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
 
     verbose : Boolean, optional
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of CPU cores to use in the pair counting.
-        If ``num_threads`` is set to the string 'max', use all available cores.
-        Default is 1 thread for a serial calculation that
-        does not open a multiprocessing pool.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.RectangularDoubleMesh`
-        will apportion the ``data`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use 1/10 of the box size in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use Lbox/10 in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
-    approx_cell2_size : array_like, optional
-        See comments for ``approx_cell1_size``.
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns
     -------
@@ -109,15 +110,15 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
 
-    >>> data1 = np.vstack([x1, y1, z1]).T
-    >>> data2 = np.vstack([x2, y2, z2]).T
+    >>> sample1 = np.vstack([x1, y1, z1]).T
+    >>> sample2 = np.vstack([x2, y2, z2]).T
 
-    >>> result = npairs_projected(data1, data2, rp_bins, pi_max, period = period)
+    >>> result = npairs_projected(sample1, sample2, rp_bins, pi_max, period = period)
 
     """
 
     ### Process the inputs with the helper function
-    result = _npairs_projected_process_args(data1, data2, rp_bins, pi_max, period,
+    result = _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
@@ -141,8 +142,8 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
 
     # # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_projected_engine, 
-        double_mesh, data1[:,0], data1[:,1], data1[:,2], 
-        data2[:,0], data2[:,1], data2[:,2], rp_bins, pi_max)
+        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
+        sample2[:,0], sample2[:,1], sample2[:,2], rp_bins, pi_max)
 
     # # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -158,7 +159,7 @@ def npairs_projected(data1, data2, rp_bins, pi_max, period = None,
 
     return np.array(counts)
 
-def _npairs_projected_process_args(data1, data2, rp_bins, pi_max, period, 
+def _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
@@ -170,12 +171,12 @@ def _npairs_projected_process_args(data1, data2, rp_bins, pi_max, period,
             raise ValueError(msg)
     
     # Passively enforce that we are working with ndarrays
-    x1 = data1[:,0]
-    y1 = data1[:,1]
-    z1 = data1[:,2]
-    x2 = data2[:,0]
-    y2 = data2[:,1]
-    z2 = data2[:,2]
+    x1 = sample1[:,0]
+    y1 = sample1[:,1]
+    z1 = sample1[:,2]
+    x2 = sample2[:,0]
+    y2 = sample2[:,1]
+    z2 = sample2[:,2]
 
     rp_bins = np.atleast_1d(rp_bins).astype('f8')
     try:

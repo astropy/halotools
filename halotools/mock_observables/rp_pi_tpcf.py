@@ -64,7 +64,8 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points. 
         Passing ``sample2`` as an input permits the calculation of 
-        the cross-correlation function. Default is None, in which case only the 
+        the cross-correlation function. 
+        Default is None, in which case only the 
         auto-correlation function will be calculated. 
     
     randoms : array_like, optional

@@ -18,7 +18,7 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 __all__ = ('marked_npairs_xy_z', )
 
-def marked_npairs_xy_z(data1, data2, rp_bins, pi_bins, 
+def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, 
                   period=None, weights1 = None, weights2 = None,
                   weight_func_id = 0, verbose = False, num_threads = 1,
                   approx_cell1_size = None, approx_cell2_size = None):
@@ -34,27 +34,31 @@ def marked_npairs_xy_z(data1, data2, rp_bins, pi_bins,
 
     Parameters
     ----------
-    data1 : array_like
-        *N1* by 3 array of 3-D positions.  If the ``period`` parameter is set, each
-        component of the coordinates should be bounded between zero and the corresponding
-        periodic boundary.
+    sample1 : array_like
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    data2 : array_like
-        *N2* by 3 array of 3-D positions.  If the ``period`` parameter is set, each
-        component of the coordinates should be bounded between zero and the corresponding
-        periodic boundary.
+    sample2 : array_like, optional
+        Npts2 x 3 array containing 3-D positions of points. 
 
     rp_bins : array_like
-        numpy array of length Nrp_bins+1 defining the boundaries of bins of projected
-        separation, :math:`r_{\\rm p}`, in which pairs are counted.
+        array of boundaries defining the radial bins perpendicular to the LOS in which 
+        pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     pi_bins : array_like
-        numpy array of length Npi_bins+1 defining the boundaries of bins of parallel
-        separation, :math:`\\pi`, in which pairs are counted.
+        array of boundaries defining the p radial bins parallel to the LOS in which 
+        pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, the period is assumed to be np.array([Lbox]*3).
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
 
     weights1 : array_like, optional
         Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
@@ -75,22 +79,25 @@ def marked_npairs_xy_z(data1, data2, rp_bins, pi_bins,
         If True, print out information and progress.
 
     num_threads : int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all
-        available cores.  num_threads=0 is the default.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.RectangularDoubleMesh`
-        will apportion the ``data`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use 1/10 of the box size in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use Lbox/10 in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
-    approx_cell2_size : array_like, optional
-        See comments for ``approx_cell1_size``.
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns
     -------
@@ -100,7 +107,7 @@ def marked_npairs_xy_z(data1, data2, rp_bins, pi_bins,
     """
 
     ### Process the inputs with the helper function
-    result = _npairs_xy_z_process_args(data1, data2, rp_bins, pi_bins, period,
+    result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
@@ -111,7 +118,7 @@ def marked_npairs_xy_z(data1, data2, rp_bins, pi_bins,
     search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
 
     # Process the input weights and with the helper function
-    weights1, weights2 = _marked_npairs_process_weights(data1, data2,
+    weights1, weights2 = _marked_npairs_process_weights(sample1, sample2,
             weights1, weights2, weight_func_id)
 
     ### Compute the estimates for the cell sizes

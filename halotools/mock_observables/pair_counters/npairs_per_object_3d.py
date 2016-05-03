@@ -15,7 +15,7 @@ from .npairs_3d import _npairs_3d_process_args
 
 __all__ = ('npairs_per_object_3d', )
 
-def npairs_per_object_3d(data1, data2, rbins, period = None,
+def npairs_per_object_3d(sample1, sample2, rbins, period = None,
     verbose = False, num_threads = 1,
     approx_cell1_size = None, approx_cell2_size = None):
     """
@@ -24,21 +24,20 @@ def npairs_per_object_3d(data1, data2, rbins, period = None,
 
     Parameters
     ----------
-    data1 : array_like
-        N1 by 3 numpy array of 3-dimensional positions.
-        Values of each dimension should be between zero and the corresponding dimension
-        of the input period.
+    sample1 : array_like
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    data2 : array_like
-        N2 by 3 numpy array of 3-dimensional positions.
-        Values of each dimension should be between zero and the corresponding dimension
-        of the input period.
+    sample2 : array_like, optional
+        Npts2 x 3 array containing 3-D positions of points. 
 
     rbins : array_like
         Boundaries defining the bins in which pairs are counted.
-
-    n_thresh : int, optional
-        positive integer number indicating the threshold pair count
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.
@@ -51,24 +50,25 @@ def npairs_per_object_3d(data1, data2, rbins, period = None,
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of CPU cores to use in the pair counting.
-        If ``num_threads`` is set to the string 'max', use all available cores.
-        Default is 1 thread for a serial calculation that
-        does not open a multiprocessing pool.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional
-        Length-3 array serving as a guess for the optimal manner by which
-        the `~halotools.mock_observables.pair_counters.RectangularDoubleMesh`
-        will apportion the ``data`` points into subvolumes of the simulation box.
-        The optimum choice unavoidably depends on the specs of your machine.
-        Default choice is to use 1/10 of the box size in each dimension,
-        which will return reasonable result performance for most use-cases.
-        Performance can vary sensitively with this parameter, so it is highly
-        recommended that you experiment with this parameter when carrying out
-        performance-critical calculations.
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use Lbox/10 in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
 
-    approx_cell2_size : array_like, optional
-        See comments for ``approx_cell1_size``.
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns
     -------
@@ -94,14 +94,14 @@ def npairs_per_object_3d(data1, data2, rbins, period = None,
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
 
-    >>> data1 = np.vstack([x1, y1, z1]).T
-    >>> data2 = np.vstack([x2, y2, z2]).T
+    >>> sample1 = np.vstack([x1, y1, z1]).T
+    >>> sample2 = np.vstack([x2, y2, z2]).T
 
-    >>> result = npairs_per_object_3d(data1, data2, rbins, period = period)
+    >>> result = npairs_per_object_3d(sample1, sample2, rbins, period = period)
     """
 
     ### Process the inputs with the helper function
-    result = _npairs_3d_process_args(data1, data2, rbins, period,
+    result = _npairs_3d_process_args(sample1, sample2, rbins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
@@ -125,8 +125,8 @@ def npairs_per_object_3d(data1, data2, rbins, period = None,
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_per_object_3d_engine, 
-        double_mesh, data1[:,0], data1[:,1], data1[:,2], 
-        data2[:,0], data2[:,1], data2[:,2], rbins)
+        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
+        sample2[:,0], sample2[:,1], sample2[:,2], rbins)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
