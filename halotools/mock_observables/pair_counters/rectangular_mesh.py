@@ -45,8 +45,8 @@ def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
     be less than the search length, must evenly divide the box length, 
     and may not exceed ``max_cells_per_dimension``. 
     """
-    num_sample1_cells = int(round(period / sample1_cell_size))
-    ndivs_sample1_cells = int(round(sample1_cell_size/float(approx_cell_size)))
+    num_sample1_cells = int(np.round(period / sample1_cell_size))
+    ndivs_sample1_cells = int(np.round(sample1_cell_size/float(approx_cell_size)))
     ndivs_sample1_cells = max(1, ndivs_sample1_cells)
     ndivs_sample1_cells = min(max_cells_per_dimension, ndivs_sample1_cells)
     num_sample2_cells = num_sample1_cells*ndivs_sample1_cells
