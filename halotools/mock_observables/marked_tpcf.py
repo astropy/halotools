@@ -1,25 +1,24 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate the marked two point correlation function, MCF.
+Module containing the `~halotools.mock_observables.marked_tpcf` function used to 
+calculate the marked two-point correlation function. 
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+
 from .clustering_helpers import _marked_tpcf_process_args
-from .pair_counters.marked_double_tree_pairs import marked_npairs
-from .pair_counters import npairs_3d
+from .pair_counters import npairs_3d, marked_npairs_3d
 
 
-__all__=['marked_tpcf']
+__all__ = ['marked_tpcf']
 __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 def marked_tpcf(sample1, rbins, sample2=None, 
     marks1=None, marks2=None, period=None, do_auto=True, do_cross=True, 
-    num_threads=1, max_sample_size=int(1e6), wfunc=1, 
+    num_threads=1, max_sample_size=int(1e6), weight_func_id=1, 
     normalize_by='random_marks', iterations=1, randomize_marks=None):
     """ 
     Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
@@ -34,45 +33,64 @@ def marked_tpcf(sample1, rbins, sample2=None,
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     rbins : array_like
-        array of boundaries defining the real space radial bins in which pairs are 
-        counted.
+        array of boundaries defining the real space radial bins in which pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     marks1 : array_like, optional
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
-        appropriate shape for the chosen ``wfunc`` (see Notes for requirements).  If this
+        appropriate shape for the chosen ``weight_func_id`` (see Notes for requirements).  If this
         parameter is not specified, it is set to numpy.ones((len(sample1), N_marks)).
         
     marks2 : array_like, optional
         len(sample2) x N_marks array of marks.  The supplied marks array must have the 
-        appropriate shape for the chosen ``wfunc`` (see Notes for requirements).  If this
+        appropriate shape for the chosen ``weight_func_id`` (see Notes for requirements).  If this
         parameter is not specified, it is set to numpy.ones((len(sample2), N_marks)).
     
     period : array_like, optional
-        length 3 array defining periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
-        do auto-correlation?
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
     
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is equal to max_sample_size.
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
-    wfunc : int, optional
+    weight_func_id : int, optional
         Integer ID indicating which marking function should be used. 
         See notes for a list of available marking functions.
     
@@ -122,10 +140,10 @@ def marked_tpcf(sample1, rbins, sample2=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.marked_npairs`.
-    This pair counter is optimized to work on points distributed in a rectangular  
-    volume, e.g. a simulation box.  This optimization restricts this function to work on 
-    3-D point distributions.
+    `~halotools.mock_observables.pair_counters.marked_npairs_3d`.
+
+    If the ``period`` argument is passed in, the ith coordinate of all points
+    must be between 0 and period[i].
     
     ``normalize_by`` indicates how to calculate :math:`\\mathrm{XX}`.  If ``normalize_by``
     is 'random_marks', then :math:`\\mathrm{XX} \\equiv \\mathcal{RR}`, and 
@@ -136,12 +154,11 @@ def marked_tpcf(sample1, rbins, sample2=None,
         \\mathcal{M}(r) \\equiv \\frac{\\sum_{ij}f(m_i,m_j)}{\\sum_{kl}f(m_k,m_l)}
     
     where the sum in the numerator is of pairs :math:`i,j` with seperation :math:`r`, 
-    and marks :math:`m_i,m_j`.  :math:`f()` is the marking function, ``wfunc``.  The sum 
+    and marks :math:`m_i,m_j`.  :math:`f()` is the marking function, ``weight_func_id``.  The sum 
     in the denominator is over an equal number of random pairs :math:`k,l`. The 
     calculation of this sum can be done multiple times, by setting the ``iterations`` 
     parameter. The mean of the sum is then taken amongst iterations and used in the 
     calculation.
-    
     
     If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{XX} \\equiv \\mathrm{DD}`
     is calculated by counting total number of pairs using 
@@ -154,7 +171,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     There are multiple marking functions available.  In general, each requires a different
     number of marks per point, N_marks.  The marking function gets passed two vectors 
     per pair, w1 and w2, of length N_marks and return a float.  The available marking 
-    functions, ``wfunc`` and the associated integer ID numbers are:
+    functions, ``weight_func_id`` and the associated integer ID numbers are:
     
     #. multiplicaitive weights (N_marks = 1)
         .. math::
@@ -270,7 +287,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     Use the multiplicative marking function:
     
     >>> rbins = np.logspace(-2,-1,10)
-    >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='number_counts', wfunc=1)
+    >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='number_counts', weight_func_id=1)
     
     The result should be consistent with :math:`\\langle {\\rm mark}\\rangle^2` at all *r* 
     within the statistical errors.
@@ -280,21 +297,21 @@ def marked_tpcf(sample1, rbins, sample2=None,
     #process parameters
     function_args = (sample1, rbins, sample2, marks1, marks2, 
         period, do_auto, do_cross, num_threads, max_sample_size, 
-        wfunc, normalize_by, iterations, randomize_marks)
+        weight_func_id, normalize_by, iterations, randomize_marks)
     sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross, num_threads,\
-        wfunc, normalize_by, _sample1_is_sample2, PBCs,\
+        weight_func_id, normalize_by, _sample1_is_sample2, PBCs,\
         randomize_marks = _marked_tpcf_process_args(*function_args)
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2):
+        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
         """
         Count weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1 = marked_npairs(sample1, sample1, rbins,
+            D1D1 = marked_npairs_3d(sample1, sample1, rbins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc, period=period, num_threads=num_threads)
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -305,14 +322,14 @@ def marked_tpcf(sample1, rbins, sample2=None,
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = marked_npairs(sample1, sample2, rbins,
-                    weights1=marks1, weights2=marks2, wfunc = wfunc,
+                D1D2 = marked_npairs_3d(sample1, sample2, rbins,
+                    weights1=marks1, weights2=marks2, weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = marked_npairs(sample2, sample2, rbins,
-                    weights1=marks2, weights2=marks2, wfunc = wfunc,
+                D2D2 = marked_npairs_3d(sample2, sample2, rbins,
+                    weights1=marks2, weights2=marks2, weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
@@ -320,7 +337,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
         return D1D1, D1D2, D2D2
     
     def random_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, wfunc,
+        do_auto, do_cross, marks1, marks2, weight_func_id,
         _sample1_is_sample2, permutate1, permutate2, randomize_marks):
         """
         Count random weighted data pairs.
@@ -336,9 +353,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 permuted_marks2[:,i] = marks2[permutate2,i]
         
         if do_auto is True:
-            R1R1 = marked_npairs(sample1, sample1, rbins,
+            R1R1 = marked_npairs_3d(sample1, sample1, rbins,
                 weights1=marks1, weights2=permuted_marks1,
-                wfunc = wfunc, period=period, num_threads=num_threads)
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
             R1R1 = np.diff(R1R1)
         else:
             R1R1=None
@@ -349,16 +366,16 @@ def marked_tpcf(sample1, rbins, sample2=None,
             R2R2 = R1R1
         else:
             if do_cross is True:
-                R1R2 = marked_npairs(sample1, sample2, rbins,
+                R1R2 = marked_npairs_3d(sample1, sample2, rbins,
                     weights1=permuted_marks1,
                     weights2=permuted_marks2,
-                    wfunc = wfunc, period=period, num_threads=num_threads)
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
                 R1R2 = np.diff(R1R2)
             else: R1R2=None
             if do_auto is True:
-                R2R2 = marked_npairs(sample2, sample2, rbins,
+                R2R2 = marked_npairs_3d(sample2, sample2, rbins,
                     weights1=marks2, weights2=permuted_marks2,
-                    wfunc = wfunc, period=period, num_threads=num_threads)
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
                 R2R2 = np.diff(R2R2)
             else: R2R2=None
 
@@ -401,7 +418,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     
     #calculate marked pairs
     W1W1,W1W2,W2W2 = marked_pair_counts(sample1, sample2, rbins, period,
-        num_threads, do_auto, do_cross, marks1, marks2, wfunc,_sample1_is_sample2)
+        num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,_sample1_is_sample2)
     
     if normalize_by=='number_counts':
         R1R1,R1R2,R2R2 = pair_counts(sample1, sample2, rbins, period,
@@ -420,7 +437,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 permutate2 = np.random.permutation(np.arange(0,len(sample2)))
                 R1R1[i,:],R1R2[i,:],R2R2[i,:] = random_counts(
                     sample1, sample2, rbins, period,num_threads, 
-                    do_auto, do_cross,marks1, marks2, wfunc,
+                    do_auto, do_cross,marks1, marks2, weight_func_id,
                     _sample1_is_sample2,permutate1, permutate2, randomize_marks)
             #take mean of the iterations
             # R1R1_err = np.std(R1R1, axis=0)
@@ -434,7 +451,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
             permutate1 = np.random.permutation(np.arange(0,len(sample1)))
             permutate2 = np.random.permutation(np.arange(0,len(sample2)))
             R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,
-                num_threads, do_auto, do_cross, marks1, marks2, wfunc,
+                num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,
                 _sample1_is_sample2, permutate1, permutate2, randomize_marks)
     else: 
         msg = 'normalize_by parameter not recognized.'

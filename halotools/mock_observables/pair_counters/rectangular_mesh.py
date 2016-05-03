@@ -45,8 +45,8 @@ def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
     be less than the search length, must evenly divide the box length, 
     and may not exceed ``max_cells_per_dimension``. 
     """
-    num_sample1_cells = int(round(period / sample1_cell_size))
-    ndivs_sample1_cells = int(round(sample1_cell_size/float(approx_cell_size)))
+    num_sample1_cells = int(np.round(period / sample1_cell_size))
+    ndivs_sample1_cells = int(np.round(sample1_cell_size/float(approx_cell_size)))
     ndivs_sample1_cells = max(1, ndivs_sample1_cells)
     ndivs_sample1_cells = min(max_cells_per_dimension, ndivs_sample1_cells)
     num_sample2_cells = num_sample1_cells*ndivs_sample1_cells
@@ -149,9 +149,9 @@ class RectangularMesh(object):
         self.yperiod = yperiod
         self.zperiod = zperiod
 
-        self.num_xdivs = max(int(round(xperiod / approx_xcell_size)), 1)
-        self.num_ydivs = max(int(round(yperiod / approx_ycell_size)), 1)
-        self.num_zdivs = max(int(round(zperiod / approx_zcell_size)), 1)
+        self.num_xdivs = max(int(np.round(xperiod / approx_xcell_size)), 1)
+        self.num_ydivs = max(int(np.round(yperiod / approx_ycell_size)), 1)
+        self.num_zdivs = max(int(np.round(zperiod / approx_zcell_size)), 1)
         self.ncells = self.num_xdivs*self.num_ydivs*self.num_zdivs
 
         self.xcell_size = self.xperiod / float(self.num_xdivs)
@@ -251,13 +251,35 @@ class RectangularDoubleMesh(object):
     def _check_sensible_constructor_inputs(self):
         try:
             assert self.search_xlength <= self.xperiod/3.
+        except AssertionError:
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "You tried to search for pairs out to a length of search_xlength = %.2f,\n"
+                "but the size of your box in this dimension is xperiod = %.2f.\n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n" % (self.search_xlength, self.xperiod))
+            raise ValueError(msg)
+
+        try:
             assert self.search_ylength <= self.yperiod/3.
+        except AssertionError:
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "You tried to search for pairs out to a length of search_ylength = %.2f,\n"
+                "but the size of your box in this dimension is yperiod = %.2f.\n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n" % (self.search_ylength, self.yperiod))
+            raise ValueError(msg)
+
+        try:
             assert self.search_zlength <= self.zperiod/3.
         except AssertionError:
             msg = ("\n The maximum length over which you search for pairs of points \n"
                 "cannot be larger than Lbox/3 in any dimension. \n"
+                "You tried to search for pairs out to a length of search_zlength = %.2f,\n"
+                "but the size of your box in this dimension is zperiod = %.2f.\n"
                 "If you need to count pairs on these length scales, \n"
-                "you should use a larger simulation.\n")
+                "you should use a larger simulation.\n" % (self.search_zlength, self.zperiod))
             raise ValueError(msg)
 
 
