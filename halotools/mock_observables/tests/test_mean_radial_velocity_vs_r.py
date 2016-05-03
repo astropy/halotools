@@ -386,8 +386,9 @@ def test_mean_radial_velocity_vs_r_correctness5():
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel1():
     """ 
-    Verify that the parallel and serial results are identical 
-    for two tight localizations of points with PBCs operative. 
+    Verify that the `~halotools.mock_observables.mean_radial_velocity_vs_r` function 
+    returns identical results for two tight loci of points whether the function 
+    runs in parallel or serial. 
     """
 
     npts = 91
@@ -417,8 +418,9 @@ def test_mean_radial_velocity_vs_r_parallel1():
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel2():
     """ 
-    Verify that the parallel and serial results are identical 
-    for random points and velocities, with PBCs operative. 
+    Verify that the `~halotools.mock_observables.mean_radial_velocity_vs_r` function 
+    returns identical results for two random distributions of points whether the function 
+    runs in parallel or serial, with PBCs operative. 
     """
     npts = 101
 
@@ -443,8 +445,9 @@ def test_mean_radial_velocity_vs_r_parallel2():
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel3():
     """ 
-    Verify that the parallel and serial results are identical 
-    for random points and velocities, with PBCs turned off. 
+    Verify that the `~halotools.mock_observables.mean_radial_velocity_vs_r` function 
+    returns identical results for two random distributions of points whether the function 
+    runs in parallel or serial, with PBCs turned off. 
     """
     npts = 101
 
@@ -469,7 +472,8 @@ def test_mean_radial_velocity_vs_r_parallel3():
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_auto_consistency():
-    """ Verify that we get self-consistent auto-correlation results 
+    """ Verify that the `~halotools.mock_observables.mean_radial_velocity_vs_r` function  
+    returns self-consistent auto-correlation results 
     regardless of whether we ask for cross-correlations. 
     """
     npts = 101
@@ -493,7 +497,8 @@ def test_mean_radial_velocity_vs_r_auto_consistency():
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_cross_consistency():
-    """ Verify that we get self-consistent cross-correlation results 
+    """ Verify that the `~halotools.mock_observables.mean_radial_velocity_vs_r` function  
+    returns self-consistent cross-correlation results 
     regardless of whether we ask for auto-correlations. 
     """
     npts = 101
