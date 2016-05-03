@@ -14,6 +14,119 @@ __all__ = ('test_mean_los_velocity_vs_rp_correctness1', 'test_mean_los_velocity_
 
 fixed_seed = 43
 
+def pure_python_mean_los_velocity_vs_rp(
+    sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox = None):
+    """ Brute force pure python function calculating mean los velocities 
+    in a single bin of separation. 
+    """ 
+    if Lbox is None:
+        xperiod, yperiod, zperiod = np.inf, np.inf, np.inf 
+    else:
+        xperiod, yperiod, zperiod = Lbox, Lbox, Lbox 
+
+    npts1, npts2 = len(sample1), len(sample2)
+
+    running_tally = []
+    for i in range(npts1):
+        for j in range(npts2):
+            dx = sample1[i,0] - sample2[j,0]
+            dy = sample1[i,1] - sample2[j,1]
+            dz = sample1[i,2] - sample2[j,2]
+            dvz = velocities1[i,2] - velocities2[j,2]
+
+            if dx > xperiod/2.:
+                dx = xperiod - dx
+            elif dx < -xperiod/2.:
+                dx = -(xperiod + dx)
+
+            if dy > yperiod/2.:
+                dy = yperiod - dy
+            elif dy < -yperiod/2.:
+                dy = -(yperiod + dy)
+
+            if dz > zperiod/2.:
+                dz = zperiod - dz
+                zsign_flip = -1
+            elif dz < -zperiod/2.:
+                dz = -(zperiod + dz)
+                zsign_flip = -1
+            else:
+                zsign_flip = 1
+
+            d_rp = np.sqrt(dx*dx + dy*dy)
+
+            if (d_rp > rp_min) & (d_rp < rp_max) & (abs(dz) < pi_max):
+                if abs(dz) > 0:
+                    vlos = dvz*dz*zsign_flip/abs(dz)
+                else:
+                    vlos = dvz
+                running_tally.append(vlos)
+
+    if len(running_tally) > 0:
+        return np.mean(running_tally)
+    else:
+        return 0.
+
+
+def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
+    """ This function tests that the 
+    `~halotools.mock_observables.mean_radial_velocity_vs_r` function returns 
+    results that agree with a brute force pure python implementation 
+    for a random distribution of points, both with and without PBCs. 
+    """
+
+    npts = 99
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts, 3))
+        sample2 = np.random.random((npts, 3))
+        velocities1 = np.random.uniform(-10, 10, npts*3).reshape((npts, 3))
+        velocities2 = np.random.uniform(-10, 10, npts*3).reshape((npts, 3))
+
+    rp_bins, pi_max = np.array([0, 0.1, 0.2, 0.3]), 0.1
+
+    ###########
+    # Run the test with PBCs turned off
+    s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max, 
+        sample2 = sample2, velocities2 = velocities2, do_auto = False)
+
+    rmin, rmax = rp_bins[0], rp_bins[1]
+    pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rp_bins[1], rp_bins[2]
+    pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rp_bins[2], rp_bins[3]
+    pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01) 
+
+
+    # ###########
+    # # Run the test with PBCs operative
+    s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max, 
+        sample2 = sample2, velocities2 = velocities2, do_auto = False, period=1)
+
+    rmin, rmax = rp_bins[0], rp_bins[1]
+    pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rp_bins[1], rp_bins[2]
+    pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01) 
+
+    rmin, rmax = rp_bins[2], rp_bins[3]
+    pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01) 
+
+
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness1():
     """ This function tests that the 
