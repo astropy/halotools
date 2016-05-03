@@ -1,23 +1,22 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate two point correlation functions.
+Module containing the `~halotools.mock_observables.tpcf` function used to 
+calculate the two-point correlation function in 3d (aka galaxy clustering). 
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-####import modules########################################################################
+
 import numpy as np
 from math import gamma
+from warnings import warn
+
 from .clustering_helpers import _tpcf_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .pair_counters import npairs_3d
-from warnings import warn
 ##########################################################################################
 
 
-__all__=['tpcf']
+__all__ = ['tpcf']
 __author__ = ['Duncan Campbell']
-
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
@@ -25,14 +24,15 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
     approx_cell2_size , approx_cellran_size):
     """
-    Count random pairs.  There are two high level branches:
+    Internal function used to random pairs during the calculation of the tpcf.  
+    There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
         2. PBCs and analytical randoms
-    There are also logical bits to do RR and DR pair counts, as not all estimators
-    need one or the other, and not doing these can save a lot of calculation.
+    There is also control flow governing whether RR and DR pairs are counted, 
+    as not all estimators need one or the other.
     
-    Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
-    shells, which is the correct volume to use for a continious cubic volume with PBCs
+    Analytical counts are N**2*dv*rho, where dv is the volume of the spherical 
+    shells, which is the correct volume to use for a continuous cubical volume with PBCs. 
     """
     def nball_volume(R,k=3):
         """
@@ -102,7 +102,7 @@ def _pair_counts(sample1, sample2, rbins,
     period, num_threads, do_auto, do_cross,
     _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
     """
-    Count data-data pairs.
+    Internal function used calculate DD-pairs during the calculation of the tpcf.
     """
     if do_auto is True:
         D1D1 = npairs_3d(sample1, sample1, rbins, period=period, 
@@ -149,53 +149,75 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
 
-    See also :ref:`galaxy_catalog_analysis_tutorial2`. 
+    See also :ref:`galaxy_catalog_analysis_tutorial2` for example usage on a 
+    mock galaxy catalog. 
     
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
-    
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     rbins : array_like
-        array of boundaries defining the real space radial bins in which pairs are 
-        counted.
-    
+        array of boundaries defining the real space radial bins in which pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     randoms : array_like, optional
-        Npts x 3 array containing 3-D positions of points.  If no randoms are provided
-        analytic randoms are used (only valid for periodic boundary conditions).
+        Nran x 3 array containing 3-D positions of randomly distributed points. 
+        If no randoms are provided (the default option), 
+        calculation of the tpcf can proceed using analytical randoms 
+        (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If none, PBCs are set to infinity.
-    
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     do_auto : boolean, optional
-        do auto-correlation(s)?
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
     
     estimator : string, optional
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
-    
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
+
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter. If 
-        sample size exeeds max_sample_size, the sample will be randomly down-sampled such
-        that the subsample is equal to ``max_sample_size``. 
+        Defines maximum size of the sample that will be passed to the pair counter. 
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
@@ -210,15 +232,14 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         ``approx_cell1_size`` for details. 
 
     RR_precomputed : array_like, optional 
-        Array storing the number of previously calculated RR-counts. 
-        Must have the same length as *len(rbins)*. 
+        Array storing the number of RR-counts calculated in advance during 
+        a pre-processing phase. Must have the same length as *len(rbins)*. 
         If the ``RR_precomputed`` argument is provided, 
         you must also provide the ``NR_precomputed`` argument. 
         Default is None. 
 
     NR_precomputed : int, optional 
-        Number of points in the random sample used to calculate 
-        ``RR_precomputed``.  
+        Number of points in the random sample used to calculate ``RR_precomputed``.  
         If the ``NR_precomputed`` argument is provided, 
         you must also provide the ``RR_precomputed`` argument. 
         Default is None. 
@@ -232,39 +253,33 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         .. math::
             1 + \\xi(r) \\equiv \\mathrm{DD}(r) / \\mathrm{RR}(r),
         
-        if ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(r)` is the number
-        of sample pairs with seperations equal to :math:`r`, calculated by the pair 
-        counter.  :math:`\\mathrm{RR}(r)` is the number of random pairs with seperations 
+        If ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(r)` is the number
+        of sample pairs with separations equal to :math:`r`, calculated by the pair 
+        counter.  :math:`\\mathrm{RR}(r)` is the number of random pairs with separations 
         equal to :math:`r`, and is counted internally using "analytic randoms" if 
         ``randoms`` is set to None (see notes for an explanation), otherwise it is 
         calculated using the pair counter.
         
-        If ``sample2`` is passed as input (and not exactly the same as ``sample1``), 
-        three arrays of length *len(rbins)-1* are returned:
+        If ``sample2`` is passed as input 
+        (and if ``sample2`` is not exactly the same as ``sample1``), 
+        then three arrays of length *len(rbins)-1* are returned:
         
         .. math::
             \\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r),
         
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and 
-        ``sample2``, and the autocorrelation of ``sample2``, respectively. If 
-        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are 
-        returned.
+        ``sample2``, and the autocorrelation of ``sample2``, respectively. 
+        If ``do_auto`` or ``do_cross`` is set to False, 
+        the appropriate sequence of results is returned.
 
     Notes
     -----
-    Pairs are counted using 
-    `~halotools.mock_observables.npairs_3d`.  This pair counter is optimized 
-    to work on points distributed in a rectangular cuboid volume, e.g. a simulation box.  
-    This optimization restricts this function to work on 3-D point distributions.
-    
-    If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
-    necessary, as the geometry is very simple, and the monte carlo integration that 
-    randoms are used for in complex geometries can be done analytically.
-    
-    If the ``period`` argument is passed in, all points' ith coordinate 
+    Pairs are counted using `~halotools.mock_observables.npairs_3d`.  
+        
+    If the ``period`` argument is passed in, the ith coordinate of all points
     must be between 0 and period[i].
     
-    For a higher-performance implementation of the tpcf function, 
+    For a higher-performance implementation of the tpcf function written in C, 
     see the Corrfunc code written by Manodeep Sinha, available at 
     https://github.com/manodeep/Corrfunc. 
 
@@ -275,7 +290,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     
     >>> Npts = 1000
     >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> period = Lbox
     
     >>> x = np.random.random(Npts)
     >>> y = np.random.random(Npts)
@@ -286,13 +301,14 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     is used throughout the `~halotools.mock_observables` sub-package:
     
     >>> coords = np.vstack((x,y,z)).T
+
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
+    convenience function for this same purpose, which provides additional wrapper 
+    behavior around `numpy.vstack` such as placing points into redshift-space. 
     
     >>> rbins = np.logspace(-2,-1,10)
     >>> xi = tpcf(coords, rbins, period=period)
     
-    The result should be consistent with zero correlation at all *r* within 
-    statistical errors
-
     See also 
     --------
     :ref:`galaxy_catalog_analysis_tutorial2`
@@ -309,12 +325,6 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         do_auto, do_cross, num_threads,
         _sample1_is_sample2, PBCs, 
         RR_precomputed, NR_precomputed) = _tpcf_process_args(*function_args)
-    
-    #Below we define functions to count data-data pairs and random pairs.
-    #After that, we get to work. The pair counting functions here actually call outside
-    #pair counters that are highly optimized. Beware that the control flow inside 
-    #these functions here can look a bit complicated, but don't des-pair!
-    
     
     # What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
@@ -337,6 +347,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     D1D1,D1D2,D2D2 = _pair_counts(sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
+    
     #count random pairs
     D1R, D2R, RR = _random_counts(sample1, sample2, randoms, rbins, 
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,

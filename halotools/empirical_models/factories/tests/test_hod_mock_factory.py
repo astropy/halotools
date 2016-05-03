@@ -6,10 +6,8 @@ from astropy.tests.helper import pytest
 from astropy.config.paths import _find_home 
 
 import numpy as np 
-from copy import copy, deepcopy
-from time import time 
+from copy import deepcopy 
 
-from ....mock_observables import periodic_3d_distance
 from ....mock_observables import return_xyz_formatted_array, tpcf_one_two_halo_decomp
 
 from ....sim_manager import FakeSim, CachedHaloCatalog
@@ -178,7 +176,13 @@ class TestHodMockFactory(TestCase):
         x2 = gals['halo_x']
         y2 = gals['halo_y']
         z2 = gals['halo_z']
-        d = periodic_3d_distance(x1, y1, z1, x2, y2, z2, self.model.mock.Lbox)
+        dx = np.fabs(x1 - x2)
+        dx = np.fmin(dx, self.model.mock.Lbox - dx)
+        dy = np.fabs(y1 - y2)
+        dy = np.fmin(dy, self.model.mock.Lbox - dy)
+        dz = np.fabs(z1 - z2)
+        dz = np.fmin(dz, self.model.mock.Lbox - dz)
+        d = np.sqrt(dx*dx+dy*dy+dz*dz)
         assert np.all(d <= gals['halo_rvir'])
 
     @pytest.mark.slow

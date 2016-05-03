@@ -10,7 +10,7 @@ __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
-from .cpairs import npairs_3d_engine
+from .pair_counting_engines import npairs_3d_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
 
 __all__ = ('npairs_3d', )
@@ -121,7 +121,7 @@ def npairs_3d(data1, data2, rbins, period = None,
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
@@ -149,7 +149,7 @@ def npairs_3d(data1, data2, rbins, period = None,
     else:
         counts = engine(cell1_tuples[0])
 
-    return counts
+    return np.array(counts)
 
 def _npairs_3d_process_args(data1, data2, rbins, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
@@ -169,7 +169,7 @@ def _npairs_3d_process_args(data1, data2, rbins, period,
     x2 = data2[:,0]
     y2 = data2[:,1]
     z2 = data2[:,2]
-    rbins = convert_to_ndarray(rbins)
+    rbins = np.atleast_1d(rbins).astype('f8')
     
     rmax = np.max(rbins)
     

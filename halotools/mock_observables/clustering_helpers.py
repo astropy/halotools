@@ -517,7 +517,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     
     #work with the sine of the angle between s and the LOS.  Only using cosine as the 
     #input because of convention.  sin(theta_los) increases as theta_los increases, which
-    #is required in order to get the pair counter to work.  see note in cpairs s_mu_pairs.
+    #is required in order to get the pair counter to work.  
     theta = np.arccos(mu_bins)
     mu_bins = np.sin(theta)[::-1] #must be increasing, remember to reverse result.
     
