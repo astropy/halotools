@@ -6,3 +6,5 @@ from .marked_cpairs import *
 from .conditional_pairwise_distances import *
 from .marked_npairs_3d_engine import marked_npairs_3d_engine
 from .marked_npairs_xy_z_engine import marked_npairs_xy_z_engine
+from .velocity_marked_npairs_3d_engine import velocity_marked_npairs_3d_engine
+from .velocity_marked_npairs_xy_z_engine import velocity_marked_npairs_xy_z_engine
