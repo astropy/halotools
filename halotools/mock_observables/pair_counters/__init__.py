@@ -9,3 +9,8 @@ from .double_tree import *
 from .double_tree_pair_matrix import *
 from .npairs_3d import npairs_3d
 from .rectangular_mesh import RectangularDoubleMesh
+from .npairs_xy_z import npairs_xy_z
+from .npairs_projected import npairs_projected
+from .npairs_s_mu import npairs_s_mu
+from .npairs_jackknife_3d import npairs_jackknife_3d
+
