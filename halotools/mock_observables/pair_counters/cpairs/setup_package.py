@@ -6,7 +6,8 @@ SOURCES = ("cpairs.pyx", "distances.pyx", "pairwise_distances.pyx",
     "per_object_cpairs.pyx", "npairs_3d_engine.pyx", 
     "npairs_3d_engine.pyx", "npairs_jackknife_3d_engine.pyx", 
     "npairs_projected_engine.pyx", "npairs_s_mu_engine.pyx", 
-    "npairs_xy_z_engine.pyx", "npairs_per_object_3d_engine.pyx")
+    "npairs_xy_z_engine.pyx", "npairs_per_object_3d_engine.pyx", 
+    "spherical_isolation_engine.pyx", "cylindrical_isolation_engine.pyx")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
