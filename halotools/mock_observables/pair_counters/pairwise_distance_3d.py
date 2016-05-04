@@ -1,18 +1,21 @@
 """ Module containing the `~halotools.mock_observables.pairwise_distance_3d` function 
 used to find pairs and their separation distance. 
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 import multiprocessing
 from functools import partial 
+from scipy.sparse import coo_matrix
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
+
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_3d_engine
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
-from scipy.sparse import coo_matrix
+
+from ...utils.array_utils import convert_to_ndarray, custom_len
 
 __all__ = ('pairwise_distance_3d', )
 
@@ -23,7 +26,8 @@ def pairwise_distance_3d(data1, data2, rmax, period = None,
     Function returns pairs of points separated by 
     a three-dimensional distance smaller than or eqaul to the input ``rmax``.
     
-    Note that if data1 == data2 that the ``~halotools.mock_observables.pairwise_distance_3d` function double-counts pairs.
+    Note that if data1 == data2 that the 
+    `~halotools.mock_observables.pairwise_distance_3d` function double-counts pairs.
     
     Parameters
     ----------
