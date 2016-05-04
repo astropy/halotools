@@ -1,6 +1,8 @@
 0.2 (unreleased)
 ----------------
 
+- Added velocity_marked_npairs_3d and velocity_marked_npairs_xy_z to pair_counters
+
 - Deleted mock_observables.nearest_neighbor function
 
 - Added new npairs_per_object_3d. 
