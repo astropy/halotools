@@ -1,6 +1,10 @@
 0.2 (unreleased)
 ----------------
 
+- Deleted mock_observables.nearest_neighbor function
+
+- Added new npairs_per_object_3d. 
+
 - Added new marked pair counters marked_npairs_3d and marked_npairs_xy_z
 
 - Added new pair counters npairs_s_mu, npairs_jackknife_3d, npairs_projected, npairs_xy_z
