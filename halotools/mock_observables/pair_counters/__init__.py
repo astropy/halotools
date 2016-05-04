@@ -16,4 +16,6 @@ from .npairs_jackknife_3d import npairs_jackknife_3d
 from .marked_npairs_3d import marked_npairs_3d
 from .marked_npairs_xy_z import marked_npairs_xy_z
 from .npairs_per_object_3d import npairs_per_object_3d
+from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
+from .velocity_marked_npairs_xy_z import velocity_marked_npairs_xy_z
 
