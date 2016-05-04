@@ -1,21 +1,19 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate the two point correlation function and covariance matrix.
+Module containing the `~halotools.mock_observables.tpcf_jackknife` function used to 
+calculate the two point correlation function and covariance matrix.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-####import modules########################################################################
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
+
 from .clustering_helpers import _tpcf_jackknife_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
-from .pair_counters.double_tree_pairs import jnpairs
+from .pair_counters import npairs_jackknife_3d
 from .error_estimation_tools import jackknife_covariance_matrix, cuboid_subvolume_labels
-##########################################################################################
 
 
-__all__=['tpcf_jackknife']
+__all__ = ['tpcf_jackknife']
 __author__ = ['Duncan Campbell']
 
 
@@ -43,11 +41,16 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
-    
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
     rbins : array_like
-        array of boundaries defining the real space radial bins in which pairs are 
-        counted.
+        array of boundaries defining the real space radial bins in which pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     Nsub : array_like, optional
         Lenght-3 numpy array of number of divisions along each dimension defining 
@@ -56,46 +59,62 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         *numpy.prod(Nsub)*.
     
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     randoms : array_like, optional
-        Npts x 3 array containing 3-D positions of points.  If no randoms are provided
-        analytic randoms are used (only valid for periodic boundary conditions).
+        Nran x 3 array containing 3-D positions of randomly distributed points. 
+        If no randoms are provided (the default option), 
+        calculation of the tpcf can proceed using analytical randoms 
+        (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If none, PBCs are set to infinity.
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
-        do auto-correlation(s)?
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
     
     estimator : string, optional
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
     
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter. If 
-        sample size exeeds max_sample_size, the sample will be randomly down-sampled such
-        that the subsample is equal to ``max_sample_size``. 
+        Defines maximum size of the sample that will be passed to the pair counter. 
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-    
+
     approx_cell2_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
@@ -139,7 +158,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     Notes
     -----
     The jackknife sampling of pair counts is done internally in 
-    `~halotools.mock_observables.pair_counters.jnpairs`.
+    `~halotools.mock_observables.pair_counters.npairs_jackknife_3d`.
     
     Pairs are counted such that when 'removing' subvolume :math:`k`, and counting a 
     pair in subvolumes :math:`i` and :math:`j`:
@@ -223,7 +242,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         Count jackknife data pairs: DD
         """
         if do_auto is True:
-            D1D1 = jnpairs(sample1, sample1, rbins, period=period,
+            D1D1 = npairs_jackknife_3d(sample1, sample1, rbins, period=period,
                 jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
                 num_threads=num_threads)
             D1D1 = np.diff(D1D1,axis=1)
@@ -236,13 +255,13 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = jnpairs(sample1, sample2, rbins, period=period,
+                D1D2 = npairs_jackknife_3d(sample1, sample2, rbins, period=period,
                     jtags1=j_index_1, jtags2=j_index_2,
                     N_samples=N_sub_vol, num_threads=num_threads)
                 D1D2 = np.diff(D1D2,axis=1)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = jnpairs(sample2, sample2, rbins, period=period,
+                D2D2 = npairs_jackknife_3d(sample2, sample2, rbins, period=period,
                     jtags1=j_index_2, jtags2=j_index_2,
                     N_samples=N_sub_vol, num_threads=num_threads)
                 D2D2 = np.diff(D2D2,axis=1)
@@ -256,13 +275,13 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         """
         
         if do_DR is True:
-            DR = jnpairs(sample, randoms, rbins, period=period,
+            DR = npairs_jackknife_3d(sample, randoms, rbins, period=period,
                 jtags1=j_index, jtags2=j_index_randoms,
                 N_samples=N_sub_vol, num_threads=num_threads)
             DR = np.diff(DR,axis=1)
         else: DR=None
         if do_RR is True:
-            RR = jnpairs(randoms, randoms, rbins, period=period,
+            RR = npairs_jackknife_3d(randoms, randoms, rbins, period=period,
                 jtags1=j_index_randoms, jtags2=j_index_randoms,
                 N_samples=N_sub_vol, num_threads=num_threads)
             RR = np.diff(RR,axis=1)

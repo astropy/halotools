@@ -1,21 +1,18 @@
-# -*- coding: utf-8 -*-
-
 """
-functions to calculate clustering statistics, e.g. two point correlation functions.
+Module containing the `~halotools.mock_observables.s_mu_tpcf` function used to 
+calculate the redshift-space two-point correlation function , :math:`\\xi(s, \\mu)`. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-####import modules########################################################################
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 
 from .clustering_helpers import _s_mu_tpcf_process_args
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .pair_counters.double_tree_pairs import s_mu_npairs
-##########################################################################################
+from .pair_counters import npairs_s_mu
 
 
-__all__=['s_mu_tpcf']
+__all__ = ['s_mu_tpcf']
 __author__ = ['Duncan Campbell']
 
 
@@ -47,7 +44,12 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points. 
+        Npts1 x 3 numpy array containing 3-D positions of points.
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
+        Examples section below, for instructions on how to transform 
+        your coordinate position arrays into the 
+        format accepted by the ``sample1`` and ``sample2`` arguments.   
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     s_bins : array_like
         numpy array of :math:`s` boundaries defining the bins in which pairs are counted. 
@@ -57,53 +59,68 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         which pairs are counted, and must be between [0,1]. 
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points. 
+        Passing ``sample2`` as an input permits the calculation of 
+        the cross-correlation function. Default is None, in which case only the 
+        auto-correlation function will be calculated. 
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-D positions of points.  If no randoms are 
-        provided 'analytic randoms' are used (only valid for periodic boundary conditions).
+        Nran x 3 array containing 3-D positions of randomly distributed points. 
+        If no randoms are provided (the default option), 
+        calculation of the tpcf can proceed using analytical randoms 
+        (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
-        If none, PBCs are set to infinity.
-    
-    estimator : string, optional
-        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Length-3 sequence defining the periodic boundary conditions 
+        in each dimension. If you instead provide a single scalar, Lbox, 
+        period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity, 
+        in which case ``randoms`` must be provided. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
-        do auto-correlation?  Default is True.
+        Boolean determines whether the auto-correlation function will 
+        be calculated and returned. Default is True. 
     
     do_cross : boolean, optional
-        do cross-correlation?  Default is True.
+        Boolean determines whether the cross-correlation function will 
+        be calculated and returned. Only relevant when ``sample2`` is also provided. 
+        Default is True for the case where ``sample2`` is provided, otherwise False. 
+    
+    estimator : string, optional
+        Statistical estimator for the tpcf. 
+        Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+        Default is ``Natural``. 
     
     num_threads : int, optional
-        number of threads to use in calculation. Default is 1. A string 'max' may be used
-        to indicate that the pair counters should use all available cores on the machine.
+        Number of threads to use in calculation, where parallelization is performed 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+        calculation, in which case a multiprocessing Pool object will 
+        never be instantiated. A string 'max' may be used to indicate that 
+        the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample length is equal to max_sample_size.
+        If sample size exeeds max_sample_size, 
+        the sample will be randomly down-sampled such that the subsample 
+        is equal to ``max_sample_size``. Default value is 1e6. 
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the sample1 points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use max(rbins) in each dimension, 
+        Default choice is to use Lbox/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
 
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
     
     approx_cellran_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for ``randoms``.  See comments for 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
         ``approx_cell1_size`` for details. 
 
     Returns 
@@ -150,18 +167,11 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         \\mu = \\cos(\\theta_{\\rm LOS}) \\equiv r_{\\parallel}/s.
     
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.s_mu_npairs`.  This pair 
-    counter is optimized to work on points distributed in a rectangular cuboid volume, 
-    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
-    point distributions.
-    
-    If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
-    necessary, as the geometry is very simple, and the monte carlo integration that 
-    randoms are used for in complex geometries can be done analytically.
-    
-    If the ``period`` argument is passed in, all points' ith coordinate 
+    `~halotools.mock_observables.pair_counters.npairs_s_mu`.  
+        
+    If the ``period`` argument is passed in, the ith coordinate of all points
     must be between 0 and period[i].
-    
+        
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
@@ -181,10 +191,13 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     
     >>> coords = np.vstack((x,y,z)).T
     
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
+    convenience function for this same purpose, which provides additional wrapper 
+    behavior around `numpy.vstack` such as placing points into redshift-space. 
+
     >>> s_bins = np.logspace(-2,-1,10)
     >>> mu_bins = np.linspace(0,1,50)
-    >>> xi = s_mu_tpcf(coords, s_bins, mu_bins, period=period)
-    
+    >>> xi = s_mu_tpcf(coords, s_bins, mu_bins, period=period)    
     """
     
     #process arguments
@@ -225,14 +238,14 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         #PBCs and randoms.
         if randoms is not None:
             if do_RR is True:
-                RR = s_mu_npairs(randoms, randoms, s_bins, mu_bins, period=period,
+                RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
                                  num_threads=num_threads,
                                  approx_cell1_size=approx_cellran_size,
                                  approx_cell2_size=approx_cellran_size)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
             if do_DR is True:
-                D1R = s_mu_npairs(sample1, randoms, s_bins, mu_bins, period=period,
+                D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
                                   num_threads=num_threads,
                                   approx_cell1_size=approx_cell1_size,
                                   approx_cell2_size=approx_cellran_size)
@@ -242,7 +255,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
                 D2R = None
             else:
                 if do_DR is True:
-                    D2R = s_mu_npairs(sample2, randoms, s_bins, mu_bins, period=period,
+                    D2R = npairs_s_mu(sample2, randoms, s_bins, mu_bins, period=period,
                                       num_threads=num_threads,
                                       approx_cell1_size=approx_cell2_size,
                                       approx_cell2_size=approx_cellran_size)
@@ -286,7 +299,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         Count data pairs.
         """
         if do_auto is True:
-            D1D1 = s_mu_npairs(sample1, sample1, s_bins, mu_bins, period=period, 
+            D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_bins, period=period, 
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell1_size)
@@ -300,14 +313,14 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             D2D2 = D1D1
         else:
             if do_cross is True:
-                D1D2 = s_mu_npairs(sample1, sample2, s_bins, mu_bins, 
+                D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_bins, 
                     period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell1_size,
                     approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
             else: D1D2=None
             if do_auto is True:
-                D2D2 = s_mu_npairs(sample2, sample2, s_bins, mu_bins, period=period,
+                D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
                     num_threads=num_threads,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cell2_size)

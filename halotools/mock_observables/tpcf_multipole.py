@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
-
 """
-Calculate the multipoles of the two point correlation function
+Module containing the `~halotools.mock_observables.tpcf_multipole` function used to 
+calculate the multipoles of the redshift-space two-point correlation function, 
+aka the RSD multipoles. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-####import modules########################################################################
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
-from ..utils.array_utils import convert_to_ndarray
-from ..custom_exceptions import *
-from warnings import warn
 from scipy.special import legendre
+from ..utils.array_utils import convert_to_ndarray
+
 ##########################################################################################
 
 __all__ = ['tpcf_multipole']
@@ -20,7 +18,8 @@ __author__ = ['Duncan Campbell']
 
 def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     """
-    Calculate the multipoles of the two point correlation funcion.
+    Calculate the multipoles of the two point correlation function 
+    after first computing `~halotools.mock_observables.s_mu_tpcf`.
     
     Parameters
     ----------

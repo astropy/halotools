@@ -1,7 +1,9 @@
 0.2 (unreleased)
 ----------------
 
-- Replaced npairs function with much faster npairs_3d. 
+- Added new pair counters npairs_s_mu, npairs_jackknife_3d, npairs_projected, npairs_xy_z
+
+- Replaced npairs function with npairs_3d, which has the exact same API but is 30%-50x faster. 
 
 - Halotools is now Python 3.x compatible
 
