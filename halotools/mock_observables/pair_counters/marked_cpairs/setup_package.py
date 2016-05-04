@@ -12,7 +12,9 @@ SOURCES = ("marked_cpairs.pyx", "weighting_functions.pyx",
     "marking_functions.pyx", 
     "velocity_marking_functions.pyx", 
     "velocity_marked_npairs_3d_engine.pyx", 
-    "velocity_marked_npairs_xy_z_engine.pyx")
+    "velocity_marked_npairs_xy_z_engine.pyx", 
+    "marked_spherical_isolation_engine.pyx", 
+    "marked_cylindrical_isolation_engine")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
