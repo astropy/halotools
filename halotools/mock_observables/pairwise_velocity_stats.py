@@ -7,10 +7,11 @@ Calculate pairwise velocity statistics.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from .pair_counters.marked_double_tree_pairs import (
-    velocity_marked_npairs, xy_z_velocity_marked_npairs)
+from .pair_counters import velocity_marked_npairs_xy_z
 from .pairwise_velocity_helpers import (_pairwise_velocity_stats_process_args, 
     _process_radial_bins, _process_rp_bins)
+
+from .pair_counters import velocity_marked_npairs_3d
 
 __all__ = ('mean_radial_velocity_vs_r', 'radial_pvd_vs_r',
     'mean_los_velocity_vs_rp', 'los_pvd_vs_rp')
@@ -72,9 +73,8 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
         such that the subsample is equal to max_sample_size.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -106,6 +106,8 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     
     Pairs and radial velocities are calculated using 
     `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.
+
+    For radial separation bins in which there are zero pairs, function returns zero. 
     
     Examples
     --------
@@ -142,8 +144,8 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
 
     """
     
-    function_args = [sample1, velocities1, sample2, velocities2, period,\
-                     do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size]
+    function_args = (sample1, velocities1, sample2, velocities2, period,
+        do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
     
     sample1, velocities1, sample2, velocities2, period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)
@@ -156,16 +158,16 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        wfunc, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1, dummy, N1N1 = velocity_marked_npairs(
+            D1D1, dummy, N1N1 = velocity_marked_npairs_3d(
                 sample1, sample1, rbins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc,
+                weight_func_id = weight_func_id,
                 period=period, num_threads=num_threads,
                 approx_cell1_size = approx_cell1_size,
                 approx_cell2_size = approx_cell1_size)
@@ -184,10 +186,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
             N2N2 = N1N1
         else:
             if do_cross is True:
-                D1D2, dummy, N1N2 = velocity_marked_npairs(
+                D1D2, dummy, N1N2 = velocity_marked_npairs_3d(
                     sample1, sample2, rbins,
                     weights1=marks1, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell1_size,
                     approx_cell2_size = approx_cell2_size)
@@ -197,10 +199,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
                 D1D2=None
                 N1N2=None
             if do_auto is True:
-                D2D2, dummy, N2N2 = velocity_marked_npairs(
+                D2D2, dummy, N2N2 = velocity_marked_npairs_3d(
                     sample2, sample2, rbins,
                     weights1=marks2, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell2_size,
                     approx_cell2_size = approx_cell2_size)
@@ -214,31 +216,32 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     
     
     #count the sum of radial velocities and number of pairs
-    wfunc = 11
+    weight_func_id = 11
     V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 =\
         marked_pair_counts(sample1, sample2, rbins, period,
             num_threads, do_auto, do_cross,
-            marks1, marks2, wfunc,
+            marks1, marks2, weight_func_id,
             _sample1_is_sample2,
             approx_cell1_size, approx_cell2_size)
-    
+
     #return results: the sum of radial velocities divided by the number of pairs
     if _sample1_is_sample2:
         M_11 = V1V1/N1N1
-        return M_11
+        return np.where(np.isfinite(M_11), M_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True): 
             M_11 = V1V1/N1N1
             M_12 = V1V2/N1N2
             M_22 = V2V2/N2N2
-            return M_11, M_12, M_22
-        elif (do_cross is True):
+            return (np.where(np.isfinite(M_11), M_11, 0.), 
+                np.where(np.isfinite(M_12), M_12, 0.), np.where(np.isfinite(M_22), M_22, 0.))
+        elif do_cross is True:
             M_12 = V1V2/N1N2
-            return M_12
+            return np.where(np.isfinite(M_12), M_12, 0.)
         elif (do_auto is True):
             M_11 = V1V1/N1N1
             M_22 = V2V2/N2N2 
-            return M_11, M_22
+            return np.where(np.isfinite(M_11), M_11, 0.), np.where(np.isfinite(M_22), M_22, 0.)
 
 
 def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
@@ -368,16 +371,16 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        wfunc, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1, S1S1, N1N1 = velocity_marked_npairs(
+            D1D1, S1S1, N1N1 = velocity_marked_npairs_3d(
                 sample1, sample1, rbins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc,
+                weight_func_id = weight_func_id,
                 period=period, num_threads=num_threads,
                 approx_cell1_size = approx_cell1_size,
                 approx_cell2_size = approx_cell1_size)
@@ -401,10 +404,10 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
             S2S2 = S1S1
         else:
             if do_cross==True:
-                D1D2, S1S2, N1N2 = velocity_marked_npairs(
+                D1D2, S1S2, N1N2 = velocity_marked_npairs_3d(
                     sample1, sample2, rbins,
                     weights1=marks1, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell1_size,
                     approx_cell2_size = approx_cell2_size)
@@ -416,9 +419,9 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
                 N1N2=None
                 S1S2=None
             if do_auto is True:
-                D2D2, S2S2, N2N2 = velocity_marked_npairs(sample2, sample2, rbins,
+                D2D2, S2S2, N2N2 = velocity_marked_npairs_3d(sample2, sample2, rbins,
                     weights1=marks2, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell2_size,
                     approx_cell2_size = approx_cell2_size)
@@ -431,11 +434,11 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
     
-    wfunc = 13
+    weight_func_id = 12
     V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross,
-        marks1, marks2, wfunc,
+        marks1, marks2, weight_func_id,
         _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
     
@@ -450,20 +453,23 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     #return results
     if _sample1_is_sample2:
         sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-        return sigma_11
+        return np.where(np.isfinite(sigma_11), sigma_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True): 
             sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
             sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
             sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
-            return sigma_11, sigma_12, sigma_22
+            return (np.where(np.isfinite(sigma_11), sigma_11, 0.), 
+            np.where(np.isfinite(sigma_12), sigma_12, 0.), 
+            np.where(np.isfinite(sigma_22), sigma_22, 0.))
         elif (do_cross is True):
             sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
-            return sigma_12
+            return np.where(np.isfinite(sigma_12), sigma_12, 0.)
         elif (do_auto is True):
             sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
             sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
-            return sigma_11, sigma_22
+            return (np.where(np.isfinite(sigma_11), sigma_11, 0.), 
+                np.where(np.isfinite(sigma_22), sigma_22, 0.))
 
 
 def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
@@ -519,9 +525,8 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         such that the subsample is equal to max_sample_size.
     
     approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by which 
-        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        Length-3 array serving as a guess for the optimal manner by how points 
+        will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
@@ -552,7 +557,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     :math:`\\bar{v}_{z12}(r_p)` is the mean of this quantity in projected radial bins.
     
     Pairs and radial velocities are calculated using 
-    `~halotools.mock_observables.pair_counters.xy_z_velocity_marked_npairs`.
+    `~halotools.mock_observables.pair_counters.velocity_marked_npairs_xy_z`.
     
     Examples
     --------
@@ -596,21 +601,21 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     pi_bins = np.array([0.0,pi_max])
     
     #create marks for the marked pair counter.
-    marks1 = velocities1[:,2] #z-component of velocity
-    marks2 = velocities2[:,2] #z-component of velocity
+    marks1 = np.vstack((sample1.T, velocities1.T)).T
+    marks2 = np.vstack((sample2.T, velocities2.T)).T
     
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        wfunc, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1, dummy, N1N1 = xy_z_velocity_marked_npairs(
+            D1D1, dummy, N1N1 = velocity_marked_npairs_xy_z(
                 sample1, sample1, rp_bins, pi_bins,
                 weights1=marks1, weights2=marks1,
-                wfunc = wfunc,
+                weight_func_id = weight_func_id,
                 period=period, num_threads=num_threads,
                 approx_cell1_size = approx_cell1_size,
                 approx_cell2_size = approx_cell1_size)
@@ -631,10 +636,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
             N2N2 = N1N1
         else:
             if do_cross is True:
-                D1D2, dummy, N1N2 = xy_z_velocity_marked_npairs(
+                D1D2, dummy, N1N2 = velocity_marked_npairs_xy_z(
                     sample1, sample2, rp_bins, pi_bins,
                     weights1=marks1, weights2=marks2,
-                    wfunc = wfunc,
+                    weight_func_id = weight_func_id,
                     period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell1_size,
                     approx_cell2_size = approx_cell2_size)
@@ -646,10 +651,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                 D1D2=None
                 N1N2=None
             if do_auto is True:
-                D2D2, dummy, N2N2 = xy_z_velocity_marked_npairs(
+                D2D2, dummy, N2N2 = velocity_marked_npairs_xy_z(
                     sample2, sample2, rp_bins, pi_bins,
                     weights1=marks2, weights2=marks2,
-                    wfunc = wfunc, period=period, num_threads=num_threads,
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell2_size,
                     approx_cell2_size = approx_cell2_size)
                 D2D2 = np.diff(D2D2,axis=1)[:,0]
@@ -664,30 +669,32 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     
     #count the sum of radial velocities and number of pairs
-    wfunc = 14
+    weight_func_id = 13
     V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 =\
         marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period,
             num_threads, do_auto, do_cross,
-            marks1, marks2, wfunc,_sample1_is_sample2,
+            marks1, marks2, weight_func_id,_sample1_is_sample2,
             approx_cell1_size, approx_cell2_size)
     
     #return results: the sum of radial velocities divided by the number of pairs
     if _sample1_is_sample2:
         M_11 = V1V1/N1N1
-        return M_11
+        return np.where(np.isfinite(M_11), M_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True): 
             M_11 = V1V1/N1N1
             M_12 = V1V2/N1N2
             M_22 = V2V2/N2N2
-            return M_11, M_12, M_22
+            return (np.where(np.isfinite(M_11), M_11, 0.), 
+                np.where(np.isfinite(M_12), M_12, 0.), 
+                np.where(np.isfinite(M_22), M_22, 0.))
         elif (do_cross is True):
             M_12 = V1V2/N1N2
-            return M_12
+            return np.where(np.isfinite(M_12), M_12, 0.)
         elif (do_auto is True):
             M_11 = V1V1/N1N1
             M_22 = V2V2/N2N2 
-            return M_11, M_22
+            return np.where(np.isfinite(M_11), M_11, 0.), np.where(np.isfinite(M_22), M_22, 0.)
 
 
 def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
@@ -759,7 +766,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     projected radial bins.
     
     Pairs and radial velocities are calculated using 
-    `~halotools.mock_observables.pair_counters.xy_z_velocity_marked_npairs`.
+    `~halotools.mock_observables.pair_counters.velocity_marked_npairs_xy_z`.
     
     Examples
     --------
@@ -826,21 +833,21 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     #build the marks.
     shift1 = np.repeat(std_v1,len(sample1))
     shift2 = np.repeat(std_v2,len(sample2))
-    marks1 = np.vstack((velocities1[:,2], shift1)).T #z-component of the velocity
-    marks2 = np.vstack((velocities2[:,2], shift2)).T #z-component of the velocity
-    
+    marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
+    marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
+
     
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        wfunc, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
         
         if do_auto is True:
-            D1D1, S1S1, N1N1 = xy_z_velocity_marked_npairs(
+            D1D1, S1S1, N1N1 = velocity_marked_npairs_xy_z(
                 sample1, sample1, rp_bins, pi_bins,
-                weights1=marks1, weights2=marks1, wfunc = wfunc, 
+                weights1=marks1, weights2=marks1, weight_func_id = weight_func_id, 
                 period=period, num_threads=num_threads,
                 approx_cell1_size = approx_cell1_size,
                 approx_cell2_size = approx_cell1_size)
@@ -867,10 +874,10 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
             S2S2 = S1S1
         else:
             if do_cross is True:
-                D1D2, S1S2, N1N2 = xy_z_velocity_marked_npairs(
+                D1D2, S1S2, N1N2 = velocity_marked_npairs_xy_z(
                     sample1, sample2, rp_bins, pi_bins,
                     weights1=marks1, weights2=marks2, 
-                    wfunc = wfunc, period=period, num_threads=num_threads,
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell1_size,
                     approx_cell2_size = approx_cell2_size)
                 D1D2 = np.diff(D1D2,axis=1)[:,0]
@@ -884,10 +891,10 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                 N1N2=None
                 S1S2=None
             if do_auto is True:
-                D2D2, S2S2, N2N2 = xy_z_velocity_marked_npairs(
+                D2D2, S2S2, N2N2 = velocity_marked_npairs_xy_z(
                     sample2, sample2, rp_bins, pi_bins,
                     weights1=marks2, weights2=marks2, 
-                    wfunc = wfunc, period=period, num_threads=num_threads,
+                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
                     approx_cell1_size = approx_cell2_size,
                     approx_cell2_size = approx_cell2_size)
                 D2D2 = np.diff(D2D2,axis=1)[:,0]
@@ -902,11 +909,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
     
-    wfunc = 16
+    weight_func_id = 14
     V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
         sample1, sample2, rp_bins, pi_bins, period,
         num_threads, do_auto, do_cross, 
-        marks1, marks2, wfunc, 
+        marks1, marks2, weight_func_id, 
         _sample1_is_sample2, 
         approx_cell1_size, approx_cell2_size)
     
@@ -920,17 +927,24 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     #return results
     if _sample1_is_sample2:
         sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-        return sigma_11
+        return np.where(np.isfinite(sigma_11), sigma_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True): 
             sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
             sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
             sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
-            return sigma_11, sigma_12, sigma_22
+            return (np.where(np.isfinite(sigma_11), sigma_11, 0.), 
+                np.where(np.isfinite(sigma_12), sigma_12, 0.), 
+                np.where(np.isfinite(sigma_22), sigma_22, 0.))
         elif (do_cross is True):
             sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
-            return sigma_12
+            return np.where(np.isfinite(sigma_12), sigma_12, 0.)
         elif (do_auto is True):
             sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
             sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
-            return sigma_11, sigma_22
+            return (np.where(np.isfinite(sigma_11), sigma_11, 0.), 
+                np.where(np.isfinite(sigma_22), sigma_22, 0.))
+
+
+            
+

@@ -2,9 +2,11 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np 
 
+from astropy.utils.misc import NumpyRNGContext
+
 __all__ = ('generate_locus_of_3d_points', 'generate_3d_regular_mesh')
 
-def generate_locus_of_3d_points(npts, xc=0.1, yc=0.1, zc=0.1, epsilon=0.001):
+def generate_locus_of_3d_points(npts, xc=0.1, yc=0.1, zc=0.1, epsilon=0.001, seed=None):
     """
     Function returns a tight locus of points inside a 3d box. 
 
@@ -25,9 +27,11 @@ def generate_locus_of_3d_points(npts, xc=0.1, yc=0.1, zc=0.1, epsilon=0.001):
         ndarray with shape (npts, 3) of points tightly localized around 
         the point (xc, yc, zc)
     """
-    x = np.random.uniform(xc - epsilon/2., xc + epsilon/2., npts)
-    y = np.random.uniform(yc - epsilon/2., yc + epsilon/2., npts)
-    z = np.random.uniform(zc - epsilon/2., zc + epsilon/2., npts)
+    with NumpyRNGContext(seed):
+        x = np.random.uniform(xc - epsilon/2., xc + epsilon/2., npts)
+        y = np.random.uniform(yc - epsilon/2., yc + epsilon/2., npts)
+        z = np.random.uniform(zc - epsilon/2., zc + epsilon/2., npts)
+
     return np.vstack([x, y, z]).T
 
 def generate_3d_regular_mesh(npts, dmin=0, dmax=1):
