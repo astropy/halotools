@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function 
+""" Module containing the `~halotools.mock_observables.npairs_xy_z` function 
 used to count pairs as a function of separation. 
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -9,27 +9,29 @@ from functools import partial
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 from .rectangular_mesh import RectangularDoubleMesh
-from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
-from .cpairs import npairs_3d_engine
+from .mesh_helpers import (_set_approximate_cell_sizes, _enclose_in_box, 
+    _cell1_parallelization_indices)
+from .cpairs import npairs_xy_z_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
 
-__all__ = ('npairs_3d', )
+__all__ = ('npairs_xy_z', )
 
-def npairs_3d(sample1, sample2, rbins, period = None,
+def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
     verbose = False, num_threads = 1,
     approx_cell1_size = None, approx_cell2_size = None):
     """
-    Function counts the number of pairs of points separated by 
-    a three-dimensional distance smaller than the input ``rbins``.
+    Function counts the number of pairs of points with separation in the xy-plane 
+    less than the input ``rp_bins`` and separation in the z-dimension less than 
+    the input ``pi_bins``. 
 
     Note that if sample1 == sample2 that the
-    `~halotools.mock_observables.npairs_3d` function double-counts pairs.
+    `~halotools.mock_observables.npairs_xy_z` function double-counts pairs.
     If your science application requires sample1==sample2 inputs and also pairs
     to not be double-counted, simply divide the final counts by 2.
 
     A common variation of pair-counting calculations is to count pairs with
     separations *between* two different distances *r1* and *r2*. You can retrieve
-    this information from the `~halotools.mock_observables.npairs_3d`
+    this information from the `~halotools.mock_observables.npairs_xy_z`
     by taking `numpy.diff` of the returned array.
 
     Parameters
@@ -42,16 +44,25 @@ def npairs_3d(sample1, sample2, rbins, period = None,
         format accepted by the ``sample1`` and ``sample2`` arguments.   
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    sample2 : array_like, optional
+    sample2 : array_like
         Npts2 x 3 array containing 3-D positions of points. 
 
-    rbins : array_like
-        Boundaries defining the bins in which pairs are counted.
+    rp_bins : array_like
+        array of boundaries defining the radial bins perpendicular to the LOS in which 
+        pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
+    pi_bins : array_like
+        array of boundaries defining the p radial bins parallel to the LOS in which 
+        pairs are counted.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
+        If set to None (the default option), PBCs are set to infinity.
+        Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     verbose : Boolean, optional
         If True, print out information and progress.
@@ -80,7 +91,7 @@ def npairs_3d(sample1, sample2, rbins, period = None,
     Returns
     -------
     num_pairs : array_like
-        Numpy array of length len(rbins) storing the numbers of pairs in the input bins.
+        Numpy array of length len(rp_bins) storing the numbers of pairs in the input bins.
 
     Examples
     --------
@@ -89,7 +100,8 @@ def npairs_3d(sample1, sample2, rbins, period = None,
 
     >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
     >>> period = [Lbox, Lbox, Lbox]
-    >>> rbins = np.logspace(-1, 1.5, 15)
+    >>> rp_bins = np.logspace(-1, 1.5, 15)
+    >>> pi_bins = [20, 40, 60]
 
     >>> x1 = np.random.uniform(0, Lbox, Npts1)
     >>> y1 = np.random.uniform(0, Lbox, Npts1)
@@ -105,19 +117,20 @@ def npairs_3d(sample1, sample2, rbins, period = None,
     >>> sample1 = np.vstack([x1, y1, z1]).T
     >>> sample2 = np.vstack([x2, y2, z2]).T
 
-    >>> result = npairs_3d(sample1, sample2, rbins, period = period)
+    >>> result = npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = period)
 
     """
 
     ### Process the inputs with the helper function
-    result = _npairs_3d_process_args(sample1, sample2, rbins, period,
+    result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period 
 
-    rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    rp_max = np.max(rp_bins)
+    pi_max = np.max(pi_bins)
+    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -132,12 +145,12 @@ def npairs_3d(sample1, sample2, rbins, period = None,
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
-    # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_3d_engine, 
+    # # Create a function object that has a single argument, for parallelization purposes
+    engine = partial(npairs_xy_z_engine, 
         double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
-        sample2[:,0], sample2[:,1], sample2[:,2], rbins)
+        sample2[:,0], sample2[:,1], sample2[:,2], rp_bins, pi_bins)
 
-    # Calculate the cell1 indices that will be looped over by the engine
+    # # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
@@ -151,7 +164,7 @@ def npairs_3d(sample1, sample2, rbins, period = None,
 
     return np.array(counts)
 
-def _npairs_3d_process_args(sample1, sample2, rbins, period, 
+def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
@@ -169,25 +182,36 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
     x2 = sample2[:,0]
     y2 = sample2[:,1]
     z2 = sample2[:,2]
-    rbins = np.atleast_1d(rbins).astype('f8')
-    
-    rmax = np.max(rbins)
-    
+
+    rp_bins = np.atleast_1d(rp_bins).astype('f8')
     try:
-        assert rbins.ndim == 1
-        assert len(rbins) > 1
-        if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
+        assert rp_bins.ndim == 1
+        assert len(rp_bins) > 1
+        if len(rp_bins) > 2:
+            assert array_is_monotonic(rp_bins, strict = True) == 1
     except AssertionError:
-        msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
+        msg = ("Input ``rp_bins`` must be a monotonically increasing 1D array "
+            "with at least two entries")
         raise ValueError(msg)
+    rp_max = np.max(rp_bins)        
+
+    pi_bins = np.atleast_1d(pi_bins).astype('f8')
+    try:
+        assert pi_bins.ndim == 1
+        assert len(pi_bins) > 1
+        if len(pi_bins) > 2:
+            assert array_is_monotonic(pi_bins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``pi_bins`` must be a monotonically increasing 1D array with at least two entries"
+        raise ValueError(msg)
+    pi_max = np.max(pi_bins)
 
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2, 
-                min_size=[rmax*3.0,rmax*3.0,rmax*3.0]))
+                min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)
@@ -200,21 +224,27 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
             msg = "Input ``period`` must be a bounded positive number in all dimensions"
             raise ValueError(msg)
 
+    try:
+        assert pi_max > 0.
+        min_required_pi_max = period[2]/3.
+        assert pi_max < min_required_pi_max
+    except:
+        msg = ("Input ``pi_max`` = %.2f must be a "
+            "positive scalar less than period[2]/3 = %.2f" % (pi_max, min_required_pi_max))
+        raise ValueError(msg)
+
     if approx_cell1_size is None:
-        approx_cell1_size = [rmax, rmax, rmax]
+        approx_cell1_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:    
-        approx_cell2_size = [rmax, rmax, rmax]
+        approx_cell2_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
-        
+
     return (x1, y1, z1, x2, y2, z2, 
-        rbins, period, num_threads, PBCs, 
+        rp_bins, pi_bins, period, num_threads, PBCs, 
         approx_cell1_size, approx_cell2_size)
-
-
-
 
 
 
