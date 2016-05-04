@@ -1,24 +1,22 @@
-# -*- coding: utf-8 -*-
-
 """
-functions to assist in error estimation of mock observations.
+Functions to assist in error estimation of mock observations.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-__all__=['jackknife_covariance_matrix','cuboid_subvolume_labels']
+__all__ = ['jackknife_covariance_matrix','cuboid_subvolume_labels']
 __author__ = ('Duncan Campbell', )
 
 import numpy as np
-from ..utils.array_utils import convert_to_ndarray
-from ..custom_exceptions import HalotoolsError
 from warnings import warn
 
+from ..utils.array_utils import convert_to_ndarray
+from ..custom_exceptions import HalotoolsError
 
 def cuboid_subvolume_labels(sample, Nsub, Lbox):
     """
-    return integer labels indicating which cuboid subvolume of a larger cuboid volume a 
-    set of pionts occupy.
+    Return integer labels indicating which cubical subvolume of a larger cubical volume a 
+    set of points occupy.
     
     Parameters
     ----------
@@ -32,9 +30,9 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
         of subvolumes is then given by `numpy.prod(Nsub)`.
     
     Lbox : array_like
-        Lenght-3 numpy array definging the legnths of the sides of the cuboid volume
-        that ``sample`` occupies.  If only one number is specified, the volume is assumed 
-        to cubic with sides given by np.array([Lbox]*3).
+        Lenght-3 numpy array definging the lengths of the sides of the cubical volume
+        that ``sample`` occupies.  If only a single scalar is specified, the volume is assumed 
+        to be a cube with side-length Lbox
     
     Returns
     -------
@@ -124,7 +122,7 @@ def jackknife_covariance_matrix(observations):
     Examples
     --------
     For demonstration purposes we create some random data.  Let's say we have jackknife
-    samples and to estimate the errors on 15 measurements.  e.g. the two point
+    100 samples and to estimate the errors on 15 measurements, e.g. the two point
     correlation function in 15 radial bins.
     
     >>> observations = np.random.random((100,15))
@@ -144,7 +142,7 @@ def jackknife_covariance_matrix(observations):
     
     # raise a warning if N_samples < Nr
     if N_samples < Nr:
-        msg = ("\n the nubumber of samples is smaller than the number of \n"
+        msg = ("\n the number of samples is smaller than the number of \n"
                "observations. It is recommended to increase the number \n"
                "of samples or decrease the number of observations.")
         warn(msg)

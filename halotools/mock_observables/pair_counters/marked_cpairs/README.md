@@ -28,7 +28,7 @@ The weighting functions are defined in "weighting_functions.pyx" and "pairwise_v
 
 Available functions are:
 
-* marked_cpairs : weighted pair counts in bins
+* marked_pair_counting_engines : weighted pair counts in bins
 
 There usually two version of these functions, one assuming non-periodic distances, and another that presumes periodic boundary conditions.  However, the functions that assume non-periodic distances can be used for the periodic case if the points have been shifted to account for the periodic boundaries--this is the current approach of the halotools high level pair counters.
 

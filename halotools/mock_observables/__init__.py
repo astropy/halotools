@@ -22,5 +22,5 @@ from .pairwise_velocity_stats import *
 from .isolation_criteria import *
 from .void_stats import *
 from .catalog_analysis_helpers import *
-from .distances import *
-from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z)
+from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z, 
+    marked_npairs_3d, marked_npairs_xy_z)

@@ -24,9 +24,9 @@ All actual distance caclualtions are done using "cdef" functions defined in "dis
 
 Available functions are:
 
-* cpairs : pair counts in bins
+* pair_counting_engines : pair counts in bins
 * pairwise_distances : a matrix of distances between points
-* per_object_cpairs : pair counts in bins per object
+* per_object_npairs : pair counts in bins per object
 
 There are usually two version of these functions, one assuming non-periodic distances, and another that presumes periodic boundary conditions.  However, the functions that assume non-periodic distances can be used for the periodic case if the points have been shifted to account for the periodic boundaries--this is the current approach of the halotools higher level pair counting modules.
 
