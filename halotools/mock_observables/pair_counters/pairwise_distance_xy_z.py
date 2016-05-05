@@ -1,20 +1,21 @@
 """ Module containing the `~halotools.mock_observables.pairwise_distance_3d` function 
 used to find pairs and their separation distance. 
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 import multiprocessing
 from functools import partial 
-
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
+from scipy.sparse import coo_matrix
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_xy_z_engine
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
-from scipy.sparse import coo_matrix
+
+from ...utils.array_utils import convert_to_ndarray, custom_len
 
 __all__ = ('pairwise_distance_xy_z', )
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     verbose = False, num_threads = 1,
@@ -23,7 +24,8 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     Function returns pairs of points separated by 
     a xy-projected distance smaller than or eqaul to the input ``rp_max`` and z distance ``pi_max``.
     
-    Note that if data1 == data2 that the ``~halotools.mock_observables.pairwise_distance_xy_z` function double-counts pairs.
+    Note that if data1 == data2 that the 
+    `~halotools.mock_observables.pairwise_distance_xy_z` function double-counts pairs.
     
     Parameters
     ----------
@@ -158,7 +160,8 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
         i_inds = np.append(i_inds,result[i][2])
         j_inds = np.append(j_inds,result[i][3])
     
-    return coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))), coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2)))
+    return (coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))), 
+        coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2))))
 
 
 def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period, 

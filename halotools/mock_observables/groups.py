@@ -1,29 +1,29 @@
-# -*- coding: utf-8 -*-
-
 """
-galaxy group classes
+Module containing the `~halotools.mock_observables.FoFGroups` class used to 
+identify friends-of-friends groups of points. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix
+
+from .pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
+
 from ..custom_exceptions import HalotoolsError
-from .pair_counters.double_tree_pair_matrix import xy_z_pair_matrix
 
 igraph_available=True
-try: import igraph
+try: 
+    import igraph
 except ImportError:
     igraph_available=False
 if igraph_available is True: #there is another package called igraph--need to distinguish.
     if not hasattr(igraph,'Graph'):
         igraph_available is False
 no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
-                 "See http://igraph.org/ and note that there are two packages called \n"
-                 "'igraph'.")
+    "See http://igraph.org/ and note that there are two packages called 'igraph'.")
 
-__all__=['FoFGroups']
+__all__ = ['FoFGroups']
 __author__ = ['Duncan Campbell']
 
 class FoFGroups(object):
@@ -37,34 +37,42 @@ class FoFGroups(object):
         
         The first two dimensions (x, y) define the plane for perpendicular distances. 
         The third dimension (z) is used for line-of-sight distances.  
+        
         See the :ref:`mock_obs_pos_formatting` documentation page for 
         instructions on how to transform your coordinate position arrays into the 
         format accepted by the ``positions`` argument.   
-        See also :ref:`galaxy_catalog_analysis_tutorial5`. 
 
+        See also :ref:`galaxy_catalog_analysis_tutorial5`. 
+        
         Parameters
         ----------
         positions : array_like
             Npts x 3 numpy array containing 3-D positions of galaxies. 
-        
+            Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
         b_perp : float
-            Normalized maximum linking length in the perpendicular direction.
-            Normalized to the mean separation between galaxies. 
+            Maximum linking length in the perpendicular direction, 
+            normalized to the mean separation between galaxies. 
         
         b_para : float
-            Normalized maximum linking length in the parallel direction. 
-            Normalized to the mean separation between galaxies. 
+            Maximum linking length in the parallel direction, 
+            normalized to the mean separation between galaxies. 
         
         period : array_like, optional
-            length 3 array defining periodic boundary conditions.
-        
+            Length-3 sequence defining the periodic boundary conditions 
+            in each dimension. If you instead provide a single scalar, Lbox, 
+            period is assumed to be the same in all Cartesian directions. 
+            Length units assumed to be in Mpc/h, here and throughout Halotools. 
+
         Lbox : array_like, optional
             length 3 array defining boundaries of the simulation box.
         
         num_threads : int, optional
-            number of threads to use in calculation. Default is 1. A string 'max' may be 
-            used to indicate that the pair counters should use all available cores on
-            the machine.
+            Number of threads to use in calculation, where parallelization is performed 
+            using the python ``multiprocessing`` module. Default is 1 for a purely serial 
+            calculation, in which case a multiprocessing Pool object will 
+            never be instantiated. A string 'max' may be used to indicate that 
+            the pair counters should use all available cores on the machine.
         
         Examples
         --------
@@ -73,7 +81,7 @@ class FoFGroups(object):
         
         >>> Npts = 1000
         >>> Lbox = 1.0
-        >>> period = np.array([Lbox,Lbox,Lbox])
+        >>> period = Lbox
         
         >>> x = np.random.random(Npts)
         >>> y = np.random.random(Npts)
@@ -103,11 +111,11 @@ class FoFGroups(object):
             raise ValueError("Lbox and Period cannot be both be None.")
         elif (Lbox is None) & (period is not None):
             Lbox = period
-        elif np.shape(Lbox)==():
-            Lbox = np.array([Lbox]*3)
-        elif np.shape(Lbox)==(1,):
-            Lbox = np.array([Lbox[0]]*3)
-        else: Lbox = np.array(Lbox)
+
+        Lbox = np.atleast_1d(Lbox)
+        if len(Lbox) == 1:
+            Lbox = np.array([period, period, period])
+
         if np.shape(Lbox) != (3,):
             raise ValueError("Lbox must be an array of length 3, or number indicating the\
                               length of one side of a cube")
@@ -123,7 +131,7 @@ class FoFGroups(object):
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
         self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
         
-        self.m_perp, self.m_para = xy_z_pair_matrix(
+        self.m_perp, self.m_para = pairwise_distance_xy_z(
             self.positions, self.positions, self.d_perp, self.d_para,
             period=self.period,num_threads=num_threads)
         
@@ -171,7 +179,8 @@ class FoFGroups(object):
         """
         if igraph_available is True:
             self.g = _scipy_to_igraph(self.m, self.positions, directed=False)
-        else: raise HalotoolsError(no_igraph_msg)
+        else: 
+            raise HalotoolsError(no_igraph_msg)
     
     def get_degree(self):
         """
@@ -186,7 +195,8 @@ class FoFGroups(object):
         if igraph_available is True:
             self.degree = self.g.degree()
             return self.degree
-        else: raise HalotoolsError(no_igraph_msg)
+        else: 
+            raise HalotoolsError(no_igraph_msg)
     
     def get_betweenness(self):
         """
@@ -200,7 +210,8 @@ class FoFGroups(object):
         if igraph_available is True:
             self.betweenness = self.g.betweenness()
             return self.betweenness
-        else: raise HalotoolsError(no_igraph_msg)
+        else: 
+            raise HalotoolsError(no_igraph_msg)
     
     def get_multiplicity(self):
         """
@@ -211,7 +222,8 @@ class FoFGroups(object):
             mltp = np.array(clusters.sizes())
             self.multiplicity = mltp[self.group_ids]
             return self.multiplicity
-        else: raise HalotoolsError(no_igraph_msg)
+        else: 
+            raise HalotoolsError(no_igraph_msg)
     
     def get_edges(self):
         """

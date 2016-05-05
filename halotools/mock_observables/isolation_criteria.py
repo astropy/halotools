@@ -2,17 +2,19 @@
 Module containing functions used to determine whether 
 a set of points are isolated according to various criteria.
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 from functools import partial 
 import multiprocessing 
+
 from .pair_counters.rectangular_mesh import RectangularDoubleMesh
 from .pair_counters.cpairs import spherical_isolation_engine, cylindrical_isolation_engine
 from .pair_counters.marked_cpairs import (
     marked_spherical_isolation_engine, marked_cylindrical_isolation_engine)
 from .pair_counters.mesh_helpers import (
     _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
+
 from ..utils.array_utils import convert_to_ndarray, custom_len
 from ..custom_exceptions import HalotoolsError
 
@@ -214,7 +216,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         Number of threads to use in calculation, where parallelization is performed 
         using the python ``multiprocessing`` module. Default is 1 for a purely 
         calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        never be instantiated. A string ``max`` may be used to indicate that 
         the pair counters should use all available cores on the machine.
         
     approx_cell1_size : array_like, optional 
@@ -603,7 +605,6 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     See the Examples section for further details.
     
-    
     Parameters
     ----------
     sample1 : array_like
@@ -796,7 +797,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     >>> rp_max = 0.75
     
-    Since *h=1* implies :math:`H_{0} = 100`km/s/Mpc, our 500 km/s velocity criteria 
+    Since *h=1* implies :math:`H_{0} = 100` km/s/Mpc, our 500 km/s velocity criteria 
     gets transformed into a z-dimension length criteria as:
     
     >>> H0 = 100.0
