@@ -8,7 +8,7 @@ import numpy as np
 __all__ = ('pure_python_distance_matrix_3d', )
 
 def pure_python_distance_matrix_3d(
-    sample1, sample2, velocities2, rmin, rmax, Lbox = None):
+    sample1, sample2, r_max, Lbox = None):
     """ Brute force pure python function calculating the distance 
     between all pairs of points and storing the result into a matrix, 
     accounting for possible periodicity of the box.
@@ -43,12 +43,14 @@ def pure_python_distance_matrix_3d(
             elif dz < -zperiod/2.:
                 dz = -(zperiod + dz)
 
-            pair_matrix[i, j] = np.sqrt(dx*dx + dy*dy + dz*dz)
+            r = np.sqrt(dx*dx + dy*dy + dz*dz)
+            if r <= r_max:
+                pair_matrix[i, j] = r
 
     return pair_matrix
 
 def pure_python_distance_matrix_xy_z(
-    sample1, sample2, velocities2, rmin, rmax, Lbox = None):
+    sample1, sample2, rp_max, pi_max, Lbox = None):
     """ Brute force pure python function calculating the distance 
     between all pairs of points and storing the result into two matrices, 
     one storing xy-distances, the other storing z-distances, 
@@ -85,8 +87,12 @@ def pure_python_distance_matrix_xy_z(
             elif dz < -zperiod/2.:
                 dz = -(zperiod + dz)
 
-            pair_matrix_xy[i, j] = np.sqrt(dx*dx + dy*dy)
-            pair_matrix_z[i, j] = abs(dz)
+            rp = np.sqrt(dx*dx + dy*dy)
+            dz = abs(dz)
+            if (rp <= rp_max) & (dz <= pi_max):
+                pair_matrix_xy[i, j] = rp
+                pair_matrix_z[i, j] = dz
 
     return pair_matrix_xy, pair_matrix_z
+
 

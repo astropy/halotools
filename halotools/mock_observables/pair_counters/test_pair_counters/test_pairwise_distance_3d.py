@@ -6,11 +6,17 @@ import numpy as np
 import pytest 
 import numpy as np
 from scipy.sparse import coo_matrix
+from astropy.utils.misc import NumpyRNGContext
+
+from .pure_python_distance_matrix import pure_python_distance_matrix_3d, pure_python_distance_matrix_xy_z
 
 from ..pairwise_distance_3d import pairwise_distance_3d
+from ..pairwise_distance_xy_z import pairwise_distance_xy_z
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 from ...tests.cf_helpers import generate_3d_regular_mesh
+
+fixed_seed = 43
 
 __all__ = ["test_pairwise_distance_3d_periodic_mesh_grid_1",
            "test_pairwise_distance_3d_nonperiodic_mesh_grid_1",
@@ -165,3 +171,59 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
     
     #each point has 0 connections including 1 self connection
     assert m.getnnz()==Npts1*Npts2
+
+@pytest.mark.slow
+def test_3d_brute_force_elementwise_comparison():
+    Npts1, Npts2 = 1e2, 1e2
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    r_max = 0.3
+
+    sparse_matrix = pairwise_distance_3d(sample1, sample2, r_max, period=1)
+    dense_matrix = sparse_matrix.tocsc()
+
+    pure_python_dense_matrix = pure_python_distance_matrix_3d(sample1, sample2, r_max, Lbox=1)
+
+    for i in range(pure_python_dense_matrix.shape[0]):
+        for j in range(pure_python_dense_matrix.shape[1]):
+            brute_force_element = pure_python_dense_matrix[i, j]
+            sparse_matrix_element = dense_matrix[i, j]
+            assert np.allclose(brute_force_element, sparse_matrix_element, rtol = 0.001)
+
+@pytest.mark.slow
+def test_xy_z_brute_force_elementwise_comparison():
+    Npts1, Npts2 = 1e2, 1e2
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    rp_max, pi_max = 0.2, 0.2
+
+    sparse_matrix_xy, sparse_matrix_z = pairwise_distance_xy_z(sample1, sample2, rp_max, pi_max, period=1)
+    dense_matrix_xy = sparse_matrix_xy.tocsc()
+    dense_matrix_z = sparse_matrix_z.tocsc()
+
+    pure_python_dense_matrix_xy, pure_python_dense_matrix_z = pure_python_distance_matrix_xy_z(
+        sample1, sample2, rp_max, pi_max, Lbox=1)
+
+    for i in range(pure_python_dense_matrix_xy.shape[0]):
+        for j in range(pure_python_dense_matrix_xy.shape[1]):
+
+            brute_force_element = pure_python_dense_matrix_xy[i, j]
+            sparse_matrix_element = dense_matrix_xy[i, j]
+            assert np.allclose(brute_force_element, sparse_matrix_element, rtol = 0.001)
+
+            brute_force_element = pure_python_dense_matrix_z[i, j]
+            sparse_matrix_element = dense_matrix_z[i, j]
+            assert np.allclose(brute_force_element, sparse_matrix_element, rtol = 0.001)
+
+
+
+
+
+
+
