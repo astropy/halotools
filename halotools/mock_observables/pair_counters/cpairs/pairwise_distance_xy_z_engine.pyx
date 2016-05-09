@@ -43,10 +43,10 @@ def pairwise_distance_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
     Returns 
     --------
     distance_perp : numpy.array
-        array of pairwise seperation xy-projected distances
+        array of pairwise separation xy-projected distances
     
     distance_para : numpy.array
-        array of pairwise seperation z distances
+        array of pairwise separation z distances
     
     i : numpy.array
         array of 0-indexed indices in sample 1

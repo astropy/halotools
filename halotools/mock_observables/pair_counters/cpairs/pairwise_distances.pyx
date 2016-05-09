@@ -56,12 +56,12 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         array of z positions of lenght N2 (data2)
     
     max_r : float
-        maximum seperation to record
+        maximum separation to record
     
     Returns
     -------
     d : numpy.array
-        array of pairwise seperation distances
+        array of pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices
@@ -80,7 +80,7 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
     
-    Calculate the distance between all pairs with seperations less than 0.5:
+    Calculate the distance between all pairs with separations less than 0.5:
     
     >>> r_max = 0.5
     >>> d,i,j = pairwise_distance_no_pbc(x,y,z,x,y,z,r_max)
@@ -162,12 +162,12 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         array defining axis-aligned periodic boundary conditions.
     
     max_r : float
-        maximum seperation to record
+        maximum separation to record
     
     Returns
     -------
     d : numpy.array
-        array of pairwise seperation distances
+        array of pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices
@@ -188,7 +188,7 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
     
-    Calculate the distance between all pairs with seperations less than 0.5:
+    Calculate the distance between all pairs with separations less than 0.5:
     
     >>> r_max = 0.5
     >>> d,i,j = pairwise_distance_pbc(x,y,z,x,y,z,period,r_max)
@@ -243,7 +243,7 @@ def pairwise_xy_z_distance_no_pbc(
     """
     Calculate the limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`.
     
-    Calculate the perpendicular and parallel distance between all pairs with seperations 
+    Calculate the perpendicular and parallel distance between all pairs with separations 
     less than or equal to ``max_rp`` and ``max_pi`` wrt to the z-direction, repsectively.
     
     Parameters
@@ -267,18 +267,18 @@ def pairwise_xy_z_distance_no_pbc(
         array of z positions of lenght N2 (data2)
     
     max_rp : float
-        maximum perpendicular seperation to record
+        maximum perpendicular separation to record
     
     max_pi : float
-        maximum parallel seperation to record
+        maximum parallel separation to record
     
     Returns
     -------
     d_perp : numpy.array
-        array of perpendicular pairwise seperation distances
+        array of perpendicular pairwise separation distances
     
     d_para : numpy.array
-        array of parallel pairwise seperation distances
+        array of parallel pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices
@@ -297,7 +297,7 @@ def pairwise_xy_z_distance_no_pbc(
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
     
-    Calculate the distance between all pairs with perpednicular seperations less than 0.25
+    Calculate the distance between all pairs with perpednicular separations less than 0.25
     and parallel sperations of 0.5:
     
     >>> max_rp = 0.25
@@ -361,7 +361,7 @@ def pairwise_xy_z_distance_pbc(
     """
     Calculate the limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`, with periodic boundary conditions (PBC).
     
-    Calculate the perpendicular and parallel distance between all pairs with seperations 
+    Calculate the perpendicular and parallel distance between all pairs with separations 
     less than or equal to ``max_rp`` and ``max_pi`` wrt to the z-direction, repsectively.
     
     Parameters
@@ -388,18 +388,18 @@ def pairwise_xy_z_distance_pbc(
         array defining axis-aligned periodic boundary conditions.
     
     max_rp : float
-        maximum perpendicular seperation to record
+        maximum perpendicular separation to record
     
     max_pi : float
-        maximum parallel seperation to record
+        maximum parallel separation to record
     
     Returns
     -------
     d_perp : numpy.array
-        array of perpendicular pairwise seperation distances
+        array of perpendicular pairwise separation distances
     
     d_para : numpy.array
-        array of parallel pairwise seperation distances
+        array of parallel pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices
@@ -420,7 +420,7 @@ def pairwise_xy_z_distance_pbc(
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
     
-    Calculate the distance between all pairs with perpednicular seperations less than 0.25
+    Calculate the distance between all pairs with perpednicular separations less than 0.25
     and parallel sperations of 0.5:
     
     >>> max_rp = 0.25

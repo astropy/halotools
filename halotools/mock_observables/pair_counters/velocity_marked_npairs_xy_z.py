@@ -23,7 +23,7 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
     approx_cell1_size = None, approx_cell2_size = None):
     """
     Calculate the number of velocity weighted pairs 
-    with seperations greater than or equal to 
+    with separations greater than or equal to 
     :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.
 
     :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.

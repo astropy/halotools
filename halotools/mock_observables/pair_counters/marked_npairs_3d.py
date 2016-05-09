@@ -25,7 +25,7 @@ def marked_npairs_3d(sample1, sample2, rbins,
                   weight_func_id = 0, verbose = False, num_threads = 1,
                   approx_cell1_size = None, approx_cell2_size = None):
     """
-    Calculate the number of weighted pairs with seperations greater than or equal to r, :math:`W(>r)`.
+    Calculate the number of weighted pairs with separations greater than or equal to r, :math:`W(>r)`.
 
     The weight given to each pair is determined by the weights for a pair,
     :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated

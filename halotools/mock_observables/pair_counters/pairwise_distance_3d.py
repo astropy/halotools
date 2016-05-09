@@ -42,7 +42,7 @@ def pairwise_distance_3d(data1, data2, rmax, period = None,
         of the input period.
     
     rmax : array_like
-        maximum seperation distance to search for pairs
+        maximum separation distance to search for pairs
     
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.

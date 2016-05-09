@@ -59,7 +59,7 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
         array of z positions of lenght N2 (data2)
     
     max_r : float
-        maximum seperation to record
+        maximum separation to record
     
     w_icell1 : numpy.array
         array of floats
@@ -73,7 +73,7 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     Returns
     -------
     d : numpy.array
-        array of pairwise seperation distances
+        array of pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices
@@ -93,7 +93,7 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     >>> z = np.random.random(Npts)
     >>> weights = np.random.random(Npts)
     
-    Calculate the distance between all pairs with seperations less than 0.5 if 
+    Calculate the distance between all pairs with separations less than 0.5 if 
     the weight associated with the first point is larger than the second point:
     
     >>> r_max = 0.5
@@ -153,7 +153,7 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     """
     Calculate the conditional limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`.
     
-    Calculate the perpendicular and parallel distance between all pairs with seperations 
+    Calculate the perpendicular and parallel distance between all pairs with separations 
     less than or equal to ``max_rp`` and ``max_pi`` wrt to the z-direction, repsectively,
     if a conditon is met.
     
@@ -178,10 +178,10 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
         array of z positions of lenght N2 (data2)
     
     max_rp : float
-        maximum perpendicular seperation to record
+        maximum perpendicular separation to record
     
     max_pi : float
-        maximum parallel seperation to record
+        maximum parallel separation to record
     
     w_icell1 : numpy.array
         array of floats
@@ -195,10 +195,10 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     Returns
     -------
     d_perp : numpy.array
-        array of perpendicular pairwise seperation distances
+        array of perpendicular pairwise separation distances
     
     d_para : numpy.array
-        array of parallel pairwise seperation distances
+        array of parallel pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices
@@ -218,7 +218,7 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     >>> z = np.random.random(Npts)
     >>> weights = np.random.random(Npts)
     
-    Calculate the distance between all pairs with perpednicular seperations less than 0.25
+    Calculate the distance between all pairs with perpednicular separations less than 0.25
     and parallel sperations of 0.5:
     
     >>> max_rp = 0.25

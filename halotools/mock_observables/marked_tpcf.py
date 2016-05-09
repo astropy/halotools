@@ -119,7 +119,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
         .. math::
             \\mathcal{M}(r) \\equiv \\mathrm{WW}(r) / \\mathrm{XX}(r),
         
-        where :math:`\\mathrm{WW}(r)` is the weighted number of pairs with seperations 
+        where :math:`\\mathrm{WW}(r)` is the weighted number of pairs with separations 
         equal to :math:`r`, and :math:`\\mathrm{XX}(r)` is dependent on the choice of the 
         ``normalize_by`` parameter.  If ``normalize_by`` is 'random_marks' 
         :math:`XX \\equiv \\mathcal{RR}`, the weighted pair counts where the marks have 
@@ -153,7 +153,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     .. math::
         \\mathcal{M}(r) \\equiv \\frac{\\sum_{ij}f(m_i,m_j)}{\\sum_{kl}f(m_k,m_l)}
     
-    where the sum in the numerator is of pairs :math:`i,j` with seperation :math:`r`, 
+    where the sum in the numerator is of pairs :math:`i,j` with separation :math:`r`, 
     and marks :math:`m_i,m_j`.  :math:`f()` is the marking function, ``weight_func_id``.  The sum 
     in the denominator is over an equal number of random pairs :math:`k,l`. The 
     calculation of this sum can be done multiple times, by setting the ``iterations`` 
