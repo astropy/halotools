@@ -4,9 +4,9 @@ import numpy as np
 import pytest 
 import multiprocessing 
 
-from ..mock_observables_helpers import enforce_pbcs, get_num_threads
+from ..mock_observables_helpers import enforce_pbcs, get_num_threads, get_period
 
-__all__ = ('test_enforce_pbcs', )
+__all__ = ('test_enforce_pbcs', 'test_get_num_threads', 'test_get_period')
 
 fixed_seed = 43
 
@@ -65,6 +65,24 @@ def test_get_num_threads():
     substr = "Input ``num_threads`` must be an integer"
     assert err.value.args[0] in substr
 
+def test_get_period():
+    period, PBCs = get_period(1)
+    assert np.all(period == 1)
+    assert PBCs is True
+
+    period, PBCs = get_period([1,1,1])
+    assert np.all(period == 1)
+    assert PBCs is True
+
+    with pytest.raises(ValueError) as err:
+        period, PBCs = get_period([1,1])
+    substr = "Input ``period`` must be either a scalar or a 3-element sequence."
+    assert substr in err.value.args[0]
+
+    with pytest.raises(ValueError) as err:
+        period, PBCs = get_period([1,1, np.inf])
+    substr = "All values must bounded positive numbers."
+    assert substr in err.value.args[0]
 
 
 

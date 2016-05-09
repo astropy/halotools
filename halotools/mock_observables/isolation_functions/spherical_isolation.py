@@ -8,10 +8,9 @@ import numpy as np
 from functools import partial 
 import multiprocessing 
 
-from .process_args_helpers import (_get_r_max, _get_period, 
-    _set_spherical_isolation_approx_cell_sizes)
+from .process_args_helpers import (_get_r_max, _set_spherical_isolation_approx_cell_sizes)
 
-from ..mock_observables_helpers import enforce_pbcs, get_num_threads
+from ..mock_observables_helpers import enforce_pbcs, get_num_threads, get_period
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.cpairs import spherical_isolation_engine
 from ..pair_counters.mesh_helpers import (
@@ -193,7 +192,7 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
     r_max = _get_r_max(data1, r_max)
     max_r_max = np.amax(r_max)
 
-    period, PBCs = _get_period(period)
+    period, PBCs = get_period(period)
     # At this point, period may still be set to None, 
     # in which case we must remap our points inside the smallest enclosing cube 
     # and set ``period`` equal to this cube size.

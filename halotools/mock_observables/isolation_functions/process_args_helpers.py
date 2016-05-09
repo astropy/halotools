@@ -3,7 +3,7 @@ the isolation_functions sub-package.
 """
 import numpy as np
 
-__all__ = ('_get_r_max', '_get_period', '_set_spherical_isolation_approx_cell_sizes')
+__all__ = ('_get_r_max', '_set_spherical_isolation_approx_cell_sizes')
 
 def _get_r_max(data1, r_max):
     """ Helper function process the input ``r_max`` value and returns 
@@ -24,29 +24,6 @@ def _get_r_max(data1, r_max):
         raise ValueError(msg)
 
     return r_max
-
-def _get_period(period):
-    """ Helper function used to process the input ``period`` argument. 
-    If ``period`` is set to None, function returns (None, False). 
-    Otherwise, function returns a 3-element array.
-    """
-
-    if period is None:
-        PBCs = False
-    else:
-        PBCs = True
-        period = np.atleast_1d(period).astype(float)
-
-        if len(period) == 1:
-            period = np.array([period[0]]*3).astype(float)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "Input ``period`` must be a bounded positive number in all dimensions"
-            raise ValueError(msg)
-
-    return period, PBCs
 
 def _set_spherical_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size, max_r_max):
     """

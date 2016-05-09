@@ -6,7 +6,7 @@ import numpy as np
 import multiprocessing
 num_available_cores = multiprocessing.cpu_count()
 
-__all__ = ('enforce_pbcs', 'get_num_threads')
+__all__ = ('enforce_pbcs', 'get_num_threads', 'get_period')
 
 def enforce_pbcs(x, y, z, period):
     """ Verify that the input sample is properly bounded in all dimensions by the input period.
@@ -77,5 +77,29 @@ def get_num_threads(input_num_threads, enforce_max_cores = False):
 
     return num_threads
 
+def get_period(period):
+    """ Helper function used to process the input ``period`` argument. 
+    If ``period`` is set to None, function returns period, PBCs = (None, False). 
+    Otherwise, function returns ([period, period, period], True).
+    """
+
+    if period is None:
+        PBCs = False
+    else:
+        PBCs = True
+        period = np.atleast_1d(period).astype(float)
+
+        if len(period) == 1:
+            period = np.array([period[0]]*3).astype(float)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+            assert len(period) == 3
+        except AssertionError:
+            msg = ("Input ``period`` must be either a scalar or a 3-element sequence.\n"
+                "All values must bounded positive numbers.\n")
+            raise ValueError(msg)
+
+    return period, PBCs
 
 
