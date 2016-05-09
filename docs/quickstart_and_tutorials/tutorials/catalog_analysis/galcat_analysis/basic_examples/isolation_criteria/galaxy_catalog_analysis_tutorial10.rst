@@ -3,7 +3,7 @@
 Galaxy Catalog Analysis Example: Identifying isolated galaxies
 ==============================================================
 
-In this example, we'll start from a mock galaxy catalog and show how to
+In this tutorial, we'll start from a mock galaxy catalog and show how to
 determine which galaxies are "isolated" according to a variety of
 criteria.
 
