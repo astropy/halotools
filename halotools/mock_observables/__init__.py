@@ -19,7 +19,6 @@ from .angular_tpcf import *
 from .tpcf_multipole import *
 from .error_estimation_tools import jackknife_covariance_matrix
 from .pairwise_velocity_stats import *
-from .isolation_criteria import *
 from .isolation_functions import *
 from .void_stats import *
 from .catalog_analysis_helpers import *
