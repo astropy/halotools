@@ -56,10 +56,19 @@ Downloading the default halo catalog
 Once you have installed Halotools and verified that you can import it,
 likely the first thing you will want to do is to download the default 
 halo catalog so that you can quickly get up and running. You can accomplish 
-this by navigating to the root directory of the package and running the initial 
-download script::
+this with the ``download_initial_halocat.py`` script that is packaged as part 
+of your global install. To use it, navigate to any working directory 
+on your machine and run the script::
 
-    python scripts/download_initial_halocat.py
+    $ download_initial_halocat.py -h 
+
+Throwing the ``-h`` flag will tell you the script's options. If you omit the ``-h`` flag, 
+this will download the default halo catalog to the default location on disk, the 
+Halotools cache location::
+
+    $HOME/.astropy/cache/halotools/halo_catalogs
+
+Alternatively, you can control the disk location of the download with the ``-dirname`` flag. 
 
 Running this script will set up the Halotools cache directory system on your local machine, 
 and then download the default halo catalog to the cache (Bolshoi z=0 rockstar halos), 
@@ -75,13 +84,13 @@ To see simple examples of how to manipulate the data stored in halo catalogs,
 see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
 
 If you wish to download alternate snapshots, you can either use the 
-`~halotools.sim_manager.DownloadManager`, or use the **download_additional_halocat.py** convenience script, which should be called with four positional arguments: *simname, halo_finder, version_name* and *redshift.* For example::
+`~halotools.sim_manager.DownloadManager`, or use the **download_additional_halocat.py** convenience script, which should be called with four positional arguments: *simname, halo_finder, version_name* and *redshift.* For example, navigate to any working directory and execute::
 
-    python scripts/download_additional_halocat.py multidark rockstar most_recent 0.5
+    $ download_additional_halocat.py multidark rockstar most_recent 0.5
 
 Choosing ``most_recent`` as the version_name automatically selects the most up-to-date version of the Halotools-provided catalogs. You can read about your download options by executing the script and throwing the help flag::
 
-    python scripts/download_alternate_halocats.py --help
+    $ download_alternate_halocats.py --help
 
 
 Getting started with galaxy/halo analysis
