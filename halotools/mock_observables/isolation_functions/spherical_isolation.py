@@ -8,12 +8,15 @@ import numpy as np
 from functools import partial 
 import multiprocessing 
 
+from .process_args_helpers import (_get_num_threads, _get_r_max, _get_period, 
+    _set_spherical_isolation_approx_cell_sizes)
+
+from ..mock_observables_helpers import enforce_pbcs
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.cpairs import spherical_isolation_engine
 from ..pair_counters.mesh_helpers import (
-    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
-
-from ...utils.array_utils import convert_to_ndarray, custom_len
+    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box, 
+    _enforce_maximum_search_length)
 
 __all__ = ('spherical_isolation', )
 
@@ -159,8 +162,8 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(spherical_isolation_engine, 
-        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
-        sample2[:,0], sample2[:,1], sample2[:,2], r_max)
+        double_mesh, x1in, y1in, z1in, 
+        x2in, y2in, z2in, r_max)
     
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -179,76 +182,44 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     return is_isolated
 
 
-
-
 def _spherical_isolation_process_args(data1, data2, r_max, period, 
     num_threads, approx_cell1_size, approx_cell2_size):
     """
-    private function to process the arguents for spherical isolation functions
+    private function to process the arguments for the 
+    `~halotools.mock_observables.spherical_isolation` function. 
     """
-    if num_threads is not 1:
-        if num_threads=='max':
-            num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
-            msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
-            raise ValueError(msg)
-    
-    # Passively enforce that we are working with ndarrays
-    x1 = data1[:,0]
-    y1 = data1[:,1]
-    z1 = data1[:,2]
-    x2 = data2[:,0]
-    y2 = data2[:,1]
-    z2 = data2[:,2]
-    
-    N1 = len(x1)
-    
-    r_max = convert_to_ndarray(r_max).astype(float)
-    if len(r_max) == 1:
-        r_max = np.array([r_max[0]]*N1)
-    try:
-        assert np.all(r_max < np.inf)
-        assert np.all(r_max > 0)
-    except AssertionError:
-        msg = "Input ``r_max`` must be an array of bounded positive numbers."
-        raise ValueError(msg)
-    
+    num_threads = _get_num_threads(num_threads)
+            
+    r_max = _get_r_max(data1, r_max)
     max_r_max = np.amax(r_max)
-    
-    # Set the boolean value for the PBCs variable
+
+    period, PBCs = _get_period(period)
+    # At this point, period may still be set to None, 
+    # in which case we must remap our points inside the smallest enclosing cube 
+    # and set ``period`` equal to this cube size.
     if period is None:
-        PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2, 
+            _enclose_in_box(
+                data1[:,0], data1[:,2], data1[:,2], 
+                data2[:,0], data2[:,2], data2[:,2], 
                 min_size=[max_r_max*3.0,max_r_max*3.0,max_r_max*3.0]))
     else:
-        PBCs = True
-        period = convert_to_ndarray(period).astype(float)
-        if len(period) == 1:
-            period = np.array([period[0]]*3)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "Input ``period`` must be a bounded positive number in all dimensions"
-            raise ValueError(msg)
+        x1 = data1[:,0]
+        y1 = data1[:,1]
+        z1 = data1[:,2]
+        x2 = data2[:,0]
+        y2 = data2[:,1]
+        z2 = data2[:,2]
 
-    try:
-        assert max_r_max < period[0]/3.
-        assert max_r_max < period[1]/3.
-        assert max_r_max < period[2]/3.
-    except AssertionError:
-        msg = ("Input ``max(r_max)`` must be less than input period/3 in all dimensions.")
-        raise ValueError(msg)
+    _enforce_maximum_search_length(max_r_max, period[0])
+    _enforce_maximum_search_length(max_r_max, period[1])
+    _enforce_maximum_search_length(max_r_max, period[2])
 
-    if approx_cell1_size is None:
-        approx_cell1_size = [max_r_max, max_r_max, max_r_max]
-    elif custom_len(approx_cell1_size) == 1:
-        approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
-    if approx_cell2_size is None:    
-        approx_cell2_size = [max_r_max, max_r_max, max_r_max]
-    elif custom_len(approx_cell2_size) == 1:
-        approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
+    enforce_pbcs(x1, y1, z1, period)
+    enforce_pbcs(x2, y2, z2, period)
+
+    approx_cell1_size, approx_cell2_size = _set_spherical_isolation_approx_cell_sizes(
+        approx_cell1_size, approx_cell2_size, max_r_max)
         
     return (x1, y1, z1, x2, y2, z2, 
         r_max, max_r_max, period, num_threads, PBCs, 
