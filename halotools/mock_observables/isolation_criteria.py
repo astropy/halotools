@@ -31,6 +31,9 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
     neighbor in ``sample2`` within an user specified spherical volume centered at each 
     point in ``sample1``.
+
+    See also :ref:`galaxy_catalog_analysis_tutorial10` for example usage on a 
+    mock galaxy catalog. 
     
     Parameters
     ----------
@@ -92,12 +95,12 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     other points in the sample.
     
     >>> Npts = 1000
-    >>> Lbox = 1.0
+    >>> Lbox = 250.0
     >>> period = Lbox
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
@@ -109,16 +112,22 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     convenience function for this same purpose, which provides additional wrapper 
     behavior around `numpy.vstack` such as placing points into redshift-space. 
     
-    Now we will call `spherical_isolation` with ``sample2`` set to ``sample1``:
+    Now we will call `spherical_isolation` with ``sample2`` set to ``sample1``, 
+    requiring that no other galaxy be located within 500 kpc/h in order for a point 
+    to be considered isolated. Recall that Halotools assumes *h=1* and that all length-units 
+    are in Mpc/h throughout the package. 
     
-    >>> r_max = 0.05
+    >>> r_max = 0.5 # isolation cut of 500 kpc/h 
     >>> is_isolated = spherical_isolation(sample1, sample1, r_max, period=period)
     
     In the next example that follows, ``sample2`` will be a different set of points 
     from ``sample1``, so we will determine which points in ``sample1`` are located 
     greater than distance ``r_max`` away from all points in ``sample2``. 
     
-    >>> sample2 = np.random.random((Npts, 3))
+    >>> x2 = np.random.uniform(0, Lbox, Npts)
+    >>> y2 = np.random.uniform(0, Lbox, Npts)
+    >>> z2 = np.random.uniform(0, Lbox, Npts)
+    >>> sample2 = np.vstack([x2, y2, z2]).T
     >>> is_isolated = spherical_isolation(sample1, sample2, r_max, period=period)
     
     Notes
@@ -180,7 +189,10 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
     neighbor in ``sample2`` within an user specified cylindrical volume centered at each 
     point in ``sample1``.
-        
+
+    See also :ref:`galaxy_catalog_analysis_tutorial10` for example usage on a 
+    mock galaxy catalog. 
+  
     Parameters
     ----------
     sample1 : array_like
@@ -248,11 +260,11 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     ``rp_max`` and half-length ``pi_max``. 
     
     >>> Npts = 1000
-    >>> Lbox = 1.0
+    >>> Lbox = 250.0
     >>> period = Lbox
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     >>> vz = np.random.normal(loc = 0, scale = 100, size = Npts)
     
     We place our points into redshift-space, formatting the result into the 
@@ -261,10 +273,18 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     >>> from halotools.mock_observables import return_xyz_formatted_array
     >>> sample1 = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = vz, velocity_distortion_dimension='z')
     
-    Now we will call `cylindrical_isolation` with ``sample2`` set to ``sample1``:
+    Now we will call `cylindrical_isolation` with ``sample2`` set to ``sample1``, applying a 
+    projected separation cut of 500 kpc/h, and a line-of-sight velocity cut of 750 km/s. 
+    Note that Halotools assumes *h=1* throughout the package, and that 
+    all Halotools length-units are in Mpc/h. 
     
-    >>> rp_max = 0.05
-    >>> pi_max = 0.1
+    >>> rp_max = 0.5 # 500 kpc/h cut in perpendicular direction
+
+    Since *h=1* implies :math:`H_{0} = 100` km/s/Mpc, our 750 km/s velocity criteria 
+    gets transformed into a z-dimension length criteria as:
+    
+    >>> H0 = 100.0
+    >>> pi_max = 750./H0
     >>> is_isolated = cylindrical_isolation(sample1, sample1, rp_max, pi_max, period=period)
     
     In the next example that follows, ``sample2`` will be a different set of points 
@@ -272,9 +292,9 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     have a neighbor in ``sample2`` located inside a cylinder of radius ``rp_max`` 
     and half-length ``pi_max``. 
     
-    >>> x2 = np.random.random(Npts)
-    >>> y2 = np.random.random(Npts)
-    >>> z2 = np.random.random(Npts)
+    >>> x2 = np.random.uniform(0, Lbox, Npts)
+    >>> y2 = np.random.uniform(0, Lbox, Npts)
+    >>> z2 = np.random.uniform(0, Lbox, Npts)
     >>> vz2 = np.random.normal(loc = 0, scale = 100, size = Npts)
     >>> sample2 = return_xyz_formatted_array(x2, y2, z2, period = Lbox, velocity = vz2, velocity_distortion_dimension='z')
     
