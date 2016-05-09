@@ -1,6 +1,8 @@
 """ Module containing various helper functions used to process the 
 arguments of functions throughout the `~halotools.mock_observables` package. 
 """ 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from warnings import warn 
 import numpy as np
 import multiprocessing
