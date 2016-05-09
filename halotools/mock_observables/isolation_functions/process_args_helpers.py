@@ -2,41 +2,8 @@
 the isolation_functions sub-package.
 """
 import numpy as np
-from warnings import warn
-import multiprocessing
-num_available_cores = multiprocessing.cpu_count()
 
-__all__ = ('_get_num_threads', '_get_r_max', '_get_period', 
-    '_set_spherical_isolation_approx_cell_sizes')
-
-def _get_num_threads(input_num_threads, enforce_max_cores = False):
-    """ Helper function requires that ``input_num_threads`` either be an 
-    integer or the string ``max``. If ``input_num_threads`` exceeds the 
-    number of available cores, a warning will be issued. 
-    In this event,  ``enforce_max_cores`` is set to True, 
-    then ``num_threads`` is automatically set to num_cores. 
-    """
-    if input_num_threads=='max':
-        num_threads = num_available_cores
-    else:
-        try:
-            num_threads = int(input_num_threads)
-            assert num_threads == input_num_threads
-        except:
-            msg = ("Input ``num_threads`` must be an integer")
-            raise ValueError(msg)
-
-    if num_threads > num_available_cores:
-        msg = ("Input ``num_threads`` = %i exceeds the ``num_available_cores`` = %i.\n")
-
-        if enforce_max_cores is True:
-            msg += ("Since ``enforce_max_cores`` is True, "
-                "setting ``num_threads`` to ``num_available_cores``.\n")
-            num_threads = num_available_cores
-
-        warn(msg % (num_threads, num_available_cores))
-
-    return num_threads
+__all__ = ('_get_r_max', '_get_period', '_set_spherical_isolation_approx_cell_sizes')
 
 def _get_r_max(data1, r_max):
     """ Helper function process the input ``r_max`` value and returns 

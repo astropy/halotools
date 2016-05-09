@@ -1,13 +1,21 @@
 """ Module containing various helper functions used to process the 
 arguments of functions throughout the `~halotools.mock_observables` package. 
 """ 
-
+from warnings import warn 
 import numpy as np
+import multiprocessing
+num_available_cores = multiprocessing.cpu_count()
 
-__all__ = ('enforce_pbcs', )
+__all__ = ('enforce_pbcs', 'get_num_threads')
 
 def enforce_pbcs(x, y, z, period):
-    """ Verify that the input sample is properly bounded in all dimensions by the input period. 
+    """ Verify that the input sample is properly bounded in all dimensions by the input period.
+
+    Parameters 
+    -----------
+    x, y, z : arrays 
+
+    period : 3-element sequence 
     """
     try:
         assert np.all(x >= 0)
@@ -39,6 +47,35 @@ def enforce_pbcs(x, y, z, period):
         msg = ("You set zperiod = %.2f but there are values in the z-dimension \n"
             "of the input data that exceed this value")
         raise ValueError(msg % period[2])
+
+def get_num_threads(input_num_threads, enforce_max_cores = False):
+    """ Helper function requires that ``input_num_threads`` either be an 
+    integer or the string ``max``. If ``input_num_threads`` exceeds the 
+    number of available cores, a warning will be issued. 
+    In this event,  ``enforce_max_cores`` is set to True, 
+    then ``num_threads`` is automatically set to num_cores. 
+    """
+    if input_num_threads=='max':
+        num_threads = num_available_cores
+    else:
+        try:
+            num_threads = int(input_num_threads)
+            assert num_threads == input_num_threads
+        except:
+            msg = ("Input ``num_threads`` must be an integer")
+            raise ValueError(msg)
+
+    if num_threads > num_available_cores:
+        msg = ("Input ``num_threads`` = %i exceeds the ``num_available_cores`` = %i.\n")
+
+        if enforce_max_cores is True:
+            msg += ("Since ``enforce_max_cores`` is True, "
+                "setting ``num_threads`` to ``num_available_cores``.\n")
+            num_threads = num_available_cores
+
+        warn(msg % (num_threads, num_available_cores))
+
+    return num_threads
 
 
 

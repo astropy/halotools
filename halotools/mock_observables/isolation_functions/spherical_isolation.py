@@ -8,10 +8,10 @@ import numpy as np
 from functools import partial 
 import multiprocessing 
 
-from .process_args_helpers import (_get_num_threads, _get_r_max, _get_period, 
+from .process_args_helpers import (_get_r_max, _get_period, 
     _set_spherical_isolation_approx_cell_sizes)
 
-from ..mock_observables_helpers import enforce_pbcs
+from ..mock_observables_helpers import enforce_pbcs, get_num_threads
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.cpairs import spherical_isolation_engine
 from ..pair_counters.mesh_helpers import (
@@ -188,7 +188,7 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
     private function to process the arguments for the 
     `~halotools.mock_observables.spherical_isolation` function. 
     """
-    num_threads = _get_num_threads(num_threads)
+    num_threads = get_num_threads(num_threads)
             
     r_max = _get_r_max(data1, r_max)
     max_r_max = np.amax(r_max)
