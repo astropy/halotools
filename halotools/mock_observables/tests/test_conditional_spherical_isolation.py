@@ -9,6 +9,13 @@ from .cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
 __all__ = ('test_conditional_spherical_isolation_cond_func1', )
 
+def test_conditional_spherical_isolation_args_processing1():
+    npts = 100
+    sample1 = np.random.random((npts, 3))
+    r_max = 0.1
+    iso = conditional_spherical_isolation(sample1, sample1, r_max, period=1)
+
+
 def test_conditional_spherical_isolation_cond_func1():
     sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
     sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
