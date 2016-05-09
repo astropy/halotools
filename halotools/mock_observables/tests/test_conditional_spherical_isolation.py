@@ -4,7 +4,8 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np 
 
-from ..isolation_criteria import spherical_isolation, conditional_spherical_isolation
+from ..isolation_criteria import conditional_spherical_isolation
+from ..isolation_functions import spherical_isolation
 from .cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
 __all__ = ('test_conditional_spherical_isolation_cond_func1', )
