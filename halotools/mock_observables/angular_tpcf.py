@@ -48,7 +48,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     
     randoms : array_like, optional
         Nran x 2 array containing ra,dec positions of points in degrees.  If no randoms 
-        are provided analytic randoms are used (only valid for for continuous all-sky 
+        are provided analytic randoms are used (only valid for for continious all-sky 
         converage).
     
     do_auto : boolean, optional

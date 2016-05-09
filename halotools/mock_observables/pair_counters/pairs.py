@@ -70,7 +70,7 @@ def npairs(sample1, sample2, rbins, period=None):
     
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,)) #store radial pair seperations 
+    dd = np.zeros((N1*N2,)) #store radial pair separations 
     for i in range(0,N1): #calculate distance between every point and every other point
         x1 = sample1[i,:]
         x2 = sample2
@@ -91,7 +91,7 @@ def npairs(sample1, sample2, rbins, period=None):
 def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
     """
     Calculate the number of pairs with parellal separations less than or equal to 
-    pi_bins[i], and perpendicular seperations less than or equal to rp_bins[i].
+    pi_bins[i], and perpendicular separations less than or equal to rp_bins[i].
     
     Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS), and
     the final dimension is parallel to the LOS.
@@ -153,7 +153,7 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
     
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,2)) #store pair seperations 
+    dd = np.zeros((N1*N2,2)) #store pair separations 
     for i in range(0,N1): #calculate distance between every point and every other point
         x1 = sample1[i,:]
         x2 = sample2
@@ -248,7 +248,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
     
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1,N2), dtype=np.float64) #store radial pair seperations 
+    dd = np.zeros((N1,N2), dtype=np.float64) #store radial pair separations 
     for i in range(0,N1): #calculate distance between every point and every other point
         x1 = sample1[i,:]
         x2 = sample2
@@ -268,7 +268,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None, weights2=None):
     """
     Calculate the number of weighted pairs with parellal separations less than or equal to 
-    pi_bins[i], and perpendicular seperations less than or equal to rp_bins[i].
+    pi_bins[i], and perpendicular separations less than or equal to rp_bins[i].
     
     Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS), and
     the final dimension is parallel to the LOS.
@@ -354,8 +354,8 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
     
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,2)) #store pair seperations 
-    ww = np.zeros((N1*N2,1)) #store pair seperations
+    dd = np.zeros((N1*N2,2)) #store pair separations 
+    ww = np.zeros((N1*N2,1)) #store pair separations
     for i in range(0,N1): #calculate distance between every point and every other point
         x1 = sample1[i,:]
         x2 = sample2
@@ -427,7 +427,7 @@ def pairs(sample1, r, sample2=None, period=None):
     
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1,N2)) #store radial pair seperations 
+    dd = np.zeros((N1,N2)) #store radial pair separations 
     for i in range(0,N1): #calculate distance between every point and every other point
         x1 = sample1[i,:]
         x2 = sample2

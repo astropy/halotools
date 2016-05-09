@@ -26,7 +26,7 @@ class FixedAutosummary(Autosummary):
             except ImportError:
                 self.warn('failed to import %s' % name)
                 items.append((name, '', '', name))
-                continue
+                continie
 
             self.result = ViewList()  # initialize for each documenter
             full_name = real_name
@@ -40,13 +40,13 @@ class FixedAutosummary(Autosummary):
             if not documenter.parse_name():
                 self.warn('failed to parse name %s' % real_name)
                 items.append((display_name, '', '', real_name))
-                continue
+                continie
             if not documenter.import_object():
                 self.warn('failed to import object %s' % real_name)
                 items.append((display_name, '', '', real_name))
-                continue
+                continie
             if documenter.options.members and not documenter.check_module():
-                continue
+                continie
 
             # try to also get a source code analyzer for attribute docs
             try:

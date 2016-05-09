@@ -30,7 +30,7 @@ def pairwise_distance_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         Numpy arrays storing Cartesian coordinates of points in sample 2
     
     rmax : array
-        maximum seperation distance to search for and return pairs
+        maximum separation distance to search for and return pairs
     
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in 
@@ -40,7 +40,7 @@ def pairwise_distance_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     Returns 
     --------
     distance : numpy.array
-        array of pairwise seperation distances
+        array of pairwise separation distances
     
     i : numpy.array
         array of 0-indexed indices in sample 1

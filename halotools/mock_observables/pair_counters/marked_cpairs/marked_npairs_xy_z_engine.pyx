@@ -46,7 +46,7 @@ def marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         :math:`r_{\\rm p}` in which pairs are counted.
 
     pi_bins : numpy.array
-        array defining parallel seperation in which to sum the pair counts
+        array defining parallel separation in which to sum the pair counts
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in 

@@ -480,7 +480,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                             approx_cell2_size = None):
     """ 
     Calculate the mean pairwise line-of-sight (LOS) velocity 
-    as a function of projected seperation, :math:`\\bar{v}_{z,12}(r_p)`.
+    as a function of projected separation, :math:`\\bar{v}_{z,12}(r_p)`.
     
     Example calls to this function appear in the documentation below. 
 
@@ -497,7 +497,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         pairs are counted.
     
     pi_max : float
-        maximum LOS seperation
+        maximum LOS separation
     
     sample2 : array_like, optional
         Npts x 3 array containing 3-D positions of points.
@@ -719,7 +719,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         pairs are counted.
     
     pi_max : float
-        maximum LOS seperation
+        maximum LOS separation
     
     sample2 : array_like, optional
         Npts x 3 array containing 3-D positions of points.

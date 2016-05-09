@@ -32,7 +32,7 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     as not all estimators need one or the other.
     
     Analytical counts are N**2*dv*rho, where dv is the volume of the spherical 
-    shells, which is the correct volume to use for a continuous cubical volume with PBCs. 
+    shells, which is the correct volume to use for a continious cubical volume with PBCs. 
     """
     def nball_volume(R,k=3):
         """

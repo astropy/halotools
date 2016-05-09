@@ -26,7 +26,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)` 
     
-    Divide redshift space into bins of radial seperation and angle to to the line-of-sight 
+    Divide redshift space into bins of radial separation and angle to to the line-of-sight 
     (LOS).  This is a pre-step for calculating correlation function multipoles.
     
     The first two dimensions (x, y) define the plane for perpendicular distances. 
@@ -158,8 +158,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     .. math:: 
         s = \\sqrt{r_{\\parallel}^2+r_{\\perp}^2},
     
-    where :math:`r_{\\parallel}` is the seperation parallel to the LOS 
-    and :math:`r_{\\perp}` is the seperation perpednicular to the LOS.  :math:`\\mu` is 
+    where :math:`r_{\\parallel}` is the separation parallel to the LOS 
+    and :math:`r_{\\perp}` is the separation perpednicular to the LOS.  :math:`\\mu` is 
     the cosine of the angle, :math:`\\theta_{\\rm LOS}`, between the LOS 
     and :math:`\\vec{s}`:
     
