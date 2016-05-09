@@ -2,9 +2,9 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np 
 
-from ..isolation_criteria import conditional_cylindrical_isolation
-from ..isolation_functions import cylindrical_isolation
-from .cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
+from ..conditional_cylindrical_isolation import conditional_cylindrical_isolation
+from ..cylindrical_isolation import cylindrical_isolation
+from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
 __all__ = ['test_conditional_cylindrical_isolation_cond_func1']
 
