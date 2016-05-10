@@ -1,12 +1,15 @@
 """ Module providing testing for 
 `~halotools.mock_observables.conditional_spherical_isolation` function. 
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 import pytest 
+from astropy.utils.misc import NumpyRNGContext
 
 from ..spherical_isolation import spherical_isolation
 from ..conditional_spherical_isolation import conditional_spherical_isolation
+
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
 __all__ = ('test_conditional_spherical_isolation_cond_func1', )

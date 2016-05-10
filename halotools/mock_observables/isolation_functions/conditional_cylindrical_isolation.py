@@ -9,7 +9,7 @@ from functools import partial
 import multiprocessing 
 
 from .cylindrical_isolation import _cylindrical_isolation_process_args
-from .conditional_spherical_isolation import _conditional_isolation_process_weights
+from .conditional_spherical_isolation import _conditional_isolation_process_marks
 
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.marked_cpairs import marked_cylindrical_isolation_engine
@@ -70,13 +70,13 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     marks1 : array_like
         len(sample1) x N_marks array of marks.  The supplied marks array must have the 
-        appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
+        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
         this parameter is not specified, it is set 
         to numpy.ones((len(sample1), N_marks)).
     
     marks2 : array_like
         len(sample2) x N_marks array of marks.  The supplied marks array must have the 
-        appropiate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
+        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
         this parameter is not specified, it is set 
         to numpy.ones((len(sample1), N_marks)).
     
@@ -92,7 +92,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
         calculation, in which case a multiprocessing Pool object will 
         never be instantiated. A string 'max' may be used to indicate that 
         the pair counters should use all available cores on the machine.
@@ -262,8 +262,8 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     search_xlength, search_ylength, search_zlength = max_rp_max, max_rp_max, max_pi_max 
     
-    # Process the input weights and with the helper function
-    marks1, marks2 = _conditional_isolation_process_weights(sample1, sample2, marks1, marks2, cond_func)
+    # Process the input marks and with the helper function
+    marks1, marks2 = _conditional_isolation_process_marks(sample1, sample2, marks1, marks2, cond_func)
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (

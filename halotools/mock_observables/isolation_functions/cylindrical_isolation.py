@@ -67,9 +67,9 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely 
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
         calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string ``max`` may be used to indicate that 
+        never be instantiated. A string 'max' may be used to indicate that 
         the pair counters should use all available cores on the machine.
         
     approx_cell1_size : array_like, optional 
@@ -173,8 +173,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(cylindrical_isolation_engine, 
-        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
-        sample2[:,0], sample2[:,1], sample2[:,2], rp_max, pi_max)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rp_max, pi_max)
     
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
