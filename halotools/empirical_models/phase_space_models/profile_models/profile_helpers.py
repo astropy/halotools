@@ -13,17 +13,18 @@ Testing for this module is done in the
 `~halotools.empirical_models.test_profile_helpers` module. 
 
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np 
 from astropy import cosmology as astropy_cosmology_obj
 from astropy import units as u
+from astropy.constants import G
+newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 from ....custom_exceptions import HalotoolsError
 
-__all__ = (['density_threshold', 'delta_vir', 
-    'halo_mass_to_halo_radius', 'halo_radius_to_halo_mass'])
+__all__ = ('density_threshold', 'delta_vir', 
+    'halo_mass_to_halo_radius', 'halo_radius_to_halo_mass', 'halo_mass_to_virial_velocity')
 
 __author__ = ['Benedikt Diemer', 'Andrew Hearin']
 
@@ -246,4 +247,46 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
     rho = density_threshold(cosmology, redshift, mdef)
     mass = 4.0 / 3.0 * np.pi * rho * radius**3
     return mass
+
+def halo_mass_to_virial_velocity(total_mass, cosmology, redshift, mdef):
+    """ The circular velocity evaluated at the halo boundary, 
+    :math:`V_{\\rm vir} \\equiv \\sqrt{GM_{\\rm halo}/R_{\\rm halo}}`.
+
+    Parameters
+    --------------
+    total_mass : array_like 
+        Total mass of the halo; can be a scalar or numpy array.
+
+    cosmology : object 
+        Instance of an Astropy `~astropy.cosmology` object. 
+
+    redshift: array_like
+        Can either be a scalar, or a numpy array of the same dimension as the input ``mass``. 
+
+    mdef: str
+        String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+
+    Returns 
+    --------
+    vvir : array_like 
+        Virial velocity in km/s.
+
+    Notes 
+    ------
+    See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+    """
+    halo_radius = halo_mass_to_halo_radius(total_mass, cosmology, redshift, mdef)
+    return np.sqrt(newtonG.value*total_mass/halo_radius)
+
+
+
+
+
+
+
+
+
+
+
 
