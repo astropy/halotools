@@ -1,6 +1,6 @@
 """
-Module containing functions used to determine whether 
-a set of points are isolated according to various criteria.
+Module containing the `~halotools.mock_observables.conditional_spherical_isolation` function 
+used to apply a a variety of 3d isolation criteria to a set of points in a periodic box.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -9,15 +9,11 @@ from functools import partial
 import multiprocessing 
 
 from .cylindrical_isolation import _cylindrical_isolation_process_args
-from .conditional_spherical_isolation import _conditional_isolation_process_marks
+from .process_args_helpers import _conditional_isolation_process_marks
 
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.marked_cpairs import marked_cylindrical_isolation_engine
-from ..pair_counters.mesh_helpers import (
-    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
-
-from ...utils.array_utils import convert_to_ndarray, custom_len
-from ...custom_exceptions import HalotoolsError
+from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 
 __all__ = ('conditional_cylindrical_isolation', )
 
@@ -26,9 +22,8 @@ __author__ = ['Duncan Campbell', 'Andrew Hearin']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
 
-
 def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
-                          marks1, marks2, cond_func, period=None, num_threads=1,
+                          marks1=None, marks2=None, cond_func=0, period=None, num_threads=1,
                           approx_cell1_size=None, approx_cell2_size=None):
     """
     Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a 
@@ -280,8 +275,8 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(marked_cylindrical_isolation_engine, 
-        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
-        sample2[:,0], sample2[:,1], sample2[:,2], marks1, marks2, cond_func, rp_max, pi_max)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
+        marks1, marks2, cond_func, rp_max, pi_max)
     
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(

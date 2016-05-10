@@ -4,7 +4,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np 
-import pytest 
 from astropy.utils.misc import NumpyRNGContext
 
 from ..spherical_isolation import spherical_isolation
@@ -12,7 +11,18 @@ from ..conditional_spherical_isolation import conditional_spherical_isolation
 
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
-__all__ = ('test_conditional_spherical_isolation_cond_func1', )
+__all__ = ('test_agreement_with_unconditioned_calculation', 
+    'test_conditional_spherical_isolation_cond_func1', 
+    'test_conditional_spherical_isolation_cond_func2', 
+    'test_conditional_spherical_isolation_cond_func3', 
+    'test_conditional_spherical_isolation_cond_func4', 
+    'test_conditional_spherical_isolation_cond_func5', 
+    'test_stellar_mass_conditional_spherical_isolation_correctness_cond_func1', 
+    'test_stellar_mass_conditional_spherical_isolation_correctness_cond_func2', 
+    'test_stellar_mass_conditional_spherical_isolation_correctness_cond_func3',
+    'test_stellar_mass_conditional_spherical_isolation_correctness_cond_func4', 
+    'test_stellar_mass_conditional_spherical_isolation_correctness_cond_func5', 
+    'test_stellar_mass_conditional_spherical_isolation_correctness_cond_func6')
 
 fixed_seed = 43 
 
