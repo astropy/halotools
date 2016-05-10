@@ -137,3 +137,15 @@ def _cell1_parallelization_indices(ncells, num_threads):
         list_of_nonempty_arrays = [a for a in list_with_possibly_empty_arrays if len(a) > 0]
         list_of_tuples = [(x[0], x[0] + len(x)) for x in list_of_nonempty_arrays]
         return num_threads, list_of_tuples
+
+
+def _enforce_maximum_search_length(search_length, period):
+    """ The `~halotools.mock_observables.pair_counters.RectangularDoubleMesh` 
+    algorithm requires that the search length cannot exceed period/3 in any dimension. 
+    """ 
+    try:
+        assert search_length < period/3.
+    except AssertionError:
+        msg = ("The `~halotools.mock_observables.pair_counters.RectangularDoubleMesh` "
+            "algorithm requires that the search length cannot exceed period/3 in any dimension.")
+        raise ValueError(msg)

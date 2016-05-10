@@ -6,7 +6,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 cimport numpy as np
 
 __author__ = ["Duncan Campbell", "Andrew Hearin"]
-__all__ = ('gt_cond', 'lt_cond', 'eq_cond', 'neq_cond', 'tg_cond', 'lg_cond')
+__all__ = ('trivial', 'gt_cond', 'lt_cond', 'eq_cond', 'neq_cond', 'tg_cond', 'lg_cond')
+
+cdef bint trivial(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    0
+    """
+    cdef bint result = 1
+    return result
 
 cdef bint gt_cond(cnp.float64_t* w1, cnp.float64_t* w2):
     """

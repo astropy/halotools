@@ -4,8 +4,7 @@ This module contains the `AnalyticalDensityProf` class,
 a container class for the distribution of mass and/or galaxies 
 within dark matter halos.  
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np 
 from astropy.extern import six 
@@ -314,8 +313,8 @@ class AnalyticDensityProf(object):
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
         """
-        halo_radius = self.halo_mass_to_halo_radius(total_mass)
-        return np.sqrt(newtonG.value*total_mass/halo_radius)
+        return profile_helpers.halo_mass_to_virial_velocity(total_mass, 
+            self.cosmology, self.redshift, self.mdef)
 
     def circular_velocity(self, radius, total_mass, *prof_params):
         """
