@@ -17,6 +17,9 @@ By following this tutorial together with this notebook,
 you can play around with your own variations of the calculation 
 as you learn the basic syntax. 
 
+This tutorial only displays basic usage of the isolation functions. For more sophisticated 
+analyses, such as those in which the definition of isolation varies with stellar mass 
+on a galaxy-by-galaxy basis, see :ref:`galaxy_catalog_intermediate_analysis_tutorial1`. 
 
 Generate a mock galaxy catalog
 ------------------------------
@@ -148,3 +151,13 @@ mask manually.
     pi_max = 3000./H0 # line-of-sight velocity cut of 3000 km/s
     
     is_isolated = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period = model.mock.Lbox)
+
+Next steps 
+------------
+
+This tutorial only displays basic usage of the isolation functions. For more sophisticated 
+analyses, such as those in which the definition of isolation varies with stellar mass 
+on a galaxy-by-galaxy basis, see :ref:`galaxy_catalog_intermediate_analysis_tutorial1`. 
+
+
+

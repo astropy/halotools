@@ -69,6 +69,17 @@ isolation criteria
 
    basic_examples/isolation_criteria/galaxy_catalog_analysis_tutorial10
 
+Intermediate examples
+===================
+Each of the examples in this section gives a demonstration of more complex 
+calculations you can perform with the `~halotools.mock_observables` package. 
+
+isolation criteria 
+---------------------
+.. toctree::
+   :maxdepth: 1
+
+   intermediate_examples/isolation_criteria/galaxy_catalog_intermediate_analysis_tutorial1
 
 
 

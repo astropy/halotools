@@ -35,7 +35,9 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     Different additional criteria can be built up from different combinations of 
     input ``marks1``, ``marks2`` and ``cond_func``.
     
-    See the Examples section for further details.
+    See the Examples section for further details, and also 
+    :ref:`galaxy_catalog_intermediate_analysis_tutorial1` for a tutorial on usage 
+    with a mock galaxy catalog. 
     
     Parameters
     ----------
