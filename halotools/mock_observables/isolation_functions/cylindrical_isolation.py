@@ -9,11 +9,11 @@ from functools import partial
 import multiprocessing 
 
 from .process_args_helpers import _get_r_max, _set_isolation_approx_cell_sizes
+from .engines import cylindrical_isolation_engine
 
 from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
-from ..pair_counters.cpairs import cylindrical_isolation_engine
 from ..pair_counters.mesh_helpers import (
     _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box, 
     _enforce_maximum_search_length)
