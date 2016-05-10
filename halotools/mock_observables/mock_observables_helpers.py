@@ -8,9 +8,9 @@ import numpy as np
 import multiprocessing
 num_available_cores = multiprocessing.cpu_count()
 
-__all__ = ('enforce_pbcs', 'get_num_threads', 'get_period')
+__all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period')
 
-def enforce_pbcs(x, y, z, period):
+def enforce_sample_respects_pbcs(x, y, z, period):
     """ Verify that the input sample is properly bounded in all dimensions by the input period.
 
     Parameters 

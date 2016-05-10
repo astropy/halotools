@@ -1,41 +1,45 @@
-#!/usr/bin/env python
+""" Module providing unit-testing for 
+`~halotools.mock_observables.mock_observables_helpers` functions. 
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 import pytest 
 import multiprocessing 
 
-from ..mock_observables_helpers import enforce_pbcs, get_num_threads, get_period
+from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 
-__all__ = ('test_enforce_pbcs', 'test_get_num_threads', 'test_get_period')
+__all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads', 
+    'test_get_period')
 
 fixed_seed = 43
 
-def test_enforce_pbcs():
+def test_enforce_sample_respects_pbcs():
     npts = 10
     x = np.linspace(0, 1, npts)
     y = np.linspace(0, 1, npts)
     z = np.linspace(0, 1, npts)
 
-    enforce_pbcs(x, y, z, [1, 1, 1])
+    enforce_sample_respects_pbcs(x, y, z, [1, 1, 1])
 
     with pytest.raises(ValueError) as err:
-        enforce_pbcs(x, y, z, [0.9, 1, 1])
+        enforce_sample_respects_pbcs(x, y, z, [0.9, 1, 1])
     substr = "You set xperiod = "
     assert substr in err.value.args[0]
 
     with pytest.raises(ValueError) as err:
-        enforce_pbcs(x, y, z, [1, 0.9, 1])
+        enforce_sample_respects_pbcs(x, y, z, [1, 0.9, 1])
     substr = "You set yperiod = "
     assert substr in err.value.args[0]
 
     with pytest.raises(ValueError) as err:
-        enforce_pbcs(x, y, z, [1, 1, 0.9])
+        enforce_sample_respects_pbcs(x, y, z, [1, 1, 0.9])
     substr = "You set zperiod = "
     assert substr in err.value.args[0]
 
     x = np.linspace(-1, 1, npts)
     with pytest.raises(ValueError) as err:
-        enforce_pbcs(x, y, z, [1, 1, 1])
+        enforce_sample_respects_pbcs(x, y, z, [1, 1, 1])
     substr = "your input data has negative values"
     assert substr in err.value.args[0]
 

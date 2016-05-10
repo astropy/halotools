@@ -3,18 +3,24 @@ the isolation_functions sub-package.
 """
 import numpy as np
 
-__all__ = ('_get_r_max', '_set_spherical_isolation_approx_cell_sizes')
+__all__ = ('_get_r_max', '_set_isolation_approx_cell_sizes')
 
-def _get_r_max(data1, r_max):
+def _get_r_max(sample1, r_max):
     """ Helper function process the input ``r_max`` value and returns 
     the appropriate array after requiring the input is the appropriate 
     size and verifying that all entries are bounded positive numbers. 
     """
-    N1 = len(data1)
+    N1 = len(sample1)
     r_max = np.atleast_1d(r_max).astype(float)
 
     if len(r_max) == 1:
         r_max = np.array([r_max[0]]*N1)
+    else:
+        try:
+            assert len(r_max) == N1
+        except AssertionError:
+            msg = "Input ``r_max`` must be the same length as ``sample1``."
+            raise ValueError(msg)
 
     try:
         assert np.all(r_max < np.inf)
@@ -25,11 +31,12 @@ def _get_r_max(data1, r_max):
 
     return r_max
 
-def _set_spherical_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size, max_r_max):
+def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size, 
+    xsearch_length, ysearch_length, zsearch_length):
     """
     """
     if approx_cell1_size is None:
-        approx_cell1_size = np.array([max_r_max, max_r_max, max_r_max]).astype(float)
+        approx_cell1_size = np.array([xsearch_length, ysearch_length, zsearch_length]).astype(float)
     else:
         approx_cell1_size = np.atleast_1d(approx_cell1_size)
         if len(approx_cell1_size) == 1:
@@ -43,7 +50,7 @@ def _set_spherical_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_s
         raise ValueError(msg)
 
     if approx_cell2_size is None:
-        approx_cell2_size = np.array([max_r_max, max_r_max, max_r_max]).astype(float)
+        approx_cell2_size = np.array([xsearch_length, ysearch_length, zsearch_length]).astype(float)
     else:
         approx_cell2_size = np.atleast_1d(approx_cell2_size)
         if len(approx_cell2_size) == 1:

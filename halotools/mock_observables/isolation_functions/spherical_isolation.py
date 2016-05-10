@@ -8,9 +8,9 @@ import numpy as np
 from functools import partial 
 import multiprocessing 
 
-from .process_args_helpers import (_get_r_max, _set_spherical_isolation_approx_cell_sizes)
+from .process_args_helpers import _get_r_max, _set_isolation_approx_cell_sizes
 
-from ..mock_observables_helpers import enforce_pbcs, get_num_threads, get_period
+from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.cpairs import spherical_isolation_engine
 from ..pair_counters.mesh_helpers import (
@@ -181,7 +181,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     return is_isolated
 
 
-def _spherical_isolation_process_args(data1, data2, r_max, period, 
+def _spherical_isolation_process_args(sample1, sample2, r_max, period, 
     num_threads, approx_cell1_size, approx_cell2_size):
     """
     private function to process the arguments for the 
@@ -189,7 +189,7 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
     """
     num_threads = get_num_threads(num_threads)
             
-    r_max = _get_r_max(data1, r_max)
+    r_max = _get_r_max(sample1, r_max)
     max_r_max = np.amax(r_max)
 
     period, PBCs = get_period(period)
@@ -199,26 +199,26 @@ def _spherical_isolation_process_args(data1, data2, r_max, period,
     if period is None:
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(
-                data1[:,0], data1[:,2], data1[:,2], 
-                data2[:,0], data2[:,2], data2[:,2], 
+                sample1[:,0], sample1[:,2], sample1[:,2], 
+                sample2[:,0], sample2[:,2], sample2[:,2], 
                 min_size=[max_r_max*3.0,max_r_max*3.0,max_r_max*3.0]))
     else:
-        x1 = data1[:,0]
-        y1 = data1[:,1]
-        z1 = data1[:,2]
-        x2 = data2[:,0]
-        y2 = data2[:,1]
-        z2 = data2[:,2]
+        x1 = sample1[:,0]
+        y1 = sample1[:,1]
+        z1 = sample1[:,2]
+        x2 = sample2[:,0]
+        y2 = sample2[:,1]
+        z2 = sample2[:,2]
 
     _enforce_maximum_search_length(max_r_max, period[0])
     _enforce_maximum_search_length(max_r_max, period[1])
     _enforce_maximum_search_length(max_r_max, period[2])
 
-    enforce_pbcs(x1, y1, z1, period)
-    enforce_pbcs(x2, y2, z2, period)
+    enforce_sample_respects_pbcs(x1, y1, z1, period)
+    enforce_sample_respects_pbcs(x2, y2, z2, period)
 
-    approx_cell1_size, approx_cell2_size = _set_spherical_isolation_approx_cell_sizes(
-        approx_cell1_size, approx_cell2_size, max_r_max)
+    approx_cell1_size, approx_cell2_size = _set_isolation_approx_cell_sizes(
+        approx_cell1_size, approx_cell2_size, max_r_max, max_r_max, max_r_max)
         
     return (x1, y1, z1, x2, y2, z2, 
         r_max, max_r_max, period, num_threads, PBCs, 

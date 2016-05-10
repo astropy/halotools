@@ -8,12 +8,15 @@ import numpy as np
 from functools import partial 
 import multiprocessing 
 
+from .process_args_helpers import _get_r_max, _set_isolation_approx_cell_sizes
+
+from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
+
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.cpairs import cylindrical_isolation_engine
 from ..pair_counters.mesh_helpers import (
-    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box)
-
-from ...utils.array_utils import convert_to_ndarray, custom_len
+    _set_approximate_cell_sizes, _cell1_parallelization_indices, _enclose_in_box, 
+    _enforce_maximum_search_length)
 
 __all__ = ('cylindrical_isolation', )
 
@@ -189,87 +192,46 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     
     return is_isolated
 
-def _cylindrical_isolation_process_args(data1, data2, rp_max, pi_max, period, 
+def _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period, 
     num_threads, approx_cell1_size, approx_cell2_size):
     """
     private function to process the arguents for cylindrical isolation functions
     """
-    if num_threads is not 1:
-        if num_threads=='max':
-            num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
-            msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
-            raise ValueError(msg)
-    
-    # Passively enforce that we are working with ndarrays
-    x1 = data1[:,0]
-    y1 = data1[:,1]
-    z1 = data1[:,2]
-    x2 = data2[:,0]
-    y2 = data2[:,1]
-    z2 = data2[:,2]
-    
-    N1 = len(x1)
-    
-    rp_max = convert_to_ndarray(rp_max).astype(float)
-    if len(rp_max) == 1:
-        rp_max = np.array([rp_max[0]]*N1)
-    try:
-        assert np.all(rp_max < np.inf)
-        assert np.all(rp_max > 0)
-    except AssertionError:
-        msg = "Input ``rp_max`` must be an array of bounded positive numbers."
-        raise ValueError(msg)
-    
+    num_threads = get_num_threads(num_threads)
+
+    rp_max = _get_r_max(sample1, rp_max)
+    pi_max = _get_r_max(sample1, pi_max)
     max_rp_max = np.amax(rp_max)
-    
-    pi_max = convert_to_ndarray(pi_max).astype(float)
-    if len(pi_max) == 1:
-        pi_max = np.array([pi_max[0]]*N1)
-    try:
-        assert np.all(pi_max < np.inf)
-        assert np.all(pi_max > 0)
-    except AssertionError:
-        msg = "Input ``pi_max`` must be an array of bounded positive numbers."
-        raise ValueError(msg)
-    
     max_pi_max = np.amax(pi_max)
-    
-    # Set the boolean value for the PBCs variable
+
+    period, PBCs = get_period(period)
+
+    # At this point, period may still be set to None, 
+    # in which case we must remap our points inside the smallest enclosing cube 
+    # and set ``period`` equal to this cube size.
     if period is None:
-        PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2, 
+            _enclose_in_box(
+                sample1[:,0], sample1[:,2], sample1[:,2], 
+                sample2[:,0], sample2[:,2], sample2[:,2], 
                 min_size=[max_rp_max*3.0,max_rp_max*3.0,max_pi_max*3.0]))
     else:
-        PBCs = True
-        period = convert_to_ndarray(period).astype(float)
-        if len(period) == 1:
-            period = np.array([period[0]]*3)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "Input ``period`` must be a bounded positive number in all dimensions"
-            raise ValueError(msg)
+        x1 = sample1[:,0]
+        y1 = sample1[:,1]
+        z1 = sample1[:,2]
+        x2 = sample2[:,0]
+        y2 = sample2[:,1]
+        z2 = sample2[:,2]
     
-    try:
-        assert max_rp_max < period[0]/3.
-        assert max_rp_max < period[1]/3.
-        assert max_pi_max < period[2]/3.
-    except AssertionError:
-        msg = ("Input ``rp_max`` and ``pi_max`` must both be less than "
-            "input period in the first two and third dimensions respectively.")
-        raise ValueError(msg)
-    
-    if approx_cell1_size is None:
-        approx_cell1_size = [max_rp_max, max_rp_max, max_pi_max]
-    elif custom_len(approx_cell1_size) == 1:
-        approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
-    if approx_cell2_size is None:    
-        approx_cell2_size = [max_rp_max, max_rp_max, max_pi_max]
-    elif custom_len(approx_cell2_size) == 1:
-        approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
+    _enforce_maximum_search_length(max_rp_max, period[0])
+    _enforce_maximum_search_length(max_rp_max, period[1])
+    _enforce_maximum_search_length(max_pi_max, period[2])
+
+    enforce_sample_respects_pbcs(x1, y1, z1, period)
+    enforce_sample_respects_pbcs(x2, y2, z2, period)
+
+    approx_cell1_size, approx_cell2_size = _set_isolation_approx_cell_sizes(
+        approx_cell1_size, approx_cell2_size, max_rp_max, max_rp_max, max_pi_max)
     
     return (x1, y1, z1, x2, y2, z2, 
         rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs, 
