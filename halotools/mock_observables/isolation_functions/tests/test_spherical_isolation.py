@@ -1,6 +1,7 @@
 """ Module providing testing for the `~halotools.mock_observables.spherical_isolation` function.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 from astropy.utils.misc import NumpyRNGContext
 
@@ -8,11 +9,14 @@ from ..spherical_isolation import spherical_isolation
 
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
-__all__ = ['test_spherical_isolation_criteria1']
+__all__ = ('test_spherical_isolation1', 'test_spherical_isolation2', 
+    'test_spherical_isolation3', 'test_spherical_isolation4', 
+    'test_spherical_isolation_grid1', 'test_spherical_isolation_grid2', 
+    'test_shifted_randoms')
 
 fixed_seed = 43 
 
-def test_spherical_isolation_criteria1():
+def test_spherical_isolation1():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function 
     returns all points as isolated for two distant localizations of points. 
     """ 
@@ -25,7 +29,7 @@ def test_spherical_isolation_criteria1():
     iso = spherical_isolation(sample1, sample2, r_max)
     assert np.all(iso == True)
 
-def test_spherical_isolation_criteria2():
+def test_spherical_isolation2():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function 
     returns no points as isolated when a subset of ``sample2`` lies within ``sample1``
     """ 
@@ -37,7 +41,7 @@ def test_spherical_isolation_criteria2():
     iso = spherical_isolation(sample1, sample2, r_max)
     assert np.all(iso == False)
 
-def test_spherical_isolation_criteria3():
+def test_spherical_isolation3():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function 
     returns the correct subset of points in ``sample1`` as being isolated.
 
@@ -54,7 +58,7 @@ def test_spherical_isolation_criteria3():
     assert np.all(iso[:100] == False)
     assert np.all(iso[100:] == True)
 
-def test_spherical_isolation_criteria4():
+def test_spherical_isolation4():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function 
     returns the correct subset of points in ``sample1`` as being isolated.
 

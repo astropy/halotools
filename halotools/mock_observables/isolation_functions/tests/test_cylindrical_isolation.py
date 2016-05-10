@@ -1,44 +1,89 @@
-#!/usr/bin/env python
+""" Module providing testing for the `~halotools.mock_observables.spherical_isolation` function.
+"""
 from __future__ import (absolute_import, division, print_function)
+
 import numpy as np 
 
 from ..cylindrical_isolation import cylindrical_isolation
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
-__all__ = ['test_cylindrical_isolation1']
+__all__ = ('test_cylindrical_isolation1', 'test_cylindrical_isolation2', 
+    'test_cylindrical_isolation3', 'test_cylindrical_isolation4',
+    'test_cylindrical_isolation5', 'test_cylindrical_isolation_indices')
 
-sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1)
-
+fixed_seed = 43
 
 def test_cylindrical_isolation1():
-    """ For two tight localizations of points right on top of each other, 
-    all points in sample1 should not be isolated. 
-    """
-    sample2 = generate_locus_of_3d_points(100)
+    """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function 
+    returns all points as isolated for two distant localizations of points. 
+    """ 
+    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.9, seed = fixed_seed)
+    pi_max = 0.1
+    rp_max = 0.1
+    iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
+    assert np.all(iso == True)
+
+    iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)
+    assert np.all(iso == True)
+
+def test_cylindrical_isolation2():
+    """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function 
+    returns no points as isolated when a subset of ``sample2`` lies within ``sample1``
+    """ 
+    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1)
+    sample2 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1)
+    pi_max = 0.1
+    rp_max = 0.1
+    iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
+    assert np.all(iso == False)
+
+def test_cylindrical_isolation3():
+    """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function 
+    returns the correct subset of points in ``sample1`` as being isolated.
+
+    For this test, PBCs are irrelevant. 
+    """ 
+    sample1a = generate_locus_of_3d_points(100, xc=0.11, seed = fixed_seed)
+    sample1b = generate_locus_of_3d_points(100, xc=1.11, seed = fixed_seed)
+    sample1 = np.concatenate((sample1a, sample1b))
+
+    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed = fixed_seed)
     pi_max = 0.1
     rp_max = 0.1
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)
-    assert np.all(iso == False)
 
-def test_cylindrical_isolation2():
-    """ For two tight localizations of distant points, 
-    all points in sample1 should be isolated unless PBCs are turned on
-    """
-    sample1 = generate_locus_of_3d_points(100, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(100, xc=0.95, yc=0.95, zc=0.95)
+    assert np.all(iso[:100] == False)
+    assert np.all(iso[100:] == True)
+
+def test_cylindrical_isolation4():
+    """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function 
+    returns the correct subset of points in ``sample1`` as being isolated.
+
+    For this test, PBCs have a non-trivial impact on the result. 
+    """ 
+    sample1a = generate_locus_of_3d_points(100, xc=0.5, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample1b = generate_locus_of_3d_points(100, xc=0.99, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample1 = np.concatenate((sample1a, sample1b))
+
+    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed = fixed_seed)
+
     pi_max = 0.2
     rp_max = 0.2
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)
     assert np.all(iso == True)
-    iso2 = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1.)
-    assert np.all(iso2 == False)
 
-def test_cylindrical_isolation3():
+    iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
+    assert np.all(iso[:100] == True)
+    assert np.all(iso[100:] == False)
+
+def test_cylindrical_isolation5():
     """ For two tight localizations of distant points, 
-    verify independently correct behavior for pi_max and rp_max
+    verify that the `~halotools.mock_observables.cylindrical_isolation` function 
+    has independently correct behavior in all combinations of limits for pi_max and rp_max
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed = fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed = fixed_seed)
 
     rp_max, pi_max = 0.2, 0.2
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)
