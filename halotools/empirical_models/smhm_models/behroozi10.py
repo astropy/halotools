@@ -97,6 +97,8 @@ class Behroozi10SmHm(PrimGalpropModel):
         super(Behroozi10SmHm, self).__init__(
             galprop_name='stellar_mass', **kwargs)
 
+        self._methods_to_inherit.extend(['mean_log_halo_mass'])
+
         self.publications = ['arXiv:1001.0015']
 
     def retrieve_default_param_dict(self):

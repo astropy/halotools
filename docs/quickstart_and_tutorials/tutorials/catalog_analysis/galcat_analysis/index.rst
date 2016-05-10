@@ -62,5 +62,16 @@ void statistics
 
    basic_examples/void_stats/galaxy_catalog_analysis_tutorial8
 
+isolation criteria 
+---------------------
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/isolation_criteria/galaxy_catalog_analysis_tutorial10
+
+
+
+
+
 
 

@@ -6,7 +6,7 @@ import numpy as np
 cimport numpy as cnp
 cimport cython 
 from libc.math cimport ceil
-from .isolation_criteria_marking_functions cimport (gt_cond, lt_cond, 
+from .isolation_criteria_marking_functions cimport (trivial, gt_cond, lt_cond, 
     eq_cond, neq_cond, lg_cond, tg_cond)
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
@@ -252,7 +252,9 @@ cdef f_type return_conditional_function(cond_func_id):
     returns a pointer to the user-specified conditional function.
     """
     
-    if cond_func_id==1:
+    if cond_func_id==0:
+        return trivial
+    elif cond_func_id==1:
         return gt_cond
     elif cond_func_id==2:
         return lt_cond
