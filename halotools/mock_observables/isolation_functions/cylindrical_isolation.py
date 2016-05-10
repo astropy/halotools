@@ -83,14 +83,15 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
+        Default choice is to use ``rp_max``/10 in the xy-dimensions 
+        and ``pi_max``/10 in the z-dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-
+        
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
         ``approx_cell1_size`` for details. 
         
     Returns

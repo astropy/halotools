@@ -63,21 +63,26 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         If a single float is given, ``pi_max`` is assumed to be the same for each galaxy in
         ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
     
-    marks1 : array_like
-        len(sample1) x N_marks array of marks.  The supplied marks array must have the 
-        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
-        this parameter is not specified, it is set 
-        to numpy.ones((len(sample1), N_marks)).
+    marks1 : array_like, optional 
+        *Npts1 x N_marks* array of marks.  The supplied marks array must have the 
+        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  
+        If this parameter is not specified, all marks will be set to unity. 
+
+    marks2 : array_like, optional 
+        *Npts2 x N_marks* array of marks.  The supplied marks array must have the 
+        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  
+        If this parameter is not specified, all marks will be set to unity. 
     
-    marks2 : array_like
-        len(sample2) x N_marks array of marks.  The supplied marks array must have the 
-        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
-        this parameter is not specified, it is set 
-        to numpy.ones((len(sample1), N_marks)).
-    
-    cond_func : int
-        Integer ID indicating which conditional function should be used.  See notes for a 
-        list of available conditional functions.
+    cond_func : int, optional 
+        Integer ID indicating which function should be used to apply an additional 
+        condition on whether a nearby point should be considered as a candidate neighbor. 
+        This allows, for example, stellar mass-dependent isolation criteria on a 
+        galaxy-by-galaxy basis. 
+
+        Default is 0 for an unconditioned calculation, in which case 
+        points will be considered neighbor candidates regardless of the 
+        value of their marks. 
+        See Notes for a list of options for the conditional functions.
     
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
@@ -96,15 +101,16 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
+        Default choice is to use ``rp_max``/10 in the xy-dimensions 
+        and ``pi_max``/10 in the z-dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-    
+        
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details.
+        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
+        ``approx_cell1_size`` for details. 
     
     Returns
     -------
@@ -124,15 +130,20 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     #. the input conditional marking function :math:`f(w_{1}, w_{2})` must return *True*.  
     
     There are multiple conditional functions available.  In general, each requires a 
-    different number of marks per point, N_marks.  The conditional function gets passed 
-    two arrays per pair, w1 and w2, of length N_marks and return a float.  
+    different number of marks per point, N_marks.  
+    All conditional functions return a boolean and get passed 
+    two arrays per pair, *w1* and *w2*, each of length N_marks.  
     You can pass in more than one piece of information about each point by choosing a 
     the input ``marks`` arrays to be multi-dimensional of shape (N_points, N_marks). 
-        
-    The available marking functions, ``cond_func`` and the associated integer 
+    
+    The available marking functions, ``cond_func``, and the associated integer 
     ID numbers are:
     
-    #. greater than (N_marks = 1)
+    0. trivial (N_marks = 1)
+        .. math::
+            f(w_1,w_2) = True
+    
+    1. greater than (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -142,7 +153,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. less than (N_marks = 1)
+    2. less than (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -152,7 +163,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. equality (N_marks = 1)
+    3. equality (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -162,7 +173,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. inequality (N_marks = 1)
+    4. inequality (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -172,7 +183,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance greater than (N_marks = 2)
+    5. tolerance greater than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -182,7 +193,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance less than (N_marks = 2)
+    6. tolerance less than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -190,8 +201,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
                     True & : w_1[0] < (w_2[0]+w_1[1]) \\\\
                     False & : w_1[0] \\geq (w_2[0]+w_1[1]) \\\\
                 \\end{array}
-                \\right.
-    
+                \\right.    
     
     Examples
     --------

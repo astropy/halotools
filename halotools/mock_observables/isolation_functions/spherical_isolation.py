@@ -60,7 +60,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-        
+
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
         
     num_threads : int, optional
@@ -74,7 +74,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         Length-3 array serving as a guess for the optimal manner by how points 
         will be apportioned into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
+        Default choice is to use ``r_max``/10 in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
