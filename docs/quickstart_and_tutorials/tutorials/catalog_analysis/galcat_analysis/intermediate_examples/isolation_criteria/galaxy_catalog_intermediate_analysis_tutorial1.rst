@@ -50,10 +50,11 @@ For the first example we'll find "isolated" galaxies using a 3d search
 criteria that depends on stellar mass in the following manner. From our
 mock, we know the stellar mass of every galaxy. The stellar mass component of the underlying model
 that generated the mock, `halotools.empirical_models.Behroozi10SmHm`, 
-has a ``mean_log_halo_mass`` method that provides a map from :math:`M_{\ast}^{\rm cen}` to
+has a `halotools.empirical_models.Behroozi10SmHm.mean_log_halo_mass` 
+method that provides a map from :math:`M_{\ast}^{\rm cen}` to
 :math:`M_{\rm vir}^{\rm host}.` There is also a
-`halotools.empirical_models.halo_mass_to_halo_radius` function in `~halotools.empirical_models` that
-provides a map from :math:`M_{\rm vir}^{\rm host}` to
+`~halotools.empirical_models.halo_mass_to_halo_radius` function 
+in `~halotools.empirical_models` that provides a map from :math:`M_{\rm vir}^{\rm host}` to
 :math:`R_{\rm vir}.` We will use these two functions together to draw a
 sphere of radius :math:`R_{\rm vir}` around each galaxy; a galaxy will
 be said to be isolated if there are no other galaxies in the sample
@@ -89,8 +90,8 @@ galaxies in a specific stellar mass range of
 
     from halotools.mock_observables import conditional_spherical_isolation
 
-The calling signature of ``conditional_spherical_isolation`` accepts a
-multi-dimensional array storing the x, y, z positions of each point. You
+The calling signature of `~halotools.mock_observables.conditional_spherical_isolation` 
+accepts a multi-dimensional array storing the x, y, z positions of each point. You
 can place your points into the appropriate form using
 `numpy.vstack`, but below we'll demo how to use the
 `~halotools.mock_observables.return_xyz_formatted_array` function for
@@ -153,7 +154,11 @@ function formalism.
     marks1 = sm_selected_gals['stellar_mass']
     marks2 = all_gals['stellar_mass']
 
-    cond_func = 2 # See the docstring of conditional_spherical_isolation for the function <==> function ID correspondence
+Now we select the value of ``cond_func`` for the conditional function described above. 
+See the docstring of `~halotools.mock_observables.conditional_spherical_isolation` 
+for the function <==> function ID correspondence. 
+
+    cond_func = 2
 
     is_isolated = conditional_spherical_isolation(sample1_pos, sample2_pos, r_max, 
                         marks1=marks1, marks2=marks2, cond_func=cond_func, period = model.mock.Lbox)
@@ -201,6 +206,10 @@ are the virial radius and velocity inferred from the underlying
 stellar-to-halo mass relation. In order for a ``sample1`` galaxy to be
 isolated, there must be no other ``sample2`` galaxies more massive than
 *0.5* dex within this cylinder.
+
+We already computed :math:`R_{\rm vir}` above; 
+we will compute :math:`V_{\rm vir}` using the 
+`~halotools.mock_observables.halo_mass_to_virial_velocity` function:
 
 .. code:: python
 
