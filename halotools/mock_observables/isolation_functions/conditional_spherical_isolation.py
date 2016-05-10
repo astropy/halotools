@@ -40,33 +40,42 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     Parameters
     ----------
     sample1 : array_like
-        Npts1 x 3 numpy array containing 3-D positions of points.
+        *Npts1 x 3* numpy array containing 3-D positions of points.
+        
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
         format accepted by the ``sample1`` and ``sample2`` arguments.   
+        
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
-    
+        
     sample2 : array_like
-        Npts2 x 3 numpy array containing 3-D positions of points.
-    
+        *Npts2 x 3* numpy array containing 3-D positions of points.
+        
     r_max : array_like
         radius of spheres to search for neighbors around galaxies in ``sample1``.
-        If a single float is given, ``r_max`` is assumed to be the same for each galaxy in
-        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+        If a single float is given, r_max is assumed to be the same for each galaxy in
+        ``sample1``. You may optionally pass in an array of length *Npts1*, in which case 
+        each point in ``sample1`` will have its own individual neighbor-search radius. 
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
     
     marks1 : array_like, optional 
-        len(sample1) x N_marks array of marks.  The supplied marks array must have the 
-        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
-        this parameter is not specified, ``marks1`` will be set to unity. 
+        *Npts1 x N_marks* array of marks.  The supplied marks array must have the 
+        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  
+        If this parameter is not specified, all marks will be set to unity. 
 
     marks2 : array_like, optional 
-        len(sample1) x N_marks array of marks.  The supplied marks array must have the 
-        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  If 
-        this parameter is not specified, ``marks2`` will be set to unity. 
+        *Npts2 x N_marks* array of marks.  The supplied marks array must have the 
+        appropriate shape for the chosen ``cond_func`` (see Notes for requirements).  
+        If this parameter is not specified, all marks will be set to unity. 
         
     cond_func : int, optional 
-        Integer ID indicating which conditional function should be used. 
+        Integer ID indicating which function should be used to apply an additional 
+        condition on whether a nearby point should be considered as a candidate neighbor. 
+        This allows, for example, stellar mass-dependent isolation criteria on a 
+        galaxy-by-galaxy basis. 
+
         Default is 0 for an unconditioned calculation, in which case 
         points will be considered neighbor candidates regardless of the 
         value of their marks. 
@@ -117,19 +126,20 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     #. the input conditional marking function :math:`f(w_{1}, w_{2})` must return *True*.  
     
     There are multiple conditional functions available.  In general, each requires a 
-    different number of marks per point, N_marks.  The conditional function gets passed 
-    two arrays per pair, *w1* and *w2*, of length N_marks and return a boolean.  
+    different number of marks per point, N_marks.  
+    All conditional functions return a boolean and get passed 
+    two arrays per pair, *w1* and *w2*, each of length N_marks.  
     You can pass in more than one piece of information about each point by choosing a 
     the input ``marks`` arrays to be multi-dimensional of shape (N_points, N_marks). 
     
-    The available marking functions, ``cond_func`` and the associated integer 
+    The available marking functions, ``cond_func``, and the associated integer 
     ID numbers are:
 
-    #. trivial (N_marks = 1)
+    0. trivial (N_marks = 1)
         .. math::
             f(w_1,w_2) = True
     
-    #. greater than (N_marks = 1)
+    1. greater than (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -139,7 +149,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. less than (N_marks = 1)
+    2. less than (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -149,7 +159,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. equality (N_marks = 1)
+    3. equality (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -159,7 +169,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. inequality (N_marks = 1)
+    4. inequality (N_marks = 1)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -169,7 +179,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance greater than (N_marks = 2)
+    5. tolerance greater than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -179,7 +189,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
                 \\end{array}
                 \\right.
     
-    #. tolerance less than (N_marks = 2)
+    6. tolerance less than (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
                 \\left \\{
@@ -232,7 +242,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     >>> r_max = 5.0
     >>> cond_func = 2
     
-    >>> is_isolated = conditional_spherical_isolation(sample1, sample2, r_max, period=Lbox)
+    >>> is_isolated = conditional_spherical_isolation(sample1, sample2, r_max, marks1, marks2, cond_func, period=Lbox)
     
     """
     
