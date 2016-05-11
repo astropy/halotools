@@ -9,7 +9,7 @@ from functools import partial
 import multiprocessing 
 
 from .cylindrical_isolation import _cylindrical_isolation_process_args
-from .process_args_helpers import _conditional_isolation_process_marks
+from .isolation_functions_helpers import _conditional_isolation_process_marks
 from .engines import marked_cylindrical_isolation_engine
 
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
