@@ -14,7 +14,7 @@ __all__ = ('radial_profile_3d_engine', )
 @cython.wraparound(False)
 @cython.nonecheck(False)
 def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
-    normalize_rbins_by_in, sample2_quantity_in, rbins_normalized, cell1_tuple):
+    squared_normalize_rbins_by_in, sample2_quantity_in, rbins_normalized, cell1_tuple):
     """ Cython engine for computing radial profiles 
     as a function of (optionally normalized) three-dimensional separation. 
 
@@ -29,7 +29,7 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     x2in, y2in, z2in : arrays 
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    normalize_rbins_by_in : array 
+    squared_normalize_rbins_by_in : array 
 
     sample2_quantity_in : array 
 
@@ -74,8 +74,8 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] normalize_rbins_by = np.ascontiguousarray(
-        normalize_rbins_by_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] squared_normalize_rbins_by = np.ascontiguousarray(
+        squared_normalize_rbins_by_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] sample2_quantity = np.ascontiguousarray(
         sample2_quantity_in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
@@ -128,7 +128,7 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         y_icell1 = y1[ifirst1:ilast1]
         z_icell1 = z1[ifirst1:ilast1]
 
-        w_icell1 = normalize_rbins_by[ifirst1:ilast1]
+        w_icell1 = squared_normalize_rbins_by[ifirst1:ilast1]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -194,7 +194,7 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
-                                distance_norm1tmp = normalize_rbins_by[i]
+                                distance_norm1tmp = squared_normalize_rbins_by[i]
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance

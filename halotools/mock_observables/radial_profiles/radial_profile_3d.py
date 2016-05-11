@@ -157,7 +157,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
 
     rbins_normalized, normalize_rbins_by = get_normalized_rbins(
         rbins_absolute, rbins_normalized, normalize_rbins_by, sample1)
-
+    squared_normalize_rbins_by = normalize_rbins_by*normalize_rbins_by
     max_rbins_absolute = np.amax(rbins_normalized)*np.amax(normalize_rbins_by)
 
     period, PBCs = get_period(period)
@@ -205,12 +205,14 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(radial_profile_3d_engine, double_mesh, 
         x1in, y1in, z1in, x2in, y2in, z2in, 
-        normalize_rbins_by, sample2_quantity, rbins_normalized)
+        squared_normalize_rbins_by, sample2_quantity, rbins_normalized)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
+    # print(rbins_normalized)
+    # print(set(normalize_rbins_by))
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)

@@ -16,33 +16,37 @@ __all__ = ('test_radial_profile_3d_test1', )
 
 fixed_seed = 44
 
-@pytest.mark.xfail
 def test_radial_profile_3d_test1():
     """ For a tight localization of sample1 points surrounded by two concentric 
     shells of sample2 points, verify that both the counts and the primary result 
     of `~halotools.mock_observables.radial_profile_3d` are correct. 
 
-    In this test, PBCs are turned off. 
+    In this test, PBCs are irrelevant. 
     """
     npts1 = 100
     xc, yc, zc = 0.5, 0.5, 0.5
     sample1 = generate_locus_of_3d_points(npts1, xc, yc, zc, seed=fixed_seed)
 
-    rbins = np.array([0.1, 0.2, 0.3, 0.4])
-    midpoints = (rbins[:-1] + rbins[1:])/2.
-    sample2a = generate_thin_shell_of_3d_points(npts1, midpoints[0], xc, yc, zc, seed=fixed_seed)
-    sample2b = generate_thin_shell_of_3d_points(npts1, midpoints[1], xc, yc, zc, seed=fixed_seed)
-    sample2c = generate_thin_shell_of_3d_points(npts1, midpoints[2], xc, yc, zc, seed=fixed_seed)
+    npts2 = 90
+    shell_radii_absolute = np.array([0.01, 0.02, 0.03, 0.04])
+    midpoints = (shell_radii_absolute[:-1] + shell_radii_absolute[1:])/2.
+    sample2a = generate_thin_shell_of_3d_points(npts2, midpoints[0], xc, yc, zc, seed=fixed_seed)
+    sample2b = generate_thin_shell_of_3d_points(npts2, midpoints[1], xc, yc, zc, seed=fixed_seed)
+    sample2c = generate_thin_shell_of_3d_points(npts2, midpoints[2], xc, yc, zc, seed=fixed_seed)
     sample2 = np.concatenate([sample2a, sample2b, sample2c])
 
-    quantity_a, quantity_b, quantity_c = np.zeros(npts1) + 0.5, np.zeros(npts1) + 1.5, np.zeros(npts1) + 2.5
+    a, b, c = 0.5, 1.5, 2.5
+    quantity_a = np.zeros(npts2) + a
+    quantity_b = np.zeros(npts2) + b
+    quantity_c = np.zeros(npts2) + c
     quantity = np.concatenate([quantity_a, quantity_b, quantity_c])
 
-    result = radial_profile_3d(sample1, sample2, quantity, rbins)
+    result, counts = radial_profile_3d(sample1, sample2, quantity,
+        rbins_absolute = shell_radii_absolute, period=1, return_counts = True)
     assert len(result) == len(midpoints)
-    assert np.all(result == [0.5, 1.5, 2.5])
+    assert np.all(result == [a, b, c])
+    assert np.all(counts == npts1*npts2)
 
-@pytest.mark.xfail
 def test_radial_profile_3d_test2():
     """ For two tight localizations of sample1 points each surrounded by two concentric 
     shells of sample2 points, verify that both the counts and the primary result 
@@ -59,22 +63,52 @@ def test_radial_profile_3d_test2():
     sample1 = np.concatenate([sample1a, sample1b])
     npts1 = len(sample1)
 
-    rbins = np.array([0.01, 0.03, 0.3])
-    r1, r2 = 0.02, 0.2
+    rbins_absolute = np.array([0.01, 0.03, 0.3])
+    shell1_absolute_radius, shell2_absolute_radius = 0.02, 0.2
 
-    sample2_p1_r1 = generate_thin_shell_of_3d_points(npts1, r1, xca1, yca1, zca1, seed=fixed_seed, Lbox=1)
-    sample2_p2_r1 = generate_thin_shell_of_3d_points(npts1, r1, xca2, yca2, zca2, seed=fixed_seed, Lbox=1)
-    sample2_p1_r2 = generate_thin_shell_of_3d_points(npts1, r2, xca1, yca1, zca1, seed=fixed_seed, Lbox=1)
-    sample2_p2_r2 = generate_thin_shell_of_3d_points(npts1, r2, xca2, yca2, zca2, seed=fixed_seed, Lbox=1)
+    sample2_p1_r1 = generate_thin_shell_of_3d_points(npts1, shell1_absolute_radius, 
+        xca1, yca1, zca1, seed=fixed_seed, Lbox=1)
+    sample2_p2_r1 = generate_thin_shell_of_3d_points(npts1, shell1_absolute_radius, 
+        xca2, yca2, zca2, seed=fixed_seed, Lbox=1)
+    sample2_p1_r2 = generate_thin_shell_of_3d_points(npts1, shell2_absolute_radius, 
+        xca1, yca1, zca1, seed=fixed_seed, Lbox=1)
+    sample2_p2_r2 = generate_thin_shell_of_3d_points(npts1, shell2_absolute_radius, 
+        xca2, yca2, zca2, seed=fixed_seed, Lbox=1)
     sample2 = np.concatenate([sample2_p1_r1, sample2_p2_r1, sample2_p1_r2, sample2_p2_r2])
     npts2 = len(sample2)
 
-    quantity_a, quantity_b = np.zeros(npts2/2) + 0.5, np.zeros(npts2/2) + 1.5
+    a, b = 0.5, 1.5
+    quantity_a = np.zeros(npts2/2) + a
+    quantity_b = np.zeros(npts2/2) + b
     quantity = np.concatenate([quantity_a, quantity_b])
 
-    result, counts = radial_profile_3d(sample1, sample2, quantity, rbins, return_counts=True, period=1)
+    result, counts = radial_profile_3d(sample1, sample2, quantity, 
+        rbins_absolute=rbins_absolute, return_counts=True, period=1)
     assert np.all(counts == (npts1/2.)*(npts2/2.))
     assert np.all(result == [0.5, 1.5])
+
+def test_absolute_normalized_agreement():
+    npts1, npts2 = 100, 90
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
+        quantity2 = np.random.random(npts2)
+
+    rbins_absolute = np.linspace(0.01, 0.2, 5)
+    fixed_rvir = 0.1
+    rbins_normalized = rbins_absolute/fixed_rvir
+
+    print("rbins_absolute case")
+    result1, counts1 = radial_profile_3d(sample1, sample2, quantity2, 
+        rbins_absolute=rbins_absolute, return_counts=True, period=1)
+    print("rbins_normalized case")
+    result2, counts2 = radial_profile_3d(sample1, sample2, quantity2, 
+        rbins_normalized=rbins_normalized, 
+        normalize_rbins_by = np.zeros(npts1) + fixed_rvir, 
+        return_counts=True, period=1)
+    assert np.all(counts1 == counts2)
+    assert np.allclose(result1, result2, rtol = 0.001)
+
 
 @pytest.mark.xfail
 def test_radial_profile_3d_test3():
