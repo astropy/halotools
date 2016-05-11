@@ -149,35 +149,155 @@ def test_radial_profile_3d_test4():
     assert np.all(result == [0.5, 1.5])
 
 
-@pytest.mark.xfail
-def test_args_processing1():
+def test_args_processing1a():
+    """ Verify that we correctly enforce self-consistent choices for 
+    all ``rbins`` arguments
+
+    """
+    npts1, npts2 = 100, 200
+    sample1 = np.random.random((npts1, 3))
+    sample2 = np.random.random((npts2, 3))
+
+    quantity = np.ones(len(sample2))
+    dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity)
+    substr = "You must either provide a ``rbins_absolute`` argument"
+    assert substr in err.value.args[0]
+
+def test_args_processing1b():
+    """ Verify that we correctly enforce self-consistent choices for 
+    all ``rbins`` arguments
+
+    """
+    npts1, npts2 = 100, 200
+    sample1 = np.random.random((npts1, 3))
+    sample2 = np.random.random((npts2, 3))
+
+    quantity = np.ones(len(sample2))
+    dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_absolute = dummy_rbins, rbins_normalized = dummy_rbins)
+    substr = "Do not provide both ``rbins_normalized`` and ``rbins_absolute`` arguments."
+    assert substr in err.value.args[0]
+
+def test_args_processing1c():
+    """ Verify that we correctly enforce self-consistent choices for 
+    all ``rbins`` arguments
+
+    """
+    npts1, npts2 = 100, 200
+    sample1 = np.random.random((npts1, 3))
+    sample2 = np.random.random((npts2, 3))
+
+    quantity = np.ones(len(sample2))
+    dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_absolute = dummy_rbins, normalize_rbins_by = 1)
+    substr = "you should not provide the ``normalize_rbins_by`` argument."
+    assert substr in err.value.args[0]
+
+def test_args_processing1d():
+    """ Verify that we correctly enforce self-consistent choices for 
+    all ``rbins`` arguments
+
+    """
+    npts1, npts2 = 100, 200
+    sample1 = np.random.random((npts1, 3))
+    sample2 = np.random.random((npts2, 3))
+
+    quantity = np.ones(len(sample2))
+    dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_normalized = np.ones(len(sample1)))
+    substr = "you must also provide the ``normalize_rbins_by`` argument."
+    assert substr in err.value.args[0]
+
+def test_args_processing1e():
+    """ Verify that we correctly enforce self-consistent choices for 
+    all ``rbins`` arguments
+
+    """
+    npts1, npts2 = 100, 200
+    sample1 = np.random.random((npts1, 3))
+    sample2 = np.random.random((npts2, 3))
+
+    quantity = np.ones(len(sample2))
+    dummy_rbins = np.array([0.000, 0.0002, 0.0003])
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_normalized = dummy_rbins, 
+            normalize_rbins_by = np.ones(len(sample1)))
+    substr = "Input ``normalize_rbins_by`` and ``rbins_normalized`` must both be strictly positive."
+    assert substr in err.value.args[0]
+
+
+def test_args_processing2():
+    """ Verify that we correctly enforce that ``sample1`` and ``normalize_rbins_by`` 
+    have the same number of elements. 
+    """
+    npts1, npts2 = 100, 200
+    sample1 = np.random.random((npts1, 3))
+    sample2 = np.random.random((npts2, 3))
+
+    quantity = np.ones(len(sample2))
+    rbins_normalized = np.array([0.0001, 0.0002, 0.0003])
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_normalized = rbins_normalized, normalize_rbins_by = np.ones(5))
+    substr = "Your input ``normalize_rbins_by`` must have the same number of elements"
+    assert substr in err.value.args[0]
+
+def test_args_processing3():
+    """ Verify that we correctly enforce that ``sample2`` and ``sample2_quantity`` 
+    have the same number of elements. 
+    """
     npts1, npts2 = 100, 200
     sample1 = np.random.random((npts1, 3))
     sample2 = np.random.random((npts2, 3))
 
     quantity = np.arange(5)
-    rbins = np.linspace(4, 5, 5)
+    rbins_absolute = np.array([0.0001, 0.0002, 0.0003])
 
     with pytest.raises(ValueError) as err:
-        result = radial_profile_3d(sample1, sample2, quantity, rbins)
+        result = radial_profile_3d(sample1, sample2, quantity, rbins_absolute = rbins_absolute)
     substr = "elements, but input ``sample2`` has"
     assert substr in err.value.args[0]
 
-@pytest.mark.xfail
-def test_args_processing2():
+def test_enforce_search_length():
+
     npts1, npts2 = 100, 200
     sample1 = np.random.random((npts1, 3))
     sample2 = np.random.random((npts2, 3))
 
     quantity = np.zeros(npts2)
-    rbins = np.linspace(4, 5, 5)
-
-    norm = np.arange(5)
+    rbins_absolute = np.array([0.0001, 0.0002, 0.4])
 
     with pytest.raises(ValueError) as err:
-        result = radial_profile_3d(sample1, sample2, quantity, rbins, normalize_rbins_by=norm)
-    substr = "elements, but input ``sample1`` has"
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_absolute = rbins_absolute, period=1)
+    substr = "This exceeds the maximum permitted search length of period/3."
     assert substr in err.value.args[0]
+
+    rbins_normalized = np.arange(1, 10)
+    normalize_rbins_by = np.ones(len(sample1))
+
+    with pytest.raises(ValueError) as err:
+        result = radial_profile_3d(sample1, sample2, quantity, 
+            rbins_normalized = rbins_normalized, normalize_rbins_by=normalize_rbins_by, period=1)
+    substr = "This exceeds the maximum permitted search length of period/3."
+    assert substr in err.value.args[0]
+
+
 
 
 

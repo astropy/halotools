@@ -14,7 +14,7 @@ __all__ = ('radial_profile_3d_engine', )
 @cython.wraparound(False)
 @cython.nonecheck(False)
 def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
-    distance_normalization_in, sample2_quantity_in, rbins, cell1_tuple):
+    normalize_rbins_by_in, sample2_quantity_in, rbins_normalized, cell1_tuple):
     """ Cython engine for computing radial profiles 
     as a function of (optionally normalized) three-dimensional separation. 
 
@@ -29,11 +29,11 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     x2in, y2in, z2in : arrays 
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    distance_normalization_in : array 
+    normalize_rbins_by_in : array 
 
     sample2_quantity_in : array 
 
-    rbins : array
+    rbins_normalized : array
         Boundaries defining the bins in which pairs are counted.
 
     cell1_tuple : tuple
@@ -44,18 +44,18 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     Returns 
     --------
     weighted_counts : array 
-        Array of length len(rbins) giving the number of pairs 
+        Array of length len(rbins_normalized) giving the number of pairs 
         in ``sample2``separated from points in ``sample1`` by a distance less than 
-        the corresponding entry of ``rbins``, 
+        the corresponding entry of ``rbins_normalized``, 
         weighted by the values stored in sample2_quantity_in. 
 
     counts : array 
-        Array of length len(rbins) giving the number of pairs 
+        Array of length len(rbins_normalized) giving the number of pairs 
         in ``sample2``separated from points in ``sample1`` by a distance less than 
-        the corresponding entry of ``rbins``.
+        the corresponding entry of ``rbins_normalized``.
     """
 
-    cdef cnp.float64_t[:] rbins_squared = rbins*rbins
+    cdef cnp.float64_t[:] rbins_normalized_squared = rbins_normalized*rbins_normalized
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -64,9 +64,9 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
-    cdef int num_rbins = len(rbins)
-    cdef cnp.float64_t[:] counts = np.zeros(num_rbins, dtype=np.float64)
-    cdef cnp.float64_t[:] counts2 = np.zeros(num_rbins, dtype=np.float64)
+    cdef int num_rbins_normalized = len(rbins_normalized)
+    cdef cnp.float64_t[:] counts = np.zeros(num_rbins_normalized, dtype=np.float64)
+    cdef cnp.float64_t[:] counts2 = np.zeros(num_rbins_normalized, dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
@@ -74,8 +74,8 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] distance_normalization = np.ascontiguousarray(
-        distance_normalization_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] normalize_rbins_by = np.ascontiguousarray(
+        normalize_rbins_by_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] sample2_quantity = np.ascontiguousarray(
         sample2_quantity_in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
@@ -128,7 +128,7 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         y_icell1 = y1[ifirst1:ilast1]
         z_icell1 = z1[ifirst1:ilast1]
 
-        w_icell1 = distance_normalization[ifirst1:ilast1]
+        w_icell1 = normalize_rbins_by[ifirst1:ilast1]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -194,7 +194,7 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
-                                distance_norm1tmp = distance_normalization[i]
+                                distance_norm1tmp = normalize_rbins_by[i]
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance
@@ -204,8 +204,8 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     dsq = (dx*dx + dy*dy + dz*dz)/distance_norm1tmp
 
                                     weight = w_icell2[j]
-                                    k = num_rbins-1
-                                    while dsq <= rbins_squared[k]:
+                                    k = num_rbins_normalized-1
+                                    while dsq <= rbins_normalized_squared[k]:
                                         counts[k] += weight
                                         counts2[k] += 1.
                                         k=k-1

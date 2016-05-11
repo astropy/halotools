@@ -7,11 +7,13 @@ import numpy as np
 import multiprocessing
 from functools import partial 
 
-from .radial_profiles_helpers import bounds_check_sample2_quantity, get_distance_normalization
+from .radial_profiles_helpers import (bounds_check_sample2_quantity, 
+    get_normalized_rbins, enforce_maximum_search_length_3d)
 from .engines import radial_profile_3d_engine 
 
-from ..pair_counters.npairs_3d import _npairs_3d_process_args
-from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
+from ..mock_observables_helpers import get_num_threads, get_period, enforce_sample_respects_pbcs
+from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes, 
+    _cell1_parallelization_indices, _enclose_in_box)
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. marked_counts/counts
@@ -19,9 +21,9 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. mark
 __author__ = ('Andrew Hearin', )
 __all__ = ('radial_profile_3d', )
 
-def radial_profile_3d(sample1, sample2, sample2_quantity, rbins, 
-    normalize_rbins_by=None, return_counts=False, 
-    period=None, verbose=False, num_threads=1,
+def radial_profile_3d(sample1, sample2, sample2_quantity, 
+    rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None, 
+    return_counts=False, period=None, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):
     """ Function used to calculate the mean value of some quantity in ``sample2`` 
     as a function of 3d distance from the points in ``sample1``. As illustrated 
@@ -129,35 +131,61 @@ def radial_profile_3d(sample1, sample2, sample2_quantity, rbins,
     >>> sample2 = np.vstack([halo_sample2['halo_x'], halo_sample2['halo_y'], halo_sample2['halo_z']]).T
     >>> dmdt_sample2 = halo_sample2['halo_mass_accretion_rate']
 
-    >>> rbins = np.logspace(-1, 1.5, 15)
-    >>> # result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, period=halocat.Lbox)
+    >>> rbins_absolute = np.logspace(-1, 1.5, 15)
+    >>> result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins_absolute=rbins_absolute, period=halocat.Lbox)
 
     The array ``result1`` contains the mean mass accretion rate of halos in ``sample2`` 
-    in the bins of distance from halos in ``sample1`` determined by ``rbins``. 
+    in the bins of distance from halos in ``sample1`` determined by ``rbins_absolute``. 
 
     You can retrieve the number counts in these separation bins as follows:
 
-    >>> # result1, counts = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, period=halocat.Lbox, return_counts=True)
+    >>> result1, counts = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins_absolute=rbins_absolute, period=halocat.Lbox, return_counts=True)
 
-    Now suppose that you wish to calculate the same quantity, but instead as a function of 
-    :math:`r / R_{\rm vir}`. In this case, we use the ``normalize_rbins_by`` feature. 
-    Defining ``rbins`` as follows will give us 15 separation bins linearly spaced 
+    Now suppose that you wish to calculate the same quantity, 
+    but instead as a function of :math:`r / R_{\rm vir}`. 
+    In this case, we use the ``rbins_normalized`` and ``normalize_rbins_by`` arguments. 
+    The following choices for these arguments will give us 15 separation bins linearly spaced 
     between :math:`\\frac{1}{2}R_{\\rm vir}` and :math:`5R_{\\rm vir}`. 
 
     >>> rvir = halo_sample1['halo_rvir']
-    >>> rbins = np.linspace(0.5, 10, 15) 
-    >>> #result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, normalize_rbins_by=rvir, period=halocat.Lbox)
+    >>> rbins_normalized = np.linspace(0.5, 10, 15) 
+    >>> result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins_normalized=rbins_normalized, normalize_rbins_by=rvir, period=halocat.Lbox)
 
     """
 
-    result = _npairs_3d_process_args(sample1, sample2, rbins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
-    x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    num_threads = get_num_threads(num_threads, enforce_max_cores = False)
 
-    rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    rbins_normalized, normalize_rbins_by = get_normalized_rbins(
+        rbins_absolute, rbins_normalized, normalize_rbins_by, sample1)
+
+    max_rbins_absolute = np.amax(rbins_normalized)*np.amax(normalize_rbins_by)
+
+    period, PBCs = get_period(period)
+    # At this point, period may still be set to None, 
+    # in which case we must remap our points inside the smallest enclosing cube 
+    # and set ``period`` equal to this cube size.
+    if period is None:
+        x1in, y1in, z1in, x2in, y2in, z2in, period = (
+            _enclose_in_box(
+                sample1[:,0], sample1[:,2], sample1[:,2], 
+                sample2[:,0], sample2[:,2], sample2[:,2], 
+                min_size=[max_rbins_absolute*3.0,max_rbins_absolute*3.0,max_rbins_absolute*3.0]))
+    else:
+        x1in = sample1[:,0]
+        y1in = sample1[:,1]
+        z1in = sample1[:,2]
+        x2in = sample2[:,0]
+        y2in = sample2[:,1]
+        z2in = sample2[:,2]
+    xperiod, yperiod, zperiod = period 
+    enforce_maximum_search_length_3d(rbins_normalized, normalize_rbins_by, period)
+
+    enforce_sample_respects_pbcs(x1in, y1in, z1in, period)
+    enforce_sample_respects_pbcs(x2in, y2in, z2in, period)
+
+    search_xlength = max_rbins_absolute
+    search_ylength = max_rbins_absolute
+    search_zlength = max_rbins_absolute
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -166,8 +194,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity, rbins,
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
 
-    sample2_quantity, distance_normalization = _radial_profile_3d_process_additional_inputs(
-        sample1, sample2, sample2_quantity, rbins, normalize_rbins_by, period)
+    sample2_quantity = bounds_check_sample2_quantity(sample2, sample2_quantity)
 
     # Build the rectangular mesh
     double_mesh = RectangularDoubleMesh(x1in, y1in, z1in, x2in, y2in, z2in,
@@ -178,7 +205,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity, rbins,
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(radial_profile_3d_engine, double_mesh, 
         x1in, y1in, z1in, x2in, y2in, z2in, 
-        distance_normalization, sample2_quantity, rbins)
+        normalize_rbins_by, sample2_quantity, rbins_normalized)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -204,42 +231,6 @@ def radial_profile_3d(sample1, sample2, sample2_quantity, rbins,
         return result, counts 
     else:
         return result
-
-
-def _radial_profile_3d_process_additional_inputs(sample1, sample2, sample2_quantity, 
-    normalize_rbins_by, rbins, period):
-    """
-    """
-    sample2_quantity = bounds_check_sample2_quantity(sample2, sample2_quantity)
-
-    distance_normalization = get_distance_normalization(sample1, normalize_rbins_by)
-
-    ### LEFT OFF HERE ### 
-
-
-
-
-    rmax = np.max(rbins)*np.max(distance_normalization)
-
-    max_rvir = np.max(distance_normalization)
-    max_search_radius = max_rvir*rmax
-    try:
-        minperiod = np.min(np.atleast_1d(period))
-        assert max_search_radius < minperiod
-    except AssertionError:
-        msg = ("You are operating the ``radial_profile_3d`` function "
-            "using the ``normalize_rbins_by`` feature.\n"
-            "The largest value of the input ``normalize_rbins_by`` array is %.2f.\n"
-            "The largest value of the input ``rbins`` array is %.2f.\n"
-            "Thus you requested to count pairs over a distance of %.2f,"
-            "but your simulation has side length %.2f.\n"
-            "It is not permissible to attempt to count pairs across distances \n"
-            "greater than Lbox/3 with Halotools. If you need to count pairs across such distances,\n"
-            "you should be using a larger simulation.\n" % ())
-        raise ValueError(msg)
-
-    return sample2_quantity, distance_normalization
-
 
 
 
