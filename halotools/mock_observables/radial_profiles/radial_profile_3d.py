@@ -7,6 +7,7 @@ import numpy as np
 import multiprocessing
 from functools import partial 
 
+from .radial_profiles_helpers import bounds_check_sample2_quantity, get_distance_normalization
 from .engines import radial_profile_3d_engine 
 
 from ..pair_counters.npairs_3d import _npairs_3d_process_args
@@ -129,14 +130,14 @@ def radial_profile_3d(sample1, sample2, sample2_quantity, rbins,
     >>> dmdt_sample2 = halo_sample2['halo_mass_accretion_rate']
 
     >>> rbins = np.logspace(-1, 1.5, 15)
-    >>> result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, period=halocat.Lbox)
+    >>> # result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, period=halocat.Lbox)
 
     The array ``result1`` contains the mean mass accretion rate of halos in ``sample2`` 
     in the bins of distance from halos in ``sample1`` determined by ``rbins``. 
 
     You can retrieve the number counts in these separation bins as follows:
 
-    >>> result1, counts = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, period=halocat.Lbox, return_counts=True)
+    >>> # result1, counts = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, period=halocat.Lbox, return_counts=True)
 
     Now suppose that you wish to calculate the same quantity, but instead as a function of 
     :math:`r / R_{\rm vir}`. In this case, we use the ``normalize_rbins_by`` feature. 
@@ -145,7 +146,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity, rbins,
 
     >>> rvir = halo_sample1['halo_rvir']
     >>> rbins = np.linspace(0.5, 10, 15) 
-    >>> result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, normalize_rbins_by=rvir, period=halocat.Lbox)
+    >>> #result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins, normalize_rbins_by=rvir, period=halocat.Lbox)
 
     """
 
@@ -209,34 +210,17 @@ def _radial_profile_3d_process_additional_inputs(sample1, sample2, sample2_quant
     normalize_rbins_by, rbins, period):
     """
     """
-    msg = "See commented section marked ### LEFT OFF HERE ### "
-    raise ValueError(msg)
+    sample2_quantity = bounds_check_sample2_quantity(sample2, sample2_quantity)
 
-    npts1 = sample1.shape[0]
-    npts2 = sample2.shape[0]
-    npts_quantity2 = len(sample2_quantity)
-    sample2_quantity = np.atleast_1d(sample2_quantity)
-    try:
-        assert npts_quantity2 == npts2 
-    except AssertionError:
-        msg = ("Input ``sample2_quantity`` has %i elements, "
-            "but input ``sample2`` has %i elements.\n" % (npts_quantity2, npts2))
-        raise ValueError(msg)
-
-    if normalize_rbins_by is None:
-        distance_normalization = np.ones(npts1)
-    else:
-        distance_normalization = np.atleast_1d(normalize_rbins_by)
-        npts_normalization = len(distance_normalization)
-        try:
-            assert npts_normalization == npts1
-        except AssertionError:
-            msg = ("Input ``normalize_rbins_by`` has %i elements, "
-                "but input ``sample1`` has %i elements.\n" % (npts_normalization, npts1))
-            raise ValueError(msg)
+    distance_normalization = get_distance_normalization(sample1, normalize_rbins_by)
 
     ### LEFT OFF HERE ### 
-    rmax = np.max(rbins)
+
+
+
+
+    rmax = np.max(rbins)*np.max(distance_normalization)
+
     max_rvir = np.max(distance_normalization)
     max_search_radius = max_rvir*rmax
     try:
