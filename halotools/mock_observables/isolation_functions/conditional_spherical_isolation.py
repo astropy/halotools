@@ -10,9 +10,9 @@ import multiprocessing
 
 from .spherical_isolation import _spherical_isolation_process_args
 from .process_args_helpers import _conditional_isolation_process_marks
+from .engines import marked_spherical_isolation_engine
 
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
-from ..pair_counters.marked_cpairs import marked_spherical_isolation_engine
 from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 
 __all__ = ('conditional_spherical_isolation', )
