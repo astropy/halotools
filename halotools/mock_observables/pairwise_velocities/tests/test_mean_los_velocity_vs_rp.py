@@ -4,7 +4,7 @@ import numpy as np
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..pairwise_velocity_stats import mean_los_velocity_vs_rp
+from ..mean_los_velocity_vs_rp import mean_los_velocity_vs_rp
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_los_velocity_vs_rp_correctness1', 'test_mean_los_velocity_vs_rp_correctness2', 

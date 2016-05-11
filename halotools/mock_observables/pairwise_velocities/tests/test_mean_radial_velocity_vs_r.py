@@ -1,11 +1,12 @@
 """ Module providing testing of `halotools.mock_observables.mean_radial_velocity_vs_r`
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..pairwise_velocity_stats import mean_radial_velocity_vs_r
+from ..mean_radial_velocity_vs_r import mean_radial_velocity_vs_r
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_radial_velocity_vs_r_correctness1', 

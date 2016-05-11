@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np 
 from astropy.tests.helper import pytest
 
-from ..pairwise_velocity_stats import (mean_los_velocity_vs_rp, los_pvd_vs_rp)
+from ..los_pvd_vs_rp import los_pvd_vs_rp
+from ..mean_los_velocity_vs_rp import mean_los_velocity_vs_rp
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_los_velocity_vs_rp_auto_consistency', )
