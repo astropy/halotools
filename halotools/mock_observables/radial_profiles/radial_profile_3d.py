@@ -26,12 +26,20 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     return_counts=False, period=None, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):
     """ Function used to calculate the mean value of some quantity in ``sample2`` 
-    as a function of 3d distance from the points in ``sample1``. As illustrated 
-    in the Examples section below, the ``normalize_rbins_by`` argument allows you to 
+    as a function of 3d distance from the points in ``sample1``. 
+
+    As illustrated in the Examples section below, 
+    the ``normalize_rbins_by`` argument allows you to 
     optionally normalize the distances defined by ``rbins`` according to 
     some scaling factor defined by the points in ``sample1``. The documentation below 
     shows how to calculate the mean mass accretion rate of ``sample2`` as a function 
     of the Rvir-normalized halo-centric distance from points in ``sample1``. 
+
+    Note that this function can also be used to calculate simply the radial profiles 
+    of number counts of ``sample2`` objects as a function of halo-centric distance 
+    from ``sample1`` points. If you are only interested in number counts, 
+    you can pass in any dummy array for the input ``sample2_quantity``, 
+    and set the ``return_counts`` argument to True. 
 
     Parameters 
     -----------
@@ -59,7 +67,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
         Numpy array of length Npts1 defining how the distance between each pair of points 
         will be normalized. For example, if ``normalize_rbins_by`` is defined to be the 
         virial radius of each point in ``sample1``, then the input ``rbins`` will be 
-        re-interpreted as referring to :math:`r / R_{\rm vir}`. Default is None, 
+        re-interpreted as referring to :math:`r / R_{\\rm vir}`. Default is None, 
         in which case the input ``rbins`` will be interpreted to be an absolute distance 
         in units of Mpc/h. 
 
