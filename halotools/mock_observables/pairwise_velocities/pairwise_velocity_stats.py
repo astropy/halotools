@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Calculate pairwise velocity statistics.
 """
@@ -7,11 +5,12 @@ Calculate pairwise velocity statistics.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from .pair_counters import velocity_marked_npairs_xy_z
+
 from .pairwise_velocity_helpers import (_pairwise_velocity_stats_process_args, 
     _process_radial_bins, _process_rp_bins)
 
-from .pair_counters import velocity_marked_npairs_3d
+from ..pair_counters import velocity_marked_npairs_xy_z
+from ..pair_counters import velocity_marked_npairs_3d
 
 __all__ = ('mean_radial_velocity_vs_r', 'radial_pvd_vs_r',
     'mean_los_velocity_vs_rp', 'los_pvd_vs_rp')

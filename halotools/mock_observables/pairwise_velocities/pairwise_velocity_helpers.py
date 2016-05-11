@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
-
 """
-helper functions for the pairwise velocity statistics module
+helper functions for `~halotools.mock_observables.pairwise_velocities`. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count 
-from ..custom_exceptions import HalotoolsError
-from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
+
+from ...custom_exceptions import HalotoolsError
+from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ['_pairwise_velocity_stats_process_args','_process_radial_bins','_process_rp_bins']
 __author__ = ['Duncan Campbell']

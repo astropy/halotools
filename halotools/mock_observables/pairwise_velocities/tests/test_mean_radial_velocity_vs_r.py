@@ -6,7 +6,7 @@ from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..pairwise_velocity_stats import mean_radial_velocity_vs_r
-from .cf_helpers import generate_locus_of_3d_points
+from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_radial_velocity_vs_r_correctness1', 
     'test_mean_radial_velocity_vs_r_correctness2', 'test_mean_radial_velocity_vs_r_correctness3', 

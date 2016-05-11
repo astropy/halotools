@@ -4,7 +4,7 @@ import numpy as np
 from astropy.tests.helper import pytest
 
 from ..pairwise_velocity_stats import (mean_los_velocity_vs_rp, los_pvd_vs_rp)
-from .cf_helpers import generate_locus_of_3d_points
+from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_los_velocity_vs_rp_auto_consistency', )
 
