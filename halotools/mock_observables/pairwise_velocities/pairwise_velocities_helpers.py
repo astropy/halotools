@@ -1,25 +1,22 @@
-# -*- coding: utf-8 -*-
-
 """
-helper functions for the pairwise velocity statistics module
+Helper functions used by modules in `~halotools.mock_observables.pairwise_velocities` 
+to process arguments and raise appropriate exceptions. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count 
-from ..custom_exceptions import HalotoolsError
-from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
+
+from ...custom_exceptions import HalotoolsError
+from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ['_pairwise_velocity_stats_process_args','_process_radial_bins','_process_rp_bins']
 __author__ = ['Duncan Campbell']
 
-def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2,
-                                          velocities2, period, do_auto, do_cross,
-                                          num_threads, max_sample_size,
-                                          approx_cell1_size, approx_cell2_size):
+def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2, 
+    period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.pairwise_velocity_stats`. 
