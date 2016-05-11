@@ -10,7 +10,7 @@ import numpy as np
 from .pairwise_velocities_helpers import (_pairwise_velocity_stats_process_args, 
     _process_radial_bins)
 
-from ..pair_counters import velocity_marked_npairs_3d
+from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
 
 __all__ = ('radial_pvd_vs_r', )
 __author__ = ['Duncan Campbell']

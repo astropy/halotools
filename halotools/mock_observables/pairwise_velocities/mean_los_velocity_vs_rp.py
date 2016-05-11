@@ -10,7 +10,7 @@ import numpy as np
 from .pairwise_velocities_helpers import (_pairwise_velocity_stats_process_args, 
     _process_rp_bins)
 
-from ..pair_counters import velocity_marked_npairs_xy_z
+from .velocity_marked_npairs_xy_z import velocity_marked_npairs_xy_z
 
 __all__ = ('mean_los_velocity_vs_rp', )
 __author__ = ['Duncan Campbell']
