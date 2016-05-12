@@ -10,6 +10,7 @@ import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count 
 from .tpcf_estimators import _list_estimators
+from .mock_observables_helpers import enforce_sample_has_correct_shape
 from ..custom_exceptions import HalotoolsError
 from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
@@ -38,6 +39,76 @@ def verify_tpcf_estimator(estimator):
         msg = ("Your estimator ``{0}`` \n"
             "is not in the list of available estimators:\n {1}".format(estimator, available_estimators))
         raise ValueError(msg)
+
+
+def process_optional_input_sample2(sample1, sample2, do_cross):
+    """ Function used to process the input ``sample2`` passed to all two-point clustering 
+    functions in `~halotools.mock_observables`. The input ``sample1`` should have already 
+    been run through the 
+    `~halotools.mock_observables.mock_observables_helpers.enforce_sample_has_correct_shape` 
+    function. 
+    If the input ``sample2`` is  None, then  `process_optional_input_sample2` 
+    will set ``sample2`` equal to ``sample1`` and additionally 
+    return True for ``_sample1_is_sample2``. 
+    Otherwise, the `process_optional_input_sample2` function 
+    will verify that the input ``sample2`` has the correct shape. 
+    The input ``sample2`` will also be tested for equality with ``sample1``. 
+    If the two samples are equal, the ``_sample1_is_sample2`` will be set to True, 
+    and ``do_cross`` will be over-written to False. 
+    """
+    if sample2 is None:
+        sample2 = sample1
+        _sample1_is_sample2 = True
+    else:
+        sample2 = enforce_sample_has_correct_shape(sample2)
+        if np.all(sample1==sample2):
+            _sample1_is_sample2 = True
+            msg = ("\n `sample1` and `sample2` are exactly the same, \n"
+                   "only the auto-correlation will be returned.\n")
+            warn(msg)
+            do_cross = False
+        else: 
+            _sample1_is_sample2 = False
+
+    return sample2, _sample1_is_sample2, do_cross
+
+
+def downsample_inputs_exceeding_max_sample_size(sample1, sample2, _sample1_is_sample2, max_sample_size):
+    # down sample if sample size exceeds max_sample_size.
+    if _sample1_is_sample2 is True:
+        if (len(sample1) > max_sample_size):
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            msg = ("\n `sample1` exceeds `max_sample_size` \n"
+                   "downsampling `sample1`...")
+            warn(msg)
+        else:
+            pass
+    else:
+        if len(sample1) > max_sample_size:
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            msg = ("\n `sample1` exceeds `max_sample_size` \n"
+                   "downsampling `sample1`...")
+            warn(msg)
+        else:
+            pass
+        if len(sample2) > max_sample_size:
+            inds = np.arange(0,len(sample2))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample2 = sample2[inds]
+            msg = ("\n `sample2` exceeds `max_sample_size` \n"
+                   "downsampling `sample2`...")
+            warn(msg)
+        else:
+            pass
+
+    return sample1, sample2
 
 
 def _tpcf_process_args(sample1, rbins, sample2, randoms, 

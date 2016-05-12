@@ -12,7 +12,8 @@ from ..utils.array_utils import array_is_monotonic
 
 num_available_cores = multiprocessing.cpu_count()
 
-__all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period')
+__all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period', 
+    'enforce_sample_has_correct_shape', 'get_separation_bins_array')
 
 def enforce_sample_respects_pbcs(x, y, z, period):
     """ Verify that the input sample is properly bounded in all dimensions by the input period.
