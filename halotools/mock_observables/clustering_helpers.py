@@ -15,10 +15,29 @@ from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ('_tpcf_process_args', '_tpcf_jackknife_process_args',
     '_rp_pi_tpcf_process_args', '_s_mu_tpcf_process_args',
-    '_marked_tpcf_process_args', '_delta_sigma_process_args',
-    '_tpcf_one_two_halo_decomp_process_args',
+    '_marked_tpcf_process_args', '_tpcf_one_two_halo_decomp_process_args',
     '_angular_tpcf_process_args')
+
 __author__=['Duncan Campbell', 'Andrew Hearin']
+
+# Define a dictionary containing the available tpcf estimator names 
+# and their corresponding values of (do_DD, do_DR, do_RR)
+tpcf_estimator_dd_dr_rr_requirements = ({
+    'Natural': (True, False, True), 
+    'Davis-Peebles': (True, True, False), 
+    'Hewett': (True, True, True), 
+    'Hamilton': (True, True, True), 
+    'Landy-Szalay': (True, True, True)
+    })
+
+def verify_tpcf_estimator(estimator):
+    available_estimators = list(tpcf_estimator_dd_dr_rr_requirements.keys())
+    if estimator in available_estimators:
+        return estimator
+    else:
+        msg = ("Your estimator ``{0}`` \n"
+            "is not in the list of available estimators:\n {1}".format(estimator, available_estimators))
+        raise ValueError(msg)
 
 
 def _tpcf_process_args(sample1, rbins, sample2, randoms, 
@@ -756,58 +775,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
     
     return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
            num_threads, wfunc, normalize_by, _sample1_is_sample2, PBCs, randomize_marks
-
-
-def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, 
-    period,estimator, num_threads, approx_cell1_size, approx_cell2_size):
-    """ 
-    Private method to do bounds-checking on the arguments passed to 
-    `~halotools.mock_observables.delta_sigma`. 
-    """
-    
-    galaxies = convert_to_ndarray(galaxies)
-    particles = convert_to_ndarray(particles)
-    
-    rp_bins = convert_to_ndarray(rp_bins)
-    try:
-        assert rp_bins.ndim == 1
-        assert len(rp_bins) > 1
-        if len(rp_bins) > 2:
-            assert array_is_monotonic(rp_bins, strict = True) == 1
-    except AssertionError:
-        msg = ("\n Input `rp_bins` must be a monotonically increasing \n"
-               "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
-    if np.min(rp_bins)==0.0:
-        msg = "\n Input `rp_bins` minimum must be greater than 0.0"
-        raise HalotoolsError(msg)
-        
-    #Process period entry and check for consistency.
-    if period is None:
-        PBCs = False
-    else:
-        PBCs = True
-        period = convert_to_ndarray(period)
-        if len(period) == 1:
-            period = np.array([period[0]]*3)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "\n Input `period` must be a bounded positive number in all dimensions"
-            raise HalotoolsError(msg)
-    
-    if num_threads == 'max':
-        num_threads = cpu_count()
-    
-    available_estimators = _list_estimators()
-    if estimator not in available_estimators:
-        msg = ("\n Input `estimator` must be one of the following: \n"
-               "{0}".value(available_estimators))
-        raise HalotoolsError(msg)
-    
-    return galaxies, particles, rp_bins, period, num_threads, PBCs
-
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
     sample2, sample2_host_halo_id, randoms,
