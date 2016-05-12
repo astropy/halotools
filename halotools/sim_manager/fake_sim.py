@@ -46,6 +46,11 @@ class FakeSim(UserSuppliedHaloCatalog):
         seed : int, optional 
             Random number seed used to generate the fake halos and particles. 
             Default is 43.
+
+        Examples 
+        --------
+        >>> halocat = FakeSim()
+
         """
         Lbox = 250.0
         particle_mass = 1.e8
@@ -100,6 +105,7 @@ class FakeSim(UserSuppliedHaloCatalog):
         conc = np.random.uniform(4, 15, self.num_halos)
         rs = rvir/conc
         zhalf = np.random.uniform(0, 10, self.num_halos)
+        dmdt = np.random.uniform(-1, 10, self.num_halos)
 
         x = np.random.uniform(0, Lbox, self.num_halos)
         y = np.random.uniform(0, Lbox, self.num_halos)
@@ -136,10 +142,9 @@ class FakeSim(UserSuppliedHaloCatalog):
             halo_vmax = vmax, 
             halo_vpeak = vpeak, 
             halo_spin = spin, 
+            halo_mass_accretion_rate = dmdt, 
             user_supplied_ptclcat = ptclcat
             )
-
-
 
 class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
     """ Fake simulation data used in the test suite of `~halotools.empirical_models`. 
@@ -167,6 +172,10 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
         seed : int, optional 
             Random number seed used to generate the fake halos and particles. 
             Default is 43.
+
+        Examples 
+        --------
+        >>> fakesim = FakeSimHalosNearBoundaries()
         """
         Lbox = 250.0
         particle_mass = 1.e8

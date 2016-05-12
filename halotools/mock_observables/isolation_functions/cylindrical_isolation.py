@@ -8,7 +8,7 @@ import numpy as np
 from functools import partial 
 import multiprocessing 
 
-from .process_args_helpers import _get_r_max, _set_isolation_approx_cell_sizes
+from .isolation_functions_helpers import _get_r_max, _set_isolation_approx_cell_sizes
 from .engines import cylindrical_isolation_engine
 
 from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period

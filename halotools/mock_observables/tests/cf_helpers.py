@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function)
 import numpy as np 
 
 from astropy.utils.misc import NumpyRNGContext
 
-__all__ = ('generate_locus_of_3d_points', 'generate_3d_regular_mesh')
+__all__ = ('generate_locus_of_3d_points', 'generate_3d_regular_mesh', 
+    'generate_thin_shell_of_3d_points')
 
 def generate_locus_of_3d_points(npts, xc=0.1, yc=0.1, zc=0.1, epsilon=0.001, seed=None):
     """
@@ -58,7 +59,7 @@ def generate_3d_regular_mesh(npts, dmin=0, dmax=1):
     Returns 
     ---------
     x, y, z : array_like 
-        ndarrays of length npts**3 storing the cartesian coordinates 
+        ndarrays of length npts**3 stoshell the cartesian coordinates 
         of the regular grid. 
 
     """
@@ -68,4 +69,80 @@ def generate_3d_regular_mesh(npts, dmin=0, dmax=1):
     delta = np.diff(x)[0]/2.
     x, y, z = np.array(np.meshgrid(x[:-1], y[:-1], z[:-1]))
     return np.vstack([x.flatten()+delta, y.flatten()+delta, z.flatten()+delta]).T
+
+
+def generate_thin_shell_of_3d_points(npts, radius, xc, yc, zc, seed=None, Lbox = None):
+    """ Function returns a thin shell of ``npts`` points located at a distance 
+    ``radius`` from the point defined by ``xc``, ``yc``, ``zc``.
+
+    Parameters 
+    -----------
+    npts : int 
+        Number of points in the output shell. 
+
+    radius : float 
+        Radius of the shell 
+
+    xc, yc, zc : floats 
+        Center of the shell
+
+    seed : int, optional 
+        Random number seed used to generate the shell
+
+    Returns 
+    --------
+    shell : array 
+        npts x 3 numpy array stoshell the points in the shell
+
+    Examples 
+    --------
+    >>> x0, y0, z0 = 0.05, 0.15, 0.25
+    >>> radius = 0.1
+    >>> shell = generate_thin_shell_of_3d_points(100, radius, x0, y0, z0)
+    >>> x, y, z = shell[:,0], shell[:,1], shell[:,2]
+    >>> r = np.sqrt((x-x0)**2 + (y-y0)**2 + (z-z0)**2)
+    >>> assert np.allclose(r, radius, rtol = 0.001)
+
+    """
+    with NumpyRNGContext(seed):
+        x0 = np.random.uniform(-1, 1, npts)
+        y0 = np.random.uniform(-1, 1, npts)
+        z0 = np.random.uniform(-1, 1, npts)
+
+    r0 = np.sqrt(x0*x0 + y0*y0 + z0*z0)
+    mask = r0 == 0
+    x = x0[~mask]
+    y = y0[~mask]
+    z = z0[~mask]
+    r = r0[~mask]
+    normed_x = radius*x/r
+    normed_y = radius*y/r
+    normed_z = radius*z/r
+
+    if Lbox is None:
+        xout = normed_x + xc
+        yout = normed_y + yc
+        zout = normed_z + zc
+    else:
+        xout = (normed_x + xc) % Lbox
+        yout = (normed_y + yc) % Lbox
+        zout = (normed_z + zc) % Lbox
+
+    return np.vstack([xout, yout, zout]).T
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
