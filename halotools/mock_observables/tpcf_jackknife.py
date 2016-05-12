@@ -48,6 +48,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         format accepted by the ``sample1`` and ``sample2`` arguments.   
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
+    randoms : array_like
+        Nran x 3 array containing 3-D positions of randomly distributed points. 
+
     rbins : array_like
         array of boundaries defining the real space radial bins in which pairs are counted.
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
@@ -56,26 +59,19 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         Lenght-3 numpy array of number of divisions along each dimension defining 
         jackknife sample subvolumes.  If single integer is given, it is assumed to be 
         equivalent for each dimension.  The total number of samples used is then given by
-        *numpy.prod(Nsub)*.
+        *numpy.prod(Nsub)*. Default is 5 divisions per dimension. 
     
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points. 
         Passing ``sample2`` as an input permits the calculation of 
         the cross-correlation function. Default is None, in which case only the 
         auto-correlation function will be calculated. 
-    
-    randoms : array_like, optional
-        Nran x 3 array containing 3-D positions of randomly distributed points. 
-        If no randoms are provided (the default option), 
-        calculation of the tpcf can proceed using analytical randoms 
-        (only valid for periodic boundary conditions).
-    
+        
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-        If set to None (the default option), PBCs are set to infinity, 
-        in which case ``randoms`` must be provided. 
+        If set to None (the default option), PBCs are set to infinity.
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
@@ -90,7 +86,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     estimator : string, optional
         Statistical estimator for the tpcf. 
         Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
-        Default is ``Natural``. 
+        Default is 'Natural'. 
     
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed 
