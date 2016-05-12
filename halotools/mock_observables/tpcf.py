@@ -9,10 +9,16 @@ import numpy as np
 from math import gamma
 from warnings import warn
 
-from .clustering_helpers import process_optional_input_sample2, downsample_inputs_exceeding_max_sample_size
-from .mock_observables_helpers import enforce_sample_has_correct_shape 
+from .clustering_helpers import (process_optional_input_sample2, 
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
+    tpcf_estimator_dd_dr_rr_requirements)
+from .mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_period, get_num_threads)
+from .pair_counters.mesh_helpers import _enforce_maximum_search_length
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .pair_counters import npairs_3d
+
+from ..custom_exceptions import HalotoolsError
 ##########################################################################################
 
 
@@ -329,8 +335,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         RR_precomputed, NR_precomputed) = _tpcf_process_args(*function_args)
     
     # What needs to be done?
-    do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
-    if RR_precomputed is not None: do_RR = False
+    do_DD, do_DR, do_RR = tpcf_estimator_dd_dr_rr_requirements[estimator]
+    if RR_precomputed is not None: 
+        # overwrite do_RR as necessary
+        do_RR = False
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -411,90 +419,28 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
         sample1, sample2, _sample1_is_sample2, max_sample_size)
 
-    # down sample if sample size exceeds max_sample_size.
-    if _sample1_is_sample2 is True:
-        if (len(sample1) > max_sample_size):
-            inds = np.arange(0,len(sample1))
-            np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            msg = ("\n `sample1` exceeds `max_sample_size` \n"
-                   "downsampling `sample1`...")
-            warn(msg)
-    else:
-        if len(sample1) > max_sample_size:
-            inds = np.arange(0,len(sample1))
-            np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            msg = ("\n `sample1` exceeds `max_sample_size` \n"
-                   "downsampling `sample1`...")
-            warn(msg)
-        if len(sample2) > max_sample_size:
-            inds = np.arange(0,len(sample2))
-            np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample2 = sample2[inds]
-            msg = ("\n `sample2` exceeds `max_sample_size` \n"
-                   "downsampling `sample2`...")
-            warn(msg)
     
-    rbins = convert_to_ndarray(rbins)
-    rmax = np.max(rbins)
-    try:
-        assert rbins.ndim == 1
-        assert len(rbins) > 1
-        if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
-    except AssertionError:
-        msg = ("\n Input ``rbins`` must be a monotonically increasing \n"
-               "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
-        
-    #Process period entry and check for consistency.
-    if period is None:
-        PBCs = False
-    else:
-        PBCs = True
-        period = convert_to_ndarray(period)
-        if len(period) == 1:
-            period = np.array([period[0]]*3)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "\n Input `period` must be a bounded positive number in all dimensions"
-            raise HalotoolsError(msg)
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.amax(rbins)
 
-    #check for input parameter consistency
-    if (period is not None):
-        if (rmax >= np.min(period)/3.0):
-            msg = ("\n The maximum length over which you search for pairs of points \n"
-                   "cannot be larger than Lbox/3 in any dimension. \n"
-                   "If you need to count pairs on these length scales, \n"
-                   "you should use a larger simulation.\n")
-            raise HalotoolsError(msg)
-    
-    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
-        msg = ('\n `sample1` and `sample2` must have same dimension.')
-        raise HalotoolsError(msg)
-    
+    period, PBCs = get_period(period)
+
+    _enforce_maximum_search_length(rmax, period)
+       
     if (randoms is None) & (PBCs is False):
-        msg = ('\n If no PBCs are specified, randoms must be provided.')
-        raise HalotoolsError(msg)
+        msg = "If no PBCs are specified, randoms must be provided.\n"
+        raise ValueError(msg)
     
-    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        msg = ('\n `do_auto` and `do_cross` keywords must be of type boolean.')
-        raise HalotoolsError(msg)
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
     
-    if num_threads == 'max':
-        num_threads = cpu_count()
+    num_threads = get_num_threads(num_threads)
     
-    available_estimators = _list_estimators()
-    if estimator not in available_estimators:
-        msg = ("\n Input `estimator` must be one of the following: \n"
-               "{0}".format(available_estimators))
-        raise HalotoolsError(msg)
+    verify_tpcf_estimator(estimator)
     
     if ((RR_precomputed is not None) | (NR_precomputed is not None)):
         try:

@@ -173,14 +173,14 @@ def test_tpcf_randoms():
                     approx_cellran_size = [rmax, rmax, rmax])
 
     #No PBCs and no randoms should throw an error.
-    try:
+    with pytest.raises(ValueError) as err:
         tpcf(sample1, rbins, sample2 = sample2, 
              randoms=None, period = None, 
              max_sample_size=int(1e4), estimator='Natural', 
              approx_cell1_size = [rmax, rmax, rmax], 
              approx_cellran_size = [rmax, rmax, rmax])
-    except HalotoolsError:
-        pass
+    substr = "If no PBCs are specified, randoms must be provided."
+    assert substr in err.value.args[0]
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
@@ -212,13 +212,14 @@ def test_tpcf_period_API():
 
     #should throw an error.  period must be positive!
     period = np.array([1.0,1.0,-1.0])
-    try:
+    with pytest.raises(ValueError) as err:
         tpcf(sample1, rbins, sample2 = sample2, 
              randoms=randoms, period = period, 
              max_sample_size=int(1e4), estimator='Natural', 
              approx_cell1_size = [rmax, rmax, rmax])
-    except HalotoolsError:
-        pass
+    substr = "All values must bounded positive numbers."
+    assert substr in err.value.args[0]
+
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
@@ -524,9 +525,9 @@ def test_tpcf_raises_exception_for_non_monotonic_rbins():
     period = np.array([1.0,1.0,1.0])
     rbins = np.linspace(10,0.3,5)
 
-    with pytest.raises(HalotoolsError) as err:
+    with pytest.raises(TypeError) as err:
         normal_result = tpcf(sample1, rbins, period = period)
-    substr = "Input ``rbins`` must be a monotonically increasing"
+    substr = "Input separation bins must be a monotonically increasing"
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_large_search_length():
@@ -534,9 +535,9 @@ def test_tpcf_raises_exception_for_large_search_length():
     period = np.array([1.0,1.0,1.0])
     rbins = np.linspace(0.1,0.5,5)
 
-    with pytest.raises(HalotoolsError) as err:
+    with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, period = period)
-    substr = "The maximum length over which you search for pairs"
+    substr = "search length cannot exceed period/3 in any dimension."
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_incompatible_data_shapes():
@@ -545,9 +546,9 @@ def test_tpcf_raises_exception_for_incompatible_data_shapes():
     period = np.array([1.0,1.0,1.0])
     rbins = np.linspace(0.1,0.3,5)
 
-    with pytest.raises(HalotoolsError) as err:
+    with pytest.raises(TypeError) as err:
         normal_result = tpcf(sample1, rbins, sample2 = sample2, period = period)
-    substr = "`sample1` and `sample2` must have same dimension"
+    substr = "Input sample of points must be a Numpy ndarray of shape (Npts, 3)."
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_bad_do_auto_instructions():
@@ -556,10 +557,10 @@ def test_tpcf_raises_exception_for_bad_do_auto_instructions():
     period = np.array([1.0,1.0,1.0])
     rbins = np.linspace(0.1,0.3,5)
 
-    with pytest.raises(HalotoolsError) as err:
+    with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, sample2 = sample2, period = period, 
             do_auto = 'Jose Canseco')
-    substr = "`do_auto` and `do_cross` keywords must be of type boolean"
+    substr = "`do_auto` and `do_cross` keywords must be boolean-valued."
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_unavailable_estimator():
@@ -568,10 +569,10 @@ def test_tpcf_raises_exception_for_unavailable_estimator():
     period = np.array([1.0,1.0,1.0])
     rbins = np.linspace(0.1,0.3,5)
 
-    with pytest.raises(HalotoolsError) as err:
+    with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, period = period, 
             estimator = 'Jose Canseco')
-    substr = "Input `estimator` must be one of the following"
+    substr = "is not in the list of available estimators:"
     assert substr in err.value.args[0]
 
 

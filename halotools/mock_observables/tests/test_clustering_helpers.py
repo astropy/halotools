@@ -35,11 +35,8 @@ def test_downsample_inputs_exceeding_max_sample_size_case2():
 
     npts1, npts2, max_sample_size = 100, 100, 20
     sample1_in = np.zeros((npts1, 3))
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
-            sample1_in, sample1_in, _sample1_is_sample2, max_sample_size=max_sample_size)
-    assert "`sample1` exceeds `max_sample_size`" in str(w[-1].message)
+    sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
+        sample1_in, sample1_in, _sample1_is_sample2, max_sample_size=max_sample_size)
     assert len(sample1_out) == 20
     assert len(sample2_out) == npts2
 
@@ -61,11 +58,8 @@ def test_downsample_inputs_exceeding_max_sample_size_case4():
     npts1, npts2, max_sample_size = 1000, 10, 100
     sample1_in = np.zeros((npts1, 3))
     sample2_in = np.zeros((npts2, 3))
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
-            sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
-    assert "`sample1` exceeds `max_sample_size`" in str(w[-1].message)
+    sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
+        sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
     assert len(sample1_out) == max_sample_size
     assert len(sample2_out) == npts2
 
@@ -76,11 +70,8 @@ def test_downsample_inputs_exceeding_max_sample_size_case5():
     npts1, npts2, max_sample_size = 10, 1000, 100
     sample1_in = np.zeros((npts1, 3))
     sample2_in = np.zeros((npts2, 3))
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
-            sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
-    assert "`sample2` exceeds `max_sample_size`" in str(w[-1].message)
+    sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
+        sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
     assert len(sample1_out) == npts1
     assert len(sample2_out) == max_sample_size
 
@@ -91,10 +82,8 @@ def test_downsample_inputs_exceeding_max_sample_size_case6():
     npts1, npts2, max_sample_size = 1000, 1000, 100
     sample1_in = np.zeros((npts1, 3))
     sample2_in = np.zeros((npts2, 3))
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
-            sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
+    sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
+        sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
     assert len(sample1_out) == max_sample_size
     assert len(sample2_out) == max_sample_size
 
