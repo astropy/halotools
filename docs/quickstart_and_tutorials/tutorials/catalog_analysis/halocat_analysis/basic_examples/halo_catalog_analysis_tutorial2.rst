@@ -17,6 +17,15 @@ Before following this tutorial, make sure you understand
 covers basic material such as how halo data is organized into an Astropy
 Table object.
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+    **halotools/docs/notebooks/halocat_analysis/basic_examples/halo_catalog_analysis_tutorial2.ipynb**
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the calculation 
+as you learn the basic syntax. 
+
 Example 1: :math:`dM_{\rm vir}/dt` vs. halo-centric distance
 ------------------------------------------------------------
 
@@ -60,7 +69,7 @@ accepts two different kinds of inputs
 for the separation bins. If you pass in ``rbins_normalized`` and
 ``normalize_rbins_by``, then this combination of arguments allows you to
 calculate how various quantities vary as a function of, for example,
-:math:`r / R_{\rm vir}.` The way this works is that the
+:math:`x = r / R_{\rm vir}.` The way this works is that the
 ``normalize_rbins_by`` argument stores the value of :math:`R_{\rm vir}`
 for each point in ``sample1``, and the ``rbins_normalized`` argument
 will be interpreted as referring to the distance of points in
@@ -108,6 +117,9 @@ host-centric distance to our sample of group-mass host halos?
 The `~halotools.mock_observables.radial_profile_3d` function has a 
 ``return_counts`` argument that can be used to additionally 
 return the number of objects as a function of the input distance.
+In the following call to the `~halotools.mock_observables.radial_profile_3d` function, 
+we will calculate the mean mass accretion rate of the lower-mass halos in 20
+bins linearly spaced in *r* between :math:`0.5 {\\rm Mpc} < r < 10 {\\rm Mpc}.`
 
 .. code:: python
 

@@ -29,22 +29,24 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     as a function of 3d distance from the points in ``sample1``. 
 
     As illustrated in the Examples section below, 
+    and also in :ref:`halo_catalog_analysis_tutorial2`, 
     the ``normalize_rbins_by`` argument allows you to 
-    optionally normalize the distances defined by ``rbins`` according to 
+    optionally normalize the 3d distances according to 
     some scaling factor defined by the points in ``sample1``. The documentation below 
     shows how to calculate the mean mass accretion rate of ``sample2`` as a function 
-    of the Rvir-normalized halo-centric distance from points in ``sample1``. 
+    of :math:`r / R_{\\rm vir}`, the Rvir-normalized halo-centric distance from points in ``sample1``. 
 
-    Note that this function can also be used to calculate simply the radial profiles 
-    of number counts of ``sample2`` objects as a function of halo-centric distance 
+    Note that this function can also be used to calculate number density profiles 
+    of ``sample2`` points as a function of halo-centric distance 
     from ``sample1`` points. If you are only interested in number counts, 
     you can pass in any dummy array for the input ``sample2_quantity``, 
     and set the ``return_counts`` argument to True. 
+    See the Examples below for an explicit demonstration. 
 
     Parameters 
     -----------
     sample1 : array_like
-        Npts1 x 3 numpy array containing 3-D positions of points.
+        Length-*Npts1 x 3* numpy array containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the 
         Examples section below, for instructions on how to transform 
         your coordinate position arrays into the 
@@ -52,27 +54,42 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
+        Length-*Npts2 x 3* array containing 3-D positions of points. 
 
     sample2_quantity: array_like 
-        Length-Npts2 array containing the ``sample2`` quantity whose mean 
+        Length-*Npts2* array containing the ``sample2`` quantity whose mean 
         value is being calculated as a function of distance from points in ``sample1``. 
 
-    rbins : array_like
-        numpy array of length *Nrbins+1* defining the boundaries of bins in which
-        pairs are counted.
+    rbins_absolute : array_like, optional 
+        Array of length *Nrbins+1* defining the boundaries of bins in which
+        mean quantities and number counts are computed.
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    normalize_rbins_by : array_like, optional 
-        Numpy array of length Npts1 defining how the distance between each pair of points 
-        will be normalized. For example, if ``normalize_rbins_by`` is defined to be the 
-        virial radius of each point in ``sample1``, then the input ``rbins`` will be 
-        re-interpreted as referring to :math:`r / R_{\\rm vir}`. Default is None, 
-        in which case the input ``rbins`` will be interpreted to be an absolute distance 
-        in units of Mpc/h. 
+    rbins_normalized : array_like, optional 
+        Array of length *Nrbins+1* defining the bin boundaries *x*, where 
+        :math:`x = r / R_{\\rm vir}`, in which mean quantities and number counts are computed.
+        The quantity :math:`R_{\\rm vir}` can vary from point to point in ``sample1``
+        and is passed in via the ``normalize_rbins_by`` argument. 
+        While scaling by :math:`R_{\\rm vir}` is common, you are not limited to this 
+        normalization choice; in principle you can use the ``rbins_normalized`` and 
+        ``normalize_rbins_by`` arguments to scale your distances by any length-scale 
+        associated with points in ``sample1``. 
+        Default is None, in which case the ``rbins_absolute`` argument must be passed. 
 
-        Pay special attention to units with this argument - the Rockstar default is to 
-        return halo catalogs with Rvir in kpc/h units but halo centers in Mpc/h units. 
+    normalize_rbins_by : array_like, optional 
+        Numpy array of length *Npts1* defining how the distance between each pair of points 
+        will be normalized. For example, if ``normalize_rbins_by`` is defined to be the 
+        virial radius of each point in ``sample1``, then the input numerical values *x* 
+        stored in ``rbins_normalized`` will be interpreted as referring to 
+        bins of :math:`x = r / R_{\\rm vir}`. Default is None, in which case 
+        the input ``rbins_absolute`` argument must be passed instead of 
+        ``rbins_normalized``. 
+
+        Pay special attention to length-units in whatever halo catalog you are using: 
+        while Halotools-provided catalogs will always have length units 
+        pre-processed to be Mpc/h, commonly used default settings for ASCII catalogs 
+        produced by Rockstar return the ``Rvir`` column in kpc/h units, 
+        but halo centers in Mpc/h units. 
 
     return_counts : bool, optional 
         If set to True, `radial_profile_3d` will additionally return the number of 
@@ -118,6 +135,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
 
     Examples 
     --------
+
     In this example, we'll select two samples of halos, 
     and calculate how the mass accretion of halos in the second set varies as a function 
     of distance from the halos in the first set. For demonstration purposes we'll use 
@@ -150,14 +168,18 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     >>> result1, counts = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins_absolute=rbins_absolute, period=halocat.Lbox, return_counts=True)
 
     Now suppose that you wish to calculate the same quantity, 
-    but instead as a function of :math:`r / R_{\rm vir}`. 
+    but instead as a function of :math:`x = r / R_{\\rm vir}`. 
     In this case, we use the ``rbins_normalized`` and ``normalize_rbins_by`` arguments. 
-    The following choices for these arguments will give us 15 separation bins linearly spaced 
-    between :math:`\\frac{1}{2}R_{\\rm vir}` and :math:`5R_{\\rm vir}`. 
+    The following choices for these arguments will give us 15 separation bins linearly spaced in *x* 
+    between :math:`\\frac{1}{2}R_{\\rm vir}` and :math:`10R_{\\rm vir}`. 
 
     >>> rvir = halo_sample1['halo_rvir']
     >>> rbins_normalized = np.linspace(0.5, 10, 15) 
     >>> result1 = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins_normalized=rbins_normalized, normalize_rbins_by=rvir, period=halocat.Lbox)
+
+    See also 
+    ---------
+    :ref:`halo_catalog_analysis_tutorial2`
 
     """
 
