@@ -96,7 +96,7 @@ def _TP_estimator_requirements(estimator):
     else: 
         available_estimators = _list_estimators()
         if estimator not in available_estimators:
-            msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+            msg = ("Input `estimator` must be one of the following:{0}".format(available_estimators))
             raise HalotoolsError(msg)
     
     return do_DD, do_DR, do_RR

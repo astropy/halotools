@@ -6,6 +6,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from warnings import warn 
 import numpy as np
 import multiprocessing
+
+from ..utils.array_utils import array_is_monotonic
+
+
 num_available_cores = multiprocessing.cpu_count()
 
 __all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period')
@@ -103,5 +107,50 @@ def get_period(period):
             raise ValueError(msg)
 
     return period, PBCs
+
+def enforce_sample_has_correct_shape(sample):
+    """ Function inspects the input ``sample`` and enforces that it is of shape (Npts, 3). 
+    """
+    sample = np.atleast_1d(sample)
+    try:
+        input_shape = np.shape(sample)
+        assert len(input_shape) == 2
+        assert input_shape[1] == 3
+    except:
+        msg = ("Input sample of points must be a Numpy ndarray of shape (Npts, 3).\n"
+            "To convert a sequence of 1d arrays x, y, z into correct shape expected \n"
+            "throughout the `mock_observables` package:\n\n"
+            ">>> sample = np.vstack([x, y, z]).T ")
+        raise TypeError(msg)
+    return sample
+
+
+def get_separation_bins_array(separation_bins):
+    """ Function verifies that the input ``separation_bins`` is a monotonically increasing 
+    1d Numpy array with at least two entries, all of which are required to be strictly positive. 
+
+    This helper function can be used equally well with 3d separation bins ``rbins``, 
+    2d projected separation bins ``rp_bins``, or 1d line-of-sight bins ``pi_bins``. 
+    """
+    separation_bins = np.atleast_1d(separation_bins)
+    
+    try:
+        assert separation_bins.ndim == 1
+        assert len(separation_bins) > 1
+        if len(separation_bins) > 2:
+            assert array_is_monotonic(separation_bins, strict = True) == 1
+        assert np.all(separation_bins > 0)
+    except AssertionError:
+        msg = ("\n Input separation bins must be a monotonically increasing \n"
+               "1-D array with at least two entries, all of which must be strictly positive.\n")
+        raise TypeError(msg)
+
+    return separation_bins
+
+
+
+
+
+
 
 

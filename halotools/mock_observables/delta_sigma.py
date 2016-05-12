@@ -8,17 +8,17 @@ from scipy import integrate
 from warnings import warn
 
 from .tpcf import tpcf
-from .clustering_helpers import _delta_sigma_process_args
-
-from ..custom_exceptions import HalotoolsError
+from .mock_observables_helpers import (get_num_threads, get_separation_bins_array, 
+    get_period, enforce_sample_respects_pbcs, enforce_sample_has_correct_shape)
+from .clustering_helpers import verify_tpcf_estimator
 
 __all__ = ['delta_sigma']
 __author__ = ['Duncan Campbell']
 
 
 def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
-                log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
-                approx_cell1_size = None, approx_cell2_size = None):
+    log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
+    approx_cell1_size = None, approx_cell2_size = None):
     """ 
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
     
@@ -54,12 +54,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         (see notes for more details).
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
-    period : array_like, optional
+    period : array_like
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-        If set to None (the default option), PBCs are set to infinity, 
-        in which case ``randoms`` must be provided. 
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
 
     log_bins : boolean, optional
@@ -159,33 +157,18 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     :ref:`galaxy_catalog_analysis_tutorial3`
 
     """
-    
+
     #process the input parameters
-    function_args = (galaxies, particles, rp_bins, pi_max, period, estimator,
-        num_threads, approx_cell1_size, approx_cell2_size)
-    galaxies, particles, rp_bins, period, num_threads, PBCs = _delta_sigma_process_args(
-        *function_args)
-    
-    mean_rho = len(particles)/period.prod() #number density of particles
+    args = (galaxies, particles, rp_bins, period, estimator, num_threads)
+    result = _delta_sigma_process_args(*args)
+    galaxies, particles, rp_bins, period, estimator, num_threads, PBCs = result
     
     #determine radial bins to calculate tpcf in
     rp_max = np.max(rp_bins)
     rp_min = np.min(rp_bins)
     #maximum radial distance to calculate TPCF out to:
     rmax = np.sqrt(rp_max**2 + pi_max**2)
-    
-    #check to make sure rmax is not too large
-    if (period is not None):
-        if (rmax >= np.min(period)/3.0):
-            msg = ("\n"
-                   "rmax = sqrt(max(rp_bins)**2 + pi_max**2)>Lbox/3 \n"
-                   "The DeltaSigma calculation requires the correlation function \n"
-                   "to be calculated out to rmax. The maximum length over which you \n"
-                   "search for pairs of points cannot be larger than Lbox/3 \n"
-                   "in any dimension. If you need to count pairs on these \n"
-                   "length scales, you should use a larger simulation.")
-            raise HalotoolsError(msg)
-    
+        
     #define radial bins using either log or linear spacing
     if log_bins is True:
         rbins = np.logspace(np.log10(rp_min), np.log10(rmax), n_bins)
@@ -202,7 +185,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     #This could mean that the user has under-sampled the particles.
     if np.any(xi==-1.0):
         msg = ("\n"
-               "Some raidal bins contain 0 particles in the \n"
+               "Some radial bins contain 0 particles in the \n"
                "galaxy-matter cross cross correlation calculation. \n"
                "If you downsampled the amount of matter particles, \n"
                "consider using more particles. Alternatively, you \n"
@@ -219,6 +202,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0 #note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
     
+    mean_rho = len(particles)/period.prod() #number density of particles
+
     #define function to integrate
     def f(pi,rp):
         r = np.sqrt(rp**2+pi**2)
@@ -252,4 +237,23 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     
     return delta_sigma
 
+def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, num_threads):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.delta_sigma`. 
+    """
+    period, PBCs = get_period(period)
+
+    galaxies = enforce_sample_has_correct_shape(galaxies)
+    particles = enforce_sample_has_correct_shape(particles)
+    enforce_sample_respects_pbcs(galaxies[:,0], galaxies[:,1], galaxies[:,2], period)
+    enforce_sample_respects_pbcs(particles[:,0], particles[:,1], particles[:,2], period)
+
+    rp_bins = get_separation_bins_array(rp_bins)
+
+    num_threads = get_num_threads(num_threads, enforce_max_cores = False)
+    
+    estimator = verify_tpcf_estimator(estimator)
+    
+    return galaxies, particles, rp_bins, period, estimator, num_threads, PBCs
 
