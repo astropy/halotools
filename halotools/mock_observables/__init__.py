@@ -11,10 +11,8 @@ from .tpcf_one_two_halo_decomp import *
 from .marked_tpcf import *
 from .rp_pi_tpcf import *
 from .wp import *
-from .s_mu_tpcf import *
 from .group_identification import *
 from .mock_survey import *
-from .tpcf_multipole import *
 from .error_estimation_tools import jackknife_covariance_matrix
 from .pairwise_velocities import *
 from .isolation_functions import *

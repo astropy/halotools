@@ -7,9 +7,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from .clustering_helpers import _s_mu_tpcf_process_args
-from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .pair_counters import npairs_s_mu
+from ..clustering_helpers import _s_mu_tpcf_process_args
+from ..tpcf_estimators import _TP_estimator_requirements, _TP_estimator
+from ..pair_counters import npairs_s_mu
 
 
 __all__ = ['s_mu_tpcf']

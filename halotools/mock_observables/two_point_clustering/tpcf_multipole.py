@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from scipy.special import legendre
-from ..utils.array_utils import convert_to_ndarray
+from ...utils.array_utils import convert_to_ndarray
 
 ##########################################################################################
 

@@ -3,7 +3,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
-import sys
 
 from ..s_mu_tpcf import s_mu_tpcf
 
