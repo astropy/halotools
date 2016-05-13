@@ -7,7 +7,7 @@ from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..tpcf_jackknife import tpcf_jackknife
-from ...tpcf import tpcf
+from ..tpcf import tpcf
 
 slow = pytest.mark.slow
 

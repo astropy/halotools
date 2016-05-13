@@ -2,15 +2,18 @@
 Module containing the `~halotools.mock_observables.delta_sigma` function used to 
 calculate galaxy-galaxy lensing. 
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
 from warnings import warn
 
-from ..tpcf import tpcf
+from .tpcf import tpcf
+
 from ..mock_observables_helpers import (get_num_threads, get_separation_bins_array, 
     get_period, enforce_sample_respects_pbcs, enforce_sample_has_correct_shape)
-from ..clustering_helpers import verify_tpcf_estimator
+from .clustering_helpers import verify_tpcf_estimator
 
 __all__ = ['delta_sigma']
 __author__ = ['Duncan Campbell']

@@ -1,25 +1,24 @@
-#!/usr/bin/env python
+""" Module providing unit-testing for the `~halotools.mock_observables.tpcf` function.
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 import numpy as np
 from multiprocessing import cpu_count 
+import warnings 
+from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..tpcf import tpcf
-from ...custom_exceptions import HalotoolsError
 
-import warnings 
-import pytest
+from ....custom_exceptions import HalotoolsError
+
 slow = pytest.mark.slow
 
 __all__ = ('test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',
     'test_tpcf_sample_size_limit','test_tpcf_randoms', 
     'test_tpcf_period_API', 'test_tpcf_cross_consistency_w_auto')
 
-"""
-Note that these are almost all unit-tests.  Non tirival tests are a little heard to think
-of here.
-"""
+fixed_seed = 43
 
 @slow
 def test_tpcf_auto():
@@ -513,13 +512,11 @@ def test_tpcf_raises_warning_for_large_samples():
     period = np.array([1.0,1.0,1.0])
     rbins = np.linspace(0.001,0.3,5)
 
-    substr = "`sample1` exceeds `max_sample_size`"
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         normal_result = tpcf(sample1, rbins, period = period, 
             max_sample_size=int(1e2))
-        assert substr in str(w[-1].message)
-        
+
 def test_tpcf_raises_exception_for_non_monotonic_rbins():
     sample1 = np.random.random((1000,3))
     period = np.array([1.0,1.0,1.0])

@@ -10,8 +10,8 @@ import numpy as np
 from math import gamma
 from warnings import warn
 
-from ..clustering_helpers import _tpcf_one_two_halo_decomp_process_args
-from ..tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .clustering_helpers import _tpcf_one_two_halo_decomp_process_args
+from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_3d
 from ..pair_counters import marked_npairs_3d
 

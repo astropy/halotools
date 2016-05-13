@@ -5,8 +5,6 @@ and other point data in periodic cubes.
 """
 from __future__ import absolute_import
 
-from .tpcf import *
-from .marked_tpcf import *
 from .group_identification import *
 from .mock_survey import *
 from .error_estimation_tools import jackknife_covariance_matrix

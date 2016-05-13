@@ -2,7 +2,6 @@
 Module containing the `~halotools.mock_observables.tpcf` function used to 
 calculate the two-point correlation function in 3d (aka galaxy clustering). 
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -12,13 +11,14 @@ from warnings import warn
 from .clustering_helpers import (process_optional_input_sample2, 
     downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
     tpcf_estimator_dd_dr_rr_requirements)
-from .mock_observables_helpers import (enforce_sample_has_correct_shape, 
-    get_separation_bins_array, get_period, get_num_threads)
-from .pair_counters.mesh_helpers import _enforce_maximum_search_length
-from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
-from .pair_counters import npairs_3d
+from .tpcf_estimators import _TP_estimator
 
-from ..custom_exceptions import HalotoolsError
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_period, get_num_threads)
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ..pair_counters import npairs_3d
+
+from ...custom_exceptions import HalotoolsError
 ##########################################################################################
 
 

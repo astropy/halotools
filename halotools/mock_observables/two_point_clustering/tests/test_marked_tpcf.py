@@ -1,11 +1,15 @@
-#!/usr/bin/env python
-
+""" Module providing unit-testing for the `~halotools.mock_observables.marked_tpcf` function. 
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
+
 from ..marked_tpcf import marked_tpcf
 
-import pytest
+from astropy.tests.helper import pytest
 slow = pytest.mark.slow
+from astropy.utils.misc import NumpyRNGContext
+
 
 #create toy data to test functions
 N_pts = 100

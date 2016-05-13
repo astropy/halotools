@@ -7,8 +7,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from ..clustering_helpers import _tpcf_jackknife_process_args
-from ..tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .clustering_helpers import _tpcf_jackknife_process_args
+from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_jackknife_3d
 from ..error_estimation_tools import jackknife_covariance_matrix, cuboid_subvolume_labels
 

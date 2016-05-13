@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from .clustering_helpers import _marked_tpcf_process_args
-from .pair_counters import npairs_3d, marked_npairs_3d
+from ..pair_counters import npairs_3d, marked_npairs_3d
 
 
 __all__ = ['marked_tpcf']

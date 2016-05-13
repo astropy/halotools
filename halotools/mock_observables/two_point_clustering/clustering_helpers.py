@@ -1,18 +1,19 @@
-# -*- coding: utf-8 -*-
-
 """
-helper functions for clustering statistics functions, 
-e.g. two point correlation functions.
+helper functions used to process arguments passed to the functions in the 
+`~halotools.mock_observables.two_point_clustering` sub-package.  
 """
-
 from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count 
+
 from .tpcf_estimators import _list_estimators
-from .mock_observables_helpers import enforce_sample_has_correct_shape
-from ..custom_exceptions import HalotoolsError
-from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
+
+from ..mock_observables_helpers import enforce_sample_has_correct_shape
+
+from ...custom_exceptions import HalotoolsError
+from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ('_tpcf_jackknife_process_args',
     '_rp_pi_tpcf_process_args', '_s_mu_tpcf_process_args',

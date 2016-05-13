@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from ..clustering_helpers import _rp_pi_tpcf_process_args
+from .clustering_helpers import _rp_pi_tpcf_process_args
 from .rp_pi_tpcf import rp_pi_tpcf
 
 
