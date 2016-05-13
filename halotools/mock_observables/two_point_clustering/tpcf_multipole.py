@@ -3,12 +3,10 @@ Module containing the `~halotools.mock_observables.tpcf_multipole` function used
 calculate the multipoles of the redshift-space two-point correlation function, 
 aka the RSD multipoles. 
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from scipy.special import legendre
-from ...utils.array_utils import convert_to_ndarray
 
 ##########################################################################################
 
@@ -71,8 +69,8 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     """
     
     #process inputs
-    s_mu_tcpf_result = convert_to_ndarray(s_mu_tcpf_result)
-    mu_bins = convert_to_ndarray(mu_bins)
+    s_mu_tcpf_result = np.atleast_1d(s_mu_tcpf_result)
+    mu_bins = np.atleast_1d(mu_bins)
     order = int(order)
     
     #calculate the center of each mu bin
