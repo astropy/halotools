@@ -6,7 +6,6 @@ and other point data in periodic cubes.
 from __future__ import absolute_import
 
 from .tpcf import *
-from .tpcf_jackknife import *
 from .tpcf_one_two_halo_decomp import *
 from .marked_tpcf import *
 from .group_identification import *
