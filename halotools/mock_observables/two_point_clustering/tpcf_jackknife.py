@@ -7,11 +7,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from .clustering_helpers import _tpcf_jackknife_process_args
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_jackknife_3d
 from ..error_estimation_tools import jackknife_covariance_matrix, cuboid_subvolume_labels
 
+from .clustering_helpers import (process_optional_input_sample2, 
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_period, get_num_threads)
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+
+from ...custom_exceptions import HalotoolsError
 
 __all__ = ['tpcf_jackknife']
 __author__ = ['Duncan Campbell']
@@ -407,6 +413,66 @@ def _enclose_in_box(data1, data2, data3):
     return np.vstack((x1, y1, z1)).T,\
            np.vstack((x2, y2, z2)).T,\
            np.vstack((x3, y3, z3)).T, Lbox
+
+def _tpcf_jackknife_process_args(sample1, randoms, rbins, 
+    Nsub, sample2, period, do_auto, do_cross, 
+    estimator, num_threads, max_sample_size):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.jackknife_tpcf`. 
+    """
+    
+    sample1 = enforce_sample_has_correct_shape(sample1)
+
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross)
+
+    period, PBCs = get_period(period)
+
+    #process randoms parameter
+    if np.shape(randoms) == (1,):
+        N_randoms = randoms[0]
+        if PBCs is True:
+            randoms = np.random.random((N_randoms,3))*period
+        else:
+            msg = ("\n When no `period` parameter is passed, \n"
+                   "the user must provide true randoms, and \n"
+                   "not just the number of randoms desired.")
+            raise HalotoolsError(msg)
+    
+    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
+        sample1, sample2, _sample1_is_sample2, max_sample_size)
+
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.amax(rbins)
+        
+    #Process Nsub entry and check for consistency.
+    Nsub = np.atleast_1d(Nsub)
+    if len(Nsub) == 1:
+        Nsub = np.array([Nsub[0]]*3)
+    try:
+        assert np.all(Nsub < np.inf)
+        assert np.all(Nsub > 0)
+    except AssertionError:
+        msg = "\n Input `Nsub` must be a bounded positive number in all dimensions"
+        raise HalotoolsError(msg)
+        
+    _enforce_maximum_search_length(rmax, period)
+    
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
+    
+    num_threads = get_num_threads(num_threads)
+
+    verify_tpcf_estimator(estimator)  
+    
+    return sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross,\
+           num_threads, _sample1_is_sample2, PBCs
+
 
 
 
