@@ -9,9 +9,16 @@ import numpy as np
 from math import gamma
 from warnings import warn
 
-from .clustering_helpers import _tpcf_process_args
+from .clustering_helpers import (process_optional_input_sample2, 
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
+    tpcf_estimator_dd_dr_rr_requirements)
+from .mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_period, get_num_threads)
+from .pair_counters.mesh_helpers import _enforce_maximum_search_length
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .pair_counters import npairs_3d
+
+from ..custom_exceptions import HalotoolsError
 ##########################################################################################
 
 
@@ -328,8 +335,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         RR_precomputed, NR_precomputed) = _tpcf_process_args(*function_args)
     
     # What needs to be done?
-    do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
-    if RR_precomputed is not None: do_RR = False
+    do_DD, do_DR, do_RR = tpcf_estimator_dd_dr_rr_requirements[estimator]
+    if RR_precomputed is not None: 
+        # overwrite do_RR as necessary
+        do_RR = False
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -389,6 +398,81 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11, xi_22
+
+
+def _tpcf_process_args(sample1, rbins, sample2, randoms, 
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+    approx_cell1_size, approx_cell2_size, approx_cellran_size, 
+    RR_precomputed, NR_precomputed):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.tpcf`. 
+    """
+    
+    sample1 = enforce_sample_has_correct_shape(sample1)
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross)
+        
+    if randoms is not None: 
+        randoms = np.atleast_1d(randoms)
+    
+    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
+        sample1, sample2, _sample1_is_sample2, max_sample_size)
+
+    
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.amax(rbins)
+
+    period, PBCs = get_period(period)
+
+    _enforce_maximum_search_length(rmax, period)
+       
+    if (randoms is None) & (PBCs is False):
+        msg = "If no PBCs are specified, randoms must be provided.\n"
+        raise ValueError(msg)
+    
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
+    
+    num_threads = get_num_threads(num_threads)
+    
+    verify_tpcf_estimator(estimator)
+    
+    if ((RR_precomputed is not None) | (NR_precomputed is not None)):
+        try:
+            assert ((RR_precomputed is not None) & (NR_precomputed is not None)) is True
+        except AssertionError:
+            msg = ("\nYou must either provide both "
+                "``RR_precomputed`` and ``NR_precomputed`` arguments, or neither\n")
+            raise HalotoolsError(msg)
+        # At this point, we have been provided *both* RR_precomputed *and* NR_precomputed
+
+        try:
+            assert len(RR_precomputed) == len(rbins)-1
+        except AssertionError:
+            msg = ("\nLength of ``RR_precomputed`` must match length of ``rbins``\n")
+            raise HalotoolsError(msg)
+
+        if np.any(RR_precomputed == 0):
+            msg = ("RR_precomputed has radial bin(s) which contain no pairs. \n"
+                   "Consider increasing the number of randoms, or using larger bins.")
+            warn(msg)
+
+        try:
+            assert len(randoms) == NR_precomputed
+        except AssertionError:
+            msg = ("If passing in randoms and also NR_precomputed, \n"
+                "the value of NR_precomputed must agree with the number of randoms\n")
+            raise HalotoolsError(msg)
+
+    assert np.all(rbins > 0.), "All values of input ``rbins`` must be positive"
+
+    return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
+           _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed
 
 
 
