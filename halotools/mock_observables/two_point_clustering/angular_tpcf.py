@@ -8,11 +8,14 @@ from __future__ import absolute_import, division, print_function,unicode_literal
 import numpy as np
 from warnings import warn
 
-from .clustering_helpers import _angular_tpcf_process_args
-from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .pair_counters import npairs_3d
+from ..pair_counters import npairs_3d
+from ..mock_observables_helpers import get_num_threads
+from ..tpcf_estimators import _TP_estimator_requirements, _TP_estimator
 
-from ..utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesian
+from ..clustering_helpers import verify_tpcf_estimator
+from ...utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesian
+from ...custom_exceptions import HalotoolsError
+from ...utils.array_utils import array_is_monotonic
 
 __all__=['angular_tpcf']
 __author__ = ['Duncan Campbell']
@@ -291,3 +294,89 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11, xi_22
 
+def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms, 
+    do_auto, do_cross, estimator, num_threads, max_sample_size):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.angular_tpcf`. 
+    """
+    
+    sample1 = np.atleast_1d(sample1)
+    
+    if sample2 is not None: 
+        sample2 = np.atleast_1d(sample2)
+        if np.all(sample1==sample2):
+            _sample1_is_sample2 = True
+            msg = ("\n `sample1` and `sample2` are exactly the same, \n"
+                   "only the auto-correlation will be returned.\n")
+            warn(msg)
+            do_cross=False
+        else: 
+            _sample1_is_sample2 = False
+    else: 
+        sample2 = sample1
+        _sample1_is_sample2 = True
+    
+    if randoms is not None: 
+        randoms = np.atleast_1d(randoms)
+    
+    # down sample if sample size exceeds max_sample_size.
+    if _sample1_is_sample2 is True:
+        if (len(sample1) > max_sample_size):
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            msg = ("\n `sample1` exceeds `max_sample_size` \n"
+                   "downsampling `sample1`...")
+            warn(msg)
+    else:
+        if len(sample1) > max_sample_size:
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            msg = ("\n `sample1` exceeds `max_sample_size` \n"
+                   "downsampling `sample1`...")
+            warn(msg)
+        if len(sample2) > max_sample_size:
+            inds = np.arange(0,len(sample2))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample2 = sample2[inds]
+            msg = ("\n `sample2` exceeds `max_sample_size` \n"
+                    "downsampling `sample2`...")
+            warn(msg)
+    
+    theta_bins = np.atleast_1d(theta_bins)
+    theta_max = np.max(theta_bins)
+    try:
+        assert theta_bins.ndim == 1
+        assert len(theta_bins) > 1
+        if len(theta_bins) > 2:
+            assert array_is_monotonic(theta_bins, strict = True) == 1
+    except AssertionError:
+        msg = ("\n Input `theta_bins` must be a monotonically increasing 1-D \n"
+               "array with at least two entries.")
+        raise HalotoolsError(msg)
+    
+    #check for input parameter consistency
+    if (theta_max >= 180.0):
+        msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than 180.0 deg. \n")
+        raise HalotoolsError(msg)
+
+    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
+        msg = ('\n `sample1` and `sample2` must have same dimension.\n')
+        raise HalotoolsError(msg)
+
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        msg = ('\n `do_auto` and `do_cross` keywords must be of type boolean.')
+        raise HalotoolsError(msg)
+    
+    num_threads = get_num_threads(num_threads)
+    
+    verify_tpcf_estimator(estimator)
+    
+    return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
+           _sample1_is_sample2

@@ -16,8 +16,7 @@ from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ('_tpcf_jackknife_process_args',
     '_rp_pi_tpcf_process_args', '_s_mu_tpcf_process_args',
-    '_marked_tpcf_process_args', '_tpcf_one_two_halo_decomp_process_args',
-    '_angular_tpcf_process_args')
+    '_marked_tpcf_process_args', '_tpcf_one_two_halo_decomp_process_args')
 
 __author__=['Duncan Campbell', 'Andrew Hearin']
 
@@ -831,94 +830,3 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
-def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms, 
-    do_auto, do_cross, estimator, num_threads, max_sample_size):
-    """ 
-    Private method to do bounds-checking on the arguments passed to 
-    `~halotools.mock_observables.angular_tpcf`. 
-    """
-    
-    sample1 = convert_to_ndarray(sample1)
-    
-    if sample2 is not None: 
-        sample2 = convert_to_ndarray(sample2)
-        if np.all(sample1==sample2):
-            _sample1_is_sample2 = True
-            msg = ("\n `sample1` and `sample2` are exactly the same, \n"
-                   "only the auto-correlation will be returned.\n")
-            warn(msg)
-            do_cross=False
-        else: 
-            _sample1_is_sample2 = False
-    else: 
-        sample2 = sample1
-        _sample1_is_sample2 = True
-    
-    if randoms is not None: 
-        randoms = convert_to_ndarray(randoms)
-    
-    # down sample if sample size exceeds max_sample_size.
-    if _sample1_is_sample2 is True:
-        if (len(sample1) > max_sample_size):
-            inds = np.arange(0,len(sample1))
-            np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            msg = ("\n `sample1` exceeds `max_sample_size` \n"
-                   "downsampling `sample1`...")
-            warn(msg)
-    else:
-        if len(sample1) > max_sample_size:
-            inds = np.arange(0,len(sample1))
-            np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            msg = ("\n `sample1` exceeds `max_sample_size` \n"
-                   "downsampling `sample1`...")
-            warn(msg)
-        if len(sample2) > max_sample_size:
-            inds = np.arange(0,len(sample2))
-            np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample2 = sample2[inds]
-            msg = ("\n `sample2` exceeds `max_sample_size` \n"
-                    "downsampling `sample2`...")
-            warn(msg)
-    
-    theta_bins = convert_to_ndarray(theta_bins)
-    theta_max = np.max(theta_bins)
-    try:
-        assert theta_bins.ndim == 1
-        assert len(theta_bins) > 1
-        if len(theta_bins) > 2:
-            assert array_is_monotonic(theta_bins, strict = True) == 1
-    except AssertionError:
-        msg = ("\n Input `theta_bins` must be a monotonically increasing 1-D \n"
-               "array with at least two entries.")
-        raise HalotoolsError(msg)
-    
-    #check for input parameter consistency
-    if (theta_max >= 180.0):
-        msg = ("\n The maximum length over which you search for pairs of points \n"
-                "cannot be larger than 180.0 deg. \n")
-        raise HalotoolsError(msg)
-
-    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
-        msg = ('\n `sample1` and `sample2` must have same dimension.\n')
-        raise HalotoolsError(msg)
-
-    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        msg = ('\n `do_auto` and `do_cross` keywords must be of type boolean.')
-        raise HalotoolsError(msg)
-    
-    if num_threads == 'max':
-        num_threads = cpu_count()
-    
-    available_estimators = _list_estimators()
-    if estimator not in available_estimators:
-        msg = ("\n Input `estimator` must be one of the following: \n"
-               "{0}".value(available_estimators))
-        raise HalotoolsError(msg)
-    
-    return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-           _sample1_is_sample2

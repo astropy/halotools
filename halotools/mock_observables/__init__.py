@@ -15,7 +15,6 @@ from .s_mu_tpcf import *
 from .delta_sigma import *
 from .group_identification import *
 from .mock_survey import *
-from .angular_tpcf import *
 from .tpcf_multipole import *
 from .error_estimation_tools import jackknife_covariance_matrix
 from .pairwise_velocities import *
@@ -25,3 +24,4 @@ from .catalog_analysis_helpers import *
 from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z, 
     marked_npairs_3d, marked_npairs_xy_z)
 from .radial_profiles import *
+from .two_point_clustering import *
