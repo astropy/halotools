@@ -2,17 +2,17 @@
 Module containing the `~halotools.mock_observables.angular_tpcf` function used to 
 calculate galaxy clustering as a function of angular separation. 
 """
-
 from __future__ import absolute_import, division, print_function,unicode_literals
 
 import numpy as np
 from warnings import warn
 
+from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
+from .clustering_helpers import verify_tpcf_estimator
+
 from ..pair_counters import npairs_3d
 from ..mock_observables_helpers import get_num_threads
-from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
 
-from .clustering_helpers import verify_tpcf_estimator
 from ...utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesian
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import array_is_monotonic

@@ -12,8 +12,8 @@ __all__ = ('test_rp_pi_tpcf_auto_nonperiodic','test_rp_pi_tpcf_auto_periodic',
 
 #create toy data to test functions
 period = np.array([1.0,1.0,1.0])
-rp_bins = np.linspace(0,0.3,5)
-pi_bins = np.linspace(0,0.3,5)
+rp_bins = np.linspace(0.001, 0.3, 5)
+pi_bins = np.linspace(0, 0.3, 5)
 
 fixed_seed = 43
 

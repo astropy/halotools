@@ -8,8 +8,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from math import pi
 
-from .clustering_helpers import _rp_pi_tpcf_process_args
+from .clustering_helpers import (process_optional_input_sample2, 
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
+    tpcf_estimator_dd_dr_rr_requirements)
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import npairs_xy_z
 
 
@@ -341,4 +347,52 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11
 
+
+def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size, 
+    approx_cell1_size, approx_cell2_size,approx_cellran_size):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.redshift_space_tpcf`. 
+    """
+    sample1 = enforce_sample_has_correct_shape(sample1)
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross)
+
+    if randoms is not None: 
+        randoms = np.atleast_1d(randoms)
+    
+    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
+        sample1, sample2, _sample1_is_sample2, max_sample_size)
+    
+    rp_bins = get_separation_bins_array(rp_bins)
+    rp_max = np.amax(rp_bins)
+
+    pi_bins = get_line_of_sight_bins_array(pi_bins)
+    pi_max = np.amax(pi_bins)
+
+    period, PBCs = get_period(period)
+
+    _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
+            
+    if (randoms is None) & (PBCs is False):
+        msg = "If no PBCs are specified, randoms must be provided.\n"
+        raise ValueError(msg)
+
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
+
+    num_threads = get_num_threads(num_threads)
+    
+    verify_tpcf_estimator(estimator)
+    
+    
+    assert np.all(rp_bins > 0.), "All values of input ``rp_bins`` must be positive"
+
+    return sample1, rp_bins, pi_bins, sample2, randoms, period,\
+           do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 

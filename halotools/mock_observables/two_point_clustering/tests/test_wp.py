@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
+from astropy.tests.helper import pytest
 
 from ..wp import wp
 
@@ -11,7 +12,7 @@ __all__ = ('test_wp_auto_nonperiodic','test_wp_auto_periodic','test_wp_cross_per
     'test_wp_cross_nonperiodic')
 
 period = np.array([1.0,1.0,1.0])
-rp_bins = np.linspace(0,0.3,5)
+rp_bins = np.linspace(0.001,0.3,3)
 pi_max = 0.3
 
 fixed_seed = 43
@@ -32,7 +33,6 @@ def test_wp_auto_nonperiodic():
     print(result)
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
-
 def test_wp_auto_periodic():
     """
     test wp autocorrelation with periodic boundary conditions
@@ -47,7 +47,6 @@ def test_wp_auto_periodic():
     
 
     assert result.ndim == 1, "More than one correlation function returned erroneously."
-
 
 def test_wp_cross_periodic():
     """
