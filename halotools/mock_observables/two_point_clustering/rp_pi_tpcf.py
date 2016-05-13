@@ -8,9 +8,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from math import pi
 
-from .clustering_helpers import _rp_pi_tpcf_process_args
-from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
-from .pair_counters import npairs_xy_z
+from ..clustering_helpers import _rp_pi_tpcf_process_args
+from ..tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from ..pair_counters import npairs_xy_z
 
 
 __all__ = ['rp_pi_tpcf']
