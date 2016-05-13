@@ -13,7 +13,7 @@ from .rp_pi_tpcf import *
 from .wp import *
 from .s_mu_tpcf import *
 from .delta_sigma import *
-from .groups import *
+from .group_identification import *
 from .mock_survey import *
 from .angular_tpcf import *
 from .tpcf_multipole import *

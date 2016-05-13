@@ -2,15 +2,14 @@
 Module containing the `~halotools.mock_observables.FoFGroups` class used to 
 identify friends-of-friends groups of points. 
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix
 
-from .pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
+from ..pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
 
-from ..custom_exceptions import HalotoolsError
+from ...custom_exceptions import HalotoolsError
 
 igraph_available=True
 try: 

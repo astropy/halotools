@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+""" Module providing unit-testing for `~halotools.mock_observables.FoFGroups`. 
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-#import packages
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 import numpy as np
-import sys
 from scipy.sparse import coo_matrix
-import pytest 
+from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 igraph_available=True
 try: import igraph
@@ -14,18 +13,20 @@ except ImportError:
     igraph_available=False
     print("igraph package not installed.  Some functions will not be available.")
 
-from ..groups import FoFGroups
+from ..fof_groups import FoFGroups
 
-__all__=['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality']
+__all__ = ['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality']
 
 #set random seed to get consistent behavior
-np.random.seed(1)
-N=1e3
+N = 1e3
 Lbox = np.array([1.0,1.0,1.0])
 period = Lbox
-sample = np.random.random((N,3))
 b_perp = 0.5
 b_para = 0.5
+
+fixed_seed = 43
+with NumpyRNGContext(fixed_seed):
+    sample = np.random.random((N,3))
 
 @pytest.mark.slow
 def test_fof_groups_init():
@@ -63,7 +64,7 @@ def test_igraph_functionality():
     
     fof_group = FoFGroups(sample, b_perp, b_para, Lbox=Lbox, period=period)
     
-    if igraph_available==True:
+    if igraph_available is True:
         
         fof_group.create_graph()
         assert isinstance(fof_group.g,igraph.Graph)
