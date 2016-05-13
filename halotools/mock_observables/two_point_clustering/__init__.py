@@ -6,6 +6,7 @@ galaxy-galaxy lensing `~halotools.mock_observables.delta_sigma`, and more.
 """
 from __future__ import absolute_import 
 
-__all__ = ('angular_tpcf', )
+__all__ = ('angular_tpcf', 'delta_sigma')
 
 from .angular_tpcf import angular_tpcf 
+from .delta_sigma import delta_sigma
