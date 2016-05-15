@@ -6,9 +6,10 @@ import numpy as np
 
 def crossmatch(x, y, skip_bounds_checking = False):
     """
-    Function used to identify elements of an integer array x 
-    that may appear in an integer array y, and return the 
-    indices providing the correspondence. 
+    Function providing the index-correspondence between the 
+    elements of an array x with values that have a match in an array y. 
+    The elements in x may be repeated, but the elements in y must be unique. 
+    The arrays x and y may be only partially overlapping. 
 
     The applications of this function envolve cross-matching 
     two catalogs/data tables which share an objectID. 
@@ -23,8 +24,8 @@ def crossmatch(x, y, skip_bounds_checking = False):
     you can use the `~halotools.utils.crossmatch` function to create new columns 
     storing properties of the associated host. 
 
-    See :ref:`crossmatching_halo_catalogs` for a tutorial on common usage 
-    of this function with a halo catalog. 
+    See :ref:`crossmatching_halo_catalogs` and :ref:`crossmatching_galaxy_catalogs`
+    for tutorials on common usages of this function with halo and galaxy catalogs. 
 
     Parameters 
     ----------
@@ -35,7 +36,10 @@ def crossmatch(x, y, skip_bounds_checking = False):
         Array of unique integers. 
 
     skip_bounds_checking : bool, optional 
-        If set to False, the input y will be 
+        If set to False, the input arrays will be tested for consistency 
+        with the assumptions of the algorithm. If set to True, 
+        testing is bypassed and the function evaluates faster. 
+        Default is False. 
 
     Returns 
     -------
@@ -49,19 +53,18 @@ def crossmatch(x, y, skip_bounds_checking = False):
 
     Examples 
     --------
-    Create a sample of 1e6 random integers between 0 and 1000:
+    Let's create some fake integer data 
+    to demonstrate basic usage of the function:
 
     >>> xmax = 1000
     >>> numx = 1e6
     >>> x = np.random.random_integers(0, xmax, numx)
-    >>> x.sort()
+    >>> y = np.arange(-xmax/2, xmax/2)[::10]
 
-    Randomly select 50 unique integers between 0 and 1000:
+    Note that x may have repeated entries, and that x and y may be 
+    only partially overlapping. 
 
-    >>> y = np.random.choice(xmax+1, 50)
-    >>> y.sort()
-
-    Now find the integers in x for which there are matches in y
+    Now find the integers in x for which there are matches in y:
 
     >>> x_idx, y_idx = crossmatch(x, y)
 
@@ -73,7 +76,9 @@ def crossmatch(x, y, skip_bounds_checking = False):
     See also 
     ---------
     :ref:`crossmatching_halo_catalogs`
-    
+
+    :ref:`crossmatching_galaxy_catalogs`
+
     """
     # Ensure inputs are Numpy arrays
     x = np.atleast_1d(x)

@@ -12,6 +12,8 @@ two different examples of how you can use the
 `~halotools.utils.crossmatch` function to exploit this column to create 
 "value-added" versions of your halo catalogs. 
 
+For a closely related tutorial, see :ref:`crossmatching_galaxy_catalogs`. 
+
 Example 1: Combining information from different halo catalogs 
 =================================================================
 When analyzing halo catalogs, it's a common situation for you to have 
@@ -34,7 +36,9 @@ or generally any structured data table with an object ID.
 
 Now let's add some new column information to ``halo_table2`` 
 and use the `~halotools.utils.crossmatch` function to transfer 
-this information to ``halo_table1``. 
+this information to ``halo_table1``. This function returns the indices 
+providing the correspondence between the rows in the ``halo_table1`` that have 
+matches in the ``halo_table2``. 
 
 >>> import numpy as np
 >>> halo_table2['some_new_column'] = np.random.random(len(halo_table2))
