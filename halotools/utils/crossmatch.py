@@ -6,8 +6,8 @@ import numpy as np
 
 def crossmatch(x, y, skip_bounds_checking = False):
     """
-    Function providing the index-correspondence between the 
-    elements of an integer array x with values that have a match in an integer array y. 
+    Finds where the elements of ``x`` appear in the array ``y``, including repeats. 
+    
     The elements in x may be repeated, but the elements in y must be unique. 
     The arrays x and y may be only partially overlapping. 
 
@@ -56,25 +56,62 @@ def crossmatch(x, y, skip_bounds_checking = False):
 
     Examples 
     --------
-    Let's create some fake integer data 
-    to demonstrate basic usage of the function:
+    Let's create some fake data to demonstrate basic usage of the function. 
+    First, let's suppose we have two tables of objects, ``table1`` and ``table2``. 
+    There are no repeated elements in any table, but these tables only partially overlap. 
+    The example below demonstrates how to transfer column data from ``table2`` 
+    into ``table1`` for the subset of objects that appear in both tables. 
 
-    >>> xmax = 1000
-    >>> numx = 1e6
-    >>> x = np.random.random_integers(0, xmax, numx)
-    >>> y = np.arange(-xmax/2, xmax/2)[::10]
+    >>> num_table1 = 1e6
+    >>> x = np.random.rand(num_table1)
+    >>> objid = np.arange(num_table1)
+    >>> from astropy.table import Table
+    >>> table1 = Table({'x': x, 'objid': objid})
 
-    Note that x has repeated entries, and that x and y are  
-    only partially overlapping. 
+    >>> num_table2 = 1e6
+    >>> objid = np.arange(5e5, num_table2+5e5)
+    >>> y = np.random.rand(num_table2)
+    >>> table2 = Table({'y': y, 'objid': objid})
 
-    Now find the integers in x for which there are matches in y:
+    Note that ``table1`` and ``table2`` only partially overlap. In the code below, 
+    we will initialize a new ``y`` column for ``table1``, and for those rows 
+    with an ``objid`` that appears in both ``table1`` and ``table2``, 
+    we'll transfer the values of ``y`` from ``table2`` to ``table1``. 
 
-    >>> x_idx, y_idx = crossmatch(x, y)
+    >>> idx_table1, idx_table2 = crossmatch(table1['objid'].data, table2['objid'].data)
+    >>> table1['y'] = np.zeros(len(table1), dtype = table2['y'].dtype)
+    >>> table1['y'][idx_table1] = table2['y'][idx_table2]
 
-    The indexing arrays ``x_idx`` and ``y_idx`` are such that 
-    the following assertion always holds true:
+    Now we'll consider a slightly more complicated example in which there 
+    are repeated entries in the input array ``x``. Suppose in this case that 
+    our data ``x`` comes with a natural grouping, for example into those 
+    galaxies that occupy a common halo. If we have a separate table ``y`` that 
+    stores attributes of the group, we may wish to broadcast some group property 
+    such as total group mass amongst all the group members. 
 
-    >>> assert np.all(x[x_idx] == y[y_idx])
+    First create some new dummy data to demonstrate this application of 
+    the `crossmatch` function:
+
+    >>> num_galaxies = 1e6
+    >>> x = np.random.rand(num_galaxies)
+    >>> objid = np.arange(num_galaxies)
+    >>> num_groups = 1e4
+    >>> groupid = np.random.random_integers(0, num_groups-1, num_galaxies)
+    >>> galaxy_table = Table({'x': x, 'objid': objid, 'groupid': groupid})
+
+    >>> groupmass = np.random.rand(num_groups)
+    >>> groupid = np.arange(num_groups)
+    >>> group_table = Table({'groupmass': groupmass, 'groupid': groupid})
+
+    Now we use the `crossmatch` to paint the appropriate value of ``groupmass`` 
+    onto each galaxy:
+
+    >>> idx_galaxies, idx_groups = crossmatch(galaxy_table['groupid'].data, group_table['groupid'].data)
+    >>> galaxy_table['groupmass'] = np.zeros(len(galaxy_table), dtype = group_table['groupmass'].dtype)
+    >>> galaxy_table['groupmass'][idx_galaxies] = group_table['groupmass'][idx_groups]
+
+    See the tutorials for additional demonstrations of alternative 
+    uses of the `crossmatch` function. 
 
     See also 
     ---------
