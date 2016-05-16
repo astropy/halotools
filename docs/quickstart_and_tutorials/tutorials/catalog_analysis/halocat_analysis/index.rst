@@ -19,14 +19,6 @@ straightforward calculation on a halo catalog. By reading through
 these examples, you will gain a working knowledge of all the major functions 
 in the `~halotools.mock_observables` package. 
 
-cross-matching halo catalogs with each other
--------------------------------------------------
-
-.. toctree:: 
-	:maxdepth: 1
-
-	crossmatching_halo_catalogs
-
 halo properties as a function of halo mass
 -------------------------------------------------
 
@@ -34,6 +26,14 @@ halo properties as a function of halo mass
    :maxdepth: 1
 
    basic_examples/halo_catalog_analysis_tutorial1
+
+cross-matching halo catalogs 
+-------------------------------------------------
+
+.. toctree:: 
+	:maxdepth: 1
+
+	crossmatching_halo_catalogs
 
 halo properties as a function of distance from a nearby halo 
 --------------------------------------------------------------

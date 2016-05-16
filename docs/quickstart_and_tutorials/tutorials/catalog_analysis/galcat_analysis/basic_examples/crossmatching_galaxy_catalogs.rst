@@ -13,9 +13,6 @@ only stored in the halo catalog.
 
 For a closely related tutorial, see :ref:`crossmatching_halo_catalogs`. 
 
-Example 1: Creating a value-added galaxy catalog from information in a halo catalog
-=====================================================================================
-
 Let's start out by generating a mock galaxy catalog from a (fake) halo catalog:
 
 >>> from halotools.sim_manager import FakeSim
@@ -25,13 +22,18 @@ Let's start out by generating a mock galaxy catalog from a (fake) halo catalog:
 >>> model.populate_mock(halocat)
 
 The tabular data of mock galaxies is stored in ``model.mock.galaxy_table``, 
-an Astropy `~astropy.table.Table`, and the halo catalog initially passed 
-to the `~halotools.empirical_models.HodMockFactory` is stored in  
-``halocat.halo_table``. All mock galaxy catalogs come with 
+an Astropy `~astropy.table.Table`. All mock galaxy catalogs come with 
 a ``halo_id`` that lets you cross-match the galaxies against the halos they live in 
 using the `~halotools.utils.crossmatch` function. This function returns the indices 
 providing the correspondence between the rows in the ``galaxy_table`` that have 
-matches in the ``halo_table``. 
+matches in the ``halo_table``. You can use this function to transfer any 
+property stored in the halo catalog onto the galaxies in your mock. 
+If you are working with a model you have built yourself, and you know in advance that 
+you would like some particular halo property to always be a part of your ``galaxy_table``, 
+then you can exploit :ref:`list_of_haloprops_needed_mechanism` when building your model. 
+But you can always use the `~halotools.utils.crossmatch` function to perform this task 
+in a post-processing phase, as shown here for the case of adding the ``halo_vmax`` 
+column to the ``galaxy_table``. 
 
 >>> import numpy as np
 >>> from halotools.utils import crossmatch 

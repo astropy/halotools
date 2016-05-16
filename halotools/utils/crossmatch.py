@@ -7,7 +7,7 @@ import numpy as np
 def crossmatch(x, y, skip_bounds_checking = False):
     """
     Function providing the index-correspondence between the 
-    elements of an array x with values that have a match in an array y. 
+    elements of an integer array x with values that have a match in an integer array y. 
     The elements in x may be repeated, but the elements in y must be unique. 
     The arrays x and y may be only partially overlapping. 
 
@@ -36,19 +36,22 @@ def crossmatch(x, y, skip_bounds_checking = False):
         Array of unique integers. 
 
     skip_bounds_checking : bool, optional 
-        If set to False, the input arrays will be tested for consistency 
-        with the assumptions of the algorithm. If set to True, 
-        testing is bypassed and the function evaluates faster. 
+        The first step in the `crossmatch` function is to test that the input 
+        arrays satisfy the assumptions of the algorithm 
+        (namely that ``x`` and ``y`` store integers, 
+        and that all values in ``y`` are unique). 
+        If ``skip_bounds_checking`` is set to True, 
+        this testing is bypassed and the function evaluates faster. 
         Default is False. 
 
     Returns 
     -------
     idx_x : integer array
-        Boolean array used to apply a mask to x 
+        Integer array used to apply a mask to x 
         such that x[idx_x] == y[idx_y] 
 
     y_idx : integer array  
-        Array of integers used to apply a fancy-indexing mask to y 
+        Integer array used to apply a mask to y 
         such that x[idx_x] == y[idx_y] 
 
     Examples 
@@ -61,7 +64,7 @@ def crossmatch(x, y, skip_bounds_checking = False):
     >>> x = np.random.random_integers(0, xmax, numx)
     >>> y = np.arange(-xmax/2, xmax/2)[::10]
 
-    Note that x may have repeated entries, and that x and y may be 
+    Note that x has repeated entries, and that x and y are  
     only partially overlapping. 
 
     Now find the integers in x for which there are matches in y:
