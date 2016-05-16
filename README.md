@@ -13,14 +13,14 @@ The code is publicly available at https://github.com/astropy/halotools.
 
 ## Documentation
 
-The latest build of the documentation can be found at http://halotools.readthedocs.org. The documentation includes installation instructions, quickstart guides and step-by-step tutorials. The *Basic features* section below gives an overview of the primary functionality of the package. 
+The latest build of the documentation can be found at http://halotools.readthedocs.io. The documentation includes installation instructions, quickstart guides and step-by-step tutorials. The *Basic features* section below gives an overview of the primary functionality of the package. 
 
 ---
 
 ## Installation 
 
 You can find detailed installation instructions 
-in the *Package Installation* section of halotools.readthedocs.org. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations. 
+in the *Package Installation* section of halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations. 
 
 ---
 

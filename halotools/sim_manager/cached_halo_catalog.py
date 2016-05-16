@@ -351,7 +351,7 @@ class CachedHaloCatalog(object):
         if len(ptcl_table_cache.log) == 0:
             msg = ("\nThe Halotools cache log has no record of any particle catalogs.\n"
                 "If you have never used Halotools before, "
-                "you should read the Getting Started guide on halotools.readthedocs.org.\n"
+                "you should read the Getting Started guide on halotools.readthedocs.io.\n"
                 "If you have previously used the package before, \n"
                 "try running the halotools/scripts/rebuild_ptcl_table_cache_log.py script.\n")
             raise HalotoolsError(msg)
@@ -429,7 +429,7 @@ class CachedHaloCatalog(object):
         if len(self.halo_table_cache.log) == 0:
             msg = ("\nThe Halotools cache log is empty.\n"
                 "If you have never used Halotools before, "
-                "you should read the Getting Started guide on halotools.readthedocs.org.\n"
+                "you should read the Getting Started guide on halotools.readthedocs.io.\n"
                 "If you have previously used the package before, \n"
                 "try running the halotools/scripts/rebuild_halo_table_cache_log.py script.\n")
             raise HalotoolsError(msg)
