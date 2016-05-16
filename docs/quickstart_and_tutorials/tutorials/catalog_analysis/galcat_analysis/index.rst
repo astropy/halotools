@@ -20,6 +20,14 @@ straightforward calculation on a mock galaxy catalog. By reading through
 these examples, you will gain a working knowledge of all the major functions 
 in the `~halotools.mock_observables` package. 
 
+cross-matching galaxy and halo catalogs 
+-------------------------------------------------
+
+.. toctree:: 
+   :maxdepth: 1
+
+   basic_examples/crossmatching_galaxy_catalogs
+
 galaxy properties as a function of halo mass
 -------------------------------------------------
 

@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+""" Module providing unit-testing for `~halotools.utils.value_added_halo_table_functions`. 
+"""
+
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
@@ -12,6 +14,7 @@ from astropy.tests.helper import pytest
 from astropy.extern.six.moves import xrange as range
 
 from ..value_added_halo_table_functions import broadcast_host_halo_property, add_halo_hostid
+from ..crossmatch import crossmatch 
 
 from ...sim_manager import FakeSim
 
@@ -38,6 +41,13 @@ class TestValueAddedHaloTableFunctions(TestCase):
         hostmask = t['halo_hostid'] == t['halo_id']
         assert np.all(t['halo_mvir_host_halo'][hostmask] == t['halo_mvir'][hostmask])
         assert np.any(t['halo_mvir_host_halo'][~hostmask] != t['halo_mvir'][~hostmask])
+
+        # Verify that both the group_member_generator method and the 
+        # crossmatch method give identical results for calculation of host halo mass
+        idx_table1, idx_table2 = crossmatch(t['halo_hostid'], t['halo_id'])
+        t['tmp'] = np.zeros(len(t), dtype = t['halo_mvir'].dtype)
+        t['tmp'][idx_table1] = t['halo_mvir'][idx_table2]
+        assert np.all(t['tmp'] == t['halo_mvir_host_halo'])
 
         data = Counter(t['halo_hostid'])
         frequency_analysis = data.most_common()

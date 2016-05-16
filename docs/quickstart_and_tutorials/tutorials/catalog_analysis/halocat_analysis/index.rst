@@ -27,6 +27,14 @@ halo properties as a function of halo mass
 
    basic_examples/halo_catalog_analysis_tutorial1
 
+cross-matching halo catalogs 
+-------------------------------------------------
+
+.. toctree:: 
+	:maxdepth: 1
+
+	crossmatching_halo_catalogs
+
 halo properties as a function of distance from a nearby halo 
 --------------------------------------------------------------
 
