@@ -130,8 +130,9 @@ def get_separation_bins_array(separation_bins):
     """ Function verifies that the input ``separation_bins`` is a monotonically increasing 
     1d Numpy array with at least two entries, all of which are required to be strictly positive. 
 
-    This helper function can be used equally well with 3d separation bins ``rbins``, 
-    2d projected separation bins ``rp_bins``, or 1d line-of-sight bins ``pi_bins``. 
+    This helper function can be used equally well with 3d separation bins ``rbins`` or 
+    2d projected separation bins ``rp_bins``.
+
     """
     separation_bins = np.atleast_1d(separation_bins)
     
@@ -148,6 +149,25 @@ def get_separation_bins_array(separation_bins):
 
     return separation_bins
 
+def get_line_of_sight_bins_array(pi_bins):
+    """ Function verifies that the input ``pi_bins`` is a monotonically increasing 
+    1d Numpy array with at least two entries. The  `get_line_of_sight_bins_array` function differs from 
+    the `get_separation_bins_array` function only in that values of zero are permissible. 
+
+    """
+    pi_bins = np.atleast_1d(pi_bins)
+    
+    try:
+        assert pi_bins.ndim == 1
+        assert len(pi_bins) > 1
+        if len(pi_bins) > 2:
+            assert array_is_monotonic(pi_bins, strict = True) == 1
+    except AssertionError:
+        msg = ("\n Input separation bins must be a monotonically increasing \n"
+               "1-D array with at least two entries.\n")
+        raise TypeError(msg)
+
+    return pi_bins
 
 
 

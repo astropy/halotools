@@ -1,0 +1,8 @@
+""" This subpackage contains modules that identify groups of galaxies 
+from mock data. 
+"""
+from __future__ import absolute_import 
+
+__all__ = ('FoFGroups', )
+
+from .fof_groups import FoFGroups

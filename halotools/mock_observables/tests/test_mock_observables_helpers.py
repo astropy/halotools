@@ -9,6 +9,7 @@ import multiprocessing
 
 from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 from ..mock_observables_helpers import enforce_sample_has_correct_shape, get_separation_bins_array
+from ..mock_observables_helpers import get_line_of_sight_bins_array 
 
 __all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads', 
     'test_get_period')
@@ -121,6 +122,29 @@ def test_get_separation_bins_array():
     substr = "Input separation bins must be a monotonically increasing "
     assert substr in err.value.args[0]
 
+def test_get_line_of_sight_bins_array():
+
+    good_pi_bins = [1,2]
+    _ = get_line_of_sight_bins_array(good_pi_bins)
+
+    good_pi_bins = np.linspace(1, 2, 10)
+    _ = get_line_of_sight_bins_array(good_pi_bins)
+
+    # Note that a zero-value in pi_bins is currently permissible
+    good_pi_bins = [0, 1, 2]
+    _ = get_line_of_sight_bins_array(good_pi_bins)
+
+    bad_pi_bins = [1, 0.5, 0.1]
+    with pytest.raises(TypeError) as err:
+        _ = get_line_of_sight_bins_array(bad_pi_bins)
+    substr = "Input separation bins must be a monotonically increasing "
+    assert substr in err.value.args[0]
+
+    bad_pi_bins = [1, 2, 2, 4]
+    with pytest.raises(TypeError) as err:
+        _ = get_line_of_sight_bins_array(bad_pi_bins)
+    substr = "Input separation bins must be a monotonically increasing "
+    assert substr in err.value.args[0]
 
 
 
