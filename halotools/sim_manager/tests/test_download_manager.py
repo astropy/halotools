@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-
+""" Module providing unit-testing for `~halotools.sim_manager.DownloadManager`. 
+"""
 
 import os
 import shutil
@@ -121,17 +121,17 @@ class TestDownloadManager(TestCase):
 
         file_list = self.downman._ptcl_tables_available_for_download(simname='bolshoi')
         assert len(file_list) == 1
-        assert 'hlist_1.00035.particles.hdf5' == os.path.basename(file_list[0])
+        assert 'hlist_1.00035.particles.halotools_alpha_version1.hdf5' == os.path.basename(file_list[0])
 
         file_list = self.downman._ptcl_tables_available_for_download(simname='multidark')
         assert len(file_list) == 1
-        assert 'hlist_1.00109.particles.hdf5' == os.path.basename(file_list[0])
+        assert 'hlist_1.00109.particles.halotools_alpha_version1.hdf5' == os.path.basename(file_list[0])
 
         consuelo_set = set(
-            ['hlist_0.33324.particles.hdf5', 
-            'hlist_0.50648.particles.hdf5',
-            'hlist_0.67540.particles.hdf5', 
-            'hlist_1.00000.particles.hdf5']
+            ['hlist_0.33324.particles.halotools_alpha_version1.hdf5', 
+            'hlist_0.50648.particles.halotools_alpha_version1.hdf5',
+            'hlist_0.67540.particles.halotools_alpha_version1.hdf5', 
+            'hlist_1.00000.particles.halotools_alpha_version1.hdf5']
             )
         file_list = self.downman._ptcl_tables_available_for_download(simname='consuelo')
         assert len(file_list) == 4
@@ -139,10 +139,10 @@ class TestDownloadManager(TestCase):
         assert file_set == consuelo_set
 
         bolplanck_set = set(
-            ['hlist_0.33406.particles.hdf5', 
-            'hlist_0.50112.particles.hdf5',
-            'hlist_0.66818.particles.hdf5', 
-            'hlist_1.00231.particles.hdf5']
+            ['hlist_0.33406.particles.halotools_alpha_version1.hdf5', 
+            'hlist_0.50112.particles.halotools_alpha_version1.hdf5',
+            'hlist_0.66818.particles.halotools_alpha_version1.hdf5', 
+            'hlist_1.00231.particles.halotools_alpha_version1.hdf5']
             )
         file_list = self.downman._ptcl_tables_available_for_download(simname='bolplanck')
         assert len(file_list) == 4
