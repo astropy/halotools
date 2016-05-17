@@ -10,11 +10,19 @@ import numpy as np
 from math import gamma
 from warnings import warn
 
-from .clustering_helpers import _tpcf_one_two_halo_decomp_process_args
+from .clustering_helpers import (process_optional_input_sample2, 
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
+    tpcf_estimator_dd_dr_rr_requirements)
+
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_period, get_num_threads)
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_3d
 from ..pair_counters import marked_npairs_3d
 
+from ...custom_exceptions import HalotoolsError
 
 __all__=['tpcf_one_two_halo_decomp']
 __author__ = ['Duncan Campbell']
@@ -188,131 +196,16 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     """
     
     #check input arguments using clustering helper functions
-    function_args = [sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
-                     randoms, period, do_auto, do_cross, estimator, num_threads,
-                     max_sample_size, approx_cell1_size, approx_cell2_size,
-                     approx_cellran_size]
+    function_args = (sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
+        randoms, period, do_auto, do_cross, estimator, num_threads,
+        max_sample_size, approx_cell1_size, approx_cell2_size, approx_cellran_size)
     
     #pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,\
     do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =\
     _tpcf_one_two_halo_decomp_process_args(*function_args)
     
-    
-    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
-        do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
-        approx_cell2_size , approx_cellran_size):
-        """
-        Count random pairs.  There are two high level branches:
-            1. w/ or wo/ PBCs and randoms.
-            2. PBCs and analytical randoms
-        There are also logical bits to do RR and DR pair counts, as not all estimators
-        need one or the other, and not doing these can save a lot of calculation.
-        
-        Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
-        shells, which is the correct volume to use for a continious cubic volume with PBCs
-        """
-        def nball_volume(R,k=3):
-            """
-            Calculate the volume of a n-shpere.
-            This is used for the analytical randoms.
-            """
-            return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
-        
-        #randoms provided, so calculate random pair counts.
-        if randoms is not None:
-            if do_RR is True:
-                RR = npairs_3d(randoms, randoms, rbins, period=period,
-                            num_threads=num_threads,
-                            approx_cell1_size=approx_cellran_size,
-                            approx_cell2_size=approx_cellran_size)
-                RR = np.diff(RR)
-            else: RR=None
-            if do_DR is True:
-                D1R = npairs_3d(sample1, randoms, rbins, period=period,
-                             num_threads=num_threads,
-                             approx_cell1_size=approx_cell1_size,
-                             approx_cell2_size=approx_cellran_size
-                             )
-                D1R = np.diff(D1R)
-            else: D1R=None
-            if _sample1_is_sample2:
-                D2R = None
-            else:
-                if do_DR is True:
-                    D2R = npairs_3d(sample2, randoms, rbins, period=period,
-                                 num_threads=num_threads,
-                                 approx_cell1_size=approx_cell2_size,
-                                 approx_cell2_size=approx_cellran_size)
-                    D2R = np.diff(D2R)
-                else: D2R=None
-            
-            return D1R, D2R, RR
-        #PBCs and no randoms--calculate randoms analytically.
-        elif randoms is None:
-            #set the number of randoms equal to the number of points in sample1
-            NR = len(sample1)
-            
-            #do volume calculations
-            v = nball_volume(rbins) #volume of spheres
-            dv = np.diff(v) #volume of shells
-            global_volume = period.prod() #volume of simulation
-            
-            #calculate randoms for sample1
-            N1 = np.shape(sample1)[0] #number of points in sample1
-            rho1 = N1/global_volume #number density of points
-            D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
-            
-            #calculate randoms for sample2
-            N2 = np.shape(sample2)[0] #number of points in sample2
-            rho2 = N2/global_volume #number density of points
-            D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
-            
-            #calculate the random-random pairs.
-            rhor = (NR**2)/global_volume
-            RR = (dv*rhor)
-            
-            return D1R, D2R, RR
-    
-    
-    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
-        """
-        Count weighted data pairs.
-        """
-        
-        #add ones to weights, so returned value is return 1.0*1.0
-        marks1 = np.vstack((marks1,np.ones(len(marks1)))).T
-        marks2 = np.vstack((marks2,np.ones(len(marks2)))).T
-        
-        if do_auto is True:
-            D1D1 = marked_npairs_3d(sample1, sample1, rbins,
-                weights1=marks1, weights2=marks1,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-            D1D1 = np.diff(D1D1)
-        else:
-            D1D1=None
-            D2D2=None
-        
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross is True:
-                D1D2 = marked_npairs_3d(sample1, sample2, rbins,
-                    weights1=marks1, weights2=marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-                D1D2 = np.diff(D1D2)
-            else: D1D2=None
-            if do_auto is True:
-                D2D2 = marked_npairs_3d(sample2, sample2, rbins,
-                    weights1=marks2, weights2=marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-                D2D2 = np.diff(D2D2)
-            else: D2D2=None
-        
-        return D1D1, D1D2, D2D2
-    
+     
     #What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
@@ -328,15 +221,15 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     
     #calculate 1-halo pairs
     weight_func_id=3
-    one_halo_D1D1,one_halo_D1D2, one_halo_D2D2 =\
-        marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+    one_halo_D1D1,one_halo_D1D2, one_halo_D2D2 = marked_pair_counts(
+        sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
             sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
     
     #calculate 2-halo pairs 
     weight_func_id=4
-    two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 =\
-        marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+    two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 = marked_pair_counts(
+        sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
             sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
     
@@ -387,5 +280,187 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             two_halo_xi_22 = _TP_estimator(two_halo_D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_22, two_halo_xi_22
+
+   
+def nball_volume(R,k=3):
+    """
+    Calculate the volume of a n-shpere.
+    This is used for the analytical randoms.
+    """
+    return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
+
+def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
+    do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
+    approx_cell2_size , approx_cellran_size):
+    """
+    Count random pairs.  There are two high level branches:
+        1. w/ or wo/ PBCs and randoms.
+        2. PBCs and analytical randoms
+    There are also logical bits to do RR and DR pair counts, as not all estimators
+    need one or the other, and not doing these can save a lot of calculation.
+    
+    Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
+    shells, which is the correct volume to use for a continious cubic volume with PBCs
+    """
+    
+    #randoms provided, so calculate random pair counts.
+    if randoms is not None:
+        if do_RR is True:
+            RR = npairs_3d(randoms, randoms, rbins, period=period,
+                        num_threads=num_threads,
+                        approx_cell1_size=approx_cellran_size,
+                        approx_cell2_size=approx_cellran_size)
+            RR = np.diff(RR)
+        else: RR=None
+        if do_DR is True:
+            D1R = npairs_3d(sample1, randoms, rbins, period=period,
+                         num_threads=num_threads,
+                         approx_cell1_size=approx_cell1_size,
+                         approx_cell2_size=approx_cellran_size
+                         )
+            D1R = np.diff(D1R)
+        else: D1R=None
+        if _sample1_is_sample2:
+            D2R = None
+        else:
+            if do_DR is True:
+                D2R = npairs_3d(sample2, randoms, rbins, period=period,
+                             num_threads=num_threads,
+                             approx_cell1_size=approx_cell2_size,
+                             approx_cell2_size=approx_cellran_size)
+                D2R = np.diff(D2R)
+            else: D2R=None
+        
+        return D1R, D2R, RR
+    #PBCs and no randoms--calculate randoms analytically.
+    elif randoms is None:
+        #set the number of randoms equal to the number of points in sample1
+        NR = len(sample1)
+        
+        #do volume calculations
+        v = nball_volume(rbins) #volume of spheres
+        dv = np.diff(v) #volume of shells
+        global_volume = period.prod() #volume of simulation
+        
+        #calculate randoms for sample1
+        N1 = np.shape(sample1)[0] #number of points in sample1
+        rho1 = N1/global_volume #number density of points
+        D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
+        
+        #calculate randoms for sample2
+        N2 = np.shape(sample2)[0] #number of points in sample2
+        rho2 = N2/global_volume #number density of points
+        D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
+        
+        #calculate the random-random pairs.
+        rhor = (NR**2)/global_volume
+        RR = (dv*rhor)
+        
+        return D1R, D2R, RR
+    
+def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+    do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
+    """
+    Count weighted data pairs.
+    """
+    
+    #add ones to weights, so returned value is return 1.0*1.0
+    marks1 = np.vstack((marks1,np.ones(len(marks1)))).T
+    marks2 = np.vstack((marks2,np.ones(len(marks2)))).T
+    
+    if do_auto is True:
+        D1D1 = marked_npairs_3d(sample1, sample1, rbins,
+            weights1=marks1, weights2=marks1,
+            weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+        D1D1 = np.diff(D1D1)
+    else:
+        D1D1=None
+        D2D2=None
+    
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross is True:
+            D1D2 = marked_npairs_3d(sample1, sample2, rbins,
+                weights1=marks1, weights2=marks2,
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            D1D2 = np.diff(D1D2)
+        else: D1D2=None
+        if do_auto is True:
+            D2D2 = marked_npairs_3d(sample2, sample2, rbins,
+                weights1=marks2, weights2=marks2,
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            D2D2 = np.diff(D2D2)
+        else: D2D2=None
+    
+    return D1D1, D1D2, D2D2
+
+
+
+
+def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
+    sample2, sample2_host_halo_id, randoms,
+    period, do_auto, do_cross, estimator,num_threads, max_sample_size, 
+    approx_cell1_size, approx_cell2_size,approx_cellran_size):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.tpcf_one_two_halo_decomp`. 
+    """
+    
+    sample1 = enforce_sample_has_correct_shape(sample1)
+    sample1_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype(np.int64)
+
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross)        
+    if _sample1_is_sample2 is True:
+        sample2_host_halo_id = sample1_host_halo_id
+    else:
+        if sample2_host_halo_id is None:
+            msg = ("If passing an input ``sample2``, must also pass sample2_host_halo_id")
+            raise ValueError(msg)
+        else:
+            sample2_host_halo_id = np.atleast_1d(sample2_host_halo_id).astype(np.int64)
+
+    if randoms is not None: 
+        randoms = np.atleast_1d(randoms)
+        
+    #test to see if halo ids are the same length as samples
+    if np.shape(sample1_host_halo_id) != (len(sample1),):
+        msg = ("\n `sample1_host_halo_id` must be a 1-D \n"
+               "array the same length as `sample1`.")
+        raise HalotoolsError(msg)
+    if np.shape(sample2_host_halo_id) != (len(sample2),):
+        msg = ("\n `sample2_host_halo_id` must be a 1-D \n"
+               "array the same length as `sample2`.")
+        raise HalotoolsError(msg)
+    
+    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
+        sample1, sample2, _sample1_is_sample2, max_sample_size)
+   
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.max(rbins)
+        
+    period, PBCs = get_period(period)
+
+    _enforce_maximum_search_length(rmax, period)
+        
+    if (randoms is None) & (PBCs is False):
+        msg = ('\n If no PBCs are specified, randoms must be provided.')
+        raise HalotoolsError(msg)
+    
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
+    
+    num_threads = get_num_threads(num_threads)
+
+    verify_tpcf_estimator(estimator)
+    
+    return sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,\
+        randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
 

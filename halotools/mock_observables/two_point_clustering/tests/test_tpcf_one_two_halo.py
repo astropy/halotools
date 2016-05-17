@@ -1,4 +1,5 @@
-""" Module providing unit-testing for the `~halotools.mock_observables.tpcf_one_two_halo_decomp` function. 
+""" Module providing unit-testing for the 
+`~halotools.mock_observables.tpcf_one_two_halo_decomp` function. 
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -14,7 +15,7 @@ __all__=['test_tpcf_one_two_halo_auto_periodic', 'test_tpcf_one_two_halo_cross_p
 
 #create toy data to test functions
 period = np.array([1.0,1.0,1.0])
-rbins = np.linspace(0,0.3,5)
+rbins = np.linspace(0.001,0.3,5)
 rmax = rbins.max()
 
 fixed_seed = 43
