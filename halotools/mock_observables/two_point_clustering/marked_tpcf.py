@@ -7,8 +7,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from .clustering_helpers import _marked_tpcf_process_args
+from .clustering_helpers import (process_optional_input_sample2, 
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
+    tpcf_estimator_dd_dr_rr_requirements)
+
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
+    get_separation_bins_array, get_period, get_num_threads)
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+
 from ..pair_counters import npairs_3d, marked_npairs_3d
+
+from ...custom_exceptions import HalotoolsError
 
 
 __all__ = ['marked_tpcf']
@@ -302,120 +311,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
         weight_func_id, normalize_by, _sample1_is_sample2, PBCs,\
         randomize_marks = _marked_tpcf_process_args(*function_args)
     
-    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
-        """
-        Count weighted data pairs.
-        """
-        
-        if do_auto is True:
-            D1D1 = marked_npairs_3d(sample1, sample1, rbins,
-                weights1=marks1, weights2=marks1,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-            D1D1 = np.diff(D1D1)
-        else:
-            D1D1=None
-            D2D2=None
-        
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross is True:
-                D1D2 = marked_npairs_3d(sample1, sample2, rbins,
-                    weights1=marks1, weights2=marks2, weight_func_id = weight_func_id,
-                    period=period, num_threads=num_threads)
-                D1D2 = np.diff(D1D2)
-            else: D1D2=None
-            if do_auto is True:
-                D2D2 = marked_npairs_3d(sample2, sample2, rbins,
-                    weights1=marks2, weights2=marks2, weight_func_id = weight_func_id,
-                    period=period, num_threads=num_threads)
-                D2D2 = np.diff(D2D2)
-            else: D2D2=None
-
-        return D1D1, D1D2, D2D2
-    
-    def random_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, weight_func_id,
-        _sample1_is_sample2, permutate1, permutate2, randomize_marks):
-        """
-        Count random weighted data pairs.
-        """
-        
-        permuted_marks1 = marks1
-        permuted_marks2 = marks2
-        for i in range(marks1.shape[1]):
-            if randomize_marks[i]:
-                permuted_marks1[:,i] = marks1[permutate1,i]
-        for i in range(marks2.shape[1]):
-            if randomize_marks[i]:
-                permuted_marks2[:,i] = marks2[permutate2,i]
-        
-        if do_auto is True:
-            R1R1 = marked_npairs_3d(sample1, sample1, rbins,
-                weights1=marks1, weights2=permuted_marks1,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-            R1R1 = np.diff(R1R1)
-        else:
-            R1R1=None
-            R2R2=None
-        
-        if _sample1_is_sample2:
-            R1R2 = R1R1
-            R2R2 = R1R1
-        else:
-            if do_cross is True:
-                R1R2 = marked_npairs_3d(sample1, sample2, rbins,
-                    weights1=permuted_marks1,
-                    weights2=permuted_marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-                R1R2 = np.diff(R1R2)
-            else: R1R2=None
-            if do_auto is True:
-                R2R2 = marked_npairs_3d(sample2, sample2, rbins,
-                    weights1=marks2, weights2=permuted_marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads)
-                R2R2 = np.diff(R2R2)
-            else: R2R2=None
-
-        return R1R1, R1R2, R2R2
-    
-    def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross,
-        _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
-        """
-        Count data-data pairs.
-        """
-        if do_auto is True:
-            D1D1 = npairs_3d(sample1, sample1, rbins, period=period, num_threads=num_threads,
-                          approx_cell1_size=approx_cell1_size,
-                          approx_cell2_size=approx_cell1_size)
-            D1D1 = np.diff(D1D1)
-        else:
-            D1D1=None
-            D2D2=None
-        
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross is True:
-                D1D2 = npairs_3d(sample1, sample2, rbins, period=period,
-                              num_threads=num_threads,
-                              approx_cell1_size=approx_cell1_size,
-                              approx_cell2_size=approx_cell2_size)
-                D1D2 = np.diff(D1D2)
-            else: D1D2=None
-            if do_auto is True:
-                D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
-                              num_threads=num_threads,
-                              approx_cell1_size=approx_cell2_size,
-                              approx_cell2_size=approx_cell2_size)
-                D2D2 = np.diff(D2D2)
-            else: D2D2=None
-        
-        return D1D1, D1D2, D2D2
-    
     #calculate marked pairs
     W1W1,W1W2,W2W2 = marked_pair_counts(sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,_sample1_is_sample2)
@@ -475,4 +370,225 @@ def marked_tpcf(sample1, rbins, sample2=None,
             M_22 = W2W2/R2R2 
             return M_11, M_22
 
+def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
+    do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
+    """
+    Count weighted data pairs.
+    """
+    
+    if do_auto is True:
+        D1D1 = marked_npairs_3d(sample1, sample1, rbins,
+            weights1=marks1, weights2=marks1,
+            weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+        D1D1 = np.diff(D1D1)
+    else:
+        D1D1=None
+        D2D2=None
+    
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross is True:
+            D1D2 = marked_npairs_3d(sample1, sample2, rbins,
+                weights1=marks1, weights2=marks2, weight_func_id = weight_func_id,
+                period=period, num_threads=num_threads)
+            D1D2 = np.diff(D1D2)
+        else: D1D2=None
+        if do_auto is True:
+            D2D2 = marked_npairs_3d(sample2, sample2, rbins,
+                weights1=marks2, weights2=marks2, weight_func_id = weight_func_id,
+                period=period, num_threads=num_threads)
+            D2D2 = np.diff(D2D2)
+        else: D2D2=None
+
+    return D1D1, D1D2, D2D2
+
+def random_counts(sample1, sample2, rbins, period, num_threads,
+    do_auto, do_cross, marks1, marks2, weight_func_id,
+    _sample1_is_sample2, permutate1, permutate2, randomize_marks):
+    """
+    Count random weighted data pairs.
+    """
+    
+    permuted_marks1 = marks1
+    permuted_marks2 = marks2
+    for i in range(marks1.shape[1]):
+        if randomize_marks[i]:
+            permuted_marks1[:,i] = marks1[permutate1,i]
+    for i in range(marks2.shape[1]):
+        if randomize_marks[i]:
+            permuted_marks2[:,i] = marks2[permutate2,i]
+    
+    if do_auto is True:
+        R1R1 = marked_npairs_3d(sample1, sample1, rbins,
+            weights1=marks1, weights2=permuted_marks1,
+            weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+        R1R1 = np.diff(R1R1)
+    else:
+        R1R1=None
+        R2R2=None
+    
+    if _sample1_is_sample2:
+        R1R2 = R1R1
+        R2R2 = R1R1
+    else:
+        if do_cross is True:
+            R1R2 = marked_npairs_3d(sample1, sample2, rbins,
+                weights1=permuted_marks1,
+                weights2=permuted_marks2,
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            R1R2 = np.diff(R1R2)
+        else: R1R2=None
+        if do_auto is True:
+            R2R2 = marked_npairs_3d(sample2, sample2, rbins,
+                weights1=marks2, weights2=permuted_marks2,
+                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            R2R2 = np.diff(R2R2)
+        else: R2R2=None
+
+    return R1R1, R1R2, R2R2
+
+def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
+    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+    """
+    Count data-data pairs.
+    """
+    if do_auto is True:
+        D1D1 = npairs_3d(sample1, sample1, rbins, period=period, num_threads=num_threads,
+                      approx_cell1_size=approx_cell1_size,
+                      approx_cell2_size=approx_cell1_size)
+        D1D1 = np.diff(D1D1)
+    else:
+        D1D1=None
+        D2D2=None
+    
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross is True:
+            D1D2 = npairs_3d(sample1, sample2, rbins, period=period,
+                          num_threads=num_threads,
+                          approx_cell1_size=approx_cell1_size,
+                          approx_cell2_size=approx_cell2_size)
+            D1D2 = np.diff(D1D2)
+        else: D1D2=None
+        if do_auto is True:
+            D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
+                          num_threads=num_threads,
+                          approx_cell1_size=approx_cell2_size,
+                          approx_cell2_size=approx_cell2_size)
+            D2D2 = np.diff(D2D2)
+        else: D2D2=None
+    
+    return D1D1, D1D2, D2D2
+
+
+
+def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
+    period, do_auto, do_cross, num_threads, max_sample_size, 
+    wfunc, normalize_by, iterations, randomize_marks):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.marked_tpcf`. 
+    """
+    
+    sample1 = enforce_sample_has_correct_shape(sample1)
+    
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross)
+
+    #process wfunc parameter
+    try:
+        int(wfunc) == wfunc
+    except:
+        msg = ("\n `wfunc` parameter must be an integer ID of the desired function.")
+        raise ValueError(msg)
+
+    #process normalize_by parameter
+    if normalize_by not in ['random_marks','number_counts']:
+        msg = ("\n `normalize_by` parameter not recognized.")
+        raise ValueError(msg)
+
+    #process marks
+    if marks1 is not None: 
+        marks1 = np.atleast_1d(marks1).astype(float)
+    else:
+        marks1 = np.ones(len(sample1)).astype(float)
+    if marks2 is not None: 
+        marks2 = np.atleast_1d(marks2).astype(float)
+    else:
+        marks2 = np.ones(len(sample2)).astype(float)
+        
+    if marks1.ndim == 1:
+        npts1 = len(marks1)
+        marks1 = marks1.reshape((npts1, 1))
+    elif marks1.ndim == 2:
+        pass
+    else:
+        ndim1 = marks1.ndim
+        msg = ("\n You must either pass in a 1-D or 2-D array \n"
+               "for the input `marks1`. \n"
+               "The `pair_counters._wnpairs_process_weights` function received \n"
+               "a `marks1` array of dimension %i")
+        raise HalotoolsError(msg % ndim1)
+    
+    if marks2.ndim == 1:
+        npts2 = len(marks2)
+        marks2 = marks2.reshape((npts2, 1))
+    elif marks2.ndim == 2:
+        pass
+    else:
+        ndim2 = marks2.ndim
+        msg = ("\n You must either pass in a 1-D or 2-D array \n"
+               "for the input `marks2`. \n"
+               "The `pair_counters._wnpairs_process_weights` function received \n"
+               "a `marks2` array of dimension %i")
+        raise HalotoolsError(msg % ndim2)
+    
+    #check for consistency between marks and samples
+    if len(marks1) != len(sample1):
+        msg = ("\n `marks1` must have same length as `sample1`.")
+        raise HalotoolsError(msg)
+    if len(marks2) != len(marks2):
+        msg = ("\n `marks2` must have same length as `sample2`.")
+        raise HalotoolsError(msg)
+    
+    if randomize_marks is not None: 
+        randomize_marks = np.atleast_1d(randomize_marks)
+    else:
+        randomize_marks = np.array([True]*marks1.shape[1])
+    
+    if randomize_marks.ndim == 1:
+        if len(randomize_marks)!=marks1.shape[1]:
+            msg = ("\n `randomize_marks` must have same length \n"
+                   " as the number of weights per point.")
+            raise HalotoolsError(msg)
+    else:
+        msg = ("\n `randomize_marks` must be one dimensional.")
+        raise HalotoolsError(msg)
+    
+    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
+        sample1, sample2, _sample1_is_sample2, max_sample_size)
+
+
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.amax(rbins)
+
+    period, PBCs = get_period(period)
+
+    _enforce_maximum_search_length(rmax, period)
+
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
+    
+    num_threads = get_num_threads(num_threads)
+        
+    return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
+           num_threads, wfunc, normalize_by, _sample1_is_sample2, PBCs, randomize_marks
 

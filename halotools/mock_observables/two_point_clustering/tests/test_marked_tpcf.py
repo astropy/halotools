@@ -10,14 +10,8 @@ from astropy.tests.helper import pytest
 slow = pytest.mark.slow
 from astropy.utils.misc import NumpyRNGContext
 
+fixed_seed = 43
 
-#create toy data to test functions
-N_pts = 100
-sample1 = np.random.random((N_pts,3))
-sample2 = np.random.random((N_pts,3))
-period = np.array([1.0,1.0,1.0])
-rbins = np.linspace(0,0.3,5)
-rmax = rbins.max()
 
 __all__ = ('test_marked_tpcf_auto_periodic', 
     'test_marked_tpcf_auto_nonperiodic', 
@@ -27,9 +21,15 @@ def test_marked_tpcf_auto_periodic():
     """
     test marked_tpcf auto correlation with periodic boundary conditions
     """
-    
+    Npts = 100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+
+    rbins = np.linspace(0.001, 0.25, 5)
+    period = 1
+
     weight_func_id = 1
-    weights1 = np.random.random(N_pts)
+    weights1 = np.random.random(Npts)
     
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
@@ -42,9 +42,14 @@ def test_marked_tpcf_auto_nonperiodic():
     """
     test marked_tpcf auto correlation without periodic boundary conditions
     """
-    
+    Npts = 100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+
+    rbins = np.linspace(0.001, 0.25, 5)
+
     weight_func_id = 1
-    weights1 = np.random.random(N_pts)
+    weights1 = np.random.random(Npts)
     
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
@@ -55,8 +60,16 @@ def test_marked_tpcf_auto_nonperiodic():
 def test_marked_tpcf_cross1():
     """
     """
-    weights1 = np.random.random(N_pts)
-    weights2 = np.random.random(N_pts)
+    Npts = 100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
+
+    rbins = np.linspace(0.001, 0.25, 5)
+    period = 1
+
+    weights1 = np.random.random(Npts)
+    weights2 = np.random.random(Npts)
     weight_func_id = 1
 
     result = marked_tpcf(sample1, rbins, sample2=sample2, 
@@ -66,8 +79,16 @@ def test_marked_tpcf_cross1():
 def test_marked_tpcf_cross_consistency():
     """
     """
-    weights1 = np.random.random(N_pts)
-    weights2 = np.random.random(N_pts)
+    Npts = 100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
+
+    rbins = np.linspace(0.001, 0.25, 5)
+    period = 1
+
+    weights1 = np.random.random(Npts)
+    weights2 = np.random.random(Npts)
     weight_func_id = 1
 
     cross_mark1 = marked_tpcf(sample1, rbins, sample2=sample2, 
