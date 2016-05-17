@@ -202,113 +202,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
-    
-    def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
-            PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-            approx_cell1_size, approx_cell2_size, approx_cellran_size):
-        """
-        Count random pairs.  There are two high level branches:
-            1. w/ or wo/ PBCs and randoms.
-            2. PBCs and analytical randoms
-        There are also logical bits to do RR and DR pair counts, as not all estimators
-        need one or the other, and not doing these can save a lot of calculation.
         
-        Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
-        shells, which is the correct volume to use for a continious cubic volume with PBCs
-        """
-        
-        def cylinder_volume(R,h):
-            """
-            Calculate the volume of a cylinder(s), used for the analytical randoms.
-            """
-            return pi*np.outer(R**2.0,h)
-        
-        #No PBCs, randoms must have been provided.
-        if randoms is not None:
-            if do_RR is True:
-                RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins, 
-                    period=period,num_threads=num_threads,
-                    approx_cell1_size=approx_cellran_size,
-                    approx_cell2_size=approx_cellran_size)
-                RR = np.diff(np.diff(RR,axis=0),axis=1)
-            else: RR=None
-            if do_DR is True:
-                D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins, 
-                    period=period, num_threads=num_threads,
-                    approx_cell1_size=approx_cell1_size,
-                    approx_cell2_size=approx_cellran_size)
-                D1R = np.diff(np.diff(D1R,axis=0),axis=1)
-            else: D1R=None
-            if _sample1_is_sample2: #calculating the cross-correlation
-                D2R = None
-            else:
-                if do_DR is True:
-                    D2R = npairs_xy_z(sample2, randoms, rp_bins, pi_bins, 
-                        period=period, num_threads=num_threads,
-                        approx_cell1_size=approx_cell2_size,
-                        approx_cell2_size=approx_cellran_size)
-                    D2R = np.diff(np.diff(D2R,axis=0),axis=1)
-                else: D2R=None
-            
-            return D1R, D2R, RR
-        #PBCs and no randoms--calculate randoms analytically.
-        elif randoms is None:
-            
-            #set the number of randoms equal to the number of points in sample1
-            NR = len(sample1)
-            
-            #do volume calculations
-            v = cylinder_volume(rp_bins,2.0*pi_bins) #volume of spheres
-            dv = np.diff(np.diff(v, axis=0),axis=1) #volume of annuli
-            global_volume = period.prod()
-            
-            #calculate randoms for sample1
-            N1 = np.shape(sample1)[0]
-            rho1 = N1/global_volume
-            D1R = (N1)*(dv*rho1) #read note about pair counter
-            
-            #calculate randoms for sample2
-            N2 = np.shape(sample2)[0]
-            rho2 = N2/global_volume
-            D2R = N2*(dv*rho2) #read note about pair counter
-                
-            #calculate the random-random pairs.
-            rhor = NR**2/global_volume
-            RR = (dv*rhor) #RR is only the RR for the cross-correlation.
-            
-            return D1R, D2R, RR
-    
-    def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
-            N_thread, do_auto, do_cross, _sample1_is_sample2,
-            approx_cell1_size, approx_cell2_size):
-        """
-        Count data pairs.
-        """
-        D1D1 = npairs_xy_z(sample1, sample1, rp_bins, pi_bins, period=period,
-            num_threads=num_threads,approx_cell1_size=approx_cell1_size,
-            approx_cell2_size=approx_cell1_size)
-        D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross is True:
-                D1D2 = npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
-                    num_threads=num_threads,
-                    approx_cell1_size=approx_cell1_size,
-                    approx_cell2_size=approx_cell2_size)
-                D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
-            else: D1D2=None
-            if do_auto is True:
-                D2D2 = npairs_xy_z(sample2, sample2, rp_bins, pi_bins, 
-                    period=period, num_threads=num_threads,
-                    approx_cell1_size=approx_cell2_size,
-                    approx_cell2_size=approx_cell2_size)
-                D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
-            else: D2D2=None
-        
-        return D1D1, D1D2, D2D2
-    
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
               
     # How many points are there (for normalization purposes)?
@@ -346,6 +240,112 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11
+
+def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
+        num_threads, do_auto, do_cross, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size):
+    """
+    Count data pairs.
+    """
+    D1D1 = npairs_xy_z(sample1, sample1, rp_bins, pi_bins, period=period,
+        num_threads=num_threads,approx_cell1_size=approx_cell1_size,
+        approx_cell2_size=approx_cell1_size)
+    D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross is True:
+            D1D2 = npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cell2_size)
+            D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+        else: D1D2=None
+        if do_auto is True:
+            D2D2 = npairs_xy_z(sample2, sample2, rp_bins, pi_bins, 
+                period=period, num_threads=num_threads,
+                approx_cell1_size=approx_cell2_size,
+                approx_cell2_size=approx_cell2_size)
+            D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+        else: D2D2=None
+    
+    return D1D1, D1D2, D2D2
+
+def cylinder_volume(R,h):
+    """
+    Calculate the volume of a cylinder(s), used for the analytical randoms.
+    """
+    return pi*np.outer(R**2.0,h)
+
+def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
+        PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size):
+    """
+    Count random pairs.  There are two high level branches:
+        1. w/ or wo/ PBCs and randoms.
+        2. PBCs and analytical randoms
+    There are also logical bits to do RR and DR pair counts, as not all estimators
+    need one or the other, and not doing these can save a lot of calculation.
+    
+    Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
+    shells, which is the correct volume to use for a continious cubic volume with PBCs
+    """
+            
+    #No PBCs, randoms must have been provided.
+    if randoms is not None:
+        if do_RR is True:
+            RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins, 
+                period=period,num_threads=num_threads,
+                approx_cell1_size=approx_cellran_size,
+                approx_cell2_size=approx_cellran_size)
+            RR = np.diff(np.diff(RR,axis=0),axis=1)
+        else: RR=None
+        if do_DR is True:
+            D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins, 
+                period=period, num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cellran_size)
+            D1R = np.diff(np.diff(D1R,axis=0),axis=1)
+        else: D1R=None
+        if _sample1_is_sample2: #calculating the cross-correlation
+            D2R = None
+        else:
+            if do_DR is True:
+                D2R = npairs_xy_z(sample2, randoms, rp_bins, pi_bins, 
+                    period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cellran_size)
+                D2R = np.diff(np.diff(D2R,axis=0),axis=1)
+            else: D2R=None
+        
+        return D1R, D2R, RR
+    #PBCs and no randoms--calculate randoms analytically.
+    elif randoms is None:
+        
+        #set the number of randoms equal to the number of points in sample1
+        NR = len(sample1)
+        
+        #do volume calculations
+        v = cylinder_volume(rp_bins,2.0*pi_bins) #volume of spheres
+        dv = np.diff(np.diff(v, axis=0),axis=1) #volume of annuli
+        global_volume = period.prod()
+        
+        #calculate randoms for sample1
+        N1 = np.shape(sample1)[0]
+        rho1 = N1/global_volume
+        D1R = (N1)*(dv*rho1) #read note about pair counter
+        
+        #calculate randoms for sample2
+        N2 = np.shape(sample2)[0]
+        rho2 = N2/global_volume
+        D2R = N2*(dv*rho2) #read note about pair counter
+            
+        #calculate the random-random pairs.
+        rhor = NR**2/global_volume
+        RR = (dv*rhor) #RR is only the RR for the cross-correlation.
+        
+        return D1R, D2R, RR
 
 
 def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
@@ -390,9 +390,6 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
     
     verify_tpcf_estimator(estimator)
     
-    
-    assert np.all(rp_bins > 0.), "All values of input ``rp_bins`` must be positive"
-
     return sample1, rp_bins, pi_bins, sample2, randoms, period,\
            do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
