@@ -41,7 +41,7 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     For demonstration purposes we create a randomly distributed set of points within a 
     periodic unit cube. 
     
-    >>> Npts = 1000
+    >>> Npts = 100
     >>> Lbox = 1.0
     >>> period = np.array([Lbox,Lbox,Lbox])
     
@@ -59,8 +59,8 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     `~halotools.mock_observables.s_mu_tpcf`.
     
     >>> from halotools.mock_observables import s_mu_tpcf
-    >>> s_bins  = np.linspace(0,0.25,10)
-    >>> mu_bins = np.linspace(0,1,100)
+    >>> s_bins  = np.linspace(0.01, 0.25, 10)
+    >>> mu_bins = np.linspace(0, 1, 15)
     >>> xi = s_mu_tpcf(coords, s_bins, mu_bins, period=period)
     
     Then, we can claclulate the quadrapole of the correlatio function:
