@@ -10,7 +10,7 @@ from .mock_survey import *
 from .error_estimation_tools import jackknife_covariance_matrix
 from .pairwise_velocities import *
 from .isolation_functions import *
-from .void_stats import *
+from .void_statistics import *
 from .catalog_analysis_helpers import *
 from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z, 
     marked_npairs_3d, marked_npairs_xy_z)
