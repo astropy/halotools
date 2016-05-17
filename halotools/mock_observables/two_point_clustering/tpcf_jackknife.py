@@ -222,74 +222,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     else: 
         Lbox = period
     
-    def get_subvolume_numbers(j_index, N_sub_vol):
-        """
-        calculate how many points are in each subvolume.
-        """
-        
-        #there could be subvolumes with no points, and we
-        #need every label to be in there at least once. append a vector
-        #of the possible labels, and we can subtract 1 later.
-        temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1)))
-        
-        labels, N = np.unique(temp,return_counts=True)
-        
-        N = N-1 #remove the place holder I added two lines above.
-        
-        return N
-    
-    def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
-        period, N_thread, do_auto, do_cross, _sample1_is_sample2):
-        """
-        Count jackknife data pairs: DD
-        """
-        if do_auto is True:
-            D1D1 = npairs_jackknife_3d(sample1, sample1, rbins, period=period,
-                jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
-                num_threads=num_threads)
-            D1D1 = np.diff(D1D1,axis=1)
-        else:
-            D1D1=None
-            D2D2=None
-        
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross is True:
-                D1D2 = npairs_jackknife_3d(sample1, sample2, rbins, period=period,
-                    jtags1=j_index_1, jtags2=j_index_2,
-                    N_samples=N_sub_vol, num_threads=num_threads)
-                D1D2 = np.diff(D1D2,axis=1)
-            else: D1D2=None
-            if do_auto is True:
-                D2D2 = npairs_jackknife_3d(sample2, sample2, rbins, period=period,
-                    jtags1=j_index_2, jtags2=j_index_2,
-                    N_samples=N_sub_vol, num_threads=num_threads)
-                D2D2 = np.diff(D2D2,axis=1)
-
-        return D1D1, D1D2, D2D2
-    
-    def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
-        period, N_thread, do_DR, do_RR):
-        """
-        Count jackknife random pairs: DR, RR
-        """
-        
-        if do_DR is True:
-            DR = npairs_jackknife_3d(sample, randoms, rbins, period=period,
-                jtags1=j_index, jtags2=j_index_randoms,
-                N_samples=N_sub_vol, num_threads=num_threads)
-            DR = np.diff(DR,axis=1)
-        else: DR=None
-        if do_RR is True:
-            RR = npairs_jackknife_3d(randoms, randoms, rbins, period=period,
-                jtags1=j_index_randoms, jtags2=j_index_randoms,
-                N_samples=N_sub_vol, num_threads=num_threads)
-            RR = np.diff(RR,axis=1)
-        else: RR=None
-
-        return DR, RR
     
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
@@ -396,7 +328,7 @@ def _enclose_in_box(data1, data2, data3):
     zmax = np.max([np.max(z1),np.max(z2), np.min(z3)])
     
     xyzmin = np.min([xmin,ymin,zmin])
-    xyzmax = np.min([xmax,ymax,zmax])-xyzmin
+    xyzmax = np.max([xmax,ymax,zmax])-xyzmin
     
     x1 = x1 - xyzmin
     y1 = y1 - xyzmin
@@ -413,6 +345,75 @@ def _enclose_in_box(data1, data2, data3):
     return np.vstack((x1, y1, z1)).T,\
            np.vstack((x2, y2, z2)).T,\
            np.vstack((x3, y3, z3)).T, Lbox
+
+def get_subvolume_numbers(j_index, N_sub_vol):
+    """
+    calculate how many points are in each subvolume.
+    """
+    
+    #there could be subvolumes with no points, and we
+    #need every label to be in there at least once. append a vector
+    #of the possible labels, and we can subtract 1 later.
+    temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1)))
+    
+    labels, N = np.unique(temp,return_counts=True)
+    
+    N = N-1 #remove the place holder I added two lines above.
+    
+    return N
+
+def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
+    period, num_threads, do_auto, do_cross, _sample1_is_sample2):
+    """
+    Count jackknife data pairs: DD
+    """
+    if do_auto is True:
+        D1D1 = npairs_jackknife_3d(sample1, sample1, rbins, period=period,
+            jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
+            num_threads=num_threads)
+        D1D1 = np.diff(D1D1,axis=1)
+    else:
+        D1D1=None
+        D2D2=None
+    
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross is True:
+            D1D2 = npairs_jackknife_3d(sample1, sample2, rbins, period=period,
+                jtags1=j_index_1, jtags2=j_index_2,
+                N_samples=N_sub_vol, num_threads=num_threads)
+            D1D2 = np.diff(D1D2,axis=1)
+        else: D1D2=None
+        if do_auto is True:
+            D2D2 = npairs_jackknife_3d(sample2, sample2, rbins, period=period,
+                jtags1=j_index_2, jtags2=j_index_2,
+                N_samples=N_sub_vol, num_threads=num_threads)
+            D2D2 = np.diff(D2D2,axis=1)
+
+    return D1D1, D1D2, D2D2
+
+def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
+    period, num_threads, do_DR, do_RR):
+    """
+    Count jackknife random pairs: DR, RR
+    """
+    
+    if do_DR is True:
+        DR = npairs_jackknife_3d(sample, randoms, rbins, period=period,
+            jtags1=j_index, jtags2=j_index_randoms,
+            N_samples=N_sub_vol, num_threads=num_threads)
+        DR = np.diff(DR,axis=1)
+    else: DR=None
+    if do_RR is True:
+        RR = npairs_jackknife_3d(randoms, randoms, rbins, period=period,
+            jtags1=j_index_randoms, jtags2=j_index_randoms,
+            N_samples=N_sub_vol, num_threads=num_threads)
+        RR = np.diff(RR,axis=1)
+    else: RR=None
+
+    return DR, RR
 
 def _tpcf_jackknife_process_args(sample1, randoms, rbins, 
     Nsub, sample2, period, do_auto, do_cross, 
