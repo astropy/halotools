@@ -2,7 +2,6 @@
 Module containing the `~halotools.mock_observables.s_mu_tpcf` function used to 
 calculate the redshift-space two-point correlation function , :math:`\\xi(s, \\mu)`. 
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -11,10 +10,8 @@ from .clustering_helpers import _s_mu_tpcf_process_args
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
 from ..pair_counters import npairs_s_mu
 
-
 __all__ = ['s_mu_tpcf']
 __author__ = ['Duncan Campbell']
-
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
@@ -207,128 +204,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     
     sample1, s_bins, mu_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _s_mu_tpcf_process_args(*function_args)
-    
-    def random_counts(sample1, sample2, randoms, s_bins, mu_bins, 
-        period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size , approx_cellran_size):
-        """
-        Count random pairs.  There are two high level branches:
-            1. w/ or wo/ PBCs and randoms.
-            2. PBCs and analytical randoms
-        There are also logical bits to do RR and DR pair counts, as not all estimators
-        need one or the other, and not doing these can save a lot of calculation.
         
-        Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
-        wedge sectors, which is the correct volume to use for a continious cubic volume 
-        with PBCs
-        """
-        def spherical_sector_volume(s,mu):
-            """
-            This function is used to calculate analytical randoms.
-            
-            Calculate the volume of a spherical sector, used for the analytical randoms.
-            https://en.wikipedia.org/wiki/Spherical_sector
-            
-            Note that the extra *2 is to get the reflection.
-            """
-            theta = np.arcsin(mu)
-            vol = (2.0*np.pi/3.0) * np.outer((s**3.0),(1.0-np.cos(theta)))*2.0
-            return vol
-        
-        #PBCs and randoms.
-        if randoms is not None:
-            if do_RR is True:
-                RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
-                                 num_threads=num_threads,
-                                 approx_cell1_size=approx_cellran_size,
-                                 approx_cell2_size=approx_cellran_size)
-                RR = np.diff(np.diff(RR,axis=0),axis=1)
-            else: RR=None
-            if do_DR is True:
-                D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
-                                  num_threads=num_threads,
-                                  approx_cell1_size=approx_cell1_size,
-                                  approx_cell2_size=approx_cellran_size)
-                D1R = np.diff(np.diff(D1R,axis=0),axis=1)
-            else: D1R=None
-            if _sample1_is_sample2: #calculating the cross-correlation
-                D2R = None
-            else:
-                if do_DR is True:
-                    D2R = npairs_s_mu(sample2, randoms, s_bins, mu_bins, period=period,
-                                      num_threads=num_threads,
-                                      approx_cell1_size=approx_cell2_size,
-                                      approx_cell2_size=approx_cellran_size)
-                    D2R = np.diff(np.diff(D2R,axis=0),axis=1)
-                else: D2R=None
-            
-            return D1R, D2R, RR
-        #PBCs and no randoms--calculate randoms analytically.
-        elif randoms is None:
-            
-            #set the number of randoms equal to the number of points in sample1
-            NR = len(sample1)
-            
-            #do volume calculations
-            dv = spherical_sector_volume(s_bins,mu_bins)
-            dv = np.diff(dv, axis=1) #volume of wedges
-            dv = np.diff(dv, axis=0) #volume of wedge 'pieces'
-            global_volume = period.prod()
-            
-            #calculate randoms for sample1
-            N1 = np.shape(sample1)[0]
-            rho1 = N1/global_volume
-            D1R = (N1-1.0)*(dv*rho1) #read note about pair counter
-            
-            N2 = np.shape(sample2)[0]
-            rho2 = N2/global_volume
-            D2R = (N2-1.0)*(dv*rho2) #read note about pair counter
-            
-            #calculate the random-random pairs.
-            rhor = NR**2/global_volume
-            RR = (dv*rhor)
-            
-            return D1R, D2R, RR
-        else:
-            raise ValueError('Un-supported combination of PBCs and randoms provided.')
-    
-    def pair_counts(sample1, sample2, s_bins, mu_bins, period,
-        N_thread, do_auto, do_cross, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size):
-        """
-        Count data pairs.
-        """
-        if do_auto is True:
-            D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_bins, period=period, 
-                num_threads=num_threads,
-                approx_cell1_size=approx_cell1_size,
-                approx_cell2_size=approx_cell1_size)
-            D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
-        else: 
-            D1D1=None
-            D2D2=None
-            
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-        else:
-            if do_cross is True:
-                D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_bins, 
-                    period=period, num_threads=num_threads,
-                    approx_cell1_size=approx_cell1_size,
-                    approx_cell2_size=approx_cell2_size)
-                D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
-            else: D1D2=None
-            if do_auto is True:
-                D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
-                    num_threads=num_threads,
-                    approx_cell1_size=approx_cell2_size,
-                    approx_cell2_size=approx_cell2_size)
-                D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
-            else: D2D2=None
-
-        return D1D1, D1D2, D2D2
-    
     #what needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
@@ -342,7 +218,6 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         #this is arbitrarily set, but must remain consistent!
         NR = N1
     
-    #count pairs!
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
@@ -369,5 +244,127 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)[:,::-1]
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)[:,::-1]
             return xi_11
+
+def spherical_sector_volume(s,mu):
+    """
+    This function is used to calculate analytical randoms.
+    
+    Calculate the volume of a spherical sector, used for the analytical randoms.
+    https://en.wikipedia.org/wiki/Spherical_sector
+    
+    Note that the extra *2 is to get the reflection.
+    """
+    theta = np.arcsin(mu)
+    vol = (2.0*np.pi/3.0) * np.outer((s**3.0),(1.0-np.cos(theta)))*2.0
+    return vol
+
+def random_counts(sample1, sample2, randoms, s_bins, mu_bins, 
+    period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+    approx_cell1_size, approx_cell2_size , approx_cellran_size):
+    """
+    Count random pairs.  There are two high level branches:
+        1. w/ or wo/ PBCs and randoms.
+        2. PBCs and analytical randoms
+    There are also logical bits to do RR and DR pair counts, as not all estimators
+    need one or the other, and not doing these can save a lot of calculation.
+    
+    Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
+    wedge sectors, which is the correct volume to use for a continious cubic volume 
+    with PBCs
+    """
+    
+    #PBCs and randoms.
+    if randoms is not None:
+        if do_RR is True:
+            RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
+                             num_threads=num_threads,
+                             approx_cell1_size=approx_cellran_size,
+                             approx_cell2_size=approx_cellran_size)
+            RR = np.diff(np.diff(RR,axis=0),axis=1)
+        else: RR=None
+        if do_DR is True:
+            D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
+                              num_threads=num_threads,
+                              approx_cell1_size=approx_cell1_size,
+                              approx_cell2_size=approx_cellran_size)
+            D1R = np.diff(np.diff(D1R,axis=0),axis=1)
+        else: D1R=None
+        if _sample1_is_sample2: #calculating the cross-correlation
+            D2R = None
+        else:
+            if do_DR is True:
+                D2R = npairs_s_mu(sample2, randoms, s_bins, mu_bins, period=period,
+                                  num_threads=num_threads,
+                                  approx_cell1_size=approx_cell2_size,
+                                  approx_cell2_size=approx_cellran_size)
+                D2R = np.diff(np.diff(D2R,axis=0),axis=1)
+            else: D2R=None
+        
+        return D1R, D2R, RR
+    #PBCs and no randoms--calculate randoms analytically.
+    elif randoms is None:
+        
+        #set the number of randoms equal to the number of points in sample1
+        NR = len(sample1)
+        
+        #do volume calculations
+        dv = spherical_sector_volume(s_bins,mu_bins)
+        dv = np.diff(dv, axis=1) #volume of wedges
+        dv = np.diff(dv, axis=0) #volume of wedge 'pieces'
+        global_volume = period.prod()
+        
+        #calculate randoms for sample1
+        N1 = np.shape(sample1)[0]
+        rho1 = N1/global_volume
+        D1R = (N1-1.0)*(dv*rho1) #read note about pair counter
+        
+        N2 = np.shape(sample2)[0]
+        rho2 = N2/global_volume
+        D2R = (N2-1.0)*(dv*rho2) #read note about pair counter
+        
+        #calculate the random-random pairs.
+        rhor = NR**2/global_volume
+        RR = (dv*rhor)
+        
+        return D1R, D2R, RR
+    else:
+        raise ValueError('Un-supported combination of PBCs and randoms provided.')
+
+def pair_counts(sample1, sample2, s_bins, mu_bins, period,
+    num_threads, do_auto, do_cross, _sample1_is_sample2,
+    approx_cell1_size, approx_cell2_size):
+    """
+    Count data pairs.
+    """
+    if do_auto is True:
+        D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_bins, period=period, 
+            num_threads=num_threads,
+            approx_cell1_size=approx_cell1_size,
+            approx_cell2_size=approx_cell1_size)
+        D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
+    else: 
+        D1D1=None
+        D2D2=None
+        
+    if _sample1_is_sample2:
+        D1D2 = D1D1
+        D2D2 = D1D1
+    else:
+        if do_cross is True:
+            D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_bins, 
+                period=period, num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cell2_size)
+            D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+        else: D1D2=None
+        if do_auto is True:
+            D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell2_size,
+                approx_cell2_size=approx_cell2_size)
+            D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+        else: D2D2=None
+
+    return D1D1, D1D2, D2D2
 
 
