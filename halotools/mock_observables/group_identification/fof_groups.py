@@ -116,8 +116,8 @@ class FoFGroups(object):
             Lbox = np.array([period, period, period])
 
         if np.shape(Lbox) != (3,):
-            raise ValueError("Lbox must be an array of length 3, or number indicating the\
-                              length of one side of a cube")
+            raise ValueError("Lbox must be an array of length 3, or number indicating the "
+                "length of one side of a cube")
         if (period is not None) and (not np.all(Lbox==period)):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
         

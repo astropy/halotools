@@ -177,8 +177,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
 
     # # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_s_mu_engine, 
-        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
-        sample2[:,0], sample2[:,1], sample2[:,2], s_bins, mu_bins)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins)
 
     # # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
