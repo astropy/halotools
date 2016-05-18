@@ -173,8 +173,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_jackknife_3d_engine, 
-        double_mesh, sample1[:,0], sample1[:,1], sample1[:,2], 
-        sample2[:,0], sample2[:,1], sample2[:,2], 
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
         weights1, weights2, jtags1, jtags2, N_samples, rbins)
 
     # Calculate the cell1 indices that will be looped over by the engine

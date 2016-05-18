@@ -131,8 +131,7 @@ def pairwise_distance_3d(data1, data2, rmax, period = None,
     
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(pairwise_distance_3d_engine, 
-        double_mesh, data1[:,0], data1[:,1], data1[:,2], 
-        data2[:,0], data2[:,1], data2[:,2], rmax)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rmax)
     
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(

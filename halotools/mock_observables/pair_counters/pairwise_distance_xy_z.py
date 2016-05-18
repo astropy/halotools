@@ -133,8 +133,7 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(pairwise_distance_xy_z_engine, 
-        double_mesh, data1[:,0], data1[:,1], data1[:,2], 
-        data2[:,0], data2[:,1], data2[:,2], rp_max, pi_max)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rp_max, pi_max)
     
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
