@@ -544,13 +544,13 @@ class TabularAsciiReader(object):
         file_size = os.path.getsize(self.input_fname)
         # convert to bytes to match units of file_size
         chunk_memory_size *= 1e6
-        num_data_rows = self.data_len()
+        num_data_rows = int(self.data_len())
         print(("Total number of rows in detected data = %i" % num_data_rows))
 
         # Set the number of chunks to be filesize/chunk_memory,
         # but enforcing that 0 < Nchunks <= num_data_rows
         try:
-            Nchunks = max(1, min(file_size / chunk_memory_size, num_data_rows))
+            Nchunks = int(max(1, min(file_size / chunk_memory_size, num_data_rows)))
         except ZeroDivisionError:
             msg = ("\nMust choose non-zero size for input "
                    "``chunk_memory_size``")
@@ -560,7 +560,7 @@ class TabularAsciiReader(object):
         num_full_chunks = int(num_data_rows // num_rows_in_chunk)
         num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk*Nchunks
 
-        header_length = self.header_len()
+        header_length = int(self.header_len())
         print(("Number of rows in detected header = %i \n" % header_length))
 
         chunklist = []
