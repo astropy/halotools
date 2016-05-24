@@ -138,7 +138,7 @@ bins linearly spaced in *r* between :math:`0.5 {\\rm Mpc} < r < 10 {\\rm Mpc}.`
     plt.plot(rbins_midpoints, mean_number_density, color='blue')
     
     plt.xlabel(r'$r$  $[Mpc]$', fontsize=20)
-    plt.ylabel(r'$\langle dN/dV \rangle$  $[M_{\odot}/{\rm yr/Mpc^{3}}]$', fontsize=20)
+    plt.ylabel(r'$\langle dN/dV \rangle$  $[M_{\odot}/{\rm Mpc^{3}}]$', fontsize=20)
     plt.xticks(size=15); plt.yticks(size=15)
 
 .. image:: figs/radial_profile_halocat_tutorial_fig2.png
