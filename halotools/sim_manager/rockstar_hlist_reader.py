@@ -599,7 +599,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     "``columns_to_keep_dict``\n")
                 raise HalotoolsError(msg)
 
-        result = self.read_ascii(**kwargs)
+        result = self._read_ascii(**kwargs)
         self.halo_table = Table(result)
 
         for key in columns_to_convert_from_kpc_to_mpc:
@@ -632,7 +632,7 @@ class RockstarHlistReader(TabularAsciiReader):
                         "the write_to_disk and update_cache_log methods.\n")
                     raise HalotoolsError(msg)
 
-    def read_ascii(self, **kwargs):
+    def _read_ascii(self, **kwargs):
         """ Method reads the input ascii and returns
         a structured Numpy array of the data
         that passes the row- and column-cuts.
@@ -658,6 +658,9 @@ class RockstarHlistReader(TabularAsciiReader):
         -----
         The behavior of this function is entirely controlled in the 
         `~halotools.sim_manager.TabularAsciiReader` superclass. 
+        This trivial reimplementation is simply here to guide readers 
+        of the source code to the location of the implementation - 
+        this private function should not be called by users. 
         """
         return TabularAsciiReader.read_ascii(self, **kwargs)
 
