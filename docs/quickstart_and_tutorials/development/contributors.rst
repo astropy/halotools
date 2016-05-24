@@ -22,7 +22,6 @@ Core package contributors
 * Matt Becker
 * Peter Behroozi
 * Duncan Campbell
-* Shany Danieli
 * Benedikt Diemer
 * Yu Feng
 * Nathan Goldbaum
@@ -34,7 +33,6 @@ Core package contributors
 * John Parejko
 * Manodeep Sinha
 * Brigitta Sipocz
-* Kevin Tan
 * Erik Tollerud
 * Doug Watson
 * Andrew Zentner

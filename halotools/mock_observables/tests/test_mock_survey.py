@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+""" Module providing unit-testing for the functions in 
+the `~halotools.mock_observables.mock_survey` module
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 import numpy as np
-import sys
-import pytest 
+from astropy.tests.helper import pytest
 
 from ..mock_survey import distant_observer_redshift, ra_dec_z
 
