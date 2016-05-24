@@ -10,7 +10,6 @@ __author__ = ('Duncan Campbell', )
 import numpy as np
 from warnings import warn
 
-from ..utils.array_utils import convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
 def cuboid_subvolume_labels(sample, Nsub, Lbox):
@@ -24,13 +23,13 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
         Npts x 3 numpy array containing 3-D positions of points.
     
     Nsub : array_like
-        Lenght-3 numpy array of integers indicating how many times to split the volume 
+        Length-3 numpy array of integers indicating how many times to split the volume 
         along each dimension.  If single integer, N, is supplied, ``Nsub`` is set to 
         [N,N,N], and the volume is split along each dimension N times.  The total number 
-        of subvolumes is then given by `numpy.prod(Nsub)`.
+        of subvolumes is then given by numpy.prod(Nsub).
     
     Lbox : array_like
-        Lenght-3 numpy array definging the lengths of the sides of the cubical volume
+        Length-3 numpy array definging the lengths of the sides of the cubical volume
         that ``sample`` occupies.  If only a single scalar is specified, the volume is assumed 
         to be a cube with side-length Lbox
     
@@ -60,34 +59,36 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample = np.vstack((x,y,z)).T
     
-    Divide the volume into cubes with legnth 0.25 on a side.
+    Divide the volume into cubes with length 0.25 on a side.
     
     >>> Nsub = [4,4,4]
-    >>> labels = cuboid_subvolume_labels(coords, Nsub, Lbox)
+    >>> labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     """
     
     #process inputs and check for consistency
-    sample = convert_to_ndarray(sample)
-    if sample.ndim !=2:
-        msg = "sample must be a legnth-N by 3 array."
-        raise HalotoolsError(msg)
-    elif np.shape(sample)[1] !=3:
-        msg = "sample must be a legnth-N by 3 array."
-        raise HalotoolsError(msg)
-    if type(Nsub) is int:
-        Nsub = np.array([Nsub]*3)
-    else: Nsub = convert_to_ndarray(Nsub, dt=np.int)
-    if np.shape(Nsub) != (3,):
-        msg = "Nsub must be a length-3 array or an integer."
-        raise HalotoolsError(msg)
-    Lbox = convert_to_ndarray(Lbox)
+    sample = np.atleast_1d(sample).astype('f8')
+    try:
+        assert sample.ndim == 2
+        assert sample.shape[1] == 3
+    except AssertionError:
+        msg = ("Input ``sample`` must have shape (Npts, 3)")
+        raise TypeError(msg)
+
+    Nsub = np.atleast_1d(Nsub).astype('f4')
+    if len(Nsub) == 1:
+        Nsub = np.array([Nsub[0], Nsub[0], Nsub[0]])
+    elif len(Nsub) != 3:
+        msg = "Input ``Nsub`` must be a scalar or length-3 sequence"
+        raise TypeError(msg)
+
+    Lbox = np.atleast_1d(Lbox).astype('f8')
     if len(Lbox) == 1:
         Lbox = np.array([Lbox[0]]*3)
-    if np.shape(Lbox) != (3,):
-        msg = "Lsub must be a length-3 array or a number."
-        raise HalotoolsError(msg)
+    elif len(Lbox) != 3:
+        msg = "Input ``Lbox`` must be a scalar or length-3 sequence"
+        raise TypeError(msg)
         
     dL = Lbox/Nsub # length of subvolumes along each dimension
     N_sub_vol = np.prod(Nsub) # total the number of subvolumes
@@ -106,7 +107,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
 
 def jackknife_covariance_matrix(observations):
     """
-    Calculate the covariance matrix given a sample of jackknifed "observations".
+    Calculate the covariance matrix given a sample of jackknifed observations.
     
     Parameters
     ----------
@@ -116,7 +117,7 @@ def jackknife_covariance_matrix(observations):
     Returns
     -------
     cov : numpy.matrix
-        covaraince matrix shape (N_observations, N_observations) with the covariance 
+        covariance matrix shape (N_observations, N_observations) with the covariance 
         between observations i,j (in the order they appear in ``observations``).
     
     Examples
@@ -130,7 +131,7 @@ def jackknife_covariance_matrix(observations):
     
     """
     
-    observations =  convert_to_ndarray(observations)
+    observations =  np.atleast_1d(observations)
     
     if observations.ndim !=2:
         msg = ("observations array must be 2-dimensional")
