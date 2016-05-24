@@ -7,7 +7,6 @@ from __future__ import absolute_import
 
 from .group_identification import *
 from .mock_survey import *
-from .error_estimation_tools import *
 from .pairwise_velocities import *
 from .isolation_functions import *
 from .void_statistics import *

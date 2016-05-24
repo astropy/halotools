@@ -1,7 +1,8 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_jackknife_3d` function 
+used to estimate errors in the `~halotools.mock_observables.tpcf` function. 
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np 
 import multiprocessing
 from functools import partial 
@@ -191,7 +192,8 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
     return np.array(counts)
 
 
-def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2, weights1, weights2, jtags1, jtags2, N_samples):
+def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2, 
+    weights1, weights2, jtags1, jtags2, N_samples):
     """
     """
 
