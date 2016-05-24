@@ -9,12 +9,11 @@ from astropy.utils.misc import NumpyRNGContext
 
 from .cf_helpers import generate_locus_of_3d_points
 
-from ..error_estimation_tools import cuboid_subvolume_labels, jackknife_covariance_matrix
+from ..error_estimation_tools import cuboid_subvolume_labels
 
 fixed_seed = 43
 
-__all__ = ('test_cuboid_subvolume_labels_bounds_checking', 
-    'jackknife_covariance_matrix')
+__all__ = ('test_cuboid_subvolume_labels_bounds_checking', )
 
 def test_cuboid_subvolume_labels_bounds_checking():
     Npts = 100
@@ -68,24 +67,6 @@ def test_cuboid_subvolume_labels_correctness():
 
 
 
-def test_jackknife_covariance_matrix():
-    N_samples = 1e3
-
-    num_observations = 1
-    with NumpyRNGContext(fixed_seed):
-        observations = np.random.random(N_samples*num_observations).reshape(
-            (N_samples, num_observations))
-    cov = jackknife_covariance_matrix(observations)
-    assert cov.shape == (num_observations, num_observations)
-
-    num_observations = 2
-    with NumpyRNGContext(fixed_seed):
-        observations = np.random.random(N_samples*num_observations).reshape(
-            (N_samples, num_observations))
-    cov = jackknife_covariance_matrix(observations)
-    assert cov.shape == (num_observations, num_observations)
-
-    
 
 
 

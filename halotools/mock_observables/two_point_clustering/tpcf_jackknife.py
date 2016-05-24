@@ -9,7 +9,7 @@ import numpy as np
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_jackknife_3d
-from ..error_estimation_tools import jackknife_covariance_matrix, cuboid_subvolume_labels
+from ..error_estimation_tools import cuboid_subvolume_labels
 
 from .clustering_helpers import (process_optional_input_sample2, 
     downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
@@ -283,7 +283,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         RR_full = None
         RR_sub = None
     
-    
     #calculate the correlation function for the full sample
     xi_11_full = _TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
     xi_12_full = _TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
@@ -295,9 +294,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
     
     #calculate the covariance matrix
-    xi_11_cov = jackknife_covariance_matrix(xi_11_sub)
-    xi_12_cov = jackknife_covariance_matrix(xi_12_sub)
-    xi_22_cov = jackknife_covariance_matrix(xi_22_sub)
+    xi_11_cov = np.matrix(np.cov(xi_11_sub.T))
+    xi_12_cov = np.matrix(np.cov(xi_12_sub.T))
+    xi_22_cov = np.matrix(np.cov(xi_22_sub.T))
     
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov

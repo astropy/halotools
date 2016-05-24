@@ -4,13 +4,10 @@ Functions to assist in error estimation of mock observations.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__all__ = ['jackknife_covariance_matrix','cuboid_subvolume_labels']
+__all__ = ('cuboid_subvolume_labels', )
 __author__ = ('Duncan Campbell', )
 
 import numpy as np
-from warnings import warn
-
-from ..custom_exceptions import HalotoolsError
 
 def cuboid_subvolume_labels(sample, Nsub, Lbox):
     """
@@ -105,55 +102,3 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     return index, int(N_sub_vol)
 
 
-def jackknife_covariance_matrix(observations):
-    """
-    Calculate the covariance matrix given a sample of jackknifed observations.
-    
-    Parameters
-    ----------
-    observations : np.ndarray
-        shape (N_samples, N_observations) numpy array of observations.
-    
-    Returns
-    -------
-    cov : numpy.matrix
-        covariance matrix shape (N_observations, N_observations) with the covariance 
-        between observations i,j (in the order they appear in ``observations``).
-    
-    Examples
-    --------
-    For demonstration purposes we create some random data.  Let's say we have jackknife
-    100 samples and to estimate the errors on 15 measurements, e.g. the two point
-    correlation function in 15 radial bins.
-    
-    >>> observations = np.random.random((100,15))
-    >>> cov = jackknife_covariance_matrix(observations)
-    
-    """
-    
-    observations =  np.atleast_1d(observations)
-    
-    if observations.ndim !=2:
-        msg = ("observations array must be 2-dimensional")
-        raise HalotoolsError(msg)
-    
-    N_samples = observations.shape[0] # number of samples
-    Nr = observations.shape[1] # number of observations per sample
-    after_subtraction = observations - np.mean(observations, axis=0) # subtract the mean
-    
-    # raise a warning if N_samples < Nr
-    if N_samples < Nr:
-        msg = ("\n the number of samples is smaller than the number of \n"
-               "observations. It is recommended to increase the number \n"
-               "of samples or decrease the number of observations.")
-        warn(msg)
-    
-    cov = np.zeros((Nr,Nr)) # 2D array that stores the covariance matrix 
-    for i in range(Nr):
-        for j in range(Nr):
-            tmp = 0.0
-            for k in range(N_samples):
-                tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
-                cov[i,j] = (((N_samples-1)/N_samples)*tmp)
-    
-    return np.matrix(cov)
