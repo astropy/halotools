@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Module storing the RockstarHlistReader, 
+Module storing the `~halotools.sim_manager.RockstarHlistReader` class, 
 the primary class used by Halotools to process 
 publicly available Rockstar hlist files and store them in cache. 
 
@@ -522,7 +521,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
     def read_halocat(self, columns_to_convert_from_kpc_to_mpc, 
         write_to_disk = False, update_cache_log = False, 
-        add_supplementary_halocat_columns = True):
+        add_supplementary_halocat_columns = True, **kwargs):
         """ Method reads the ascii data and  
         binds the resulting catalog to ``self.halo_table``.
 
@@ -567,6 +566,13 @@ class RockstarHlistReader(TabularAsciiReader):
             Note that this feature is rather bare-bones and is likely to significantly 
             evolve and/or entirely vanish in future releases. 
 
+        chunk_memory_size : int, optional
+            Determine the approximate amount of Megabytes of memory
+            that will be processed in chunks. This variable
+            must be smaller than the amount of RAM on your machine;
+            choosing larger values typically improves performance.
+            Default is 500 Mb.
+
         Notes 
         -----
         Regarding the ``columns_to_convert_from_kpc_to_mpc`` argument, 
@@ -593,7 +599,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     "``columns_to_keep_dict``\n")
                 raise HalotoolsError(msg)
 
-        result = self.read_ascii()
+        result = self._read_ascii(**kwargs)
         self.halo_table = Table(result)
 
         for key in columns_to_convert_from_kpc_to_mpc:
@@ -625,6 +631,38 @@ class RockstarHlistReader(TabularAsciiReader):
                         "After you resolve the problem, you can manually call \n"
                         "the write_to_disk and update_cache_log methods.\n")
                     raise HalotoolsError(msg)
+
+    def _read_ascii(self, **kwargs):
+        """ Method reads the input ascii and returns
+        a structured Numpy array of the data
+        that passes the row- and column-cuts.
+
+        Parameters
+        ----------
+        chunk_memory_size : int, optional
+            Determine the approximate amount of Megabytes of memory
+            that will be processed in chunks. This variable
+            must be smaller than the amount of RAM on your machine;
+            choosing larger values typically improves performance.
+            Default is 500 Mb.
+
+        Returns
+        --------
+        full_array : array_like
+            Structured Numpy array storing the rows and columns
+            that pass the input cuts. The columns of this array
+            are those selected by the ``column_indices_to_keep``
+            argument passed to the constructor.
+
+        Notes 
+        -----
+        The behavior of this function is entirely controlled in the 
+        `~halotools.sim_manager.TabularAsciiReader` superclass. 
+        This trivial reimplementation is simply here to guide readers 
+        of the source code to the location of the implementation - 
+        this private function should not be called by users. 
+        """
+        return TabularAsciiReader.read_ascii(self, **kwargs)
 
     def write_to_disk(self):
         """ Method writes ``self.halo_table`` to ``self.output_fname`` 

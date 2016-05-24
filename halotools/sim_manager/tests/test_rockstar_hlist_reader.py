@@ -1,12 +1,16 @@
-#!/usr/bin/env python
+""" This module provides unit-testing for 
+the `~halotools.sim_manager.RockstarHlistReader` class. 
+"""
 
+import numpy as np
 import os
 import shutil
 from unittest import TestCase
 from astropy.tests.helper import pytest 
 from astropy.table import Table 
-
+from astropy.utils.misc import NumpyRNGContext
 from astropy.config.paths import _find_home 
+from collections import OrderedDict
 
 from ..rockstar_hlist_reader import RockstarHlistReader, _infer_redshift_from_input_fname
 from ..halo_table_cache import HaloTableCache 
@@ -33,12 +37,28 @@ else:
 
 __all__ = ('TestRockstarHlistReader', )
 
+fixed_seed = 43
+
+
+def write_temporary_ascii(num_halos, temp_fname):
+    d = OrderedDict()
+    with NumpyRNGContext(fixed_seed):
+        d['halo_spin_bullock'] = np.random.random(num_halos).astype('f4')
+        d['halo_id'] = np.arange(num_halos).astype('i8')
+        d['halo_upid'] = np.random.random_integers(-1, 5, num_halos).astype('i8')
+        d['halo_x'] = np.random.random(num_halos).astype('f4')
+        d['halo_y'] = np.random.random(num_halos).astype('f4')
+        d['halo_z'] = np.random.random(num_halos).astype('f4')
+    t = Table(d)
+    t.meta['comments'] = ['Some comment', 'Another comment']
+    t.write(temp_fname, format='ascii.commented_header')
+
 
 class TestRockstarHlistReader(TestCase):
 
     def setUp(self):
 
-        self.tmpdir = os.path.join(_find_home(), 'Desktop', 'tmp_testingdir')
+        self.tmpdir = os.path.join(_find_home(), 'tmp_testingdir')
         try:
             os.makedirs(self.tmpdir)
         except OSError:
@@ -262,6 +282,42 @@ class TestRockstarHlistReader(TestCase):
         fname = 'hlist_0.07812.list'
         result = _infer_redshift_from_input_fname(fname)
         assert result == 11.8008
+
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_reader_configurations(self):
+        """ 
+        """
+        num_halos = 100
+        temp_fname = os.path.join(self.tmpdir, 'temp_ascii_halo_catalog.list')
+        write_temporary_ascii(num_halos, temp_fname)
+
+        columns_to_keep_dict = (
+            {'halo_spin_bullock': (0, 'f4'), 'halo_id': (1, 'i8'), 
+            'halo_x': (3, 'f4'), 
+            'halo_y': (4, 'f4'), 
+            'halo_z': (5, 'f4'), 
+            })
+
+        reader = RockstarHlistReader(
+            input_fname = temp_fname, 
+            columns_to_keep_dict = columns_to_keep_dict, 
+            output_fname = 'std_cache_loc', 
+            simname = 'bolplanck', halo_finder = 'rockstar', redshift = 11.8008, 
+            version_name = 'dummy', Lbox = 250., particle_mass = 1.35e8, 
+            )
+        reader.read_halocat([], add_supplementary_halocat_columns=False)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, 
+            chunk_memory_size = 10)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, 
+            chunk_memory_size = 11)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, 
+            chunk_memory_size = 99)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, 
+            chunk_memory_size = 100)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, 
+            chunk_memory_size = 101)
+
+
 
     def tearDown(self):
         try:
