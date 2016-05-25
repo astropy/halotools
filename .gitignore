@@ -43,7 +43,7 @@ distribute-*.tar.gz
 # Other
 .*.swp
 *~
-
+temporary_testing_script.py 
 *.ipynb
 .ipynb_checkpoints/*
 */.ipynb_checkpoints/*
