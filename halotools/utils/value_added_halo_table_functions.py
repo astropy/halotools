@@ -2,20 +2,20 @@
 Common functions applied to halo catalogs. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from astropy.table import Table 
 
 from .group_member_generator import group_member_generator
+from .crossmatch import crossmatch
 
 from ..custom_exceptions import HalotoolsError 
 
 __all__ = ('broadcast_host_halo_property', 'add_halo_hostid')
 
 def broadcast_host_halo_property(table, halo_property_key, 
-    table_is_already_sorted = False, delete_possibly_existing_column = False):
+    delete_possibly_existing_column = False):
     """ Calculate a property of the host of a group system 
     and broadcast that property to all group members, 
     e.g., calculate host halo mass or group central star formation rate. 
@@ -27,14 +27,6 @@ def broadcast_host_halo_property(table, halo_property_key,
 
     halo_property_key : string 
         Name of the column to be broadcasted to all halo members 
-
-    table_is_already_sorted : bool, optional 
-        If set to True, `group_member_generator` will skip the pre-processing 
-        step of sorting the table. This improves performance, 
-        but `group_member_generator` will return incorrect values 
-        if the table has not been sorted properly. 
-        Default is False, in which case the returned table will 
-        generally be sorted in a different order than the input table. 
 
     delete_possibly_existing_column : bool, optional 
         If set to False, `add_halo_hostid` will raise an Exception 
@@ -75,23 +67,9 @@ def broadcast_host_halo_property(table, halo_property_key,
     elif (new_colname in list(table.keys())) & (delete_possibly_existing_column is True):
         del table[new_colname]
 
-
-    if table_is_already_sorted is True:
-        pass
-    else:
-        table.sort(['halo_hostid', 'halo_upid'])
-
-    grouping_key = 'halo_hostid'
-    requested_columns = [halo_property_key]
-    group_gen = group_member_generator(table, grouping_key, requested_columns)
-
-    result = np.zeros(len(table), dtype = table[halo_property_key].dtype)
-    for first, last, member_props in group_gen:
-        prop = member_props[0]
-        hostprop = prop[0]
-        result[first:last] = hostprop
-    table[new_colname] = result
-
+    idx_halos, idx_hosts = crossmatch(table['halo_hostid'].data, table['halo_id'].data)
+    table[new_colname] = np.zeros(len(table), dtype = table[halo_property_key].dtype)
+    table[new_colname][idx_halos] = table[halo_property_key][idx_hosts]
 
 
 def add_halo_hostid(table, delete_possibly_existing_column = False):
