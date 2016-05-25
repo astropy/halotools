@@ -136,17 +136,42 @@ Memory allocation phase
 ---------------------------
 
 After pre-processing the halo catalog, memory must be allocated to store the ``galaxy_table``. 
-This is controlled by the `HodMockFactory.allocate_memory` method. 
+This is controlled by the `~HodMockFactory.allocate_memory` method. After initializing the table, 
+the `~HodMockFactory.allocate_memory` method creates the ``_remaining_methods_to_call`` 
+attribute; this will be used to keep a running list of the names of the 
+composite model methods that the `HodMockFactory` should call; 
+the factory calls the methods in this list one by one, deleting the corresponding name 
+after the call; when the list is exhausted, mock-making is complete. 
 
-Mapping galaxy properties to the ``galaxy_table``
-------------------------------------------------------
+For every ``gal_type`` in a composite model, e.g., ``centrals`` or ``satellites``, 
+there is a corresponding ``mc_occupation_gal_type`` method that is responsible for 
+determining how many galaxies of that type belong in each halo, e.g., 
+``mc_occupation_centrals`` or ``mc_occupation_satellites``. 
+As described in the previous section, these ``mc_occupation`` methods work together with 
+`numpy.repeat` to build the ``galaxy_table``. 
 
+In HOD-style models, there is a natural division between the component model methods that 
+get called by the `HodMockFactory`:
 
+1. methods that are called *prior* to the ``mc_occupation`` methods
+2. the ``mc_occupation`` methods themselves
+3. methods that are called *after* the ``mc_occupation`` methods.
+
+The reason for this classification is simple to understand. 
+For the first set of methods, memory has not yet been allocated for the ``galaxy_table`` 
+as the length of the table is determined by the result of the call to the ``mc_occupation`` 
+methods, which has stochastic behavior. 
+For the third set of methods, the ``galaxy_table`` length is determined, and so these 
+methods merely fill existing (empty) columns. 
+We will now describe how each of these method calls works in sequence.
 
 .. _galprops_assigned_before_mc_occupation: 
 
 Galaxy properties assigned prior to calling the occupation components 
-========================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All methods that are called prior to the ``mc_occupation`` methods 
+
 
 
 .. _determining_the_gal_type_slice:
