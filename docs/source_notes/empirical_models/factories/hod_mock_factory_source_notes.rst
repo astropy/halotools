@@ -75,7 +75,7 @@ Algorithm for populating HOD-style mocks
 .. _intro_to_np_repeat:
 
 Basics of `numpy.repeat`: the core function in HOD mock-making
-================================================================
+----------------------------------------------------------------
 
 Before going into the details of the `HodMockFactory.populate` method, 
 in this section we will first cover a basic introduction to the `numpy.repeat` function, 
@@ -115,6 +115,31 @@ halo catalog columns to `numpy.repeat`. In this way, the factory does not need t
 about how the ``occupations`` array comes into existence. The factory simply 
 only needs to repeatedly call `numpy.repeat` with the appropriate inputs that are 
 determined by the model. 
+
+
+Pre-processing phase
+----------------------
+
+The preliminary tasks of HOD mock-making are carried out by the 
+`~HodMockFactory.preprocess_halo_catalog` method. This first thing this function does 
+is to throw out subhalos from the halo catalog, and to apply a halo mass completeness cut. 
+You can control the completeness cut with the ``Num_ptcl_requirement`` keyword argument passed 
+to the `HodMockFactory` constructor (``Num_ptcl_requirement`` is also an optional keyword argument 
+that may be passed to the `HodModelFactory.populate_mock` method, which in turn passes this argument 
+on to the `HodMockFactory` constructor.)
+
+New columns are then added to the ``halo_table`` 
+according to any entries in the ``new_haloprop_func_dict``; any such columns will automatically be included 
+in the ``galaxy_table``. See :ref:`new_haloprop_func_dict_mechanism` for further details. 
+
+Memory allocation phase 
+---------------------------
+
+After pre-processing the halo catalog, memory must be allocated to store the ``galaxy_table``. 
+This is controlled by the `HodMockFactory.allocate_memory` method. 
+
+Mapping galaxy properties to the ``galaxy_table``
+------------------------------------------------------
 
 
 
