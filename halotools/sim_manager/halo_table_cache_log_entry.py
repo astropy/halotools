@@ -174,17 +174,17 @@ class HaloTableCacheLogEntry(object):
             msg += tmp_msg
             tmp_msg, num_failures = self._verify_metadata_consistency(num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_table_read(num_failures)
+            tmp_msg, num_failures, halo_table = self._verify_table_read(num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_has_required_data_columns(num_failures)
+            tmp_msg, num_failures = self._verify_has_required_data_columns(halo_table, num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_all_keys_begin_with_halo(num_failures)
+            tmp_msg, num_failures = self._verify_all_keys_begin_with_halo(halo_table, num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_all_positions_inside_box(num_failures)
+            tmp_msg, num_failures = self._verify_all_positions_inside_box(halo_table, num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_halo_ids_are_unique(num_failures)
+            tmp_msg, num_failures = self._verify_halo_ids_are_unique(halo_table, num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_halo_rvir_mpc_units(num_failures)
+            tmp_msg, num_failures = self._verify_halo_rvir_mpc_units(halo_table, num_failures)
             msg += tmp_msg
 
             # verification_sequence = ('_verify_h5py_extension',
@@ -214,14 +214,14 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            data = Table.read(self.fname, path='data')
+            halo_table = Table.read(self.fname, path='data')
         except:
             num_failures += 1
             msg = (str(num_failures)+". The hdf5 file must be readable with "
                 "Astropy \nusing the following syntax:\n\n"
                 ">>> halo_data = Table.read(fname, path='data')\n\n")
             pass
-        return msg, num_failures
+        return msg, num_failures, halo_table
 
 
     def _verify_metadata_consistency(self, num_failures):
@@ -276,14 +276,13 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures
 
 
-    def _verify_all_keys_begin_with_halo(self, num_failures):
+    def _verify_all_keys_begin_with_halo(self, halo_table, num_failures):
         """
         """
         msg = ''
 
         try:
-            data = Table.read(self.fname, path='data')
-            for key in list(data.keys()):
+            for key in list(halo_table.keys()):
                 try:
                     assert key[0:5] == 'halo_'
                 except AssertionError:
@@ -296,14 +295,13 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures
 
-    def _verify_has_required_data_columns(self, num_failures):
+    def _verify_has_required_data_columns(self, halo_table, num_failures):
         """
         """
         msg = ''
 
         try:
-            data = Table.read(self.fname, path='data')
-            keys = list(data.keys())
+            keys = list(halo_table.keys())
             try:
                 assert 'halo_x' in keys
                 assert 'halo_y' in keys
@@ -322,20 +320,19 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures
 
-    def _verify_all_positions_inside_box(self, num_failures):
+    def _verify_all_positions_inside_box(self, halo_table, num_failures):
         """
         """
         msg = ''
 
         try:
-            data = Table.read(self.fname, path='data')
             f = self.h5py.File(self.fname)
             Lbox = f.attrs['Lbox']
             f.close()
             try:
-                halo_x = data['halo_x']
-                halo_y = data['halo_y']
-                halo_z = data['halo_z']
+                halo_x = halo_table['halo_x'].data
+                halo_y = halo_table['halo_y'].data
+                halo_z = halo_table['halo_z'].data
 
                 assert np.all(halo_x >= 0)
                 assert np.all(halo_x <= Lbox)
@@ -355,24 +352,20 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures
 
-    def _verify_halo_ids_are_unique(self, num_failures):
+    def _verify_halo_ids_are_unique(self, halo_table, num_failures):
         """
         """
         msg = ''
 
         try:
-            data = Table.read(self.fname, path='data')
-            try:
-                halo_id = data['halo_id'].data
-                assert halo_id.dtype.str[1] in ('i','u')
-                assert len(halo_id) == len(set(halo_id))
-            except AssertionError:
-                num_failures += 1
-                msg = (str(num_failures)+". The ``halo_id`` column "
-                    "must contain a unique set of integers.\n\n"
-                    )
-        except:
-            pass
+            halo_id = halo_table['halo_id'].data
+            assert halo_id.dtype.str[1] in ('i','u')
+            assert len(halo_id) == len(set(halo_id))
+        except AssertionError:
+            num_failures += 1
+            msg = (str(num_failures)+". The ``halo_id`` column "
+                "must contain a unique set of integers.\n\n"
+                )
 
         return msg, num_failures
 
@@ -401,25 +394,21 @@ class HaloTableCacheLogEntry(object):
             msg = str(num_failures) + ". The input file must have '.hdf5' extension.\n\n"
         return msg, num_failures
 
-    def _verify_halo_rvir_mpc_units(self, num_failures):
+    def _verify_halo_rvir_mpc_units(self, halo_table, num_failures):
         """ Require that all values stored in the halo_rvir column
         are less than 50, a crude way to ensure that units are not kpc.
         """
         msg = ''
 
         try:
-            data = Table.read(self.fname, path='data')
-            try:
-                halo_rvir = data['halo_rvir']
-                assert np.all(halo_rvir < 50)
-            except AssertionError:
-                num_failures += 1
-                msg = (str(num_failures)+". All values of the "
-                    "``halo_rvir`` column\n"
-                    "must be less than 50, crudely ensuring you used Mpc/h units.\n\n"
-                    )
-        except:
-            pass
+            halo_rvir = halo_table['halo_rvir'].data
+            assert np.all(halo_rvir < 50)
+        except AssertionError:
+            num_failures += 1
+            msg = (str(num_failures)+". All values of the "
+                "``halo_rvir`` column\n"
+                "must be less than 50, crudely ensuring you used Mpc/h units.\n\n"
+                )
 
         return msg, num_failures
 
