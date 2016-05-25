@@ -524,6 +524,9 @@ class SubhaloModelFactory(ModelFactory):
                     component_model, methodname)
                 setattr(self, new_method_name, new_method_behavior)
 
+                docstring = getattr(component_model, methodname).__doc__
+                getattr(self, new_method_name).__doc__ = docstring
+
             attrs_to_inherit = list(set(
                 component_model._attrs_to_inherit))
             for attrname in attrs_to_inherit:
