@@ -206,7 +206,7 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         input_model_dictionary, supplementary_kwargs = (
-            self.parse_constructor_kwargs(**kwargs)
+            self._parse_constructor_kwargs(**kwargs)
             )
 
         super(SubhaloModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
@@ -237,7 +237,7 @@ class SubhaloModelFactory(ModelFactory):
         self.set_calling_sequence()
         self._test_dictionary_consistency()
 
-    def parse_constructor_kwargs(self, **kwargs):
+    def _parse_constructor_kwargs(self, **kwargs):
         """ Method used to parse the arguments passed to 
         the constructor into a model dictionary and supplementary arguments.
 

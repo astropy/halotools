@@ -19,7 +19,7 @@ We will start in :ref:`subhalo_model_factory_design_overview` with a high-level
 description of how the class creates a composite model from 
 a set of independently-defined features. In :ref:`subhalo_model_factory_parsing_kwargs` we describe 
 how the factory's `__init__` constructor parses the large number of optional inputs into a *model dictionary*. 
-In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. The syntax for using a composite model to create mock catalogs is covered in :ref:`populate_subhalo_mock_convenience_method`. 
+In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does in order to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. The syntax for using a composite model to create mock catalogs is covered in :ref:`populate_subhalo_mock_convenience_method`. 
 We conclude in :ref:`subhalo_model_factory_further_reading` by pointing to sections of documentation covering related aspects such as the algorithm for using `SubhaloModelFactory` instances to populate mocks. 
 
 .. _subhalo_model_factory_design_overview:
@@ -76,7 +76,7 @@ Inferring a model dictionary from the constructor inputs
 ===========================================================
 
 The first thing the `__init__` constructor of `~SubhaloModelFactory` does is to 
-pass all its arguments to the `~SubhaloModelFactory.parse_constructor_kwargs` method, 
+pass all its arguments to the `~SubhaloModelFactory._parse_constructor_kwargs` method, 
 which simply extracts (if present) ``galaxy_selection_func``, ``halo_selection_func`` and ``model_feature_calling_sequence`` from the arguments passed to ``__init__``; 
 all remaining arguments will be interpeted as model dictionary inputs. 
 For an explanation of ``galaxy_selection_func`` and ``halo_selection_func``, 
@@ -201,7 +201,7 @@ You can also populate alternative halo catalogs:
 
     from halotools.sim_manager import CachedHaloCatalog
     my_halocat = CachedHaloCatalog(simname = my_simname, redshift = my_redshift)
-    model.populate_mock(halocat = my_halocat)
+    model.populate_mock(my_halocat)
 
 You can use the syntax above to populate any instance of either 
 `~halotools.sim_manager.CachedHaloCatalog` or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 

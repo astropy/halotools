@@ -572,7 +572,7 @@ class HodModelFactory(ModelFactory):
         `set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
-        for component_model in list(self.model_dictionary.values()):
+        for component_model in self.model_dictionary.values():
             gal_type = component_model.gal_type
             feature_name = component_model.feature_name
 
