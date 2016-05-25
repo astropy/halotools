@@ -168,22 +168,42 @@ class HaloTableCacheLogEntry(object):
             return False
         else:
 
-            verification_sequence = ('_verify_h5py_extension',
-                '_verify_hdf5_has_complete_metadata',
-                '_verify_metadata_consistency',
-                '_verify_table_read',
-                '_verify_has_required_data_columns',
-                '_verify_all_keys_begin_with_halo',
-                '_verify_all_positions_inside_box',
-                '_verify_halo_ids_are_unique',
-                '_verify_halo_rvir_mpc_units')
+            tmp_msg, num_failures = self._verify_h5py_extension(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_hdf5_has_complete_metadata(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_metadata_consistency(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_table_read(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_has_required_data_columns(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_all_keys_begin_with_halo(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_all_positions_inside_box(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_halo_ids_are_unique(num_failures)
+            msg += tmp_msg
+            tmp_msg, num_failures = self._verify_halo_rvir_mpc_units(num_failures)
+            msg += tmp_msg
 
-            for verification_function in verification_sequence:
-                func = getattr(self, verification_function)
-                tmp_msg, num_failures = func(num_failures)
-                msg += tmp_msg
+            # verification_sequence = ('_verify_h5py_extension',
+            #     '_verify_hdf5_has_complete_metadata',
+            #     '_verify_metadata_consistency',
+            #     '_verify_table_read',
+            #     '_verify_has_required_data_columns',
+            #     '_verify_all_keys_begin_with_halo',
+            #     '_verify_all_positions_inside_box',
+            #     '_verify_halo_ids_are_unique',
+            #     '_verify_halo_rvir_mpc_units')
 
-            if num_failures > 0: self._cache_safety_message = message_preamble + msg
+            # for verification_function in verification_sequence:
+            #     func = getattr(self, verification_function)
+            #     tmp_msg, num_failures = func(num_failures)
+            #     msg += tmp_msg
+
+            if num_failures > 0: 
+                self._cache_safety_message = message_preamble + msg
 
             self._num_failures = num_failures
             return num_failures == 0
