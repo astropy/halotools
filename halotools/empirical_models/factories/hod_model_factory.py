@@ -594,6 +594,9 @@ class HodModelFactory(ModelFactory):
                 setattr(getattr(self, new_method_name), 'gal_type', gal_type)
                 setattr(getattr(self, new_method_name), 'feature_name', feature_name)
 
+                docstring = getattr(component_model, methodname).__doc__
+                getattr(self, new_method_name).__doc__ = docstring
+                
             attrs_to_inherit = list(set(
                 component_model._attrs_to_inherit))
             for attrname in attrs_to_inherit:

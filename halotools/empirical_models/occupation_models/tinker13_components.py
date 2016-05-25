@@ -405,10 +405,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         # by the composite model built by the HodModelFactory
         # Here we are overriding this attribute that is normally defined 
         # in the OccupationComponent super class
-        self._methods_to_inherit = (
-            ['mc_occupation', 'mean_occupation', 
-            'mean_stellar_mass', 'mean_log_halo_mass']
-            )
+        self._methods_to_inherit = ['mc_occupation', 'mean_occupation']
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
@@ -569,10 +566,7 @@ class Tinker13ActiveSats(OccupationComponent):
         # by the composite model built by the HodModelFactory
         # Here we are overriding this attribute that is normally defined 
         # in the OccupationComponent super class
-        self._methods_to_inherit = (
-            ['mc_occupation', 'mean_occupation', 
-            'mean_stellar_mass', 'mean_log_halo_mass']
-            )
+        self._methods_to_inherit = ['mc_occupation', 'mean_occupation']
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
