@@ -45,6 +45,9 @@ class HodMockFactory(MockFactory):
     attributes were requested by the model, such as xyz position,  
     central/satellite designation, star-formation rate, etc. 
 
+    See :ref:`hod_mock_factory_source_notes` 
+    for an in-depth tutorial on the mock-making algorithm. 
+
     """
 
     def __init__(self, Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement, 
@@ -216,7 +219,12 @@ class HodMockFactory(MockFactory):
         >>> model_instance.param_dict['logMmin'] = 12.1
         >>> model_instance.mock.populate()
 
+        See also 
+        ---------
+        :ref:`hod_mock_factory_source_notes`
+
         """
+
         # The _testing_mode keyword is for unit-testing only 
         # it has been intentionally left out of the docstring
         try:

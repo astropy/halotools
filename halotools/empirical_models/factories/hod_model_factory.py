@@ -1002,6 +1002,9 @@ class HodModelFactory(ModelFactory):
         You can then access the galaxy population via ``model.mock.galaxy_table``, 
         an Astropy `~astropy.table.Table`. 
 
+        See :ref:`hod_mock_factory_source_notes` 
+        for an in-depth tutorial on the mock-making algorithm. 
+
         Calling `populate_mock` triggers a halo catalog pre-processing phase that 
         only needs to be done once. After calling `populate_mock`, 
         if you want to repopulate the halo catalog, you should use the 
@@ -1089,6 +1092,10 @@ class HodModelFactory(ModelFactory):
 
         >>> model_instance.param_dict['logMmin'] = 12.1
         >>> model_instance.mock.populate()
+
+        See also 
+        --------
+        :ref:`hod_mock_factory_source_notes` 
 
         """
         ModelFactory.populate_mock(self, halocat, **kwargs)

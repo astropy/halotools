@@ -30,7 +30,8 @@ Basic syntax for making subhalo-based mocks
 The `SubhaloMockFactory` is responsible for one task: using a Halotools composite model 
 to populate a simulation with mock galaxies. To fulfill this one task, there are just 
 two required keyword arguments: ``model`` and ``halocat``. The model must be an instance 
-of a `SubhaloModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.CachedHaloCatalog`. 
+of a `SubhaloModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.CachedHaloCatalog` 
+or `~halotools.sim_manager.UserSuppliedHaloCatalog`.  
 For simplicity, in this tutorial we will assume that you are using the `SubhaloMockFactory`  
 to populate the default halo catalog. However, you can populate alternate halo catalogs 
 using the same syntax works with any instance of either 
@@ -43,7 +44,7 @@ with a composite model based on the prebuilt
 
 .. code-block:: python
 
-	behroozi10_model = SubhaloModelFactory('behroozi10')
+	behroozi10_model = PrebuiltSubhaloModelFactory('behroozi10')
 	default_halocat = CachedHaloCatalog()
 	mock = SubhaloMockFactory(model = behroozi10_model, halocat = default_halocat)
 
@@ -54,7 +55,7 @@ to improve the efficiency of MCMCs (see below for details).
 By default, instantiating the factory also triggers 
 the `SubhaloMockFactory.populate` method to be called. This is the method that actually creates 
 the galaxy population. By calling the `SubhaloMockFactory.populate` method, 
-a new ``galaxy_table`` attribute is created and bound to the instance. 
+a new ``galaxy_table`` attribute is created and bound to the ``mock`` instance. 
 The ``galaxy_table`` attribute stores an Astropy `~astropy.table.Table` object with one row 
 per mock galaxy and one column for every property assigned by the chosen composite model. 
 
