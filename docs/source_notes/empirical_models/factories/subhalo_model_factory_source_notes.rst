@@ -211,7 +211,7 @@ You can use the syntax above to populate any instance of either
 Further reading 
 ================
 
-Detailed documentation on the mock-population algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
+Detailed documentation on the mock-population algorithm is covered in :ref:`subhalo_mock_factory_source_notes`. 
 
 
 

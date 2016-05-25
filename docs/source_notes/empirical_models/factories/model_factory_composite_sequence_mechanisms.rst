@@ -144,7 +144,7 @@ When the `MockFactory` calls upon the component model methods, the only thing th
 gets passed to each methods is a ``table`` keyword argument. In *almost* all cases, 
 the table bound to this keyword is the ``galaxy_table`` that is in the process of 
 being generated (see the :ref:`galprops_assigned_before_mc_occupation` section of the 
-:ref:`hod_mock_factory_source_code_notes` documentation page for the only exception to this rule). 
+:ref:`hod_mock_factory_source_notes` documentation page for the only exception to this rule). 
 
 The ``galaxy_table`` differs from the ``halo_table`` in several respects. 
 In subhalo-based models, they will have the same length, but in HOD-style models 
