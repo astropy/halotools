@@ -899,15 +899,9 @@ class SubhaloModelFactory(ModelFactory):
         >>> model_instance.mock.populate()
 
         See also 
-        -----------        
-        :ref:`populating_mocks_with_alternate_sims_tutorial`
-
-        See also 
         -----------
         :ref:`basic_syntax_subhalo_mocks` 
         
-        :ref:`populating_mocks_with_alternate_sims_tutorial`
-
         """
         ModelFactory.populate_mock(self, halocat)
 

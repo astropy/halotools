@@ -32,8 +32,10 @@ to populate a simulation with mock galaxies. To fulfill this one task, there are
 two required keyword arguments: ``model`` and ``halocat``. The model must be an instance 
 of a `SubhaloModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.CachedHaloCatalog`. 
 For simplicity, in this tutorial we will assume that you are using the `SubhaloMockFactory`  
-to populate the default halo catalog. For documentation on populating alternative catalogs, 
-see :ref:`populating_mocks_with_alternate_sims_tutorial`. 
+to populate the default halo catalog. However, you can populate alternate halo catalogs 
+using the same syntax works with any instance of either 
+`~halotools.sim_manager.CachedHaloCatalog` or `~halotools.sim_manager.UserSuppliedHaloCatalog`.
+
 
 As a simple example, here is how to create an instance of the `SubhaloMockFactory` 
 with a composite model based on the prebuilt 

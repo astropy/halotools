@@ -1090,10 +1090,6 @@ class HodModelFactory(ModelFactory):
         >>> model_instance.param_dict['logMmin'] = 12.1
         >>> model_instance.mock.populate()
 
-        See also 
-        -----------        
-        :ref:`populating_mocks_with_alternate_sims_tutorial`
-
         """
         ModelFactory.populate_mock(self, halocat, **kwargs)
 

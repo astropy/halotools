@@ -203,8 +203,8 @@ You can also populate alternative halo catalogs:
     my_halocat = CachedHaloCatalog(simname = my_simname, redshift = my_redshift)
     model.populate_mock(halocat = my_halocat)
 
-To read more about the options you have for populating mocks, see 
-:ref:`populating_mocks_with_alternate_sims_tutorial`. 
+You can use the syntax above to populate any instance of either 
+`~halotools.sim_manager.CachedHaloCatalog` or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
 
 .. _subhalo_model_factory_further_reading:
 
