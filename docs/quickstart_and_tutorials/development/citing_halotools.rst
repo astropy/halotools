@@ -36,6 +36,8 @@ tagging the issue with the ``feature request`` label and/or ``question`` label.
 Halotools License 
 ---------------------
 
+Halotools is licensed under a 3-clause BSD style license - see the licenses/LICENSE.rst file.
+
 Copyright (c) 2015, Andrew Hearin
 All rights reserved.
 
