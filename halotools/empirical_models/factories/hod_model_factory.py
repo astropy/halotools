@@ -33,6 +33,10 @@ class HodModelFactory(ModelFactory):
     provided by Halotools, 
     instead see `~halotools.empirical_models.PrebuiltHodModelFactory`. 
 
+    All HOD-style composite models can directly populate catalogs of dark matter halos. 
+    For an in-depth description of how Halotools implements this mock-generation, see 
+    :ref:`hod_mock_factory_source_notes`.
+
     The arguments passed to the `HodModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
     both of which have explicit examples provided below. 
@@ -193,6 +197,13 @@ class HodModelFactory(ModelFactory):
 
         The ``new_model_instance`` and the original ``model_instance`` are identical in every respect 
         except for the assembly bias of central galaxy occupation. 
+
+        See also 
+        ---------
+        :ref:`hod_model_factory_source_notes`
+
+        :ref:`hod_mock_factory_source_notes`
+
         """
 
         input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(

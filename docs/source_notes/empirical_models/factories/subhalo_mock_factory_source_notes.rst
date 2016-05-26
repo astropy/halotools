@@ -11,7 +11,7 @@ Tutorial on the algorithm for subhalo-based mock-making
 This section of the documentation provides detailed notes 
 for how the `SubhaloMockFactory` populates subhalo catalogs with synthetic galaxy populations. 
 The `SubhaloMockFactory` uses composite models built with the `SubhaloModelFactory`, which 
-is documented in the :ref:`subhalo_model_factory_tutorial`. 
+is documented in the :ref:`subhalo_model_factory_source_notes`. 
 
 
 Outline 

@@ -173,6 +173,9 @@ class HodMockFactory(MockFactory):
         whatever values of the model parameters are currently stored in the 
         model ``param_dict``. 
 
+        For an in-depth discussion of how this method is implemented, 
+        see the :ref:`hod_mock_factory_source_notes` section of the documentation. 
+
         Parameters 
         ------------
         masking_function : function, optional 

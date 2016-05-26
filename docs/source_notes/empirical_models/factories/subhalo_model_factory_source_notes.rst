@@ -2,7 +2,7 @@
 
 .. currentmodule:: halotools.empirical_models
 
-.. _subhalo_model_factory_tutorial:
+.. _subhalo_model_factory_source_notes:
 
 ****************************************************
 Source code notes on `SubhaloModelFactory`

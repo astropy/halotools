@@ -32,6 +32,10 @@ class SubhaloModelFactory(ModelFactory):
     provided by Halotools, 
     instead see `~halotools.empirical_models.PrebuiltSubhaloModelFactory`. 
 
+    All subhalo-based composite models can directly populate catalogs of dark matter halos. 
+    For an in-depth description of how Halotools implements this mock-generation, see 
+    :ref:`subhalo_mock_factory_source_notes`.
+
     The arguments passed to the `SubhaloModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
     both of which have explicit examples provided below. 
@@ -65,7 +69,6 @@ class SubhaloModelFactory(ModelFactory):
         """
         Parameters
         ------------------------------------
-
         *model_features : sequence of keyword arguments, optional 
             Each keyword you use will be interpreted as the name 
             of a feature in the composite model, 
@@ -196,12 +199,11 @@ class SubhaloModelFactory(ModelFactory):
 
         >>> new_model_instance = SubhaloModelFactory(stellar_mass = moster_model, baseline_model_instance = model_instance, model_feature_calling_sequence = ['stellar_mass', 'sfr'])
 
+        See also 
+        ---------
+        :ref:`subhalo_model_factory_source_notes`
 
-        Notes 
-        ------------------------------------
-        See :ref:`subhalo_model_factory_tutorial` for documentation on the internals of the factory. 
-
-        This factory is tested by the `~halotools.empirical_models.TestSubhaloModelFactory` class. 
+        :ref:`subhalo_mock_factory_source_notes`
 
         """
 
