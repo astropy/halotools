@@ -176,16 +176,15 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    For demonstration purposes we create a randomly distributed set of points 
+    within a periodic cube of box length Lbox = 250 Mpc/h. 
     
     >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> Lbox = 250.
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
@@ -195,17 +194,17 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     
     Create some 'randoms' in the same way:
     
-    >>> x = np.random.random(Npts*3)
-    >>> y = np.random.random(Npts*3)
-    >>> z = np.random.random(Npts*3)
-    >>> ran_coords = np.vstack((x,y,z)).T
+    >>> Nran = Npts*2
+    >>> xran = np.random.uniform(0, Lbox, Nran)
+    >>> yran = np.random.uniform(0, Lbox, Nran)
+    >>> zran = np.random.uniform(0, Lbox, Nran)
+    >>> randoms = np.vstack((x,y,z)).T
     
-    Divide the volume into 4^3 samples:
+    Calculate the jackknife covariance matrix by dividing the simulation box 
+    into 4 samples per dimension (for a total of 4^3 total jackknife samples):
     
-    >>> Nsub = np.array([4,4,4])
-    
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> xi, cov = tpcf_jackknife(coords, ran_coords, rbins, Nsub=Nsub, period=period)
+    >>> rbins = np.logspace(-1, 1, 10)
+    >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=4, period=Lbox)
     """
     
     #process input parameters
