@@ -46,7 +46,7 @@ Tutorials
    tutorials/model_building/index
    tutorials/catalog_analysis/galcat_analysis/index
    tutorials/catalog_analysis/halocat_analysis/index
-   ../source_notes/empirical_models/factories/hod_mock_factory_source_notes
+   ../source_notes/empirical_models/factories/index
 
 
 Developer Documentation
