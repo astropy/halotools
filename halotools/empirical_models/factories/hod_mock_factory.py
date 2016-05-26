@@ -205,7 +205,8 @@ class HodMockFactory(MockFactory):
         >>> halocat = FakeSim()
         >>> model_instance.populate_mock(halocat)
 
-        Your ``model_instance`` now has a ``mock`` attribute bound to it. 
+        Your ``model_instance`` now has a ``mock`` attribute bound to it, 
+        which is an instance of the `~halotools.empirical_models.HodMockFactory` class. 
         You can call the `populate` method bound to the ``mock``, 
         which will repopulate the halo catalog with a new Monte Carlo 
         realization of the model. 
@@ -213,7 +214,9 @@ class HodMockFactory(MockFactory):
         >>> model_instance.mock.populate()
 
         If you want to change the behavior of your model, just change the 
-        values stored in the ``param_dict``. Differences in the parameter values 
+        values stored in the ``param_dict``. The ``param_dict`` attribute 
+        is a python dictionary storing the values of all parameters in the model. 
+        Differences in the parameter values 
         will change the behavior of the mock-population. 
 
         >>> model_instance.param_dict['logMmin'] = 12.1
@@ -327,6 +330,7 @@ class HodMockFactory(MockFactory):
         galprops_assigned_to_halo_table = []
         for func_name in self.model._mock_generation_calling_sequence:
             if 'mc_occupation' in func_name:
+                # exit when we encounter a ``mc_occupation_`` function
                 break
             else:
                 func = getattr(self.model, func_name)
