@@ -32,6 +32,10 @@ class SubhaloModelFactory(ModelFactory):
     provided by Halotools, 
     instead see `~halotools.empirical_models.PrebuiltSubhaloModelFactory`. 
 
+    All subhalo-based composite models can directly populate catalogs of dark matter halos. 
+    For an in-depth description of how Halotools implements this mock-generation, see 
+    :ref:`subhalo_mock_factory_source_notes`.
+
     The arguments passed to the `SubhaloModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
     both of which have explicit examples provided below. 
@@ -65,7 +69,6 @@ class SubhaloModelFactory(ModelFactory):
         """
         Parameters
         ------------------------------------
-
         *model_features : sequence of keyword arguments, optional 
             Each keyword you use will be interpreted as the name 
             of a feature in the composite model, 
@@ -196,17 +199,16 @@ class SubhaloModelFactory(ModelFactory):
 
         >>> new_model_instance = SubhaloModelFactory(stellar_mass = moster_model, baseline_model_instance = model_instance, model_feature_calling_sequence = ['stellar_mass', 'sfr'])
 
+        See also 
+        ---------
+        :ref:`subhalo_model_factory_source_notes`
 
-        Notes 
-        ------------------------------------
-        See :ref:`subhalo_model_factory_tutorial` for documentation on the internals of the factory. 
-
-        This factory is tested by the `~halotools.empirical_models.TestSubhaloModelFactory` class. 
+        :ref:`subhalo_mock_factory_source_notes`
 
         """
 
         input_model_dictionary, supplementary_kwargs = (
-            self.parse_constructor_kwargs(**kwargs)
+            self._parse_constructor_kwargs(**kwargs)
             )
 
         super(SubhaloModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
@@ -237,7 +239,7 @@ class SubhaloModelFactory(ModelFactory):
         self.set_calling_sequence()
         self._test_dictionary_consistency()
 
-    def parse_constructor_kwargs(self, **kwargs):
+    def _parse_constructor_kwargs(self, **kwargs):
         """ Method used to parse the arguments passed to 
         the constructor into a model dictionary and supplementary arguments.
 
@@ -848,6 +850,9 @@ class SubhaloModelFactory(ModelFactory):
         You can then access the galaxy population via ``model.mock.galaxy_table``, 
         an Astropy `~astropy.table.Table`. 
 
+        See :ref:`subhalo_mock_factory_source_notes` 
+        for an in-depth tutorial on the mock-making algorithm. 
+
         Calling `populate_mock` triggers a halo catalog pre-processing phase that 
         only needs to be done once. After calling `populate_mock`, 
         if you want to repopulate the halo catalog, you should use the 
@@ -902,15 +907,9 @@ class SubhaloModelFactory(ModelFactory):
         >>> model_instance.mock.populate()
 
         See also 
-        -----------        
-        :ref:`populating_mocks_with_alternate_sims_tutorial`
-
-        See also 
         -----------
-        :ref:`basic_syntax_subhalo_mocks` 
+        :ref:`subhalo_mock_factory_source_notes` 
         
-        :ref:`populating_mocks_with_alternate_sims_tutorial`
-
         """
         ModelFactory.populate_mock(self, halocat)
 

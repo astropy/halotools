@@ -33,6 +33,10 @@ class HodModelFactory(ModelFactory):
     provided by Halotools, 
     instead see `~halotools.empirical_models.PrebuiltHodModelFactory`. 
 
+    All HOD-style composite models can directly populate catalogs of dark matter halos. 
+    For an in-depth description of how Halotools implements this mock-generation, see 
+    :ref:`hod_mock_factory_source_notes`.
+
     The arguments passed to the `HodModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
     both of which have explicit examples provided below. 
@@ -193,6 +197,13 @@ class HodModelFactory(ModelFactory):
 
         The ``new_model_instance`` and the original ``model_instance`` are identical in every respect 
         except for the assembly bias of central galaxy occupation. 
+
+        See also 
+        ---------
+        :ref:`hod_model_factory_source_notes`
+
+        :ref:`hod_mock_factory_source_notes`
+
         """
 
         input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(
@@ -572,7 +583,7 @@ class HodModelFactory(ModelFactory):
         `set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
-        for component_model in list(self.model_dictionary.values()):
+        for component_model in self.model_dictionary.values():
             gal_type = component_model.gal_type
             feature_name = component_model.feature_name
 
@@ -1005,6 +1016,9 @@ class HodModelFactory(ModelFactory):
         You can then access the galaxy population via ``model.mock.galaxy_table``, 
         an Astropy `~astropy.table.Table`. 
 
+        See :ref:`hod_mock_factory_source_notes` 
+        for an in-depth tutorial on the mock-making algorithm. 
+
         Calling `populate_mock` triggers a halo catalog pre-processing phase that 
         only needs to be done once. After calling `populate_mock`, 
         if you want to repopulate the halo catalog, you should use the 
@@ -1094,8 +1108,8 @@ class HodModelFactory(ModelFactory):
         >>> model_instance.mock.populate()
 
         See also 
-        -----------        
-        :ref:`populating_mocks_with_alternate_sims_tutorial`
+        --------
+        :ref:`hod_mock_factory_source_notes` 
 
         """
         ModelFactory.populate_mock(self, halocat, **kwargs)

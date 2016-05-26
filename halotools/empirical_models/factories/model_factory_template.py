@@ -134,6 +134,10 @@ class ModelFactory(object):
         model will automatically propagate into the behavior of 
         the `~halotools.empirical_models.MockFactory.populate` method. 
 
+        See the :ref:`mock_making_tutorials` section of the documentation for 
+        an in-depth description of the Halotools source-code implementation 
+        of mock galaxy population. 
+
         Parameters 
         ----------
         halocat : object 
@@ -204,6 +208,10 @@ class ModelFactory(object):
 
         >>> model_instance.param_dict['logMmin'] = 12.1
         >>> model_instance.mock.populate()
+
+        See also 
+        ---------
+        :ref:`mock_making_tutorials`
 
         """
         if hasattr(self, 'redshift'):

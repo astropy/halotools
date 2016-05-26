@@ -3,7 +3,7 @@
 .. _features_planned_for_next_release:
 
 ***************************************
-Features planned for Halotools v0.2
+Features planned for Halotools v0.3
 ***************************************
 
 Many of the features below already have development branches 
@@ -15,7 +15,7 @@ would be interested in using Halotools for an application
 that is not currently supported and does not appear in this list, 
 you can submit a feature request on the 
 `Halotools Issues page <https://github.com/astropy/halotools/issues>`_ 
-by raising a new issue and attaching the *feature request* label. 
+by raising a new issue and attaching the *feature-request* label. 
 
 Empirical Models 
 ==================
@@ -28,6 +28,4 @@ Empirical Models
 
 Mock Observables 
 =================
-* Optimization of the pair-counting engine 
-* Conformity calculations 
 * Large-scale topology identification
