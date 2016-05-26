@@ -73,7 +73,7 @@ The ``galprop_dtypes_to_allocate`` mechanism
 Whenever a component model is used during mock population, the mock factory passes a ``table`` keyword 
 argument to the methods of the component. It is important that the table passed to the function has the necessary columns assumed by the function. 
 
-Every component model assigns some property or set of properties to the mock population of galaxies. In mock population, the synthetic galaxy population is stored in the ``galaxy_table`` bound to the mock object. The ``galaxy_table`` is an Astropy `~astropy.table.Table` object, with columns storing every galaxy property assigned by the composite model. The ``_galprop_dtypes_to_allocate`` mechanism is responsible for creating the columns of the ``galaxy_table`` and making sure they are appropriately formatted. 
+Every component model assigns some property or set of properties to the mock population of galaxies. In mock population, the synthetic galaxy population is stored in the ``galaxy_table`` bound to the mock object. The ``galaxy_table`` is an Astropy `~astropy.table.Table` object, with columns storing every galaxy property assigned by the composite model. The ``_galprop_dtypes_to_allocate`` mechanism is responsible for creating the necessary columns of the ``galaxy_table`` and making sure they are appropriately formatted. 
 
 If you are writing your own model component of any kind, the model factories require that instances of your model have a ``_galprop_dtypes_to_allocate`` attribute. You can meet this specification by assigning any `numpy.dtype` object to the ``_galprop_dtypes_to_allocate`` attribute during the `__init__` constructor of your componenent model (even if the dtype is empty). See :ref:`composing_new_models` for many examples. 
 

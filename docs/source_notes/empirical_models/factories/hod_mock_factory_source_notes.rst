@@ -36,9 +36,9 @@ with a composite model based on the prebuilt
 
 .. code-block:: python
 
-	zheng07_model = PrebuiltHodModelFactory('zheng07')
-	default_halocat = CachedHaloCatalog()
-	mock = HodMockFactory(model = zheng07_model, halocat = default_halocat)
+    zheng07_model = PrebuiltHodModelFactory('zheng07')
+    default_halocat = CachedHaloCatalog()
+    mock = HodMockFactory(model = zheng07_model, halocat = default_halocat)
 
 Instantiating the `HodMockFactory` triggers the pre-processing phase of mock population. 
 Briefly, this phase does as many tasks in advance of actual mock population as possible 
@@ -60,7 +60,7 @@ by the `HodModelFactory.populate_mock` method, which is just a convenience wrapp
 
 .. code-block:: python 
 
-	zheng07_model.populate_mock(default_halocat)
+    zheng07_model.populate_mock(default_halocat)
 
 This is essentially equivalent to the three lines of code written above. The only difference is that 
 in the above line will create a ``mock`` attribute that is bound to ``zheng07_model``; this ``mock`` 
@@ -157,20 +157,158 @@ get called by the `HodMockFactory`:
 2. the ``mc_occupation`` methods themselves
 3. methods that are called *after* the ``mc_occupation`` methods.
 
-The reason for this classification is simple to understand. 
 For the first set of methods, memory has not yet been allocated for the ``galaxy_table`` 
 as the length of the table is determined by the result of the call to the ``mc_occupation`` 
 methods, which has stochastic behavior. 
-For the third set of methods, the ``galaxy_table`` length is determined, and so these 
-methods merely fill existing (empty) columns. 
-We will now describe how each of these method calls works in sequence.
+For the third set of methods, the length of the ``galaxy_table`` has already been 
+determined, and so these methods merely fill existing (empty) columns of the ``galaxy_table``. 
 
 .. _galprops_assigned_before_mc_occupation: 
 
-Galaxy properties assigned prior to calling the occupation components 
+Galaxy properties assigned prior to the ``mc_occupation`` methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All methods that are called prior to the ``mc_occupation`` methods 
+As described above, the functions whose names appear in the 
+``_remaining_methods_to_call`` list are called in sequence by the `HodMockFactory`. 
+For all functions that appear in this list *prior* to the first appearance of the 
+``mc_occupation_`` functions, the data structure passed to the functions 
+via the *table* keyword is the (post-processed) ``mock.halo_table``. 
+Thus whatever values these functions compute, the result of the functions 
+will be stored in ``mock.halo_table``. The reason that the functions in this phase 
+are not directly passed ``mock.galaxy_table`` is because we do not know how many 
+elements this table will have until calling the ``mc_occupation_`` methods. 
+Moreover, functions in this phase are by definition modeling some 
+property of the galaxy population that does not even need to know 
+which galaxies the property pertains to. Thus these model functions can only depend on 
+the underlying halo, and so these models should have sufficient knowledge to map 
+their results on an input halo catalog. 
+
+All the same, any function in the ``_mock_generation_calling_sequence`` should have 
+the results of its computations applied to the ``galaxy_table``. As we will see 
+in the next section, this transfer of information can be accomplished with 
+`numpy.repeat`. Before that, let's look at the source code that generates 
+the behavior we just described. 
+
+.. code-block:: python
+
+    self.galaxy_table = Table() # ``self`` refers to the ``mock`` object
+
+    self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
+
+    galprops_assigned_to_halo_table = []
+    for func_name in self.model._mock_generation_calling_sequence:
+        if 'mc_occupation' in func_name:
+            break
+        else:
+            func = getattr(self.model, func_name)
+            func(table = self.halo_table)
+            galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
+            galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
+            self._remaining_methods_to_call.remove(func_name)
+
+    self.additional_haloprops.extend(galprops_assigned_to_halo_table)
+
+
+After executing the above for loop, all functions in the ``_mock_generation_calling_sequence`` 
+that appear prior to the ``mc_occupation_`` methods will have been executed after being 
+passed the ``halo_table`` as the data structure bound to the ``table`` keyword argument. 
+Additionally, the ``galprops_assigned_to_halo_table_by_func`` list works with  
+:ref:`galprop_dtypes_to_allocate_mechanism` mechanism to keep track of 
+which data columns we will pass on from the ``halo_table`` to the ``galaxy_table`` 
+after allocating memory for the ``galaxy_table`` with the ``mc_occupation_`` methods. 
+After calling the ``mc_occupation_`` methods, we will use `numpy.repeat` to transfer all columns 
+appearing in ``additional_haloprops`` from the ``halo_table`` to the ``galaxy_table``.
+
+
+Calling the ``mc_occupation_`` methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `HodMockFactory` marches through the mock-generation functions listed 
+in ``_mock_generation_calling_sequence`` until the first time a function with name 
+``mc_occupation_`` appears, triggering a new phase of the mock generation in which 
+memory is allocated to the ``galaxy_table``. 
+
+The basic way this next phase works is as follows. The ``halo_table`` is passed 
+to each of the ``mc_occupation_`` functions; these functions are called in the sequence 
+in which their corresponding ``gal_type`` appears in ``self.gal_types``. 
+For each ``gal_type`` in the composite model, 
+the ``mc_occupation_gal_type`` function call will calculate a length-*Nhalos* array 
+of integers that determines how many galaxies of that type belong in each halo. 
+This integer array is stored in a private python dictionary ``self._occupation``; 
+there are *num_gal_types* keys in ``self._occupation``, 
+one for each array of occupations. 
+
+Discussion of the ``mc_occupation_`` phase continues below the following source code 
+that controls the behavior we are describing. 
+
+.. code-block:: python
+
+    self._occupation = {}
+    self._total_abundance = {}
+    self._gal_type_indices = {}
+
+    first_galaxy_index = 0
+    for gal_type in self.gal_types:
+        occupation_func_name = 'mc_occupation_'+gal_type
+        occupation_func = getattr(self.model, occupation_func_name)
+        # Call the component model to get a Monte Carlo
+        # realization of the abundance of gal_type galaxies
+        self._occupation[gal_type] = occupation_func(table=self.halo_table) 
+
+        # Now use the above result to set up the indexing scheme
+        self._total_abundance[gal_type] = (
+            self._occupation[gal_type].sum()
+            )
+        last_galaxy_index = first_galaxy_index + self._total_abundance[gal_type]
+        # Build a bookkeeping device to keep track of 
+        # which array elements pertain to which gal_type. 
+        self._gal_type_indices[gal_type] = slice(
+            first_galaxy_index, last_galaxy_index)
+        first_galaxy_index = last_galaxy_index
+        # Remove the mc_occupation function from the list of methods to call
+        self._remaining_methods_to_call.remove(occupation_func_name)
+        galprops_assigned_to_halo_table_by_func = occupation_func._galprop_dtypes_to_allocate.names
+        self.additional_haloprops.extend(galprops_assigned_to_halo_table_by_func)
+        
+    self.Ngals = np.sum(list(self._total_abundance.values()))
+
+
+After calling the ``occupation_func`` for a given ``gal_type``, we know exactly how many 
+galaxies of that type will appear in our mock. The total abundance of galaxies of a given 
+type is stored in the ``self._total_abundance`` dictionary. The keys and integers stored 
+in this dictionary determine the memory layout of the ``galaxy_table``. Suppose we have 
+three galaxy types, ``centrals``, ``satellites`` and ``splashbacks``. The first 
+``num_centrals = self._total_abundance['centrals']`` rows of the ``galaxy_table`` 
+store the information about our population of centrals; the next ``num_satellites`` 
+are dedicated to the satellites; the final ``num_orphans`` stores the orphan properties. 
+
+Once these bookkeeping dictionaries have been built, allocating memory for the ``galaxy_table`` 
+is straightforward. We just need to initialize all the columns to which values will be 
+assigned by the functions that still appear in ``self._remaining_methods_to_call``. 
+The initialization is just a `numpy.zeros` array of the appropriate data type. 
+These arrays will be filled during the third and final stage of mock-making. 
+
+.. code-block:: python
+
+    # Allocate memory for all additional halo properties
+    for halocatkey in self.additional_haloprops:
+        self.galaxy_table[halocatkey] = np.zeros(self.Ngals, 
+            dtype = self.halo_table[halocatkey].dtype)
+
+    # Separately allocate memory for the galaxy profile parameters
+    for galcatkey in self.model.prof_param_keys:
+        self.galaxy_table[galcatkey] = 0.
+
+    self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)
+
+    dt = self.model._galprop_dtypes_to_allocate
+    for key in dt.names:
+        self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
+
+
+Final stage: galaxy properties assigned after the ``mc_occupation`` methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
 
@@ -184,3 +322,25 @@ and explains the following mechanism.
 
 setattr(getattr(self, new_method_name), 'gal_type', gal_type) # line 4
 setattr(getattr(self, new_method_name), 'feature_name', feature_name) # line 5
+
+
+
+
+
+
+
+
+.. _which_data_table_hod_mock_making:
+
+Summary: which data table is passed to the ``table`` keyword argument in HOD mock-making?
+===========================================================================================
+
+As described in detail in :ref:`hod_modeling_tutorial0`, all methods in the 
+``_mock_generation_calling_sequence`` must accept a ``table`` keyword argument. 
+
+
+
+
+
+
+
