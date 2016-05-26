@@ -182,9 +182,10 @@ the flexibility of the model factories.
 Note also how in lines 4 and 5 that we bind additional data to the newly created methods of the 
 composite model. In particular, every method passed from a component model to a 
 composite model binds the name of its associated ``gal_type`` and ``feature_name`` to the 
-inherited method. As described in the :ref:`determining_the_gal_type_slice` section of  
-:ref:`hod_mock_factory_source_notes`, this information informs the `HodMockFactory` 
-of the appropriate data to pass to each component model. 
+inherited method. This information informs the `HodMockFactory` 
+of the appropriate data to pass to each component model 
+(see the conclusion of the :ref:`mock_generation_functions_after_mc_occupation` section of the 
+:ref:`hod_mock_factory_source_notes` for details about how the mock factory uses this information). 
 
 .. _populate_hod_mock_convenience_method:
 

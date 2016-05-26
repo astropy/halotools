@@ -5,7 +5,7 @@
 .. _hod_mock_factory_source_notes:
 
 ********************************************************************
-Source code notes on `HodMockFactory` 
+Tutorial on the algorithm for making mocks with HOD-style models
 ********************************************************************
 
 This section of the documentation provides detailed notes 
@@ -13,59 +13,62 @@ for how the `HodMockFactory` populates halo catalogs with synthetic galaxy popul
 The `HodMockFactory` uses composite models built with the `HodModelFactory`, which 
 is documented in the :ref:`hod_model_factory_source_notes`. 
 
+The bookkeeping of every step of the mock-generation is described in detail below. 
+The design of the algorithm was built around the following considerations: 
+
+1. The `HodMockFactory` should be able to correctly control mock-generation for a wide variety of (possibly inter-dependent) mappings from a halo table to a galaxy table. 
+2. It should be easy for users to include just a single additional component model without having to worry about any of the tedious bookkeeping of how memory is allocated for other galaxy properties or galaxy types. 
+
+These two goals together drive the `HodMockFactory` to be written with a high-level of abstraction. 
+So the price paid for the modeling flexibility and the user-friendliness of modeling 
+new features is that the `HodMockFactory` gluing these behaviors together is complex. 
+In this tutorial we describe every step in this abstract process, 
+including a detailed look at the source code. 
+
+Outline 
+========
+
+We will start in :ref:`basic_syntax_hod_mocks` with a high-level overview of the functionality 
+of the `HodMockFactory` class. We provide detailed 
+notes on the source code of the mock factory in :ref:`hod_mock_algorithm`. 
 
 .. _basic_syntax_hod_mocks:
 
 Basic syntax for making HOD-style mocks
 ===============================================
 
-The `HodMockFactory` is responsible for one task: using a Halotools composite model 
-to populate a simulation with mock galaxies. To fulfill this one task, there are just 
-two required keyword arguments: ``model`` and ``halocat``. The model must be an instance 
-of a `HodModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.CachedHaloCatalog` 
-or `~halotools.sim_manager.UserSuppliedHaloCatalog`.  
-For simplicity, in this tutorial we will assume that you are using the `HodMockFactory`  
-to populate the default halo catalog. However, you can populate alternate halo catalogs 
-using the same syntax works with any instance of either 
-`~halotools.sim_manager.CachedHaloCatalog` or `~halotools.sim_manager.UserSuppliedHaloCatalog`.
+The most common way to interact with 
+instances of the `HodMockFactory` is as an attribute of the composite model you 
+are using to generate the mock. For example, the code snippet below shows how 
+the `~HodModelFactory.populate_mock` method creates a ``mock`` object to 
+the composite model, which in this case will be a model based on Zheng et al. (2007):
 
-
-As a simple example, here is how to create an instance of the `HodMockFactory` 
-with a composite model based on the prebuilt 
-`~halotools.empirical_models.zheng07_model_dictionary`:
-
-.. code-block:: python
-
+.. code-block:: python 
+    
+    from halotools.empirical_models import PrebuiltHodModelFactory
     zheng07_model = PrebuiltHodModelFactory('zheng07')
-    default_halocat = CachedHaloCatalog()
-    mock = HodMockFactory(model = zheng07_model, halocat = default_halocat)
 
-Instantiating the `HodMockFactory` triggers the pre-processing phase of mock population. 
+    from halotools.sim_manager import CachedHaloCatalog
+    default_halocat = CachedHaloCatalog()
+
+    zheng07_model.populate_mock(default_halocat)
+
+The final line of code above creates the ``zheng07_model.mock`` attribute, 
+an instance of `HodMockFactory`. 
+
+The `HodMockFactory` is responsible for one task: using a Halotools composite model 
+to populate a simulation with mock galaxies. 
+When the `HodModelFactory.populate_mock` method first creates a ``model.mock`` instance, 
+the instantiation of `HodMockFactory` triggers the pre-processing phase of mock population. 
 Briefly, this phase does as many tasks in advance of actual mock population as possible 
 to improve the efficiency of MCMCs (see below for details). 
 
 By default, instantiating the factory also triggers 
 the `HodMockFactory.populate` method to be called. This is the method that actually creates 
 the galaxy population. By calling the `HodMockFactory.populate` method, 
-a new ``galaxy_table`` attribute is created and bound to the ``mock`` instance. 
+a new ``galaxy_table`` attribute is created and bound to the ``model.mock`` instance. 
 The ``galaxy_table`` attribute stores an Astropy `~astropy.table.Table` object with one row 
 per mock galaxy and one column for every property assigned by the chosen composite model. 
-
-An aside on the ``populate_mock`` convenience function 
----------------------------------------------------------
-
-Probably the most common way in which you will actually interact with the `~HodMockFactory` is 
-by the `HodModelFactory.populate_mock` method, which is just a convenience wrapper around the 
-`HodMockFactory.populate` method. Consider the following call to this function:
-
-.. code-block:: python 
-
-    zheng07_model.populate_mock(default_halocat)
-
-This is essentially equivalent to the three lines of code written above. The only difference is that 
-in the above line will create a ``mock`` attribute that is bound to ``zheng07_model``; this ``mock`` 
-attribute is simply an instance of the `~HodMockFactory`. 
-
 
 .. _hod_mock_algorithm:
 
@@ -305,11 +308,84 @@ These arrays will be filled during the third and final stage of mock-making.
     for key in dt.names:
         self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
 
+.. _mock_generation_functions_after_mc_occupation:
 
 Final stage: galaxy properties assigned after the ``mc_occupation`` methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+After the ``galaxy_table`` has been initialized, the ``allocate_memory`` method 
+is complete and control is returned to the ``populate`` method. The first 
+thing the ``populate`` method does is transfer all the necessary halo properties 
+from the ``halo_table`` to the ``galaxy_table``. Recall the ``galaxy_table`` memory layout 
+described in the previous section when viewing the following code block:
 
+.. code-block:: python
+
+    for gal_type in self.gal_types:
+
+        # Retrieve the indices of our pre-allocated arrays 
+        # that store the info pertaining to gal_type galaxies
+        gal_type_slice = self._gal_type_indices[gal_type]
+        # gal_type_slice is a slice object
+
+        self.galaxy_table['gal_type'][gal_type_slice] = (
+            np.repeat(gal_type, self._total_abundance[gal_type],axis=0))
+
+        # Store all other relevant host halo properties into their 
+        # appropriate pre-allocated array 
+        for halocatkey in self.additional_haloprops:
+            self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
+                self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
+
+At this point, the ``galaxy_table`` stores all the halo properties needed by 
+the composite model, and so when we proceed to call the remaining mock-generation 
+functions, we can safely pass these functions the appropriate slice of the 
+``galaxy_table`` and rest assured that the functions will have all the information 
+they need to assign whatever property they are responsible for. 
+
+The functions responsible for modeling the intra-halo distribution of galaxies 
+(e.g., an `NFWProfile` for satellites and a `TrivialProfile` for centrals) 
+model *host-centric* positions, so we initialize the positions of each galaxy 
+to be at its halo center. 
+
+.. code-block:: python
+
+    self.galaxy_table['x'] = self.galaxy_table['halo_x']
+    self.galaxy_table['y'] = self.galaxy_table['halo_y']
+    self.galaxy_table['z'] = self.galaxy_table['halo_z']
+    self.galaxy_table['vx'] = self.galaxy_table['halo_vx']
+    self.galaxy_table['vy'] = self.galaxy_table['halo_vy']
+    self.galaxy_table['vz'] = self.galaxy_table['halo_vz']
+
+Finally, the loop below is where all the action happens with galaxy property assignment:
+
+.. code-block:: python
+
+    for method in self._remaining_methods_to_call:
+        func = getattr(self.model, method)
+        gal_type_slice = self._gal_type_indices[func.gal_type]
+        func(table = self.galaxy_table[gal_type_slice])
+
+We perform a loop over the functions whose names remain in 
+``self._remaining_methods_to_call``. All functions appearing in this list 
+have a ``gal_type`` attribute bound to them that was created by the 
+`HodModelFactory` during the assembly of the composite model 
+(see the :ref:`hod_model_factory_inheriting_behaviors` section of the 
+:ref:`hod_model_factory_source_notes` for further details about how the `HodModelFactory` 
+binds the appropriate ``gal_type`` information to each mock-generation function). 
+This ``gal_type`` determines the slice of the table that will be passed to the 
+function via the ``table`` keyword argument. This way, each component model 
+does not need to manage any bookkeeping about which slice of an input table 
+it assigns its properties to: the `HodMockFactory` is responsible for passing 
+the slice of the ``galaxy_table`` that pertains to the ``gal_type`` of the component model. 
+
+The generation of all properties predicted by the model is now complete. 
+The `HodMockFactory.populate` function terminates after enforcing the 
+periodic boundary conditions of the simulation. This enforcement is controlled 
+by the `HodMockFactory` because component models of halo profiles strictly 
+assign halo-centric positions. Thus corrections need to be applied to 
+cases where galaxies are assigned to regions of the halo 
+that spilled over the edges of the simulation box. 
 
 
 .. _determining_the_gal_type_slice:
