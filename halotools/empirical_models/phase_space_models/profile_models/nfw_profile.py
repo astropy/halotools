@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains the `NFWProfile` class, 
 which is used to model the spatial distribution of mass and/or galaxies 
@@ -541,7 +540,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
 
-    def mc_generate_nfw_radial_positions(self, num_pts = 1e4, conc = 5, **kwargs):
+    def mc_generate_nfw_radial_positions(self, num_pts = int(1e4), conc = 5, **kwargs):
         """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
 
         See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique. 
@@ -628,7 +627,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             np.random.seed(kwargs['seed'])
 
         # Build lookup table from which to tabulate the inverse cumulative_mass_PDF
-        Npts_radius_table = 1e3
+        Npts_radius_table = int(1e3)
         radius_array = np.logspace(-4, 0, Npts_radius_table)
         logradius_array = np.log10(radius_array)
         table_ordinates = self.cumulative_mass_PDF(radius_array, conc)

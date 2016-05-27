@@ -31,7 +31,7 @@ def test_find_idx_nearest_val():
 
     # Check that you never differ by more than 0.5 when 
     # your inputs are within the range spanned by x
-    Npts = 1e4
+    Npts = int(1e4)
     v = np.random.uniform(x.min()-0.5, x.max()+0.5,Npts)
     result = np.empty(Npts)
     for ii, elt in enumerate(v):

@@ -94,7 +94,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period = None,
     For demonstration purposes we create randomly distributed sets of points within a
     periodic unit cube.
 
-    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
     >>> rp_bins = np.logspace(-1, 1.5, 15)
     >>> pi_max = 40.

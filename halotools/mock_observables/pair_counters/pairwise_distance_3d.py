@@ -85,7 +85,7 @@ def pairwise_distance_3d(data1, data2, rmax, period = None,
     For demonstration purposes we create randomly distributed sets of points within a
     periodic unit cube.
     
-    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
     >>> rmax = 1.0
     

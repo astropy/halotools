@@ -23,7 +23,7 @@ class TestAssembias(TestCase):
     def setup_class(self):
         """
         """
-        Npts = 1e4
+        Npts = int(1e4)
         mass = np.zeros(Npts) + 1e12
         zform = np.linspace(0, 10, Npts)
 

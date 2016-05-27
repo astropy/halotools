@@ -78,8 +78,8 @@ def test_radial_profile_3d_test2():
     npts2 = len(sample2)
 
     a, b = 0.5, 1.5
-    quantity_a = np.zeros(npts2/2) + a
-    quantity_b = np.zeros(npts2/2) + b
+    quantity_a = np.zeros(int(npts2/2)) + a
+    quantity_b = np.zeros(int(npts2/2)) + b
     quantity = np.concatenate([quantity_a, quantity_b])
 
     result, counts = radial_profile_3d(sample1, sample2, quantity, 
@@ -129,8 +129,8 @@ def test_radial_profile_3d_test3():
     npts2 = len(sample2)
 
     with NumpyRNGContext(fixed_seed):
-        inner_ring_values = np.random.uniform(-1, 1, npts2/2)
-        outer_ring_values = np.random.uniform(-1, 1, npts2/2)
+        inner_ring_values = np.random.uniform(-1, 1, int(npts2/2))
+        outer_ring_values = np.random.uniform(-1, 1, int(npts2/2))
 
     quantity = np.concatenate([inner_ring_values, outer_ring_values])
 
@@ -169,7 +169,7 @@ def test_radial_profile_3d_test4():
     sample2 = np.concatenate([sample2_p1_r1, sample2_p2_r1, sample2_p1_r2, sample2_p2_r2])
     npts2 = len(sample2)
 
-    quantity_a, quantity_b = np.zeros(npts2/2) + 0.5, np.zeros(npts2/2) + 1.5
+    quantity_a, quantity_b = np.zeros(int(npts2/2)) + 0.5, np.zeros(int(npts2/2)) + 1.5
     quantity = np.concatenate([quantity_a, quantity_b])
 
     result, counts = radial_profile_3d(sample1, sample2, quantity, rbins_normalized=rbins_normalized, 

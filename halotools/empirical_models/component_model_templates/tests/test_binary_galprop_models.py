@@ -23,7 +23,7 @@ class TestBinaryGalpropInterpolModel(TestCase):
             galprop_abscissa = self.abscissa, galprop_ordinates = self.ordinates, 
             prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
 
-        Npts = 5e3
+        Npts = int(5e3)
         self.testmass12 = np.ones(Npts)*1e12
         self.testmass135 = np.ones(Npts)*10.**13.5
         self.testmass15 = np.ones(Npts)*1e15

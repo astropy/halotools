@@ -113,7 +113,7 @@ class UserSuppliedHaloCatalog(object):
 
         Here's an example of how to use this argument using some fake data:
 
-        >>> num_ptcls = 1e4
+        >>> num_ptcls = int(1e4)
         >>> ptcl_x = np.random.uniform(0, Lbox, num_ptcls)
         >>> ptcl_y = np.random.uniform(0, Lbox, num_ptcls)
         >>> ptcl_z = np.random.uniform(0, Lbox, num_ptcls)

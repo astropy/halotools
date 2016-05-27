@@ -86,7 +86,7 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period = None,
     For demonstration purposes we create randomly distributed sets of points within a
     periodic unit cube.
     
-    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
     >>> rp_max = 1.0
     >>> pi_max = 2.0
