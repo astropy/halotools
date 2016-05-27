@@ -107,33 +107,32 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
-    
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
-    
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    For demonstration purposes we will work with 
+    halos in the `~halotools.sim_manager.FakeSim`. 
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
     
-    We will do the same to get a random set of peculiar velocities.
+    We will do the same to get a random set of velocities.
     
-    >>> vx = np.random.random(Npts)-0.5
-    >>> vy = np.random.random(Npts)-0.5
-    >>> vz = np.random.random(Npts)-0.5
+    >>> vx = halocat.halo_table['halo_vx']
+    >>> vy = halocat.halo_table['halo_vy']
+    >>> vz = halocat.halo_table['halo_vz']
     >>> velocities = np.vstack((vx,vy,vz)).T
     
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> pi_max = 0.3
-    >>> vz_12 = mean_los_velocity_vs_rp(coords, velocities, rp_bins, pi_max, period=period)
+    >>> vz_12 = mean_los_velocity_vs_rp(sample1, velocities, rp_bins, pi_max, period=halocat.Lbox)
     
     """
     
