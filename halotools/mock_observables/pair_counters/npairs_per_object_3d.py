@@ -79,7 +79,7 @@ def npairs_per_object_3d(sample1, sample2, rbins, period = None,
     --------
     For illustration purposes, we'll create some fake data and call the pair counter:
 
-    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
     >>> rbins = np.logspace(-1, 1.5, 15)
 

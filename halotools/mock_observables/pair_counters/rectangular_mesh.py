@@ -108,7 +108,7 @@ class RectangularMesh(object):
 
         Examples
         ---------
-        >>> Npts, Lbox = 1e4, 1000
+        >>> Npts, Lbox = int(1e4), 1000
         >>> xperiod, yperiod, zperiod = Lbox, Lbox, Lbox
         >>> approx_xcell_size = Lbox/10.
         >>> approx_ycell_size = Lbox/10.

@@ -117,7 +117,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
     For demonstration purposes we create randomly distributed sets of points within a
     periodic unit cube.
 
-    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 200.
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 200.
     >>> period = [Lbox, Lbox, Lbox]
     >>> s_bins = np.logspace(-1, 1.25, 15)
     >>> mu_bins = np.linspace(-0.5, 0.5)

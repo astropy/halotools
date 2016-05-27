@@ -133,7 +133,7 @@ def test_shifted_randoms():
     Demonstrate that the `~halotools.mock_observables.spherical_isolation` function 
     behaves properly in all appropriate limits of ``r_max``. 
     """
-    npts = 1e3
+    npts = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
     epsilon = 0.001
