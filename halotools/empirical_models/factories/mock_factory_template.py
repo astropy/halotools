@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-
-Module containing the template class
-`~halotools.empirical_models.MockFactory` used to
-construct mock galaxy populations.
-The mock factory only has knowledge of a simulation halocat
-and composite model object, and provides an
-abstract interface between the two.
+Module containing the template class `~halotools.empirical_models.MockFactory` 
+used to construct mock galaxy populations.
 """
 from __future__ import absolute_import
 
@@ -380,7 +374,11 @@ class MockFactory(object):
             raise HalotoolsError(msg)
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
-        ptcl_table = randomly_downsample_data(self.ptcl_table, nptcl)
+        if nptcl < len(self.ptcl_table):
+            ptcl_table = randomly_downsample_data(self.ptcl_table, nptcl)
+        else:
+            ptcl_table = self.ptcl_table
+
         ptcl_pos = three_dim_pos_bundle(table = ptcl_table,
             key1='x', key2='y', key3='z')
 

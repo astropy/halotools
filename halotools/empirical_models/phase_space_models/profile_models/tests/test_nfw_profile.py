@@ -1,6 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function, 
-    unicode_literals)
+""" Module providing unit-testing for `~halotools.empirical_models.NFWProfile` class
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np 
 
@@ -232,7 +232,7 @@ class TestNFWProfile(TestCase):
 
         """
         halo_radius = 0.5
-        num_pts = 2e6
+        num_pts = int(2e6)
         num_rbins = 20
         rbins = np.linspace(0.05, 1, num_rbins)
 

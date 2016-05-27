@@ -21,12 +21,12 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw.setup_prof_lookup_tables((cmin, cmax, dc))
         self.nfw.build_lookup_tables()
 
-        Npts = 5e4
+        Npts = int(5e4)
         self.c15 = np.zeros(Npts) + 15
         self.c10 = np.zeros(Npts) + 10
         self.c5 = np.zeros(Npts) + 5
 
-        npts = 1e3
+        npts = int(1e3)
         Lbox = 250
         zeros = np.zeros(npts)
         x = np.random.uniform(0, Lbox, npts)
@@ -230,7 +230,7 @@ class TestNFWPhaseSpace(TestCase):
         as computed by the `~halotools.empirical_models.NFWPhaseSpace.vmax`. Method 
         verifies that these two results agree within the expected random noise level. 
         """
-        npts = 1e4
+        npts = int(1e4)
         conc = 10
         carr = np.zeros(npts) + conc
 

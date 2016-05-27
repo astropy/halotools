@@ -16,7 +16,7 @@ class TestModelHelpers(TestCase):
     def test_enforce_periodicity_of_box(self):
 
         box_length = 250
-        Npts = 1e5
+        Npts = int(1e5)
         coords = np.random.uniform(0,box_length,Npts*3).reshape(Npts,3)
 
         perturbation_size = box_length/10.
@@ -31,7 +31,7 @@ class TestModelHelpers(TestCase):
 
     def test_check_multiple_box_lengths(self):
         box_length = 250
-        Npts = 1e4
+        Npts = int(1e4)
 
         x = np.linspace(-2*box_length, box_length, Npts)
         with pytest.raises(HalotoolsError) as err:
@@ -53,7 +53,7 @@ class TestModelHelpers(TestCase):
 
     def test_velocity_flip(self):
         box_length = 250
-        Npts = 1e4
+        Npts = int(1e4)
 
         x = np.linspace(-0.5*box_length, 1.5*box_length, Npts)
         vx = np.ones(Npts)

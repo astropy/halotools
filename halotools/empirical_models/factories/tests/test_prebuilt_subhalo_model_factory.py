@@ -1,18 +1,12 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function)
+""" Module providing unit-testing for 
+the `~halotools.empirical_models.PrebuiltSubhaloModelFactory` class
+""" 
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
-import numpy as np 
-from copy import copy 
-
-from ...smhm_models import Behroozi10SmHm, Moster13SmHm
-from ...component_model_templates import BinaryGalpropInterpolModel
-
 from ...factories import PrebuiltSubhaloModelFactory, SubhaloModelFactory
-from ...composite_models.smhm_models.behroozi10 import behroozi10_model_dictionary
-
 
 from ....sim_manager import FakeSim
 from ....custom_exceptions import HalotoolsError

@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Module storing the factories used to generate 
-Halotools-provided composite models 
+Module storing `~halotools.empirical_models.PrebuiltSubhaloModelFactory` and 
+`~halotools.empirical_models.PrebuiltHodModelFactory` classes, 
+the factories used to generate Halotools-provided composite models 
 of the galaxy-halo connection. 
 """
 

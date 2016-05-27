@@ -70,9 +70,9 @@ def test_Moster13SmHm_behavior():
     mstar5_z1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12, redshift=1)
     assert mstar5_z1 != mstar4_z1
 
-    mstar_realization1 = default_model.mc_stellar_mass(prim_haloprop = np.ones(1e4)*1e12, seed=43)
-    mstar_realization2 = default_model.mc_stellar_mass(prim_haloprop = np.ones(1e4)*1e12, seed=43)
-    mstar_realization3 = default_model.mc_stellar_mass(prim_haloprop = np.ones(1e4)*1e12, seed=44)
+    mstar_realization1 = default_model.mc_stellar_mass(prim_haloprop = 1.e12*np.ones(int(1e4)), seed=43)
+    mstar_realization2 = default_model.mc_stellar_mass(prim_haloprop = 1.e12*np.ones(int(1e4)), seed=43)
+    mstar_realization3 = default_model.mc_stellar_mass(prim_haloprop = 1.e12*np.ones(int(1e4)), seed=44)
     assert np.array_equal(mstar_realization1, mstar_realization2)
     assert not np.array_equal(mstar_realization1, mstar_realization3)
 
@@ -81,7 +81,7 @@ def test_Moster13SmHm_behavior():
     np.testing.assert_allclose(measured_scatter1, model_scatter, rtol=1e-3)
 
     default_model.param_dict['scatter_model_param1'] = 0.3
-    mstar_realization4 = default_model.mc_stellar_mass(prim_haloprop = np.ones(1e4)*1e12, seed=43)
+    mstar_realization4 = default_model.mc_stellar_mass(prim_haloprop = 1e12*np.ones(int(1e4)), seed=43)
     measured_scatter4 = np.std(np.log10(mstar_realization4))
     np.testing.assert_allclose(measured_scatter4, 0.3, rtol=1e-3)
 
@@ -137,7 +137,7 @@ def test_LogNormalScatterModel_behavior():
 
     default_scatter_model = LogNormalScatterModel()
 
-    Npts = 1e4
+    Npts = int(1e4)
     testmass12 = 1e12
     mass12 = np.zeros(Npts) + testmass12
     masskey = model_defaults.default_smhm_haloprop 

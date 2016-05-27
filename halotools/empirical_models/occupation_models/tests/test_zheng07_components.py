@@ -162,7 +162,7 @@ class TestZheng07Cens(TestCase):
 
         # First check that the mean occuation is ~0.5 when model is evaulated at Mmin
         mvir_midpoint = 10.**model.param_dict['logMmin']
-        Npts = 1e3
+        Npts = int(1e3)
         masses = np.ones(Npts)*mvir_midpoint
         mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
         assert set(mc_occ).issubset([0,1])
@@ -303,7 +303,7 @@ class TestZheng07Sats(TestCase):
         model.param_dict['logM0'] = 11.25
         model.param_dict['logM1'] = model.param_dict['logM0'] + np.log10(20.)
 
-        Npts = 1e3
+        Npts = int(1e3)
         masses = np.ones(Npts)*10.**model.param_dict['logM1']
         mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
         # We chose a specific seed that has been pre-tested, 
@@ -316,7 +316,7 @@ class TestZheng07Sats(TestCase):
         cenmodel = zheng07_components.Zheng07Cens()
         satmodel_cens = zheng07_components.Zheng07Sats(modulate_with_cenocc=True)
 
-        Npts = 1e2 
+        Npts = 100
         masses = np.logspace(10, 15, Npts)
         mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(prim_haloprop=masses)
         mean_occ_satmodel_cens = satmodel_cens.mean_occupation(prim_haloprop=masses)
@@ -338,7 +338,7 @@ class TestZheng07Sats(TestCase):
     def test_alpha_scaling2_mc_occupation(self):
         logmass = self.model2.param_dict['logM1'] + np.log10(5)
         mass = 10.**logmass
-        Npts = 1e3
+        Npts = 1000
         masses = np.ones(Npts)*mass
 
         assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() > 
@@ -347,7 +347,7 @@ class TestZheng07Sats(TestCase):
     def test_alpha_propagation(self):
         logmass = self.model2.param_dict['logM1'] + np.log10(5)
         mass = 10.**logmass
-        Npts = 1e3
+        Npts = 1000
         masses = np.ones(Npts)*mass
 
         alt_default_model = deepcopy(self.default_model)
