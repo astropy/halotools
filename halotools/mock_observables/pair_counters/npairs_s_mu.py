@@ -149,7 +149,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
     rmax = np.max(s_bins)
 
     #process mu_bins parameter separately
-    mu_bins = convert_to_ndarray(mu_bins)
+    mu_bins = np.atleast_1d(mu_bins)
     try:
         assert mu_bins.ndim == 1
         assert len(mu_bins) > 1

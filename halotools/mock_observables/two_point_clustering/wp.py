@@ -164,15 +164,14 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    periodic cube with Lbox = 250 Mpc/h. 
     
     >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> Lbox = 250.
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
@@ -184,9 +183,9 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     convenience function for this same purpose, which provides additional wrapper 
     behavior around `numpy.vstack` such as placing points into redshift-space. 
 
-    >>> rp_bins = np.logspace(-2,-1,10)
-    >>> pi_max = 0.1
-    >>> xi = wp(coords, rp_bins, pi_max, period=period)
+    >>> rp_bins = np.logspace(-1,1,10)
+    >>> pi_max = 10
+    >>> xi = wp(coords, rp_bins, pi_max, period=Lbox)
     
     See also 
     --------

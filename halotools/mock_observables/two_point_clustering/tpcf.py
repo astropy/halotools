@@ -281,41 +281,35 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         the appropriate sequence of results is returned.
 
     Notes
-    -----
-    Pairs are counted using `~halotools.mock_observables.npairs_3d`.  
-        
-    If the ``period`` argument is passed in, the ith coordinate of all points
-    must be between 0 and period[i].
-    
+    -----    
     For a higher-performance implementation of the tpcf function written in C, 
     see the Corrfunc code written by Manodeep Sinha, available at 
     https://github.com/manodeep/Corrfunc. 
 
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
-    
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = Lbox
-    
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    For demonstration purposes we calculate the `tpcf` for halos in the 
+    `~halotools.sim_manager.FakeSim`. 
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+        
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
 
     Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
     convenience function for this same purpose, which provides additional wrapper 
     behavior around `numpy.vstack` such as placing points into redshift-space. 
     
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> xi = tpcf(coords, rbins, period=period)
+    >>> rbins = np.logspace(-1, 1, 10)
+    >>> xi = tpcf(sample1, rbins, period=halocat.Lbox)
     
     See also 
     --------

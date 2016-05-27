@@ -11,8 +11,7 @@ from math import gamma
 from warnings import warn
 
 from .clustering_helpers import (process_optional_input_sample2, 
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
-    tpcf_estimator_dd_dr_rr_requirements)
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
     get_separation_bins_array, get_period, get_num_threads)
@@ -169,25 +168,21 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         and the one and two halo autocorrelation of ``sample2``.  
         If ``do_auto`` or ``do_cross`` is set to False, only the appropriate result(s) 
         is returned.
-
-    Notes
-    -----
-    Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.marked_npairs_3d`.  
-        
-    If the ``period`` argument is passed in, the ith coordinate of all points
-    must be between 0 and period[i].
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
-    >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
-    >>> coords = np.vstack((x,y,z)).T
-    >>> period = np.array([1.0,1.0,1.0])
+    For demonstration purposes, we'll use the `~halotools.sim_manager.FakeSim` to demonstrate 
+    how to calculate the 1- and 2-halo term on a set of fake halos. 
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+
+    >>> x,y,z = halocat.halo_table['halo_x'], halocat.halo_table['halo_y'], halocat.halo_table['halo_z']
+    >>> sample1 = np.vstack((x,y,z)).T
+
     >>> rbins = np.logspace(-2,-1,10)
-    >>> host_halo_IDs = np.random.random_integers(1,10,size=Npts)
-    >>> xi_1h, xi_2h = tpcf_one_two_halo_decomp(coords, host_halo_IDs, rbins, period=period)
+    >>> host_halo_IDs = halocat.halo_table['halo_hostid']
+    >>> xi_1h, xi_2h = tpcf_one_two_halo_decomp(sample1, host_halo_IDs, rbins, period=halocat.Lbox)
     
     See also 
     -----------

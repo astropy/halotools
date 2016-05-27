@@ -127,33 +127,32 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     
     Examples
     --------
-    For demonstration purposes we create ae randomly distributed set of points within a 
-    periodic unit cube. 
+    For demonstration purposes we will calculate `delta_sigma` using the 
+    `~halotools.sim_manager.FakeSim` that is generated on-the-fly. 
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
     
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> gal_coords = np.vstack((x,y,z)).T
+    >>> galaxies = np.vstack((x,y,z)).T
     
     Let's do the same thing for a set of particle data
     
-    >>> Nptcls = 10000
-    >>> x = np.random.random(Nptcls)
-    >>> y = np.random.random(Nptcls)
-    >>> z = np.random.random(Nptcls)
-    >>> ptcl_coords = np.vstack((x,y,z)).T
+    >>> px = halocat.ptcl_table['x']
+    >>> py = halocat.ptcl_table['y']
+    >>> pz = halocat.ptcl_table['z']
+    >>> particles = np.vstack((px,py,pz)).T
     
-    >>> rp_bins = np.logspace(-2,-1,10)
-    >>> result = delta_sigma(gal_coords, ptcl_coords, rp_bins, pi_max=0.3, period=period)
+    >>> rp_bins = np.logspace(-1, 1, 10)
+    >>> result = delta_sigma(galaxies, particles, rp_bins, pi_max=20, period=halocat.Lbox)
 
     See also 
     --------
