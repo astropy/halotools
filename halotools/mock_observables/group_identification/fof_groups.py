@@ -75,26 +75,55 @@ class FoFGroups(object):
         
         Examples
         --------
-        For demonstration purposes we create a randomly distributed set of points within a 
-        periodic unit cube. 
-        
-        >>> Npts = 1000
-        >>> Lbox = 1.0
-        >>> period = Lbox
-        
-        >>> x = np.random.random(Npts)
-        >>> y = np.random.random(Npts)
-        >>> z = np.random.random(Npts)
-        
-        We transform our *x, y, z* points into the array shape used by the pair-counter by 
-        taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
-        is used throughout the `~halotools.mock_observables` sub-package:
-        
-        >>> coords = np.vstack((x,y,z)).T
-        
-        >>> b_perp, b_para = (0.1,0.2)
-        >>> groups = FoFGroups(coords, b_perp, b_para, period=period)
-        >>> IDs = groups.group_ids
+        In this example we will populate the `~halotools.sim_manager.FakeSim` 
+        with an HOD-style model to demonstrate how to use the group-finder. 
+
+        >>> from halotools.sim_manager import FakeSim
+        >>> halocat = FakeSim()
+
+        >>> from halotools.empirical_models import PrebuiltHodModelFactory
+        >>> model = PrebuiltHodModelFactory('zheng07', threshold = -22)
+        >>> model.populate_mock(halocat)
+
+        Now that we have a mock galaxy catalog, we will extract the 3d coordinates 
+        of the galaxy positions and place this information into the shape of the 
+        multi-d array expected by the ``positions`` argument of `FoFGroups` 
+        using the `~halotools.mock_observables.return_xyz_formatted_array` function. 
+
+        >>> from halotools.mock_observables import return_xyz_formatted_array
+
+        Note that `FoFGroups` is based on 2+1 dimensional positions, with the z-dimension 
+        having a separate linking length from the xy-plane. To make our example 
+        more realistic, we will apply the redshift-space distortions to the z-coordinate 
+        when constructing the ``positions`` array. 
+
+        >>> x = model.mock.galaxy_table['x']
+        >>> y = model.mock.galaxy_table['y']
+        >>> z = model.mock.galaxy_table['z']
+        >>> vz = model.mock.galaxy_table['vz']
+
+        >>> positions = return_xyz_formatted_array(x, y, z, velocity = vz, velocity_distortion_dimension = 'z', period=halocat.Lbox)
+
+        The ``b_perp`` and ``b_para`` arguments of `FoFGroups` control the linking lengths 
+        for the group-finding. The values passed for these variables are assumed to be in 
+        units of the mean number density of the input points, so that if you want your FoF 
+        linking length to be, say, 0.15 times the mean number density, then you should set 
+        ``b_perp`` to 0.15. Here we adopt the convention given in Berlind et al. (2006) 
+        and set ``b_perp`` to 0.14 and ``b_para`` to 0.75.
+
+        >>> b_perp, b_para = (0.14,0.75)
+        >>> groups = FoFGroups(positions, b_perp, b_para, period=halocat.Lbox)
+    
+        Now that groups have been identified, we can create a new column of our 
+        ``galaxy_table`` storing the group ID that each galaxy belongs to. 
+
+        >>> model.mock.galaxy_table['fof_group_ID'] = groups.group_ids
+
+        At this point, we are now in a position to calculate a large variety of 
+        *group aggregation* statistics with the ``fof_group_ID`` as our grouping key. 
+        The `~halotools.utils.group_member_generator` is designed for exactly such 
+        calculations. See :ref:`galaxy_catalog_analysis_tutorial5` for a 
+        tutorial showing how to use this generator to analyze galaxy groups. 
 
         See also 
         --------

@@ -9,8 +9,7 @@ import numpy as np
 from math import pi
 
 from .clustering_helpers import (process_optional_input_sample2, 
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
-    tpcf_estimator_dd_dr_rr_requirements)
+    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
@@ -45,7 +44,6 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
-    For thorough documentation of all features, see :ref:`rp_pi_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------
@@ -158,41 +156,32 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         ``sample2``, and the autocorrelation of ``sample2``, respectively. If 
         ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are 
         returned.
-    
-    Notes
-    -----
-    Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.npairs_xy_z`.  
         
-    If the ``period`` argument is passed in, the ith coordinate of all points
-    must be between 0 and period[i].
-    
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    periodic cube of Lbox = 250 Mpc/h. 
     
     >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> Lbox = 250
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
 
     Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
     convenience function for this same purpose, which provides additional wrapper 
     behavior around `numpy.vstack` such as placing points into redshift-space. 
 
-    >>> rp_bins = np.logspace(-2,-1,10)
-    >>> pi_bins = np.logspace(-2,-1,10)
-    >>> xi = rp_pi_tpcf(coords, rp_bins, pi_bins, period=period)
+    >>> rp_bins = np.logspace(-1,1,10)
+    >>> pi_bins = np.logspace(-1,1,10)
+    >>> xi = rp_pi_tpcf(sample1, rp_bins, pi_bins, period=Lbox)
     
     """
     

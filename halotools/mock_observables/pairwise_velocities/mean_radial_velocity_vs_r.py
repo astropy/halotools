@@ -110,32 +110,33 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
-    
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
-    
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    For demonstration purposes we will work with 
+    halos in the `~halotools.sim_manager.FakeSim`. Here we'll just demonstrate 
+    basic usage, referring to :ref:`galaxy_catalog_analysis_tutorial6` for a 
+    more detailed demo. 
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
     
-    We will do the same to get a random set of peculiar velocities.
+    We will do the same to get a random set of velocities.
     
-    >>> vx = np.random.random(Npts)-0.5
-    >>> vy = np.random.random(Npts)-0.5
-    >>> vz = np.random.random(Npts)-0.5
+    >>> vx = halocat.halo_table['halo_vx']
+    >>> vy = halocat.halo_table['halo_vy']
+    >>> vz = halocat.halo_table['halo_vz']
     >>> velocities = np.vstack((vx,vy,vz)).T
     
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> v_12 = mean_radial_velocity_vs_r(coords, velocities, rbins, period=period)
+    >>> rbins = np.logspace(-1, 1, 10)
+    >>> v_12 = mean_radial_velocity_vs_r(sample1, velocities, rbins, period=halocat.Lbox)
     
     See also 
     --------

@@ -56,7 +56,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         numpy array of :math:`s` boundaries defining the bins in which pairs are counted. 
     
     mu_bins : array_like
-        numpy array of :math:`\\cos(\\theta_{\\rm LOS})` boundaries defining the bins in 
+        numpy array of :math:`mu = \\cos(\\theta_{\\rm LOS})` boundaries defining the bins in 
         which pairs are counted, and must be between [0,1]. 
     
     sample2 : array_like, optional
@@ -176,29 +176,28 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    periodic cube with Lbox = 250 Mpc/h
     
     >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> Lbox = 250.
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
     
     Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array` 
     convenience function for this same purpose, which provides additional wrapper 
     behavior around `numpy.vstack` such as placing points into redshift-space. 
 
-    >>> s_bins = np.logspace(-2,-1,10)
-    >>> mu_bins = np.linspace(0,1,50)
-    >>> xi = s_mu_tpcf(coords, s_bins, mu_bins, period=period)    
+    >>> s_bins = np.logspace(-1, 1, 10)
+    >>> mu_bins = np.linspace(0, 1, 50)
+    >>> xi = s_mu_tpcf(sample1, s_bins, mu_bins, period=Lbox)    
     """
     
     #process arguments
