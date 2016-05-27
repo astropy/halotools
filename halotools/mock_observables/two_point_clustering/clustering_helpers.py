@@ -79,14 +79,17 @@ def process_optional_input_sample2(sample1, sample2, do_cross):
         _sample1_is_sample2 = True
     else:
         sample2 = enforce_sample_has_correct_shape(sample2)
-        if np.all(sample1==sample2):
-            _sample1_is_sample2 = True
-            msg = ("\n `sample1` and `sample2` are exactly the same, \n"
-                   "only the auto-correlation will be returned.\n")
-            warn(msg)
-            do_cross = False
-        else: 
+        if sample1.shape != sample2.shape:
             _sample1_is_sample2 = False
+        else:
+            if np.all(sample1==sample2):
+                _sample1_is_sample2 = True
+                msg = ("\n `sample1` and `sample2` are exactly the same, \n"
+                       "only the auto-correlation will be returned.\n")
+                warn(msg)
+                do_cross = False
+            else: 
+                _sample1_is_sample2 = False
 
     return sample2, _sample1_is_sample2, do_cross
 
