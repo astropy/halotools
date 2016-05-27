@@ -48,7 +48,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests.
         """
-        self.Nhalos = 1e2
+        self.Nhalos = 100
         self.Lbox = 100
         self.redshift = 0.0
         self.halo_x = np.linspace(0, self.Lbox, self.Nhalos)
@@ -62,7 +62,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             )
         self.toy_list = [elt for elt in self.halo_x]
 
-        self.num_ptcl = 1e4
+        self.num_ptcl = int(1e4)
         self.good_ptcl_table = Table(
             {'x': np.zeros(self.num_ptcl),
             'y': np.zeros(self.num_ptcl),

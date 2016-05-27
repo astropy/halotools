@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function, 
-    unicode_literals)
-
-__all__ = ['TestConcMass']
+""" Module providing unit-testing for `~halotools.empirical_models.ConcMass` class.
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from astropy.table import Table
@@ -11,6 +9,8 @@ from unittest import TestCase
 from ..conc_mass_models import ConcMass
 
 from .... import model_defaults
+
+__all__ = ['TestConcMass']
 
 class TestConcMass(TestCase):
     """ Tests of `~halotools.empirical_models.ConcMass` class.  
@@ -37,7 +37,7 @@ class TestConcMass(TestCase):
 
         """
 
-        Npts = 1e3
+        Npts = int(1e3)
         mass = np.logspace(10, 15, Npts)
         conc = self.dutton_maccio14_model.compute_concentration(prim_haloprop=mass)
         assert np.all(conc > 1)
@@ -53,7 +53,7 @@ class TestConcMass(TestCase):
 
         * Method returns the min/max boundary values when passed halo concentrations that are out of bounds.
         """
-        Npts = 1e3
+        Npts = int(1e3)
         mass = np.logspace(10, 15, Npts)
         conc = np.random.uniform(0, 100, Npts)
         t = Table({'conc': conc, 'halo_mvir': mass})

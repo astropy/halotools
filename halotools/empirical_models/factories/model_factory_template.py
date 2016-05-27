@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Module storing the various factories used to build galaxy-halo models. 
+Module storing the `~halotools.empirical_models.ModelFactory` class, 
+an abstract container class used to build 
+any composite model of the galaxy-halo connection.
 """
 
 __all__ = ['ModelFactory']
@@ -668,7 +669,7 @@ class ModelFactory(object):
             use_fake_sim = False
 
         if use_fake_sim is True:
-            halocat = FakeSim(num_ptcl=1e5, **halocat_kwargs)
+            halocat = FakeSim(num_ptcl=int(1e5), **halocat_kwargs)
         else:
             halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
 

@@ -70,7 +70,7 @@ class UserSuppliedPtclCatalog(object):
         >>> redshift = 0.0
         >>> Lbox = 250.
         >>> particle_mass = 1e9
-        >>> num_ptcls = 1e4
+        >>> num_ptcls = int(1e4)
         >>> x = np.random.uniform(0, Lbox, num_ptcls)
         >>> y = np.random.uniform(0, Lbox, num_ptcls)
         >>> z = np.random.uniform(0, Lbox, num_ptcls)

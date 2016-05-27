@@ -18,7 +18,7 @@ from ..fof_groups import FoFGroups
 __all__ = ['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality']
 
 #set random seed to get consistent behavior
-N = 1e3
+N = 1000
 Lbox = np.array([1.0,1.0,1.0])
 period = Lbox
 b_perp = 0.5

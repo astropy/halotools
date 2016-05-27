@@ -62,13 +62,13 @@ def crossmatch(x, y, skip_bounds_checking = False):
     The example below demonstrates how to transfer column data from ``table2`` 
     into ``table1`` for the subset of objects that appear in both tables. 
 
-    >>> num_table1 = 1e6
+    >>> num_table1 = int(1e6)
     >>> x = np.random.rand(num_table1)
     >>> objid = np.arange(num_table1)
     >>> from astropy.table import Table
     >>> table1 = Table({'x': x, 'objid': objid})
 
-    >>> num_table2 = 1e6
+    >>> num_table2 = int(1e6)
     >>> objid = np.arange(5e5, num_table2+5e5)
     >>> y = np.random.rand(num_table2)
     >>> table2 = Table({'y': y, 'objid': objid})
@@ -92,10 +92,10 @@ def crossmatch(x, y, skip_bounds_checking = False):
     First create some new dummy data to demonstrate this application of 
     the `crossmatch` function:
 
-    >>> num_galaxies = 1e6
+    >>> num_galaxies = int(1e6)
     >>> x = np.random.rand(num_galaxies)
     >>> objid = np.arange(num_galaxies)
-    >>> num_groups = 1e4
+    >>> num_groups = int(1e4)
     >>> groupid = np.random.random_integers(0, num_groups-1, num_galaxies)
     >>> galaxy_table = Table({'x': x, 'objid': objid, 'groupid': groupid})
 

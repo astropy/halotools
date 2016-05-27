@@ -23,7 +23,7 @@ Example of how to transform your coordinates
 Suppose you have a collection of *x, y, z* arrays 
 storing the spatial positions of halos or galaxies. 
 
->>> Npts = 1e5
+>>> Npts = int(1e5)
 >>> Lbox = 250
 >>> import numpy as np
 >>> x = np.random.uniform(0, Lbox, Npts)

@@ -174,7 +174,7 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
 
 @pytest.mark.slow
 def test_3d_brute_force_elementwise_comparison():
-    Npts1, Npts2 = 1e2, 1e2
+    Npts1, Npts2 = int(1e2), int(1e2)
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))
@@ -195,7 +195,7 @@ def test_3d_brute_force_elementwise_comparison():
 
 @pytest.mark.slow
 def test_xy_z_brute_force_elementwise_comparison():
-    Npts1, Npts2 = 1e2, 1e2
+    Npts1, Npts2 = int(1e2), int(1e2)
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))

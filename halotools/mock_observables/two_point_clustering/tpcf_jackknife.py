@@ -533,7 +533,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
         msg = ("Input ``sample`` must have shape (Npts, 3)")
         raise TypeError(msg)
 
-    Nsub = np.atleast_1d(Nsub).astype('f4')
+    Nsub = np.atleast_1d(Nsub).astype('i4')
     if len(Nsub) == 1:
         Nsub = np.array([Nsub[0], Nsub[0], Nsub[0]])
     elif len(Nsub) != 3:
@@ -548,7 +548,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
         raise TypeError(msg)
         
     dL = Lbox/Nsub # length of subvolumes along each dimension
-    N_sub_vol = np.prod(Nsub) # total the number of subvolumes
+    N_sub_vol = int(np.prod(Nsub)) # total the number of subvolumes
     # create an array of unique integer IDs for each subvolume
     inds = np.arange(1, N_sub_vol+1).reshape(Nsub[0], Nsub[1], Nsub[2])
     
