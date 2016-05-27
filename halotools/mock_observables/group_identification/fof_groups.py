@@ -107,7 +107,7 @@ class FoFGroups(object):
         The ``b_perp`` and ``b_para`` arguments of `FoFGroups` control the linking lengths 
         for the group-finding. The values passed for these variables are assumed to be in 
         units of the mean number density of the input points, so that if you want your FoF 
-        linking length to be, say, :math:`0.15 \bar{n_{\\rm g}}`, then you should set 
+        linking length to be, say, 0.15 times the mean number density, then you should set 
         ``b_perp`` to 0.15. Here we adopt the convention given in Berlind et al. (2006) 
         and set ``b_perp`` to 0.14 and ``b_para`` to 0.75.
 
