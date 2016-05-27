@@ -58,7 +58,7 @@ class TestSampleSelector(TestCase):
 class TestComputeConditionalPercentiles(TestCase):
 
     def setup_class(self):
-        Npts = 1e4
+        Npts = int(1e4)
         mass1 = np.zeros(Npts/2) + 1e12
         mass2 = np.zeros(Npts/2) + 1e14
         mass = np.append(mass1, mass2)

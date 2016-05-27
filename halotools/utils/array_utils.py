@@ -195,8 +195,8 @@ def randomly_downsample_data(array, num_downsample):
 
     Examples 
     --------
-    >>> x = np.linspace(0, 1000, num=1e5)
-    >>> desired_sample_size = 1e3
+    >>> x = np.linspace(0, 1000, num=int(1e5))
+    >>> desired_sample_size = int(1e3)
     >>> downsampled_x = randomly_downsample_data(x, desired_sample_size)
 
     """
