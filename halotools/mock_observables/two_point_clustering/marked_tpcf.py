@@ -8,8 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from .clustering_helpers import (process_optional_input_sample2, 
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator, 
-    tpcf_estimator_dd_dr_rr_requirements)
+    downsample_inputs_exceeding_max_sample_size)
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape, 
     get_separation_bins_array, get_period, get_num_threads)
@@ -36,8 +35,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
-
-    For thorough documentation of all features, see :ref:`marked_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------
@@ -73,8 +70,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
         Length-3 sequence defining the periodic boundary conditions 
         in each dimension. If you instead provide a single scalar, Lbox, 
         period is assumed to be the same in all Cartesian directions. 
-        If set to None (the default option), PBCs are set to infinity, 
-        in which case ``randoms`` must be provided. 
+        If set to None (the default option), PBCs are set to infinity.
         Length units assumed to be in Mpc/h, here and throughout Halotools. 
     
     do_auto : boolean, optional
