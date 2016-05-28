@@ -16,7 +16,7 @@ __all__ = ('broadcast_host_halo_property', 'add_halo_hostid')
 
 
 def broadcast_host_halo_property(table, halo_property_key,
-    delete_possibly_existing_column=False):
+        delete_possibly_existing_column=False):
     """ Calculate a property of the host of a group system
     and broadcast that property to all group members,
     e.g., calculate host halo mass or group central star formation rate.

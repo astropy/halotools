@@ -17,12 +17,12 @@ __all__ = ['smhm_binary_sfr_model_dictionary']
 
 
 def smhm_binary_sfr_model_dictionary(
-    prim_haloprop_key=model_defaults.default_smhm_haloprop,
-    smhm_model=Behroozi10SmHm,
-    scatter_level=0.2,
-    redshift=sim_defaults.default_redshift,
-    sfr_abscissa=[12, 15], sfr_ordinates=[0.25, 0.75], logparam=True,
-    **kwargs):
+        prim_haloprop_key=model_defaults.default_smhm_haloprop,
+        smhm_model=Behroozi10SmHm,
+        scatter_level=0.2,
+        redshift=sim_defaults.default_redshift,
+        sfr_abscissa=[12, 15], sfr_ordinates=[0.25, 0.75], logparam=True,
+        **kwargs):
     """ Dictionary to build a subhalo-based model for both stellar mass
     and star-formation rate.
 

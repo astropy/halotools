@@ -277,8 +277,8 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
         msg = "Input ``Lbox`` must be a scalar or length-3 sequence"
         raise TypeError(msg)
 
-    dL = Lbox/Nsub # length of subvolumes along each dimension
-    N_sub_vol = int(np.prod(Nsub)) # total the number of subvolumes
+    dL = Lbox/Nsub  # length of subvolumes along each dimension
+    N_sub_vol = int(np.prod(Nsub))  # total the number of subvolumes
     # create an array of unique integer IDs for each subvolume
     inds = np.arange(1, N_sub_vol+1).reshape(Nsub[0], Nsub[1], Nsub[2])
 

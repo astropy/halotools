@@ -1,7 +1,7 @@
 """ Sub-package of `~halotools.mock_observables` providing the
 isolation criteria functionality.
 """
-__all__  = ('spherical_isolation', 'cylindrical_isolation',
+__all__ = ('spherical_isolation', 'cylindrical_isolation',
     'conditional_spherical_isolation', 'conditional_cylindrical_isolation')
 
 from .spherical_isolation import spherical_isolation

@@ -25,12 +25,12 @@ from ...custom_exceptions import HalotoolsError
 __all__ = ['tpcf']
 __author__ = ['Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
-    do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
-    approx_cell2_size, approx_cellran_size):
+        do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
+        approx_cell2_size, approx_cellran_size):
     """
     Internal function used to random pairs during the calculation of the tpcf.
     There are two high level branches:
@@ -86,19 +86,19 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
         NR = len(sample1)
 
         #do volume calculations
-        v = nball_volume(rbins) #volume of spheres
-        dv = np.diff(v) #volume of shells
-        global_volume = period.prod() #volume of simulation
+        v = nball_volume(rbins)  # volume of spheres
+        dv = np.diff(v)  # volume of shells
+        global_volume = period.prod()  # volume of simulation
 
         #calculate randoms for sample1
-        N1 = np.shape(sample1)[0] #number of points in sample1
-        rho1 = N1/global_volume #number density of points
-        D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
+        N1 = np.shape(sample1)[0]  # number of points in sample1
+        rho1 = N1/global_volume  # number density of points
+        D1R = (NR)*(dv*rho1)  # random counts are N**2*dv*rho
 
         #calculate randoms for sample2
-        N2 = np.shape(sample2)[0] #number of points in sample2
-        rho2 = N2/global_volume #number density of points
-        D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
+        N2 = np.shape(sample2)[0]  # number of points in sample2
+        rho2 = N2/global_volume  # number density of points
+        D2R = (NR)*(dv*rho2)  # random counts are N**2*dv*rho
 
         #calculate the random-random pairs.
         rhor = (NR**2)/global_volume
@@ -108,8 +108,8 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
 
 
 def _pair_counts(sample1, sample2, rbins,
-    period, num_threads, do_auto, do_cross,
-    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+        period, num_threads, do_auto, do_cross,
+        _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
     """
     Internal function used calculate DD-pairs during the calculation of the tpcf.
     """
@@ -146,10 +146,10 @@ def _pair_counts(sample1, sample2, rbins,
 
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
-    do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-    max_sample_size=int(1e6), approx_cell1_size=None,
-    approx_cell2_size=None, approx_cellran_size=None,
-    RR_precomputed=None, NR_precomputed=None):
+        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+        max_sample_size=int(1e6), approx_cell1_size=None,
+        approx_cell2_size=None, approx_cellran_size=None,
+        RR_precomputed=None, NR_precomputed=None):
     """
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
 
@@ -397,9 +397,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
 
 
 def _tpcf_process_args(sample1, rbins, sample2, randoms,
-    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size,
-    RR_precomputed, NR_precomputed):
+        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size,
+        RR_precomputed, NR_precomputed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf`.

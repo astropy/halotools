@@ -22,12 +22,12 @@ __all__ = ('tpcf_jackknife', )
 __author__ = ('Duncan Campbell', )
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
-    sample2=None, period=None, do_auto=True, do_cross=True,
-    estimator='Natural', num_threads=1, max_sample_size=int(1e6)):
+        sample2=None, period=None, do_auto=True, do_cross=True,
+        estimator='Natural', num_threads=1, max_sample_size=int(1e6)):
     """
     Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance
     matrix, :math:`{C}_{ij}`, between ith and jth radial bin.
@@ -353,13 +353,13 @@ def get_subvolume_numbers(j_index, N_sub_vol):
 
     labels, N = np.unique(temp, return_counts=True)
 
-    N = N-1 #remove the place holder I added two lines above.
+    N = N-1  # remove the place holder I added two lines above.
 
     return N
 
 
 def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
-    period, num_threads, do_auto, do_cross, _sample1_is_sample2):
+        period, num_threads, do_auto, do_cross, _sample1_is_sample2):
     """
     Count jackknife data pairs: DD
     """
@@ -392,7 +392,7 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
 
 
 def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
-    period, num_threads, do_DR, do_RR):
+        period, num_threads, do_DR, do_RR):
     """
     Count jackknife random pairs: DR, RR
     """
@@ -414,8 +414,8 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
 
 
 def _tpcf_jackknife_process_args(sample1, randoms, rbins,
-    Nsub, sample2, period, do_auto, do_cross,
-    estimator, num_threads, max_sample_size):
+        Nsub, sample2, period, do_auto, do_cross,
+        estimator, num_threads, max_sample_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.jackknife_tpcf`.

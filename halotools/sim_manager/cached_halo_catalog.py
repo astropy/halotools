@@ -391,12 +391,12 @@ class CachedHaloCatalog(object):
         if len(matching_entries) == 0:
             suggestion_preamble = ("\nThe following entries in the cache log "
                 "most closely match your inputs:\n\n")
-            alt_list1 = list(gen1) # discard the redshift requirement
+            alt_list1 = list(gen1)  # discard the redshift requirement
             if len(alt_list1) > 0:
                 msg += suggestion_preamble
                 for entry in alt_list1: msg += str(entry) + "\n\n"
             else:
-                alt_list2 = list(gen2) # discard the version_name requirement
+                alt_list2 = list(gen2)  # discard the version_name requirement
                 if len(alt_list2) > 0:
                     msg += suggestion_preamble
                     for entry in alt_list2: msg += str(entry) + "\n\n"
@@ -418,7 +418,7 @@ class CachedHaloCatalog(object):
             raise InvalidCacheLogEntry(msg)
 
     def _retrieve_matching_log_entry_from_metadata(self,
-        simname, halo_finder, version_name, redshift):
+            simname, halo_finder, version_name, redshift):
         """
         """
 
@@ -478,17 +478,17 @@ class CachedHaloCatalog(object):
         if len(matching_entries) == 0:
             suggestion_preamble = ("\nThe following entries in the cache log "
                 "most closely match your inputs:\n\n")
-            alt_list1 = list(gen1) # discard the redshift requirement
+            alt_list1 = list(gen1)  # discard the redshift requirement
             if len(alt_list1) > 0:
                 msg += suggestion_preamble
                 for entry in alt_list1: msg += str(entry) + "\n\n"
             else:
-                alt_list2 = list(gen2) # discard the version_name requirement
+                alt_list2 = list(gen2)  # discard the version_name requirement
                 if len(alt_list2) > 0:
                     msg += suggestion_preamble
                     for entry in alt_list2: msg += str(entry) + "\n\n"
                 else:
-                    alt_list3 = list(gen3) # discard the halo_finder requirement
+                    alt_list3 = list(gen3)  # discard the halo_finder requirement
                     if len(alt_list3) > 0:
                         msg += suggestion_preamble
                         for entry in alt_list3: msg += str(entry) + "\n\n"

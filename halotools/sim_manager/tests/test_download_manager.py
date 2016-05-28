@@ -286,7 +286,7 @@ class TestDownloadManager(TestCase):
 
     @classmethod
     def clear_APH_MACHINE_of_highz_file(self,
-        delete_corresponding_halo_catalog=True):
+            delete_corresponding_halo_catalog=True):
 
         cache = HaloTableCache()
         matching_log_entries = cache.matching_log_entry_generator(

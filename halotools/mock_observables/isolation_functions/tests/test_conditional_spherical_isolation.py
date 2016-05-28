@@ -214,7 +214,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func1():
     Testing function for conf_func_id = 1
     """
     sample1 = np.zeros((1, 3)) + 0.2
-    sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(5)  # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros(len(sample2)) + 2e10
 
     # First verify that unconditioned spherical isolation behaves properly for this sample
@@ -261,7 +261,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func2():
     Testing function for conf_func_id = 2
     """
     sample1 = np.zeros((1, 3)) + 0.2
-    sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(5)  # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros(len(sample2)) + 2e10
 
     # First verify that unconditioned spherical isolation behaves properly for this sample
@@ -308,7 +308,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func3():
     Testing function for conf_func_id = 3
     """
     sample1 = np.zeros((1, 3)) + 0.2
-    sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(5)  # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros(len(sample2)) + 2e10
 
     # First verify that unconditioned spherical isolation behaves properly for this sample
@@ -355,7 +355,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func4():
     Testing function for conf_func_id = 4
     """
     sample1 = np.zeros((1, 3)) + 0.2
-    sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(5)  # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros(len(sample2)) + 2e10
 
     # First verify that unconditioned spherical isolation behaves properly for this sample
@@ -402,7 +402,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func5():
     Testing function for conf_func_id = 5
     """
     sample1 = np.zeros((1, 3)) + 0.2
-    sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(5)  # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros((len(sample2), 2))
     stellar_mass2[:, 0] = 2e10
 
@@ -504,7 +504,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func6():
     Testing function for conf_func_id = 6
     """
     sample1 = np.zeros((1, 3)) + 0.2
-    sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(5)  # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros((len(sample2), 2))
     stellar_mass2[:, 0] = 2e10
 

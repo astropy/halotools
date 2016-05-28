@@ -27,7 +27,7 @@ __all__=['tpcf_one_two_halo_decomp']
 __author__ = ['Duncan Campbell']
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
@@ -285,8 +285,8 @@ def nball_volume(R, k=3):
 
 
 def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
-    do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
-    approx_cell2_size, approx_cellran_size):
+        do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
+        approx_cell2_size, approx_cellran_size):
     """
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
@@ -333,19 +333,19 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
         NR = len(sample1)
 
         #do volume calculations
-        v = nball_volume(rbins) #volume of spheres
-        dv = np.diff(v) #volume of shells
-        global_volume = period.prod() #volume of simulation
+        v = nball_volume(rbins)  # volume of spheres
+        dv = np.diff(v)  # volume of shells
+        global_volume = period.prod()  # volume of simulation
 
         #calculate randoms for sample1
-        N1 = np.shape(sample1)[0] #number of points in sample1
-        rho1 = N1/global_volume #number density of points
-        D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
+        N1 = np.shape(sample1)[0]  # number of points in sample1
+        rho1 = N1/global_volume  # number density of points
+        D1R = (NR)*(dv*rho1)  # random counts are N**2*dv*rho
 
         #calculate randoms for sample2
-        N2 = np.shape(sample2)[0] #number of points in sample2
-        rho2 = N2/global_volume #number density of points
-        D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
+        N2 = np.shape(sample2)[0]  # number of points in sample2
+        rho2 = N2/global_volume  # number density of points
+        D2R = (NR)*(dv*rho2)  # random counts are N**2*dv*rho
 
         #calculate the random-random pairs.
         rhor = (NR**2)/global_volume
@@ -355,7 +355,7 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
 
 
 def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-    do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
+        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
     """
     Count weighted data pairs.
     """
@@ -394,9 +394,9 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
 
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
-    sample2, sample2_host_halo_id, randoms,
-    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+        sample2, sample2_host_halo_id, randoms,
+        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf_one_two_halo_decomp`.

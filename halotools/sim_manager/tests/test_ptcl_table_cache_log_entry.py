@@ -160,7 +160,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
-        _ =  log_entry.safe_for_cache
+        _ = log_entry.safe_for_cache
         assert "``particle_mass``" not in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -269,7 +269,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.close()
 
         assert log_entry.safe_for_cache is True, log_entry._cache_safety_message
-        substr =  "The particle catalog is safe to add to the cache log."
+        substr = "The particle catalog is safe to add to the cache log."
         assert substr in log_entry._cache_safety_message
 
     def tearDown(self):

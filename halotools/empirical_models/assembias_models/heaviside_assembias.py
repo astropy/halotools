@@ -7,7 +7,7 @@ any method of any component model, as in
 """
 
 __all__ = ('HeavisideAssembias', )
-__author__  = ('Andrew Hearin', )
+__author__ = ('Andrew Hearin', )
 
 import numpy as np
 from warnings import warn
@@ -109,7 +109,7 @@ class HeavisideAssembias(object):
             self.publications = ['arXiv:1512.03050']
 
     def _interpret_constructor_inputs(self, loginterp=True,
-        sec_haloprop_key=model_defaults.sec_haloprop_key, **kwargs):
+            sec_haloprop_key=model_defaults.sec_haloprop_key, **kwargs):
         """
         """
         self._loginterp = loginterp

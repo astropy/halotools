@@ -33,7 +33,7 @@ def get_scenario_cache_fname(scenario):
 
 
 def add_new_row_to_cache_log(scenario,
-    simname, halo_finder, redshift, version_name, **kwargs):
+        simname, halo_finder, redshift, version_name, **kwargs):
     if type(scenario) == int:
         scenario = str(scenario)
 

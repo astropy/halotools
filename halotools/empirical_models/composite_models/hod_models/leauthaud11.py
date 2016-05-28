@@ -15,7 +15,7 @@ __all__ = ['leauthaud11_model_dictionary']
 
 
 def leauthaud11_model_dictionary(threshold=model_defaults.default_stellar_mass_threshold,
-    **kwargs):
+        **kwargs):
     """
     Dictionary to build an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077.
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation.

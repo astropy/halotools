@@ -21,8 +21,8 @@ __all__ = ('npairs_jackknife_3d', )
 
 
 def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, weights2=None,
-    jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
-    approx_cell1_size=None, approx_cell2_size=None):
+        jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Pair counter used to make jackknife error estimates of real-space pair counter
     `~halotools.mock_observables.pair_counters.npairs`.
@@ -194,7 +194,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
 
 
 def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
-    weights1, weights2, jtags1, jtags2, N_samples):
+        weights1, weights2, jtags1, jtags2, N_samples):
     """
     """
 

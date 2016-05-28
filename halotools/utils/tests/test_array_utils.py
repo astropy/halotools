@@ -102,7 +102,7 @@ def test_convert_to_ndarray4():
 def test_convert_to_ndarray5():
     """
     """
-    z  = None
+    z = None
     zarr = array_utils.convert_to_ndarray(z)
     assert type(zarr) == np.ndarray
     assert len(zarr) == 1
@@ -113,7 +113,7 @@ def test_convert_to_ndarray6():
     """
     """
     t = np.array(1)
-    tarr  = array_utils.convert_to_ndarray(t)
+    tarr = array_utils.convert_to_ndarray(t)
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
     assert tarr[0] == 1
@@ -123,7 +123,7 @@ def test_convert_to_ndarray7():
     """
     """
     t = np.array(1)
-    tarr  = array_utils.convert_to_ndarray(t, dt=float)
+    tarr = array_utils.convert_to_ndarray(t, dt=float)
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
     assert tarr[0] == 1

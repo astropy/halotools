@@ -19,13 +19,13 @@ __all__ = ('underdensity_prob_func', )
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def underdensity_prob_func(sample1, rbins, n_ran=None,
-    random_sphere_centers=None, period=None,
-    sample_volume=None, u=0.2, num_threads=1,
-    approx_cell1_size=None, approx_cellran_size=None):
+        random_sphere_centers=None, period=None,
+        sample_volume=None, u=0.2, num_threads=1,
+        approx_cell1_size=None, approx_cellran_size=None):
     """
     Calculate the underdensity probability function (UPF), :math:`P_U(r)`.
 
@@ -162,9 +162,9 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
 
 
 def _underdensity_prob_func_process_args(sample1, rbins,
-    n_ran, random_sphere_centers, period,
-    sample_volume, u, num_threads,
-    approx_cell1_size, approx_cellran_size):
+        n_ran, random_sphere_centers, period,
+        sample_volume, u, num_threads,
+        approx_cell1_size, approx_cellran_size):
     """
     """
     sample1 = convert_to_ndarray(sample1)

@@ -17,7 +17,7 @@ __author__ = ['Duncan Campbell']
 
 
 def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
-    period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size):
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.pairwise_velocity_stats`.

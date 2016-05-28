@@ -142,7 +142,7 @@ class HaloTableCache(object):
                 if key == 'redshift':
                     requested_redshift = float(kwargs[key])
                     redshift_of_entry = float(getattr(entry, key))
-                    yield_entry *=  abs(redshift_of_entry - requested_redshift) <= dz_tol
+                    yield_entry *= abs(redshift_of_entry - requested_redshift) <= dz_tol
                 else:
                     yield_entry *= kwargs[key] == getattr(entry, key)
             if bool(yield_entry) is True:
@@ -175,9 +175,9 @@ class HaloTableCache(object):
             self._overwrite_log_ascii(self.log)
 
     def remove_entry_from_cache_log(self, simname, halo_finder,
-        version_name, redshift, fname,
-        raise_non_existence_exception=True,
-        update_ascii=True, delete_corresponding_halo_catalog=False):
+            version_name, redshift, fname,
+            raise_non_existence_exception=True,
+            update_ascii=True, delete_corresponding_halo_catalog=False):
         """
         If the log stores an entry matching the input metadata, the entry will be deleted and
         the ascii file storing the log will be updated. If there is no match,

@@ -65,9 +65,9 @@ class DownloadManager(object):
         self.ptcl_table_cache = PtclTableCache()
 
     def download_processed_halo_table(self, simname, halo_finder, redshift,
-        dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_version_name,
-        download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
-        **kwargs):
+            dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_version_name,
+            download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
+            **kwargs):
         """ Method to download one of the pre-processed binary files
         storing a reduced halo catalog.
 
@@ -353,9 +353,9 @@ class DownloadManager(object):
             print(success_msg)
 
     def download_ptcl_table(self, simname, redshift,
-        dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_ptcl_version_name,
-        download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
-        **kwargs):
+            dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_ptcl_version_name,
+            download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
+            **kwargs):
         """ Method to download one of the binary files storing a
         random downsampling of dark matter particles.
 
@@ -713,7 +713,7 @@ class DownloadManager(object):
         return output_fname, closest_available_redshift
 
     def _closest_catalog_on_web(self, catalog_type,
-        simname, desired_redshift, **kwargs):
+            simname, desired_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -817,7 +817,7 @@ class DownloadManager(object):
         return output_fname, actual_redshift
 
     def _ptcl_tables_available_for_download(self,
-        version_name=sim_defaults.default_ptcl_version_name, **kwargs):
+            version_name=sim_defaults.default_ptcl_version_name, **kwargs):
         """ Method searches the appropriate web location and
         returns a list of the filenames of all reduced
         halo catalog binaries processed by Halotools

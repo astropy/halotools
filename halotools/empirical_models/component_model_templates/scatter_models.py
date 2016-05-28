@@ -26,8 +26,8 @@ class LogNormalScatterModel(object):
     """
 
     def __init__(self,
-        prim_haloprop_key=model_defaults.default_smhm_haloprop,
-        **kwargs):
+            prim_haloprop_key=model_defaults.default_smhm_haloprop,
+            **kwargs):
         """
         Parameters
         ----------

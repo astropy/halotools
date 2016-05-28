@@ -19,12 +19,12 @@ __all__ = ('void_prob_func', )
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
-    period=None, num_threads=1,
-    approx_cell1_size=None, approx_cellran_size=None):
+        period=None, num_threads=1,
+        approx_cell1_size=None, approx_cellran_size=None):
     """
     Calculate the void probability function (VPF), :math:`P_0(r)`,
     defined as the probability that a random
@@ -146,8 +146,8 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
 
 
 def _void_prob_func_process_args(sample1, rbins,
-    n_ran, random_sphere_centers, period, num_threads,
-    approx_cell1_size, approx_cellran_size):
+        n_ran, random_sphere_centers, period, num_threads,
+        approx_cell1_size, approx_cellran_size):
     """
     """
     sample1 = convert_to_ndarray(sample1)

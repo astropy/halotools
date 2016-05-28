@@ -67,7 +67,7 @@ class MockFactory(object):
             setattr(self, key, halocat.__dict__[key])
 
         try:
-            self.ptcl_table = halocat.ptcl_table # pre-retrieve the particles from disk, if available
+            self.ptcl_table = halocat.ptcl_table  # pre-retrieve the particles from disk, if available
         except:
             pass
 
@@ -427,8 +427,8 @@ class MockFactory(object):
             return rbin_centers, clustering, clustering2
 
     def compute_fof_group_ids(self, zspace=True,
-        b_perp=model_defaults.default_b_perp,
-        b_para=model_defaults.default_b_para, **kwargs):
+            b_perp=model_defaults.default_b_perp,
+            b_para=model_defaults.default_b_para, **kwargs):
         """
         Method computes the friends-of-friends group IDs of the
         mock galaxy catalog after (optionally) placing the mock into redshift space.

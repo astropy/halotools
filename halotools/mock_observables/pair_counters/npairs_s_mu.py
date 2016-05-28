@@ -18,7 +18,7 @@ __all__ = ('npairs_s_mu', )
 
 
 def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
-    verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+        verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points separated by less than
     radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`,

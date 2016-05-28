@@ -217,7 +217,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
-        _ =  log_entry.safe_for_cache
+        _ = log_entry.safe_for_cache
         assert "``particle_mass``" not in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')

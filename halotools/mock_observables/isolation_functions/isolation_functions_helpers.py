@@ -36,7 +36,7 @@ def _get_r_max(sample1, r_max):
 
 
 def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size,
-    xsearch_length, ysearch_length, zsearch_length):
+        xsearch_length, ysearch_length, zsearch_length):
     """
     """
     if approx_cell1_size is None:

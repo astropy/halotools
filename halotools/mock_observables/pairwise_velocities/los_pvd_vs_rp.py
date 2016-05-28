@@ -16,13 +16,13 @@ from .velocity_marked_npairs_xy_z import velocity_marked_npairs_xy_z
 __all__ = ('los_pvd_vs_rp', )
 __author__ = ['Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 
 def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
-    velocities2=None, period=None, do_auto=True, do_cross=True,
-    num_threads=1, max_sample_size=int(1e6),
-    approx_cell1_size=None, approx_cell2_size=None):
+        velocities2=None, period=None, do_auto=True, do_cross=True,
+        num_threads=1, max_sample_size=int(1e6),
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\\sigma_{z12}(r_p)`.
 
@@ -159,8 +159,8 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
 
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
-        do_auto, do_cross, marks1, marks2,
-        weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+            do_auto, do_cross, marks1, marks2,
+            weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """

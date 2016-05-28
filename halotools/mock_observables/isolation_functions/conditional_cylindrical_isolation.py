@@ -19,7 +19,7 @@ __all__ = ('conditional_cylindrical_isolation', )
 
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 
 def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,

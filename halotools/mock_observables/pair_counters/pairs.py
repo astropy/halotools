@@ -70,8 +70,8 @@ def npairs(sample1, sample2, rbins, period=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,)) #store radial pair separations
-    for i in range(0, N1): #calculate distance between every point and every other point
+    dd = np.zeros((N1*N2,))  # store radial pair separations
+    for i in range(0, N1):  # calculate distance between every point and every other point
         x1 = sample1[i, :]
         x2 = sample2
         dd[i*N2:i*N2+N2] = distance(x1, x2, period)
@@ -153,8 +153,8 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2, 2)) #store pair separations
-    for i in range(0, N1): #calculate distance between every point and every other point
+    dd = np.zeros((N1*N2, 2))  # store pair separations
+    for i in range(0, N1):  # calculate distance between every point and every other point
         x1 = sample1[i, :]
         x2 = sample2
         dd[i*N2:i*N2+N2, 1] = parallel_distance(x1, x2, period)
@@ -248,8 +248,8 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1, N2), dtype=np.float64) #store radial pair separations
-    for i in range(0, N1): #calculate distance between every point and every other point
+    dd = np.zeros((N1, N2), dtype=np.float64)  # store radial pair separations
+    for i in range(0, N1):  # calculate distance between every point and every other point
         x1 = sample1[i, :]
         x2 = sample2
         dd[i, :] = distance(x1, x2, period)
@@ -354,9 +354,9 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2, 2)) #store pair separations
-    ww = np.zeros((N1*N2, 1)) #store pair separations
-    for i in range(0, N1): #calculate distance between every point and every other point
+    dd = np.zeros((N1*N2, 2))  # store pair separations
+    ww = np.zeros((N1*N2, 1))  # store pair separations
+    for i in range(0, N1):  # calculate distance between every point and every other point
         x1 = sample1[i, :]
         x2 = sample2
         dd[i*N2:i*N2+N2, 1] = parallel_distance(x1, x2, period)
@@ -427,8 +427,8 @@ def pairs(sample1, r, sample2=None, period=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1, N2)) #store radial pair separations
-    for i in range(0, N1): #calculate distance between every point and every other point
+    dd = np.zeros((N1, N2))  # store radial pair separations
+    for i in range(0, N1):  # calculate distance between every point and every other point
         x1 = sample1[i, :]
         x2 = sample2
         dd[i, :] = distance(x1, x2, period)

@@ -17,8 +17,8 @@ __all__ = ('npairs_per_object_3d', )
 
 
 def npairs_per_object_3d(sample1, sample2, rbins, period=None,
-    verbose=False, num_threads=1,
-    approx_cell1_size=None, approx_cell2_size=None):
+        verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of times the pair count between two samples exceeds a
     threshold value as a function of the 3d spatial separation *r*.

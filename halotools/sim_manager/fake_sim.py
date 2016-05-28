@@ -30,7 +30,7 @@ class FakeSim(UserSuppliedHaloCatalog):
     """
 
     def __init__(self, num_massbins=10, num_halos_per_massbin=int(100),
-        num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
+            num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
         """
         Parameters
         ----------
@@ -156,7 +156,7 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
     """
 
     def __init__(self, num_massbins=6, num_halos_per_massbin=int(100),
-        num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
+            num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
         """
         Parameters
         ----------

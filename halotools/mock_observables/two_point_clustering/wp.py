@@ -14,13 +14,13 @@ __all__ = ['wp']
 __author__ = ['Duncan Campbell']
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
-    do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-    max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,
-    approx_cellran_size=None):
+        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+        max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,
+        approx_cellran_size=None):
     """
     Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
     where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS).

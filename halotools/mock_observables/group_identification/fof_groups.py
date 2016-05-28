@@ -16,7 +16,7 @@ try:
     import igraph
 except ImportError:
     igraph_available=False
-if igraph_available is True: #there is another package called igraph--need to distinguish.
+if igraph_available is True:  # there is another package called igraph--need to distinguish.
     if not hasattr(igraph, 'Graph'):
         igraph_available is False
 no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
@@ -131,9 +131,9 @@ class FoFGroups(object):
         :ref:`galaxy_catalog_analysis_tutorial5`
         """
 
-        self.b_perp = float(b_perp) #perpendicular linking length
-        self.b_para = float(b_para) #parallel linking length
-        self.positions=np.asarray(positions, dtype=np.float64) #coordinates of galaxies
+        self.b_perp = float(b_perp)  # perpendicular linking length
+        self.b_para = float(b_para)  # parallel linking length
+        self.positions=np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
 
         #process Lbox parameter
         if (Lbox is None) & (period is None):
@@ -151,8 +151,8 @@ class FoFGroups(object):
         if (period is not None) and (not np.all(Lbox==period)):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
 
-        self.period = period #simulation box periodic boundary conditions
-        self.Lbox = np.asarray(Lbox, dtype='float64') #simulation box periodic boundary conditions
+        self.period = period  # simulation box periodic boundary conditions
+        self.Lbox = np.asarray(Lbox, dtype='float64')  # simulation box periodic boundary conditions
 
         #calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)

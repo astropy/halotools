@@ -22,11 +22,11 @@ __all__ = ('cylindrical_isolation', )
 
 __author__ = ['Andrew Hearin', 'Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 
 def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
-    num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a
     neighbor in ``sample2`` within an user specified cylindrical volume centered at each
@@ -202,7 +202,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
 
 
 def _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period,
-    num_threads, approx_cell1_size, approx_cell2_size):
+        num_threads, approx_cell1_size, approx_cell2_size):
     """
     private function to process the arguents for cylindrical isolation functions
     """

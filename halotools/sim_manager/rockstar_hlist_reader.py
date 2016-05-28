@@ -75,12 +75,12 @@ class RockstarHlistReader(TabularAsciiReader):
     """
 
     def __init__(self, input_fname, columns_to_keep_dict,
-        output_fname, simname, halo_finder, redshift, version_name,
-        Lbox, particle_mass, header_char='#',
-        row_cut_min_dict={}, row_cut_max_dict={},
-        row_cut_eq_dict={}, row_cut_neq_dict={},
-        overwrite=False, ignore_nearby_redshifts=False, dz_tol=0.05,
-        processing_notes=' ', **kwargs):
+            output_fname, simname, halo_finder, redshift, version_name,
+            Lbox, particle_mass, header_char='#',
+            row_cut_min_dict={}, row_cut_max_dict={},
+            row_cut_eq_dict={}, row_cut_neq_dict={},
+            overwrite=False, ignore_nearby_redshifts=False, dz_tol=0.05,
+            processing_notes=' ', **kwargs):
         """
         Parameters
         -----------
@@ -520,8 +520,8 @@ class RockstarHlistReader(TabularAsciiReader):
         return output_fname
 
     def read_halocat(self, columns_to_convert_from_kpc_to_mpc,
-        write_to_disk=False, update_cache_log=False,
-        add_supplementary_halocat_columns=True, **kwargs):
+            write_to_disk=False, update_cache_log=False,
+            add_supplementary_halocat_columns=True, **kwargs):
         """ Method reads the ascii data and
         binds the resulting catalog to ``self.halo_table``.
 

@@ -32,8 +32,8 @@ class PrimGalpropModel(object):
     """
 
     def __init__(self, galprop_name,
-        prim_haloprop_key=model_defaults.default_smhm_haloprop,
-        scatter_model=LogNormalScatterModel, **kwargs):
+            prim_haloprop_key=model_defaults.default_smhm_haloprop,
+            scatter_model=LogNormalScatterModel, **kwargs):
         """
         Parameters
         ----------

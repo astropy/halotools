@@ -16,7 +16,7 @@ fixed_seed = 43
 
 
 def pure_python_mean_los_velocity_vs_rp(
-    sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox=None):
+        sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox=None):
     """ Brute force pure python function calculating mean los velocities
     in a single bin of separation.
     """

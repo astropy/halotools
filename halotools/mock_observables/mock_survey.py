@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from scipy.interpolate import interp1d
 from astropy import cosmology
-from astropy.constants import c #the speed of light
+from astropy.constants import c  # the speed of light
 
 
 __all__=['distant_observer_redshift', 'ra_dec_z']
@@ -116,7 +116,7 @@ def distant_observer_redshift(x, v, period=None, cosmo=None):
 
     #reflect galaxies around PBC
     if period is not None:
-        z_cos_max = period[2]*100.00/c_km_s #maximum cosmological redshift
+        z_cos_max = period[2]*100.00/c_km_s  # maximum cosmological redshift
         flip = (z > z_cos_max)
         z[flip] = z[flip] - z_cos_max
         flip = (z < 0.0)
@@ -210,7 +210,7 @@ def ra_dec_z(x, v, cosmo=None):
     phi = np.arctan2(x[:, 1], x[:, 0])
 
     #convert spherical coordinates into ra,dec
-    ra  = phi
+    ra = phi
     dec = theta - np.pi/2.0
 
     return ra, dec, redshift

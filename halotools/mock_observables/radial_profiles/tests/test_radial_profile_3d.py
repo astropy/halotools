@@ -118,7 +118,7 @@ def test_radial_profile_3d_test3():
     correct counts and results.
     """
     npts1 = 100
-    sample1 = generate_3d_regular_mesh(4) # coords = 0.125, 0.375, 0.625, 0.875
+    sample1 = generate_3d_regular_mesh(4)  # coords = 0.125, 0.375, 0.625, 0.875
 
     rbins_absolute = np.array([0.04, 0.06, 0.1])
     r1, r2 = 0.05, 0.09

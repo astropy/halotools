@@ -27,9 +27,9 @@ class Zheng07Cens(OccupationComponent):
     """
 
     def __init__(self,
-        threshold=model_defaults.default_luminosity_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        **kwargs):
+            threshold=model_defaults.default_luminosity_threshold,
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            **kwargs):
         """
         Parameters
         ----------
@@ -210,10 +210,10 @@ class Zheng07Sats(OccupationComponent):
     """
 
     def __init__(self,
-        threshold=model_defaults.default_luminosity_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        modulate_with_cenocc=False,
-        **kwargs):
+            threshold=model_defaults.default_luminosity_threshold,
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            modulate_with_cenocc=False,
+            **kwargs):
         """
         Parameters
         ----------

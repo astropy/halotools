@@ -27,7 +27,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
     """
 
     def __init__(self, halo_mass_key,
-        halo_mass_abscissa, quiescent_fraction_control_values, **kwargs):
+            halo_mass_abscissa, quiescent_fraction_control_values, **kwargs):
         """
         Parameters
         -----------

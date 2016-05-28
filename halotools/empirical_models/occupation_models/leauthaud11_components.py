@@ -28,8 +28,8 @@ class Leauthaud11Cens(OccupationComponent):
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -182,10 +182,10 @@ class Leauthaud11Sats(OccupationComponent):
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift=sim_manager.sim_defaults.default_redshift,
-        modulate_with_cenocc=True,
-        **kwargs):
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            redshift=sim_manager.sim_defaults.default_redshift,
+            modulate_with_cenocc=True,
+            **kwargs):
         """
         Parameters
         ----------

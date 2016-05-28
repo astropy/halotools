@@ -136,7 +136,7 @@ class PtclTableCache(object):
                 if key == 'redshift':
                     requested_redshift = float(kwargs[key])
                     redshift_of_entry = float(getattr(entry, key))
-                    yield_entry *=  abs(redshift_of_entry - requested_redshift) <= dz_tol
+                    yield_entry *= abs(redshift_of_entry - requested_redshift) <= dz_tol
                 else:
                     yield_entry *= kwargs[key] == getattr(entry, key)
             if bool(yield_entry) is True:

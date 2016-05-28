@@ -28,9 +28,9 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
         #the outer dimension is the number of samples.
         #the N arrays are the number of points in each dimension.
         #so, what we want to do is multiple each row of e.g. DD by the number of 1/N
-        mult = lambda x, y: (x*y.T).T #annoying and ugly, but works.
+        mult = lambda x, y: (x*y.T).T  # annoying and ugly, but works.
     else:
-        mult = lambda x, y: x*y #used for all else
+        mult = lambda x, y: x*y  # used for all else
 
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
@@ -57,7 +57,7 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
         raise ValueError("unsupported estimator!")
 
     if np.shape(xi)[0]==1: return xi[0]
-    else: return xi #for jackknife
+    else: return xi  # for jackknife
 
 
 def _list_estimators():

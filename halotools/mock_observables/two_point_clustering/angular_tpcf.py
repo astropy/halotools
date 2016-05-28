@@ -21,12 +21,12 @@ __all__=['angular_tpcf']
 __author__ = ['Duncan Campbell']
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
-    do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-    max_sample_size=int(1e6)):
+        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+        max_sample_size=int(1e6)):
     """
     Calculate the angular two-point correlation function, :math:`w(\\theta)`.
 
@@ -139,7 +139,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     _sample1_is_sample2 = _angular_tpcf_process_args(*function_args)
 
     #convert angular bins to coord lengths on a unit sphere
-    chord_bins  = chord_to_cartesian(theta_bins, radians=False)
+    chord_bins = chord_to_cartesian(theta_bins, radians=False)
 
     #convert samples and randoms to cartesian coordinates (x,y,z) on a unit sphere
     x, y, z = spherical_to_cartesian(sample1[:, 0], sample1[:, 1])
@@ -154,7 +154,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         randoms = np.vstack((x, y, z)).T
 
     def random_counts(sample1, sample2, randoms, chord_bins,
-        num_threads, do_RR, do_DR, _sample1_is_sample2):
+            num_threads, do_RR, do_DR, _sample1_is_sample2):
         """
         Count random pairs.
         """
@@ -194,15 +194,15 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             #do area calculations
             da = area_spherical_cap(chord_bins)
             da = np.diff(da)
-            global_area = 4.0*np.pi #surface area of a unit sphere
+            global_area = 4.0*np.pi  # surface area of a unit sphere
 
             #calculate randoms for sample1
-            N1 = np.shape(sample1)[0] #number of points in sample1
-            rho1 = N1/global_area #number density of points
-            D1R = (N1)*(da*rho1) #random counts are N**2*dv*rho
+            N1 = np.shape(sample1)[0]  # number of points in sample1
+            rho1 = N1/global_area  # number density of points
+            D1R = (N1)*(da*rho1)  # random counts are N**2*dv*rho
 
             N2 = np.shape(sample2)[0]
-            rho2 = N2/global_area #number density of points
+            rho2 = N2/global_area  # number density of points
             D2R = N2*(da*rho2)
 
             #calculate the random-random pairs.
@@ -212,7 +212,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             return D1R, D2R, RR
 
     def pair_counts(sample1, sample2, chord_bins,
-        N_thread, do_auto, do_cross, _sample1_is_sample2):
+            N_thread, do_auto, do_cross, _sample1_is_sample2):
         """
         Count data-data pairs.
         """
@@ -296,7 +296,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
 
 def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
-    do_auto, do_cross, estimator, num_threads, max_sample_size):
+        do_auto, do_cross, estimator, num_threads, max_sample_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.angular_tpcf`.

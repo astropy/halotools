@@ -17,8 +17,8 @@ __all__ = ['zheng07_model_dictionary']
 
 
 def zheng07_model_dictionary(
-    threshold=model_defaults.default_luminosity_threshold,
-    redshift=sim_defaults.default_redshift, **kwargs):
+        threshold=model_defaults.default_luminosity_threshold,
+        redshift=sim_defaults.default_redshift, **kwargs):
     """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457.
 
     See :ref:`zheng07_composite_model` for a tutorial on this model.

@@ -19,9 +19,9 @@ __all__ = ('velocity_marked_npairs_xy_z', )
 
 
 def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
-    weights1=None, weights2=None,
-    weight_func_id=0, verbose=False, num_threads=1,
-    approx_cell1_size=None, approx_cell2_size=None):
+        weights1=None, weights2=None,
+        weight_func_id=0, verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the number of velocity weighted pairs
     with separations greater than or equal to
@@ -165,7 +165,7 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         counts3 = np.sum(counts3, axis=0)
         pool.close()
     else:
-        counts1, counts2, counts3  = np.array(engine(cell1_tuples[0]))
+        counts1, counts2, counts3 = np.array(engine(cell1_tuples[0]))
 
     return counts1, counts2, counts3
 

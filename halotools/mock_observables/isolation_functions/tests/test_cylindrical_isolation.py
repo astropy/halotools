@@ -116,8 +116,8 @@ def test_cylindrical_isolation_indices():
     Verify that there is only a single isolated point and that it has the correct index.
     """
 
-    sample1_mesh = generate_3d_regular_mesh(5) # 0.1, 0.3, 0.5, 0.7, 0.9
-    sample2 = generate_3d_regular_mesh(10) # 0.05, 0.15, 0.25, 0.35, ..., 0.95
+    sample1_mesh = generate_3d_regular_mesh(5)  # 0.1, 0.3, 0.5, 0.7, 0.9
+    sample2 = generate_3d_regular_mesh(10)  # 0.05, 0.15, 0.25, 0.35, ..., 0.95
 
     insertion_idx = 5
     sample1 = np.insert(sample1_mesh, insertion_idx*3, [0.06, 0.06, 0.06]).reshape((len(sample1_mesh)+1, 3))

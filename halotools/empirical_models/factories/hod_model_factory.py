@@ -411,7 +411,7 @@ class HodModelFactory(ModelFactory):
         return model_feature_calling_sequence
 
     def _test_model_feature_calling_sequence_consistency(self,
-        model_feature_calling_sequence, gal_type_list):
+            model_feature_calling_sequence, gal_type_list):
         """
         """
         for model_feature_calling_sequence_element in model_feature_calling_sequence:
@@ -481,7 +481,7 @@ class HodModelFactory(ModelFactory):
                         feature_name, model_feature_calling_sequence_element))
 
     def _infer_gal_type_and_feature_name(self, model_dictionary_key, gal_type_list,
-        known_gal_type=None, known_feature_name=None):
+            known_gal_type=None, known_feature_name=None):
 
         processed_key = model_dictionary_key.lower()
 

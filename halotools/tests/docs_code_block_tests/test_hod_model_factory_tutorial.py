@@ -21,11 +21,11 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import TrivialPhaseSpace, Zheng07Cens
 
-        cens_occ_model =  Zheng07Cens()
+        cens_occ_model = Zheng07Cens()
         cens_prof_model = TrivialPhaseSpace()
 
         from ...empirical_models import NFWPhaseSpace, Zheng07Sats
-        sats_occ_model =  Zheng07Sats()
+        sats_occ_model = Zheng07Sats()
         sats_prof_model = NFWPhaseSpace()
 
         model_instance = HodModelFactory(
@@ -48,11 +48,11 @@ class TestHodModelFactoryTutorial(TestCase):
         from ...empirical_models import HodModelFactory
 
         from ...empirical_models import TrivialPhaseSpace, Zheng07Cens
-        another_cens_occ_model =  Zheng07Cens()
+        another_cens_occ_model = Zheng07Cens()
         another_cens_prof_model = TrivialPhaseSpace()
 
         from ...empirical_models import NFWPhaseSpace, Zheng07Sats
-        another_sats_occ_model =  Zheng07Sats()
+        another_sats_occ_model = Zheng07Sats()
         another_sats_prof_model = NFWPhaseSpace()
 
         from ...empirical_models import HaloMassInterpolQuenching
@@ -76,11 +76,11 @@ class TestHodModelFactoryTutorial(TestCase):
         from ...empirical_models import HodModelFactory
 
         from ...empirical_models import TrivialPhaseSpace, Leauthaud11Cens
-        another_cens_occ_model =  Leauthaud11Cens()
+        another_cens_occ_model = Leauthaud11Cens()
         another_cens_prof_model = TrivialPhaseSpace()
 
         from ...empirical_models import NFWPhaseSpace, Leauthaud11Sats
-        another_sats_occ_model =  Leauthaud11Sats()
+        another_sats_occ_model = Leauthaud11Sats()
         another_sats_prof_model = NFWPhaseSpace()
 
         from ...empirical_models import HaloMassInterpolQuenching
@@ -144,11 +144,11 @@ class TestHodModelFactoryTutorial(TestCase):
         from ...empirical_models import HodModelFactory
 
         from ...empirical_models import TrivialPhaseSpace, Zheng07Cens
-        another_cens_occ_model =  Zheng07Cens()
+        another_cens_occ_model = Zheng07Cens()
         another_cens_prof_model = TrivialPhaseSpace()
 
         from ...empirical_models import NFWPhaseSpace, Zheng07Sats
-        another_sats_occ_model =  Zheng07Sats()
+        another_sats_occ_model = Zheng07Sats()
         another_sats_prof_model = NFWPhaseSpace()
 
         ordinary_zheng07_model = HodModelFactory(

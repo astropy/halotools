@@ -96,7 +96,7 @@ def process_optional_input_sample2(sample1, sample2, do_cross):
 
 
 def downsample_inputs_exceeding_max_sample_size(
-    sample1, sample2, _sample1_is_sample2, max_sample_size):
+        sample1, sample2, _sample1_is_sample2, max_sample_size):
     """ Function used to downsample sample1 and/or sample2
     if either samples exceed max_sample_size
 

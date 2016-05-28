@@ -20,8 +20,8 @@ __author__ = ['Duncan Campbell']
 
 
 def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
-    log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
-    approx_cell1_size=None, approx_cell2_size=None):
+        log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
 
@@ -200,10 +200,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     #fit a spline to the tpcf
     #note that we fit the log10 of xi+1.0
-    rbin_centers = (rbins[:-1]+rbins[1:])/2.0 #note these are the true centers, not log
+    rbin_centers = (rbins[:-1]+rbins[1:])/2.0  # note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
 
-    mean_rho = len(particles)/period.prod() #number density of particles
+    mean_rho = len(particles)/period.prod()  # number density of particles
 
     #define function to integrate
     def f(pi, rp):
@@ -213,7 +213,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         return mean_rho*(1.0+(10.0**xi(r)-1.0))
 
     #integrate xi to get the surface density as a function of r_p
-    surface_density = np.zeros(len(rp_bins)) #initialize to 0.0
+    surface_density = np.zeros(len(rp_bins))  # initialize to 0.0
     for i in range(0, len(rp_bins)):
         surface_density[i] = integrate.quad(f, 0.0, pi_max, args=(rp_bins[i],))[0]
 

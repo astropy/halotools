@@ -52,7 +52,7 @@ class HodMockFactory(MockFactory):
     """
 
     def __init__(self, Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
-        halo_mass_column_key='halo_mvir', **kwargs):
+            halo_mass_column_key='halo_mvir', **kwargs):
         """
         Parameters
         ----------

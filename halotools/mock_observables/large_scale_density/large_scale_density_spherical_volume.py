@@ -16,12 +16,12 @@ __all__ = ('large_scale_density_spherical_volume', )
 
 __author__ = ('Andrew Hearin', )
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def large_scale_density_spherical_volume(sample, tracers, radius,
-    period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
-    norm_by_mean_density=False):
+        period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
+        norm_by_mean_density=False):
     """
     Calculate the mean density of the input ``sample``
     from an input set of tracer particles using a sphere centered on each point
@@ -119,7 +119,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
 
 
 def _large_scale_density_spherical_volume_process_args(
-    sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size):
+        sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size):
     """
     """
     sample = convert_to_ndarray(sample)

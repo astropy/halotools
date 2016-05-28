@@ -27,7 +27,7 @@ class NbodySimulation(object):
     """
 
     def __init__(self, simname, Lbox, particle_mass, num_ptcl_per_dim,
-        softening_length, initial_redshift, cosmology):
+            softening_length, initial_redshift, cosmology):
         """
         Parameters
         -----------

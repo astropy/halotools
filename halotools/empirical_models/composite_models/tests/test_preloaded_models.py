@@ -47,7 +47,7 @@ class TestHearin15(TestCase):
         halocat = FakeSim(redshift=2.)
         # Test that an attempt to repopulate with a different halocat raises an exception
         with pytest.raises(HalotoolsError) as exc:
-            model.populate_mock(halocat) #default redshift != 2
+            model.populate_mock(halocat)  # default redshift != 2
 
     def test_Leauthaud11c(self):
 

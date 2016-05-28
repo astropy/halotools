@@ -20,7 +20,7 @@ fixed_seed = 43
 
 
 def pure_python_mean_radial_velocity_vs_r(
-    sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=None):
+        sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=None):
     """ Brute force pure python function calculating mean radial velocities
     in a single bin of separation.
     """

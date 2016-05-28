@@ -22,7 +22,7 @@ __all__ = ['rp_pi_tpcf']
 __author__ = ['Duncan Campbell']
 
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
@@ -300,7 +300,7 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
                 approx_cell2_size=approx_cellran_size)
             D1R = np.diff(np.diff(D1R, axis=0), axis=1)
         else: D1R=None
-        if _sample1_is_sample2: #calculating the cross-correlation
+        if _sample1_is_sample2:  # calculating the cross-correlation
             D2R = None
         else:
             if do_DR is True:
@@ -319,30 +319,30 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
         NR = len(sample1)
 
         #do volume calculations
-        v = cylinder_volume(rp_bins, 2.0*pi_bins) #volume of spheres
-        dv = np.diff(np.diff(v, axis=0), axis=1) #volume of annuli
+        v = cylinder_volume(rp_bins, 2.0*pi_bins)  # volume of spheres
+        dv = np.diff(np.diff(v, axis=0), axis=1)  # volume of annuli
         global_volume = period.prod()
 
         #calculate randoms for sample1
         N1 = np.shape(sample1)[0]
         rho1 = N1/global_volume
-        D1R = (N1)*(dv*rho1) #read note about pair counter
+        D1R = (N1)*(dv*rho1)  # read note about pair counter
 
         #calculate randoms for sample2
         N2 = np.shape(sample2)[0]
         rho2 = N2/global_volume
-        D2R = N2*(dv*rho2) #read note about pair counter
+        D2R = N2*(dv*rho2)  # read note about pair counter
 
         #calculate the random-random pairs.
         rhor = NR**2/global_volume
-        RR = (dv*rhor) #RR is only the RR for the cross-correlation.
+        RR = (dv*rhor)  # RR is only the RR for the cross-correlation.
 
         return D1R, D2R, RR
 
 
 def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
-    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.redshift_space_tpcf`.

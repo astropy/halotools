@@ -657,9 +657,9 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         MonteCarloGalProf.setup_prof_lookup_tables(self, *concentration_binning)
 
     def build_lookup_tables(self,
-        logrmin=model_defaults.default_lograd_min,
-        logrmax=model_defaults.default_lograd_max,
-        Npts_radius_table=model_defaults.Npts_radius_table):
+            logrmin=model_defaults.default_lograd_min,
+            logrmax=model_defaults.default_lograd_max,
+            Npts_radius_table=model_defaults.Npts_radius_table):
         """ Method used to create a lookup table of the spatial and velocity radial profiles.
 
         Parameters

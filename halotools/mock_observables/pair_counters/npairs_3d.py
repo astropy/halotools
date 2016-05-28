@@ -17,8 +17,8 @@ __all__ = ('npairs_3d', )
 
 
 def npairs_3d(sample1, sample2, rbins, period=None,
-    verbose=False, num_threads=1,
-    approx_cell1_size=None, approx_cell2_size=None):
+        verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points separated by
     a three-dimensional distance smaller than the input ``rbins``.
@@ -153,7 +153,7 @@ def npairs_3d(sample1, sample2, rbins, period=None,
 
 
 def _npairs_3d_process_args(sample1, sample2, rbins, period,
-    verbose, num_threads, approx_cell1_size, approx_cell2_size):
+        verbose, num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
     if num_threads is not 1:

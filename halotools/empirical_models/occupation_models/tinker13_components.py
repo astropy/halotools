@@ -30,9 +30,9 @@ class Tinker13Cens(OccupationComponent):
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift=sim_manager.sim_defaults.default_redshift,
-        **kwargs):
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            redshift=sim_manager.sim_defaults.default_redshift,
+            **kwargs):
         """
         Parameters
         ----------
@@ -100,8 +100,8 @@ class Tinker13Cens(OccupationComponent):
             ])
 
     def _initialize_param_dict(self,
-        quiescent_fraction_abscissa=[6.31e10, 3.98e11, 2.51e12, 1.58e13, 1.e14],
-        quiescent_fraction_ordinates=[0.052, 0.14, 0.54, 0.63, 0.77], **kwargs):
+            quiescent_fraction_abscissa=[6.31e10, 3.98e11, 2.51e12, 1.58e13, 1.e14],
+            quiescent_fraction_ordinates=[0.052, 0.14, 0.54, 0.63, 0.77], **kwargs):
         """
         """
         self.param_dict = {}
@@ -289,9 +289,9 @@ class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift=sim_manager.sim_defaults.default_redshift,
-        **kwargs):
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            redshift=sim_manager.sim_defaults.default_redshift,
+            **kwargs):
         """
         Parameters
         ----------
@@ -360,8 +360,8 @@ class Tinker13QuiescentSats(OccupationComponent):
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -521,8 +521,8 @@ class Tinker13ActiveSats(OccupationComponent):
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
+            prim_haloprop_key=model_defaults.prim_haloprop_key,
+            redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters
         ----------

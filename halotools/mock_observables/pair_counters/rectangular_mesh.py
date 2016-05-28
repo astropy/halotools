@@ -17,7 +17,7 @@ def digitized_position(p, cell_size, num_divs):
 
 
 def sample1_cell_size(period, search_length, approx_cell_size,
-    max_cells_per_dimension=50):
+        max_cells_per_dimension=50):
     """ Function determines the size of the cells of mesh1.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -42,7 +42,7 @@ def sample1_cell_size(period, search_length, approx_cell_size,
 
 
 def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
-    max_cells_per_dimension=50):
+        max_cells_per_dimension=50):
     """ Function determines the size of the cells of mesh2.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -94,7 +94,7 @@ class RectangularMesh(object):
     """
 
     def __init__(self, x1in, y1in, z1in, xperiod, yperiod, zperiod,
-        approx_xcell_size, approx_ycell_size, approx_zcell_size):
+            approx_xcell_size, approx_ycell_size, approx_zcell_size):
         """
         Parameters
         ----------
@@ -184,10 +184,10 @@ class RectangularDoubleMesh(object):
     """
 
     def __init__(self, x1, y1, z1, x2, y2, z2,
-        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
-        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
-        search_xlength, search_ylength, search_zlength,
-        xperiod, yperiod, zperiod, PBCs=True):
+            approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
+            approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
+            search_xlength, search_ylength, search_zlength,
+            xperiod, yperiod, zperiod, PBCs=True):
         """
         Parameters
         ----------

@@ -19,7 +19,7 @@ from ..pair_counters import npairs_s_mu
 __all__ = ['s_mu_tpcf']
 __author__ = ['Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
@@ -264,8 +264,8 @@ def spherical_sector_volume(s, mu):
 
 
 def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
-    period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+        period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
@@ -294,7 +294,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
                               approx_cell2_size=approx_cellran_size)
             D1R = np.diff(np.diff(D1R, axis=0), axis=1)
         else: D1R=None
-        if _sample1_is_sample2: #calculating the cross-correlation
+        if _sample1_is_sample2:  # calculating the cross-correlation
             D2R = None
         else:
             if do_DR is True:
@@ -314,18 +314,18 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
 
         #do volume calculations
         dv = spherical_sector_volume(s_bins, mu_bins)
-        dv = np.diff(dv, axis=1) #volume of wedges
-        dv = np.diff(dv, axis=0) #volume of wedge 'pieces'
+        dv = np.diff(dv, axis=1)  # volume of wedges
+        dv = np.diff(dv, axis=0)  # volume of wedge 'pieces'
         global_volume = period.prod()
 
         #calculate randoms for sample1
         N1 = np.shape(sample1)[0]
         rho1 = N1/global_volume
-        D1R = (N1-1.0)*(dv*rho1) #read note about pair counter
+        D1R = (N1-1.0)*(dv*rho1)  # read note about pair counter
 
         N2 = np.shape(sample2)[0]
         rho2 = N2/global_volume
-        D2R = (N2-1.0)*(dv*rho2) #read note about pair counter
+        D2R = (N2-1.0)*(dv*rho2)  # read note about pair counter
 
         #calculate the random-random pairs.
         rhor = NR**2/global_volume
@@ -337,8 +337,8 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
 
 
 def pair_counts(sample1, sample2, s_bins, mu_bins, period,
-    num_threads, do_auto, do_cross, _sample1_is_sample2,
-    approx_cell1_size, approx_cell2_size):
+        num_threads, do_auto, do_cross, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size):
     """
     Count data pairs.
     """
@@ -375,8 +375,8 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
 
 
 def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
-    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.s_mu_tpcf`.
@@ -404,7 +404,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     #input because of convention.  sin(theta_los) increases as theta_los increases, which
     #is required in order to get the pair counter to work.
     theta = np.arccos(mu_bins)
-    mu_bins = np.sin(theta)[::-1] #must be increasing, remember to reverse result.
+    mu_bins = np.sin(theta)[::-1]  # must be increasing, remember to reverse result.
 
     if (np.min(mu_bins)<0.0) | (np.max(mu_bins)>1.0):
         msg = "`mu_bins` must be in the range [0,1]."

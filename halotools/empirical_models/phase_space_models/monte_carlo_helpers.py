@@ -94,9 +94,9 @@ class MonteCarloGalProf(object):
             setattr(self, '_' + prof_param_key + '_lookup_table_spacing', lookup_table_binning[ipar][2])
 
     def build_lookup_tables(self,
-        logrmin=model_defaults.default_lograd_min,
-        logrmax=model_defaults.default_lograd_max,
-        Npts_radius_table=model_defaults.Npts_radius_table):
+            logrmin=model_defaults.default_lograd_min,
+            logrmax=model_defaults.default_lograd_max,
+            Npts_radius_table=model_defaults.Npts_radius_table):
         """ Method used to create a lookup table of the spatial and velocity radial profiles.
 
         Parameters
@@ -618,7 +618,7 @@ class MonteCarloGalProf(object):
         return radial_velocities
 
     def mc_vel(self, table, overwrite_table_velocities=True,
-        return_velocities=False):
+            return_velocities=False):
         """ Method assigns a Monte Carlo realization of the Jeans velocity
         solution to the halos in the input ``table``.
 

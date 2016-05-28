@@ -9,7 +9,7 @@ __all__ = ('pure_python_distance_matrix_3d', )
 
 
 def pure_python_distance_matrix_3d(
-    sample1, sample2, r_max, Lbox=None):
+        sample1, sample2, r_max, Lbox=None):
     """ Brute force pure python function calculating the distance
     between all pairs of points and storing the result into a matrix,
     accounting for possible periodicity of the box.
@@ -52,7 +52,7 @@ def pure_python_distance_matrix_3d(
 
 
 def pure_python_distance_matrix_xy_z(
-    sample1, sample2, rp_max, pi_max, Lbox=None):
+        sample1, sample2, rp_max, pi_max, Lbox=None):
     """ Brute force pure python function calculating the distance
     between all pairs of points and storing the result into two matrices,
     one storing xy-distances, the other storing z-distances,

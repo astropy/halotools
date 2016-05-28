@@ -16,16 +16,16 @@ from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
     _cell1_parallelization_indices, _enclose_in_box)
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. marked_counts/counts
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. marked_counts/counts
 
 __author__ = ('Andrew Hearin', )
 __all__ = ('radial_profile_3d', )
 
 
 def radial_profile_3d(sample1, sample2, sample2_quantity,
-    rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
-    return_counts=False, period=None, num_threads=1,
-    approx_cell1_size=None, approx_cell2_size=None):
+        rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
+        return_counts=False, period=None, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """ Function used to calculate the mean value of some quantity in ``sample2``
     as a function of 3d distance from the points in ``sample1``.
 

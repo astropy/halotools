@@ -27,8 +27,8 @@ class BinaryGalpropModel(object):
     """
 
     def __init__(self,
-        prim_haloprop_key=model_defaults.default_binary_galprop_haloprop,
-        **kwargs):
+            prim_haloprop_key=model_defaults.default_binary_galprop_haloprop,
+            **kwargs):
         """
         Parameters
         ----------
@@ -139,7 +139,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
     """
 
     def __init__(self, galprop_abscissa, galprop_ordinates,
-        logparam=True, interpol_method='spline', **kwargs):
+            logparam=True, interpol_method='spline', **kwargs):
         """
         Parameters
         ----------

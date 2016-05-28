@@ -51,8 +51,8 @@ class TabularAsciiReader(object):
     """
 
     def __init__(self, input_fname, columns_to_keep_dict,
-        header_char='#', row_cut_min_dict={}, row_cut_max_dict={},
-        row_cut_eq_dict={}, row_cut_neq_dict={}):
+            header_char='#', row_cut_min_dict={}, row_cut_max_dict={},
+            row_cut_eq_dict={}, row_cut_neq_dict={}):
         """
         Parameters
         -----------

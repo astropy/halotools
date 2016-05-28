@@ -22,13 +22,13 @@ from ...custom_exceptions import HalotoolsError
 __all__ = ['marked_tpcf']
 __author__ = ['Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
 def marked_tpcf(sample1, rbins, sample2=None,
-    marks1=None, marks2=None, period=None, do_auto=True, do_cross=True,
-    num_threads=1, max_sample_size=int(1e6), weight_func_id=1,
-    normalize_by='random_marks', iterations=1, randomize_marks=None):
+        marks1=None, marks2=None, period=None, do_auto=True, do_cross=True,
+        num_threads=1, max_sample_size=int(1e6), weight_func_id=1,
+        normalize_by='random_marks', iterations=1, randomize_marks=None):
     """
     Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
 
@@ -368,7 +368,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
 
 
 def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-    do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
+        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
     """
     Count weighted data pairs.
     """
@@ -403,8 +403,8 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
 
 
 def random_counts(sample1, sample2, rbins, period, num_threads,
-    do_auto, do_cross, marks1, marks2, weight_func_id,
-    _sample1_is_sample2, permutate1, permutate2, randomize_marks):
+        do_auto, do_cross, marks1, marks2, weight_func_id,
+        _sample1_is_sample2, permutate1, permutate2, randomize_marks):
     """
     Count random weighted data pairs.
     """
@@ -449,7 +449,7 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
 
 
 def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
-    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+        _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
     """
     Count data-data pairs.
     """
@@ -485,8 +485,8 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
 
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
-    period, do_auto, do_cross, num_threads, max_sample_size,
-    wfunc, normalize_by, iterations, randomize_marks):
+        period, do_auto, do_cross, num_threads, max_sample_size,
+        wfunc, normalize_by, iterations, randomize_marks):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.marked_tpcf`.

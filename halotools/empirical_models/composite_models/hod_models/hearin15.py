@@ -15,10 +15,10 @@ __all__ = ['hearin15_model_dictionary']
 
 
 def hearin15_model_dictionary(central_assembias_strength=1,
-    central_assembias_strength_abscissa=[1e12],
-    satellite_assembias_strength=0.2,
-    satellite_assembias_strength_abscissa=[1e12],
-    **kwargs):
+        central_assembias_strength_abscissa=[1e12],
+        satellite_assembias_strength=0.2,
+        satellite_assembias_strength_abscissa=[1e12],
+        **kwargs):
     """
     Dictionary to build an HOD-style model in which
     central and satellite occupations statistics are assembly-biased.

@@ -112,7 +112,7 @@ def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
 
 
 def enforce_periodicity_of_box(coords, box_length,
-    check_multiple_box_lengths=False, **kwargs):
+        check_multiple_box_lengths=False, **kwargs):
     """ Function used to apply periodic boundary conditions
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
@@ -163,7 +163,7 @@ def enforce_periodicity_of_box(coords, box_length,
 
 
 def piecewise_heaviside(bin_midpoints, bin_width,
-    values_inside_bins, value_outside_bins, abscissa):
+        values_inside_bins, value_outside_bins, abscissa):
     """ Piecewise heaviside function.
 
     The function returns values_inside_bins

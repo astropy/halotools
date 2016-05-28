@@ -21,11 +21,11 @@ __all__ = ('spherical_isolation', )
 
 __author__ = ['Andrew Hearin', 'Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
+np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 
 def spherical_isolation(sample1, sample2, r_max, period=None,
-    num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a
     neighbor in ``sample2`` within an user specified spherical volume centered at each
@@ -187,7 +187,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
 
 
 def _spherical_isolation_process_args(sample1, sample2, r_max, period,
-    num_threads, approx_cell1_size, approx_cell2_size):
+        num_threads, approx_cell1_size, approx_cell2_size):
     """
     private function to process the arguments for the
     `~halotools.mock_observables.spherical_isolation` function.

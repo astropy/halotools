@@ -13,7 +13,7 @@ __all__ = ('three_dim_pos_bundle', 'infer_mask_from_kwargs')
 
 
 def three_dim_pos_bundle(table, key1, key2, key3,
-    return_complement=False, **kwargs):
+        return_complement=False, **kwargs):
     """
     Method returns 3d positions of particles in
     the standard form of the inputs used by many of the
