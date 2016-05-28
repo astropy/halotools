@@ -21,7 +21,7 @@ __author__ = ['Duncan Campbell']
 
 def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
-    approx_cell1_size = None, approx_cell2_size = None):
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
 
@@ -180,7 +180,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     #calculate the cross-correlation between galaxies and particles
     xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,
         do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads,
-        approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell2_size)
+        approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell2_size)
 
     #Check to see if xi ever is equal to -1
     #if so, there are radial bins with 0 matter particles.
@@ -253,7 +253,7 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, n
 
     rp_bins = get_separation_bins_array(rp_bins)
 
-    num_threads = get_num_threads(num_threads, enforce_max_cores = False)
+    num_threads = get_num_threads(num_threads, enforce_max_cores=False)
 
     estimator = verify_tpcf_estimator(estimator)
 

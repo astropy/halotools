@@ -19,9 +19,9 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 __all__ = ('marked_npairs_xy_z', )
 
 def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
-                  period=None, weights1 = None, weights2 = None,
-                  weight_func_id = 0, verbose = False, num_threads = 1,
-                  approx_cell1_size = None, approx_cell2_size = None):
+                  period=None, weights1=None, weights2=None,
+                  weight_func_id=0, verbose=False, num_threads=1,
+                  approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the number of weighted pairs with separations greater than
     or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.

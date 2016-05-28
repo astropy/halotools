@@ -28,7 +28,7 @@ class ConcMass(object):
 
     """
 
-    def __init__(self, conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+    def __init__(self, conc_mass_model=model_defaults.conc_mass_model, **kwargs):
         """
         Parameters
         ----------

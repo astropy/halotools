@@ -4,7 +4,7 @@ sharing a common objectID.
 """
 import numpy as np
 
-def crossmatch(x, y, skip_bounds_checking = False):
+def crossmatch(x, y, skip_bounds_checking=False):
     """
     Finds where the elements of ``x`` appear in the array ``y``, including repeats.
 
@@ -130,13 +130,13 @@ def crossmatch(x, y, skip_bounds_checking = False):
     else:
         try:
             assert len(set(y)) == len(y)
-            assert np.all(np.array(y, dtype = np.int64) == y)
+            assert np.all(np.array(y, dtype=np.int64) == y)
             assert np.shape(y) == (len(y), )
         except:
             msg = ("Input array y must be a 1d sequence of unique integers")
             raise ValueError(msg)
         try:
-            assert np.all(np.array(x, dtype = np.int64) == x)
+            assert np.all(np.array(x, dtype=np.int64) == x)
             assert np.shape(x) == (len(x), )
         except:
             msg = ("Input array x must be a 1d sequence of integers")
@@ -149,10 +149,10 @@ def crossmatch(x, y, skip_bounds_checking = False):
     y_sorted = np.copy(y[idx_y_sorted])
 
     # x may have repeated entries, so find the unique values as well as their multiplicity
-    unique_xvals, counts = np.unique(x_sorted, return_counts = True)
+    unique_xvals, counts = np.unique(x_sorted, return_counts=True)
 
     # Determine which of the unique x values has a match in y
-    unique_xval_has_match = np.in1d(unique_xvals, y_sorted, assume_unique = True)
+    unique_xval_has_match = np.in1d(unique_xvals, y_sorted, assume_unique=True)
 
     # Create a boolean array with True for each value in x with a match, otherwise False
     idx_x = np.repeat(unique_xval_has_match, counts)

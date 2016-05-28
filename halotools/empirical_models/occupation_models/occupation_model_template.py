@@ -100,7 +100,7 @@ class OccupationComponent(object):
         self._mock_generation_calling_sequence = ['mc_occupation']
         self._galprop_dtypes_to_allocate = np.dtype([('halo_num_'+ self.gal_type, 'i4')])
 
-    def mc_occupation(self, seed = None, **kwargs):
+    def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies.
 
         Parameters

@@ -53,26 +53,26 @@ def test_Moster13SmHm_behavior():
     """
     """
     default_model = Moster13SmHm()
-    mstar1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
+    mstar1 = default_model.mean_stellar_mass(prim_haloprop=1.e12)
     ratio1 = mstar1/3.4275e10
     np.testing.assert_array_almost_equal(ratio1, 1.0, decimal=3)
 
     default_model.param_dict['n10'] *= 1.1
-    mstar2 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
+    mstar2 = default_model.mean_stellar_mass(prim_haloprop=1.e12)
     assert mstar2 > mstar1
 
     default_model.param_dict['n11'] *= 1.1
-    mstar3 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
+    mstar3 = default_model.mean_stellar_mass(prim_haloprop=1.e12)
     assert mstar3 == mstar2
 
-    mstar4_z1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12, redshift=1)
+    mstar4_z1 = default_model.mean_stellar_mass(prim_haloprop=1.e12, redshift=1)
     default_model.param_dict['n11'] *= 1.1
-    mstar5_z1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12, redshift=1)
+    mstar5_z1 = default_model.mean_stellar_mass(prim_haloprop=1.e12, redshift=1)
     assert mstar5_z1 != mstar4_z1
 
-    mstar_realization1 = default_model.mc_stellar_mass(prim_haloprop = 1.e12*np.ones(int(1e4)), seed=43)
-    mstar_realization2 = default_model.mc_stellar_mass(prim_haloprop = 1.e12*np.ones(int(1e4)), seed=43)
-    mstar_realization3 = default_model.mc_stellar_mass(prim_haloprop = 1.e12*np.ones(int(1e4)), seed=44)
+    mstar_realization1 = default_model.mc_stellar_mass(prim_haloprop=1.e12*np.ones(int(1e4)), seed=43)
+    mstar_realization2 = default_model.mc_stellar_mass(prim_haloprop=1.e12*np.ones(int(1e4)), seed=43)
+    mstar_realization3 = default_model.mc_stellar_mass(prim_haloprop=1.e12*np.ones(int(1e4)), seed=44)
     assert np.array_equal(mstar_realization1, mstar_realization2)
     assert not np.array_equal(mstar_realization1, mstar_realization3)
 
@@ -81,7 +81,7 @@ def test_Moster13SmHm_behavior():
     np.testing.assert_allclose(measured_scatter1, model_scatter, rtol=1e-3)
 
     default_model.param_dict['scatter_model_param1'] = 0.3
-    mstar_realization4 = default_model.mc_stellar_mass(prim_haloprop = 1e12*np.ones(int(1e4)), seed=43)
+    mstar_realization4 = default_model.mc_stellar_mass(prim_haloprop=1e12*np.ones(int(1e4)), seed=43)
     measured_scatter4 = np.std(np.log10(mstar_realization4))
     np.testing.assert_allclose(measured_scatter4, 0.3, rtol=1e-3)
 
@@ -108,7 +108,7 @@ def test_LogNormalScatterModel_initialization():
     input_abscissa = [12, 15]
     input_ordinates = [0.3, 0.1]
     scatter_model2 = LogNormalScatterModel(
-        scatter_abscissa = input_abscissa, scatter_ordinates = input_ordinates)
+        scatter_abscissa=input_abscissa, scatter_ordinates=input_ordinates)
 
     assert np.all(scatter_model2.abscissa == input_abscissa)
     assert np.all(scatter_model2.ordinates == input_ordinates)
@@ -145,18 +145,18 @@ def test_LogNormalScatterModel_behavior():
     halos12 = Table(d)
 
     # Test the mean_scatter method of the default model
-    scatter = default_scatter_model.mean_scatter(prim_haloprop = testmass12)
+    scatter = default_scatter_model.mean_scatter(prim_haloprop=testmass12)
     assert np.allclose(scatter, model_defaults.default_smhm_scatter)
-    scatter_array = default_scatter_model.mean_scatter(prim_haloprop = mass12)
+    scatter_array = default_scatter_model.mean_scatter(prim_haloprop=mass12)
     assert np.allclose(scatter_array, model_defaults.default_smhm_scatter)
-    scatter_array = default_scatter_model.mean_scatter(table = halos12)
+    scatter_array = default_scatter_model.mean_scatter(table=halos12)
     assert np.allclose(scatter_array, model_defaults.default_smhm_scatter)
 
     # Test the scatter_realization method of the default model
-    scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, prim_haloprop =mass12)
+    scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, prim_haloprop=mass12)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, model_defaults.default_smhm_scatter, decimal=2)
-    scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, table =halos12)
+    scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, table=halos12)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, model_defaults.default_smhm_scatter, decimal=2)
 
@@ -164,7 +164,7 @@ def test_LogNormalScatterModel_behavior():
     input_abscissa = [12, 15]
     input_ordinates = [0.3, 0.1]
     scatter_model2 = LogNormalScatterModel(
-        scatter_abscissa = input_abscissa, scatter_ordinates = input_ordinates)
+        scatter_abscissa=input_abscissa, scatter_ordinates=input_ordinates)
 
     assert len(scatter_model2.abscissa) == 2
     assert len(scatter_model2.param_dict) == 2
@@ -172,16 +172,16 @@ def test_LogNormalScatterModel_behavior():
     assert set(scatter_model2.param_dict.values()) == set(input_ordinates)
 
     # Test the mean_scatter method of a non-trivial model at the first abscissa
-    scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass12)
+    scatter_array = scatter_model2.mean_scatter(prim_haloprop=mass12)
     assert np.allclose(scatter_array, 0.3)
-    scatter_array = scatter_model2.mean_scatter(table = halos12)
+    scatter_array = scatter_model2.mean_scatter(table=halos12)
     assert np.allclose(scatter_array, 0.3)
 
     # Test the scatter_realization method of a non-trivial model at the first abscissa
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass12)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass12)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.3, decimal=2)
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table =halos12)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table=halos12)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.3, decimal=2)
 
@@ -193,16 +193,16 @@ def test_LogNormalScatterModel_behavior():
     d = {masskey: mass15}
     halos15 = Table(d)
 
-    scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass15)
+    scatter_array = scatter_model2.mean_scatter(prim_haloprop=mass15)
     assert np.allclose(scatter_array, 0.1)
-    scatter_array = scatter_model2.mean_scatter(table = halos15)
+    scatter_array = scatter_model2.mean_scatter(table=halos15)
     assert np.allclose(scatter_array, 0.1)
 
     # Test the scatter_realization method of a non-trivial model at the second abscissa
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass15)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass15)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.1, decimal=2)
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table =halos15)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table=halos15)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.1, decimal=2)
 
@@ -213,16 +213,16 @@ def test_LogNormalScatterModel_behavior():
     d = {masskey: mass135}
     halos135 = Table(d)
 
-    scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass135)
+    scatter_array = scatter_model2.mean_scatter(prim_haloprop=mass135)
     assert np.allclose(scatter_array, 0.2)
-    scatter_array = scatter_model2.mean_scatter(table = halos135)
+    scatter_array = scatter_model2.mean_scatter(table=halos135)
     assert np.allclose(scatter_array, 0.2)
 
     # Test the scatter_realization method of a non-trivial model at an intermediate value
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass135)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass135)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.2, decimal=2)
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table =halos135)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table=halos135)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.2, decimal=2)
 
@@ -230,21 +230,21 @@ def test_LogNormalScatterModel_behavior():
     scatter_model2.param_dict['scatter_model_param2'] = 0.5
 
     # Test the mean_scatter method of the updated non-trivial model
-    scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass12)
+    scatter_array = scatter_model2.mean_scatter(prim_haloprop=mass12)
     assert np.allclose(scatter_array, 0.3)
-    scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass15)
+    scatter_array = scatter_model2.mean_scatter(prim_haloprop=mass15)
     assert np.allclose(scatter_array, 0.5)
-    scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass135)
+    scatter_array = scatter_model2.mean_scatter(prim_haloprop=mass135)
     assert np.allclose(scatter_array, 0.4)
 
     # Test the scatter_realization method of the updated non-trivial model
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass15)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass15)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.5, decimal=2)
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass135)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass135)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.4, decimal=2)
-    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass12)
+    scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass12)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.3, decimal=2)
 
@@ -333,19 +333,19 @@ class TestBehroozi10SmHm(TestCase):
         """
 
         halo_mass_z01 = 10.**self.logmh_z01
-        z01_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z01, redshift = 0.1)
+        z01_sm = self.model.mean_stellar_mass(prim_haloprop=halo_mass_z01, redshift=0.1)
         z01_ratio = z01_sm / halo_mass_z01
         z01_result = np.log10(z01_ratio)
         assert np.allclose(z01_result, self.logmratio_z01, rtol=0.02)
 
         halo_mass_z05 = 10.**self.logmh_z05
-        z05_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z05, redshift = 0.5)
+        z05_sm = self.model.mean_stellar_mass(prim_haloprop=halo_mass_z05, redshift=0.5)
         z05_ratio = z05_sm / halo_mass_z05
         z05_result = np.log10(z05_ratio)
         assert np.allclose(z05_result, self.logmratio_z05, rtol=0.02)
 
         halo_mass_z1 = 10.**self.logmh_z1
-        z1_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z1, redshift = 1)
+        z1_sm = self.model.mean_stellar_mass(prim_haloprop=halo_mass_z1, redshift=1)
         z1_ratio = z1_sm / halo_mass_z1
         z1_result = np.log10(z1_ratio)
         assert np.allclose(z1_result, self.logmratio_z1, rtol=0.02)

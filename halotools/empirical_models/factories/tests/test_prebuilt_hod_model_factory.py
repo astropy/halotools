@@ -33,4 +33,4 @@ class TestPrebuiltHodModelFactory(TestCase):
             result = model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
         result = model.compute_average_galaxy_clustering(
             num_iterations=1, simname='fake',
-            gal_type = 'centrals', include_crosscorr = True)
+            gal_type='centrals', include_crosscorr=True)

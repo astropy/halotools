@@ -19,11 +19,11 @@ class TestConcMass(TestCase):
     def setup_class(self):
         """ Pre-load various arrays into memory for use by all tests.
         """
-        self.dutton_maccio14_model = ConcMass(redshift=0, conc_mass_model = 'dutton_maccio14')
+        self.dutton_maccio14_model = ConcMass(redshift=0, conc_mass_model='dutton_maccio14')
 
         self.direct_model = ConcMass(redshift=0,
-            conc_mass_model = 'direct_from_halo_catalog',
-            concentration_key = 'conc')
+            conc_mass_model='direct_from_halo_catalog',
+            concentration_key='conc')
 
     def test_dutton_maccio14(self):
         """ Tests of `~halotools.empirical_models.ConcMass.compute_concentration` method for the analytical *dutton_maccio14* option.
@@ -57,7 +57,7 @@ class TestConcMass(TestCase):
         mass = np.logspace(10, 15, Npts)
         conc = np.random.uniform(0, 100, Npts)
         t = Table({'conc': conc, 'halo_mvir': mass})
-        conc_result = self.direct_model.compute_concentration(table = t)
+        conc_result = self.direct_model.compute_concentration(table=t)
 
         within_bounds_mask = (conc >= model_defaults.min_permitted_conc) & (conc <= model_defaults.max_permitted_conc)
         assert np.all(conc_result[within_bounds_mask] == t['conc'][within_bounds_mask])

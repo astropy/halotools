@@ -16,9 +16,9 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_
 
 __all__ = ('npairs_xy_z', )
 
-def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
-    verbose = False, num_threads = 1,
-    approx_cell1_size = None, approx_cell2_size = None):
+def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
+    verbose=False, num_threads=1,
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points with separation in the xy-plane
     less than the input ``rp_bins`` and separation in the z-dimension less than
@@ -187,7 +187,7 @@ def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
         assert rp_bins.ndim == 1
         assert len(rp_bins) > 1
         if len(rp_bins) > 2:
-            assert array_is_monotonic(rp_bins, strict = True) == 1
+            assert array_is_monotonic(rp_bins, strict=True) == 1
     except AssertionError:
         msg = ("Input ``rp_bins`` must be a monotonically increasing 1D array "
             "with at least two entries")
@@ -199,7 +199,7 @@ def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
         assert pi_bins.ndim == 1
         assert len(pi_bins) > 1
         if len(pi_bins) > 2:
-            assert array_is_monotonic(pi_bins, strict = True) == 1
+            assert array_is_monotonic(pi_bins, strict=True) == 1
     except AssertionError:
         msg = "Input ``pi_bins`` must be a monotonically increasing 1D array with at least two entries"
         raise ValueError(msg)

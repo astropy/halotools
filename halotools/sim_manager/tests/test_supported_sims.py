@@ -35,8 +35,8 @@ class TestSupportedSims(TestCase):
             alist = self.adict[simname]
             for a in alist:
                 z = 1/a - 1
-                halocat = CachedHaloCatalog(simname = simname, redshift = z)
-                assert np.allclose(halocat.redshift, z, atol = 0.01)
+                halocat = CachedHaloCatalog(simname=simname, redshift=z)
+                assert np.allclose(halocat.redshift, z, atol=0.01)
 
                 if simname not in ['bolshoi', 'multidark']:
                     particles = halocat.ptcl_table
@@ -55,6 +55,6 @@ class TestSupportedSims(TestCase):
             alist = self.adict[simname]
             a = alist[0]
             z = 1/a - 1
-            halocat = CachedHaloCatalog(simname = simname, redshift = z)
+            halocat = CachedHaloCatalog(simname=simname, redshift=z)
             r = halocat.halo_table['halo_rvir']
             assert np.all(r < 50.)

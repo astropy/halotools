@@ -354,7 +354,7 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
         assert theta_bins.ndim == 1
         assert len(theta_bins) > 1
         if len(theta_bins) > 2:
-            assert array_is_monotonic(theta_bins, strict = True) == 1
+            assert array_is_monotonic(theta_bins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input `theta_bins` must be a monotonically increasing 1-D \n"
                "array with at least two entries.")

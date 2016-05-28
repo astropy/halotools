@@ -19,9 +19,9 @@ from ...utils.array_utils import convert_to_ndarray, custom_len
 
 __all__ = ('pairwise_distance_3d', )
 
-def pairwise_distance_3d(data1, data2, rmax, period = None,
-    verbose = False, num_threads = 1,
-    approx_cell1_size = None, approx_cell2_size = None):
+def pairwise_distance_3d(data1, data2, rmax, period=None,
+    verbose=False, num_threads=1,
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Function returns pairs of points separated by
     a three-dimensional distance smaller than or eqaul to the input ``rmax``.

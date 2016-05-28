@@ -107,8 +107,8 @@ class HeavisideAssembias(object):
             self.publications = ['arXiv:1512.03050']
 
 
-    def _interpret_constructor_inputs(self, loginterp = True,
-        sec_haloprop_key = model_defaults.sec_haloprop_key, **kwargs):
+    def _interpret_constructor_inputs(self, loginterp=True,
+        sec_haloprop_key=model_defaults.sec_haloprop_key, **kwargs):
         """
         """
         self._loginterp = loginterp
@@ -149,7 +149,7 @@ class HeavisideAssembias(object):
         if 'halo_type_tuple' in kwargs:
             self.halo_type_tuple = kwargs['halo_type_tuple']
 
-    def _set_percentile_splitting(self, split = 0.5, **kwargs):
+    def _set_percentile_splitting(self, split=0.5, **kwargs):
         """
         Method interprets the arguments passed to the constructor
         and sets up the interpolation scheme for how halos will be
@@ -178,7 +178,7 @@ class HeavisideAssembias(object):
                     "keyword argument, or alternatively ``split`` and ``split_abscissa`` arguments.")
                 raise HalotoolsError(msg)
 
-    def _initialize_assembias_param_dict(self, assembias_strength = 0.5, **kwargs):
+    def _initialize_assembias_param_dict(self, assembias_strength=0.5, **kwargs):
         """
         """
         if not hasattr(self, 'param_dict'):
@@ -232,9 +232,9 @@ class HeavisideAssembias(object):
 
         def assembias_percentile_calculator(table):
             return compute_conditional_percentiles(
-                table = table,
-                prim_haloprop_key = self.prim_haloprop_key,
-                sec_haloprop_key = self.sec_haloprop_key
+                table=table,
+                prim_haloprop_key=self.prim_haloprop_key,
+                sec_haloprop_key=self.sec_haloprop_key
                 )
 
         key = self.sec_haloprop_key + '_percentile'
@@ -264,7 +264,7 @@ class HeavisideAssembias(object):
         """
 
         if hasattr(self, '_input_split_func'):
-            result = self._input_split_func(prim_haloprop = prim_haloprop)
+            result = self._input_split_func(prim_haloprop=prim_haloprop)
 
             if np.any(result < 0):
                 msg = ("The input split_func passed to the HeavisideAssembias class"
@@ -485,8 +485,8 @@ class HeavisideAssembias(object):
                     warn(msg % (key, key))
 
                     percentiles = compute_conditional_percentiles(
-                        prim_haloprop = prim_haloprop,
-                        sec_haloprop = sec_haloprop
+                        prim_haloprop=prim_haloprop,
+                        sec_haloprop=sec_haloprop
                         )
                     no_edge_percentiles = percentiles[no_edge_mask]
                     type1_mask = no_edge_percentiles > no_edge_split
@@ -497,8 +497,8 @@ class HeavisideAssembias(object):
                         percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
                 except KeyError:
                     percentiles = compute_conditional_percentiles(
-                        prim_haloprop = prim_haloprop,
-                        sec_haloprop = sec_haloprop
+                        prim_haloprop=prim_haloprop,
+                        sec_haloprop=sec_haloprop
                         )
                 no_edge_percentiles = percentiles[no_edge_mask]
                 type1_mask = no_edge_percentiles > no_edge_split
@@ -507,9 +507,9 @@ class HeavisideAssembias(object):
             #################################################################################
 
             perturbation = self._galprop_perturbation(
-                    prim_haloprop = prim_haloprop[no_edge_mask],
-                    baseline_result = no_edge_result,
-                    splitting_result = no_edge_split)
+                    prim_haloprop=prim_haloprop[no_edge_mask],
+                    baseline_result=no_edge_result,
+                    splitting_result=no_edge_split)
 
             frac_type1 = 1 - no_edge_split
             frac_type2 = 1 - frac_type1

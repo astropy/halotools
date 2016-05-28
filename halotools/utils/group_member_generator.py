@@ -158,7 +158,7 @@ def group_member_generator(data, grouping_key, requested_columns):
         msg = ("Your input ``data`` must be sorted so that the ``data[grouping_key]`` is monotonic")
         raise ValueError(msg)
 
-    result = np.unique(group_id_array, return_index = True, return_counts = True)
+    result = np.unique(group_id_array, return_index=True, return_counts=True)
     group_ids_data, idx_groups_data, group_richness_data = result
 
     requested_array_list = [data[key].data for key in requested_columns]

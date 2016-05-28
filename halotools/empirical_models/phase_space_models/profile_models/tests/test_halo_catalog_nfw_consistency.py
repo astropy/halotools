@@ -39,8 +39,8 @@ class TestHaloCatNFWConsistency(TestCase):
     def setup_class(self):
         """ Pre-load various arrays into memory for use by all tests.
         """
-        halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0.)
-        hosts = table_utils.SampleSelector.host_halo_selection(table = halocat.halo_table)
+        halocat = CachedHaloCatalog(simname='bolshoi', redshift=0.)
+        hosts = table_utils.SampleSelector.host_halo_selection(table=halocat.halo_table)
 
         mask_mvir_1e11 = (hosts['halo_mvir'] > 1e11) & (hosts['halo_mvir'] < 2e11)
         self.halos_mvir_1e11 = hosts[mask_mvir_1e11]
@@ -53,8 +53,8 @@ class TestHaloCatNFWConsistency(TestCase):
 
         self.halo_sample_names = ['halos_mvir_1e11', 'halos_mvir_1e12', 'halos_mvir_1e13']
 
-        self.nfw_profile = NFWProfile(cosmology = halocat.cosmology,
-            redshift = 0., mdef = 'vir')
+        self.nfw_profile = NFWProfile(cosmology=halocat.cosmology,
+            redshift=0., mdef='vir')
 
 
     @pytest.mark.slow
@@ -72,9 +72,9 @@ class TestHaloCatNFWConsistency(TestCase):
             median_conc = np.median(carr[mask])
 
             predicted_conc = self.nfw_profile.conc_NFWmodel(
-                table = halos[mask])
+                table=halos[mask])
 
-            assert np.allclose(carr[mask], predicted_conc, rtol = 0.001)
+            assert np.allclose(carr[mask], predicted_conc, rtol=0.001)
 
 
     @pytest.mark.slow
@@ -91,4 +91,4 @@ class TestHaloCatNFWConsistency(TestCase):
             predicted_vmax = self.nfw_profile.vmax(
                 median_mass, median_conc)
 
-            assert np.allclose(median_vmax, predicted_vmax, rtol = 0.05)
+            assert np.allclose(median_vmax, predicted_vmax, rtol=0.05)

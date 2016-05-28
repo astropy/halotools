@@ -17,8 +17,8 @@ __all__ = ['zheng07_model_dictionary']
 
 
 def zheng07_model_dictionary(
-    threshold = model_defaults.default_luminosity_threshold,
-    redshift = sim_defaults.default_redshift, **kwargs):
+    threshold=model_defaults.default_luminosity_threshold,
+    redshift=sim_defaults.default_redshift, **kwargs):
     """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457.
 
     See :ref:`zheng07_composite_model` for a tutorial on this model.
@@ -73,19 +73,19 @@ def zheng07_model_dictionary(
     ####################################
     # Build the `occupation` feature
     centrals_occupation = zheng07_components.Zheng07Cens(
-        threshold = threshold, redshift = redshift)
+        threshold=threshold, redshift=redshift)
 
     # Build the `profile` feature
-    centrals_profile = TrivialPhaseSpace(redshift = redshift, **kwargs)
+    centrals_profile = TrivialPhaseSpace(redshift=redshift, **kwargs)
 
     ####################################
     # Build the occupation model
     satellites_occupation = zheng07_components.Zheng07Sats(
-        threshold = threshold, redshift = redshift, **kwargs)
+        threshold=threshold, redshift=redshift, **kwargs)
     satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model
-    satellites_profile = NFWPhaseSpace(redshift = redshift, **kwargs)
+    satellites_profile = NFWPhaseSpace(redshift=redshift, **kwargs)
 
 
     return ({'centrals_occupation': centrals_occupation,

@@ -72,7 +72,7 @@ def monte_carlo_density_outer_shell_normalization(rbins, radial_positions):
 
     """
     rbin_midpoints = 0.5*(rbins[:-1] + rbins[1:])
-    counts = np.histogram(radial_positions, bins = rbins)[0].astype(np.float64)
+    counts = np.histogram(radial_positions, bins=rbins)[0].astype(np.float64)
     outer_radius = rbin_midpoints[-1]
     outer_counts = counts[-1]
     return rbin_midpoints, (counts/rbin_midpoints**2)/(outer_counts/outer_radius**2)
@@ -88,8 +88,8 @@ class TestNFWProfile(TestCase):
         """ Pre-load various arrays into memory for use by all tests.
         """
         self.default_nfw = NFWProfile()
-        self.wmap9_nfw = NFWProfile(cosmology = WMAP9)
-        self.m200_nfw = NFWProfile(mdef = '200m')
+        self.wmap9_nfw = NFWProfile(cosmology=WMAP9)
+        self.m200_nfw = NFWProfile(mdef='200m')
 
         self.model_list = [self.default_nfw, self.wmap9_nfw, self.m200_nfw]
 
@@ -125,7 +125,7 @@ class TestNFWProfile(TestCase):
                 model.density_threshold *
                 model.dimensionless_mass_density(scaled_radius, conc)
                 )
-            assert np.allclose(derived_result, result, rtol = 1e-4)
+            assert np.allclose(derived_result, result, rtol=1e-4)
 
 
     def test_cumulative_mass_PDF(self):
@@ -174,7 +174,7 @@ class TestNFWProfile(TestCase):
             ### dimensionless_mass_density
             super_class_result = super(NFWProfile, model).cumulative_mass_PDF(
                 scaled_radius, conc)
-            assert np.allclose(super_class_result, result, rtol = 1e-4)
+            assert np.allclose(super_class_result, result, rtol=1e-4)
 
             # Verify that we get a self-consistent result between
             ### enclosed_mass and cumulative_mass_PDF
@@ -182,7 +182,7 @@ class TestNFWProfile(TestCase):
             radius = scaled_radius*halo_radius
             enclosed_mass = model.enclosed_mass(radius, total_mass, conc)
             derived_enclosed_mass = result*total_mass
-            assert np.allclose(enclosed_mass, derived_enclosed_mass, rtol = 1e-4)
+            assert np.allclose(enclosed_mass, derived_enclosed_mass, rtol=1e-4)
 
     def test_vmax(self):
         """ Require that the analytic approximation used to estimate the NFW :math:`V_{\\rm max}`
@@ -200,7 +200,7 @@ class TestNFWProfile(TestCase):
             for conc in conc_list:
                 analytic_vmax = model.vmax(total_mass, conc)
                 derived_vmax = model.circular_velocity(radius_array, total_mass, conc).max()
-                assert np.allclose(analytic_vmax, derived_vmax, rtol = 0.01)
+                assert np.allclose(analytic_vmax, derived_vmax, rtol=0.01)
 
     @pytest.mark.slow
     def test_mc_generate_nfw_radial_positions(self):
@@ -242,8 +242,8 @@ class TestNFWProfile(TestCase):
 
             for conc in conc_to_test:
                 radial_positions = model.mc_generate_nfw_radial_positions(
-                    halo_radius = halo_radius, conc = conc, num_pts = num_pts,
-                    seed = 43)
+                    halo_radius=halo_radius, conc=conc, num_pts=num_pts,
+                    seed=43)
 
                 radial_positions /= halo_radius
 

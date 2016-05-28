@@ -21,7 +21,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     velocities2=None, period=None, do_auto=True, do_cross=True,
     num_threads=1, max_sample_size=int(1e6),
-    approx_cell1_size = None, approx_cell2_size = None):
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\\sigma_{z12}(r_p)`.
 
@@ -168,10 +168,10 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         if do_auto is True:
             D1D1, S1S1, N1N1 = velocity_marked_npairs_xy_z(
                 sample1, sample1, rp_bins, pi_bins,
-                weights1=marks1, weights2=marks1, weight_func_id = weight_func_id,
+                weights1=marks1, weights2=marks1, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads,
-                approx_cell1_size = approx_cell1_size,
-                approx_cell2_size = approx_cell1_size)
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cell1_size)
             D1D1 = np.diff(D1D1,axis=1)[:,0]
             D1D1 = np.diff(D1D1)
             S1S1 = np.diff(S1S1,axis=1)[:,0]
@@ -198,9 +198,9 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                 D1D2, S1S2, N1N2 = velocity_marked_npairs_xy_z(
                     sample1, sample2, rp_bins, pi_bins,
                     weights1=marks1, weights2=marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
-                    approx_cell1_size = approx_cell1_size,
-                    approx_cell2_size = approx_cell2_size)
+                    weight_func_id=weight_func_id, period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell1_size,
+                    approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(D1D2,axis=1)[:,0]
                 D1D2 = np.diff(D1D2)
                 S1S2 = np.diff(S1S2,axis=1)[:,0]
@@ -215,9 +215,9 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                 D2D2, S2S2, N2N2 = velocity_marked_npairs_xy_z(
                     sample2, sample2, rp_bins, pi_bins,
                     weights1=marks2, weights2=marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
-                    approx_cell1_size = approx_cell2_size,
-                    approx_cell2_size = approx_cell2_size)
+                    weight_func_id=weight_func_id, period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cell2_size)
                 D2D2 = np.diff(D2D2,axis=1)[:,0]
                 D2D2 = np.diff(D2D2)
                 S2S2 = np.diff(S2S2,axis=1)[:,0]

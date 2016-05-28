@@ -16,8 +16,8 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ('npairs_s_mu', )
 
-def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
-    verbose = False, num_threads = 1, approx_cell1_size = None, approx_cell2_size = None):
+def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
+    verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points separated by less than
     radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`,
@@ -154,7 +154,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
         assert mu_bins.ndim == 1
         assert len(mu_bins) > 1
         if len(mu_bins) > 2:
-            assert array_is_monotonic(mu_bins, strict = True) == 1
+            assert array_is_monotonic(mu_bins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input `mu_bins` must be a monotonically increasing \n"
                "1D array with at least two entries")

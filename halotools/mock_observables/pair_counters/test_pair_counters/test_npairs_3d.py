@@ -98,7 +98,7 @@ def test_rectangular_mesh_pairs_tight_locus6():
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2,npts1*npts2])
 
-    counts = npairs_3d(points1, points2, rbins, approx_cell1_size = [0.1, 0.1, 0.1])
+    counts = npairs_3d(points1, points2, rbins, approx_cell1_size=[0.1, 0.1, 0.1])
     assert np.all(counts == correct_result)
 
 def test_rectangular_mesh_pairs_tight_locus7():
@@ -114,8 +114,8 @@ def test_rectangular_mesh_pairs_tight_locus7():
     correct_result = np.array([0, npts1*npts2,npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins,
-        approx_cell1_size = [0.1, 0.1, 0.1],
-        approx_cell2_size = [0.1, 0.1, 0.1])
+        approx_cell1_size=[0.1, 0.1, 0.1],
+        approx_cell2_size=[0.1, 0.1, 0.1])
     assert np.all(counts == correct_result)
 
 def test_rectangular_mesh_pairs_tight_locus8():
@@ -131,7 +131,7 @@ def test_rectangular_mesh_pairs_tight_locus8():
     correct_result = np.array([0, npts1*npts2,npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins,
-        approx_cell1_size = 0.1, approx_cell2_size = 0.1, period=1)
+        approx_cell1_size=0.1, approx_cell2_size=0.1, period=1)
     assert np.all(counts == correct_result)
 
 def test_rectangular_mesh_pairs_tight_locus9():
@@ -147,8 +147,8 @@ def test_rectangular_mesh_pairs_tight_locus9():
     correct_result = np.array([0, npts1*npts2,npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins,
-        approx_cell1_size = [0.2, 0.2, 0.2],
-        approx_cell2_size = [0.15, 0.15, 0.15], period=1)
+        approx_cell1_size=[0.2, 0.2, 0.2],
+        approx_cell2_size=[0.15, 0.15, 0.15], period=1)
     assert np.all(counts == correct_result)
 
 def test_rectangular_mesh_pairs():
@@ -187,9 +187,9 @@ def test_parallel():
     rbins = np.array([r1, r2, r3, r4])
     serial_result = npairs_3d(data1, data2, rbins, period=Lbox, approx_cell1_size=0.1)
     parallel_result2 = npairs_3d(data1, data2, rbins, period=Lbox,
-        approx_cell1_size=0.1, num_threads = 2)
+        approx_cell1_size=0.1, num_threads=2)
     parallel_result7 = npairs_3d(data1, data2, rbins, period=Lbox,
-        approx_cell1_size=0.1, num_threads = 7)
+        approx_cell1_size=0.1, num_threads=7)
     assert np.all(serial_result == parallel_result2)
     assert np.all(serial_result == parallel_result7)
 
@@ -241,7 +241,7 @@ def test_sensible_num_threads():
     rbins = np.array((0.05, 0.15, 0.3))
     with pytest.raises(ValueError) as err:
         result = npairs_3d(data1, data2, rbins, period=1,
-            num_threads = "Cuba Gooding Jr.")
+            num_threads="Cuba Gooding Jr.")
     substr = "Input ``num_threads`` argument must be an integer or the string 'max'"
     assert substr in err.value.args[0]
 

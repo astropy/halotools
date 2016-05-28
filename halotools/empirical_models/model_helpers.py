@@ -109,7 +109,7 @@ def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
     return output_ordinates
 
 def enforce_periodicity_of_box(coords, box_length,
-    check_multiple_box_lengths = False, **kwargs):
+    check_multiple_box_lengths=False, **kwargs):
     """ Function used to apply periodic boundary conditions
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
@@ -471,7 +471,7 @@ def custom_incomplete_gamma(a, x):
 custom_incomplete_gamma.__author__ = ['Surhud More']
 
 
-def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning = True):
+def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning=True):
     """
     Function returns a decorator that can be used to clip the values
     of an original function to produce a modified function whose

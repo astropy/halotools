@@ -26,7 +26,7 @@ class BinaryGalpropModel(object):
     """
 
     def __init__(self,
-        prim_haloprop_key = model_defaults.default_binary_galprop_haloprop,
+        prim_haloprop_key=model_defaults.default_binary_galprop_haloprop,
         **kwargs):
         """
         Parameters

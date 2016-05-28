@@ -20,8 +20,8 @@ def test_spherical_isolation1():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
     returns all points as isolated for two distant localizations of points.
     """
-    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed = fixed_seed)
-    sample2 = generate_locus_of_3d_points(100, xc=0.9, seed = fixed_seed)
+    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.9, seed=fixed_seed)
     r_max = 0.1
     iso = spherical_isolation(sample1, sample2, r_max, period=1)
     assert np.all(iso == True)
@@ -33,9 +33,9 @@ def test_spherical_isolation2():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
     returns no points as isolated when a subset of ``sample2`` lies within ``sample1``
     """
-    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed = fixed_seed)
-    sample2a = generate_locus_of_3d_points(100, xc=0.11, seed = fixed_seed)
-    sample2b = generate_locus_of_3d_points(100, xc=1.11, seed = fixed_seed)
+    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    sample2a = generate_locus_of_3d_points(100, xc=0.11, seed=fixed_seed)
+    sample2b = generate_locus_of_3d_points(100, xc=1.11, seed=fixed_seed)
     sample2 = np.concatenate((sample2a, sample2b))
     r_max = 0.3
     iso = spherical_isolation(sample1, sample2, r_max)
@@ -47,11 +47,11 @@ def test_spherical_isolation3():
 
     For this test, PBCs are irrelevant.
     """
-    sample1a = generate_locus_of_3d_points(100, xc=0.11, seed = fixed_seed)
-    sample1b = generate_locus_of_3d_points(100, xc=1.11, seed = fixed_seed)
+    sample1a = generate_locus_of_3d_points(100, xc=0.11, seed=fixed_seed)
+    sample1b = generate_locus_of_3d_points(100, xc=1.11, seed=fixed_seed)
     sample1 = np.concatenate((sample1a, sample1b))
 
-    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed=fixed_seed)
     r_max = 0.2
     iso = spherical_isolation(sample1, sample2, r_max)
 
@@ -64,11 +64,11 @@ def test_spherical_isolation4():
 
     For this test, PBCs have a non-trivial impact on the result.
     """
-    sample1a = generate_locus_of_3d_points(100, xc=0.5, seed = fixed_seed)
-    sample1b = generate_locus_of_3d_points(100, xc=0.99, seed = fixed_seed)
+    sample1a = generate_locus_of_3d_points(100, xc=0.5, seed=fixed_seed)
+    sample1b = generate_locus_of_3d_points(100, xc=0.99, seed=fixed_seed)
     sample1 = np.concatenate((sample1a, sample1b))
 
-    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed=fixed_seed)
 
     r_max = 0.2
     iso = spherical_isolation(sample1, sample2, r_max)

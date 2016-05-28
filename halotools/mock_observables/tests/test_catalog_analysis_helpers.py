@@ -57,19 +57,19 @@ def test_cuboid_subvolume_labels_correctness():
     Nsub = 2
     Lbox = 1
 
-    sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
     labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     assert np.all(labels == 1)
 
-    sample = generate_locus_of_3d_points(Npts, xc=0.9, yc=0.9, zc=0.9, seed = fixed_seed)
+    sample = generate_locus_of_3d_points(Npts, xc=0.9, yc=0.9, zc=0.9, seed=fixed_seed)
     labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     assert np.all(labels == 8)
 
-    sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.1, zc=0.9, seed = fixed_seed)
+    sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.1, zc=0.9, seed=fixed_seed)
     labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     assert np.all(labels == 2)
 
-    sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.9, zc=0.1, seed = fixed_seed)
+    sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.9, zc=0.1, seed=fixed_seed)
     labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     assert np.all(labels == 3)
 
@@ -92,13 +92,13 @@ class TestCatalogAnalysisHelpers(TestCase):
     def test_mean_y_vs_x2(self):
         abscissa, mean, err = cat_helpers.mean_y_vs_x(
             self.halo_table['halo_mvir'], self.halo_table['halo_spin'],
-            error_estimator = 'variance')
+            error_estimator='variance')
 
     def test_mean_y_vs_x3(self):
         with pytest.raises(HalotoolsError) as err:
             abscissa, mean, err = cat_helpers.mean_y_vs_x(
                 self.halo_table['halo_mvir'], self.halo_table['halo_spin'],
-                error_estimator = 'Jose Canseco')
+                error_estimator='Jose Canseco')
         substr = "Input ``error_estimator`` must be either"
         assert substr in err.value.args[0]
 
@@ -116,17 +116,17 @@ class TestCatalogAnalysisHelpers(TestCase):
         assert masked_pos.shape[0] < pos.shape[0]
 
         pos_zdist = cat_helpers.return_xyz_formatted_array(
-            x, y, z, velocity = self.halo_table['halo_vz'],
-            velocity_distortion_dimension = 'z')
+            x, y, z, velocity=self.halo_table['halo_vz'],
+            velocity_distortion_dimension='z')
         assert np.all(pos_zdist[:,0] == pos[:,0])
         assert np.all(pos_zdist[:,1] == pos[:,1])
         assert np.any(pos_zdist[:,2] != pos[:,2])
         assert np.all(abs(pos_zdist[:,2] - pos[:,2]) < 50)
 
         pos_zdist_pbc = cat_helpers.return_xyz_formatted_array(
-            x, y, z, velocity = self.halo_table['halo_vz'],
-            velocity_distortion_dimension = 'z',
-            period = self.Lbox)
+            x, y, z, velocity=self.halo_table['halo_vz'],
+            velocity_distortion_dimension='z',
+            period=self.Lbox)
         assert np.all(pos_zdist_pbc[:,0] == pos[:,0])
         assert np.all(pos_zdist_pbc[:,1] == pos[:,1])
         assert np.any(pos_zdist_pbc[:,2] != pos[:,2])

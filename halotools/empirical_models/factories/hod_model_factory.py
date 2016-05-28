@@ -485,7 +485,7 @@ class HodModelFactory(ModelFactory):
 
 
     def _infer_gal_type_and_feature_name(self, model_dictionary_key, gal_type_list,
-        known_gal_type = None, known_feature_name = None):
+        known_gal_type=None, known_feature_name=None):
 
         processed_key = model_dictionary_key.lower()
 
@@ -545,7 +545,7 @@ class HodModelFactory(ModelFactory):
                 if gal_type_guess in processed_key:
                     known_gal_type = gal_type_guess
                     gal_type, feature_name = self._infer_gal_type_and_feature_name(
-                        processed_key, gal_type_guess_list, known_gal_type = known_gal_type)
+                        processed_key, gal_type_guess_list, known_gal_type=known_gal_type)
                     return gal_type, feature_name
             msg = ("\nThe ``_infer_gal_type_and_feature_name`` method was unable to identify\n"
                 "the name of your galaxy population from the ``%s`` key of the model_dictionary.\n"

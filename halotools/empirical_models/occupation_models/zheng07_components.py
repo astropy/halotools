@@ -213,7 +213,7 @@ class Zheng07Sats(OccupationComponent):
     def __init__(self,
         threshold=model_defaults.default_luminosity_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        modulate_with_cenocc = False,
+        modulate_with_cenocc=False,
         **kwargs):
         """
         Parameters
@@ -284,7 +284,7 @@ class Zheng07Sats(OccupationComponent):
         super(Zheng07Sats, self).__init__(
             gal_type='satellites', threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
-            prim_haloprop_key = prim_haloprop_key,
+            prim_haloprop_key=prim_haloprop_key,
             **kwargs)
 
         self.param_dict = self.get_published_parameters(self.threshold)
@@ -292,8 +292,8 @@ class Zheng07Sats(OccupationComponent):
         self.modulate_with_cenocc = modulate_with_cenocc
         if self.modulate_with_cenocc is True:
             self.central_occupation_model = Zheng07Cens(
-                prim_haloprop_key = prim_haloprop_key,
-                threshold = threshold)
+                prim_haloprop_key=prim_haloprop_key,
+                threshold=threshold)
             for key, value in self.central_occupation_model.param_dict.items():
                 self.param_dict[key] = value
 
@@ -504,9 +504,9 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
         """
         Zheng07Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
-            method_name_to_decorate = 'mean_occupation',
-            lower_assembias_bound = self._lower_occupation_bound,
-            upper_assembias_bound = self._upper_occupation_bound,
+            method_name_to_decorate='mean_occupation',
+            lower_assembias_bound=self._lower_occupation_bound,
+            upper_assembias_bound=self._upper_occupation_bound,
             **kwargs)
 
 
@@ -560,6 +560,6 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
         """
         Zheng07Cens.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
-            lower_assembias_bound = self._lower_occupation_bound,
-            upper_assembias_bound = self._upper_occupation_bound,
-            method_name_to_decorate = 'mean_occupation', **kwargs)
+            lower_assembias_bound=self._lower_occupation_bound,
+            upper_assembias_bound=self._upper_occupation_bound,
+            method_name_to_decorate='mean_occupation', **kwargs)

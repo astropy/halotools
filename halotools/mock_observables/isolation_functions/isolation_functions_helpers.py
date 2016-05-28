@@ -107,7 +107,7 @@ def reshape_input_marks(marks, npts_sample, correct_num_marks, cond_func):
     """
     """
     if marks is None:
-        marks = np.ones((npts_sample, correct_num_marks), dtype = np.float64)
+        marks = np.ones((npts_sample, correct_num_marks), dtype=np.float64)
     else:
         marks = np.atleast_1d(marks).astype(np.float64)
         if len(marks.shape) == 1:

@@ -22,8 +22,8 @@ def test_s_mu_tpcf_auto_nonperiodic():
     s_bins = np.linspace(0.001,0.3,5)
     mu_bins = np.linspace(0,1.0,10)
 
-    result_1 = s_mu_tpcf(sample1, s_bins, mu_bins, sample2 = None,
-        randoms=randoms, period = None,
+    result_1 = s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None,
+        randoms=randoms, period=None,
         max_sample_size=int(1e4), estimator='Natural')
 
     assert result_1.ndim == 2, "correlation function returned has wrong dimension."
@@ -40,8 +40,8 @@ def test_s_mu_tpcf_auto_periodic():
     s_bins = np.linspace(0.001,0.3,5)
     mu_bins = np.linspace(0,1.0,10)
 
-    result_1 = s_mu_tpcf(sample1, s_bins, mu_bins, sample2 = None,
-        randoms=None, period = period,
+    result_1 = s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None,
+        randoms=None, period=period,
         max_sample_size=int(1e4), estimator='Natural')
 
     assert result_1.ndim == 2, "correlation function returned has wrong dimension."

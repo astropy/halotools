@@ -191,7 +191,7 @@ def test_3d_brute_force_elementwise_comparison():
         for j in range(pure_python_dense_matrix.shape[1]):
             brute_force_element = pure_python_dense_matrix[i, j]
             sparse_matrix_element = dense_matrix[i, j]
-            assert np.allclose(brute_force_element, sparse_matrix_element, rtol = 0.001)
+            assert np.allclose(brute_force_element, sparse_matrix_element, rtol=0.001)
 
 @pytest.mark.slow
 def test_xy_z_brute_force_elementwise_comparison():
@@ -215,8 +215,8 @@ def test_xy_z_brute_force_elementwise_comparison():
 
             brute_force_element = pure_python_dense_matrix_xy[i, j]
             sparse_matrix_element = dense_matrix_xy[i, j]
-            assert np.allclose(brute_force_element, sparse_matrix_element, rtol = 0.001)
+            assert np.allclose(brute_force_element, sparse_matrix_element, rtol=0.001)
 
             brute_force_element = pure_python_dense_matrix_z[i, j]
             sparse_matrix_element = dense_matrix_z[i, j]
-            assert np.allclose(brute_force_element, sparse_matrix_element, rtol = 0.001)
+            assert np.allclose(brute_force_element, sparse_matrix_element, rtol=0.001)

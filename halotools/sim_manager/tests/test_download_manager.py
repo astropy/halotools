@@ -175,16 +175,16 @@ class TestDownloadManager(TestCase):
     def test_ptcl_tables_available_for_download2(self):
         """ Test that there is exactly one ptcl_table available for Bolshoi.
         """
-        x = self.downman._ptcl_tables_available_for_download(simname = 'bolshoi')
+        x = self.downman._ptcl_tables_available_for_download(simname='bolshoi')
         assert len(x) == 1
 
-        x = self.downman._ptcl_tables_available_for_download(simname = 'bolplanck')
+        x = self.downman._ptcl_tables_available_for_download(simname='bolplanck')
         assert len(x) == 4
 
-        x = self.downman._ptcl_tables_available_for_download(simname = 'consuelo')
+        x = self.downman._ptcl_tables_available_for_download(simname='consuelo')
         assert len(x) == 4
 
-        x = self.downman._ptcl_tables_available_for_download(simname = 'multidark')
+        x = self.downman._ptcl_tables_available_for_download(simname='multidark')
         assert len(x) == 1
 
 
@@ -216,9 +216,9 @@ class TestDownloadManager(TestCase):
         redshift = 2
         halo_finder = 'bdm'
         with pytest.raises(HalotoolsError) as exc:
-            self.downman.download_processed_halo_table(simname = simname,
-                halo_finder = halo_finder, redshift = redshift,
-                overwrite = False, download_dirname=self.halocat_dir)
+            self.downman.download_processed_halo_table(simname=simname,
+                halo_finder=halo_finder, redshift=redshift,
+                overwrite=False, download_dirname=self.halocat_dir)
 
 
     def test_orig_halo_table_web_location(self):
@@ -228,47 +228,47 @@ class TestDownloadManager(TestCase):
         assert (
             'www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM' in
             self.downman._orig_halo_table_web_location(
-                simname = 'bolshoi', halo_finder = 'bdm')
+                simname='bolshoi', halo_finder='bdm')
             )
 
         assert (
             'www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/' in
             self.downman._orig_halo_table_web_location(
-                simname = 'bolshoi', halo_finder = 'rockstar')
+                simname='bolshoi', halo_finder='rockstar')
             )
 
         assert (
             'tp://www.slac.stanford.edu/~behroozi/BPlanck_Hlists' in
             self.downman._orig_halo_table_web_location(
-                simname = 'bolplanck', halo_finder = 'rockstar')
+                simname='bolplanck', halo_finder='rockstar')
             )
 
         assert (
             'c.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar' in
             self.downman._orig_halo_table_web_location(
-                simname = 'multidark', halo_finder = 'rockstar')
+                simname='multidark', halo_finder='rockstar')
             )
 
         assert (
             '/www.slac.stanford.edu/~behroozi/Consuelo_Catalo' in
             self.downman._orig_halo_table_web_location(
-                simname = 'consuelo', halo_finder = 'rockstar')
+                simname='consuelo', halo_finder='rockstar')
             )
 
     @remote_data
     def test_closest_halo_catalog_on_web1(self):
         """
         """
-        fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi',
-            halo_finder = 'rockstar', desired_redshift = 0., catalog_type = 'halos')
+        fname, redshift = self.downman._closest_catalog_on_web(simname='bolshoi',
+            halo_finder='rockstar', desired_redshift=0., catalog_type='halos')
         assert 'hlist_1.00035.list.halotools_alpha_version2.hdf5' in fname
 
     @remote_data
     def test_closest_halo_catalog_on_web2(self):
         """
         """
-        fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi',
-            halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos')
+        fname, redshift = self.downman._closest_catalog_on_web(simname='bolshoi',
+            halo_finder='bdm', desired_redshift=0., catalog_type='halos')
         assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version2.hdf5' in fname
 
     @remote_data
@@ -276,8 +276,8 @@ class TestDownloadManager(TestCase):
         """
         """
         with pytest.raises(HalotoolsError) as err:
-            fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi',
-                halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'Jose Canseco')
+            fname, redshift = self.downman._closest_catalog_on_web(simname='bolshoi',
+                halo_finder='bdm', desired_redshift=0., catalog_type='Jose Canseco')
         substr = "Input ``catalog_type`` must be either ``particles`` or ``halos``"
         assert substr in err.value.args[0]
 
@@ -285,30 +285,30 @@ class TestDownloadManager(TestCase):
     def test_closest_ptcl_catalog_on_web(self):
         """ This test currently fails because the halo catalogs have not been updated yet.
         """
-        fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolplanck',
-            desired_redshift = 2, catalog_type = 'particles')
+        fname, redshift = self.downman._closest_catalog_on_web(simname='bolplanck',
+            desired_redshift=2, catalog_type='particles')
         assert 'bolplanck/hlist_0.33406.particles.halotools_alpha_version1.hdf5' in fname
 
     @classmethod
     def clear_APH_MACHINE_of_highz_file(self,
-        delete_corresponding_halo_catalog = True):
+        delete_corresponding_halo_catalog=True):
 
         cache = HaloTableCache()
         matching_log_entries = cache.matching_log_entry_generator(
-            simname = 'bolshoi',
-            halo_finder = 'rockstar',
-            version_name = 'halotools_alpha_version2',
-            redshift = 11.7, dz_tol = 0.2
+            simname='bolshoi',
+            halo_finder='rockstar',
+            version_name='halotools_alpha_version2',
+            redshift=11.7, dz_tol=0.2
             )
         for matching_log_entry in matching_log_entries:
             cache.remove_entry_from_cache_log(
-                simname = matching_log_entry.simname,
-                halo_finder = matching_log_entry.halo_finder,
-                version_name = matching_log_entry.version_name,
-                redshift = matching_log_entry.redshift,
-                fname = matching_log_entry.fname,
-                update_ascii = True,
-                delete_corresponding_halo_catalog = delete_corresponding_halo_catalog
+                simname=matching_log_entry.simname,
+                halo_finder=matching_log_entry.halo_finder,
+                version_name=matching_log_entry.version_name,
+                redshift=matching_log_entry.redshift,
+                fname=matching_log_entry.fname,
+                update_ascii=True,
+                delete_corresponding_halo_catalog=delete_corresponding_halo_catalog
                 )
 
     @remote_data
@@ -317,10 +317,10 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_processed_halo_table(
-                simname = 'Jose Canseco',
-                halo_finder = 'rockstar',
-                version_name = 'halotools_alpha_version2',
-                redshift = 11.7,
+                simname='Jose Canseco',
+                halo_finder='rockstar',
+                version_name='halotools_alpha_version2',
+                redshift=11.7,
                 download_dirname=self.halocat_dir)
         substr = "no web locations"
         assert substr in err.value.args[0]
@@ -332,10 +332,10 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_processed_halo_table(
-                simname = 'bolshoi',
-                halo_finder = 'rockstar',
-                version_name = 'Jose Canseco',
-                redshift = 11.7,
+                simname='bolshoi',
+                halo_finder='rockstar',
+                version_name='Jose Canseco',
+                redshift=11.7,
                 download_dirname=self.halocat_dir)
         substr = "no halo catalogs meeting"
         assert substr in err.value.args[0]
@@ -347,10 +347,10 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_processed_halo_table(
-                simname = 'bolshoi',
-                halo_finder = 'rockstar',
-                version_name = sim_defaults.default_version_name,
-                redshift = 0, overwrite=False)
+                simname='bolshoi',
+                halo_finder='rockstar',
+                version_name=sim_defaults.default_version_name,
+                redshift=0, overwrite=False)
         substr = "you must set the ``overwrite`` keyword argument to True"
         assert substr in err.value.args[0]
 
@@ -360,10 +360,10 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_processed_halo_table(
-                simname = 'bolshoi',
-                halo_finder = 'rockstar',
-                version_name = sim_defaults.default_version_name,
-                redshift = 0, overwrite=False, download_dirname = 'abc')
+                simname='bolshoi',
+                halo_finder='rockstar',
+                version_name=sim_defaults.default_version_name,
+                redshift=0, overwrite=False, download_dirname='abc')
         substr = "Your input ``download_dirname`` is a non-existent path."
         assert substr in err.value.args[0]
 
@@ -374,11 +374,11 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_processed_halo_table(
-                simname = 'bolshoi',
-                halo_finder = 'rockstar',
-                version_name = sim_defaults.default_version_name,
-                redshift = 11.7, dz_tol = 200,
-                overwrite=True, download_dirname = 'std_cache_loc')
+                simname='bolshoi',
+                halo_finder='rockstar',
+                version_name=sim_defaults.default_version_name,
+                redshift=11.7, dz_tol=200,
+                overwrite=True, download_dirname='std_cache_loc')
         substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``"
         assert substr in err.value.args[0]
 
@@ -388,11 +388,11 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_processed_halo_table(
-                simname = 'bolshoi',
-                halo_finder = 'rockstar',
-                version_name = sim_defaults.default_version_name,
-                redshift = 0.3, dz_tol = 0.001,
-                overwrite=False, download_dirname = self.halocat_dir)
+                simname='bolshoi',
+                halo_finder='rockstar',
+                version_name=sim_defaults.default_version_name,
+                redshift=0.3, dz_tol=0.001,
+                overwrite=False, download_dirname=self.halocat_dir)
         substr = "The closest redshift for these catalogs is"
         assert substr in err.value.args[0]
 
@@ -407,10 +407,10 @@ class TestDownloadManager(TestCase):
 
         cache1 = HaloTableCache()
         self.downman.download_processed_halo_table(
-            simname = 'bolshoi',
-            halo_finder = 'rockstar',
-            version_name = 'halotools_alpha_version2',
-            redshift = 11.7, overwrite = True)
+            simname='bolshoi',
+            halo_finder='rockstar',
+            version_name='halotools_alpha_version2',
+            redshift=11.7, overwrite=True)
         cache2 = HaloTableCache()
         assert len(cache1.log) == len(cache2.log) - 1
         new_entry = list(set(cache2.log) - set(cache1.log))[0]
@@ -424,9 +424,9 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
-                simname = 'Jose Canseco',
-                version_name = sim_defaults.default_ptcl_version_name,
-                redshift = 11.7,
+                simname='Jose Canseco',
+                version_name=sim_defaults.default_ptcl_version_name,
+                redshift=11.7,
                 download_dirname=self.halocat_dir)
         substr = "no web locations"
         assert substr in err.value.args[0]
@@ -437,9 +437,9 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
-                simname = 'bolshoi',
-                version_name = 'Jose Canseco',
-                redshift = 11.7,
+                simname='bolshoi',
+                version_name='Jose Canseco',
+                redshift=11.7,
                 download_dirname=self.halocat_dir)
         substr = "There are no particle catalogs meeting your specifications"
         assert substr in err.value.args[0]
@@ -451,9 +451,9 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
-                simname = 'bolshoi',
-                version_name = sim_defaults.default_ptcl_version_name,
-                redshift = 0,
+                simname='bolshoi',
+                version_name=sim_defaults.default_ptcl_version_name,
+                redshift=0,
                 download_dirname=self.halocat_dir)
         substr = "you must set the ``overwrite`` keyword argument to True."
         assert substr in err.value.args[0]
@@ -464,9 +464,9 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
-                simname = 'bolshoi',
-                version_name = sim_defaults.default_ptcl_version_name,
-                redshift = 0,
+                simname='bolshoi',
+                version_name=sim_defaults.default_ptcl_version_name,
+                redshift=0,
                 download_dirname='abc')
         substr = "Your input ``download_dirname`` is a non-existent path."
         assert substr in err.value.args[0]
@@ -477,9 +477,9 @@ class TestDownloadManager(TestCase):
         """
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
-                simname = 'bolshoi',
-                version_name = sim_defaults.default_ptcl_version_name,
-                redshift = 0.2, dz_tol = 0.001,
+                simname='bolshoi',
+                version_name=sim_defaults.default_ptcl_version_name,
+                redshift=0.2, dz_tol=0.001,
                 download_dirname=self.halocat_dir)
         substr = "The closest redshift for these catalogs is"
         assert substr in err.value.args[0]

@@ -71,26 +71,26 @@ class TestUserSuppliedPtclCatalog(TestCase):
     def test_particle_mass_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
+            ptclcat = UserSuppliedPtclCatalog(Lbox=200,
                 **self.good_ptclcat_args)
 
     def test_lbox_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            ptclcat = UserSuppliedPtclCatalog(particle_mass = 200,
+            ptclcat = UserSuppliedPtclCatalog(particle_mass=200,
                 **self.good_ptclcat_args)
 
     def test_ptcls_contained_inside_lbox(self):
 
         with pytest.raises(HalotoolsError):
-            ptclcat = UserSuppliedPtclCatalog(Lbox = 20, particle_mass = 100,
+            ptclcat = UserSuppliedPtclCatalog(Lbox=20, particle_mass=100,
                 **self.good_ptclcat_args)
 
     def test_redshift_is_float(self):
 
         with pytest.raises(HalotoolsError) as err:
             ptclcat = UserSuppliedPtclCatalog(
-                Lbox = 200, particle_mass = 100, redshift = '',
+                Lbox=200, particle_mass=100, redshift='',
                 **self.good_ptclcat_args)
         substr = "The ``redshift`` metadata must be a float."
         assert substr in err.value.args[0]
@@ -98,8 +98,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     def test_successful_load(self):
 
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_ptclcat_args)
         assert hasattr(ptclcat, 'Lbox')
         assert ptclcat.Lbox == 200
@@ -108,9 +108,9 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     def test_additional_metadata(self):
 
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
-            arnold_schwarzenegger = 'Stick around!',
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
+            arnold_schwarzenegger='Stick around!',
             **self.good_ptclcat_args)
         assert hasattr(ptclcat, 'arnold_schwarzenegger')
         assert ptclcat.arnold_schwarzenegger == 'Stick around!'
@@ -121,8 +121,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
         bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
         with pytest.raises(HalotoolsError):
             bad_ptclcat_args['x'][0] = -1
-            ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_ptclcat_args)
 
     def test_positions_contained_inside_lbox_alt_test(self):
@@ -130,8 +130,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
         bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
         with pytest.raises(HalotoolsError):
             bad_ptclcat_args['x'][0] = 10000
-            ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_ptclcat_args)
 
     def test_has_x_column(self):
@@ -139,8 +139,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
         bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
         with pytest.raises(HalotoolsError):
             del bad_ptclcat_args['x']
-            ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_ptclcat_args)
 
 
@@ -148,8 +148,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
     def test_add_ptclcat_to_cache1(self):
         """ Verify the overwrite requirement is enforced
         """
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_ptclcat_args)
 
         basename = 'abc'
@@ -168,15 +168,15 @@ class TestUserSuppliedPtclCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             ptclcat.add_ptclcat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string,
-                overwrite = True)
+                overwrite=True)
         assert substr not in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache2(self):
         """ Verify that the appropriate message is issued when trying to save the file to a non-existent directory.
         """
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_ptclcat_args)
 
         basename = 'abc'
@@ -192,8 +192,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
     def test_add_ptclcat_to_cache3(self):
         """ Verify that the .hdf5 extension requirement is enforced.
         """
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_ptclcat_args)
 
         basename = 'abc'
@@ -206,7 +206,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             ptclcat.add_ptclcat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string,
-                overwrite = True)
+                overwrite=True)
         substr = "The fname must end with an ``.hdf5`` extension."
         assert substr in err.value.args[0]
 
@@ -214,8 +214,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
     def test_add_ptclcat_to_cache4(self):
         """ Enforce string representation of positional arguments
         """
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_ptclcat_args)
 
         basename = 'abc.hdf5'
@@ -235,7 +235,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             ptclcat.add_ptclcat_to_cache(
                 fname, not_representable_as_string, dummy_string, dummy_string,
-                overwrite = True)
+                overwrite=True)
         substr = "must all be strings."
         assert substr in err.value.args[0]
 
@@ -243,8 +243,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache6(self):
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        ptclcat = UserSuppliedPtclCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_ptclcat_args)
 
         basename = 'abc.hdf5'
@@ -259,7 +259,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         assert 'z' in list(ptclcat.ptcl_table.keys())
 
         ptclcat.add_ptclcat_to_cache(
-            fname, simname, version_name, processing_notes, overwrite = True)
+            fname, simname, version_name, processing_notes, overwrite=True)
 
         cache = PtclTableCache()
         assert ptclcat.log_entry in cache.log
@@ -269,9 +269,9 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat.log_entry.version_name,
             ptclcat.log_entry.redshift,
             ptclcat.log_entry.fname,
-            raise_non_existence_exception = True,
-            update_ascii = True,
-            delete_corresponding_ptcl_catalog = True)
+            raise_non_existence_exception=True,
+            update_ascii=True,
+            delete_corresponding_ptcl_catalog=True)
 
 
     def tearDown(self):

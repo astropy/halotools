@@ -15,9 +15,9 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_
 
 __all__ = ('npairs_3d', )
 
-def npairs_3d(sample1, sample2, rbins, period = None,
-    verbose = False, num_threads = 1,
-    approx_cell1_size = None, approx_cell2_size = None):
+def npairs_3d(sample1, sample2, rbins, period=None,
+    verbose=False, num_threads=1,
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points separated by
     a three-dimensional distance smaller than the input ``rbins``.
@@ -176,7 +176,7 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
         assert rbins.ndim == 1
         assert len(rbins) > 1
         if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
+            assert array_is_monotonic(rbins, strict=True) == 1
     except AssertionError:
         msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
         raise ValueError(msg)

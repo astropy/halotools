@@ -19,7 +19,7 @@ __all__ = ('test_mean_radial_velocity_vs_r_correctness1',
 fixed_seed = 43
 
 def pure_python_mean_radial_velocity_vs_r(
-    sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox = None):
+    sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=None):
     """ Brute force pure python function calculating mean radial velocities
     in a single bin of separation.
     """
@@ -93,42 +93,42 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
     ###########
     # Run the test with PBCs turned off
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
 
     rmin, rmax = rbins[0], rbins[1]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax)
-    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rbins[1], rbins[2]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax)
-    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rbins[2], rbins[3]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax)
-    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
     ###########
     # Run the test with PBCs operative
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
 
     rmin, rmax = rbins[0], rbins[1]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
-    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rbins[1], rbins[2]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
-    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rbins[2], rbins[3]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
-    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
 def test_pure_python():
     """ Verify that the brute-force pairwise velocity function returns the
@@ -161,7 +161,7 @@ def test_pure_python():
     rmin, rmax = rbins[1], rbins[2]
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
-    assert np.allclose(pure_python_s1s2, correct_relative_velocity, rtol = 0.01), msg
+    assert np.allclose(pure_python_s1s2, correct_relative_velocity, rtol=0.01), msg
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_correctness1():
@@ -206,7 +206,7 @@ def test_mean_radial_velocity_vs_r_correctness1():
     rbins = np.array([0, 0.1, 0.3])
 
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -269,7 +269,7 @@ def test_mean_radial_velocity_vs_r_correctness2():
 
     # First run the calculation with PBCs set to unity
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -279,7 +279,7 @@ def test_mean_radial_velocity_vs_r_correctness2():
 
     # Now set PBCs to infinity and verify that we instead get zeros
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -346,7 +346,7 @@ def test_mean_radial_velocity_vs_r_correctness3():
     rbins = np.array([0, 0.05, 0.3])
 
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -356,7 +356,7 @@ def test_mean_radial_velocity_vs_r_correctness3():
 
     # repeat the test but with PBCs set to infinity
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -423,7 +423,7 @@ def test_mean_radial_velocity_vs_r_correctness4():
     rbins = np.array([0, 0.05, 0.3])
 
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -433,7 +433,7 @@ def test_mean_radial_velocity_vs_r_correctness4():
 
     # repeat the test but with PBCs set to infinity
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -498,7 +498,7 @@ def test_mean_radial_velocity_vs_r_correctness5():
     rbins = np.array([0, 0.1, 0.3])
 
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -508,7 +508,7 @@ def test_mean_radial_velocity_vs_r_correctness5():
 
     # repeat the test but with PBCs set to infinity
     s1s1, s1s2, s2s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -552,10 +552,10 @@ def test_mean_radial_velocity_vs_r_parallel1():
     rbins = np.array([0, 0.1, 0.3])
 
     s1s1_parallel, s1s2_parallel, s2s2_parallel = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 3, period=1)
+        sample2=sample2, velocities2=velocities2, num_threads=3, period=1)
 
     s1s1_serial, s1s2_serial, s2s2_serial = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 1, period=1)
+        sample2=sample2, velocities2=velocities2, num_threads=1, period=1)
 
     assert np.all(s1s1_serial == s1s1_parallel)
     assert np.all(s1s2_serial == s1s2_parallel)
@@ -572,21 +572,21 @@ def test_mean_radial_velocity_vs_r_parallel2():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.array([0, 0.1, 0.3])
 
     s1s1_parallel, s1s2_parallel, s2s2_parallel = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 2, period=1)
+        sample2=sample2, velocities2=velocities2, num_threads=2, period=1)
 
     s1s1_serial, s1s2_serial, s2s2_serial = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 1, period=1)
+        sample2=sample2, velocities2=velocities2, num_threads=1, period=1)
 
-    assert np.allclose(s1s1_serial, s1s1_parallel, rtol = 0.001)
-    assert np.allclose(s1s2_serial, s1s2_parallel, rtol = 0.001)
-    assert np.allclose(s2s2_serial, s2s2_parallel, rtol = 0.001)
+    assert np.allclose(s1s1_serial, s1s1_parallel, rtol=0.001)
+    assert np.allclose(s1s2_serial, s1s2_parallel, rtol=0.001)
+    assert np.allclose(s2s2_serial, s2s2_parallel, rtol=0.001)
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel3():
@@ -599,21 +599,21 @@ def test_mean_radial_velocity_vs_r_parallel3():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.array([0, 0.1, 0.3])
 
     s1s1_parallel, s1s2_parallel, s2s2_parallel = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 2)
+        sample2=sample2, velocities2=velocities2, num_threads=2)
 
     s1s1_serial, s1s2_serial, s2s2_serial = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 1)
+        sample2=sample2, velocities2=velocities2, num_threads=1)
 
-    assert np.allclose(s1s1_serial, s1s1_parallel, rtol = 0.001)
-    assert np.allclose(s1s2_serial, s1s2_parallel, rtol = 0.001)
-    assert np.allclose(s2s2_serial, s2s2_parallel, rtol = 0.001)
+    assert np.allclose(s1s1_serial, s1s1_parallel, rtol=0.001)
+    assert np.allclose(s1s2_serial, s1s2_parallel, rtol=0.001)
+    assert np.allclose(s2s2_serial, s2s2_parallel, rtol=0.001)
 
 
 @pytest.mark.slow
@@ -626,16 +626,16 @@ def test_mean_radial_velocity_vs_r_auto_consistency():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.linspace(0, 0.3, 10)
     s1s1a, s1s2a, s2s2a = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     s1s1b, s2s2b = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2,
-        do_cross = False)
+        sample2=sample2, velocities2=velocities2,
+        do_cross=False)
 
     assert np.allclose(s1s1a,s1s1b, rtol=0.001)
     assert np.allclose(s2s2a,s2s2b, rtol=0.001)
@@ -651,15 +651,15 @@ def test_mean_radial_velocity_vs_r_cross_consistency():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.linspace(0, 0.3, 10)
     s1s1a, s1s2a, s2s2a = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     s1s2b = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2 = sample2, velocities2 = velocities2,
-        do_auto = False)
+        sample2=sample2, velocities2=velocities2,
+        do_auto=False)
 
     assert np.allclose(s1s2a,s1s2b, rtol=0.001)

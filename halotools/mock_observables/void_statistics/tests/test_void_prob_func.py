@@ -62,5 +62,5 @@ def test_vpf3():
     rbins = np.logspace(-2,-1,5)
     vpf = void_prob_func(sample1, rbins, n_ran=n_ran, period=period)
     vpf2 = void_prob_func(sample1, rbins, n_ran=n_ran, period=period,
-        approx_cell1_size = [0.2, 0.2, 0.2])
-    assert np.allclose(vpf, vpf2, rtol = 0.1)
+        approx_cell1_size=[0.2, 0.2, 0.2])
+    assert np.allclose(vpf, vpf2, rtol=0.1)

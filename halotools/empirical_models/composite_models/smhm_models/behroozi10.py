@@ -13,7 +13,7 @@ from ....sim_manager import sim_defaults
 __all__ = ['behroozi10_model_dictionary']
 
 
-def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwargs):
+def behroozi10_model_dictionary(redshift=sim_defaults.default_redshift, **kwargs):
     """
     Dictionary that can be passed to the `~halotools.empirical_models.SubhaloModelFactory`
     to build a subhalo-based composite model using the stellar-to-halo-mass relation
@@ -68,5 +68,5 @@ def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwar
 
     """
 
-    stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
+    stellar_mass_model = Behroozi10SmHm(redshift=redshift, **kwargs)
     return {'stellar_mass': stellar_mass_model}

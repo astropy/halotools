@@ -15,7 +15,7 @@ __all__ = ('test_mean_los_velocity_vs_rp_correctness1', 'test_mean_los_velocity_
 fixed_seed = 43
 
 def pure_python_mean_los_velocity_vs_rp(
-    sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox = None):
+    sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox=None):
     """ Brute force pure python function calculating mean los velocities
     in a single bin of separation.
     """
@@ -88,43 +88,43 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
     ############################################
     # Run the test with PBCs turned off
     s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, do_auto = False)
+        sample2=sample2, velocities2=velocities2, do_auto=False)
 
     rmin, rmax = rp_bins[0], rp_bins[1]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
-    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[1], rp_bins[2]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
-    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[2], rp_bins[3]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
-    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
 
     # ############################################
     # # Run the test with PBCs operative
     s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, do_auto = False, period=1)
+        sample2=sample2, velocities2=velocities2, do_auto=False, period=1)
 
     rmin, rmax = rp_bins[0], rp_bins[1]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
-    assert np.allclose(s1s2[0], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[0], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[1], rp_bins[2]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
-    assert np.allclose(s1s2[1], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[1], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[2], rp_bins[3]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
-    assert np.allclose(s1s2[2], pure_python_s1s2, rtol = 0.01)
+    assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
 
 @pytest.mark.slow
@@ -169,7 +169,7 @@ def test_mean_los_velocity_vs_rp_correctness1():
     rp_bins, pi_max = np.array([0, 0.1, 0.15, 0.21, 0.25]), 0.2
 
     s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0:2], 0, rtol=0.01)
     assert np.allclose(s1s2[0:2], 0, rtol=0.01)
     assert np.allclose(s2s2[0:2], 0, rtol=0.01)
@@ -231,7 +231,7 @@ def test_mean_los_velocity_vs_rp_correctness2():
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -294,7 +294,7 @@ def test_mean_los_velocity_vs_rp_correctness3():
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -360,7 +360,7 @@ def test_mean_los_velocity_vs_rp_correctness4():
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -387,23 +387,23 @@ def test_mean_los_velocity_vs_rp_parallel():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1_parallel, s1s2_parallel, s2s2_parallel = mean_los_velocity_vs_rp(
         sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 2, period=1)
+        sample2=sample2, velocities2=velocities2, num_threads=2, period=1)
 
     s1s1_serial, s1s2_serial, s2s2_serial = mean_los_velocity_vs_rp(
         sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, num_threads = 1, period=1)
+        sample2=sample2, velocities2=velocities2, num_threads=1, period=1)
 
-    assert np.allclose(s1s1_serial, s1s1_parallel, rtol = 0.001)
-    assert np.allclose(s1s2_serial, s1s2_parallel, rtol = 0.001)
-    assert np.allclose(s2s2_serial, s2s2_parallel, rtol = 0.001)
+    assert np.allclose(s1s1_serial, s1s1_parallel, rtol=0.001)
+    assert np.allclose(s1s2_serial, s1s2_parallel, rtol=0.001)
+    assert np.allclose(s2s2_serial, s2s2_parallel, rtol=0.001)
 
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_auto_consistency():
@@ -415,17 +415,17 @@ def test_mean_los_velocity_vs_rp_auto_consistency():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1a, s1s2a, s2s2a = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     s1s1b, s2s2b = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2,
-        do_cross = False)
+        sample2=sample2, velocities2=velocities2,
+        do_cross=False)
 
     assert np.allclose(s1s1a,s1s1b, rtol=0.001)
     assert np.allclose(s2s2a,s2s2b, rtol=0.001)
@@ -441,16 +441,16 @@ def test_mean_los_velocity_vs_rp_cross_consistency():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc = 0, scale = 100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1a, s1s2a, s2s2a = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     s1s2b = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2,
-        do_auto = False)
+        sample2=sample2, velocities2=velocities2,
+        do_auto=False)
 
     assert np.allclose(s1s2a,s1s2b, rtol=0.001)

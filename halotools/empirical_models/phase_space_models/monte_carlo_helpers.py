@@ -95,9 +95,9 @@ class MonteCarloGalProf(object):
             setattr(self, '_' + prof_param_key + '_lookup_table_spacing', lookup_table_binning[ipar][2])
 
     def build_lookup_tables(self,
-        logrmin = model_defaults.default_lograd_min,
-        logrmax = model_defaults.default_lograd_max,
-        Npts_radius_table = model_defaults.Npts_radius_table):
+        logrmin=model_defaults.default_lograd_min,
+        logrmax=model_defaults.default_lograd_max,
+        Npts_radius_table=model_defaults.Npts_radius_table):
         """ Method used to create a lookup table of the spatial and velocity radial profiles.
 
         Parameters
@@ -336,7 +336,7 @@ class MonteCarloGalProf(object):
         else:
             seed = None
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
-            *profile_params, seed = seed)
+            *profile_params, seed=seed)
 
         # get random positions within the solid sphere
         x *= dimensionless_radial_distance
@@ -531,7 +531,7 @@ class MonteCarloGalProf(object):
             of galaxies within their halos,
             scaled by the size of the halo's virial velocity.
         """
-        scaled_radius = convert_to_ndarray(scaled_radius, dt = np.float64)
+        scaled_radius = convert_to_ndarray(scaled_radius, dt=np.float64)
         # x = convert_to_ndarray(kwargs['x'])
         # x = x.astype(float)
         # profile_params = kwargs['profile_params']
@@ -616,12 +616,12 @@ class MonteCarloGalProf(object):
         if 'seed' in list(kwargs.keys()):
             np.random.seed(kwargs['seed'])
 
-        radial_velocities = np.random.normal(scale = radial_dispersions)
+        radial_velocities = np.random.normal(scale=radial_dispersions)
 
         return radial_velocities
 
-    def mc_vel(self, table, overwrite_table_velocities = True,
-        return_velocities = False):
+    def mc_vel(self, table, overwrite_table_velocities=True,
+        return_velocities=False):
         """ Method assigns a Monte Carlo realization of the Jeans velocity
         solution to the halos in the input ``table``.
 

@@ -145,9 +145,9 @@ def _pair_counts(sample1, sample2, rbins,
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-    max_sample_size=int(1e6), approx_cell1_size = None,
-    approx_cell2_size = None, approx_cellran_size = None,
-    RR_precomputed = None, NR_precomputed = None):
+    max_sample_size=int(1e6), approx_cell1_size=None,
+    approx_cell2_size=None, approx_cellran_size=None,
+    RR_precomputed=None, NR_precomputed=None):
     """
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
 

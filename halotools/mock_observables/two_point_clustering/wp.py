@@ -209,8 +209,8 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
 
     #pass the arguments into the redshift space TPCF function
     result = rp_pi_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,
-        sample2 = sample2, randoms=randoms,
-        period = period, do_auto=do_auto, do_cross=do_cross,
+        sample2=sample2, randoms=randoms,
+        period=period, do_auto=do_auto, do_cross=do_cross,
         estimator=estimator, num_threads=num_threads,
         max_sample_size=max_sample_size,
         approx_cell1_size=approx_cell1_size,

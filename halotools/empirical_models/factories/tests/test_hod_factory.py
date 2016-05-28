@@ -23,7 +23,7 @@ def test_Zheng07_composite():
 
         * Default behavior is recovered after calling the `~halotools.empirical_models.HodModelFactory.restore_init_param_dict` method.
     """
-    model = PrebuiltHodModelFactory('zheng07', threshold = -18)
+    model = PrebuiltHodModelFactory('zheng07', threshold=-18)
 
     # Verify that changes param_dict properly propagate
     testmass1 = 5.e11
@@ -60,8 +60,8 @@ def test_alt_Zheng07_composites():
     default_satocc_component = default_model_dictionary['satellites_occupation']
 
     cenmod_satocc_compoent = Zheng07Sats(
-        threshold = default_satocc_component.threshold, modulate_with_cenocc = True,
-        gal_type_centrals = 'centrals')
+        threshold=default_satocc_component.threshold, modulate_with_cenocc=True,
+        gal_type_centrals='centrals')
 
     cenmod_model_dictionary = copy(default_model_dictionary)
     cenmod_model_dictionary['satellites_occupation'] = cenmod_satocc_compoent
@@ -73,17 +73,17 @@ def test_alt_Zheng07_composites():
     # by central occupations
     assert set(cenmod_model.param_dict) == set(default_model.param_dict)
 
-    nsat1 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
-    nsat2 = cenmod_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+    nsat1 = default_model.mean_occupation_satellites(prim_haloprop=2.e12)
+    nsat2 = cenmod_model.mean_occupation_satellites(prim_haloprop=2.e12)
     assert nsat2 < nsat1
 
     cenmod_model.param_dict['logMmin'] *= 1.1
-    nsat3 = cenmod_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+    nsat3 = cenmod_model.mean_occupation_satellites(prim_haloprop=2.e12)
     assert nsat3 < nsat2
 
-    nsat3 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+    nsat3 = default_model.mean_occupation_satellites(prim_haloprop=2.e12)
     default_model.param_dict['logMmin'] *= 1.1
-    nsat4 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+    nsat4 = default_model.mean_occupation_satellites(prim_haloprop=2.e12)
     assert nsat3 == nsat4
 
     fakesim = FakeSim()
@@ -94,7 +94,7 @@ def test_alt_Zheng07_composites():
 def test_Leauthaud11_composite():
     """
     """
-    model = PrebuiltHodModelFactory('leauthaud11', threshold = 10.5)
+    model = PrebuiltHodModelFactory('leauthaud11', threshold=10.5)
 
     # Verify that changes param_dict properly propagate
     testmass1 = 5.e11

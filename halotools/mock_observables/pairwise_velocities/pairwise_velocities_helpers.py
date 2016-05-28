@@ -112,7 +112,7 @@ def _process_radial_bins(rbins,period, PBCs):
         assert rbins.ndim == 1
         assert len(rbins) > 1
         if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
+            assert array_is_monotonic(rbins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input `rbins` must be a monotonically increasing \n"
                "1-D array with at least two entries.")
@@ -141,7 +141,7 @@ def _process_rp_bins(rp_bins,pi_max,period,PBCs):
         assert rp_bins.ndim == 1
         assert len(rp_bins) > 1
         if len(rp_bins) > 2:
-            assert array_is_monotonic(rp_bins, strict = True) == 1
+            assert array_is_monotonic(rp_bins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input `rp_bins` must be a monotonically increasing \n"
                "1-D array with at least two entries.")

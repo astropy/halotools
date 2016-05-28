@@ -32,8 +32,8 @@ class PrimGalpropModel(object):
     """
 
     def __init__(self, galprop_name,
-        prim_haloprop_key = model_defaults.default_smhm_haloprop,
-        scatter_model = LogNormalScatterModel, **kwargs):
+        prim_haloprop_key=model_defaults.default_smhm_haloprop,
+        scatter_model=LogNormalScatterModel, **kwargs):
         """
         Parameters
         ----------
@@ -158,7 +158,7 @@ class PrimGalpropModel(object):
         for key, value in scatter_param_dict.items():
             self.param_dict[key] = value
 
-    def _mc_galprop(self, include_scatter = True, **kwargs):
+    def _mc_galprop(self, include_scatter=True, **kwargs):
         """ Return the prim_galprop of the galaxies living in the input table.
 
         Parameters

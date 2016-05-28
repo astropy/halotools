@@ -13,7 +13,7 @@ __all__ = ('mean_y_vs_x', 'return_xyz_formatted_array', 'cuboid_subvolume_labels
 __author__ = ['Andrew Hearin']
 
 
-def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
+def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
     """
     Estimate the mean value of the property *y* as a function of *x*
     for an input sample of galaxies/halos,
@@ -90,7 +90,7 @@ def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
     if error_estimator == 'variance':
         err = variance
     else:
-        counts = np.histogram(x, bins = bin_edges)
+        counts = np.histogram(x, bins=bin_edges)
         err = variance/np.sqrt(counts[0])
 
     return bin_midpoints, mean, err

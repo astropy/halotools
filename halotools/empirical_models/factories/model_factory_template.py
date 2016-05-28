@@ -36,11 +36,11 @@ inconsistent_version_name_error_msg = ("Inconsistency between the version_name "
     "You should instantiate a new model object if you wish to switch halo catalogs.")
 
 def _test_mock_consistency(mock,
-    redshift = sim_defaults.default_redshift,
-    simname = sim_defaults.default_simname,
-    halo_finder = sim_defaults.default_halo_finder,
-    version_name = sim_defaults.default_version_name,
-    halocat = None):
+    redshift=sim_defaults.default_redshift,
+    simname=sim_defaults.default_simname,
+    halo_finder=sim_defaults.default_halo_finder,
+    version_name=sim_defaults.default_version_name,
+    halocat=None):
 
     if halocat is None:
         pass
@@ -110,7 +110,7 @@ class ModelFactory(object):
 
 
     def populate_mock(self, halocat,
-        Num_ptcl_requirement = sim_defaults.Num_ptcl_requirement,
+        Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
         **kwargs):
         """
         Method used to populate a simulation with a Monte Carlo realization of a model.
@@ -287,7 +287,7 @@ class ModelFactory(object):
 
         return decorated_func
 
-    def compute_average_galaxy_clustering(self, num_iterations=5, summary_statistic = 'median', **kwargs):
+    def compute_average_galaxy_clustering(self, num_iterations=5, summary_statistic='median', **kwargs):
         """
         Method repeatedly populates a simulation with a mock galaxy catalog, computes the clustering
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering
@@ -457,7 +457,7 @@ class ModelFactory(object):
         if use_fake_sim is True:
             halocat = FakeSim(**halocat_kwargs)
         else:
-            halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
+            halocat = CachedHaloCatalog(preload_halo_table=True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -475,7 +475,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations*3).reshape(3, num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(halocat = halocat)
+                self.populate_mock(halocat=halocat)
                 rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :], xi_coll[2, i, :] = (
                     self.mock.compute_galaxy_clustering(**kwargs)
                     )
@@ -489,13 +489,13 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(halocat = halocat)
+                self.populate_mock(halocat=halocat)
                 rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi
 
     def compute_average_galaxy_matter_cross_clustering(self, num_iterations=5,
-        summary_statistic = 'median', **kwargs):
+        summary_statistic='median', **kwargs):
         """
         Method repeatedly populates a simulation with a mock galaxy catalog,
         computes the galaxy-matter cross-correlation
@@ -671,7 +671,7 @@ class ModelFactory(object):
         if use_fake_sim is True:
             halocat = FakeSim(num_ptcl=int(1e5), **halocat_kwargs)
         else:
-            halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
+            halocat = CachedHaloCatalog(preload_halo_table=True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -689,7 +689,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations*2).reshape(2, num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(halocat = halocat)
+                self.populate_mock(halocat=halocat)
                 rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :] = (
                     self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
                     )
@@ -702,7 +702,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(halocat = halocat)
+                self.populate_mock(halocat=halocat)
                 rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi

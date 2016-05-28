@@ -28,8 +28,8 @@ class TestTrivialProfile(TestCase):
         """ Pre-load various arrays into memory for use by all tests.
         """
         self.default_model = TrivialProfile()
-        self.wmap9_model = TrivialProfile(cosmology = WMAP9)
-        self.m200_model = TrivialProfile(mdef = '200m')
+        self.wmap9_model = TrivialProfile(cosmology=WMAP9)
+        self.m200_model = TrivialProfile(mdef='200m')
 
     def test_instance_attrs(self):
         """ Require that all model variants have ``cosmology``, ``redshift`` and ``mdef`` attributes.

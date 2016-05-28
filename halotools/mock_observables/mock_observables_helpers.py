@@ -55,7 +55,7 @@ def enforce_sample_respects_pbcs(x, y, z, period):
             "of the input data that exceed this value")
         raise ValueError(msg % period[2])
 
-def get_num_threads(input_num_threads, enforce_max_cores = False):
+def get_num_threads(input_num_threads, enforce_max_cores=False):
     """ Helper function requires that ``input_num_threads`` either be an
     integer or the string ``max``. If ``input_num_threads`` exceeds the
     number of available cores, a warning will be issued.
@@ -140,7 +140,7 @@ def get_separation_bins_array(separation_bins):
         assert separation_bins.ndim == 1
         assert len(separation_bins) > 1
         if len(separation_bins) > 2:
-            assert array_is_monotonic(separation_bins, strict = True) == 1
+            assert array_is_monotonic(separation_bins, strict=True) == 1
         assert np.all(separation_bins > 0)
     except AssertionError:
         msg = ("\n Input separation bins must be a monotonically increasing \n"
@@ -161,7 +161,7 @@ def get_line_of_sight_bins_array(pi_bins):
         assert pi_bins.ndim == 1
         assert len(pi_bins) > 1
         if len(pi_bins) > 2:
-            assert array_is_monotonic(pi_bins, strict = True) == 1
+            assert array_is_monotonic(pi_bins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input separation bins must be a monotonically increasing \n"
                "1-D array with at least two entries.\n")

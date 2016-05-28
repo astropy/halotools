@@ -14,10 +14,10 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 __all__ = ['hearin15_model_dictionary']
 
 
-def hearin15_model_dictionary(central_assembias_strength = 1,
-    central_assembias_strength_abscissa = [1e12],
-    satellite_assembias_strength = 0.2,
-    satellite_assembias_strength_abscissa = [1e12],
+def hearin15_model_dictionary(central_assembias_strength=1,
+    central_assembias_strength_abscissa=[1e12],
+    satellite_assembias_strength=0.2,
+    satellite_assembias_strength_abscissa=[1e12],
     **kwargs):
     """
     Dictionary to build an HOD-style model in which
@@ -101,8 +101,8 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
         centrals_occupation = leauthaud11_components.Leauthaud11Cens(**kwargs)
     else:
         centrals_occupation = leauthaud11_components.AssembiasLeauthaud11Cens(
-            assembias_strength = central_assembias_strength,
-            assembias_strength_abscissa = central_assembias_strength_abscissa,
+            assembias_strength=central_assembias_strength,
+            assembias_strength_abscissa=central_assembias_strength_abscissa,
             **kwargs)
 
     # Build the profile model
@@ -114,8 +114,8 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
         satellites_occupation = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:
         satellites_occupation = leauthaud11_components.AssembiasLeauthaud11Sats(
-            assembias_strength = satellite_assembias_strength,
-            assembias_strength_abscissa = satellite_assembias_strength_abscissa,
+            assembias_strength=satellite_assembias_strength,
+            assembias_strength_abscissa=satellite_assembias_strength_abscissa,
             **kwargs)
         # There is no need for a redundant new_haloprop_func_dict
         # if this is already possessed by the central model

@@ -29,9 +29,9 @@ class Tinker13Cens(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
     """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold,
+    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift,
+        redshift=sim_manager.sim_defaults.default_redshift,
         **kwargs):
         """
         Parameters
@@ -67,12 +67,12 @@ class Tinker13Cens(OccupationComponent):
         super(Tinker13Cens, self).__init__(
             gal_type='centrals', threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
-            prim_haloprop_key = prim_haloprop_key,
+            prim_haloprop_key=prim_haloprop_key,
             **kwargs)
         self.redshift = redshift
 
         self.smhm_model = Behroozi10SmHm(
-            prim_haloprop_key = prim_haloprop_key, **kwargs)
+            prim_haloprop_key=prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)
 
@@ -100,8 +100,8 @@ class Tinker13Cens(OccupationComponent):
             ])
 
     def _initialize_param_dict(self,
-        quiescent_fraction_abscissa = [6.31e10, 3.98e11, 2.51e12, 1.58e13, 1.e14],
-        quiescent_fraction_ordinates = [0.052, 0.14, 0.54, 0.63, 0.77], **kwargs):
+        quiescent_fraction_abscissa=[6.31e10, 3.98e11, 2.51e12, 1.58e13, 1.e14],
+        quiescent_fraction_ordinates=[0.052, 0.14, 0.54, 0.63, 0.77], **kwargs):
         """
         """
         self.param_dict = {}
@@ -207,11 +207,11 @@ class Tinker13Cens(OccupationComponent):
                     raise HalotoolsError(msg)
 
         if 'table' in kwargs:
-            quiescent_result = self.mean_occupation_quiescent(table = table)
-            active_result = self.mean_occupation_active(table = table)
+            quiescent_result = self.mean_occupation_quiescent(table=table)
+            active_result = self.mean_occupation_active(table=table)
         else:
-            quiescent_result = self.mean_occupation_quiescent(prim_haloprop = prim_haloprop)
-            active_result = self.mean_occupation_active(prim_haloprop = prim_haloprop)
+            quiescent_result = self.mean_occupation_quiescent(prim_haloprop=prim_haloprop)
+            active_result = self.mean_occupation_active(prim_haloprop=prim_haloprop)
 
         result = np.where(sfr_designation == 'quiescent', quiescent_result, active_result)
 
@@ -224,7 +224,7 @@ class Tinker13Cens(OccupationComponent):
         self._update_smhm_param_dict('active')
 
         logmstar = np.log10(self.smhm_model.mean_stellar_mass(
-            redshift = self.redshift, **kwargs))
+            redshift=self.redshift, **kwargs))
         logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
 
         mean_ncen = 0.5*(1.0 -
@@ -239,7 +239,7 @@ class Tinker13Cens(OccupationComponent):
         self._update_smhm_param_dict('quiescent')
 
         logmstar = np.log10(self.smhm_model.mean_stellar_mass(
-            redshift = self.redshift, **kwargs))
+            redshift=self.redshift, **kwargs))
         logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
 
         mean_ncen = 0.5*(1.0 -
@@ -252,27 +252,27 @@ class Tinker13Cens(OccupationComponent):
         """
         """
         self._update_smhm_param_dict('active')
-        return self.smhm_model.mean_stellar_mass(redshift = self.redshift, **kwargs)
+        return self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
 
     def mean_stellar_mass_quiescent(self, **kwargs):
         """
         """
         self._update_smhm_param_dict('quiescent')
-        return self.smhm_model.mean_stellar_mass(redshift = self.redshift, **kwargs)
+        return self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
 
     def mean_log_halo_mass_active(self, log_stellar_mass):
         """
         """
         self._update_smhm_param_dict('active')
         return self.smhm_model.mean_log_halo_mass(log_stellar_mass,
-            redshift = self.redshift)
+            redshift=self.redshift)
 
     def mean_log_halo_mass_quiescent(self, log_stellar_mass):
         """
         """
         self._update_smhm_param_dict('quiescent')
         return self.smhm_model.mean_log_halo_mass(log_stellar_mass,
-            redshift = self.redshift)
+            redshift=self.redshift)
 
     def _update_smhm_param_dict(self, sfr_key):
 
@@ -288,9 +288,9 @@ class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
     """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold,
+    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift,
+        redshift=sim_manager.sim_defaults.default_redshift,
         **kwargs):
         """
         Parameters
@@ -348,9 +348,9 @@ class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
         """
         Tinker13Cens.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
-            method_name_to_decorate = 'mean_quiescent_fraction',
-            lower_assembias_bound = 0.,
-            upper_assembias_bound = 1.,
+            method_name_to_decorate='mean_quiescent_fraction',
+            lower_assembias_bound=0.,
+            upper_assembias_bound=1.,
             **kwargs)
 
 
@@ -360,9 +360,9 @@ class Tinker13QuiescentSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
     """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold,
+    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift, **kwargs):
+        redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -389,11 +389,11 @@ class Tinker13QuiescentSats(OccupationComponent):
         super(Tinker13QuiescentSats, self).__init__(
             gal_type='quiescent_satellites', threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
-            prim_haloprop_key = prim_haloprop_key, **kwargs)
+            prim_haloprop_key=prim_haloprop_key, **kwargs)
         self.redshift = redshift
 
         self.smhm_model = Behroozi10SmHm(
-            prim_haloprop_key = prim_haloprop_key, **kwargs)
+            prim_haloprop_key=prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict()
 
@@ -455,7 +455,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         power_law_factor = (mass*self.littleh/self._msat)**self.param_dict['alphasat_quiescent']
 
         exp_arg_numerator = self._mcut + 10.**self.smhm_model.mean_log_halo_mass(
-            log_stellar_mass = self.threshold, redshift = self.redshift)
+            log_stellar_mass=self.threshold, redshift=self.redshift)
         exp_factor = np.exp(-exp_arg_numerator/(mass*self.littleh))
 
         mean_nsat = exp_factor*power_law_factor
@@ -505,7 +505,7 @@ class Tinker13QuiescentSats(OccupationComponent):
                 self.smhm_model.param_dict[stripped_key] = value
 
         log_halo_mass_threshold = self.smhm_model.mean_log_halo_mass(
-            log_stellar_mass = self.threshold, redshift = self.redshift)
+            log_stellar_mass=self.threshold, redshift=self.redshift)
         knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
 
         knee_mass = 1.e12
@@ -522,9 +522,9 @@ class Tinker13ActiveSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/active stellar-to-halo-mass relations.
     """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold,
+    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift, **kwargs):
+        redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -550,11 +550,11 @@ class Tinker13ActiveSats(OccupationComponent):
         super(Tinker13ActiveSats, self).__init__(
             gal_type='active_satellites', threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
-            prim_haloprop_key = prim_haloprop_key, **kwargs)
+            prim_haloprop_key=prim_haloprop_key, **kwargs)
         self.redshift = redshift
 
         self.smhm_model = Behroozi10SmHm(
-            prim_haloprop_key = prim_haloprop_key, **kwargs)
+            prim_haloprop_key=prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict()
 
@@ -616,7 +616,7 @@ class Tinker13ActiveSats(OccupationComponent):
         power_law_factor = (mass*self.littleh/self._msat)**self.param_dict['alphasat_active']
 
         exp_arg_numerator = self._mcut + 10.**self.smhm_model.mean_log_halo_mass(
-            log_stellar_mass = self.threshold, redshift = self.redshift)
+            log_stellar_mass=self.threshold, redshift=self.redshift)
         exp_factor = np.exp(-exp_arg_numerator/(mass*self.littleh))
 
         mean_nsat = exp_factor*power_law_factor
@@ -662,7 +662,7 @@ class Tinker13ActiveSats(OccupationComponent):
                 self.smhm_model.param_dict[stripped_key] = value
 
         log_halo_mass_threshold = self.smhm_model.mean_log_halo_mass(
-            log_stellar_mass = self.threshold, redshift = self.redshift)
+            log_stellar_mass=self.threshold, redshift=self.redshift)
         knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
 
         knee_mass = 1.e12

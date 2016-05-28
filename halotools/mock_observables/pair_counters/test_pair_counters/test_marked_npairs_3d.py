@@ -72,11 +72,11 @@ def test_marked_npairs_parallelization():
 
     parallel_result2 = marked_npairs_3d(random_sample, random_sample,
         rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1,
-        num_threads = 2)
+        num_threads=2)
 
     parallel_result7 = marked_npairs_3d(random_sample, random_sample,
         rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1,
-        num_threads = 7)
+        num_threads=7)
 
     assert np.allclose(serial_result,parallel_result2,rtol=1e-09), "pair counts are incorrect"
     assert np.allclose(serial_result,parallel_result7,rtol=1e-09), "pair counts are incorrect"
@@ -128,7 +128,7 @@ def test_marked_npairs_3d_wfuncs_signatures():
         weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
         result = marked_npairs_3d(random_sample, random_sample, rbins, period=period,
             weights1=weights, weights2=weights, weight_func_id=wfunc_index,
-            approx_cell1_size = [rmax, rmax, rmax])
+            approx_cell1_size=[rmax, rmax, rmax])
 
         with pytest.raises(HalotoolsError):
             signature = _func_signature_int_from_wfunc(wfunc_index) + 1
@@ -153,7 +153,7 @@ def test_marked_npairs_behavior_weight_func_id1():
     # wfunc = 1
     weights = np.ones(Npts)*3
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=1, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=1, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 9.*test_result), error_msg
 
 @slow
@@ -173,7 +173,7 @@ def test_marked_npairs_behavior_weight_func_id2():
     # wfunc = 2
     weights = np.ones(Npts)*3
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=2, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=2, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 6.*test_result), error_msg
 
 @slow
@@ -196,12 +196,12 @@ def test_marked_npairs_behavior_weight_func_id3():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=3, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=3, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 9.*test_result), error_msg
 
     weights = np.vstack([weights3, weights2]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=3, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=3, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 4.*test_result), error_msg
 
 @slow
@@ -224,7 +224,7 @@ def test_marked_npairs_behavior_weight_func_id4():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=4, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=4, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
 
 @slow
@@ -247,7 +247,7 @@ def test_marked_npairs_behavior_weight_func_id5():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=5, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=5, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
 
 @slow
@@ -270,7 +270,7 @@ def test_marked_npairs_behavior_weight_func_id6():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=6, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=6, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
 
 @slow
@@ -293,7 +293,7 @@ def test_marked_npairs_behavior_weight_func_id7():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=7, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=7, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == -test_result), error_msg
 
 @slow
@@ -316,7 +316,7 @@ def test_marked_npairs_behavior_weight_func_id8():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=8, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=8, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 3*test_result), error_msg
 
 @slow
@@ -339,7 +339,7 @@ def test_marked_npairs_behavior_weight_func_id9():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=9, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=9, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 3*test_result), error_msg
 
 @slow
@@ -362,7 +362,7 @@ def test_marked_npairs_behavior_weight_func_id10():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
 
     weights2 = np.ones(Npts)
@@ -370,5 +370,5 @@ def test_marked_npairs_behavior_weight_func_id10():
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
-    weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size = [rmax, rmax, rmax])
+    weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == -3*test_result), error_msg

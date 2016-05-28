@@ -31,7 +31,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
     """
 
-    def __init__(self, high_precision = False, **kwargs):
+    def __init__(self, high_precision=False, **kwargs):
         """
         Parameters
         ----------
@@ -105,11 +105,11 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         * `~halotools.empirical_models.monte_carlo_helpers.MonteCarloGalProf.mc_vel`
 
         """
-        MonteCarloGalProf.mc_pos(self, table = table)
-        MonteCarloGalProf.mc_vel(self, table = table)
+        MonteCarloGalProf.mc_pos(self, table=table)
+        MonteCarloGalProf.mc_vel(self, table=table)
 
 
-    def mc_generate_nfw_phase_space_points(self, Ngals = int(1e4), conc=5, mass = 1e12, verbose=True):
+    def mc_generate_nfw_phase_space_points(self, Ngals=int(1e4), conc=5, mass=1e12, verbose=True):
         """ Stand-alone convenience function for returning
         a Monte Carlo realization of points in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
@@ -168,10 +168,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         m = np.zeros(Ngals) + mass
         c = np.zeros(Ngals) + conc
-        rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass = m)
+        rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass=m)
 
         x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, c,
-            halo_radius = rvir)
+            halo_radius=rvir)
         r = np.sqrt(x**2 + y**2 + z**2)
         scaled_radius = r/rvir
 
@@ -657,9 +657,9 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         MonteCarloGalProf.setup_prof_lookup_tables(self, *concentration_binning)
 
     def build_lookup_tables(self,
-        logrmin = model_defaults.default_lograd_min,
-        logrmax = model_defaults.default_lograd_max,
-        Npts_radius_table = model_defaults.Npts_radius_table):
+        logrmin=model_defaults.default_lograd_min,
+        logrmax=model_defaults.default_lograd_max,
+        Npts_radius_table=model_defaults.Npts_radius_table):
         """ Method used to create a lookup table of the spatial and velocity radial profiles.
 
         Parameters

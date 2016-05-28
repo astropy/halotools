@@ -29,10 +29,10 @@ class TestHodModelFactoryTutorial(TestCase):
         sats_prof_model = NFWPhaseSpace()
 
         model_instance = HodModelFactory(
-            centrals_occupation = cens_occ_model,
-            centrals_profile = cens_prof_model,
-            satellites_occupation = sats_occ_model,
-            satellites_profile = sats_prof_model)
+            centrals_occupation=cens_occ_model,
+            centrals_profile=cens_prof_model,
+            satellites_occupation=sats_occ_model,
+            satellites_profile=sats_prof_model)
 
         # The model_instance is a composite model
         # All composite models can directly populate N-body simulations
@@ -57,17 +57,17 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import HaloMassInterpolQuenching
         sat_quenching = HaloMassInterpolQuenching('halo_mvir',
-            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type='satellites')
         cen_quenching = HaloMassInterpolQuenching('halo_mvir',
-            [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+            [1e12, 1e15], [0.25, 0.95], gal_type='centrals')
 
         model_instance = HodModelFactory(
-            centrals_occupation = another_cens_occ_model,
-            centrals_profile = another_cens_prof_model,
-            satellites_occupation = another_sats_occ_model,
-            satellites_profile = another_sats_prof_model,
-            centrals_quenching = cen_quenching,
-            satellites_quenching = sat_quenching
+            centrals_occupation=another_cens_occ_model,
+            centrals_profile=another_cens_prof_model,
+            satellites_occupation=another_sats_occ_model,
+            satellites_profile=another_sats_prof_model,
+            centrals_quenching=cen_quenching,
+            satellites_quenching=sat_quenching
             )
 
     @pytest.mark.slow
@@ -85,20 +85,20 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import HaloMassInterpolQuenching
         sat_quenching = HaloMassInterpolQuenching('halo_mvir',
-            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type='satellites')
         cen_quenching = HaloMassInterpolQuenching('halo_mvir',
-            [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+            [1e12, 1e15], [0.25, 0.95], gal_type='centrals')
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
 
             model_instance = HodModelFactory(
-                centrals_occupation = another_cens_occ_model,
-                centrals_profile = another_cens_prof_model,
-                satellites_occupation = another_sats_occ_model,
-                satellites_profile = another_sats_prof_model,
-                centrals_quenching = cen_quenching,
-                satellites_quenching = sat_quenching
+                centrals_occupation=another_cens_occ_model,
+                centrals_profile=another_cens_prof_model,
+                satellites_occupation=another_sats_occ_model,
+                satellites_profile=another_sats_prof_model,
+                centrals_quenching=cen_quenching,
+                satellites_quenching=sat_quenching
                 )
             assert len(w) > 0
             assert 'appears in more than one component model' in str(w[-1].message)
@@ -108,12 +108,12 @@ class TestHodModelFactoryTutorial(TestCase):
             warnings.simplefilter("always")
 
             model_instance = HodModelFactory(
-                centrals_occupation = another_cens_occ_model,
-                centrals_profile = another_cens_prof_model,
-                satellites_occupation = another_sats_occ_model,
-                satellites_profile = another_sats_prof_model,
-                centrals_quenching = cen_quenching,
-                satellites_quenching = sat_quenching
+                centrals_occupation=another_cens_occ_model,
+                centrals_profile=another_cens_prof_model,
+                satellites_occupation=another_sats_occ_model,
+                satellites_profile=another_sats_prof_model,
+                centrals_quenching=cen_quenching,
+                satellites_quenching=sat_quenching
                 )
             assert len(w) == 0
 
@@ -153,21 +153,21 @@ class TestHodModelFactoryTutorial(TestCase):
         another_sats_prof_model = NFWPhaseSpace()
 
         ordinary_zheng07_model = HodModelFactory(
-            centrals_occupation = another_cens_occ_model,
-            centrals_profile = another_cens_prof_model,
-            satellites_occupation = another_sats_occ_model,
-            satellites_profile = another_sats_prof_model)
+            centrals_occupation=another_cens_occ_model,
+            centrals_profile=another_cens_prof_model,
+            satellites_occupation=another_sats_occ_model,
+            satellites_profile=another_sats_prof_model)
 
         from ...empirical_models import HaloMassInterpolQuenching
         sat_quenching = HaloMassInterpolQuenching('halo_mvir',
-            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type='satellites')
         cen_quenching = HaloMassInterpolQuenching('halo_mvir',
-            [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+            [1e12, 1e15], [0.25, 0.95], gal_type='centrals')
 
         zheng07_with_quenching = HodModelFactory(
-            baseline_model_instance = ordinary_zheng07_model,
-            centrals_quenching = cen_quenching,
-            satellites_quenching = sat_quenching
+            baseline_model_instance=ordinary_zheng07_model,
+            centrals_quenching=cen_quenching,
+            satellites_quenching=sat_quenching
             )
 
     @pytest.mark.slow
@@ -190,8 +190,8 @@ class TestHodModelFactoryTutorial(TestCase):
         sat_size = Size('satellites')
         from ...empirical_models import PrebuiltHodModelFactory, HodModelFactory
         zheng_model = PrebuiltHodModelFactory('zheng07')
-        new_model = HodModelFactory(baseline_model_instance = zheng_model,
-            centrals_size = cen_size, satellites_size = sat_size)
+        new_model = HodModelFactory(baseline_model_instance=zheng_model,
+            centrals_size=cen_size, satellites_size=sat_size)
 
         assert hasattr(new_model, 'assign_size_centrals')
 
@@ -254,8 +254,8 @@ class TestHodModelFactoryTutorial(TestCase):
         sat_shape = Shape('satellites', 'halo_m200b')
         from ...empirical_models import PrebuiltHodModelFactory, HodModelFactory
         zheng_model = PrebuiltHodModelFactory('zheng07')
-        new_model = HodModelFactory(baseline_model_instance = zheng_model,
-            centrals_shape = cen_shape, satellites_shape = sat_shape)
+        new_model = HodModelFactory(baseline_model_instance=zheng_model,
+            centrals_shape=cen_shape, satellites_shape=sat_shape)
 
         halocat = FakeSim()
         new_model.populate_mock(halocat)
@@ -336,17 +336,17 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import Leauthaud11Cens, TrivialPhaseSpace
         cen_occupation = Leauthaud11Cens()
-        cen_profile = TrivialPhaseSpace(gal_type = 'centrals')
-        cen_shape = Shape(gal_type = 'centrals')
-        cen_size = Size(gal_type = 'centrals')
+        cen_profile = TrivialPhaseSpace(gal_type='centrals')
+        cen_shape = Shape(gal_type='centrals')
+        cen_size = Size(gal_type='centrals')
 
         from ...empirical_models import HodModelFactory
         model = HodModelFactory(
-            centrals_occupation = cen_occupation,
-            centrals_profile = cen_profile,
-            centrals_shape = cen_shape,
-            centrals_size = cen_size,
-            model_feature_calling_sequence = ('centrals_occupation',
+            centrals_occupation=cen_occupation,
+            centrals_profile=cen_profile,
+            centrals_shape=cen_shape,
+            centrals_size=cen_size,
+            model_feature_calling_sequence=('centrals_occupation',
                 'centrals_profile', 'centrals_shape', 'centrals_size')
             )
 
@@ -397,17 +397,17 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import Leauthaud11Cens, TrivialPhaseSpace
         cen_occupation = Leauthaud11Cens()
-        cen_profile = TrivialPhaseSpace(gal_type = 'centrals')
-        cen_shape = Shape(gal_type = 'centrals')
-        cen_size = Size(gal_type = 'centrals')
+        cen_profile = TrivialPhaseSpace(gal_type='centrals')
+        cen_shape = Shape(gal_type='centrals')
+        cen_size = Size(gal_type='centrals')
 
         from ...empirical_models import HodModelFactory
         model = HodModelFactory(
-            centrals_occupation = cen_occupation,
-            centrals_profile = cen_profile,
-            centrals_shape = cen_shape,
-            centrals_size = cen_size,
-            model_feature_calling_sequence = ('centrals_occupation',
+            centrals_occupation=cen_occupation,
+            centrals_profile=cen_profile,
+            centrals_shape=cen_shape,
+            centrals_size=cen_size,
+            model_feature_calling_sequence=('centrals_occupation',
                 'centrals_profile', 'centrals_shape', 'centrals_size')
             )
 

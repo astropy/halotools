@@ -71,7 +71,7 @@ def generate_3d_regular_mesh(npts, dmin=0, dmax=1):
     return np.vstack([x.flatten()+delta, y.flatten()+delta, z.flatten()+delta]).T
 
 
-def generate_thin_shell_of_3d_points(npts, radius, xc, yc, zc, seed=None, Lbox = None):
+def generate_thin_shell_of_3d_points(npts, radius, xc, yc, zc, seed=None, Lbox=None):
     """ Function returns a thin shell of ``npts`` points located at a distance
     ``radius`` from the point defined by ``xc``, ``yc``, ``zc``.
 

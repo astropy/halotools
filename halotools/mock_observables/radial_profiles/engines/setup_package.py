@@ -20,7 +20,7 @@ def get_extensions():
             sources=[source],
             include_dirs=include_dirs,
             libraries=libraries,
-            language = language,
+            language=language,
             extra_compile_args=extra_compile_args))
 
     return extensions

@@ -204,7 +204,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(y1 == y2)
         assert np.all(z1 == z2)
 
-        self.nfw.mc_pos(table = self._dummy_halo_table)
+        self.nfw.mc_pos(table=self._dummy_halo_table)
 
     def test_vrad_disp_from_lookup(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace._vrad_disp_from_lookup`.

@@ -95,7 +95,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
 
 
         BinaryGalpropInterpolModel.__init__(self,
-            galprop_name = 'quiescent', prim_haloprop_key=halo_mass_key,
-            galprop_abscissa = log10_halo_mass_abscissa,
-            galprop_ordinates = quiescent_fraction_control_values,
-            logparam = True, **kwargs)
+            galprop_name='quiescent', prim_haloprop_key=halo_mass_key,
+            galprop_abscissa=log10_halo_mass_abscissa,
+            galprop_ordinates=quiescent_fraction_control_values,
+            logparam=True, **kwargs)

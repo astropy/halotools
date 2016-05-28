@@ -27,8 +27,8 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         period=None, do_auto=True, do_cross=True, estimator='Natural',
-        num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
-        approx_cell2_size = None, approx_cellran_size = None):
+        num_threads=1, max_sample_size=int(1e6), approx_cell1_size=None,
+        approx_cell2_size=None, approx_cellran_size=None):
     """
     Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`
 

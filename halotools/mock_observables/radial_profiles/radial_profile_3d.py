@@ -183,7 +183,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
 
     """
 
-    num_threads = get_num_threads(num_threads, enforce_max_cores = False)
+    num_threads = get_num_threads(num_threads, enforce_max_cores=False)
 
     rbins_normalized, normalize_rbins_by = get_normalized_rbins(
         rbins_absolute, rbins_normalized, normalize_rbins_by, sample1)

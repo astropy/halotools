@@ -295,7 +295,7 @@ class UserSuppliedHaloCatalog(object):
 
     def add_halocat_to_cache(self,
         fname, simname, halo_finder, version_name, processing_notes,
-        overwrite = False, **additional_metadata):
+        overwrite=False, **additional_metadata):
         """
         Parameters
         ------------

@@ -92,7 +92,7 @@ class SubhaloMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.items():
-                halo_table[new_haloprop_key] = new_haloprop_func(table = halo_table)
+                halo_table[new_haloprop_key] = new_haloprop_func(table=halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
@@ -206,7 +206,7 @@ class SubhaloMockFactory(MockFactory):
 
         for method in self.model._mock_generation_calling_sequence:
             func = getattr(self.model, method)
-            func(table = self.galaxy_table)
+            func(table=self.galaxy_table)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
@@ -222,4 +222,4 @@ class SubhaloMockFactory(MockFactory):
 
         for key in new_column_generator:
             dt = self.model._galprop_dtypes_to_allocate[key]
-            self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
+            self.galaxy_table[key] = np.empty(Ngals, dtype=dt)

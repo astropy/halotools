@@ -76,10 +76,10 @@ class RockstarHlistReader(TabularAsciiReader):
     def __init__(self, input_fname, columns_to_keep_dict,
         output_fname, simname, halo_finder, redshift, version_name,
         Lbox, particle_mass, header_char='#',
-        row_cut_min_dict = {}, row_cut_max_dict = {},
-        row_cut_eq_dict = {}, row_cut_neq_dict = {},
-        overwrite = False, ignore_nearby_redshifts = False, dz_tol = 0.05,
-        processing_notes = ' ', **kwargs):
+        row_cut_min_dict={}, row_cut_max_dict={},
+        row_cut_eq_dict={}, row_cut_neq_dict={},
+        overwrite=False, ignore_nearby_redshifts=False, dz_tol=0.05,
+        processing_notes=' ', **kwargs):
         """
         Parameters
         -----------
@@ -394,9 +394,9 @@ class RockstarHlistReader(TabularAsciiReader):
         must contain a set of unique integers).
         """
         self.halo_table_cache = HaloTableCache()
-        self.log_entry = HaloTableCacheLogEntry(simname = self.simname,
-            halo_finder = self.halo_finder, version_name = self.version_name,
-            redshift = self.redshift, fname = self.output_fname)
+        self.log_entry = HaloTableCacheLogEntry(simname=self.simname,
+            halo_finder=self.halo_finder, version_name=self.version_name,
+            redshift=self.redshift, fname=self.output_fname)
 
         if self.log_entry in self.halo_table_cache.log:
             msg = ("\nThere is already an existing entry "
@@ -429,11 +429,11 @@ class RockstarHlistReader(TabularAsciiReader):
             else:
                 closely_matching_catalogs = list(
                     self.halo_table_cache.matching_log_entry_generator(
-                        simname = self.simname,
-                        halo_finder = self.halo_finder,
-                        version_name = self.version_name,
-                        redshift = self.redshift,
-                        fname = self.output_fname, dz_tol = self.dz_tol)
+                        simname=self.simname,
+                        halo_finder=self.halo_finder,
+                        version_name=self.version_name,
+                        redshift=self.redshift,
+                        fname=self.output_fname, dz_tol=self.dz_tol)
                         )
                 if len(closely_matching_catalogs) > 0:
                     msg = ("\nThe following filenames appear in the cache log \n"
@@ -520,8 +520,8 @@ class RockstarHlistReader(TabularAsciiReader):
         return output_fname
 
     def read_halocat(self, columns_to_convert_from_kpc_to_mpc,
-        write_to_disk = False, update_cache_log = False,
-        add_supplementary_halocat_columns = True, **kwargs):
+        write_to_disk=False, update_cache_log=False,
+        add_supplementary_halocat_columns=True, **kwargs):
         """ Method reads the ascii data and
         binds the resulting catalog to ``self.halo_table``.
 
@@ -670,7 +670,7 @@ class RockstarHlistReader(TabularAsciiReader):
         hdf5 file into standard form.
         """
         self.halo_table.write(
-            self.output_fname, path='data', overwrite = self.overwrite)
+            self.output_fname, path='data', overwrite=self.overwrite)
         self._write_metadata()
 
     def _write_metadata(self):
@@ -720,7 +720,7 @@ class RockstarHlistReader(TabularAsciiReader):
         provided that it is safe to add to the cache.
         """
         self.halo_table_cache.add_entry_to_cache_log(
-            self.log_entry, update_ascii = True)
+            self.log_entry, update_ascii=True)
 
     def add_supplementary_halocat_columns(self):
         """ Add the halo_nfw_conc and halo_hostid columns.

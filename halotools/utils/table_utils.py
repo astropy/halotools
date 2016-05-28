@@ -207,8 +207,8 @@ class SampleSelector(object):
             return table[mask], table[~mask]
 
     @staticmethod
-    def property_range(lower_bound = -float("inf"), upper_bound = float("inf"),
-        return_complement = False, host_halos_only=False, subhalos_only=False, **kwargs):
+    def property_range(lower_bound=-float("inf"), upper_bound=float("inf"),
+        return_complement=False, host_halos_only=False, subhalos_only=False, **kwargs):
         """ Method makes a cut on an input table column based on an input upper and lower bound, and
         returns the cut table.
 

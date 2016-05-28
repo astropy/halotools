@@ -35,8 +35,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
                              randoms=None, period=None,
                              do_auto=True, do_cross=True, estimator='Natural',
                              num_threads=1, max_sample_size=int(1e6),
-                             approx_cell1_size = None, approx_cell2_size = None,
-                             approx_cellran_size = None):
+                             approx_cell1_size=None, approx_cell2_size=None,
+                             approx_cellran_size=None):
     """
     Calculate the real space one-halo and two-halo decomposed two-point correlation
     functions, :math:`\\xi^{1h}(r)` and :math:`\\xi^{2h}(r)`.
@@ -366,7 +366,7 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     if do_auto is True:
         D1D1 = marked_npairs_3d(sample1, sample1, rbins,
             weights1=marks1, weights2=marks1,
-            weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            weight_func_id=weight_func_id, period=period, num_threads=num_threads)
         D1D1 = np.diff(D1D1)
     else:
         D1D1=None
@@ -379,13 +379,13 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         if do_cross is True:
             D1D2 = marked_npairs_3d(sample1, sample2, rbins,
                 weights1=marks1, weights2=marks2,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+                weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             D1D2 = np.diff(D1D2)
         else: D1D2=None
         if do_auto is True:
             D2D2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=marks2,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+                weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             D2D2 = np.diff(D2D2)
         else: D2D2=None
 

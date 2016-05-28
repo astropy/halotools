@@ -24,7 +24,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def underdensity_prob_func(sample1, rbins, n_ran=None,
     random_sphere_centers=None, period=None,
-    sample_volume = None, u=0.2, num_threads=1,
+    sample_volume=None, u=0.2, num_threads=1,
     approx_cell1_size=None, approx_cellran_size=None):
     """
     Calculate the underdensity probability function (UPF), :math:`P_U(r)`.
@@ -145,9 +145,9 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
             num_threads, approx_cell1_size, approx_cellran_size))
 
     result = npairs_per_object_3d(random_sphere_centers, sample1, rbins,
-        period = period, num_threads = num_threads,
-        approx_cell1_size = approx_cell1_size,
-        approx_cell2_size = approx_cellran_size)
+        period=period, num_threads=num_threads,
+        approx_cell1_size=approx_cell1_size,
+        approx_cell2_size=approx_cellran_size)
 
     # calculate the number of galaxies as a
     # function of r that corresponds to the
@@ -175,7 +175,7 @@ def _underdensity_prob_func_process_args(sample1, rbins,
         assert len(rbins) > 1
         assert np.min(rbins) > 0
         if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
+            assert array_is_monotonic(rbins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input ``rbins`` must be a monotonically increasing \n"
                "1-D array with at least two entries. All entries must be strictly positive.")

@@ -17,8 +17,8 @@ def test_cylindrical_isolation1():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
     returns all points as isolated for two distant localizations of points.
     """
-    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed = fixed_seed)
-    sample2 = generate_locus_of_3d_points(100, xc=0.9, seed = fixed_seed)
+    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.9, seed=fixed_seed)
     pi_max = 0.1
     rp_max = 0.1
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
@@ -44,11 +44,11 @@ def test_cylindrical_isolation3():
 
     For this test, PBCs are irrelevant.
     """
-    sample1a = generate_locus_of_3d_points(100, xc=0.11, seed = fixed_seed)
-    sample1b = generate_locus_of_3d_points(100, xc=1.11, seed = fixed_seed)
+    sample1a = generate_locus_of_3d_points(100, xc=0.11, seed=fixed_seed)
+    sample1b = generate_locus_of_3d_points(100, xc=1.11, seed=fixed_seed)
     sample1 = np.concatenate((sample1a, sample1b))
 
-    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed=fixed_seed)
     pi_max = 0.1
     rp_max = 0.1
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)
@@ -62,11 +62,11 @@ def test_cylindrical_isolation4():
 
     For this test, PBCs have a non-trivial impact on the result.
     """
-    sample1a = generate_locus_of_3d_points(100, xc=0.5, yc=0.1, zc=0.1, seed = fixed_seed)
-    sample1b = generate_locus_of_3d_points(100, xc=0.99, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample1a = generate_locus_of_3d_points(100, xc=0.5, yc=0.1, zc=0.1, seed=fixed_seed)
+    sample1b = generate_locus_of_3d_points(100, xc=0.99, yc=0.1, zc=0.1, seed=fixed_seed)
     sample1 = np.concatenate((sample1a, sample1b))
 
-    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed = fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.11, yc=0.1, zc=0.1, seed=fixed_seed)
 
     pi_max = 0.2
     rp_max = 0.2
@@ -82,8 +82,8 @@ def test_cylindrical_isolation5():
     verify that the `~halotools.mock_observables.cylindrical_isolation` function
     has independently correct behavior in all combinations of limits for pi_max and rp_max
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed = fixed_seed)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed = fixed_seed)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
 
     rp_max, pi_max = 0.2, 0.2
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)

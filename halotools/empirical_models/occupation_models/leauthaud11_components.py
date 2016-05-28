@@ -25,9 +25,9 @@ class Leauthaud11Cens(OccupationComponent):
     """ HOD-style model for any central galaxy occupation that derives from
     a stellar-to-halo-mass relation.
     """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold,
+    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift, **kwargs):
+        redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -59,12 +59,12 @@ class Leauthaud11Cens(OccupationComponent):
         super(Leauthaud11Cens, self).__init__(
             gal_type='centrals', threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
-            prim_haloprop_key = prim_haloprop_key,
+            prim_haloprop_key=prim_haloprop_key,
             **kwargs)
         self.redshift = redshift
 
         self.smhm_model = Behroozi10SmHm(
-            prim_haloprop_key = prim_haloprop_key, **kwargs)
+            prim_haloprop_key=prim_haloprop_key, **kwargs)
 
         for key, value in self.smhm_model.param_dict.items():
             self.param_dict[key] = value
@@ -122,7 +122,7 @@ class Leauthaud11Cens(OccupationComponent):
                 self.smhm_model.param_dict[key] = value
 
         logmstar = np.log10(self.smhm_model.mean_stellar_mass(
-            redshift = self.redshift, **kwargs))
+            redshift=self.redshift, **kwargs))
         logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
 
         mean_ncen = 0.5*(1.0 -
@@ -153,7 +153,7 @@ class Leauthaud11Cens(OccupationComponent):
         for key, value in self.param_dict.items():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value
-        return self.smhm_model.mean_stellar_mass(redshift = self.redshift, **kwargs)
+        return self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
 
     def mean_log_halo_mass(self, log_stellar_mass):
         """ Return the base-10 logarithm of the halo mass of a central galaxy as a function
@@ -173,7 +173,7 @@ class Leauthaud11Cens(OccupationComponent):
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value
         return self.smhm_model.mean_log_halo_mass(log_stellar_mass,
-            redshift = self.redshift)
+            redshift=self.redshift)
 
 
 
@@ -181,10 +181,10 @@ class Leauthaud11Sats(OccupationComponent):
     """ HOD-style model for any satellite galaxy occupation that derives from
     a stellar-to-halo-mass relation.
     """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold,
+    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift,
-        modulate_with_cenocc = True,
+        redshift=sim_manager.sim_defaults.default_redshift,
+        modulate_with_cenocc=True,
         **kwargs):
         """
         Parameters
@@ -214,13 +214,13 @@ class Leauthaud11Sats(OccupationComponent):
         self.littleh = 0.72
 
         self.central_occupation_model = Leauthaud11Cens(
-            threshold=threshold, prim_haloprop_key = prim_haloprop_key,
-            redshift = redshift, **kwargs)
+            threshold=threshold, prim_haloprop_key=prim_haloprop_key,
+            redshift=redshift, **kwargs)
 
         super(Leauthaud11Sats, self).__init__(
             gal_type='satellites', threshold=threshold,
             upper_occupation_bound=float("inf"),
-            prim_haloprop_key = prim_haloprop_key,
+            prim_haloprop_key=prim_haloprop_key,
             **kwargs)
         self.redshift = redshift
 
@@ -305,7 +305,7 @@ class Leauthaud11Sats(OccupationComponent):
                 self.central_occupation_model.param_dict[key] = value
 
         log_halo_mass_threshold = self.central_occupation_model.mean_log_halo_mass(
-            log_stellar_mass = self.threshold)
+            log_stellar_mass=self.threshold)
         knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
 
         knee_mass = 1.e12
@@ -371,9 +371,9 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
         """
         Leauthaud11Cens.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
-            lower_assembias_bound = self._lower_occupation_bound,
-            upper_assembias_bound = self._upper_occupation_bound,
-            method_name_to_decorate = 'mean_occupation', **kwargs)
+            lower_assembias_bound=self._lower_occupation_bound,
+            upper_assembias_bound=self._upper_occupation_bound,
+            method_name_to_decorate='mean_occupation', **kwargs)
 
 
 class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
@@ -429,6 +429,6 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
         """
         Leauthaud11Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
-            lower_assembias_bound = self._lower_occupation_bound,
-            upper_assembias_bound = self._upper_occupation_bound,
-            method_name_to_decorate = 'mean_occupation', **kwargs)
+            lower_assembias_bound=self._lower_occupation_bound,
+            upper_assembias_bound=self._upper_occupation_bound,
+            method_name_to_decorate='mean_occupation', **kwargs)

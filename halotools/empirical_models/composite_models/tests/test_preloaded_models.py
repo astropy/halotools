@@ -43,21 +43,21 @@ class TestHearin15(TestCase):
     def test_Leauthaud11b(self):
 
         model = PrebuiltHodModelFactory('leauthaud11')
-        halocat = FakeSim(redshift = 2.)
+        halocat = FakeSim(redshift=2.)
         # Test that an attempt to repopulate with a different halocat raises an exception
         with pytest.raises(HalotoolsError) as exc:
             model.populate_mock(halocat) #default redshift != 2
 
     def test_Leauthaud11c(self):
 
-        model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
-        halocat = FakeSim(redshift = 2.)
+        model_highz = PrebuiltHodModelFactory('leauthaud11', redshift=2.)
+        halocat = FakeSim(redshift=2.)
         model_highz.populate_mock(halocat)
 
     @pytest.mark.skipif('not APH_MACHINE')
     @pytest.mark.slow
     def test_hearin15_fullpop(self):
-        halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0)
-        model = PrebuiltHodModelFactory('hearin15', threshold = 11)
+        halocat = CachedHaloCatalog(simname='bolshoi', redshift=0)
+        model = PrebuiltHodModelFactory('hearin15', threshold=11)
         model.populate_mock(halocat)
         del model

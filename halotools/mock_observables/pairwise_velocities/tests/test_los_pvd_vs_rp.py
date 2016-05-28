@@ -49,7 +49,7 @@ def test_los_pvd_vs_rp_correctness1():
     rp_bins, pi_max = np.array([0.001, 0.1, 0.3]), 0.2
 
     s1s2 = los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, do_auto = False)
+        sample2=sample2, velocities2=velocities2, do_auto=False)
 
     correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
 
@@ -91,7 +91,7 @@ def test_los_pvd_vs_rp_correctness2():
     rp_bins, pi_max = np.array([0.001, 0.1, 0.3]), 0.2
 
     s1s2 = los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2, do_auto = False, period=1)
+        sample2=sample2, velocities2=velocities2, do_auto=False, period=1)
 
     correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
 
@@ -165,10 +165,10 @@ def test_los_pvd_vs_rp_auto_consistency():
     rp_bins, pi_max = np.array([0.001, 0.1, 0.3]), 0.2
 
     s1s1a, s1s2a, s2s2a = los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     s1s1b, s2s2b = los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2,
-        do_cross = False)
+        sample2=sample2, velocities2=velocities2,
+        do_cross=False)
 
     assert np.allclose(s1s1a,s1s1b, rtol=0.001)
     assert np.allclose(s2s2a,s2s2b, rtol=0.001)
@@ -194,9 +194,9 @@ def test_los_pvd_vs_rp_cross_consistency():
     rp_bins, pi_max = np.array([0.001, 0.1, 0.3]), 0.2
 
     s1s1a, s1s2a, s2s2a = los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2)
+        sample2=sample2, velocities2=velocities2)
     s1s2b = los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2 = sample2, velocities2 = velocities2,
-        do_auto = False)
+        sample2=sample2, velocities2=velocities2,
+        do_auto=False)
 
     assert np.allclose(s1s2a,s1s2b, rtol=0.001)

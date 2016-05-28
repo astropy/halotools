@@ -65,8 +65,8 @@ class AnalyticDensityProf(object):
         # The following four attributes are derived quantities from the above,
         # so that self-consistency between them is ensured
         self.density_threshold = profile_helpers.density_threshold(
-            cosmology = self.cosmology,
-            redshift = self.redshift, mdef = self.mdef)
+            cosmology=self.cosmology,
+            redshift=self.redshift, mdef=self.mdef)
         self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
         self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
@@ -215,17 +215,17 @@ class AnalyticDensityProf(object):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details.
         """
-        x = convert_to_ndarray(scaled_radius, dt = np.float64)
+        x = convert_to_ndarray(scaled_radius, dt=np.float64)
         enclosed_mass = np.zeros_like(x)
 
         for i in range(len(x)):
             enclosed_mass[i], _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand, 0., x[i], epsrel = 1e-5,
-                args = prof_params)
+                self._enclosed_dimensionless_mass_integrand, 0., x[i], epsrel=1e-5,
+                args=prof_params)
 
         total, _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand, 0., 1.0, epsrel = 1e-5,
-                args = prof_params)
+                self._enclosed_dimensionless_mass_integrand, 0., 1.0, epsrel=1e-5,
+                args=prof_params)
 
         return enclosed_mass / total
 
@@ -259,7 +259,7 @@ class AnalyticDensityProf(object):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details.
         """
-        radius = convert_to_ndarray(radius, dt = np.float64)
+        radius = convert_to_ndarray(radius, dt=np.float64)
         scaled_radius = radius / self.halo_mass_to_halo_radius(total_mass)
         mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass
 
@@ -440,8 +440,8 @@ class AnalyticDensityProf(object):
 
         """
         return profile_helpers.halo_mass_to_halo_radius(
-            total_mass, cosmology = self.cosmology,
-            redshift = self.redshift, mdef = self.mdef)
+            total_mass, cosmology=self.cosmology,
+            redshift=self.redshift, mdef=self.mdef)
 
     def halo_radius_to_halo_mass(self, radius):
         """
@@ -470,5 +470,5 @@ class AnalyticDensityProf(object):
 
         """
         return profile_helpers.halo_radius_to_halo_mass(
-            radius, cosmology = self.cosmology,
-            redshift = self.redshift, mdef = self.mdef)
+            radius, cosmology=self.cosmology,
+            redshift=self.redshift, mdef=self.mdef)

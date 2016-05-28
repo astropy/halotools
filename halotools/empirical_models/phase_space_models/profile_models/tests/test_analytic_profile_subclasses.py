@@ -31,7 +31,7 @@ class TestAnalyticDensityProf(TestCase):
 
         # Test that all sub-classes inherit the correct attributes
         for model_class in self.prof_model_list:
-            model_instance = model_class(cosmology = WMAP9, redshift = 2, mdef = 'vir')
+            model_instance = model_class(cosmology=WMAP9, redshift=2, mdef='vir')
 
             assert hasattr(model_instance, 'cosmology')
             assert isinstance(model_instance.cosmology, FLRW)
@@ -53,7 +53,7 @@ class TestAnalyticDensityProf(TestCase):
             assert hasattr(model_instance, 'prof_param_keys')
 
             assert hasattr(model_instance, 'virial_velocity')
-            vvir = model_instance.virial_velocity(total_mass = 1e12)
+            vvir = model_instance.virial_velocity(total_mass=1e12)
             # For fixed mdef, the value of vvir should not depend on the profile model
             try:
                 assert vvir == vvir_last

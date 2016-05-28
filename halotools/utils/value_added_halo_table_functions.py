@@ -15,7 +15,7 @@ from ..custom_exceptions import HalotoolsError
 __all__ = ('broadcast_host_halo_property', 'add_halo_hostid')
 
 def broadcast_host_halo_property(table, halo_property_key,
-    delete_possibly_existing_column = False):
+    delete_possibly_existing_column=False):
     """ Calculate a property of the host of a group system
     and broadcast that property to all group members,
     e.g., calculate host halo mass or group central star formation rate.
@@ -68,11 +68,11 @@ def broadcast_host_halo_property(table, halo_property_key,
         del table[new_colname]
 
     idx_halos, idx_hosts = crossmatch(table['halo_hostid'].data, table['halo_id'].data)
-    table[new_colname] = np.zeros(len(table), dtype = table[halo_property_key].dtype)
+    table[new_colname] = np.zeros(len(table), dtype=table[halo_property_key].dtype)
     table[new_colname][idx_halos] = table[halo_property_key][idx_hosts]
 
 
-def add_halo_hostid(table, delete_possibly_existing_column = False):
+def add_halo_hostid(table, delete_possibly_existing_column=False):
     """ Function creates a new column ``halo_hostid`` for the input table.
     For rows with ``halo_upid`` = -1, ``halo_hostid`` = ``halo_id``. Otherwise,
     ``halo_hostid`` = ``halo_upid``.
@@ -112,7 +112,7 @@ def add_halo_hostid(table, delete_possibly_existing_column = False):
 
 
     host_mask = table['halo_upid'] == -1
-    halo_hostid = np.zeros(len(table), dtype = 'i8')
+    halo_hostid = np.zeros(len(table), dtype='i8')
     halo_hostid[host_mask] = table['halo_id'][host_mask]
     halo_hostid[~host_mask] = table['halo_upid'][~host_mask]
     table['halo_hostid'] = halo_hostid

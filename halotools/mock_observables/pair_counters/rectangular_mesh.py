@@ -15,7 +15,7 @@ def digitized_position(p, cell_size, num_divs):
     return np.where(ip >= num_divs, num_divs-1, ip)
 
 def sample1_cell_size(period, search_length, approx_cell_size,
-    max_cells_per_dimension = 50):
+    max_cells_per_dimension=50):
     """ Function determines the size of the cells of mesh1.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -39,7 +39,7 @@ def sample1_cell_size(period, search_length, approx_cell_size,
     return cell_size
 
 def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
-    max_cells_per_dimension = 50):
+    max_cells_per_dimension=50):
     """ Function determines the size of the cells of mesh2.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -166,7 +166,7 @@ class RectangularMesh(object):
         self.idx_sorted = np.ascontiguousarray(np.argsort(cell_ids))
 
         cell_id_indices = np.searchsorted(cell_ids, np.arange(self.ncells),
-            sorter = self.idx_sorted)
+            sorter=self.idx_sorted)
         cell_id_indices = np.append(cell_id_indices, self.npts)
         self.cell_id_indices = np.ascontiguousarray(cell_id_indices)
 
@@ -183,7 +183,7 @@ class RectangularDoubleMesh(object):
         approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
         search_xlength, search_ylength, search_zlength,
-        xperiod, yperiod, zperiod, PBCs = True):
+        xperiod, yperiod, zperiod, PBCs=True):
         """
         Parameters
         ----------

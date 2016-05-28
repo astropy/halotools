@@ -38,7 +38,7 @@ class TestProfileHelpers(TestCase):
                 for mdef in ('vir', '200m', '2500c'):
                     m1 = halo_radius_to_halo_mass(r0, cosmology, redshift, mdef)
                     r1 = halo_mass_to_halo_radius(m1, cosmology, redshift, mdef)
-                    assert np.allclose(r1, r0, rtol = 1e-3)
+                    assert np.allclose(r1, r0, rtol=1e-3)
 
     def test_delta_vir(self):
         """ Compute the calculated value of `~halotools.empirical_models.profile_helpers.delta_vir`

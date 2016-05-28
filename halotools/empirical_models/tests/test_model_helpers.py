@@ -36,20 +36,20 @@ class TestModelHelpers(TestCase):
         x = np.linspace(-2*box_length, box_length, Npts)
         with pytest.raises(HalotoolsError) as err:
             newcoords = occuhelp.enforce_periodicity_of_box(x, box_length,
-                check_multiple_box_lengths = True)
+                check_multiple_box_lengths=True)
         substr = "There is at least one input point with a coordinate less than -Lbox"
         assert substr in err.value.args[0]
 
         x = np.linspace(-box_length, 2.1*box_length, Npts)
         with pytest.raises(HalotoolsError) as err:
             newcoords = occuhelp.enforce_periodicity_of_box(x, box_length,
-                check_multiple_box_lengths = True)
+                check_multiple_box_lengths=True)
         substr = "There is at least one input point with a coordinate greater than 2*Lbox"
         assert substr in err.value.args[0]
 
         x = np.linspace(-box_length, 2*box_length, Npts)
         newcoords = occuhelp.enforce_periodicity_of_box(x, box_length,
-            check_multiple_box_lengths = True)
+            check_multiple_box_lengths=True)
 
     def test_velocity_flip(self):
         box_length = 250
@@ -59,7 +59,7 @@ class TestModelHelpers(TestCase):
         vx = np.ones(Npts)
 
         newcoords, newvel = occuhelp.enforce_periodicity_of_box(
-            x, box_length, velocity = vx)
+            x, box_length, velocity=vx)
 
         inbox = ((x >= 0) & (x <= box_length))
         assert np.all(newvel[inbox] == 1.0)

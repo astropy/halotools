@@ -21,8 +21,8 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 
 def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_radius,
-    period=None, sample_volume = None, num_threads=1, approx_cell1_size=None,
-    norm_by_mean_density = False):
+    period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
+    norm_by_mean_density=False):
     """
     Calculate the mean density of the input ``sample``
     from an input set of tracer particles using a spherical annulus
@@ -107,8 +107,8 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
             period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = npairs_per_object_3d(sample, tracers, rbins, period = period,
-        num_threads = num_threads, approx_cell1_size = approx_cell1_size)
+    _ = npairs_per_object_3d(sample, tracers, rbins, period=period,
+        num_threads=num_threads, approx_cell1_size=approx_cell1_size)
     result = np.diff(_, axis=1)
 
     environment_volume = (4/3.)*np.pi*(outer_radius**3 - inner_radius**3)

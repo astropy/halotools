@@ -23,7 +23,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     sample2=None, velocities2=None,
     period=None, do_auto=True, do_cross=True,
     num_threads=1, max_sample_size=int(1e6),
-    approx_cell1_size = None, approx_cell2_size = None):
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the mean pairwise velocity, :math:`\\bar{v}_{12}(r)`.
 
@@ -167,10 +167,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
             D1D1, dummy, N1N1 = velocity_marked_npairs_3d(
                 sample1, sample1, rbins,
                 weights1=marks1, weights2=marks1,
-                weight_func_id = weight_func_id,
+                weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads,
-                approx_cell1_size = approx_cell1_size,
-                approx_cell2_size = approx_cell1_size)
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cell1_size)
             D1D1 = np.diff(D1D1)
             N1N1 = np.diff(N1N1)
         else:
@@ -189,10 +189,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
                 D1D2, dummy, N1N2 = velocity_marked_npairs_3d(
                     sample1, sample2, rbins,
                     weights1=marks1, weights2=marks2,
-                    weight_func_id = weight_func_id,
+                    weight_func_id=weight_func_id,
                     period=period, num_threads=num_threads,
-                    approx_cell1_size = approx_cell1_size,
-                    approx_cell2_size = approx_cell2_size)
+                    approx_cell1_size=approx_cell1_size,
+                    approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(D1D2)
                 N1N2 = np.diff(N1N2)
             else:
@@ -202,10 +202,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
                 D2D2, dummy, N2N2 = velocity_marked_npairs_3d(
                     sample2, sample2, rbins,
                     weights1=marks2, weights2=marks2,
-                    weight_func_id = weight_func_id,
+                    weight_func_id=weight_func_id,
                     period=period, num_threads=num_threads,
-                    approx_cell1_size = approx_cell2_size,
-                    approx_cell2_size = approx_cell2_size)
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cell2_size)
                 D2D2 = np.diff(D2D2)
                 N2N2 = np.diff(N2N2)
             else:

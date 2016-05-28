@@ -48,26 +48,26 @@ def test_enforce_sample_respects_pbcs():
 def test_get_num_threads():
 
     input_num_threads = 1
-    result = get_num_threads(input_num_threads, enforce_max_cores = False)
+    result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == 1
 
     input_num_threads = 'max'
-    result = get_num_threads(input_num_threads, enforce_max_cores = False)
+    result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == multiprocessing.cpu_count()
 
     max_cores = multiprocessing.cpu_count()
 
     input_num_threads = max_cores + 1
-    result = get_num_threads(input_num_threads, enforce_max_cores = False)
+    result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == input_num_threads
 
     input_num_threads = max_cores + 1
-    result = get_num_threads(input_num_threads, enforce_max_cores = True)
+    result = get_num_threads(input_num_threads, enforce_max_cores=True)
     assert result == max_cores
 
     input_num_threads = '$'
     with pytest.raises(ValueError) as err:
-        result = get_num_threads(input_num_threads, enforce_max_cores = True)
+        result = get_num_threads(input_num_threads, enforce_max_cores=True)
     substr = "Input ``num_threads`` must be an integer"
     assert err.value.args[0] in substr
 

@@ -51,7 +51,7 @@ class HodMockFactory(MockFactory):
     """
 
     def __init__(self, Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
-        halo_mass_column_key = 'halo_mvir', **kwargs):
+        halo_mass_column_key='halo_mvir', **kwargs):
         """
         Parameters
         ----------
@@ -120,7 +120,7 @@ class HodMockFactory(MockFactory):
 
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
-        halo_table = SampleSelector.host_halo_selection(table = halocat.halo_table)
+        halo_table = SampleSelector.host_halo_selection(table=halocat.halo_table)
 
         # make a (possibly trivial) completeness cut
         cutoff_mvir = self.Num_ptcl_requirement*self.particle_mass
@@ -151,7 +151,7 @@ class HodMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.items():
-                halo_table[new_haloprop_key] = new_haloprop_func(table = halo_table)
+                halo_table[new_haloprop_key] = new_haloprop_func(table=halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
@@ -282,28 +282,28 @@ class HodMockFactory(MockFactory):
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
             gal_type_slice = self._gal_type_indices[func.gal_type]
-            func(table = self.galaxy_table[gal_type_slice])
+            func(table=self.galaxy_table[gal_type_slice])
 
         if self.enforce_PBC is True:
             self.galaxy_table['x'], self.galaxy_table['vx'] = (
                 model_helpers.enforce_periodicity_of_box(
                     self.galaxy_table['x'], self.Lbox,
-                    velocity = self.galaxy_table['vx'],
-                    check_multiple_box_lengths = self._testing_mode)
+                    velocity=self.galaxy_table['vx'],
+                    check_multiple_box_lengths=self._testing_mode)
                 )
 
             self.galaxy_table['y'], self.galaxy_table['vy'] = (
                 model_helpers.enforce_periodicity_of_box(
                     self.galaxy_table['y'], self.Lbox,
-                    velocity = self.galaxy_table['vy'],
-                    check_multiple_box_lengths = self._testing_mode)
+                    velocity=self.galaxy_table['vy'],
+                    check_multiple_box_lengths=self._testing_mode)
                 )
 
             self.galaxy_table['z'], self.galaxy_table['vz'] = (
                 model_helpers.enforce_periodicity_of_box(
                     self.galaxy_table['z'], self.Lbox,
-                    velocity = self.galaxy_table['vz'],
-                    check_multiple_box_lengths = self._testing_mode)
+                    velocity=self.galaxy_table['vz'],
+                    check_multiple_box_lengths=self._testing_mode)
                 )
 
         if hasattr(self.model, 'galaxy_selection_func'):
@@ -337,7 +337,7 @@ class HodMockFactory(MockFactory):
                 break
             else:
                 func = getattr(self.model, func_name)
-                func(table = self.halo_table)
+                func(table=self.halo_table)
                 galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
                 galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
                 self._remaining_methods_to_call.remove(func_name)
@@ -385,7 +385,7 @@ class HodMockFactory(MockFactory):
         # including profile parameters of the halos such as 'conc_NFWmodel'
         for halocatkey in self.additional_haloprops:
             self.galaxy_table[halocatkey] = np.zeros(self.Ngals,
-                dtype = self.halo_table[halocatkey].dtype)
+                dtype=self.halo_table[halocatkey].dtype)
 
         # Separately allocate memory for the galaxy profile parameters
         for galcatkey in self.model.prof_param_keys:
@@ -395,4 +395,4 @@ class HodMockFactory(MockFactory):
 
         dt = self.model._galprop_dtypes_to_allocate
         for key in dt.names:
-            self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
+            self.galaxy_table[key] = np.zeros(self.Ngals, dtype=dt[key].type)

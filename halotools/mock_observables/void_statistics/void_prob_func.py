@@ -136,9 +136,9 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
             period, num_threads, approx_cell1_size, approx_cellran_size))
 
     result = npairs_per_object_3d(random_sphere_centers, sample1, rbins,
-        period = period, num_threads = num_threads,
-        approx_cell1_size = approx_cell1_size,
-        approx_cell2_size = approx_cellran_size)
+        period=period, num_threads=num_threads,
+        approx_cell1_size=approx_cell1_size,
+        approx_cell2_size=approx_cellran_size)
 
     num_empty_spheres = np.array(
         [sum(result[:,i] == 0) for i in range(result.shape[1])])
@@ -157,7 +157,7 @@ def _void_prob_func_process_args(sample1, rbins,
         assert len(rbins) > 1
         assert np.min(rbins) > 0
         if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
+            assert array_is_monotonic(rbins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input ``rbins`` must be a monotonically increasing \n"
                "1-D array with at least two entries. All entries must be strictly positive.")

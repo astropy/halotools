@@ -22,8 +22,8 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                             sample2=None, velocities2=None,
                             period=None, do_auto=True, do_cross=True,
                             num_threads=1, max_sample_size=int(1e6),
-                            approx_cell1_size = None,
-                            approx_cell2_size = None):
+                            approx_cell1_size=None,
+                            approx_cell2_size=None):
     """
     Calculate the mean pairwise line-of-sight (LOS) velocity
     as a function of projected separation, :math:`\\bar{v}_{z,12}(r_p)`.
@@ -160,10 +160,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
             D1D1, dummy, N1N1 = velocity_marked_npairs_xy_z(
                 sample1, sample1, rp_bins, pi_bins,
                 weights1=marks1, weights2=marks1,
-                weight_func_id = weight_func_id,
+                weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads,
-                approx_cell1_size = approx_cell1_size,
-                approx_cell2_size = approx_cell1_size)
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cell1_size)
             D1D1 = np.diff(D1D1,axis=1)[:,0]
             D1D1 = np.diff(D1D1)
             N1N1 = np.diff(N1N1,axis=1)[:,0]
@@ -184,10 +184,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                 D1D2, dummy, N1N2 = velocity_marked_npairs_xy_z(
                     sample1, sample2, rp_bins, pi_bins,
                     weights1=marks1, weights2=marks2,
-                    weight_func_id = weight_func_id,
+                    weight_func_id=weight_func_id,
                     period=period, num_threads=num_threads,
-                    approx_cell1_size = approx_cell1_size,
-                    approx_cell2_size = approx_cell2_size)
+                    approx_cell1_size=approx_cell1_size,
+                    approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(D1D2,axis=1)[:,0]
                 D1D2 = np.diff(D1D2)
                 N1N2 = np.diff(N1N2,axis=1)[:,0]
@@ -199,9 +199,9 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                 D2D2, dummy, N2N2 = velocity_marked_npairs_xy_z(
                     sample2, sample2, rp_bins, pi_bins,
                     weights1=marks2, weights2=marks2,
-                    weight_func_id = weight_func_id, period=period, num_threads=num_threads,
-                    approx_cell1_size = approx_cell2_size,
-                    approx_cell2_size = approx_cell2_size)
+                    weight_func_id=weight_func_id, period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cell2_size)
                 D2D2 = np.diff(D2D2,axis=1)[:,0]
                 D2D2 = np.diff(D2D2)
                 N2N2 = np.diff(N2N2,axis=1)[:,0]

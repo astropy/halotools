@@ -375,7 +375,7 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     if do_auto is True:
         D1D1 = marked_npairs_3d(sample1, sample1, rbins,
             weights1=marks1, weights2=marks1,
-            weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            weight_func_id=weight_func_id, period=period, num_threads=num_threads)
         D1D1 = np.diff(D1D1)
     else:
         D1D1=None
@@ -387,13 +387,13 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     else:
         if do_cross is True:
             D1D2 = marked_npairs_3d(sample1, sample2, rbins,
-                weights1=marks1, weights2=marks2, weight_func_id = weight_func_id,
+                weights1=marks1, weights2=marks2, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads)
             D1D2 = np.diff(D1D2)
         else: D1D2=None
         if do_auto is True:
             D2D2 = marked_npairs_3d(sample2, sample2, rbins,
-                weights1=marks2, weights2=marks2, weight_func_id = weight_func_id,
+                weights1=marks2, weights2=marks2, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads)
             D2D2 = np.diff(D2D2)
         else: D2D2=None
@@ -419,7 +419,7 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
     if do_auto is True:
         R1R1 = marked_npairs_3d(sample1, sample1, rbins,
             weights1=marks1, weights2=permuted_marks1,
-            weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+            weight_func_id=weight_func_id, period=period, num_threads=num_threads)
         R1R1 = np.diff(R1R1)
     else:
         R1R1=None
@@ -433,13 +433,13 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
             R1R2 = marked_npairs_3d(sample1, sample2, rbins,
                 weights1=permuted_marks1,
                 weights2=permuted_marks2,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+                weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             R1R2 = np.diff(R1R2)
         else: R1R2=None
         if do_auto is True:
             R2R2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=permuted_marks2,
-                weight_func_id = weight_func_id, period=period, num_threads=num_threads)
+                weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             R2R2 = np.diff(R2R2)
         else: R2R2=None
 

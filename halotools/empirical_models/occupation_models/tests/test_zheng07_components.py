@@ -61,7 +61,7 @@ class TestZheng07Cens(TestCase):
     def test_alternate_threshold_models(self):
 
         for threshold in self.supported_thresholds:
-            thresh_model = zheng07_components.Zheng07Cens(threshold = threshold)
+            thresh_model = zheng07_components.Zheng07Cens(threshold=threshold)
             self.enforce_required_attributes(thresh_model)
             self.enforce_mean_occupation_behavior(thresh_model)
             self.enforce_mc_occupation_behavior(thresh_model)
@@ -199,7 +199,7 @@ class TestZheng07Cens(TestCase):
 
     def test_raises_correct_exception(self):
         with pytest.raises(HalotoolsError) as err:
-            _ = self.default_model.mean_occupation(x = 4)
+            _ = self.default_model.mean_occupation(x=4)
         substr = "You must pass either a ``table`` or ``prim_haloprop`` argument"
         assert substr in err.value.args[0]
 
@@ -269,7 +269,7 @@ class TestZheng07Sats(TestCase):
     def test_alternate_threshold_models(self):
 
         for threshold in self.supported_thresholds:
-            thresh_model = zheng07_components.Zheng07Sats(threshold = threshold)
+            thresh_model = zheng07_components.Zheng07Sats(threshold=threshold)
             self.enforce_required_attributes(thresh_model)
             self.enforce_mean_occupation_behavior(thresh_model)
 
@@ -410,7 +410,7 @@ class TestZheng07Sats(TestCase):
 
     def test_raises_correct_exception(self):
         with pytest.raises(HalotoolsError) as err:
-            _ = self.default_model.mean_occupation(x = 4)
+            _ = self.default_model.mean_occupation(x=4)
         substr = "You must pass either a ``table`` or ``prim_haloprop`` argument"
         assert substr in err.value.args[0]
 

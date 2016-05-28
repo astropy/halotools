@@ -32,7 +32,7 @@ class TrivialProfile(AnalyticDensityProf):
     def __init__(self,
         cosmology=sim_defaults.default_cosmology,
         redshift=sim_defaults.default_redshift,
-        mdef = model_defaults.halo_mass_definition,
+        mdef=model_defaults.halo_mass_definition,
         **kwargs):
         """
         Parameters
@@ -115,5 +115,5 @@ class TrivialProfile(AnalyticDensityProf):
             The mass enclosed within radius r, in :math:`M_{\odot}/h`;
             has the same dimensions as the input ``radius``.
         """
-        radius = convert_to_ndarray(radius, dt = np.float64)
+        radius = convert_to_ndarray(radius, dt=np.float64)
         return np.where(radius > 0, total_mass, 0)

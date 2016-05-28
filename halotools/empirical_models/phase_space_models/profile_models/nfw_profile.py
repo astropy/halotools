@@ -44,9 +44,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     """
 
     def __init__(self,
-        cosmology = sim_defaults.default_cosmology,
-        redshift = sim_defaults.default_redshift,
-        mdef = model_defaults.halo_mass_definition,
+        cosmology=sim_defaults.default_cosmology,
+        redshift=sim_defaults.default_redshift,
+        mdef=model_defaults.halo_mass_definition,
         **kwargs):
         """
         Parameters
@@ -250,7 +250,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         >>> Npts = 25
         >>> result = model.g(np.logspace(-1, 1, Npts))
         """
-        x = convert_to_ndarray(x, dt = np.float64)
+        x = convert_to_ndarray(x, dt=np.float64)
         return np.log(1.0+x) - (x/(1.0+x))
 
     def cumulative_mass_PDF(self, scaled_radius, conc):
@@ -540,7 +540,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
 
-    def mc_generate_nfw_radial_positions(self, num_pts = int(1e4), conc = 5, **kwargs):
+    def mc_generate_nfw_radial_positions(self, num_pts=int(1e4), conc=5, **kwargs):
         """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
 
         See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique.
@@ -609,14 +609,14 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
                     "argument ``halo_mass`` must be specified.\n")
                 raise HalotoolsError(msg)
 
-        halo_radius = convert_to_ndarray(halo_radius, dt = np.float64)
+        halo_radius = convert_to_ndarray(halo_radius, dt=np.float64)
         try:
             assert len(halo_radius) == 1
         except AssertionError:
             msg = ("Input ``halo_radius`` or ``halo_mass`` must be a float")
             raise HalotoolsError(msg)
 
-        conc = convert_to_ndarray(conc, dt = np.float64)
+        conc = convert_to_ndarray(conc, dt=np.float64)
         try:
             assert len(conc) == 1
         except AssertionError:

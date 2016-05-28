@@ -13,7 +13,7 @@ from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
 
-def convert_to_ndarray(x, dt = None):
+def convert_to_ndarray(x, dt=None):
     """ Method checks to see in the input array x is an ndarray
     or an Astropy Table. If not, returns an array version of x.
 
@@ -210,7 +210,7 @@ def randomly_downsample_data(array, num_downsample):
         idx_sorted = np.argsort(randomizer)
         return array[idx_sorted[0:num_downsample]]
 
-def array_is_monotonic(array, strict = False):
+def array_is_monotonic(array, strict=False):
     """
     Method determines whether an input array is monotonic.
 

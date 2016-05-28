@@ -78,9 +78,9 @@ class Bolshoi(NbodySimulation):
 
     def __init__(self):
 
-        super(Bolshoi, self).__init__(simname = 'bolshoi', Lbox = 250.,
-            particle_mass = 1.35e8, num_ptcl_per_dim = 2048,
-            softening_length = 1., initial_redshift = 80., cosmology = cosmology.WMAP5)
+        super(Bolshoi, self).__init__(simname='bolshoi', Lbox=250.,
+            particle_mass=1.35e8, num_ptcl_per_dim=2048,
+            softening_length=1., initial_redshift=80., cosmology=cosmology.WMAP5)
 
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/')
@@ -96,9 +96,9 @@ class BolPlanck(NbodySimulation):
 
     def __init__(self):
 
-        super(BolPlanck, self).__init__(simname = 'bolplanck', Lbox = 250.,
-            particle_mass = 1.35e8, num_ptcl_per_dim = 2048,
-            softening_length = 1., initial_redshift = 80., cosmology = cosmology.Planck13)
+        super(BolPlanck, self).__init__(simname='bolplanck', Lbox=250.,
+            particle_mass=1.35e8, num_ptcl_per_dim=2048,
+            softening_length=1., initial_redshift=80., cosmology=cosmology.Planck13)
 
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/')
@@ -114,9 +114,9 @@ class MultiDark(NbodySimulation):
 
     def __init__(self):
 
-        super(MultiDark, self).__init__(simname = 'multidark', Lbox = 1000.,
-            particle_mass = 8.721e9, num_ptcl_per_dim = 2048,
-            softening_length = 7., initial_redshift = 65., cosmology = cosmology.WMAP5)
+        super(MultiDark, self).__init__(simname='multidark', Lbox=1000.,
+            particle_mass=8.721e9, num_ptcl_per_dim=2048,
+            softening_length=7., initial_redshift=65., cosmology=cosmology.WMAP5)
 
         self.orig_ascii_web_location = (
             'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/')
@@ -131,9 +131,9 @@ class Consuelo(NbodySimulation):
 
     def __init__(self):
 
-        super(Consuelo, self).__init__(simname = 'consuelo', Lbox = 420.,
-            particle_mass = 1.87e9, num_ptcl_per_dim = 1400,
-            softening_length = 8., initial_redshift = 99., cosmology = cosmology.WMAP5)
+        super(Consuelo, self).__init__(simname='consuelo', Lbox=420.,
+            particle_mass=1.87e9, num_ptcl_per_dim=1400,
+            softening_length=8., initial_redshift=99., cosmology=cosmology.WMAP5)
 
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/')

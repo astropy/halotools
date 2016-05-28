@@ -148,7 +148,7 @@ class MockFactory(object):
         comoving_volume = self.Lbox**3
         return ngals/float(comoving_volume)
 
-    def compute_galaxy_clustering(self, include_crosscorr = False, **kwargs):
+    def compute_galaxy_clustering(self, include_crosscorr=False, **kwargs):
         """
         Built-in method for all mock catalogs to compute the galaxy clustering signal.
 
@@ -260,11 +260,11 @@ class MockFactory(object):
             raise HalotoolsError(msg)
 
         if include_crosscorr is False:
-            pos = three_dim_pos_bundle(table = self.galaxy_table,
+            pos = three_dim_pos_bundle(table=self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
                 pos, rbins, period=self.Lbox, num_threads=num_threads,
-                approx_cell1_size = [rmax, rmax, rmax])
+                approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
@@ -273,16 +273,16 @@ class MockFactory(object):
                     "If this result is expected, you should not call the compute_galaxy_clustering"
                     "method with the include_complement keyword")
                 raise HalotoolsError(msg)
-            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table,
+            pos, pos2 = three_dim_pos_bundle(table=self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             xi11, xi12, xi22 = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=pos2,
                 period=self.Lbox, num_threads=num_threads,
-                approx_cell1_size = [rmax, rmax, rmax])
+                approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, xi11, xi12, xi22
 
 
-    def compute_galaxy_matter_cross_clustering(self, include_complement = False, **kwargs):
+    def compute_galaxy_matter_cross_clustering(self, include_complement=False, **kwargs):
         """
         Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function.
 
@@ -379,7 +379,7 @@ class MockFactory(object):
         else:
             ptcl_table = self.ptcl_table
 
-        ptcl_pos = three_dim_pos_bundle(table = ptcl_table,
+        ptcl_pos = three_dim_pos_bundle(table=ptcl_table,
             key1='x', key2='y', key3='z')
 
         try:
@@ -401,12 +401,12 @@ class MockFactory(object):
             raise HalotoolsError(msg)
 
         if include_complement is False:
-            pos = three_dim_pos_bundle(table = self.galaxy_table,
+            pos = three_dim_pos_bundle(table=self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos,
                 period=self.Lbox, num_threads=num_threads, do_auto=False,
-                approx_cell1_size = [rmax, rmax, rmax])
+                approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
@@ -415,22 +415,22 @@ class MockFactory(object):
                     "If this result is expected, you should not call the compute_galaxy_clustering"
                     "method with the include_complement keyword")
                 raise HalotoolsError(msg)
-            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table,
+            pos, pos2 = three_dim_pos_bundle(table=self.galaxy_table,
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos,
                 period=self.Lbox, num_threads=num_threads, do_auto=False,
-                approx_cell1_size = [rmax, rmax, rmax])
+                approx_cell1_size=[rmax, rmax, rmax])
             clustering2 = mock_observables.tpcf(
                 sample1=pos2, rbins=rbins, sample2=ptcl_pos,
                 period=self.Lbox, num_threads=num_threads, do_auto=False,
-                approx_cell1_size = [rmax, rmax, rmax])
+                approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, clustering, clustering2
 
 
-    def compute_fof_group_ids(self, zspace = True,
-        b_perp = model_defaults.default_b_perp,
-        b_para = model_defaults.default_b_para, **kwargs):
+    def compute_fof_group_ids(self, zspace=True,
+        b_perp=model_defaults.default_b_perp,
+        b_para=model_defaults.default_b_para, **kwargs):
         """
         Method computes the friends-of-friends group IDs of the
         mock galaxy catalog after (optionally) placing the mock into redshift space.
@@ -491,8 +491,8 @@ class MockFactory(object):
         pos = np.vstack((x, y, z)).T
 
         group_finder = mock_observables.FoFGroups(positions=pos,
-            b_perp = b_perp, b_para = b_para,
-            Lbox = self.Lbox, num_threads = num_threads)
+            b_perp=b_perp, b_para=b_para,
+            Lbox=self.Lbox, num_threads=num_threads)
 
         return group_finder.group_ids
 

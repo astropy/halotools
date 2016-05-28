@@ -42,7 +42,7 @@ def test_radial_profile_3d_test1():
     quantity = np.concatenate([quantity_a, quantity_b, quantity_c])
 
     result, counts = radial_profile_3d(sample1, sample2, quantity,
-        rbins_absolute = shell_radii_absolute, period=1, return_counts = True)
+        rbins_absolute=shell_radii_absolute, period=1, return_counts=True)
     assert len(result) == len(midpoints)
     assert np.all(result == [a, b, c])
     assert np.all(counts == npts1*npts2)
@@ -102,10 +102,10 @@ def test_absolute_vs_normalized_agreement():
         rbins_absolute=rbins_absolute, return_counts=True, period=1)
     result2, counts2 = radial_profile_3d(sample1, sample2, quantity2,
         rbins_normalized=rbins_normalized,
-        normalize_rbins_by = np.zeros(npts1) + fixed_rvir,
+        normalize_rbins_by=np.zeros(npts1) + fixed_rvir,
         return_counts=True, period=1)
     assert np.all(counts1 == counts2)
-    assert np.allclose(result1, result2, rtol = 0.001)
+    assert np.allclose(result1, result2, rtol=0.001)
 
 def test_radial_profile_3d_test3():
     """ Create a regular mesh of ``sample1`` points and two concentric rings around
@@ -135,10 +135,10 @@ def test_radial_profile_3d_test3():
     quantity = np.concatenate([inner_ring_values, outer_ring_values])
 
     result, counts = radial_profile_3d(sample1, sample2, quantity,
-        rbins_absolute = rbins_absolute, period=1, return_counts=True)
+        rbins_absolute=rbins_absolute, period=1, return_counts=True)
 
     assert np.all(counts == npts2/2)
-    assert np.allclose(result, [np.mean(inner_ring_values), np.mean(outer_ring_values)], rtol = 0.001)
+    assert np.allclose(result, [np.mean(inner_ring_values), np.mean(outer_ring_values)], rtol=0.001)
 
 def test_radial_profile_3d_test4():
     """ For two tight localizations of sample1 points each surrounded by two concentric
@@ -210,7 +210,7 @@ def test_args_processing1b():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_absolute = dummy_rbins, rbins_normalized = dummy_rbins)
+            rbins_absolute=dummy_rbins, rbins_normalized=dummy_rbins)
     substr = "Do not provide both ``rbins_normalized`` and ``rbins_absolute`` arguments."
     assert substr in err.value.args[0]
 
@@ -228,7 +228,7 @@ def test_args_processing1c():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_absolute = dummy_rbins, normalize_rbins_by = 1)
+            rbins_absolute=dummy_rbins, normalize_rbins_by=1)
     substr = "you should not provide the ``normalize_rbins_by`` argument."
     assert substr in err.value.args[0]
 
@@ -246,7 +246,7 @@ def test_args_processing1d():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_normalized = np.ones(len(sample1)))
+            rbins_normalized=np.ones(len(sample1)))
     substr = "you must also provide the ``normalize_rbins_by`` argument."
     assert substr in err.value.args[0]
 
@@ -264,8 +264,8 @@ def test_args_processing1e():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_normalized = dummy_rbins,
-            normalize_rbins_by = np.ones(len(sample1)))
+            rbins_normalized=dummy_rbins,
+            normalize_rbins_by=np.ones(len(sample1)))
     substr = "Input ``normalize_rbins_by`` and ``rbins_normalized`` must both be strictly positive."
     assert substr in err.value.args[0]
 
@@ -283,7 +283,7 @@ def test_args_processing2():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_normalized = rbins_normalized, normalize_rbins_by = np.ones(5))
+            rbins_normalized=rbins_normalized, normalize_rbins_by=np.ones(5))
     substr = "Your input ``normalize_rbins_by`` must have the same number of elements"
     assert substr in err.value.args[0]
 
@@ -299,7 +299,7 @@ def test_args_processing3():
     rbins_absolute = np.array([0.0001, 0.0002, 0.0003])
 
     with pytest.raises(ValueError) as err:
-        result = radial_profile_3d(sample1, sample2, quantity, rbins_absolute = rbins_absolute)
+        result = radial_profile_3d(sample1, sample2, quantity, rbins_absolute=rbins_absolute)
     substr = "elements, but input ``sample2`` has"
     assert substr in err.value.args[0]
 
@@ -314,7 +314,7 @@ def test_enforce_search_length():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_absolute = rbins_absolute, period=1)
+            rbins_absolute=rbins_absolute, period=1)
     substr = "This exceeds the maximum permitted search length of period/3."
     assert substr in err.value.args[0]
 
@@ -323,6 +323,6 @@ def test_enforce_search_length():
 
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
-            rbins_normalized = rbins_normalized, normalize_rbins_by=normalize_rbins_by, period=1)
+            rbins_normalized=rbins_normalized, normalize_rbins_by=normalize_rbins_by, period=1)
     substr = "This exceeds the maximum permitted search length of period/3."
     assert substr in err.value.args[0]

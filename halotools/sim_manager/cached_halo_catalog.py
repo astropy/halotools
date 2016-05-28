@@ -313,14 +313,14 @@ class CachedHaloCatalog(object):
         """
         """
         log_entry = self.halo_table_cache.determine_log_entry_from_fname(fname,
-            overwrite_fname_metadata = False)
+            overwrite_fname_metadata=False)
 
         if log_entry.fname != fname:
             if self._update_cached_fname is True:
                 old_fname = deepcopy(log_entry.fname)
                 log_entry = (
                     self.halo_table_cache.determine_log_entry_from_fname(fname,
-                        overwrite_fname_metadata = self._update_cached_fname)
+                        overwrite_fname_metadata=self._update_cached_fname)
                     )
                 self.halo_table_cache.update_cached_file_location(
                     fname, old_fname)
@@ -357,11 +357,11 @@ class CachedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         gen0 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.ptcl_version_name,
-            redshift = self.redshift, dz_tol = self._dz_tol)
+            simname=self.simname, version_name=self.ptcl_version_name,
+            redshift=self.redshift, dz_tol=self._dz_tol)
         gen1 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.ptcl_version_name)
-        gen2 = ptcl_table_cache.matching_log_entry_generator(simname = self.simname)
+            simname=self.simname, version_name=self.ptcl_version_name)
+        gen2 = ptcl_table_cache.matching_log_entry_generator(simname=self.simname)
 
         matching_entries = list(gen0)
 
@@ -436,16 +436,16 @@ class CachedHaloCatalog(object):
 
 
         gen0 = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder,
-            version_name = version_name, redshift = redshift,
-            dz_tol = self._dz_tol)
+            simname=simname, halo_finder=halo_finder,
+            version_name=version_name, redshift=redshift,
+            dz_tol=self._dz_tol)
         gen1 = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname,
-            halo_finder = halo_finder, version_name = version_name)
+            simname=simname,
+            halo_finder=halo_finder, version_name=version_name)
         gen2 = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder)
+            simname=simname, halo_finder=halo_finder)
         gen3 = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname)
+            simname=simname)
 
         matching_entries = list(gen0)
 

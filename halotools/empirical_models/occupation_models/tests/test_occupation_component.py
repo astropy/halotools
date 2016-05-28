@@ -45,7 +45,7 @@ class TestOccupationComponent(TestCase):
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self):
-                OccupationComponent.__init__(self, gal_type = 'satellites')
+                OccupationComponent.__init__(self, gal_type='satellites')
 
         with pytest.raises(KeyError) as err:
             model = MyOccupationComponent()
@@ -58,8 +58,8 @@ class TestOccupationComponent(TestCase):
 
             def __init__(self):
                 OccupationComponent.__init__(self,
-                    gal_type = 'satellites', threshold = 11,
-                    prim_haloprop_key = 'halo_mvir')
+                    gal_type='satellites', threshold=11,
+                    prim_haloprop_key='halo_mvir')
 
         with pytest.raises(KeyError) as err:
             model = MyOccupationComponent()
@@ -107,7 +107,7 @@ class TestOccupationComponent(TestCase):
 
         model = MyOccupationComponent()
         with pytest.raises(HalotoolsError) as err:
-            _ = model.mc_occupation(prim_haloprop = 1e10)
+            _ = model.mc_occupation(prim_haloprop=1e10)
         substr = "write your own ``mc_occupation`` method that overrides the method "
         assert substr in err.value.args[0]
 
@@ -121,8 +121,8 @@ class TestOccupationComponent(TestCase):
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self, threshold):
-                OccupationComponent.__init__(self, gal_type = 'centrals',
-                    threshold = threshold, upper_occupation_bound = 2)
+                OccupationComponent.__init__(self, gal_type='centrals',
+                    threshold=threshold, upper_occupation_bound=2)
 
             def mean_occupation(self, **kwargs):
                 return None
@@ -138,8 +138,8 @@ class TestOccupationComponent(TestCase):
         dt = occu_model._galprop_dtypes_to_allocate
         assert 'halo_num_centrals' in dt.names
 
-        new_model = HodModelFactory(baseline_model_instance = zheng_model,
-            centrals_occupation = occu_model)
+        new_model = HodModelFactory(baseline_model_instance=zheng_model,
+            centrals_occupation=occu_model)
         halocat = FakeSim()
         new_model.populate_mock(halocat)
         cenmask = new_model.mock.galaxy_table['gal_type'] == 'centrals'
@@ -156,9 +156,9 @@ class TestOccupationComponent(TestCase):
             def __init__(self, threshold):
 
                 OccupationComponent.__init__(self,
-                    gal_type = 'satellites',
-                    threshold = threshold,
-                    upper_occupation_bound = 5)
+                    gal_type='satellites',
+                    threshold=threshold,
+                    upper_occupation_bound=5)
 
             def mean_occupation(self, **kwargs):
                 table = kwargs['table']
@@ -172,8 +172,8 @@ class TestOccupationComponent(TestCase):
                 return result
 
         occ = MySatelliteOccupation(zheng_model.threshold)
-        new_model = HodModelFactory(baseline_model_instance = zheng_model,
-            satellites_occupation = occ)
+        new_model = HodModelFactory(baseline_model_instance=zheng_model,
+            satellites_occupation=occ)
         halocat = FakeSim()
         new_model.populate_mock(halocat)
 
@@ -189,16 +189,16 @@ class TestOccupationComponent(TestCase):
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self, threshold):
-                OccupationComponent.__init__(self, gal_type = 'centrals',
-                    threshold = threshold, upper_occupation_bound = 1)
+                OccupationComponent.__init__(self, gal_type='centrals',
+                    threshold=threshold, upper_occupation_bound=1)
 
             def mean_occupation(self, **kwargs):
                 table = kwargs['table']
                 return np.zeros(len(table)) + 0.1
 
         occu_model = MyOccupationComponent(zheng_model.threshold)
-        new_model = HodModelFactory(baseline_model_instance = zheng_model,
-            centrals_occupation = occu_model)
+        new_model = HodModelFactory(baseline_model_instance=zheng_model,
+            centrals_occupation=occu_model)
         assert not hasattr(new_model, 'prim_haloprop_key')
 
         halocat = FakeSim()

@@ -33,7 +33,7 @@ class TestHodModelFactory(TestCase):
         model = PrebuiltHodModelFactory('zheng07')
         halocat = FakeSim()
         model.populate_mock(halocat)
-        model.populate_mock(halocat = halocat)
+        model.populate_mock(halocat=halocat)
 
     def test_Num_ptcl_requirement(self):
         """ Demonstrate that passing in varying values for
@@ -43,7 +43,7 @@ class TestHodModelFactory(TestCase):
         halocat = FakeSim()
         actual_mvir_min = halocat.halo_table['halo_mvir'].min()
 
-        model.populate_mock(halocat = halocat)
+        model.populate_mock(halocat=halocat)
         default_mvir_min = model.mock.particle_mass*model.mock.Num_ptcl_requirement
         # verify that the cut was applied
         assert np.all(model.mock.halo_table['halo_mvir'] > default_mvir_min)
@@ -51,7 +51,7 @@ class TestHodModelFactory(TestCase):
         assert np.any(halocat.halo_table['halo_mvir'] < default_mvir_min)
 
         del model.mock
-        model.populate_mock(halocat = halocat, Num_ptcl_requirement = 0.)
+        model.populate_mock(halocat=halocat, Num_ptcl_requirement=0.)
         assert model.mock.Num_ptcl_requirement == 0.
         assert np.any(model.mock.halo_table['halo_mvir'] < default_mvir_min)
 
@@ -60,7 +60,7 @@ class TestHodModelFactory(TestCase):
         m = PrebuiltHodModelFactory('zheng07')
         m._haloprop_list.append("Jose Canseco")
         with pytest.raises(HalotoolsError) as err:
-            m.populate_mock(halocat = halocat)
+            m.populate_mock(halocat=halocat)
         substr = "this column is not available in the catalog you attempted to populate"
         assert substr in err.value.args[0]
         assert "``Jose Canseco``" in err.value.args[0]
@@ -71,7 +71,7 @@ class TestHodModelFactory(TestCase):
         m = PrebuiltHodModelFactory('zheng07')
 
         with pytest.raises(HalotoolsError) as err:
-            m.populate_mock(halocat = halocat)
+            m.populate_mock(halocat=halocat)
         substr = "does not have the ``halo_upid`` column."
         assert substr in err.value.args[0]
 

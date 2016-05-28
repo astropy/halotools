@@ -21,9 +21,9 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 __all__ = ('marked_npairs_3d', )
 
 def marked_npairs_3d(sample1, sample2, rbins,
-                  period=None, weights1 = None, weights2 = None,
-                  weight_func_id = 0, verbose = False, num_threads = 1,
-                  approx_cell1_size = None, approx_cell2_size = None):
+                  period=None, weights1=None, weights2=None,
+                  weight_func_id=0, verbose=False, num_threads=1,
+                  approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the number of weighted pairs with separations greater than or equal to r, :math:`W(>r)`.
 
@@ -187,7 +187,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
     if weights1 is None:
-        weights1 = np.ones((npts_sample1, 1), dtype = np.float64)
+        weights1 = np.ones((npts_sample1, 1), dtype=np.float64)
     else:
         weights1 = convert_to_ndarray(weights1)
         weights1 = weights1.astype("float64")
@@ -228,7 +228,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
     if weights2 is None:
-        weights2 = np.ones((npts_sample2, 1), dtype = np.float64)
+        weights2 = np.ones((npts_sample2, 1), dtype=np.float64)
     else:
         weights2 = convert_to_ndarray(weights2)
         weights2 = weights2.astype("float64")

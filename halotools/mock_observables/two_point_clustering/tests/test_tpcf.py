@@ -33,18 +33,18 @@ def test_tpcf_auto():
     rmax = rbins.max()
 
     #with randoms
-    result = tpcf(sample1, rbins, sample2 = None,
-                  randoms=randoms, period = None,
+    result = tpcf(sample1, rbins, sample2=None,
+                  randoms=randoms, period=None,
                   max_sample_size=int(1e4), estimator='Natural',
-                  approx_cell1_size = [rmax, rmax, rmax],
-                  approx_cellran_size = [rmax, rmax, rmax])
+                  approx_cell1_size=[rmax, rmax, rmax],
+                  approx_cellran_size=[rmax, rmax, rmax])
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
     #with out randoms
-    result = tpcf(sample1, rbins, sample2 = None,
-                  randoms=None, period = period,
+    result = tpcf(sample1, rbins, sample2=None,
+                  randoms=None, period=period,
                   max_sample_size=int(1e4), estimator='Natural',
-                  approx_cell1_size = [rmax, rmax, rmax], num_threads = 'max')
+                  approx_cell1_size=[rmax, rmax, rmax], num_threads='max')
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 
@@ -62,17 +62,17 @@ def test_tpcf_cross():
     rmax = rbins.max()
 
     #with randoms
-    result = tpcf(sample1, rbins, sample2 = sample2,
-                  randoms=randoms, period = None,
+    result = tpcf(sample1, rbins, sample2=sample2,
+                  randoms=randoms, period=None,
                   max_sample_size=int(1e4), estimator='Natural', do_auto=False,
-                  approx_cell1_size = [rmax, rmax, rmax])
+                  approx_cell1_size=[rmax, rmax, rmax])
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
     #with out randoms
-    result = tpcf(sample1, rbins, sample2 = sample2,
-                  randoms=None, period = period,
+    result = tpcf(sample1, rbins, sample2=sample2,
+                  randoms=None, period=period,
                   max_sample_size=int(1e4), estimator='Natural', do_auto=False,
-                  approx_cell1_size = [rmax, rmax, rmax])
+                  approx_cell1_size=[rmax, rmax, rmax])
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 @slow
@@ -87,31 +87,31 @@ def test_tpcf_estimators():
     rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
-    result_1 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+    result_1 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
-    result_2 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
+    result_2 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Davis-Peebles',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
-    result_3 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
+    result_3 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Hewett',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
-    result_4 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
+    result_4 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Hamilton',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
-    result_5 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
+    result_5 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Landy-Szalay',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
 
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
@@ -132,10 +132,10 @@ def test_tpcf_sample_size_limit():
     rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
-    result_1 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+    result_1 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e2), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax])
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
 
@@ -153,31 +153,31 @@ def test_tpcf_randoms():
     rmax = rbins.max()
 
     #No PBCs w/ randoms
-    result_1 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = None,
+    result_1 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
     #PBCs w/o randoms
-    result_2 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=None, period = period,
+    result_2 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=None, period=period,
                     max_sample_size=int(1e4), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
     #PBCs w/ randoms
-    result_3 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = period,
+    result_3 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=period,
                     max_sample_size=int(1e4), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax],
-                    approx_cellran_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax],
+                    approx_cellran_size=[rmax, rmax, rmax])
 
     #No PBCs and no randoms should throw an error.
     with pytest.raises(ValueError) as err:
-        tpcf(sample1, rbins, sample2 = sample2,
-             randoms=None, period = None,
+        tpcf(sample1, rbins, sample2=sample2,
+             randoms=None, period=None,
              max_sample_size=int(1e4), estimator='Natural',
-             approx_cell1_size = [rmax, rmax, rmax],
-             approx_cellran_size = [rmax, rmax, rmax])
+             approx_cell1_size=[rmax, rmax, rmax],
+             approx_cellran_size=[rmax, rmax, rmax])
     substr = "If no PBCs are specified, randoms must be provided."
     assert substr in err.value.args[0]
 
@@ -198,24 +198,24 @@ def test_tpcf_period_API():
     rbins = np.linspace(0.001,0.3,5)
     rmax = rbins.max()
 
-    result_1 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = period,
+    result_1 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=period,
                     max_sample_size=int(1e4), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax])
 
     period = 1.0
-    result_2 = tpcf(sample1, rbins, sample2 = sample2,
-                    randoms=randoms, period = period,
+    result_2 = tpcf(sample1, rbins, sample2=sample2,
+                    randoms=randoms, period=period,
                     max_sample_size=int(1e4), estimator='Natural',
-                    approx_cell1_size = [rmax, rmax, rmax])
+                    approx_cell1_size=[rmax, rmax, rmax])
 
     #should throw an error.  period must be positive!
     period = np.array([1.0,1.0,-1.0])
     with pytest.raises(ValueError) as err:
-        tpcf(sample1, rbins, sample2 = sample2,
-             randoms=randoms, period = period,
+        tpcf(sample1, rbins, sample2=sample2,
+             randoms=randoms, period=period,
              max_sample_size=int(1e4), estimator='Natural',
-             approx_cell1_size = [rmax, rmax, rmax])
+             approx_cell1_size=[rmax, rmax, rmax])
     substr = "All values must bounded positive numbers."
     assert substr in err.value.args[0]
 
@@ -238,18 +238,18 @@ def test_tpcf_cross_consistency_w_auto():
     rmax = rbins.max()
 
     #with out randoms
-    result1 = tpcf(sample1, rbins, sample2 = None,
-                   randoms=None, period = period,
+    result1 = tpcf(sample1, rbins, sample2=None,
+                   randoms=None, period=period,
                    max_sample_size=int(1e4), estimator='Natural',
-                   approx_cell1_size = [rmax, rmax, rmax])
+                   approx_cell1_size=[rmax, rmax, rmax])
 
-    result2 = tpcf(sample2, rbins, sample2 = None,
-                   randoms=None, period = period,
+    result2 = tpcf(sample2, rbins, sample2=None,
+                   randoms=None, period=period,
                    max_sample_size=int(1e4), estimator='Natural',
-                   approx_cell1_size = [rmax, rmax, rmax])
+                   approx_cell1_size=[rmax, rmax, rmax])
 
-    result1_p, result12, result2_p = tpcf(sample1, rbins, sample2 = sample2,
-                                          randoms=None, period = period,
+    result1_p, result12, result2_p = tpcf(sample1, rbins, sample2=sample2,
+                                          randoms=None, period=period,
                                           max_sample_size=int(1e4),
                                           estimator='Natural',
                                           approx_cell1_size=[rmax, rmax, rmax])
@@ -258,18 +258,18 @@ def test_tpcf_cross_consistency_w_auto():
     assert np.allclose(result2,result2_p), "cross mode and auto mode are not the same"
 
     #with randoms
-    result1 = tpcf(sample1, rbins, sample2 = None,
-                   randoms=randoms, period = period,
+    result1 = tpcf(sample1, rbins, sample2=None,
+                   randoms=randoms, period=period,
                    max_sample_size=int(1e4), estimator='Natural',
-                   approx_cell1_size = [rmax, rmax, rmax])
+                   approx_cell1_size=[rmax, rmax, rmax])
 
-    result2 = tpcf(sample2, rbins, sample2 = None,
-                   randoms=randoms, period = period,
+    result2 = tpcf(sample2, rbins, sample2=None,
+                   randoms=randoms, period=period,
                    max_sample_size=int(1e4), estimator='Natural',
-                   approx_cell1_size = [rmax, rmax, rmax])
+                   approx_cell1_size=[rmax, rmax, rmax])
 
-    result1_p, result12, result2_p = tpcf(sample1, rbins, sample2 = sample2,
-                                          randoms=randoms, period = period,
+    result1_p, result12, result2_p = tpcf(sample1, rbins, sample2=sample2,
+                                          randoms=randoms, period=period,
                                           max_sample_size=int(1e4),
                                           estimator='Natural',
                                           approx_cell1_size=[rmax, rmax, rmax])
@@ -289,11 +289,11 @@ def test_RR_precomputed_exception_handling1():
 
     RR_precomputed = rmax
     with pytest.raises(HalotoolsError) as err:
-        _ = tpcf(sample1, rbins, sample2 = sample2,
-            randoms=randoms, period = period,
+        _ = tpcf(sample1, rbins, sample2=sample2,
+            randoms=randoms, period=period,
             max_sample_size=int(1e4), estimator='Natural',
-            approx_cell1_size = [rmax, rmax, rmax],
-            RR_precomputed = RR_precomputed)
+            approx_cell1_size=[rmax, rmax, rmax],
+            RR_precomputed=RR_precomputed)
     substr = "``RR_precomputed`` and ``NR_precomputed`` arguments, or neither\n"
     assert substr in err.value.args[0]
 
@@ -310,11 +310,11 @@ def test_RR_precomputed_exception_handling2():
     RR_precomputed = rbins[:-2]
     NR_precomputed = randoms.shape[0]
     with pytest.raises(HalotoolsError) as err:
-        _ = tpcf(sample1, rbins, sample2 = sample2,
-            randoms=randoms, period = period,
+        _ = tpcf(sample1, rbins, sample2=sample2,
+            randoms=randoms, period=period,
             max_sample_size=int(1e4), estimator='Natural',
-            approx_cell1_size = [rmax, rmax, rmax],
-            RR_precomputed = RR_precomputed, NR_precomputed = NR_precomputed)
+            approx_cell1_size=[rmax, rmax, rmax],
+            RR_precomputed=RR_precomputed, NR_precomputed=NR_precomputed)
     substr = "\nLength of ``RR_precomputed`` must match length of ``rbins``\n"
     assert substr in err.value.args[0]
 
@@ -331,11 +331,11 @@ def test_RR_precomputed_exception_handling3():
     RR_precomputed = rbins[:-1]
     NR_precomputed = 5
     with pytest.raises(HalotoolsError) as err:
-        _ = tpcf(sample1, rbins, sample2 = sample2,
-            randoms=randoms, period = period,
+        _ = tpcf(sample1, rbins, sample2=sample2,
+            randoms=randoms, period=period,
             max_sample_size=int(1e4), estimator='Natural',
-            approx_cell1_size = [rmax, rmax, rmax],
-            RR_precomputed = RR_precomputed, NR_precomputed = NR_precomputed)
+            approx_cell1_size=[rmax, rmax, rmax],
+            RR_precomputed=RR_precomputed, NR_precomputed=NR_precomputed)
     substr = "the value of NR_precomputed must agree with the number of randoms"
     assert substr in err.value.args[0]
 
@@ -364,8 +364,8 @@ def test_RR_precomputed_natural_estimator_auto():
     approx_cellran_size = [rmax, rmax, rmax]
 
     normal_result = tpcf(
-        sample1, rbins, sample2 = sample2,
-        randoms=randoms, period = period,
+        sample1, rbins, sample2=sample2,
+        randoms=randoms, period=period,
         max_sample_size=int(1e4), estimator='Natural',
         approx_cell1_size=approx_cell1_size,
         approx_cellran_size=approx_cellran_size)
@@ -410,13 +410,13 @@ def test_RR_precomputed_natural_estimator_auto():
     # Now we will pass in the above RR as an argument
     # and verify that we get an identical tpcf
     result_with_RR_precomputed = tpcf(
-        sample1, rbins, sample2 = sample2,
-        randoms=randoms, period = period,
+        sample1, rbins, sample2=sample2,
+        randoms=randoms, period=period,
         max_sample_size=int(1e4), estimator='Natural',
         approx_cell1_size=approx_cell1_size,
         approx_cellran_size=approx_cellran_size,
-        RR_precomputed = RR,
-        NR_precomputed = NR)
+        RR_precomputed=RR,
+        NR_precomputed=NR)
 
     assert np.all(result_with_RR_precomputed == normal_result)
 
@@ -445,8 +445,8 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     approx_cellran_size = [rmax, rmax, rmax]
 
     normal_result = tpcf(
-        sample1, rbins, sample2 = sample2,
-        randoms=randoms, period = period,
+        sample1, rbins, sample2=sample2,
+        randoms=randoms, period=period,
         max_sample_size=int(1e4), estimator='Landy-Szalay',
         approx_cell1_size=approx_cell1_size,
         approx_cellran_size=approx_cellran_size)
@@ -496,13 +496,13 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     # Now we will pass in the above RR as an argument
     # and verify that we get an identical tpcf
     result_with_RR_precomputed = tpcf(
-        sample1, rbins, sample2 = sample2,
-        randoms=randoms, period = period,
+        sample1, rbins, sample2=sample2,
+        randoms=randoms, period=period,
         max_sample_size=int(1e4), estimator='Landy-Szalay',
         approx_cell1_size=approx_cell1_size,
         approx_cellran_size=approx_cellran_size,
-        RR_precomputed = RR,
-        NR_precomputed = NR1)
+        RR_precomputed=RR,
+        NR_precomputed=NR1)
 
     assert np.all(result_with_RR_precomputed == normal_result)
 
@@ -514,7 +514,7 @@ def test_tpcf_raises_warning_for_large_samples():
 
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
-        normal_result = tpcf(sample1, rbins, period = period,
+        normal_result = tpcf(sample1, rbins, period=period,
             max_sample_size=int(1e2))
 
 def test_tpcf_raises_exception_for_non_monotonic_rbins():
@@ -523,7 +523,7 @@ def test_tpcf_raises_exception_for_non_monotonic_rbins():
     rbins = np.linspace(10,0.3,5)
 
     with pytest.raises(TypeError) as err:
-        normal_result = tpcf(sample1, rbins, period = period)
+        normal_result = tpcf(sample1, rbins, period=period)
     substr = "Input separation bins must be a monotonically increasing"
     assert substr in err.value.args[0]
 
@@ -533,7 +533,7 @@ def test_tpcf_raises_exception_for_large_search_length():
     rbins = np.linspace(0.1,0.5,5)
 
     with pytest.raises(ValueError) as err:
-        normal_result = tpcf(sample1, rbins, period = period)
+        normal_result = tpcf(sample1, rbins, period=period)
     substr = "search length cannot exceed period/3 in any dimension."
     assert substr in err.value.args[0]
 
@@ -544,7 +544,7 @@ def test_tpcf_raises_exception_for_incompatible_data_shapes():
     rbins = np.linspace(0.1,0.3,5)
 
     with pytest.raises(TypeError) as err:
-        normal_result = tpcf(sample1, rbins, sample2 = sample2, period = period)
+        normal_result = tpcf(sample1, rbins, sample2=sample2, period=period)
     substr = "Input sample of points must be a Numpy ndarray of shape (Npts, 3)."
     assert substr in err.value.args[0]
 
@@ -555,8 +555,8 @@ def test_tpcf_raises_exception_for_bad_do_auto_instructions():
     rbins = np.linspace(0.1,0.3,5)
 
     with pytest.raises(ValueError) as err:
-        normal_result = tpcf(sample1, rbins, sample2 = sample2, period = period,
-            do_auto = 'Jose Canseco')
+        normal_result = tpcf(sample1, rbins, sample2=sample2, period=period,
+            do_auto='Jose Canseco')
     substr = "`do_auto` and `do_cross` keywords must be boolean-valued."
     assert substr in err.value.args[0]
 
@@ -567,7 +567,7 @@ def test_tpcf_raises_exception_for_unavailable_estimator():
     rbins = np.linspace(0.1,0.3,5)
 
     with pytest.raises(ValueError) as err:
-        normal_result = tpcf(sample1, rbins, period = period,
-            estimator = 'Jose Canseco')
+        normal_result = tpcf(sample1, rbins, period=period,
+            estimator='Jose Canseco')
     substr = "is not in the list of available estimators:"
     assert substr in err.value.args[0]

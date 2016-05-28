@@ -24,7 +24,7 @@ class TestSampleSelector(TestCase):
         ax = np.array(x, dtype=[('x', 'f4')])
 
         percentiles = 0.5
-        result = SampleSelector.split_sample(table=t, key='x', percentiles = percentiles)
+        result = SampleSelector.split_sample(table=t, key='x', percentiles=percentiles)
 
         assert len(result) == 2
         assert len(result[0]) == 5
@@ -47,11 +47,11 @@ class TestSampleSelector(TestCase):
         self.assertRaises(ValueError, f)
 
         f = partial(SampleSelector.split_sample, table=t, key='y',
-                percentiles= 0.5)
+                percentiles=0.5)
         self.assertRaises(KeyError, f)
 
         f = partial(SampleSelector.split_sample, table=ax, key='x',
-                percentiles= 0.5)
+                percentiles=0.5)
         self.assertRaises(TypeError, f)
 
 
@@ -84,9 +84,9 @@ class TestComputeConditionalPercentiles(TestCase):
     def test_fake_halo_table(self):
 
         percentiles = compute_conditional_percentiles(
-                table = self.fake_halo_table,
-                prim_haloprop_key = 'halo_mvir',
-                sec_haloprop_key = 'halo_vmax')
+                table=self.fake_halo_table,
+                prim_haloprop_key='halo_mvir',
+                sec_haloprop_key='halo_vmax')
         split = percentiles < 0.5
         low_vmax, high_vmax = self.fake_halo_table[split], self.fake_halo_table[np.invert(split)]
         #assert len(low_vmax) == len(high_vmax)
@@ -105,10 +105,10 @@ class TestComputeConditionalPercentiles(TestCase):
         assert manual_high_mass['halo_zform'].min() == 20
 
         percentiles = compute_conditional_percentiles(
-                table = self.custom_halo_table,
-                prim_haloprop_key = 'halo_mvir',
-                sec_haloprop_key = 'halo_zform',
-                prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)
+                table=self.custom_halo_table,
+                prim_haloprop_key='halo_mvir',
+                sec_haloprop_key='halo_zform',
+                prim_haloprop_bin_boundaries=prim_haloprop_bin_boundaries)
 
         assert np.all(percentiles <= 1)
         assert np.all(percentiles >= 0)

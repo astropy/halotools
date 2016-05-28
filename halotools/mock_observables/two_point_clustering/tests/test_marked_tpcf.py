@@ -94,15 +94,15 @@ def test_marked_tpcf_cross_consistency():
     cross_mark1 = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
         period=period, num_threads=1, weight_func_id=weight_func_id,
-        do_auto = False, normalize_by = 'number_counts')
+        do_auto=False, normalize_by='number_counts')
 
     auto1, cross_mark2, auto2 = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
-        period=period, num_threads=1, weight_func_id=weight_func_id, normalize_by = 'number_counts')
+        period=period, num_threads=1, weight_func_id=weight_func_id, normalize_by='number_counts')
 
     auto1b, auto2b = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
         period=period, num_threads=1, weight_func_id=weight_func_id,
-        do_cross = False, normalize_by = 'number_counts')
+        do_cross=False, normalize_by='number_counts')
 
     assert np.all(cross_mark1 == cross_mark2)

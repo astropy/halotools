@@ -31,10 +31,10 @@ def test_tpcf_jackknife_corr_func():
         randoms = np.random.random((Npts*10,3))
 
     result_1,err = tpcf_jackknife(sample1, randoms, rbins,
-        Nsub=5, period = period, num_threads=1)
+        Nsub=5, period=period, num_threads=1)
 
     result_2 = tpcf(sample1, rbins,
-        randoms=randoms, period = period, num_threads=1)
+        randoms=randoms, period=period, num_threads=1)
 
     assert np.allclose(result_1,result_2,rtol=1e-09), "correlation functions do not match"
 
@@ -50,6 +50,6 @@ def test_tpcf_jackknife_cov_matrix():
 
     nbins = len(rbins)-1
 
-    result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, period = period, num_threads=1)
+    result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, period=period, num_threads=1)
 
     assert np.shape(err)==(nbins,nbins), "cov matrix not correct shape"

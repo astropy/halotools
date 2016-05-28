@@ -43,7 +43,7 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
                 model2.populate_mock(halocat)
             substr = "Inconsistency between the model redshift"
             assert substr in err.value.args[0]
-            halocat = FakeSim(redshift = 2.)
+            halocat = FakeSim(redshift=2.)
             model2.populate_mock(halocat)
 
     @pytest.mark.slow
