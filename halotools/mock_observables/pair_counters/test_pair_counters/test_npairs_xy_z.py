@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
     unicode_literals)
 
 import numpy as np
-import pytest 
+import pytest
 
 from ..npairs_xy_z import npairs_xy_z
 from ..pairs import xy_z_npairs as pure_python_brute_force_npairs_xy_z
@@ -14,8 +14,8 @@ from ...tests.cf_helpers import generate_3d_regular_mesh
 __all__ = ('test_npairs_xy_z_tight_locus1', )
 
 def test_npairs_xy_z_tight_locus1():
-    """ Verify that `halotools.mock_observables.npairs_xy_z` returns 
-    the correct counts for two tight loci of points. 
+    """ Verify that `halotools.mock_observables.npairs_xy_z` returns
+    the correct counts for two tight loci of points.
 
     In this test, PBCs are irrelevant
     """
@@ -31,8 +31,8 @@ def test_npairs_xy_z_tight_locus1():
     assert np.all(result[:,1] == [0, npts1*npts2, npts1*npts2])
 
 def test_rectangular_mesh_pairs_tight_locus2():
-    """ Verify that `halotools.mock_observables.npairs_projected` returns 
-    the correct counts for two tight loci of points. 
+    """ Verify that `halotools.mock_observables.npairs_projected` returns
+    the correct counts for two tight loci of points.
 
     In this test, PBCs are important.
     """
@@ -53,8 +53,8 @@ def test_rectangular_mesh_pairs_tight_locus2():
 
 def test_npairs_xy_z_tight_locus_cell1_sizes():
     """ Verify that the pair counters return the correct results
-    when operating on a tight locus of points, regardless of how the 
-    cell sizes are set. 
+    when operating on a tight locus of points, regardless of how the
+    cell sizes are set.
 
     For this test, PBCs have no impact.
     """
@@ -65,23 +65,23 @@ def test_npairs_xy_z_tight_locus_cell1_sizes():
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_bins = np.array([0, 0.3])
 
-    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = 0.1)
     assert np.all(result1[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.1, 0.1, 0.1])
     assert np.all(result2[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.3, 0.3, 0.3])
     assert np.all(result3[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result4 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result4 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.1, 0.3, 0.3])
     assert np.all(result4[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result5 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result5 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.1, 0.2, 0.3])
     assert np.all(result5[:,1] == [0, npts1*npts2, npts1*npts2])
 
@@ -98,23 +98,23 @@ def test_npairs_xy_z_tight_locus_cell2_sizes():
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_bins = np.array([0, 0.3])
 
-    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell2_size = 0.1)
     assert np.all(result1[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell2_size = [0.1, 0.1, 0.1])
     assert np.all(result2[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell2_size = [0.3, 0.3, 0.3])
     assert np.all(result3[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result4 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result4 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell2_size = [0.1, 0.3, 0.3])
     assert np.all(result4[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result5 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result5 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell2_size = [0.1, 0.2, 0.3])
     assert np.all(result5[:,1] == [0, npts1*npts2, npts1*npts2])
 
@@ -135,37 +135,37 @@ def test_npairs_xy_z_tight_locus_cell1_cell2_sizes():
         approx_cell1_size = 0.1, approx_cell2_size = 0.1)
     assert np.all(result1[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = 0.2, approx_cell2_size = 0.1)
     assert np.all(result1[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result1 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = 0.1, approx_cell2_size = 0.2)
     assert np.all(result1[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.1, 0.1, 0.1], approx_cell2_size = [0.1, 0.1, 0.1])
     assert np.all(result2[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.1, 0.1, 0.1], approx_cell2_size = [0.2, 0.2, 0.2])
     assert np.all(result2[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.2, 0.2, 0.2], approx_cell2_size = [0.1, 0.1, 0.1])
     assert np.all(result2[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell2_size = [0.3, 0.3, 0.3])
     assert np.all(result3[:,1] == [0, npts1*npts2, npts1*npts2])
 
-    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+    result3 = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
         approx_cell1_size = [0.1, 0.2, 0.3], approx_cell2_size = [0.23, 0.32, 0.11])
     assert np.all(result3[:,1] == [0, npts1*npts2, npts1*npts2])
 
 def test_npairs_xy_z_mesh1():
-    """ Verify that `halotools.mock_observables.npairs_projected` returns 
-    the correct counts for two regularly spaced grids of points in the limit 
+    """ Verify that `halotools.mock_observables.npairs_projected` returns
+    the correct counts for two regularly spaced grids of points in the limit
     where pi_max << grid_spacing
     """
     npts_per_dim = 10
@@ -181,16 +181,16 @@ def test_npairs_xy_z_mesh1():
     rp_bins = np.array([r1, r2, r3, r4])
     pi_max = 1.1*grid_spacing
     pi_bins = np.array([0, pi_max])
-    result = npairs_xy_z(data1, data2, rp_bins, pi_bins, 
+    result = npairs_xy_z(data1, data2, rp_bins, pi_bins,
         period=Lbox, approx_cell1_size=0.1)
-    assert np.all(result[:,0] == 
+    assert np.all(result[:,0] ==
         [npts_per_dim**3, 5*npts_per_dim**3, 9*npts_per_dim**3, 9*npts_per_dim**3])
-    assert np.all(result[:,1] == 
+    assert np.all(result[:,1] ==
         [3*npts_per_dim**3, 15*npts_per_dim**3, 27*npts_per_dim**3, 27*npts_per_dim**3])
 
 def test_parallel():
-    """ Verify that `halotools.mock_observables.npairs_projected` returns 
-    identical counts whether it is run in serial or parallel. 
+    """ Verify that `halotools.mock_observables.npairs_projected` returns
+    identical counts whether it is run in serial or parallel.
     """
     npts_per_dim = 10
     data1 = generate_3d_regular_mesh(npts_per_dim)
@@ -206,11 +206,11 @@ def test_parallel():
     pi_max = 0.1
     pi_bins = np.array([0, pi_max])
 
-    serial_result = npairs_xy_z(data1, data2, rp_bins, pi_bins, 
+    serial_result = npairs_xy_z(data1, data2, rp_bins, pi_bins,
         period=Lbox, approx_cell1_size=0.1)
-    parallel_result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins, 
+    parallel_result2 = npairs_xy_z(data1, data2, rp_bins, pi_bins,
         period=Lbox, approx_cell1_size=0.1, num_threads = 2)
-    parallel_result7 = npairs_xy_z(data1, data2, rp_bins, pi_bins, 
+    parallel_result7 = npairs_xy_z(data1, data2, rp_bins, pi_bins,
         period=Lbox, approx_cell1_size=0.1, num_threads = 7)
     assert np.all(serial_result == parallel_result2)
     assert np.all(serial_result == parallel_result7)
@@ -260,9 +260,9 @@ def test_sensible_num_threads():
     pi_bins = np.array([0, pi_max])
 
     with pytest.raises(ValueError) as err:
-        result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1, 
+        result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1,
             num_threads = "Cuba Gooding Jr.")
-    substr = "Input ``num_threads`` argument must be an integer or the string 'max'" 
+    substr = "Input ``num_threads`` argument must be an integer or the string 'max'"
     assert substr in err.value.args[0]
 
 def test_sensible_rp_bins():
@@ -276,7 +276,7 @@ def test_sensible_rp_bins():
 
     with pytest.raises(ValueError) as err:
         result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
-    substr = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries" 
+    substr = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries"
     assert substr in err.value.args[0]
 
 def test_sensible_period():
@@ -289,15 +289,5 @@ def test_sensible_period():
 
     with pytest.raises(ValueError) as err:
         result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=np.inf)
-    substr = "Input ``period`` must be a bounded positive number in all dimensions" 
+    substr = "Input ``period`` must be a bounded positive number in all dimensions"
     assert substr in err.value.args[0]
-
-
-
-
-
-
-
-
-
-

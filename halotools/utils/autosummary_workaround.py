@@ -109,4 +109,3 @@ def setup(app):
 
     if LooseVersion(sphinx.__version__) <= LooseVersion('1.3.1'):
         app.add_directive('autosummary', FixedAutosummary)
-

@@ -1,25 +1,25 @@
-""" Module containing `~halotools.mock_observables.RectangularDoubleMesh`, 
-the primary data structure used to optimize pairwise 
-calculations throughout the `~halotools.mock_observables` sub-package. 
-""" 
-import numpy as np 
-from math import floor 
+""" Module containing `~halotools.mock_observables.RectangularDoubleMesh`,
+the primary data structure used to optimize pairwise
+calculations throughout the `~halotools.mock_observables` sub-package.
+"""
+import numpy as np
+from math import floor
 
 __all__ = ('RectangularDoubleMesh', )
 __author__ = ('Andrew Hearin', )
 
 def digitized_position(p, cell_size, num_divs):
-    """ Function returns a discretized spatial position of input point(s). 
+    """ Function returns a discretized spatial position of input point(s).
     """
     ip = np.floor(p // cell_size).astype(int)
     return np.where(ip >= num_divs, num_divs-1, ip)
 
-def sample1_cell_size(period, search_length, approx_cell_size, 
+def sample1_cell_size(period, search_length, approx_cell_size,
     max_cells_per_dimension = 50):
-    """ Function determines the size of the cells of mesh1. 
-    The conditions that must be met are that the cell size must 
-    be less than the search length, must evenly divide the box length, 
-    and may not exceed ``max_cells_per_dimension``. 
+    """ Function determines the size of the cells of mesh1.
+    The conditions that must be met are that the cell size must
+    be less than the search length, must evenly divide the box length,
+    and may not exceed ``max_cells_per_dimension``.
     """
     if search_length > period/3.:
         msg = ("Input ``search_length`` cannot exceed period/3")
@@ -38,12 +38,12 @@ def sample1_cell_size(period, search_length, approx_cell_size,
 
     return cell_size
 
-def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size, 
+def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
     max_cells_per_dimension = 50):
-    """ Function determines the size of the cells of mesh2. 
-    The conditions that must be met are that the cell size must 
-    be less than the search length, must evenly divide the box length, 
-    and may not exceed ``max_cells_per_dimension``. 
+    """ Function determines the size of the cells of mesh2.
+    The conditions that must be met are that the cell size must
+    be less than the search length, must evenly divide the box length,
+    and may not exceed ``max_cells_per_dimension``.
     """
     num_sample1_cells = int(np.round(period / sample1_cell_size))
     ndivs_sample1_cells = int(np.round(sample1_cell_size/float(approx_cell_size)))
@@ -57,8 +57,8 @@ def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
     return cell_size
 
 class RectangularMesh(object):
-    """ Underlying mesh structure used to place points into rectangular cells 
-    within a simulation volume. 
+    """ Underlying mesh structure used to place points into rectangular cells
+    within a simulation volume.
 
     The simulation box is divided into rectanguloid cells whose edges
     and faces are aligned with the Cartesian coordinates of the box.
@@ -89,7 +89,7 @@ class RectangularMesh(object):
 
     """
 
-    def __init__(self, x1in, y1in, z1in, xperiod, yperiod, zperiod, 
+    def __init__(self, x1in, y1in, z1in, xperiod, yperiod, zperiod,
         approx_xcell_size, approx_ycell_size, approx_zcell_size):
         """
         Parameters
@@ -165,7 +165,7 @@ class RectangularMesh(object):
         cell_ids = self.cell_id_from_cell_tuple(ix, iy, iz)
         self.idx_sorted = np.ascontiguousarray(np.argsort(cell_ids))
 
-        cell_id_indices = np.searchsorted(cell_ids, np.arange(self.ncells), 
+        cell_id_indices = np.searchsorted(cell_ids, np.arange(self.ncells),
             sorter = self.idx_sorted)
         cell_id_indices = np.append(cell_id_indices, self.npts)
         self.cell_id_indices = np.ascontiguousarray(cell_id_indices)
@@ -174,9 +174,9 @@ class RectangularMesh(object):
         return ix*(self.num_ydivs*self.num_zdivs) + iy*self.num_zdivs + iz
 
 class RectangularDoubleMesh(object):
-    """ Fundamental data structure of the `~halotools.mock_observables` sub-package. 
-    `~halotools.mock_observables.RectangularDoubleMesh` is built up from two instances 
-    of `~halotools.mock_observables.pair_counters.rectangular_mesh.RectangularMesh`. 
+    """ Fundamental data structure of the `~halotools.mock_observables` sub-package.
+    `~halotools.mock_observables.RectangularDoubleMesh` is built up from two instances
+    of `~halotools.mock_observables.pair_counters.rectangular_mesh.RectangularMesh`.
     """
 
     def __init__(self, x1, y1, z1, x2, y2, z2,
@@ -234,14 +234,14 @@ class RectangularDoubleMesh(object):
         approx_x1cell_size = sample1_cell_size(xperiod, search_xlength, approx_x1cell_size)
         approx_y1cell_size = sample1_cell_size(yperiod, search_ylength, approx_y1cell_size)
         approx_z1cell_size = sample1_cell_size(zperiod, search_zlength, approx_z1cell_size)
-        self.mesh1 = RectangularMesh(x1, y1, z1, xperiod, yperiod, zperiod, 
+        self.mesh1 = RectangularMesh(x1, y1, z1, xperiod, yperiod, zperiod,
             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size)
 
-        approx_x2cell_size = sample2_cell_sizes(xperiod, self.mesh1.xcell_size, approx_x2cell_size) 
-        approx_y2cell_size = sample2_cell_sizes(yperiod, self.mesh1.ycell_size, approx_y2cell_size) 
-        approx_z2cell_size = sample2_cell_sizes(zperiod, self.mesh1.zcell_size, approx_z2cell_size) 
+        approx_x2cell_size = sample2_cell_sizes(xperiod, self.mesh1.xcell_size, approx_x2cell_size)
+        approx_y2cell_size = sample2_cell_sizes(yperiod, self.mesh1.ycell_size, approx_y2cell_size)
+        approx_z2cell_size = sample2_cell_sizes(zperiod, self.mesh1.zcell_size, approx_z2cell_size)
 
-        self.mesh2 = RectangularMesh(x2, y2, z2, xperiod, yperiod, zperiod, 
+        self.mesh2 = RectangularMesh(x2, y2, z2, xperiod, yperiod, zperiod,
             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size)
 
         self.num_xcell2_per_xcell1 = self.mesh2.num_xdivs // self.mesh1.num_xdivs
@@ -281,18 +281,3 @@ class RectangularDoubleMesh(object):
                 "If you need to count pairs on these length scales, \n"
                 "you should use a larger simulation.\n" % (self.search_zlength, self.zperiod))
             raise ValueError(msg)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

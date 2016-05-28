@@ -1,10 +1,10 @@
-""" Module containing the `~halotools.mock_observables.npairs_s_mu` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_s_mu` function
+used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
+from functools import partial
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
@@ -16,7 +16,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ('npairs_s_mu', )
 
-def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None, 
+def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
     verbose = False, num_threads = 1, approx_cell1_size = None, approx_cell2_size = None):
     """
     Function counts the number of pairs of points separated by less than
@@ -40,55 +40,55 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Npts2 x 3 array containing 3-D positions of points.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     s_bins : array_like
-        numpy array of :math:`s` boundaries defining the bins in which pairs are counted. 
-    
+        numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
+
     mu_bins : array_like
-        numpy array of :math:`\\cos(\\theta_{\\rm LOS})` boundaries defining the bins in 
-        which pairs are counted, and must be between [0,1]. 
+        numpy array of :math:`\\cos(\\theta_{\\rm LOS})` boundaries defining the bins in
+        which pairs are counted, and must be between [0,1].
 
         Note that using the sine is not common convention for
         calculating the two point correlation function (see notes).
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     verbose : Boolean, optional
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -144,7 +144,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     s_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rmax = np.max(s_bins)
 
@@ -160,7 +160,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
                "1D array with at least two entries")
         raise ValueError(msg)
 
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -176,7 +176,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_s_mu_engine, 
+    engine = partial(npairs_s_mu_engine,
         double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins)
 
     # # Calculate the cell1 indices that will be looped over by the engine
@@ -192,4 +192,3 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = None,
         counts = engine(cell1_tuples[0])
 
     return np.array(counts)
-

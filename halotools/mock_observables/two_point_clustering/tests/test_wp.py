@@ -26,10 +26,10 @@ def test_wp_auto_nonperiodic():
         sample1 = np.random.random((Npts,3))
         randoms = np.random.random((Npts,3))
 
-    result = wp(sample1, rp_bins, pi_max, sample2 = None, 
-                  randoms=randoms, period = None, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = None,
+                  randoms=randoms, period = None,
                   max_sample_size=int(1e4), estimator='Natural')
-    
+
     print(result)
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
@@ -41,10 +41,10 @@ def test_wp_auto_periodic():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts,3))
 
-    result = wp(sample1, rp_bins, pi_max, sample2 = None, 
-                randoms=None, period = period, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = None,
+                randoms=None, period = period,
                 max_sample_size=int(1e4), estimator='Natural')
-    
+
 
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
@@ -57,8 +57,8 @@ def test_wp_cross_periodic():
         sample1 = np.random.random((Npts,3))
         sample2 = np.random.random((Npts,3))
 
-    result = wp(sample1, rp_bins, pi_max, sample2 = sample2, 
-                randoms=None, period = period, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = sample2,
+                randoms=None, period = period,
                 max_sample_size=int(1e4), estimator='Natural')
 
     assert len(result)==3, "wrong number of correlations returned"
@@ -76,12 +76,11 @@ def test_wp_cross_nonperiodic():
         sample2 = np.random.random((Npts,3))
         randoms = np.random.random((Npts,3))
 
-    result = wp(sample1, rp_bins, pi_max, sample2 = sample2, 
-                randoms=randoms, period = None, 
+    result = wp(sample1, rp_bins, pi_max, sample2 = sample2,
+                randoms=randoms, period = None,
                 max_sample_size=int(1e4), estimator='Natural')
 
     assert len(result)==3, "wrong number of correlations returned"
     assert result[0].ndim == 1, "dimension of auto incorrect"
     assert result[1].ndim == 1, "dimension of cross incorrect"
     assert result[2].ndim == 1, "dimension auto incorrect"
-

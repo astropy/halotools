@@ -432,12 +432,3 @@ class TestUserSuppliedHaloCatalog(TestCase):
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
-
-
-
-
-
-
-
-
-

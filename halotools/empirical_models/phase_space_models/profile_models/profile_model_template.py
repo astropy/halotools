@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the `AnalyticalDensityProf` class, 
-a container class for the distribution of mass and/or galaxies 
-within dark matter halos.  
+This module contains the `AnalyticalDensityProf` class,
+a container class for the distribution of mass and/or galaxies
+within dark matter halos.
 """
 from __future__ import division, print_function, absolute_import, unicode_literals
 
-import numpy as np 
-from astropy.extern import six 
+import numpy as np
+from astropy.extern import six
 from abc import ABCMeta, abstractmethod
 from scipy.integrate import quad as quad_integration
 from scipy.optimize import minimize as scipy_minimize
@@ -28,44 +28,44 @@ __all__ = ['AnalyticDensityProf']
 
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
-    """ Container class for any analytical radial profile model. 
+    """ Container class for any analytical radial profile model.
 
-    See :ref:`profile_template_tutorial` for a review of the mathematics of 
-    halo profiles, and a thorough description of how the relevant equations 
-    are implemented in the `AnalyticDensityProf` source code. 
+    See :ref:`profile_template_tutorial` for a review of the mathematics of
+    halo profiles, and a thorough description of how the relevant equations
+    are implemented in the `AnalyticDensityProf` source code.
 
-    Notes 
+    Notes
     -----
-    The primary behavior of the `AnalyticDensityProf` class is governed by the 
-    `dimensionless_mass_density`  method. The `AnalyticDensityProf` class has no 
-    implementation of its own of `dimensionless_mass_density`, but does implement 
-    all other behaviors that derive from `dimensionless_mass_density`. Thus for users 
-    who wish to define their own profile class, defining the `dimensionless_mass_density` of 
-    the profile is the necessary and sufficient ingredient. 
+    The primary behavior of the `AnalyticDensityProf` class is governed by the
+    `dimensionless_mass_density`  method. The `AnalyticDensityProf` class has no
+    implementation of its own of `dimensionless_mass_density`, but does implement
+    all other behaviors that derive from `dimensionless_mass_density`. Thus for users
+    who wish to define their own profile class, defining the `dimensionless_mass_density` of
+    the profile is the necessary and sufficient ingredient.
     """
 
     def __init__(self, cosmology, redshift, mdef, **kwargs):
         """
-        Parameters 
+        Parameters
         -----------
-        cosmology : object 
-            Instance of an `~astropy.cosmology` object. 
+        cosmology : object
+            Instance of an `~astropy.cosmology` object.
 
         redshift: array_like
             Can be a scalar or a numpy array.
 
         mdef: str
-            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+            String specifying the halo mass definition, e.g., 'vir' or '200m'.
 
         """
         self.cosmology = cosmology
         self.redshift = redshift
         self.mdef = mdef
 
-        # The following four attributes are derived quantities from the above, 
-        # so that self-consistency between them is ensured 
+        # The following four attributes are derived quantities from the above,
+        # so that self-consistency between them is ensured
         self.density_threshold = profile_helpers.density_threshold(
-            cosmology = self.cosmology, 
+            cosmology = self.cosmology,
             redshift = self.redshift, mdef = self.mdef)
         self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
         self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
@@ -79,82 +79,82 @@ class AnalyticDensityProf(object):
         """
         Physical density of the halo scaled by the density threshold of the mass definition:
 
-        The `dimensionless_mass_density` is defined as 
-        :math:`\\tilde{\\rho}_{\\rm prof}(\\tilde{r}) \\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
-        where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
-        The quantity :math:`\\rho_{\\rm thresh}` is a function of 
-        the halo mass definition, cosmology and redshift, 
-        and is computed via the 
-        `~halotools.empirical_models.profile_helpers.density_threshold` function. 
-        The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the 
-        halo profile and is computed via the `mass_density` function. 
+        The `dimensionless_mass_density` is defined as
+        :math:`\\tilde{\\rho}_{\\rm prof}(\\tilde{r}) \\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`,
+        where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`.
+        The quantity :math:`\\rho_{\\rm thresh}` is a function of
+        the halo mass definition, cosmology and redshift,
+        and is computed via the
+        `~halotools.empirical_models.profile_helpers.density_threshold` function.
+        The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the
+        halo profile and is computed via the `mass_density` function.
 
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
-        Parameters 
+        Parameters
         -----------
-        scaled_radius : array_like 
-            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
-            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+        scaled_radius : array_like
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array.
 
-        *prof_params : array_like, optional 
-            Any additional array or sequence of arrays 
-            necessary to specify the shape of the radial profile, 
-            e.g., halo concentration. 
+        *prof_params : array_like, optional
+            Any additional array or sequence of arrays
+            necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
-        Returns 
+        Returns
         -------
-        dimensionless_density: array_like 
-            Dimensionless density of a dark matter halo 
-            at the input ``scaled_radius``, normalized by the 
-            `~halotools.empirical_models.profile_helpers.density_threshold` 
-            :math:`\\rho_{\\rm thresh}` for the 
-            halo mass definition, cosmology, and redshift. 
-            Result is an array of the dimension as the input ``scaled_radius``. 
+        dimensionless_density: array_like
+            Dimensionless density of a dark matter halo
+            at the input ``scaled_radius``, normalized by the
+            `~halotools.empirical_models.profile_helpers.density_threshold`
+            :math:`\\rho_{\\rm thresh}` for the
+            halo mass definition, cosmology, and redshift.
+            Result is an array of the dimension as the input ``scaled_radius``.
 
-        Notes 
+        Notes
         -----
-        All of the behavior of a subclass of `AnalyticDensityProf` is determined by 
-        `dimensionless_mass_density`. This is numerically convenient, because mass densities 
-        in physical units are astronomically large numbers, whereas `dimensionless_mass_density` 
-        is of order :math:`\\mathcal{O}(1-100)`. This also saves users writing their own subclass 
-        from having to worry over factors of little h, how profile normalization scales 
-        with the mass definition, etc. Once a model's `dimensionless_mass_density` is specified, 
-        all the other functionality is derived from this definition. 
+        All of the behavior of a subclass of `AnalyticDensityProf` is determined by
+        `dimensionless_mass_density`. This is numerically convenient, because mass densities
+        in physical units are astronomically large numbers, whereas `dimensionless_mass_density`
+        is of order :math:`\\mathcal{O}(1-100)`. This also saves users writing their own subclass
+        from having to worry over factors of little h, how profile normalization scales
+        with the mass definition, etc. Once a model's `dimensionless_mass_density` is specified,
+        all the other functionality is derived from this definition.
 
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
         pass
 
     def mass_density(self, radius, mass, *prof_params):
         """
-        Physical density of the halo at the input radius, 
-        given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
-        
-        Parameters 
+        Physical density of the halo at the input radius,
+        given in units of :math:`h^{3}/{\\rm Mpc}^{3}`.
+
+        Parameters
         -----------
-        radius : array_like 
+        radius : array_like
             Halo-centric distance in Mpc/h units; can be a scalar or numpy array
 
-        mass : array_like 
-            Total mass of the halo; can be a scalar or numpy array of the same 
-            dimension as the input ``radius``. 
+        mass : array_like
+            Total mass of the halo; can be a scalar or numpy array of the same
+            dimension as the input ``radius``.
 
-        *prof_params : array_like, optional 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration. 
+        *prof_params : array_like, optional
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
-        Returns 
+        Returns
         -------
-        density: array_like 
-            Physical density of a dark matter halo of the input ``mass`` 
-            at the input ``radius``. Result is an array of the 
-            dimension as the input ``radius``, reported in units of :math:`h^{3}/Mpc^{3}`. 
+        density: array_like
+            Physical density of a dark matter halo of the input ``mass``
+            at the input ``radius``. Result is an array of the
+            dimension as the input ``radius``, reported in units of :math:`h^{3}/Mpc^{3}`.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
         halo_radius = self.halo_mass_to_halo_radius(mass)
@@ -167,21 +167,21 @@ class AnalyticDensityProf(object):
 
     def _enclosed_dimensionless_mass_integrand(self, scaled_radius, *prof_params):
         """
-        Integrand used when computing `cumulative_mass_PDF`. 
+        Integrand used when computing `cumulative_mass_PDF`.
 
-        Parameters 
+        Parameters
         -----------
-        scaled_radius : array_like 
-            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
-            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+        scaled_radius : array_like
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array.
 
-        *prof_params : array_like, optional 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration. 
+        *prof_params : array_like, optional
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
-        Returns 
+        Returns
         -------
-        integrand: array_like 
+        integrand: array_like
             function to be integrated to yield the amount of enclosed mass.
         """
         dimensionless_density = self.dimensionless_mass_density(scaled_radius, *prof_params)
@@ -189,168 +189,168 @@ class AnalyticDensityProf(object):
 
     def cumulative_mass_PDF(self, scaled_radius, *prof_params):
         """
-        The fraction of the total mass enclosed within dimensionless radius, 
+        The fraction of the total mass enclosed within dimensionless radius,
 
         :math:`P_{\\rm prof}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta},`
         where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`.
 
-        Parameters 
+        Parameters
         -----------
-        scaled_radius : array_like 
-            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
-            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+        scaled_radius : array_like
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array.
 
-        *prof_params : array_like, optional 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration.         
-            
+        *prof_params : array_like, optional
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
+
         Returns
         -------------
         p: array_like
-            The fraction of the total mass enclosed 
-            within radius x, in :math:`M_{\odot}/h`; 
+            The fraction of the total mass enclosed
+            within radius x, in :math:`M_{\odot}/h`;
             has the same dimensions as the input ``x``.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
         """
         x = convert_to_ndarray(scaled_radius, dt = np.float64)
         enclosed_mass = np.zeros_like(x)
 
         for i in range(len(x)):
             enclosed_mass[i], _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand, 0., x[i], epsrel = 1e-5, 
-                args = prof_params)
-    
-        total, _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand, 0., 1.0, epsrel = 1e-5, 
+                self._enclosed_dimensionless_mass_integrand, 0., x[i], epsrel = 1e-5,
                 args = prof_params)
 
-        return enclosed_mass / total 
+        total, _ = quad_integration(
+                self._enclosed_dimensionless_mass_integrand, 0., 1.0, epsrel = 1e-5,
+                args = prof_params)
+
+        return enclosed_mass / total
 
     def enclosed_mass(self, radius, total_mass, *prof_params):
         """
-        The mass enclosed within the input radius. 
+        The mass enclosed within the input radius.
 
-        :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`. 
+        :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`.
 
-        Parameters 
+        Parameters
         -----------
-        radius : array_like 
+        radius : array_like
             Halo-centric distance in Mpc/h units; can be a scalar or numpy array
 
-        total_mass : array_like 
-            Total mass of the halo; can be a scalar or numpy array of the same 
-            dimension as the input ``radius``. 
+        total_mass : array_like
+            Total mass of the halo; can be a scalar or numpy array of the same
+            dimension as the input ``radius``.
 
-        *prof_params : array_like, optional 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration.         
-            
+        *prof_params : array_like, optional
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
+
         Returns
         ----------
         enclosed_mass: array_like
-            The mass enclosed within radius r, in :math:`M_{\odot}/h`; 
+            The mass enclosed within radius r, in :math:`M_{\odot}/h`;
             has the same dimensions as the input ``radius``.
 
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
         """
         radius = convert_to_ndarray(radius, dt = np.float64)
         scaled_radius = radius / self.halo_mass_to_halo_radius(total_mass)
-        mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass 
+        mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass
 
         return mass
 
     def dimensionless_circular_velocity(self, scaled_radius, *prof_params):
-        """ Circular velocity scaled by the virial velocity, 
-        :math:`V_{\\rm cir}(x) / V_{\\rm vir}`, as a function of 
+        """ Circular velocity scaled by the virial velocity,
+        :math:`V_{\\rm cir}(x) / V_{\\rm vir}`, as a function of
         dimensionless position :math:`\\tilde{r} = r / R_{\\rm vir}`.
 
-        Parameters 
+        Parameters
         -----------
-        scaled_radius : array_like 
-            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
-            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+        scaled_radius : array_like
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array.
 
-        *prof_params : array_like, optional 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration. 
+        *prof_params : array_like, optional
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
-        Returns 
+        Returns
         -------
-        vcir : array_like 
-            Circular velocity scaled by the virial velocity, 
-            :math:`V_{\\rm cir}(x) / V_{\\rm vir}`.         
+        vcir : array_like
+            Circular velocity scaled by the virial velocity,
+            :math:`V_{\\rm cir}(x) / V_{\\rm vir}`.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
         return np.sqrt(self.cumulative_mass_PDF(scaled_radius, *prof_params)/scaled_radius)
 
 
     def virial_velocity(self, total_mass):
-        """ The circular velocity evaluated at the halo boundary, 
+        """ The circular velocity evaluated at the halo boundary,
         :math:`V_{\\rm vir} \\equiv \\sqrt{GM_{\\rm halo}/R_{\\rm halo}}`.
 
         Parameters
         --------------
-        total_mass : array_like 
+        total_mass : array_like
             Total mass of the halo; can be a scalar or numpy array.
 
-        Returns 
+        Returns
         --------
-        vvir : array_like 
+        vvir : array_like
             Virial velocity in km/s.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
-        return profile_helpers.halo_mass_to_virial_velocity(total_mass, 
+        return profile_helpers.halo_mass_to_virial_velocity(total_mass,
             self.cosmology, self.redshift, self.mdef)
 
     def circular_velocity(self, radius, total_mass, *prof_params):
         """
-        The circular velocity, :math:`V_{\\rm cir} \\equiv \\sqrt{GM(<r)/r}`, 
-        as a function of halo-centric distance r. 
+        The circular velocity, :math:`V_{\\rm cir} \\equiv \\sqrt{GM(<r)/r}`,
+        as a function of halo-centric distance r.
 
         Parameters
         --------------
-        radius : array_like 
+        radius : array_like
             Halo-centric distance in Mpc/h units; can be a scalar or numpy array
 
-        total_mass : array_like 
-            Total mass of the halo; can be a scalar or numpy array of the same 
-            dimension as the input ``radius``. 
+        total_mass : array_like
+            Total mass of the halo; can be a scalar or numpy array of the same
+            dimension as the input ``radius``.
 
-        *prof_params : array_like, optional 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration.         
+        *prof_params : array_like, optional
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
         Returns
         ----------
         vc: array_like
             The circular velocity in km/s; has the same dimensions as the input ``radius``.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
-        """     
+        """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
         scaled_radius = convert_to_ndarray(radius) / halo_radius
         return self.dimensionless_circular_velocity(
             scaled_radius, *prof_params)*self.virial_velocity(total_mass)
 
     def _vmax_helper(self, scaled_radius, *prof_params):
-        """ Helper function used to calculate `vmax` and `rmax`. 
+        """ Helper function used to calculate `vmax` and `rmax`.
         """
         encl = self.cumulative_mass_PDF(scaled_radius, *prof_params)
         return -1.*encl/scaled_radius
@@ -358,23 +358,23 @@ class AnalyticDensityProf(object):
     def rmax(self, total_mass, *prof_params):
         """ Radius at which the halo attains its maximum circular velocity.
 
-        Parameters 
+        Parameters
         ----------
         total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
-        *prof_params : array_like 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration.         
+        *prof_params : array_like
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
-        Returns 
+        Returns
         --------
-        rmax : array_like 
+        rmax : array_like
             :math:`R_{\\rm max}` in Mpc/h.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
@@ -386,25 +386,25 @@ class AnalyticDensityProf(object):
         return result.x[0]*halo_radius
 
     def vmax(self, total_mass, *prof_params):
-        """ Maximum circular velocity of the halo profile. 
+        """ Maximum circular velocity of the halo profile.
 
-        Parameters 
+        Parameters
         ----------
         total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
-        *prof_params : array_like 
-            Any additional array(s) necessary to specify the shape of the radial profile, 
-            e.g., halo concentration.         
+        *prof_params : array_like
+            Any additional array(s) necessary to specify the shape of the radial profile,
+            e.g., halo concentration.
 
-        Returns 
+        Returns
         --------
-        vmax : array_like 
+        vmax : array_like
             :math:`V_{\\rm max}` in km/s.
 
-        Notes 
+        Notes
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
         guess = 0.25
@@ -415,60 +415,60 @@ class AnalyticDensityProf(object):
 
     def halo_mass_to_halo_radius(self, total_mass):
         """
-        Spherical overdensity radius as a function of the input mass. 
+        Spherical overdensity radius as a function of the input mass.
 
         Note that this function is independent of the form of the density profile.
 
-        Parameters 
+        Parameters
         ----------
         total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
-        Returns 
+        Returns
         -------
-        radius : array_like 
-            Radius of the halo in Mpc/h units. 
+        radius : array_like
+            Radius of the halo in Mpc/h units.
             Will have the same dimension as the input ``total_mass``.
 
-        Notes 
+        Notes
         ------
-        The behavior of this function derives from 
-        `~halotools.empirical_models.profile_helpers.halo_mass_to_halo_radius`. 
+        The behavior of this function derives from
+        `~halotools.empirical_models.profile_helpers.halo_mass_to_halo_radius`.
 
-        This function is tested by the 
-        `~halotools.empirical_models.TestProfileHelpers` class. 
+        This function is tested by the
+        `~halotools.empirical_models.TestProfileHelpers` class.
 
         """
         return profile_helpers.halo_mass_to_halo_radius(
-            total_mass, cosmology = self.cosmology, 
+            total_mass, cosmology = self.cosmology,
             redshift = self.redshift, mdef = self.mdef)
 
     def halo_radius_to_halo_mass(self, radius):
         """
-        Spherical overdensity mass as a function of the input radius. 
+        Spherical overdensity mass as a function of the input radius.
 
         Note that this function is independent of the form of the density profile.
 
-        Parameters 
+        Parameters
         ------------
-        radius : array_like 
+        radius : array_like
             Radius of the halo in Mpc/h units; can be a number or a numpy array.
 
-        Returns 
+        Returns
         ----------
         total_mass: array_like
-            Total halo mass in :math:`M_{\odot}/h`. 
+            Total halo mass in :math:`M_{\odot}/h`.
             Will have the same dimension as the input ``radius``.
 
-        Notes 
+        Notes
         ------
-        The behavior of this function derives from 
-        `~halotools.empirical_models.profile_helpers.halo_radius_to_halo_mass`. 
+        The behavior of this function derives from
+        `~halotools.empirical_models.profile_helpers.halo_radius_to_halo_mass`.
 
-        This function is tested by the 
-        `~halotools.empirical_models.TestProfileHelpers` class. 
+        This function is tested by the
+        `~halotools.empirical_models.TestProfileHelpers` class.
 
         """
         return profile_helpers.halo_radius_to_halo_mass(
-            radius, cosmology = self.cosmology, 
+            radius, cosmology = self.cosmology,
             redshift = self.redshift, mdef = self.mdef)

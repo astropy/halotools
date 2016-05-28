@@ -1,5 +1,5 @@
 """
-Module containing the template class `~halotools.empirical_models.MockFactory` 
+Module containing the template class `~halotools.empirical_models.MockFactory`
 used to construct mock galaxy populations.
 """
 from __future__ import absolute_import
@@ -502,4 +502,3 @@ class MockFactory(object):
         """
         satmask = self.galaxy_table['gal_type'] != 'centrals'
         return len(self.galaxy_table[satmask]) / float(len(self.galaxy_table))
-

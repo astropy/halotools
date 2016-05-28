@@ -1,31 +1,31 @@
 #!/usr/bin/env python
 from __future__ import (absolute_import, division, print_function)
-import numpy as np 
+import numpy as np
 
 from astropy.utils.misc import NumpyRNGContext
 
-__all__ = ('generate_locus_of_3d_points', 'generate_3d_regular_mesh', 
+__all__ = ('generate_locus_of_3d_points', 'generate_3d_regular_mesh',
     'generate_thin_shell_of_3d_points')
 
 def generate_locus_of_3d_points(npts, xc=0.1, yc=0.1, zc=0.1, epsilon=0.001, seed=None):
     """
-    Function returns a tight locus of points inside a 3d box. 
+    Function returns a tight locus of points inside a 3d box.
 
-    Parameters 
+    Parameters
     -----------
-    npts : int 
-        Number of desired points 
+    npts : int
+        Number of desired points
 
-    xc, yc, zc : float 
-        Midpoint value in all three dimensions 
+    xc, yc, zc : float
+        Midpoint value in all three dimensions
 
-    epsilon : float 
+    epsilon : float
         Length of the box enclosing the returned locus of points
 
-    Returns 
+    Returns
     ---------
-    pts : array_like 
-        ndarray with shape (npts, 3) of points tightly localized around 
+    pts : array_like
+        ndarray with shape (npts, 3) of points tightly localized around
         the point (xc, yc, zc)
     """
     with NumpyRNGContext(seed):
@@ -37,30 +37,30 @@ def generate_locus_of_3d_points(npts, xc=0.1, yc=0.1, zc=0.1, epsilon=0.001, see
 
 def generate_3d_regular_mesh(npts, dmin=0, dmax=1):
     """
-    Function returns a regular 3d grid of npts**3 points. 
+    Function returns a regular 3d grid of npts**3 points.
 
-    The spacing of the grid is defined by delta = (dmax-dmin)/npts. 
-    In each dimension, the first point has coordinate delta/2., 
+    The spacing of the grid is defined by delta = (dmax-dmin)/npts.
+    In each dimension, the first point has coordinate delta/2.,
     and the last point has coordinate dmax - delta/2.
 
-    Parameters 
+    Parameters
     -----------
-    npts : int 
-        Number of desired points per dimension. 
+    npts : int
+        Number of desired points per dimension.
 
-    dmin : float, optional 
-        Minimum coordinate value of the box enclosing the grid. 
-        Default is zero. 
+    dmin : float, optional
+        Minimum coordinate value of the box enclosing the grid.
+        Default is zero.
 
-    dmax : float, optional 
-        Maximum coordinate value of the box enclosing the grid. 
+    dmax : float, optional
+        Maximum coordinate value of the box enclosing the grid.
         Default is one.
 
-    Returns 
+    Returns
     ---------
-    x, y, z : array_like 
-        ndarrays of length npts**3 stoshell the cartesian coordinates 
-        of the regular grid. 
+    x, y, z : array_like
+        ndarrays of length npts**3 stoshell the cartesian coordinates
+        of the regular grid.
 
     """
     x = np.linspace(0, 1, npts+1)
@@ -72,29 +72,29 @@ def generate_3d_regular_mesh(npts, dmin=0, dmax=1):
 
 
 def generate_thin_shell_of_3d_points(npts, radius, xc, yc, zc, seed=None, Lbox = None):
-    """ Function returns a thin shell of ``npts`` points located at a distance 
+    """ Function returns a thin shell of ``npts`` points located at a distance
     ``radius`` from the point defined by ``xc``, ``yc``, ``zc``.
 
-    Parameters 
+    Parameters
     -----------
-    npts : int 
-        Number of points in the output shell. 
+    npts : int
+        Number of points in the output shell.
 
-    radius : float 
-        Radius of the shell 
+    radius : float
+        Radius of the shell
 
-    xc, yc, zc : floats 
+    xc, yc, zc : floats
         Center of the shell
 
-    seed : int, optional 
+    seed : int, optional
         Random number seed used to generate the shell
 
-    Returns 
+    Returns
     --------
-    shell : array 
+    shell : array
         npts x 3 numpy array stoshell the points in the shell
 
-    Examples 
+    Examples
     --------
     >>> x0, y0, z0 = 0.05, 0.15, 0.25
     >>> radius = 0.1
@@ -129,20 +129,3 @@ def generate_thin_shell_of_3d_points(npts, radius, xc, yc, zc, seed=None, Lbox =
         zout = (normed_z + zc) % Lbox
 
     return np.vstack([xout, yout, zout]).T
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

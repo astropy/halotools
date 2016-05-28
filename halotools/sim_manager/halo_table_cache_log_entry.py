@@ -187,7 +187,7 @@ class HaloTableCacheLogEntry(object):
             tmp_msg, num_failures = self._verify_halo_rvir_mpc_units(halo_table, num_failures)
             msg += tmp_msg
 
-            if num_failures > 0: 
+            if num_failures > 0:
                 self._cache_safety_message = message_preamble + msg
 
             self._num_failures = num_failures
@@ -437,24 +437,3 @@ class HaloTableCacheLogEntry(object):
                 pass
 
         return msg, num_failures
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

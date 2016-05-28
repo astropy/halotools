@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import (absolute_import, division, print_function)
-import numpy as np 
+import numpy as np
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
@@ -8,29 +8,29 @@ from ..radial_pvd_vs_r import radial_pvd_vs_r
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
-__all__ = ('test_radial_pvd_vs_r1', 'test_radial_pvd_vs_r_auto_consistency', 
+__all__ = ('test_radial_pvd_vs_r1', 'test_radial_pvd_vs_r_auto_consistency',
     'test_radial_pvd_vs_r_cross_consistency')
 
-fixed_seed = 43 
+fixed_seed = 43
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness1():
-    """ This function tests that the 
-    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct 
-    results for a controlled distribution of points whose mean radial velocity 
-    can be simply calculated. 
+    """ This function tests that the
+    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct
+    results for a controlled distribution of points whose mean radial velocity
+    can be simply calculated.
 
-    For this test, the configuration is two tight localizations of points, 
-    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.25). 
-    The first set of points is moving with random uniform z-velocities; 
-    the second set of points is at rest. 
+    For this test, the configuration is two tight localizations of points,
+    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.25).
+    The first set of points is moving with random uniform z-velocities;
+    the second set of points is at rest.
 
-    PBCs are set to infinity in this test. 
+    PBCs are set to infinity in this test.
 
-    For every velocity in sample1, since we can count pairs analytically 
-    for this configuration we know exactly how many appearances of each 
-    velocity there will be, so we can calculate np.std on the exact 
-    same set of points as the marked pair-counter should operate on. 
+    For every velocity in sample1, since we can count pairs analytically
+    for this configuration we know exactly how many appearances of each
+    velocity there will be, so we can calculate np.std on the exact
+    same set of points as the marked pair-counter should operate on.
     """
     npts = 100
 
@@ -47,7 +47,7 @@ def test_radial_pvd_vs_r_correctness1():
 
     rbins = np.array([0.001, 0.1, 0.3])
 
-    s1s1, s1s2, s2s2 = radial_pvd_vs_r(sample1, velocities1, rbins, 
+    s1s1, s1s2, s2s2 = radial_pvd_vs_r(sample1, velocities1, rbins,
         sample2 = sample2, velocities2 = velocities2)
 
     correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
@@ -57,22 +57,22 @@ def test_radial_pvd_vs_r_correctness1():
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness2():
-    """ This function tests that the 
-    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct 
-    results for a controlled distribution of points whose radial velocity 
-    can be simply calculated. 
+    """ This function tests that the
+    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct
+    results for a controlled distribution of points whose radial velocity
+    can be simply calculated.
 
-    For this test, the configuration is two tight localizations of points, 
-    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.95). 
-    The first set of points is moving with random uniform z-velocities; 
-    the second set of points is at rest. 
+    For this test, the configuration is two tight localizations of points,
+    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.95).
+    The first set of points is moving with random uniform z-velocities;
+    the second set of points is at rest.
 
-    PBCs are operative in this test. 
+    PBCs are operative in this test.
 
-    For every velocity in sample1, since we can count pairs analytically 
-    for this configuration we know exactly how many appearances of each 
-    velocity there will be, so we can calculate np.std on the exact 
-    same set of points as the marked pair-counter should operate on. 
+    For every velocity in sample1, since we can count pairs analytically
+    for this configuration we know exactly how many appearances of each
+    velocity there will be, so we can calculate np.std on the exact
+    same set of points as the marked pair-counter should operate on.
     """
     npts = 100
 
@@ -88,7 +88,7 @@ def test_radial_pvd_vs_r_correctness2():
         velocities1[:,2] = np.random.uniform(0, 1, npts)
 
     rbins = np.array([0.001, 0.1, 0.3])
-    s1s1, s1s2, s2s2 = radial_pvd_vs_r(sample1, velocities1, rbins, 
+    s1s1, s1s2, s2s2 = radial_pvd_vs_r(sample1, velocities1, rbins,
         sample2 = sample2, velocities2 = velocities2, period=1)
 
     correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
@@ -98,25 +98,25 @@ def test_radial_pvd_vs_r_correctness2():
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness3():
-    """ This function tests that the 
-    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct 
-    results for a controlled distribution of points whose radial velocity 
-    can be simply calculated. 
+    """ This function tests that the
+    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct
+    results for a controlled distribution of points whose radial velocity
+    can be simply calculated.
 
-    For this test, the configuration is two tight localizations of points, 
-    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.25). 
-    The first set of points is moving with random uniform z-velocities; 
-    the second set of points is at rest. 
+    For this test, the configuration is two tight localizations of points,
+    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.25).
+    The first set of points is moving with random uniform z-velocities;
+    the second set of points is at rest.
 
-    PBCs are turned off in this test. 
+    PBCs are turned off in this test.
 
-    For every velocity in sample1, since we can count pairs analytically 
-    for this configuration we know exactly how many appearances of each 
-    velocity there will be, so we can calculate np.std on the exact 
-    same set of points as the marked pair-counter should operate on. 
+    For every velocity in sample1, since we can count pairs analytically
+    for this configuration we know exactly how many appearances of each
+    velocity there will be, so we can calculate np.std on the exact
+    same set of points as the marked pair-counter should operate on.
 
-    This is the same test as test_radial_pvd_vs_r_correctness3, only here we 
-    bundle the two sets of points into the same sample. 
+    This is the same test as test_radial_pvd_vs_r_correctness3, only here we
+    bundle the two sets of points into the same sample.
     """
     npts = 100
 
@@ -143,22 +143,22 @@ def test_radial_pvd_vs_r_correctness3():
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness4():
-    """ This function tests that the 
-    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct 
-    results for a controlled distribution of points whose radial velocity 
-    can be simply calculated. 
+    """ This function tests that the
+    `~halotools.mock_observables.radial_pvd_vs_r` function returns correct
+    results for a controlled distribution of points whose radial velocity
+    can be simply calculated.
 
-    For this test, the configuration is two tight localizations of points, 
-    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.95). 
-    The first set of points is moving with random uniform z-velocities; 
-    the second set of points is at rest. 
+    For this test, the configuration is two tight localizations of points,
+    the first at (0.5, 0.5, 0.1), the second at (0.5, 0.5, 0.95).
+    The first set of points is moving with random uniform z-velocities;
+    the second set of points is at rest.
 
-    PBCs are operative in this test. 
+    PBCs are operative in this test.
 
-    For every velocity in sample1, since we can count pairs analytically 
-    for this configuration we know exactly how many appearances of each 
-    velocity there will be, so we can calculate np.std on the exact 
-    same set of points as the marked pair-counter should operate on. 
+    For every velocity in sample1, since we can count pairs analytically
+    for this configuration we know exactly how many appearances of each
+    velocity there will be, so we can calculate np.std on the exact
+    same set of points as the marked pair-counter should operate on.
     """
     npts = 100
 
@@ -186,8 +186,8 @@ def test_radial_pvd_vs_r_correctness4():
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r1():
-    """ Verify that different choices for the cell size has no 
-    impact on the results. 
+    """ Verify that different choices for the cell size has no
+    impact on the results.
     """
 
     npts = 100
@@ -202,14 +202,14 @@ def test_radial_pvd_vs_r1():
 
     rbins = np.linspace(0, 0.3, 10)
     result1 = radial_pvd_vs_r(sample1, velocities1, rbins)
-    result2 = radial_pvd_vs_r(sample1, velocities1, rbins, 
+    result2 = radial_pvd_vs_r(sample1, velocities1, rbins,
         approx_cell1_size = [0.2, 0.2, 0.2])
     assert np.allclose(result1, result2, rtol=0.0001)
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_auto_consistency():
-    """ Verify that we get self-consistent auto-correlation results 
-    regardless of whether we ask for cross-correlations. 
+    """ Verify that we get self-consistent auto-correlation results
+    regardless of whether we ask for cross-correlations.
     """
     npts = 100
 
@@ -225,10 +225,10 @@ def test_radial_pvd_vs_r_auto_consistency():
         velocities1[:,2] = np.random.uniform(0, 1, npts)
 
     rbins = np.linspace(0, 0.3, 10)
-    s1s1a, s1s2a, s2s2a = radial_pvd_vs_r(sample1, velocities1, rbins, 
+    s1s1a, s1s2a, s2s2a = radial_pvd_vs_r(sample1, velocities1, rbins,
         sample2 = sample2, velocities2 = velocities2)
-    s1s1b, s2s2b = radial_pvd_vs_r(sample1, velocities1, rbins, 
-        sample2 = sample2, velocities2 = velocities2, 
+    s1s1b, s2s2b = radial_pvd_vs_r(sample1, velocities1, rbins,
+        sample2 = sample2, velocities2 = velocities2,
         do_cross = False)
 
     assert np.allclose(s1s1a,s1s1b, rtol=0.001)
@@ -236,8 +236,8 @@ def test_radial_pvd_vs_r_auto_consistency():
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_cross_consistency():
-    """ Verify that we get self-consistent cross-correlation results 
-    regardless of whether we ask for auto-correlations. 
+    """ Verify that we get self-consistent cross-correlation results
+    regardless of whether we ask for auto-correlations.
     """
     npts = 100
 
@@ -253,11 +253,10 @@ def test_radial_pvd_vs_r_cross_consistency():
         velocities1[:,2] = np.random.uniform(0, 1, npts)
 
     rbins = np.linspace(0, 0.3, 10)
-    s1s1a, s1s2a, s2s2a = radial_pvd_vs_r(sample1, velocities1, rbins, 
+    s1s1a, s1s2a, s2s2a = radial_pvd_vs_r(sample1, velocities1, rbins,
         sample2 = sample2, velocities2 = velocities2)
-    s1s2b = radial_pvd_vs_r(sample1, velocities1, rbins, 
-        sample2 = sample2, velocities2 = velocities2, 
+    s1s2b = radial_pvd_vs_r(sample1, velocities1, rbins,
+        sample2 = sample2, velocities2 = velocities2,
         do_auto = False)
 
     assert np.allclose(s1s2a,s1s2b, rtol=0.001)
-

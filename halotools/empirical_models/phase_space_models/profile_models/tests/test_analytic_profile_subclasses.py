@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function, 
+from __future__ import (absolute_import, division, print_function,
     unicode_literals)
 
 
@@ -12,20 +12,20 @@ from ... import profile_models
 __all__ = ['TestAnalyticDensityProf']
 
 class TestAnalyticDensityProf(TestCase):
-    """ Test the existence and reasonableness of all instances of 
-    sub-classes of `~halotools.empirical_models.AnalyticDensityProf`. 
+    """ Test the existence and reasonableness of all instances of
+    sub-classes of `~halotools.empirical_models.AnalyticDensityProf`.
     """
 
     def setup_class(self):
-        """ Pre-load various arrays into memory for use by all tests. 
+        """ Pre-load various arrays into memory for use by all tests.
         """
         self.prof_model_list = (
             profile_models.NFWProfile, profile_models.TrivialProfile
             )
 
     def test_attr_inheritance(self):
-        """ Test that all sub-classes of 
-        `~halotools.empirical_models.AnalyticDensityProf` 
+        """ Test that all sub-classes of
+        `~halotools.empirical_models.AnalyticDensityProf`
         correctly inherit the necessary attributes and methods.
         """
 
@@ -59,6 +59,3 @@ class TestAnalyticDensityProf(TestCase):
                 assert vvir == vvir_last
             except NameError:
                 vvir_last = vvir
-
-
-

@@ -2,19 +2,19 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-from astropy.tests.helper import pytest 
-import os 
+from astropy.tests.helper import pytest
+import os
 import shutil
 
-import numpy as np 
-from copy import deepcopy 
+import numpy as np
+from copy import deepcopy
 
 from astropy.table import Table
 
-from astropy.config.paths import _find_home 
+from astropy.config.paths import _find_home
 
 try:
-    import h5py 
+    import h5py
     HAS_H5PY = True
 except ImportError:
     HAS_H5PY = False
@@ -23,8 +23,8 @@ from . import helper_functions
 from ..halo_table_cache_log_entry import HaloTableCacheLogEntry
 
 ### Determine whether the machine is mine
-# This will be used to select tests whose 
-# returned values depend on the configuration 
+# This will be used to select tests whose
+# returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
 detected_home = _find_home()
@@ -33,18 +33,18 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestHaloTableCacheLogEntry' )
+__all__ = ('TestHaloTableCacheLogEntry')
 
 
 
 class TestHaloTableCacheLogEntry(TestCase):
-    """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`. 
+    """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`.
     """
 
     hard_coded_log_attrs = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
 
     def setUp(self):
-        """ Pre-load various arrays into memory for use by all tests. 
+        """ Pre-load various arrays into memory for use by all tests.
         """
 
 
@@ -60,49 +60,49 @@ class TestHaloTableCacheLogEntry(TestCase):
         self.version_names = ('v0', 'v1', 'v2', 'v3', 'v4')
         self.redshifts = (1.2, -0.1, 1.339, 1.3, 100.)
 
-        self.basenames = ('non_existent.hdf5', 'existent.file', 
+        self.basenames = ('non_existent.hdf5', 'existent.file',
             'existent.hdf5', 'existent.hdf5', 'good.hdf5')
-        self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name) 
+        self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name)
             for name in self.basenames)
 
         self.table1 = Table({'x': [1, 2, 3]})
         self.table2 = Table({'halo_x': [1, 2, 3]})
-        
+
         self.table3 = Table(
-            {'halo_id': [1, 2, 3], 
-            'halo_x': [-1, 2, 3], 
-            'halo_y': [1, 2, 3], 
-            'halo_z': [1, 2, 3], 
-            'halo_mass': [1, 2, 3], 
+            {'halo_id': [1, 2, 3],
+            'halo_x': [-1, 2, 3],
+            'halo_y': [1, 2, 3],
+            'halo_z': [1, 2, 3],
+            'halo_mass': [1, 2, 3],
             })
 
         self.table4 = Table(
-            {'halo_id': [1, 2, 2], 
-            'halo_x': [1, 2, 3], 
-            'halo_y': [1, 2, 3], 
-            'halo_z': [1, 2, 3], 
-            'halo_mass': [1, 2, 3], 
+            {'halo_id': [1, 2, 2],
+            'halo_x': [1, 2, 3],
+            'halo_y': [1, 2, 3],
+            'halo_z': [1, 2, 3],
+            'halo_mass': [1, 2, 3],
             })
 
         self.good_table = Table(
-            {'halo_id': [1, 2, 3], 
-            'halo_x': [1, 2, 3], 
-            'halo_y': [1, 2, 3], 
-            'halo_z': [1, 2, 3], 
-            'halo_mass': [1, 2, 3], 
+            {'halo_id': [1, 2, 3],
+            'halo_x': [1, 2, 3],
+            'halo_y': [1, 2, 3],
+            'halo_z': [1, 2, 3],
+            'halo_mass': [1, 2, 3],
             })
 
 
     def get_scenario_kwargs(self, num_scenario):
-        return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario], 
-            'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario], 
+        return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario],
+            'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario],
             'fname': self.fnames[num_scenario]})
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_instantiation(self):
         """ We can instantiate the log entry with a complete set of metadata
         """
-        
+
         for i in range(len(self.simnames)):
             constructor_kwargs = self.get_scenario_kwargs(i)
             log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
@@ -390,7 +390,7 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         bad_table = deepcopy(self.good_table)
         bad_table['halo_rvir'] = 0.
-        bad_table['halo_rvir'][0] = 51        
+        bad_table['halo_rvir'][0] = 51
         bad_table.write(self.fnames[num_scenario], path='data')
         f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
@@ -429,16 +429,3 @@ class TestHaloTableCacheLogEntry(TestCase):
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
-
-
-
-
-
-
-
-
-
-
-
-
-

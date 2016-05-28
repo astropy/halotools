@@ -1,17 +1,17 @@
-""" Module providing unit-testing for 
-`~halotools.mock_observables.mock_observables_helpers` functions. 
+""" Module providing unit-testing for
+`~halotools.mock_observables.mock_observables_helpers` functions.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import numpy as np 
-import pytest 
-import multiprocessing 
+import numpy as np
+import pytest
+import multiprocessing
 
 from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 from ..mock_observables_helpers import enforce_sample_has_correct_shape, get_separation_bins_array
-from ..mock_observables_helpers import get_line_of_sight_bins_array 
+from ..mock_observables_helpers import get_line_of_sight_bins_array
 
-__all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads', 
+__all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads',
     'test_get_period')
 
 fixed_seed = 43
@@ -145,7 +145,3 @@ def test_get_line_of_sight_bins_array():
         _ = get_line_of_sight_bins_array(bad_pi_bins)
     substr = "Input separation bins must be a monotonically increasing "
     assert substr in err.value.args[0]
-
-
-
-

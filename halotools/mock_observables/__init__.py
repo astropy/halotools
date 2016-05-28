@@ -1,7 +1,7 @@
-""" This sub-package contains the functions 
-used to make astronomical observations on 
-mock galaxy populations, and also analyze halo catalogs 
-and other point data in periodic cubes. 
+""" This sub-package contains the functions
+used to make astronomical observations on
+mock galaxy populations, and also analyze halo catalogs
+and other point data in periodic cubes.
 """
 from __future__ import absolute_import
 
@@ -11,7 +11,7 @@ from .pairwise_velocities import *
 from .isolation_functions import *
 from .void_statistics import *
 from .catalog_analysis_helpers import *
-from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z, 
+from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z,
     marked_npairs_3d, marked_npairs_xy_z)
 from .radial_profiles import *
 from .two_point_clustering import *

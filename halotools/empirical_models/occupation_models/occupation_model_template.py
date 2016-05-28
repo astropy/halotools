@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This module contains various component features used by 
-HOD-style models of the galaxy-halo connection. 
+This module contains various component features used by
+HOD-style models of the galaxy-halo connection.
 
 """
 
@@ -19,34 +19,34 @@ from ...custom_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
 class OccupationComponent(object):
-    """ Abstract base class of any occupation model. 
-    Functionality is mostly trivial. 
-    The sole purpose of the base class is to 
-    standardize the attributes and methods 
-    required of any HOD-style model for halo occupation statistics. 
+    """ Abstract base class of any occupation model.
+    Functionality is mostly trivial.
+    The sole purpose of the base class is to
+    standardize the attributes and methods
+    required of any HOD-style model for halo occupation statistics.
     """
     def __init__(self, **kwargs):
-        """ 
-        Parameters 
+        """
+        Parameters
         ----------
-        gal_type : string, keyword argument 
-            Name of the galaxy population whose occupation statistics is being modeled. 
+        gal_type : string, keyword argument
+            Name of the galaxy population whose occupation statistics is being modeled.
 
         threshold : float, keyword argument
-            Threshold value defining the selection function of the galaxy population 
-            being modeled. Typically refers to absolute magnitude or stellar mass. 
+            Threshold value defining the selection function of the galaxy population
+            being modeled. Typically refers to absolute magnitude or stellar mass.
 
         upper_occupation_bound : float, keyword argument
-            Upper bound on the number of gal_type galaxies per halo. 
-            The only currently supported values are unity or infinity. 
+            Upper bound on the number of gal_type galaxies per halo.
+            The only currently supported values are unity or infinity.
 
-        prim_haloprop_key : string, optional  
-            String giving the column name of the primary halo property governing 
+        prim_haloprop_key : string, optional
+            String giving the column name of the primary halo property governing
             the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``.
 
-        See also 
+        See also
         ---------
-        :ref:`writing_your_own_hod_occupation_component` 
+        :ref:`writing_your_own_hod_occupation_component`
         """
         required_kwargs = ['gal_type', 'threshold']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
@@ -78,14 +78,14 @@ class OccupationComponent(object):
         except KeyError:
             pass
 
-        # The _methods_to_inherit determines which methods will be directly callable 
+        # The _methods_to_inherit determines which methods will be directly callable
         # by the composite model built by the HodModelFactory
         try:
             self._methods_to_inherit.extend(['mc_occupation', 'mean_occupation'])
         except AttributeError:
             self._methods_to_inherit = ['mc_occupation', 'mean_occupation']
 
-        # The _attrs_to_inherit determines which methods will be directly bound  
+        # The _attrs_to_inherit determines which methods will be directly bound
         # to the composite model built by the HodModelFactory
         try:
             self._attrs_to_inherit.append('threshold')
@@ -95,33 +95,33 @@ class OccupationComponent(object):
         if not hasattr(self, 'publications'):
             self.publications = []
 
-        # The _mock_generation_calling_sequence determines which methods 
+        # The _mock_generation_calling_sequence determines which methods
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_occupation']
         self._galprop_dtypes_to_allocate = np.dtype([('halo_num_'+ self.gal_type, 'i4')])
 
     def mc_occupation(self, seed = None, **kwargs):
-        """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
+        """ Method to generate Monte Carlo realizations of the abundance of galaxies.
 
         Parameters
-        ----------        
-        prim_haloprop : array, optional  
-            Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
+        ----------
+        prim_haloprop : array, optional
+            Array of mass-like variable upon which occupation statistics are based.
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed.
 
-        table : object, optional  
-            Data table storing halo catalog. 
-            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+        table : object, optional
+            Data table storing halo catalog.
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed.
 
-        seed : int, optional  
-            Random number seed used to generate the Monte Carlo realization. 
-            Default is None. 
+        seed : int, optional
+            Random number seed used to generate the Monte Carlo realization.
+            Default is None.
 
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input table.     
-        """ 
+            Integer array giving the number of galaxies in each of the input table.
+        """
         first_occupation_moment = self.mean_occupation(**kwargs)
         if self._upper_occupation_bound == 1:
             return self._nearest_integer_distribution(first_occupation_moment, seed=seed, **kwargs)
@@ -135,22 +135,22 @@ class OccupationComponent(object):
             raise HalotoolsError(msg)
 
     def _nearest_integer_distribution(self, first_occupation_moment, seed=None, **kwargs):
-        """ Nearest-integer distribution used to draw Monte Carlo occupation statistics 
+        """ Nearest-integer distribution used to draw Monte Carlo occupation statistics
         for central-like populations with only permissible galaxy per halo.
 
-        Parameters 
+        Parameters
         ----------
         first_occupation_moment : array
-            Array giving the first moment of the occupation distribution function. 
+            Array giving the first moment of the occupation distribution function.
 
-        seed : int, optional  
-            Random number seed used to generate the Monte Carlo realization. 
-            Default is None. 
+        seed : int, optional
+            Random number seed used to generate the Monte Carlo realization.
+            Default is None.
 
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input table. 
+            Integer array giving the number of galaxies in each of the input table.
         """
         np.random.seed(seed=seed)
         mc_generator = np.random.random(custom_len(first_occupation_moment))
@@ -161,34 +161,30 @@ class OccupationComponent(object):
         return result
 
     def _poisson_distribution(self, first_occupation_moment, seed=None, **kwargs):
-        """ Poisson distribution used to draw Monte Carlo occupation statistics 
-        for satellite-like populations in which per-halo abundances are unbounded. 
+        """ Poisson distribution used to draw Monte Carlo occupation statistics
+        for satellite-like populations in which per-halo abundances are unbounded.
 
-        Parameters 
+        Parameters
         ----------
         first_occupation_moment : array
-            Array giving the first moment of the occupation distribution function. 
+            Array giving the first moment of the occupation distribution function.
 
-        seed : int, optional  
-            Random number seed used to generate the Monte Carlo realization. 
-            Default is None. 
+        seed : int, optional
+            Random number seed used to generate the Monte Carlo realization.
+            Default is None.
 
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input table. 
+            Integer array giving the number of galaxies in each of the input table.
         """
         np.random.seed(seed=seed)
-        # The scipy built-in Poisson number generator raises an exception 
+        # The scipy built-in Poisson number generator raises an exception
         # if its input is zero, so here we impose a simple workaround
-        first_occupation_moment = np.where(first_occupation_moment <=0, 
+        first_occupation_moment = np.where(first_occupation_moment <=0,
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
 
         result = poisson.rvs(first_occupation_moment)
         if 'table' in kwargs:
             kwargs['table']['halo_num_'+self.gal_type] = result
         return result
-
-
-
-

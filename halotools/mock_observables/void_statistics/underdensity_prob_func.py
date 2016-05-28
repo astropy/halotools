@@ -1,6 +1,6 @@
 """
-Module containing the `~halotools.mock_observables.void_prob_func` 
-and `~halotools.mock_observables.underdensity_prob_func` used to calculate void statistics. 
+Module containing the `~halotools.mock_observables.void_prob_func`
+and `~halotools.mock_observables.underdensity_prob_func` used to calculate void statistics.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -42,15 +42,15 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     rbins : float
         size of spheres to search for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     n_ran : int, optional
         integer number of randoms to use to search for voids.
@@ -62,20 +62,20 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
         is not passed, ``n_ran`` must be passed.
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
-        If set to None, PBCs are set to infinity, in which case ``sample_volume`` 
-        must be specified so that the global mean density can be estimated. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
+        If set to None, PBCs are set to infinity, in which case ``sample_volume``
+        must be specified so that the global mean density can be estimated.
         In this case, it is still necessary
         to drop down randomly placed spheres in order to compute the UPF. To do so,
         the spheres will be dropped inside a cubical box whose sides are defined by
         the smallest/largest coordinate distance of the input ``sample1``.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample_volume : float, optional
         If period is set to None, you must specify the effective volume of the sample.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     u : float, optional
         density threshold in units of the mean object density
@@ -84,15 +84,15 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
         number of 'threads' to use in the pair counting.  if set to 'max', use all
         available cores.  num_threads=0 is the default.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use *max(rbins)* in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use *max(rbins)* in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
     approx_cellran_size : array_like, optional
         Analogous to ``approx_cell1_size``, but for used for randoms.  See comments for
@@ -144,8 +144,8 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
             period, sample_volume, u,
             num_threads, approx_cell1_size, approx_cellran_size))
 
-    result = npairs_per_object_3d(random_sphere_centers, sample1, rbins, 
-        period = period, num_threads = num_threads, 
+    result = npairs_per_object_3d(random_sphere_centers, sample1, rbins,
+        period = period, num_threads = num_threads,
         approx_cell1_size = approx_cell1_size,
         approx_cell2_size = approx_cellran_size)
 
@@ -161,8 +161,8 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     return num_underdense_spheres/n_ran
 
 
-def _underdensity_prob_func_process_args(sample1, rbins, 
-    n_ran, random_sphere_centers, period, 
+def _underdensity_prob_func_process_args(sample1, rbins,
+    n_ran, random_sphere_centers, period,
     sample_volume, u, num_threads,
     approx_cell1_size, approx_cellran_size):
     """
@@ -232,16 +232,5 @@ def _underdensity_prob_func_process_args(sample1, rbins,
 
     u = float(u)
 
-    return (sample1, rbins, n_ran, random_sphere_centers, period, 
+    return (sample1, rbins, n_ran, random_sphere_centers, period,
         sample_volume, u, num_threads, approx_cell1_size, approx_cellran_size)
-
-
-
-
-
-
-
-
-
-
-

@@ -6,7 +6,7 @@ import pytest
 
 from ..pairs import xy_z_wnpairs as pure_python_weighted_pairs
 from ..marked_npairs_xy_z import marked_npairs_xy_z
-from ..marked_npairs_3d import _func_signature_int_from_wfunc 
+from ..marked_npairs_3d import _func_signature_int_from_wfunc
 
 from ....custom_exceptions import HalotoolsError
 
@@ -50,10 +50,10 @@ def test_marked_npairs_xy_z_periodic():
     pi_bins = np.array([0, 0.15])
 
     result = marked_npairs_xy_z(random_sample, random_sample,
-        rp_bins, pi_bins, period=period, 
+        rp_bins, pi_bins, period=period,
         weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1)
 
-    test_result = pure_python_weighted_pairs(random_sample, random_sample, rp_bins, pi_bins, 
+    test_result = pure_python_weighted_pairs(random_sample, random_sample, rp_bins, pi_bins,
         period=period, weights1=ran_weights1, weights2=ran_weights1)
 
     assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
@@ -66,7 +66,7 @@ def test_marked_npairs_xy_z_nonperiodic():
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
     ran_weights1 = np.random.random((Npts,1))
-    
+
     rp_bins = np.array([0.0,0.1,0.2,0.3])
     pi_bins = np.array([0, 0.15])
 
@@ -87,17 +87,17 @@ def test_marked_npairs_parallelization():
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
     ran_weights1 = np.random.random((Npts,1))
-    
+
     period = np.array([1.0, 1.0, 1.0])
     rp_bins = np.array([0.0,0.1,0.2,0.3])
     pi_bins = np.array([0, 0.15])
 
     serial_result = marked_npairs_xy_z(random_sample, random_sample,
-        rp_bins, pi_bins, period=period, weights1=ran_weights1, weights2=ran_weights1, 
+        rp_bins, pi_bins, period=period, weights1=ran_weights1, weights2=ran_weights1,
         weight_func_id=1)
 
     parallel_result2 = marked_npairs_xy_z(random_sample, random_sample,
-        rp_bins, pi_bins, period=period, weights1=ran_weights1, weights2=ran_weights1, 
+        rp_bins, pi_bins, period=period, weights1=ran_weights1, weights2=ran_weights1,
         weight_func_id=1, num_threads = 2)
 
     parallel_result7 = marked_npairs_xy_z(random_sample, random_sample,
@@ -133,14 +133,14 @@ def test_marked_npairs_3d_wfuncs_signatures():
     for wfunc_index in range(1, num_wfuncs):
         signature = _func_signature_int_from_wfunc(wfunc_index)
         weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
-        result = marked_npairs_xy_z(random_sample, random_sample, rp_bins, pi_bins, 
+        result = marked_npairs_xy_z(random_sample, random_sample, rp_bins, pi_bins,
             period=period, weights1=weights, weights2=weights, weight_func_id=wfunc_index,
             approx_cell1_size = [rmax, rmax, rmax])
 
         with pytest.raises(HalotoolsError):
             signature = _func_signature_int_from_wfunc(wfunc_index) + 1
             weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
-            result = marked_npairs_xy_z(random_sample, random_sample, rp_bins, pi_bins, 
+            result = marked_npairs_xy_z(random_sample, random_sample, rp_bins, pi_bins,
                 period=period, weights1=weights, weights2=weights, weight_func_id=wfunc_index)
 
 @slow
@@ -161,7 +161,7 @@ def test_marked_npairs_behavior_weight_func_id1():
         weights1=weights, weights2=weights, weight_func_id=1, approx_cell1_size = [rmax, rmax, rmax])
 
     test_result = pure_python_weighted_pairs(grid_points, grid_points,
-        rp_bins, pi_bins, period=period, 
+        rp_bins, pi_bins, period=period,
         weights1 = np.ones((Npts, 1)), weights2 = np.ones((Npts, 1)))
     assert np.all(result == 9.*test_result)
 
@@ -382,10 +382,3 @@ def test_marked_npairs_behavior_weight_func_id10():
     result = marked_npairs_xy_z(grid_points, grid_points, rp_bins, pi_bins, period=period,
     weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size = [rmax, rmax, rmax])
     assert np.all(result == -3*test_result), error_msg
-
-
-
-
-
-
-

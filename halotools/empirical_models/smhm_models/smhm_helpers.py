@@ -21,9 +21,9 @@ inconsistent_redshift_msg = ("\nYou passed a redshift = %.2f argument to the con
     )
 
 def get_inconsistent_redshift_msg(input_redshift, constructor_redshift, class_name, method_name):
-    return (inconsistent_redshift_msg % 
-        (constructor_redshift, class_name, class_name, input_redshift, method_name, 
-            class_name, method_name, method_name, method_name) )
+    return (inconsistent_redshift_msg %
+        (constructor_redshift, class_name, class_name, input_redshift, method_name,
+            class_name, method_name, method_name, method_name))
 
 def safely_retrieve_redshift(obj, method_name, **kwargs):
     """
@@ -38,13 +38,9 @@ def safely_retrieve_redshift(obj, method_name, **kwargs):
                 raise HalotoolsError(msg)
     else:
         if hasattr(obj, 'redshift'):
-            redshift = obj.redshift 
+            redshift = obj.redshift
         else:
             redshift = sim_defaults.default_redshift
             warn(unspecified_redshift_warning_msg % redshift)
 
     return redshift
-
-
-
-

@@ -1,7 +1,7 @@
 """
-Module storing the `~halotools.sim_manager.RockstarHlistReader` class, 
-the primary class used by Halotools to process 
-publicly available Rockstar hlist files and store them in cache. 
+Module storing the `~halotools.sim_manager.RockstarHlistReader` class,
+the primary class used by Halotools to process
+publicly available Rockstar hlist files and store them in cache.
 
 """
 
@@ -9,7 +9,7 @@ __all__ = ('RockstarHlistReader', )
 
 import os
 
-from warnings import warn 
+from warnings import warn
 from astropy.table import Table
 
 import datetime
@@ -23,18 +23,18 @@ from ..custom_exceptions import HalotoolsError
 
 def _infer_redshift_from_input_fname(fname):
     """ Method extracts the portion of the Rockstar hlist fname
-    that contains the scale factor of the snapshot, and returns a 
-    float for the redshift inferred from this substring. 
+    that contains the scale factor of the snapshot, and returns a
+    float for the redshift inferred from this substring.
 
-    Parameters 
+    Parameters
     ----------
-    fname : string 
-        Name of the Rockstar hlist file 
+    fname : string
+        Name of the Rockstar hlist file
 
     Returns
     -------
     rounded_redshift : float
-        Redshift of the catalog, rounded to four decimals. 
+        Redshift of the catalog, rounded to four decimals.
 
     Notes
     -----
@@ -56,206 +56,206 @@ def _infer_redshift_from_input_fname(fname):
 
 class RockstarHlistReader(TabularAsciiReader):
     """
-    The `RockstarHlistReader` reads Rockstar hlist ASCII files, 
-    stores them as hdf5 files in the Halotools cache, and updates the cache log. 
+    The `RockstarHlistReader` reads Rockstar hlist ASCII files,
+    stores them as hdf5 files in the Halotools cache, and updates the cache log.
 
-    It is important that you carefully read the 
-    :ref:`reducing_and_caching_a_new_rockstar_catalog` 
-    before using this class. 
+    It is important that you carefully read the
+    :ref:`reducing_and_caching_a_new_rockstar_catalog`
+    before using this class.
 
-    `RockstarHlistReader` is a subclass of 
-    `~halotools.sim_manager.TabularAsciiReader`, and supplements this behavior 
-    with the ability to read, update, and search the Halotools cache log. 
+    `RockstarHlistReader` is a subclass of
+    `~halotools.sim_manager.TabularAsciiReader`, and supplements this behavior
+    with the ability to read, update, and search the Halotools cache log.
 
-    If you are planning to use the Halotools cache manager to store and 
-    keep track of your halo catalogs, this is the class to use. For a stand-alone 
-    reader of Rockstar hlists or large ASCII files in general, you should instead use the 
-    `~halotools.sim_manager.TabularAsciiReader` class. 
+    If you are planning to use the Halotools cache manager to store and
+    keep track of your halo catalogs, this is the class to use. For a stand-alone
+    reader of Rockstar hlists or large ASCII files in general, you should instead use the
+    `~halotools.sim_manager.TabularAsciiReader` class.
     """
 
-    def __init__(self, input_fname, columns_to_keep_dict, 
-        output_fname, simname, halo_finder, redshift, version_name, 
-        Lbox, particle_mass, header_char='#', 
-        row_cut_min_dict = {}, row_cut_max_dict = {}, 
-        row_cut_eq_dict = {}, row_cut_neq_dict = {}, 
-        overwrite = False, ignore_nearby_redshifts = False, dz_tol = 0.05, 
+    def __init__(self, input_fname, columns_to_keep_dict,
+        output_fname, simname, halo_finder, redshift, version_name,
+        Lbox, particle_mass, header_char='#',
+        row_cut_min_dict = {}, row_cut_max_dict = {},
+        row_cut_eq_dict = {}, row_cut_neq_dict = {},
+        overwrite = False, ignore_nearby_redshifts = False, dz_tol = 0.05,
         processing_notes = ' ', **kwargs):
         """
-        Parameters 
+        Parameters
         -----------
-        input_fname : string 
-            Absolute path of the file to be processed. 
+        input_fname : string
+            Absolute path of the file to be processed.
 
-        columns_to_keep_dict : dict 
-            Dictionary used to define which columns 
+        columns_to_keep_dict : dict
+            Dictionary used to define which columns
             of the tabular ASCII data will be kept.
 
-            Each key of the dictionary will be the name of the 
-            column in the returned data table. The value bound to 
-            each key is a two-element tuple. 
-            The first tuple entry is an integer providing 
-            the *index* of the column to be kept, starting from 0. 
-            The second tuple entry is a string defining the Numpy dtype 
-            of the data in that column, 
-            e.g., 'f4' for a float, 'f8' for a double, 
-            or 'i8' for a long. 
+            Each key of the dictionary will be the name of the
+            column in the returned data table. The value bound to
+            each key is a two-element tuple.
+            The first tuple entry is an integer providing
+            the *index* of the column to be kept, starting from 0.
+            The second tuple entry is a string defining the Numpy dtype
+            of the data in that column,
+            e.g., 'f4' for a float, 'f8' for a double,
+            or 'i8' for a long.
 
-            Thus an example ``columns_to_keep_dict`` could be 
+            Thus an example ``columns_to_keep_dict`` could be
             {'halo_mvir': (1, 'f4'), 'halo_id': (0, 'i8'), 'halo_spin': (45, 'f4')}
 
-            The columns of all halo tables stored in the Halotools cache must 
-            must begin with the substring ``halo_``. 
-            At a minimum, any halo table stored in cache 
-            must have the following columns:  
-            ``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``, 
-            plus at least one additional column (typically storing a mass-like variable). 
-            These requirements must be met if you want to use the Halotools cache system, 
-            or if you want Halotools to populate your halo catalog with mock galaxies. 
-            If you do not want to conform to these conventions, just use the 
-            `~halotools.sim_manager.TabularAsciiReader` and handle 
-            the file storage using your own preferred method. 
+            The columns of all halo tables stored in the Halotools cache must
+            must begin with the substring ``halo_``.
+            At a minimum, any halo table stored in cache
+            must have the following columns:
+            ``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``,
+            plus at least one additional column (typically storing a mass-like variable).
+            These requirements must be met if you want to use the Halotools cache system,
+            or if you want Halotools to populate your halo catalog with mock galaxies.
+            If you do not want to conform to these conventions, just use the
+            `~halotools.sim_manager.TabularAsciiReader` and handle
+            the file storage using your own preferred method.
 
-        output_fname : string 
-            Absolute path to the location where the hdf5 file will be stored. 
-            The file extension must be '.hdf5'. 
-            If the file already exists, you must set 
-            the keyword argument ``overwrite`` to True. 
+        output_fname : string
+            Absolute path to the location where the hdf5 file will be stored.
+            The file extension must be '.hdf5'.
+            If the file already exists, you must set
+            the keyword argument ``overwrite`` to True.
 
-            If output_fname is set to `std_cache_loc`, Halotools will place the 
-            catalog in the following location: 
+            If output_fname is set to `std_cache_loc`, Halotools will place the
+            catalog in the following location:
 
             $HOME/.astropy/cache/halotools/halo_catalogs/simname/halo_finder/input_fname.version_name.hdf5
 
-        simname : string 
-            Nickname of the simulation used as a shorthand way to keep track 
-            of the halo catalogs in your cache. 
-            The simnames of the Halotools-provided catalogs are 
-            'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
+        simname : string
+            Nickname of the simulation used as a shorthand way to keep track
+            of the halo catalogs in your cache.
+            The simnames of the Halotools-provided catalogs are
+            'bolshoi', 'bolplanck', 'consuelo' and 'multidark'.
 
-        halo_finder : string 
-            Nickname of the halo-finder used to generate the hlist file from particle data. 
-            Most likely this should be 'rockstar', though there are also 
-            publicly available hlists processed with the 'bdm' halo-finder. 
+        halo_finder : string
+            Nickname of the halo-finder used to generate the hlist file from particle data.
+            Most likely this should be 'rockstar', though there are also
+            publicly available hlists processed with the 'bdm' halo-finder.
 
-        redshift : float 
-            Redshift of the halo catalog. 
+        redshift : float
+            Redshift of the halo catalog.
 
-        version_name : string 
-            Nickname of the version of the halo catalog you produce using RockstarHlistReader. 
+        version_name : string
+            Nickname of the version of the halo catalog you produce using RockstarHlistReader.
             The ``version_name`` is used as a bookkeeping tool in the cache log.
 
-            If you process your own halo catalog with the RockstarHlistReader, 
-            you should choose your own version name that differs from the 
-            version names of the Halotools-provided catalogs. 
+            If you process your own halo catalog with the RockstarHlistReader,
+            you should choose your own version name that differs from the
+            version names of the Halotools-provided catalogs.
 
-        Lbox : float 
+        Lbox : float
             Box size of the simulation in Mpc/h.
-            ``Lbox`` will automatically be added to the ``supplementary_metadata_dict`` 
-            so that your hdf5 file will have the box size bound as metadata. 
+            ``Lbox`` will automatically be added to the ``supplementary_metadata_dict``
+            so that your hdf5 file will have the box size bound as metadata.
 
-        particle_mass : float 
+        particle_mass : float
             Mass of the dark matter particles of the simulation in Msun/h.
-            ``particle_mass`` will automatically be added to the ``supplementary_metadata_dict`` 
-            so that your hdf5 file will have the particle mass bound as metadata. 
+            ``particle_mass`` will automatically be added to the ``supplementary_metadata_dict``
+            so that your hdf5 file will have the particle mass bound as metadata.
 
-        row_cut_min_dict : dict, optional 
-            Dictionary used to place a lower-bound cut on the rows 
-            of the tabular ASCII data. 
+        row_cut_min_dict : dict, optional
+            Dictionary used to place a lower-bound cut on the rows
+            of the tabular ASCII data.
 
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as the lower bound on the data stored 
-            in that row. A row with a smaller value than this lower bound for the 
-            corresponding column will not appear in the returned data table. 
+            Each key of the dictionary must also
+            be a key of the input ``columns_to_keep_dict``;
+            for purposes of good bookeeping, you are not permitted
+            to place a cut on a column that you do not keep. The value
+            bound to each key serves as the lower bound on the data stored
+            in that row. A row with a smaller value than this lower bound for the
+            corresponding column will not appear in the returned data table.
 
-            For example, if row_cut_min_dict = {'mass': 1e10}, then all rows of the 
-            returned data table will have a mass greater than 1e10. 
+            For example, if row_cut_min_dict = {'mass': 1e10}, then all rows of the
+            returned data table will have a mass greater than 1e10.
 
-        row_cut_max_dict : dict, optional 
-            Dictionary used to place an upper-bound cut on the rows 
-            of the tabular ASCII data. 
+        row_cut_max_dict : dict, optional
+            Dictionary used to place an upper-bound cut on the rows
+            of the tabular ASCII data.
 
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as the upper bound on the data stored 
-            in that row. A row with a larger value than this upper bound for the 
-            corresponding column will not appear in the returned data table. 
+            Each key of the dictionary must also
+            be a key of the input ``columns_to_keep_dict``;
+            for purposes of good bookeeping, you are not permitted
+            to place a cut on a column that you do not keep. The value
+            bound to each key serves as the upper bound on the data stored
+            in that row. A row with a larger value than this upper bound for the
+            corresponding column will not appear in the returned data table.
 
-            For example, if row_cut_min_dict = {'mass': 1e15}, then all rows of the 
-            returned data table will have a mass less than 1e15. 
+            For example, if row_cut_min_dict = {'mass': 1e15}, then all rows of the
+            returned data table will have a mass less than 1e15.
 
-        row_cut_eq_dict : dict, optional 
-            Dictionary used to place an equality cut on the rows 
-            of the tabular ASCII data. 
+        row_cut_eq_dict : dict, optional
+            Dictionary used to place an equality cut on the rows
+            of the tabular ASCII data.
 
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as the required value for the data stored 
-            in that row. Only rows with a value equal to this required value for the 
-            corresponding column will appear in the returned data table. 
+            Each key of the dictionary must also
+            be a key of the input ``columns_to_keep_dict``;
+            for purposes of good bookeeping, you are not permitted
+            to place a cut on a column that you do not keep. The value
+            bound to each key serves as the required value for the data stored
+            in that row. Only rows with a value equal to this required value for the
+            corresponding column will appear in the returned data table.
 
-            For example, if row_cut_eq_dict = {'upid': -1}, then *all* rows of the 
-            returned data table will have a upid of -1. 
+            For example, if row_cut_eq_dict = {'upid': -1}, then *all* rows of the
+            returned data table will have a upid of -1.
 
-        row_cut_neq_dict : dict, optional 
-            Dictionary used to place an inequality cut on the rows 
-            of the tabular ASCII data. 
+        row_cut_neq_dict : dict, optional
+            Dictionary used to place an inequality cut on the rows
+            of the tabular ASCII data.
 
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as a forbidden value for the data stored 
-            in that row. Rows with a value equal to this forbidden value for the 
-            corresponding column will not appear in the returned data table. 
+            Each key of the dictionary must also
+            be a key of the input ``columns_to_keep_dict``;
+            for purposes of good bookeeping, you are not permitted
+            to place a cut on a column that you do not keep. The value
+            bound to each key serves as a forbidden value for the data stored
+            in that row. Rows with a value equal to this forbidden value for the
+            corresponding column will not appear in the returned data table.
 
-            For example, if row_cut_neq_dict = {'upid': -1}, then *no* rows of the 
-            returned data table will have a upid of -1. 
+            For example, if row_cut_neq_dict = {'upid': -1}, then *no* rows of the
+            returned data table will have a upid of -1.
 
         header_char : str, optional
-            String to be interpreted as a header line of the ascii hlist file. 
-            Default is '#'. 
+            String to be interpreted as a header line of the ascii hlist file.
+            Default is '#'.
 
-        overwrite : bool, optional 
-            If the chosen ``output_fname`` already exists, then you must set ``overwrite`` 
-            to True in order to write the file to disk. Default is False. 
+        overwrite : bool, optional
+            If the chosen ``output_fname`` already exists, then you must set ``overwrite``
+            to True in order to write the file to disk. Default is False.
 
-        ignore_nearby_redshifts : bool, optional 
-            Flag used to determine whether nearby redshifts in cache will be ignored. 
-            If there are existing halo catalogs in the Halotools cache with matching 
-            ``simname``, ``halo_finder`` and ``version_name``, 
-            and if one or more of those catalogs has a redshift within ``dz_tol``, 
-            then the ignore_nearby_redshifts flag must be set to True in order 
-            for the new halo catalog to be stored in cache. 
-            Default is False. 
+        ignore_nearby_redshifts : bool, optional
+            Flag used to determine whether nearby redshifts in cache will be ignored.
+            If there are existing halo catalogs in the Halotools cache with matching
+            ``simname``, ``halo_finder`` and ``version_name``,
+            and if one or more of those catalogs has a redshift within ``dz_tol``,
+            then the ignore_nearby_redshifts flag must be set to True in order
+            for the new halo catalog to be stored in cache.
+            Default is False.
 
-        dz_tol : float, optional 
+        dz_tol : float, optional
             Tolerance determining when another halo catalog in cache is deemed nearby.
-            Default is 0.05. 
+            Default is 0.05.
 
-        processing_notes : string, optional 
-            String used to provide supplementary notes that will be attached to 
-            the hdf5 file storing your halo catalog. 
+        processing_notes : string, optional
+            String used to provide supplementary notes that will be attached to
+            the hdf5 file storing your halo catalog.
 
-        Notes 
+        Notes
         ------
-        When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
-        ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
-        simultaneously, only rows passing all cuts will be kept. 
+        When the ``row_cut_min_dict``, ``row_cut_max_dict``,
+        ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used
+        simultaneously, only rows passing all cuts will be kept.
 
-        Examples 
+        Examples
         ----------
-        Suppose you wish to reduce the ASCII data stored by ``input_fname`` 
-        into a data structure with the following columns: 
-        halo ID, virial mass, x, y, z position, and peak circular velocity, 
-        where the data are stored in column 1, 45, 17, 18, 19 and 56, 
-        respectively, where the first column is index 0. 
+        Suppose you wish to reduce the ASCII data stored by ``input_fname``
+        into a data structure with the following columns:
+        halo ID, virial mass, x, y, z position, and peak circular velocity,
+        where the data are stored in column 1, 45, 17, 18, 19 and 56,
+        respectively, where the first column is index 0.
         If you wish to keep *all* rows of the halo catalog:
 
         >>> columns_to_keep_dict = {'halo_id': (1, 'i8'), 'halo_mvir': (45, 'f4'), 'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4'), 'halo_rvir': (36, 'f4')}
@@ -268,26 +268,26 @@ class RockstarHlistReader(TabularAsciiReader):
         >>> reader = RockstarHlistReader(input_fname, columns_to_keep_dict, output_fname, simname, halo_finder, redshift, version_name, Lbox, particle_mass) # doctest: +SKIP
         >>> reader.read_halocat(write_to_disk = True, update_cache_log = True) # doctest: +SKIP
 
-        The halo catalog is now stored in cache and can be loaded into memory 
-        at any time using the `~halotools.sim_manager.CachedHaloCatalog` class 
-        with the following syntax. 
+        The halo catalog is now stored in cache and can be loaded into memory
+        at any time using the `~halotools.sim_manager.CachedHaloCatalog` class
+        with the following syntax.
 
         >>> from halotools.sim_manager import CachedHaloCatalog
         >>> halocat = CachedHaloCatalog(simname = 'any_nickname', halo_finder = 'rockstar', version_name = 'rockstar_v1.53_no_cuts', redshift = 0.3) # doctest: +SKIP
 
-        Note that once you have stored the catalog with the precise redshift, 
-        to load it back into memory you do not need to remember the exact redshift 
-        to four significant digits, you just need to be within ``dz_tol``. 
-        You can always verify that you are working with the catalog you intended 
+        Note that once you have stored the catalog with the precise redshift,
+        to load it back into memory you do not need to remember the exact redshift
+        to four significant digits, you just need to be within ``dz_tol``.
+        You can always verify that you are working with the catalog you intended
         by inspecting the metadata:
 
         >>> print(halocat.redshift) # doctest: +SKIP
         >>> print(halocat.version_name) # doctest: +SKIP
 
-        Now suppose that for your science target of interest, 
-        subhalos in your simulation with :math:`M_{\\rm vir} < 10^10 M_{\\odot}`  
-        are not properly resolved. In this case you can use the ``row_cut_min_dict`` keyword 
-        argument to discard such halos as the file is read. 
+        Now suppose that for your science target of interest,
+        subhalos in your simulation with :math:`M_{\\rm vir} < 10^10 M_{\\odot}`
+        are not properly resolved. In this case you can use the ``row_cut_min_dict`` keyword
+        argument to discard such halos as the file is read.
 
         >>> row_cut_min_dict = {'halo_mvir': 1e10}
         >>> version_name = 'rockstar_v1.53_mvir_gt_100'
@@ -296,46 +296,46 @@ class RockstarHlistReader(TabularAsciiReader):
         >>> reader = RockstarHlistReader(input_fname, columns_to_keep_dict, output_fname, simname, halo_finder, redshift, version_name, Lbox, particle_mass, row_cut_min_dict=row_cut_min_dict, processing_notes=processing_notes) # doctest: +SKIP
         >>> reader.read_halocat(['halo_rvir'], write_to_disk = True, update_cache_log = True) # doctest: +SKIP
 
-        Note the list we passed to the `read_halocat` method via the columns_to_convert_from_kpc_to_mpc 
-        argument. In common rockstar catalogs, :math:`R_{\\rm vir}` is stored in kpc/h units, 
-        while halo centers are stored in Mpc/h units, a potential source of buggy behavior. 
-        Take note of all units in your raw halo catalog before caching reductions of it. 
+        Note the list we passed to the `read_halocat` method via the columns_to_convert_from_kpc_to_mpc
+        argument. In common rockstar catalogs, :math:`R_{\\rm vir}` is stored in kpc/h units,
+        while halo centers are stored in Mpc/h units, a potential source of buggy behavior.
+        Take note of all units in your raw halo catalog before caching reductions of it.
 
-        After calling `read_halocat`, the halo catalog is also stored in cache, 
-        and we load it in the same way as before 
-        but now using a different ``version_name``: 
+        After calling `read_halocat`, the halo catalog is also stored in cache,
+        and we load it in the same way as before
+        but now using a different ``version_name``:
 
         >>> halocat = CachedHaloCatalog(simname = 'any_nickname', halo_finder = 'rockstar', version_name = 'rockstar_v1.53_mvir_gt_100', redshift = 0.3) # doctest: +SKIP
 
-        Using the ``processing_notes`` argument is helpful 
-        in case you forgot exactly how the catalog was initially reduced. 
-        The ``processing_notes`` string you passed to the constructor 
-        is stored as metadata on the cached hdf5 file and is automatically 
+        Using the ``processing_notes`` argument is helpful
+        in case you forgot exactly how the catalog was initially reduced.
+        The ``processing_notes`` string you passed to the constructor
+        is stored as metadata on the cached hdf5 file and is automatically
         bound to the `~halotools.sim_manager.CachedHaloCatalog` instance:
 
         >>> print(halocat.processing_notes) # doctest: +SKIP
         >>> 'All halos with halo_mvir < 1e10 were thrown out during the initial catalog reduction' # doctest: +SKIP
 
-        Any cut you placed on the catalog during its initial 
-        reduction is automatically bound to the cached halo catalog as additional metadata. 
+        Any cut you placed on the catalog during its initial
+        reduction is automatically bound to the cached halo catalog as additional metadata.
         In this case, since we placed a lower bound on :math:`M_{\\rm vir}`:
 
         >>> print(halocat.halo_mvir_row_cut_min) # doctest: +SKIP
         >>> 100 # doctest: +SKIP
 
-        This metadata provides protection against typographical errors 
-        that may have been accidentally introduced in the hand-written ``processing_notes``. 
-        Additional metadata that is automatically bound to all cached catalogs 
-        includes other sanity checks on our bookkeeping such as ``orig_ascii_fname`` 
-        and ``time_of_catalog_production``. 
+        This metadata provides protection against typographical errors
+        that may have been accidentally introduced in the hand-written ``processing_notes``.
+        Additional metadata that is automatically bound to all cached catalogs
+        includes other sanity checks on our bookkeeping such as ``orig_ascii_fname``
+        and ``time_of_catalog_production``.
 
-        See also 
+        See also
         ---------
         :ref:`reducing_and_caching_a_new_rockstar_catalog`
 
         """
         try:
-            import h5py 
+            import h5py
             self.h5py = h5py
         except ImportError:
             msg = ("\nYou must have h5py installed if you want to \n"
@@ -343,17 +343,17 @@ class RockstarHlistReader(TabularAsciiReader):
                 "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
             raise HalotoolsError(msg)
 
-        TabularAsciiReader.__init__(self, 
-            input_fname, columns_to_keep_dict, 
-            header_char, row_cut_min_dict, row_cut_max_dict, 
+        TabularAsciiReader.__init__(self,
+            input_fname, columns_to_keep_dict,
+            header_char, row_cut_min_dict, row_cut_max_dict,
             row_cut_eq_dict, row_cut_neq_dict)
 
-        # Require that the minimum required columns have been selected, 
+        # Require that the minimum required columns have been selected,
         # and that they all begin with `halo_`
         self._enforce_halo_catalog_formatting_requirements()
 
         # Bind the constructor arguments to the instance
-        self.simname = simname 
+        self.simname = simname
         self.halo_finder = halo_finder
         self.redshift = float(get_redshift_string(redshift))
         self.version_name = version_name
@@ -380,22 +380,22 @@ class RockstarHlistReader(TabularAsciiReader):
         print(msg)
 
     def _check_cache_log_for_matching_catalog(self):
-        """ If this method raises no exceptions, 
-        then either there are no conflicting log entries 
-        or self.overwrite is set to True. In either case, 
-        no if there are no exceptions then it is safe to 
-        reduce the catalog, write it to disk, and request that 
-        the cache be updated. 
+        """ If this method raises no exceptions,
+        then either there are no conflicting log entries
+        or self.overwrite is set to True. In either case,
+        no if there are no exceptions then it is safe to
+        reduce the catalog, write it to disk, and request that
+        the cache be updated.
 
-        Note, though, that this does not guarantee that the 
-        resulting processed catalog will be safe to store in cache, 
-        as the processed catalog will be subject to further testing before 
-        it can be cached (for example, the halo_id column of the processed catalog 
-        must contain a set of unique integers). 
+        Note, though, that this does not guarantee that the
+        resulting processed catalog will be safe to store in cache,
+        as the processed catalog will be subject to further testing before
+        it can be cached (for example, the halo_id column of the processed catalog
+        must contain a set of unique integers).
         """
         self.halo_table_cache = HaloTableCache()
-        self.log_entry = HaloTableCacheLogEntry(simname = self.simname, 
-            halo_finder = self.halo_finder, version_name = self.version_name, 
+        self.log_entry = HaloTableCacheLogEntry(simname = self.simname,
+            halo_finder = self.halo_finder, version_name = self.version_name,
             redshift = self.redshift, fname = self.output_fname)
 
         if self.log_entry in self.halo_table_cache.log:
@@ -429,10 +429,10 @@ class RockstarHlistReader(TabularAsciiReader):
             else:
                 closely_matching_catalogs = list(
                     self.halo_table_cache.matching_log_entry_generator(
-                        simname = self.simname, 
-                        halo_finder = self.halo_finder, 
-                        version_name = self.version_name, 
-                        redshift = self.redshift, 
+                        simname = self.simname,
+                        halo_finder = self.halo_finder,
+                        version_name = self.version_name,
+                        redshift = self.redshift,
                         fname = self.output_fname, dz_tol = self.dz_tol)
                         )
                 if len(closely_matching_catalogs) > 0:
@@ -447,7 +447,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
 
     def _enforce_halo_catalog_formatting_requirements(self):
-        """ Private method enforces the halo_table formatting conventions of the package. 
+        """ Private method enforces the halo_table formatting conventions of the package.
         """
         try:
             assert 'halo_id' in self.dt.names
@@ -483,7 +483,7 @@ class RockstarHlistReader(TabularAsciiReader):
     def _get_default_output_fname(self):
         """
         """
-        dirname = os.path.join(halotools_cache_dirname, 'halo_catalogs', 
+        dirname = os.path.join(halotools_cache_dirname, 'halo_catalogs',
             self.simname, self.halo_finder)
         try:
             os.makedirs(dirname)
@@ -496,16 +496,16 @@ class RockstarHlistReader(TabularAsciiReader):
             rootname = self.input_fname
 
         basename = (
-            os.path.basename(rootname) + 
+            os.path.basename(rootname) +
             '.' + self.version_name + '.hdf5'
             )
         default_fname = os.path.join(dirname, basename)
         return default_fname
 
     def _retrieve_output_fname(self, output_fname, overwrite, **kwargs):
-        """ Private method checks to see whether the chosen 
-        ``output_fname`` already exists on disk, and enforces 
-        compatibility with ``overwrite``. 
+        """ Private method checks to see whether the chosen
+        ``output_fname`` already exists on disk, and enforces
+        compatibility with ``overwrite``.
         """
         if output_fname == 'std_cache_loc':
             output_fname = self._get_default_output_fname()
@@ -519,52 +519,52 @@ class RockstarHlistReader(TabularAsciiReader):
 
         return output_fname
 
-    def read_halocat(self, columns_to_convert_from_kpc_to_mpc, 
-        write_to_disk = False, update_cache_log = False, 
+    def read_halocat(self, columns_to_convert_from_kpc_to_mpc,
+        write_to_disk = False, update_cache_log = False,
         add_supplementary_halocat_columns = True, **kwargs):
-        """ Method reads the ascii data and  
+        """ Method reads the ascii data and
         binds the resulting catalog to ``self.halo_table``.
 
-        By default, the optional ``write_to_disk`` and ``update_cache_log`` 
-        arguments are set to False because Halotools will not 
-        write large amounts of data to disk without your explicit instructions 
-        to do so. However, it the majority of use-cases, 
-        you should set both of these arguments to True, in which case 
-        your reduced catalog will be saved on disk and stored in cache. 
+        By default, the optional ``write_to_disk`` and ``update_cache_log``
+        arguments are set to False because Halotools will not
+        write large amounts of data to disk without your explicit instructions
+        to do so. However, it the majority of use-cases,
+        you should set both of these arguments to True, in which case
+        your reduced catalog will be saved on disk and stored in cache.
 
-        Parameters 
+        Parameters
         -----------
-        columns_to_convert_from_kpc_to_mpc : list of strings 
-            List providing column names that should be divided by 1000 
-            in order to convert from kpc/h to Mpc/h units. 
-            This is necessary with typical rockstar catalogs for the 
-            ``halo_rvir``, ``halo_rs`` and ``halo_xoff`` columns, which are stored 
-            in kpc/h, whereas halo centers are typically stored in Mpc/h. 
-            All strings appearing in ``columns_to_convert_from_kpc_to_mpc`` 
-            must also appear in the ``columns_to_keep_dict``. 
-            It is permissible for ``columns_to_convert_from_kpc_to_mpc`` 
-            to be an empty list. See Notes for further discussion. 
+        columns_to_convert_from_kpc_to_mpc : list of strings
+            List providing column names that should be divided by 1000
+            in order to convert from kpc/h to Mpc/h units.
+            This is necessary with typical rockstar catalogs for the
+            ``halo_rvir``, ``halo_rs`` and ``halo_xoff`` columns, which are stored
+            in kpc/h, whereas halo centers are typically stored in Mpc/h.
+            All strings appearing in ``columns_to_convert_from_kpc_to_mpc``
+            must also appear in the ``columns_to_keep_dict``.
+            It is permissible for ``columns_to_convert_from_kpc_to_mpc``
+            to be an empty list. See Notes for further discussion.
 
-            Note that this feature is only temporary. The API of this function 
-            will change when Halotools adopts Astropy Units. 
+            Note that this feature is only temporary. The API of this function
+            will change when Halotools adopts Astropy Units.
 
-        write_to_disk : bool, optional 
-            If True, the `write_to_disk` method will be called automatically. 
-            Default is False, in which case you must call the `write_to_disk` 
-            method yourself to store the processed catalog. 
+        write_to_disk : bool, optional
+            If True, the `write_to_disk` method will be called automatically.
+            Default is False, in which case you must call the `write_to_disk`
+            method yourself to store the processed catalog.
 
-        update_cache_log : bool, optional 
-            If True, the `update_cache_log` method will be called automatically. 
-            Default is False, in which case you must call the `update_cache_log` 
-            method yourself to add the the processed catalog to the cache. 
+        update_cache_log : bool, optional
+            If True, the `update_cache_log` method will be called automatically.
+            Default is False, in which case you must call the `update_cache_log`
+            method yourself to add the the processed catalog to the cache.
 
-        add_supplementary_halocat_columns : bool, optional 
-            Boolean determining whether the halo_table will have additional 
-            columns added to it computed by the add_supplementary_halocat_columns method. 
-            Default is True. 
+        add_supplementary_halocat_columns : bool, optional
+            Boolean determining whether the halo_table will have additional
+            columns added to it computed by the add_supplementary_halocat_columns method.
+            Default is True.
 
-            Note that this feature is rather bare-bones and is likely to significantly 
-            evolve and/or entirely vanish in future releases. 
+            Note that this feature is rather bare-bones and is likely to significantly
+            evolve and/or entirely vanish in future releases.
 
         chunk_memory_size : int, optional
             Determine the approximate amount of Megabytes of memory
@@ -573,21 +573,21 @@ class RockstarHlistReader(TabularAsciiReader):
             choosing larger values typically improves performance.
             Default is 500 Mb.
 
-        Notes 
+        Notes
         -----
-        Regarding the ``columns_to_convert_from_kpc_to_mpc`` argument, 
-        of course there could be other columns whose units you want to convert 
-        prior to caching the catalog, and simply division by 1000 may not be the 
-        appropriate unit conversion. To handle such cases, you should do 
-        the following. First, use the `read_halocat` method  with 
-        the ``write_to_disk`` and ``update_cache_log`` arguments both set to False. 
-        This will load the catalog from disk into memory. 
-        Now you are free to overwrite any column in the halo_table that you wish. 
-        When you have finished preparing the catalog, call the `write_to_disk` 
-        and `update_cache_log` methods (in that order). 
-        As you do so, be sure to include explicit notes of all manipulations you 
-        made on the halo_table between the time you called `read_halocat` and 
-        `write_to_disk`, and bind these notes to the ``processing_notes`` argument. 
+        Regarding the ``columns_to_convert_from_kpc_to_mpc`` argument,
+        of course there could be other columns whose units you want to convert
+        prior to caching the catalog, and simply division by 1000 may not be the
+        appropriate unit conversion. To handle such cases, you should do
+        the following. First, use the `read_halocat` method  with
+        the ``write_to_disk`` and ``update_cache_log`` arguments both set to False.
+        This will load the catalog from disk into memory.
+        Now you are free to overwrite any column in the halo_table that you wish.
+        When you have finished preparing the catalog, call the `write_to_disk`
+        and `update_cache_log` methods (in that order).
+        As you do so, be sure to include explicit notes of all manipulations you
+        made on the halo_table between the time you called `read_halocat` and
+        `write_to_disk`, and bind these notes to the ``processing_notes`` argument.
 
         """
         for key in columns_to_convert_from_kpc_to_mpc:
@@ -605,17 +605,17 @@ class RockstarHlistReader(TabularAsciiReader):
         for key in columns_to_convert_from_kpc_to_mpc:
             self.halo_table[key] /= 1000.
 
-        if add_supplementary_halocat_columns is True: 
+        if add_supplementary_halocat_columns is True:
             self.add_supplementary_halocat_columns()
 
-        if write_to_disk is True: 
+        if write_to_disk is True:
             self.write_to_disk()
             self._file_has_been_written_to_disk = True
         else:
             self._file_has_been_written_to_disk = False
 
         if update_cache_log is True:
-            if self._file_has_been_written_to_disk is True: 
+            if self._file_has_been_written_to_disk is True:
                 self.update_cache_log()
             else:
                 msg = ("\nYou set update_cache_log to True but the \n"
@@ -654,29 +654,29 @@ class RockstarHlistReader(TabularAsciiReader):
             are those selected by the ``column_indices_to_keep``
             argument passed to the constructor.
 
-        Notes 
+        Notes
         -----
-        The behavior of this function is entirely controlled in the 
-        `~halotools.sim_manager.TabularAsciiReader` superclass. 
-        This trivial reimplementation is simply here to guide readers 
-        of the source code to the location of the implementation - 
-        this private function should not be called by users. 
+        The behavior of this function is entirely controlled in the
+        `~halotools.sim_manager.TabularAsciiReader` superclass.
+        This trivial reimplementation is simply here to guide readers
+        of the source code to the location of the implementation -
+        this private function should not be called by users.
         """
         return TabularAsciiReader.read_ascii(self, **kwargs)
 
     def write_to_disk(self):
-        """ Method writes ``self.halo_table`` to ``self.output_fname`` 
-        and also calls the ``self._write_metadata`` method to place the 
-        hdf5 file into standard form. 
+        """ Method writes ``self.halo_table`` to ``self.output_fname``
+        and also calls the ``self._write_metadata`` method to place the
+        hdf5 file into standard form.
         """
         self.halo_table.write(
             self.output_fname, path='data', overwrite = self.overwrite)
         self._write_metadata()
 
     def _write_metadata(self):
-        """ Private method to add metadata to the hdf5 file. 
+        """ Private method to add metadata to the hdf5 file.
         """
-        # Now add the metadata 
+        # Now add the metadata
         f = self.h5py.File(self.output_fname)
         f.attrs.create('simname', str(self.simname))
         f.attrs.create('halo_finder', str(self.halo_finder))
@@ -716,16 +716,16 @@ class RockstarHlistReader(TabularAsciiReader):
 
 
     def update_cache_log(self):
-        """ Method updates the cache log with the new catalog, 
-        provided that it is safe to add to the cache. 
+        """ Method updates the cache log with the new catalog,
+        provided that it is safe to add to the cache.
         """
         self.halo_table_cache.add_entry_to_cache_log(
             self.log_entry, update_ascii = True)
 
     def add_supplementary_halocat_columns(self):
-        """ Add the halo_nfw_conc and halo_hostid columns. 
-        This implementation will eventually change in favor of something 
-        more flexible. 
+        """ Add the halo_nfw_conc and halo_hostid columns.
+        This implementation will eventually change in favor of something
+        more flexible.
         """
         ### Add the halo_nfw_conc column
         if ('halo_rvir' in list(self.halo_table.keys())) & ('halo_rs' in list(self.halo_table.keys())):
@@ -739,10 +739,3 @@ class RockstarHlistReader(TabularAsciiReader):
         self.halo_table['halo_hostid'][subhalo_mask] = (
             self.halo_table['halo_upid'][subhalo_mask]
             )
-
-
-
-
-
-
-

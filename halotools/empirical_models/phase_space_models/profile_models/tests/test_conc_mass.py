@@ -13,22 +13,22 @@ from .... import model_defaults
 __all__ = ['TestConcMass']
 
 class TestConcMass(TestCase):
-    """ Tests of `~halotools.empirical_models.ConcMass` class.  
+    """ Tests of `~halotools.empirical_models.ConcMass` class.
 
     """
     def setup_class(self):
-        """ Pre-load various arrays into memory for use by all tests. 
+        """ Pre-load various arrays into memory for use by all tests.
         """
         self.dutton_maccio14_model = ConcMass(redshift=0, conc_mass_model = 'dutton_maccio14')
 
-        self.direct_model = ConcMass(redshift=0, 
-            conc_mass_model = 'direct_from_halo_catalog', 
+        self.direct_model = ConcMass(redshift=0,
+            conc_mass_model = 'direct_from_halo_catalog',
             concentration_key = 'conc')
 
     def test_dutton_maccio14(self):
         """ Tests of `~halotools.empirical_models.ConcMass.compute_concentration` method for the analytical *dutton_maccio14* option.
-        Summary of tests is as follows: 
-        
+        Summary of tests is as follows:
+
             * Returned concentrations satisfy :math:`0 < c < 100` for the full range of reasonable masses
 
             * Returns identical results regardless of argument choice
@@ -47,9 +47,9 @@ class TestConcMass(TestCase):
     def test_direct_from_halo_catalog(self):
         """ Tests of `~halotools.empirical_models.ConcMass.compute_concentration` method for the *direct_from_halo_catalog* option.
 
-        Require that the following are true: 
+        Require that the following are true:
 
-        * Method behaves as the identity function whenever the halo concentrations are within the min/max range set in the `~halotools.empirical_models.model_defaults` module. 
+        * Method behaves as the identity function whenever the halo concentrations are within the min/max range set in the `~halotools.empirical_models.model_defaults` module.
 
         * Method returns the min/max boundary values when passed halo concentrations that are out of bounds.
         """
@@ -70,14 +70,3 @@ class TestConcMass(TestCase):
 
         above_cmax_mask = conc > model_defaults.max_permitted_conc
         assert np.all(conc_result[above_cmax_mask] == model_defaults.max_permitted_conc)
-
-
-
-
-
-
-
-
-
-
-

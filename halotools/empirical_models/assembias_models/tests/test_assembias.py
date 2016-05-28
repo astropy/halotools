@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-import numpy as np 
+import numpy as np
 from astropy.table import Table
 
 from ...occupation_models import AssembiasZheng07Cens
@@ -38,8 +38,8 @@ class TestAssembias(TestCase):
         fakesim = FakeSim()
         self.fake_halo_table = fakesim.halo_table
 
-        self.model_class_list = (AssembiasZheng07Cens, AssembiasZheng07Sats, 
-            AssembiasLeauthaud11Cens, AssembiasLeauthaud11Sats, 
+        self.model_class_list = (AssembiasZheng07Cens, AssembiasZheng07Sats,
+            AssembiasLeauthaud11Cens, AssembiasLeauthaud11Sats,
             AssembiasTinker13Cens)
 
         self.prim_haloprop = np.logspace(10, 15, 6)
@@ -58,17 +58,17 @@ class TestAssembias(TestCase):
 
         decorated_method = getattr(model, model._method_name_to_decorate)
         decorated_result_type1 = decorated_method(
-            prim_haloprop = self.prim_haloprop, 
+            prim_haloprop = self.prim_haloprop,
             sec_haloprop_percentile = 1)
         decorated_result_type2 = decorated_method(
-            prim_haloprop = self.prim_haloprop, 
+            prim_haloprop = self.prim_haloprop,
             sec_haloprop_percentile = 0)
 
         assembias_sign = model.assembias_strength(self.prim_haloprop)
         positive_assembias_idx = assembias_sign > 0
         negative_assembias_idx = assembias_sign < 0
         diff = decorated_result_type1 - decorated_result_type2
-        assert np.all(diff[positive_assembias_idx] >= 0)            
+        assert np.all(diff[positive_assembias_idx] >= 0)
         assert np.all(diff[negative_assembias_idx] <= 0)
         assert np.any(diff != 0)
 
@@ -81,10 +81,10 @@ class TestAssembias(TestCase):
 
         decorated_method = getattr(model, model._method_name_to_decorate)
         decorated_result_type1 = decorated_method(
-            prim_haloprop = prim_haloprop, 
+            prim_haloprop = prim_haloprop,
             sec_haloprop_percentile = 1)
         decorated_result_type2 = decorated_method(
-            prim_haloprop = prim_haloprop, 
+            prim_haloprop = prim_haloprop,
             sec_haloprop_percentile = 0)
         type1_frac = 1 - model.percentile_splitting_function(prim_haloprop)
         type2_frac = 1 - type1_frac
@@ -96,8 +96,8 @@ class TestAssembias(TestCase):
         yield model_class()
         yield model_class(split=0.75)
         yield model_class(split=0.25, assembias_strength = -0.5)
-        yield model_class(split_abscissa = [1e10, 1e15], 
-            split = [-0.25, 1.75], 
+        yield model_class(split_abscissa = [1e10, 1e15],
+            split = [-0.25, 1.75],
             assembias_strength_abscissa = [1e10, 1e13, 1e15],
             assembias_strength = [-1.25, 0.25, -5.75])
 
@@ -108,13 +108,3 @@ class TestAssembias(TestCase):
                 self.init_test(model)
                 self.assembias_sign_effect(model)
                 self.baseline_preservation_test(model)
-
-
-
-
-
-
-
-
-
-

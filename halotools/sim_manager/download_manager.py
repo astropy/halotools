@@ -978,6 +978,3 @@ class DownloadManager(object):
             output = all_halocats
 
         return output
-
-
-

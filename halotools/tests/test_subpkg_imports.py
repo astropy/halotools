@@ -1,4 +1,4 @@
-""" Testing module to ensure that all sub-packages can be imported. 
+""" Testing module to ensure that all sub-packages can be imported.
 """
 
 def test_import_sim_manager():

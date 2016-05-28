@@ -1,6 +1,6 @@
-""" Module contains functions used to guarantee that only American spellings 
-are used throughout the package. 
-""" 
+""" Module contains functions used to guarantee that only American spellings
+are used throughout the package.
+"""
 
 import os
 import fnmatch
@@ -9,8 +9,8 @@ from ..custom_exceptions import AmurricaError
 from . import usa
 
 def source_code_string_generator(fname):
-    """ Yield each line of source code. 
-    Each line will be checked for all misspellings. 
+    """ Yield each line of source code.
+    Each line will be checked for all misspellings.
     """
     with open(fname) as f:
         for i, l in enumerate(f):
@@ -37,9 +37,3 @@ def test_usa():
                 if t[1] in line:
                     basename = os.path.basename(fname)
                     raise AmurricaError(basename, i, t[0], t[1])
-
-
-
-
-
-

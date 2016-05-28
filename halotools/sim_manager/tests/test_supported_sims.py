@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from astropy.tests.helper import pytest 
+from astropy.tests.helper import pytest
 slow = pytest.mark.slow
 
 from unittest import TestCase
 
 import numpy as np
-from astropy.config.paths import _find_home 
+from astropy.config.paths import _find_home
 
 aph_home = '/Users/aphearin'
 detected_home = _find_home()
@@ -15,14 +15,14 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-from ..cached_halo_catalog import CachedHaloCatalog 
+from ..cached_halo_catalog import CachedHaloCatalog
 
 __all__ = ('TestSupportedSims', )
 
 class TestSupportedSims(TestCase):
-    """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`. 
+    """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`.
     """
-    adict = {'bolshoi': [0.33035, 0.54435, 0.67035, 1], 'bolplanck': [0.33406, 0.50112, 0.67, 1], 
+    adict = {'bolshoi': [0.33035, 0.54435, 0.67035, 1], 'bolplanck': [0.33406, 0.50112, 0.67, 1],
         'consuelo': [0.333, 0.506, 0.6754, 1], 'multidark': [0.318, 0.5, 0.68, 1]}
 
     @pytest.mark.slow
@@ -47,9 +47,9 @@ class TestSupportedSims(TestCase):
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
     def test_halo_rvir_in_correct_units(self):
-        """ Loop over all halo catalogs in cache and verify that the 
-        ``halo_rvir`` column never exeeds the number 50. This is a crude way of 
-        ensuring that units are in Mpc/h, not kpc/h. 
+        """ Loop over all halo catalogs in cache and verify that the
+        ``halo_rvir`` column never exeeds the number 50. This is a crude way of
+        ensuring that units are in Mpc/h, not kpc/h.
         """
         for simname in list(self.adict.keys()):
             alist = self.adict[simname]
@@ -58,28 +58,3 @@ class TestSupportedSims(TestCase):
             halocat = CachedHaloCatalog(simname = simname, redshift = z)
             r = halocat.halo_table['halo_rvir']
             assert np.all(r < 50.)
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

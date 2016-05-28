@@ -415,7 +415,7 @@ class TabularAsciiReader(object):
         Nheader = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
-                if ( (l[0:len(self.header_char)]==self.header_char) or (l=="\n") ):
+                if ((l[0:len(self.header_char)]==self.header_char) or (l=="\n")):
                     Nheader += 1
                 else:
                     break
@@ -448,7 +448,7 @@ class TabularAsciiReader(object):
         Nrows_data = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
-                if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
+                if ((l[0:len(self.header_char)]!=self.header_char) and (l!="\n")):
                     Nrows_data += 1
         return Nrows_data
 
@@ -598,6 +598,3 @@ class TabularAsciiReader(object):
         print("\a")
 
         return full_array
-
-
-

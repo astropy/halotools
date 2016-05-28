@@ -9,7 +9,7 @@ __all__ = ['TestHaloMassInterpolQuenching']
 
 
 class TestHaloMassInterpolQuenching(TestCase):
-    
+
     def test_boundary_values(self):
 
         model = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.9])
@@ -39,8 +39,3 @@ class TestHaloMassInterpolQuenching(TestCase):
 
         quiescent_fraction = model.mean_quiescent_fraction(prim_haloprop = 1e15)
         assert quiescent_fraction == 0.9
-
-
-
-
-

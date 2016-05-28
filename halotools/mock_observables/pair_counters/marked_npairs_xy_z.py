@@ -1,29 +1,29 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_3d` function
+used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
+from functools import partial
 
 from .marked_npairs_3d import _marked_npairs_process_weights
 from .npairs_xy_z import _npairs_xy_z_process_args
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .rectangular_mesh import RectangularDoubleMesh
 
-from .marked_cpairs import marked_npairs_xy_z_engine 
+from .marked_cpairs import marked_npairs_xy_z_engine
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
 __all__ = ('marked_npairs_xy_z', )
 
-def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, 
+def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                   period=None, weights1 = None, weights2 = None,
                   weight_func_id = 0, verbose = False, num_threads = 1,
                   approx_cell1_size = None, approx_cell2_size = None):
     """
-    Calculate the number of weighted pairs with separations greater than 
+    Calculate the number of weighted pairs with separations greater than
     or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.
 
     :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
@@ -36,29 +36,29 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
+        Npts2 x 3 array containing 3-D positions of points.
 
     rp_bins : array_like
-        array of boundaries defining the radial bins perpendicular to the LOS in which 
+        array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_bins : array_like
-        array of boundaries defining the p radial bins parallel to the LOS in which 
+        array of boundaries defining the p radial bins parallel to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
 
     weights1 : array_like, optional
         Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
@@ -79,25 +79,25 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -111,11 +111,11 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rp_max = np.max(rp_bins)
     pi_max = np.max(pi_bins)
-    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
+    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
 
     # Process the input weights and with the helper function
     weights1, weights2 = _marked_npairs_process_weights(sample1, sample2,
@@ -135,8 +135,8 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(marked_npairs_xy_z_engine, double_mesh, 
-        x1in, y1in, z1in, x2in, y2in, z2in, 
+    engine = partial(marked_npairs_xy_z_engine, double_mesh,
+        x1in, y1in, z1in, x2in, y2in, z2in,
         weights1, weights2, weight_func_id, rp_bins, pi_bins)
 
     # Calculate the cell1 indices that will be looped over by the engine
@@ -152,9 +152,3 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
         counts = engine(cell1_tuples[0])
 
     return np.array(counts)
-
-
-
-
-
-

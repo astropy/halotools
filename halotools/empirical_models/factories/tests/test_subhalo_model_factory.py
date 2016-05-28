@@ -4,8 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
-import numpy as np 
-from copy import copy 
+import numpy as np
+from copy import copy
 
 from ...smhm_models import Behroozi10SmHm, Moster13SmHm
 from ...component_model_templates import BinaryGalpropInterpolModel
@@ -20,11 +20,11 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ['TestSubhaloModelFactory']
 
 class TestSubhaloModelFactory(TestCase):
-    """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`. 
+    """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`.
     """
 
     def setUp(self):
-        """ Pre-load various arrays into memory for use by all tests. 
+        """ Pre-load various arrays into memory for use by all tests.
         """
         pass
 
@@ -36,18 +36,18 @@ class TestSubhaloModelFactory(TestCase):
         model = SubhaloModelFactory(**model_dictionary)
 
     def test_absent_model_feature_calling_sequence(self):
-        """ Verify that an exception is raised if the 
-        ``model_feature_calling_sequence`` keyword argument contains 
-        an entry that was not a keyword argument passed to the constructor. 
+        """ Verify that an exception is raised if the
+        ``model_feature_calling_sequence`` keyword argument contains
+        an entry that was not a keyword argument passed to the constructor.
         """
         model_dictionary = behroozi10_model_dictionary()
         model = SubhaloModelFactory(**model_dictionary)
 
         behroozi = Behroozi10SmHm(redshift = 0)
-        model2 = SubhaloModelFactory(stellar_mass = behroozi, 
+        model2 = SubhaloModelFactory(stellar_mass = behroozi,
             model_feature_calling_sequence = ['stellar_mass'])
         with pytest.raises(HalotoolsError):
-            model3 = SubhaloModelFactory(stellar_mass = behroozi, 
+            model3 = SubhaloModelFactory(stellar_mass = behroozi,
                 model_feature_calling_sequence = ['stellar_mass', 'quiescent'])
 
     def test_baseline_model_instance1(self):
@@ -64,13 +64,13 @@ class TestSubhaloModelFactory(TestCase):
         """
         """
         behroozi = Behroozi10SmHm(redshift = 0)
-        
+
         # The following instantiation methods should give the same results
         model1 = SubhaloModelFactory(stellar_mass = behroozi)
-        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
+        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent',
             galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
 
-        # The _model_feature_calling_sequence should still have stellar_mass appear first as normal 
+        # The _model_feature_calling_sequence should still have stellar_mass appear first as normal
         # when using the baseline_model_instance feature
         model3 = SubhaloModelFactory(baseline_model_instance = model1, quenching = quenching1)
         assert model3._model_feature_calling_sequence == ['stellar_mass', 'quenching']
@@ -80,26 +80,26 @@ class TestSubhaloModelFactory(TestCase):
         """
         behroozi = Behroozi10SmHm(redshift = 0)
         model1 = SubhaloModelFactory(stellar_mass = behroozi)
-        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
+        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent',
             galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
 
-        # The input model_feature_calling_sequence should also propagate when using 
+        # The input model_feature_calling_sequence should also propagate when using
         # the baseline_model_instance feature
-        model4 = SubhaloModelFactory(baseline_model_instance = model1, quenching = quenching1, 
+        model4 = SubhaloModelFactory(baseline_model_instance = model1, quenching = quenching1,
             model_feature_calling_sequence = ['quenching', 'stellar_mass'])
         assert model4._model_feature_calling_sequence == ['quenching', 'stellar_mass']
 
     def test_baseline_model_instance4(self):
         """
         """
-        behroozi = Behroozi10SmHm(redshift = 0)        
+        behroozi = Behroozi10SmHm(redshift = 0)
         model1 = SubhaloModelFactory(stellar_mass = behroozi)
-        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
+        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent',
             galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
 
         # We should raise an exception if we're missing a feature in the model_feature_calling_sequence
         with pytest.raises(HalotoolsError):
-            model5 = SubhaloModelFactory(baseline_model_instance = model1, quenching = quenching1, 
+            model5 = SubhaloModelFactory(baseline_model_instance = model1, quenching = quenching1,
                 model_feature_calling_sequence = ['quenching'])
 
     def test_baseline_model_instance_behavior1(self):
@@ -122,7 +122,7 @@ class TestSubhaloModelFactory(TestCase):
         """
         behroozi = Behroozi10SmHm(redshift = 0)
         model1 = SubhaloModelFactory(stellar_mass = behroozi)
-        quenching = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
+        quenching = BinaryGalpropInterpolModel(galprop_name = 'quiescent',
             galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
 
         mvir_array = np.logspace(10, 15, 100)
@@ -165,18 +165,3 @@ class TestSubhaloModelFactory(TestCase):
 
     def tearDown(self):
         pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

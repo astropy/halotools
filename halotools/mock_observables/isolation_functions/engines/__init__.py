@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__all__ = ('spherical_isolation_engine', 'cylindrical_isolation_engine', 
+__all__ = ('spherical_isolation_engine', 'cylindrical_isolation_engine',
     'marked_spherical_isolation_engine', 'marked_cylindrical_isolation_engine')
 
 from .spherical_isolation_engine import spherical_isolation_engine

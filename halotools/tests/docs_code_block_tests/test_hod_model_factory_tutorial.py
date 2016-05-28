@@ -3,7 +3,7 @@ import numpy as np
 
 from astropy.tests.helper import pytest
 from unittest import TestCase
-import warnings 
+import warnings
 
 from ...sim_manager import FakeSim
 
@@ -29,20 +29,20 @@ class TestHodModelFactoryTutorial(TestCase):
         sats_prof_model = NFWPhaseSpace()
 
         model_instance = HodModelFactory(
-            centrals_occupation = cens_occ_model, 
-            centrals_profile = cens_prof_model, 
-            satellites_occupation = sats_occ_model, 
+            centrals_occupation = cens_occ_model,
+            centrals_profile = cens_prof_model,
+            satellites_occupation = sats_occ_model,
             satellites_profile = sats_prof_model)
 
-        # The model_instance is a composite model 
-        # All composite models can directly populate N-body simulations 
+        # The model_instance is a composite model
+        # All composite models can directly populate N-body simulations
         # with mock galaxy catalogs using the populate_mock method:
         halocat = FakeSim()
         model_instance.populate_mock(halocat)
 
-        # Setting simname to 'fake' populates a mock into a fake halo catalog 
-        # that is generated on-the-fly, but you can use the populate_mock 
-        # method with any Halotools-formatted catalog 
+        # Setting simname to 'fake' populates a mock into a fake halo catalog
+        # that is generated on-the-fly, but you can use the populate_mock
+        # method with any Halotools-formatted catalog
 
     def test_hod_modeling_tutorial2a(self):
         from ...empirical_models import HodModelFactory
@@ -56,17 +56,17 @@ class TestHodModelFactoryTutorial(TestCase):
         another_sats_prof_model = NFWPhaseSpace()
 
         from ...empirical_models import HaloMassInterpolQuenching
-        sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir',
             [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-        cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir',
             [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
 
         model_instance = HodModelFactory(
-            centrals_occupation = another_cens_occ_model, 
-            centrals_profile = another_cens_prof_model, 
-            satellites_occupation = another_sats_occ_model, 
-            satellites_profile = another_sats_prof_model, 
-            centrals_quenching = cen_quenching, 
+            centrals_occupation = another_cens_occ_model,
+            centrals_profile = another_cens_prof_model,
+            satellites_occupation = another_sats_occ_model,
+            satellites_profile = another_sats_prof_model,
+            centrals_quenching = cen_quenching,
             satellites_quenching = sat_quenching
             )
 
@@ -84,20 +84,20 @@ class TestHodModelFactoryTutorial(TestCase):
         another_sats_prof_model = NFWPhaseSpace()
 
         from ...empirical_models import HaloMassInterpolQuenching
-        sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir',
             [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-        cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir',
             [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
 
             model_instance = HodModelFactory(
-                centrals_occupation = another_cens_occ_model, 
-                centrals_profile = another_cens_prof_model, 
-                satellites_occupation = another_sats_occ_model, 
-                satellites_profile = another_sats_prof_model, 
-                centrals_quenching = cen_quenching, 
+                centrals_occupation = another_cens_occ_model,
+                centrals_profile = another_cens_prof_model,
+                satellites_occupation = another_sats_occ_model,
+                satellites_profile = another_sats_prof_model,
+                centrals_quenching = cen_quenching,
                 satellites_quenching = sat_quenching
                 )
             assert len(w) > 0
@@ -108,11 +108,11 @@ class TestHodModelFactoryTutorial(TestCase):
             warnings.simplefilter("always")
 
             model_instance = HodModelFactory(
-                centrals_occupation = another_cens_occ_model, 
-                centrals_profile = another_cens_prof_model, 
-                satellites_occupation = another_sats_occ_model, 
-                satellites_profile = another_sats_prof_model, 
-                centrals_quenching = cen_quenching, 
+                centrals_occupation = another_cens_occ_model,
+                centrals_profile = another_cens_prof_model,
+                satellites_occupation = another_sats_occ_model,
+                satellites_profile = another_sats_prof_model,
+                centrals_quenching = cen_quenching,
                 satellites_quenching = sat_quenching
                 )
             assert len(w) == 0
@@ -153,20 +153,20 @@ class TestHodModelFactoryTutorial(TestCase):
         another_sats_prof_model = NFWPhaseSpace()
 
         ordinary_zheng07_model = HodModelFactory(
-            centrals_occupation = another_cens_occ_model, 
-            centrals_profile = another_cens_prof_model, 
-            satellites_occupation = another_sats_occ_model, 
+            centrals_occupation = another_cens_occ_model,
+            centrals_profile = another_cens_prof_model,
+            satellites_occupation = another_sats_occ_model,
             satellites_profile = another_sats_prof_model)
 
         from ...empirical_models import HaloMassInterpolQuenching
-        sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir',
             [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-        cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir',
             [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
 
         zheng07_with_quenching = HodModelFactory(
-            baseline_model_instance = ordinary_zheng07_model, 
-            centrals_quenching = cen_quenching, 
+            baseline_model_instance = ordinary_zheng07_model,
+            centrals_quenching = cen_quenching,
             satellites_quenching = sat_quenching
             )
 
@@ -174,23 +174,23 @@ class TestHodModelFactoryTutorial(TestCase):
     def test_hod_modeling_tutorial3(self):
 
         class Size(object):
-            
+
             def __init__(self, gal_type):
 
                 self.gal_type = gal_type
                 self._mock_generation_calling_sequence = ['assign_size']
                 self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
                 self.list_of_haloprops_needed = ['halo_spin']
-                
+
             def assign_size(self, table):
-                
+
                 table['galsize'][:] = table['halo_spin']/5.
 
         cen_size = Size('centrals')
         sat_size = Size('satellites')
         from ...empirical_models import PrebuiltHodModelFactory, HodModelFactory
         zheng_model = PrebuiltHodModelFactory('zheng07')
-        new_model = HodModelFactory(baseline_model_instance = zheng_model, 
+        new_model = HodModelFactory(baseline_model_instance = zheng_model,
             centrals_size = cen_size, satellites_size = sat_size)
 
         assert hasattr(new_model, 'assign_size_centrals')
@@ -204,7 +204,7 @@ class TestHodModelFactoryTutorial(TestCase):
     def test_hod_modeling_tutorial4(self):
 
         class Shape(object):
-            
+
             def __init__(self, gal_type, prim_haloprop_key):
 
                 self.gal_type = gal_type
@@ -216,10 +216,10 @@ class TestHodModelFactoryTutorial(TestCase):
 
                 self.prim_haloprop_key = prim_haloprop_key
                 self._methods_to_inherit = (
-                    ['assign_disrupted', 'assign_axis_ratio', 
+                    ['assign_disrupted', 'assign_axis_ratio',
                     'disrupted_fraction_vs_halo_mass'])
                 self.param_dict = ({
-                    'max_disruption_mass_'+self.gal_type: 1e12, 
+                    'max_disruption_mass_'+self.gal_type: 1e12,
                     'disrupted_fraction_'+self.gal_type: 0.25})
 
             def assign_disrupted(self, **kwargs):
@@ -254,7 +254,7 @@ class TestHodModelFactoryTutorial(TestCase):
         sat_shape = Shape('satellites', 'halo_m200b')
         from ...empirical_models import PrebuiltHodModelFactory, HodModelFactory
         zheng_model = PrebuiltHodModelFactory('zheng07')
-        new_model = HodModelFactory(baseline_model_instance = zheng_model, 
+        new_model = HodModelFactory(baseline_model_instance = zheng_model,
             centrals_shape = cen_shape, satellites_shape = sat_shape)
 
         halocat = FakeSim()
@@ -276,7 +276,7 @@ class TestHodModelFactoryTutorial(TestCase):
         cens_disrupted_mask = cens['disrupted'] == True
         disrupted_cens = cens[cens_disrupted_mask]
         try:
-            assert (disrupted_cens['halo_mvir'].max() <= 
+            assert (disrupted_cens['halo_mvir'].max() <=
                 new_model.param_dict['max_disruption_mass_centrals']
                 )
         except ValueError:
@@ -288,7 +288,7 @@ class TestHodModelFactoryTutorial(TestCase):
         disrupted_sats = sats[sats_disrupted_mask]
         try:
             assert (
-                disrupted_sats['halo_mvir'].max() <= 
+                disrupted_sats['halo_mvir'].max() <=
                 new_model.param_dict['max_disruption_mass_satellites']
                 )
         except ValueError:
@@ -300,7 +300,7 @@ class TestHodModelFactoryTutorial(TestCase):
     def test_hod_modeling_tutorial5(self):
 
         class Shape(object):
-            
+
             def __init__(self, gal_type):
 
                 self.gal_type = gal_type
@@ -342,15 +342,15 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import HodModelFactory
         model = HodModelFactory(
-            centrals_occupation = cen_occupation, 
-            centrals_profile = cen_profile, 
-            centrals_shape = cen_shape, 
-            centrals_size = cen_size, 
-            model_feature_calling_sequence = ('centrals_occupation', 
+            centrals_occupation = cen_occupation,
+            centrals_profile = cen_profile,
+            centrals_shape = cen_shape,
+            centrals_size = cen_size,
+            model_feature_calling_sequence = ('centrals_occupation',
                 'centrals_profile', 'centrals_shape', 'centrals_size')
             )
 
-        # We forgot to put 'halo_spin' in list_of_haloprops_needed, 
+        # We forgot to put 'halo_spin' in list_of_haloprops_needed,
         # so attempting to populate a mock should raise an exception
         halocat = FakeSim()
         with pytest.raises(KeyError) as err:
@@ -361,7 +361,7 @@ class TestHodModelFactoryTutorial(TestCase):
     def test_hod_modeling_tutorial6(self):
 
         class Shape(object):
-            
+
             def __init__(self, gal_type):
 
                 self.gal_type = gal_type
@@ -403,20 +403,13 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import HodModelFactory
         model = HodModelFactory(
-            centrals_occupation = cen_occupation, 
-            centrals_profile = cen_profile, 
-            centrals_shape = cen_shape, 
-            centrals_size = cen_size, 
-            model_feature_calling_sequence = ('centrals_occupation', 
+            centrals_occupation = cen_occupation,
+            centrals_profile = cen_profile,
+            centrals_shape = cen_shape,
+            centrals_size = cen_size,
+            model_feature_calling_sequence = ('centrals_occupation',
                 'centrals_profile', 'centrals_shape', 'centrals_size')
             )
 
         halocat = FakeSim()
         model.populate_mock(halocat)
-
-
-
-
-
-
-

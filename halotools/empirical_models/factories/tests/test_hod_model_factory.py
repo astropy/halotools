@@ -4,8 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
-import numpy as np 
-from copy import copy 
+import numpy as np
+from copy import copy
 
 from ...factories import HodModelFactory, PrebuiltHodModelFactory
 
@@ -15,11 +15,11 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ['TestHodModelFactory']
 
 class TestHodModelFactory(TestCase):
-    """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`. 
+    """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`.
     """
 
     def setUp(self):
-        """ Pre-load various arrays into memory for use by all tests. 
+        """ Pre-load various arrays into memory for use by all tests.
         """
         pass
 
@@ -36,8 +36,8 @@ class TestHodModelFactory(TestCase):
         model.populate_mock(halocat = halocat)
 
     def test_Num_ptcl_requirement(self):
-        """ Demonstrate that passing in varying values for 
-        Num_ptcl_requirement results in the proper behavior. 
+        """ Demonstrate that passing in varying values for
+        Num_ptcl_requirement results in the proper behavior.
         """
         model = PrebuiltHodModelFactory('zheng07')
         halocat = FakeSim()
@@ -50,7 +50,7 @@ class TestHodModelFactory(TestCase):
         # verify that the cut was non-trivial
         assert np.any(halocat.halo_table['halo_mvir'] < default_mvir_min)
 
-        del model.mock 
+        del model.mock
         model.populate_mock(halocat = halocat, Num_ptcl_requirement = 0.)
         assert model.mock.Num_ptcl_requirement == 0.
         assert np.any(model.mock.halo_table['halo_mvir'] < default_mvir_min)

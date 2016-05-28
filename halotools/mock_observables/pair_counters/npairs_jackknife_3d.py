@@ -1,12 +1,12 @@
-""" Module containing the `~halotools.mock_observables.npairs_jackknife_3d` function 
-used to estimate errors in the `~halotools.mock_observables.tpcf` function. 
+""" Module containing the `~halotools.mock_observables.npairs_jackknife_3d` function
+used to estimate errors in the `~halotools.mock_observables.tpcf` function.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
-from warnings import warn 
+from functools import partial
+from warnings import warn
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
@@ -30,24 +30,24 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Npts2 x 3 array containing 3-D positions of points.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     rbins : array_like
         Boundaries defining the bins in which pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
 
     weights1 : array_like, optional
         length N1 array containing weights used for weighted pair counts.
@@ -73,25 +73,25 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -149,10 +149,10 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
     # Process the input weights and jackknife-tags with the helper function
     weights1, weights2, jtags1, jtags2 = (
@@ -173,8 +173,8 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_jackknife_3d_engine, 
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+    engine = partial(npairs_jackknife_3d_engine,
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         weights1, weights2, jtags1, jtags2, N_samples, rbins)
 
     # Calculate the cell1 indices that will be looped over by the engine
@@ -192,7 +192,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
     return np.array(counts)
 
 
-def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2, 
+def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
     weights1, weights2, jtags1, jtags2, N_samples):
     """
     """
@@ -211,7 +211,7 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         weights2 = np.asarray(weights2).astype("float64")
         if np.shape(weights2)[0] != np.shape(sample2)[0]:
             raise HalotoolsError("weights2 should have same len as sample2")
-    
+
     #Process jtags_1 entry and check for consistency.
     if jtags1 is None:
         jtags1 = np.array([0]*np.shape(sample1)[0], dtype=np.int)
@@ -226,24 +226,24 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         jtags2 = np.asarray(jtags2).astype("int")
         if np.shape(jtags2)[0] != np.shape(sample2)[0]:
             raise HalotoolsError("jtags2 should have same len as sample2")
-    
+
     #Check bounds of jackknife tags
-    if np.min(jtags1) < 1: 
+    if np.min(jtags1) < 1:
         raise HalotoolsError("jtags1 must be >= 1")
-    if np.min(jtags2) < 1: 
+    if np.min(jtags2) < 1:
         raise HalotoolsError("jtags2 must be >= 1")
-    if np.max(jtags1) > N_samples: 
+    if np.max(jtags1) > N_samples:
         raise HalotoolsError("jtags1 must be <= N_samples")
-    if np.max(jtags2) > N_samples: 
+    if np.max(jtags2) > N_samples:
         raise HalotoolsError("jtags2 must be <= N_samples")
-    
+
     #throw warning if some tags do not exist
     if not np.array_equal(np.unique(jtags1),np.arange(1,N_samples+1)):
         warn("Warning: sample1 does not contain points in every jackknife sample.")
     if not np.array_equal(np.unique(jtags1),np.arange(1,N_samples+1)):
         warn("Warning: sample2 does not contain points in every jackknife sample.")
-    
-    if type(N_samples) is not int: 
+
+    if type(N_samples) is not int:
         raise HalotoolsError("There must be an integer number of jackknife samples")
     if np.max(jtags1)>N_samples:
         raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
@@ -251,9 +251,3 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
 
     return weights1, weights2, jtags1, jtags2
-
-
-
-
-
-

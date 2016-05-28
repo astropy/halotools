@@ -4,8 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
-import numpy as np 
-from copy import copy 
+import numpy as np
+from copy import copy
 
 from ...factories import PrebuiltHodModelFactory
 
@@ -16,7 +16,7 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ['TestPrebuiltHodModelFactory']
 
 class TestPrebuiltHodModelFactory(TestCase):
-    """ Class providing tests of the `~halotools.empirical_models.PrebuiltHodModelFactory`. 
+    """ Class providing tests of the `~halotools.empirical_models.PrebuiltHodModelFactory`.
     """
     @pytest.mark.slow
     def test_fake_mock_population(self):
@@ -32,5 +32,5 @@ class TestPrebuiltHodModelFactory(TestCase):
             model = PrebuiltHodModelFactory(modelname)
             result = model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
         result = model.compute_average_galaxy_clustering(
-            num_iterations=1, simname='fake', 
+            num_iterations=1, simname='fake',
             gal_type = 'centrals', include_crosscorr = True)

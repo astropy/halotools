@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the `~halotools.empirical_models.HeavisideAssembias` class. 
-The purpose of this class is to introduce step function-type assembly bias into 
-any method of any component model, as in 
-`Hearin et al 2015 decorated HODs <http://arxiv.org/abs/1512.03050>`_. 
+This module contains the `~halotools.empirical_models.HeavisideAssembias` class.
+The purpose of this class is to introduce step function-type assembly bias into
+any method of any component model, as in
+`Hearin et al 2015 decorated HODs <http://arxiv.org/abs/1512.03050>`_.
 """
 
 __all__ = ('HeavisideAssembias', )
 __author__  = ('Andrew Hearin', )
 
-import numpy as np 
-from warnings import warn 
+import numpy as np
+from warnings import warn
 
 from .. import model_defaults, model_helpers
 
@@ -20,79 +20,79 @@ from ...utils.table_utils import compute_conditional_percentiles
 import collections
 
 class HeavisideAssembias(object):
-    """ Class used as an orthogonal mix-in to introduce step function-style 
-    assembly-biased behavior into any component model. 
+    """ Class used as an orthogonal mix-in to introduce step function-style
+    assembly-biased behavior into any component model.
 
     """
     def __init__(self, **kwargs):
         """
-        No positional arguments accepted; all argument are strictly keyword arguments. 
+        No positional arguments accepted; all argument are strictly keyword arguments.
 
-        Parameters 
+        Parameters
         ----------
-        method_name_to_decorate : string 
-            Name of the method in the primary class whose behavior is being decorated 
+        method_name_to_decorate : string
+            Name of the method in the primary class whose behavior is being decorated
 
-        lower_assembias_bound : float 
-            lower bound on the method being decorated with assembly bias 
+        lower_assembias_bound : float
+            lower bound on the method being decorated with assembly bias
 
-        upper_assembias_bound : float 
-            upper bound on the method being decorated with assembly bias 
+        upper_assembias_bound : float
+            upper bound on the method being decorated with assembly bias
 
-        sec_haloprop_key : string, optional 
-            String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the table 
-            passed to the methods of `HeavisideAssembiasComponent`. 
+        sec_haloprop_key : string, optional
+            String giving the column name of the secondary halo property
+            governing the assembly bias. Must be a key in the table
+            passed to the methods of `HeavisideAssembiasComponent`.
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        split : float or list, optional 
-            Fraction or list of fractions between 0 and 1 defining how 
-            we split halos into two groupings based on 
-            their conditional secondary percentiles. 
-            Default is 0.5 for a constant 50/50 split. 
+        split : float or list, optional
+            Fraction or list of fractions between 0 and 1 defining how
+            we split halos into two groupings based on
+            their conditional secondary percentiles.
+            Default is 0.5 for a constant 50/50 split.
 
-        split_abscissa : list, optional 
-            Values of the primary halo property at which the halos are split as described above in 
-            the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
-            the interpolation will be done in the logarithm of the primary halo property. 
-            Default is to assume a constant 50/50 split. 
+        split_abscissa : list, optional
+            Values of the primary halo property at which the halos are split as described above in
+            the ``split`` argument. If ``loginterp`` is set to True (the default behavior),
+            the interpolation will be done in the logarithm of the primary halo property.
+            Default is to assume a constant 50/50 split.
 
-        splitting_model : object, optional 
-            Model instance with a method called ``splitting_method_name``  
+        splitting_model : object, optional
+            Model instance with a method called ``splitting_method_name``
             used to split the input halos into two types.
 
-        splitting_method_name : string, optional 
-            Name of method bound to ``splitting_model`` used to split the input halos into 
-            two types. 
+        splitting_method_name : string, optional
+            Name of method bound to ``splitting_model`` used to split the input halos into
+            two types.
 
-        halo_type_tuple : tuple, optional 
-            Tuple providing the information about how elements of the input ``table`` 
-            have been pre-divided into types. The first tuple entry must be a 
-            string giving the column name of the input ``table`` that provides the halo-typing. 
-            The second entry gives the value that will be stored in this column for halos 
-            that are above the percentile split, the third entry gives the value for halos 
-            below the split. 
+        halo_type_tuple : tuple, optional
+            Tuple providing the information about how elements of the input ``table``
+            have been pre-divided into types. The first tuple entry must be a
+            string giving the column name of the input ``table`` that provides the halo-typing.
+            The second entry gives the value that will be stored in this column for halos
+            that are above the percentile split, the third entry gives the value for halos
+            below the split.
 
-            If provided, you must ensure that the splitting of the ``table`` 
-            was self-consistently performed with the 
-            input ``split``, or ``split_abscissa`` and ``split_ordinates``, or 
-            ``split_func`` keyword arguments. 
+            If provided, you must ensure that the splitting of the ``table``
+            was self-consistently performed with the
+            input ``split``, or ``split_abscissa`` and ``split_ordinates``, or
+            ``split_func`` keyword arguments.
 
-        assembias_strength : float or list, optional 
-            Fraction or sequence of fractions between -1 and 1 
-            defining the assembly bias correlation strength. 
-            Default is 0.5. 
+        assembias_strength : float or list, optional
+            Fraction or sequence of fractions between -1 and 1
+            defining the assembly bias correlation strength.
+            Default is 0.5.
 
-        assembias_strength_abscissa : list, optional 
-            Values of the primary halo property at which the assembly bias strength is specified. 
-            Default is to assume a constant strength of 0.5. If passing a list, the strength 
+        assembias_strength_abscissa : list, optional
+            Values of the primary halo property at which the assembly bias strength is specified.
+            Default is to assume a constant strength of 0.5. If passing a list, the strength
             will interpreted at the input ``assembias_strength_abscissa``.
-            Default is to assume a constant strength of 0.5. 
+            Default is to assume a constant strength of 0.5.
 
         loginterp : bool, optional
-            If set to True, the interpolation will be done 
-            in the logarithm of the primary halo property, 
-            rather than linearly. Default is True. 
+            If set to True, the interpolation will be done
+            in the logarithm of the primary halo property,
+            rather than linearly. Default is True.
 
         """
         self._interpret_constructor_inputs(**kwargs)
@@ -107,7 +107,7 @@ class HeavisideAssembias(object):
             self.publications = ['arXiv:1512.03050']
 
 
-    def _interpret_constructor_inputs(self, loginterp = True, 
+    def _interpret_constructor_inputs(self, loginterp = True,
         sec_haloprop_key = model_defaults.sec_haloprop_key, **kwargs):
         """
         """
@@ -117,7 +117,7 @@ class HeavisideAssembias(object):
         required_attr_list = ['prim_haloprop_key', 'gal_type']
         for attr in required_attr_list:
             if not hasattr(self, attr):
-                msg = ("In order to use the HeavisideAssembias class " 
+                msg = ("In order to use the HeavisideAssembias class "
                     "to decorate your model component with assembly bias, \n"
                     "the component instance must have a %s attribute")
                 raise HalotoolsError(msg % attr)
@@ -126,20 +126,20 @@ class HeavisideAssembias(object):
             self._method_name_to_decorate = kwargs['method_name_to_decorate']
         except KeyError:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
-                "must be called with the following keyword arguments:\n" 
+                "must be called with the following keyword arguments:\n"
                 "``%s``")
             raise HalotoolsError(msg % ('_method_name_to_decorate'))
 
         try:
             lower_bound = float(kwargs['lower_assembias_bound'])
-            lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type 
+            lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
             setattr(self, lower_bound_key, lower_bound)
             upper_bound = float(kwargs['upper_assembias_bound'])
-            upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type 
+            upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type
             setattr(self, upper_bound_key, upper_bound)
         except KeyError:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
-                "must be called with the following keyword arguments:\n" 
+                "must be called with the following keyword arguments:\n"
                 "``%s``, ``%s``")
             raise HalotoolsError(msg % ('lower_assembias_bound', 'upper_assembias_bound'))
 
@@ -151,9 +151,9 @@ class HeavisideAssembias(object):
 
     def _set_percentile_splitting(self, split = 0.5, **kwargs):
         """
-        Method interprets the arguments passed to the constructor 
-        and sets up the interpolation scheme for how halos will be 
-        divided into two types as a function of the primary halo property. 
+        Method interprets the arguments passed to the constructor
+        and sets up the interpolation scheme for how halos will be
+        divided into two types as a function of the primary halo property.
         """
 
         if 'splitting_model' in kwargs:
@@ -174,7 +174,7 @@ class HeavisideAssembias(object):
                 self._split_abscissa = [2]
                 self._split_ordinates = [split]
             except KeyError:
-                msg = ("The _set_percentile_splitting method must at least be called with a ``split``" 
+                msg = ("The _set_percentile_splitting method must at least be called with a ``split``"
                     "keyword argument, or alternatively ``split`` and ``split_abscissa`` arguments.")
                 raise HalotoolsError(msg)
 
@@ -216,7 +216,7 @@ class HeavisideAssembias(object):
 
         try:
             baseline_method = getattr(self, self._method_name_to_decorate)
-            setattr(self, 'baseline_'+self._method_name_to_decorate, 
+            setattr(self, 'baseline_'+self._method_name_to_decorate,
                 baseline_method)
             decorated_method = self.assembias_decorator(baseline_method)
             setattr(self, self._method_name_to_decorate, decorated_method)
@@ -232,8 +232,8 @@ class HeavisideAssembias(object):
 
         def assembias_percentile_calculator(table):
             return compute_conditional_percentiles(
-                table = table, 
-                prim_haloprop_key = self.prim_haloprop_key, 
+                table = table,
+                prim_haloprop_key = self.prim_haloprop_key,
                 sec_haloprop_key = self.sec_haloprop_key
                 )
 
@@ -249,18 +249,18 @@ class HeavisideAssembias(object):
     @model_helpers.bounds_enforcing_decorator_factory(0, 1)
     def percentile_splitting_function(self, prim_haloprop):
         """
-        Method returns the fraction of halos that are ``type-2`` 
-        as a function of the input primary halo property. 
+        Method returns the fraction of halos that are ``type-2``
+        as a function of the input primary halo property.
 
-        Parameters 
+        Parameters
         -----------
-        prim_haloprop : array_like 
-            Array storing the primary halo property. 
+        prim_haloprop : array_like
+            Array storing the primary halo property.
 
-        Returns 
+        Returns
         -------
         split : float
-            Fraction of ``type2`` halos at the input primary halo property. 
+            Fraction of ``type2`` halos at the input primary halo property.
         """
 
         if hasattr(self, '_input_split_func'):
@@ -292,22 +292,22 @@ class HeavisideAssembias(object):
     @model_helpers.bounds_enforcing_decorator_factory(-1, 1)
     def assembias_strength(self, prim_haloprop):
         """
-        Method returns the strength of assembly bias as a function of the primary halo property. 
+        Method returns the strength of assembly bias as a function of the primary halo property.
 
-        The `bounds_enforcing_decorator_factory` guarantees that the assembly bias 
-        strength is enforced to be between -1 and 1. 
+        The `bounds_enforcing_decorator_factory` guarantees that the assembly bias
+        strength is enforced to be between -1 and 1.
 
-        Parameters 
+        Parameters
         ----------
-        prim_haloprop : array_like 
-            Array storing the primary halo property. 
+        prim_haloprop : array_like
+            Array storing the primary halo property.
 
-        Returns 
+        Returns
         -------
-        strength : array_like 
-            Strength of assembly bias as a function of the input halo property. 
+        strength : array_like
+            Strength of assembly bias as a function of the input halo property.
         """
-        model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)] 
+        model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)]
             for ipar in range(len(self._assembias_strength_abscissa)))
         spline_function = model_helpers.custom_spline(
             self._assembias_strength_abscissa, list(model_ordinates), k=3)
@@ -327,10 +327,10 @@ class HeavisideAssembias(object):
 
     def _galprop_perturbation(self, **kwargs):
         """
-        Method determines how much to boost the baseline function 
-        according to the strength of assembly bias and the min/max 
-        boost allowable by the requirement that the all-halo baseline 
-        function be preserved. The returned perturbation applies to type-1 halos. 
+        Method determines how much to boost the baseline function
+        according to the strength of assembly bias and the min/max
+        boost allowable by the requirement that the all-halo baseline
+        function be preserved. The returned perturbation applies to type-1 halos.
         """
         lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
         baseline_lower_bound = getattr(self, lower_bound_key)
@@ -342,7 +342,7 @@ class HeavisideAssembias(object):
             prim_haloprop = kwargs['prim_haloprop']
             splitting_result = kwargs['splitting_result']
         except KeyError:
-            msg = ("Must call _galprop_perturbation method of the" 
+            msg = ("Must call _galprop_perturbation method of the"
                 "HeavisideAssembias class with the following keyword arguments:\n"
                 "``baseline_result``, ``splitting_result`` and ``prim_haloprop``")
             raise HalotoolsError(msg)
@@ -378,24 +378,24 @@ class HeavisideAssembias(object):
         return result
 
     def assembias_decorator(self, func):
-        """ Primary behavior of the `HeavisideAssembias` class. 
+        """ Primary behavior of the `HeavisideAssembias` class.
 
-        This method is used to introduce a boost/decrement of the baseline 
-        function in a manner that preserves the all-halo result. 
-        Any function with a semi-bounded range can be decorated with 
-        `assembias_decorator`. The baseline behavior can be anything 
-        whatsoever, such as mean star formation rate or  
-        mean halo occupation, provided it has a semi-bounded range.   
+        This method is used to introduce a boost/decrement of the baseline
+        function in a manner that preserves the all-halo result.
+        Any function with a semi-bounded range can be decorated with
+        `assembias_decorator`. The baseline behavior can be anything
+        whatsoever, such as mean star formation rate or
+        mean halo occupation, provided it has a semi-bounded range.
 
-        Parameters 
+        Parameters
         -----------
-        func : function object 
-            Baseline function whose behavior is being decorated with assembly bias. 
+        func : function object
+            Baseline function whose behavior is being decorated with assembly bias.
 
-        Returns 
+        Returns
         -------
-        wrapper : function object 
-            Decorated function that includes assembly bias effects. 
+        wrapper : function object
+            Decorated function that includes assembly bias effects.
         """
         lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
         baseline_lower_bound = getattr(self, lower_bound_key)
@@ -406,7 +406,7 @@ class HeavisideAssembias(object):
 
             #################################################################################
             ### Retrieve the arrays storing prim_haloprop and sec_haloprop
-            ### The control flow below is what permits accepting an input 
+            ### The control flow below is what permits accepting an input
             ### table or a directly inputting prim_haloprop and sec_haloprop arrays
             _HAS_table = False
             if 'table' in kwargs:
@@ -447,25 +447,25 @@ class HeavisideAssembias(object):
             ### Compute the baseline, undecorated result
             result = func(*args, **kwargs)
 
-            # We will only decorate values that are not edge cases, 
+            # We will only decorate values that are not edge cases,
             ### so first compute the mask for non-edge cases
             no_edge_mask = (
-                (split > 0) & (split < 1) & 
+                (split > 0) & (split < 1) &
                 (result > baseline_lower_bound) & (result < baseline_upper_bound)
                 )
-            # Now create convenient references to the non-edge-case sub-arrays 
+            # Now create convenient references to the non-edge-case sub-arrays
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
 
             #################################################################################
-            # Compute the array type1_mask 
+            # Compute the array type1_mask
             # This array will serve as a boolean mask that divides the halo sample into two subsamples
-            # There are several possible ways that the type1_mask can be computed, depending on 
+            # There are several possible ways that the type1_mask can be computed, depending on
             # what the decorator was passed as input
 
             if _HAS_table is True:
                 # we were passed halo_type_tuple:
-                if hasattr(self, 'halo_type_tuple'): 
+                if hasattr(self, 'halo_type_tuple'):
                     halo_type_key = self.halo_type_tuple[0]
                     halo_type1_val = self.halo_type_tuple[1]
                     type1_mask = table[halo_type_key][no_edge_mask] == halo_type1_val
@@ -475,8 +475,8 @@ class HeavisideAssembias(object):
                     no_edge_percentiles = table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
                     type1_mask = no_edge_percentiles > no_edge_split
                 else:
-                    msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 
-                        "by altering the behavior of the model according to the value of " 
+                    msg = ("\nThe HeavisideAssembias class implements assembly bias \n"
+                        "by altering the behavior of the model according to the value of "
                         "``%s``.\n This quantity can be pre-computed using the "
                         "new_haloprop_func_dict mechanism, making your mock population run faster.\n"
                         "See the MockFactory documentation for detailed instructions.\n "
@@ -485,7 +485,7 @@ class HeavisideAssembias(object):
                     warn(msg % (key, key))
 
                     percentiles = compute_conditional_percentiles(
-                        prim_haloprop = prim_haloprop, 
+                        prim_haloprop = prim_haloprop,
                         sec_haloprop = sec_haloprop
                         )
                     no_edge_percentiles = percentiles[no_edge_mask]
@@ -497,18 +497,18 @@ class HeavisideAssembias(object):
                         percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
                 except KeyError:
                     percentiles = compute_conditional_percentiles(
-                        prim_haloprop = prim_haloprop, 
+                        prim_haloprop = prim_haloprop,
                         sec_haloprop = sec_haloprop
                         )
                 no_edge_percentiles = percentiles[no_edge_mask]
                 type1_mask = no_edge_percentiles > no_edge_split
 
-            # type1_mask has now been computed for all possible branchings 
+            # type1_mask has now been computed for all possible branchings
             #################################################################################
 
             perturbation = self._galprop_perturbation(
-                    prim_haloprop = prim_haloprop[no_edge_mask], 
-                    baseline_result = no_edge_result, 
+                    prim_haloprop = prim_haloprop[no_edge_mask],
+                    baseline_result = no_edge_result,
                     splitting_result = no_edge_split)
 
             frac_type1 = 1 - no_edge_split
@@ -522,27 +522,3 @@ class HeavisideAssembias(object):
             return result
 
         return wrapper
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

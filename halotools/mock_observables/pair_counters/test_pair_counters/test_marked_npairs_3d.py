@@ -63,7 +63,7 @@ def test_marked_npairs_parallelization():
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
     ran_weights1 = np.random.random((Npts,1))
-    
+
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.array([0.0,0.1,0.2,0.3])
 
@@ -89,7 +89,7 @@ def test_marked_npairs_nonperiodic():
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
     ran_weights1 = np.random.random((Npts,1))
-    
+
     rbins = np.array([0.0,0.1,0.2,0.3])
 
     result = marked_npairs_3d(random_sample, random_sample,
@@ -372,10 +372,3 @@ def test_marked_npairs_behavior_weight_func_id10():
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
     weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size = [rmax, rmax, rmax])
     assert np.all(result == -3*test_result), error_msg
-
-
-
-
-
-
-

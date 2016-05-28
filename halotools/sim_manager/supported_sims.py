@@ -137,4 +137,3 @@ class Consuelo(NbodySimulation):
 
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/')
-

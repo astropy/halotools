@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
     unicode_literals)
 
 import numpy as np
-import pytest 
+import pytest
 
 from ..npairs_3d import npairs_3d
 from ..pairs import npairs as pure_python_brute_force_npairs_3d
@@ -14,8 +14,8 @@ from ...tests.cf_helpers import generate_3d_regular_mesh
 __all__ = ('test_rectangular_mesh_pairs_tight_locus1', )
 
 def test_rectangular_mesh_pairs_tight_locus1():
-    """ Verify that `halotools.mock_observables.npairs_3d` returns 
-    the correct counts for two tight loci of points. 
+    """ Verify that `halotools.mock_observables.npairs_3d` returns
+    the correct counts for two tight loci of points.
 
     In this test, PBCs are irrelevant
     """
@@ -28,8 +28,8 @@ def test_rectangular_mesh_pairs_tight_locus1():
     assert np.all(result == [0, npts1*npts2, npts1*npts2])
 
 def test_rectangular_mesh_pairs_tight_locus2():
-    """ Verify that `halotools.mock_observables.npairs_3d` returns 
-    the correct counts for two tight loci of points. 
+    """ Verify that `halotools.mock_observables.npairs_3d` returns
+    the correct counts for two tight loci of points.
 
     In this test, PBCs are important.
     """
@@ -152,8 +152,8 @@ def test_rectangular_mesh_pairs_tight_locus9():
     assert np.all(counts == correct_result)
 
 def test_rectangular_mesh_pairs():
-    """ Verify that `halotools.mock_observables.npairs_3d` returns 
-    the correct counts for two regularly spaced grids of points. 
+    """ Verify that `halotools.mock_observables.npairs_3d` returns
+    the correct counts for two regularly spaced grids of points.
     """
     npts_per_dim = 10
     data1 = generate_3d_regular_mesh(npts_per_dim)
@@ -167,12 +167,12 @@ def test_rectangular_mesh_pairs():
     r4 = grid_spacing*np.sqrt(3) + epsilon
     rbins = np.array([r1, r2, r3, r4])
     result = npairs_3d(data1, data2, rbins, period=Lbox, approx_cell1_size=0.1)
-    assert np.all(result == 
+    assert np.all(result ==
         [npts_per_dim**3, 7*npts_per_dim**3, 19*npts_per_dim**3, 27*npts_per_dim**3])
 
 def test_parallel():
-    """ Verify that `halotools.mock_observables.npairs_3d` returns 
-    identical counts whether it is run in serial or parallel. 
+    """ Verify that `halotools.mock_observables.npairs_3d` returns
+    identical counts whether it is run in serial or parallel.
     """
     npts_per_dim = 10
     data1 = generate_3d_regular_mesh(npts_per_dim)
@@ -186,9 +186,9 @@ def test_parallel():
     r4 = grid_spacing*np.sqrt(3) + epsilon
     rbins = np.array([r1, r2, r3, r4])
     serial_result = npairs_3d(data1, data2, rbins, period=Lbox, approx_cell1_size=0.1)
-    parallel_result2 = npairs_3d(data1, data2, rbins, period=Lbox, 
+    parallel_result2 = npairs_3d(data1, data2, rbins, period=Lbox,
         approx_cell1_size=0.1, num_threads = 2)
-    parallel_result7 = npairs_3d(data1, data2, rbins, period=Lbox, 
+    parallel_result7 = npairs_3d(data1, data2, rbins, period=Lbox,
         approx_cell1_size=0.1, num_threads = 7)
     assert np.all(serial_result == parallel_result2)
     assert np.all(serial_result == parallel_result7)
@@ -240,9 +240,9 @@ def test_sensible_num_threads():
 
     rbins = np.array((0.05, 0.15, 0.3))
     with pytest.raises(ValueError) as err:
-        result = npairs_3d(data1, data2, rbins, period=1, 
+        result = npairs_3d(data1, data2, rbins, period=1,
             num_threads = "Cuba Gooding Jr.")
-    substr = "Input ``num_threads`` argument must be an integer or the string 'max'" 
+    substr = "Input ``num_threads`` argument must be an integer or the string 'max'"
     assert substr in err.value.args[0]
 
 def test_sensible_rbins():
@@ -253,7 +253,7 @@ def test_sensible_rbins():
     rbins = 0.1
     with pytest.raises(ValueError) as err:
         result = npairs_3d(data1, data2, rbins, period=1)
-    substr = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries" 
+    substr = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
     assert substr in err.value.args[0]
 
 def test_sensible_period():
@@ -264,13 +264,5 @@ def test_sensible_period():
 
     with pytest.raises(ValueError) as err:
         result = npairs_3d(data1, data2, rbins, period=np.inf)
-    substr = "Input ``period`` must be a bounded positive number in all dimensions" 
+    substr = "Input ``period`` must be a bounded positive number in all dimensions"
     assert substr in err.value.args[0]
-
-
-
-
-
-
-
-

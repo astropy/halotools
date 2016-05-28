@@ -1,9 +1,9 @@
-""" Module provides unit-testing for `~halotools.mock_observables.clustering_helpers`. 
+""" Module provides unit-testing for `~halotools.mock_observables.clustering_helpers`.
 """
 from __future__ import absolute_import, division, print_function
 
 from astropy.tests.helper import pytest
-import numpy as np 
+import numpy as np
 
 from ..clustering_helpers import verify_tpcf_estimator, downsample_inputs_exceeding_max_sample_size
 from ..clustering_helpers import process_optional_input_sample2
@@ -132,7 +132,3 @@ def test_process_optional_input_sample2_case3():
     assert np.all(sample2_in == sample2_out)
     assert _sample1_is_sample2 is True
     assert do_cross is False
-
-
-
-

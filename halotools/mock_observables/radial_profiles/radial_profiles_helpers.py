@@ -1,6 +1,6 @@
-""" Module containing helper functions used to process the arguments 
+""" Module containing helper functions used to process the arguments
 passed to functions in the `~halotools.mock_observables.radial_profiles` sub-package.
-""" 
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -14,7 +14,7 @@ def bounds_check_sample2_quantity(sample2, sample2_quantity):
     sample2_quantity = np.atleast_1d(sample2_quantity).astype('f8')
     npts_quantity2 = len(sample2_quantity)
     try:
-        assert npts_quantity2 == npts2 
+        assert npts_quantity2 == npts2
     except AssertionError:
         msg = ("Input ``sample2_quantity`` has %i elements, "
             "but input ``sample2`` has %i elements.\n" % (npts_quantity2, npts2))
@@ -22,18 +22,18 @@ def bounds_check_sample2_quantity(sample2, sample2_quantity):
     return sample2_quantity
 
 def get_normalized_rbins(rbins_absolute, rbins_normalized, normalize_rbins_by, sample1):
-    """ Function processes the various options for the input rbins arguments and returns 
-    Numpy arrays ``rbins_normalized`` and ``normalize_rbins_by``. 
+    """ Function processes the various options for the input rbins arguments and returns
+    Numpy arrays ``rbins_normalized`` and ``normalize_rbins_by``.
 
-    If ``rbins_absolute`` is provided, it is enforced that neither 
-    ``rbins_normalized`` nor ``normalize_rbins_by`` is provided. 
+    If ``rbins_absolute`` is provided, it is enforced that neither
+    ``rbins_normalized`` nor ``normalize_rbins_by`` is provided.
 
-    If ``rbins_normalized`` is provided, it is enforced that ``normalize_rbins_by`` must 
-    be provided, and that ``rbins_absolute`` is not provided. 
+    If ``rbins_normalized`` is provided, it is enforced that ``normalize_rbins_by`` must
+    be provided, and that ``rbins_absolute`` is not provided.
 
-    The returned value of ``normalize_rbins_by`` is enforced to have the same length 
-    as the input ``sample1``, and if the input ``normalize_rbins_by`` argument is None, 
-    an array of ones is returned.     
+    The returned value of ``normalize_rbins_by`` is enforced to have the same length
+    as the input ``sample1``, and if the input ``normalize_rbins_by`` argument is None,
+    an array of ones is returned.
     """
 
     if (rbins_absolute is None) & (rbins_normalized is None):
@@ -76,8 +76,8 @@ def get_normalized_rbins(rbins_absolute, rbins_normalized, normalize_rbins_by, s
     return rbins_normalized, normalize_rbins_by
 
 def enforce_maximum_search_length_3d(rbins_normalized, normalize_rbins_by, period):
-    """ Require that the input rbins does not result in an attempt to count pairs 
-    over distances exceeding period/3 in any dimension. 
+    """ Require that the input rbins does not result in an attempt to count pairs
+    over distances exceeding period/3 in any dimension.
     """
     max_r_max = np.amax(rbins_normalized)*np.amax(normalize_rbins_by)
     try:
@@ -89,26 +89,3 @@ def enforce_maximum_search_length_3d(rbins_normalized, normalize_rbins_by, perio
             "If you really need to count pairs over distances this large, \n"
             "you should be using a larger simulation.")
         raise ValueError(msg % max_r_max)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

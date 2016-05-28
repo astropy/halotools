@@ -56,7 +56,7 @@ def test_npairs_s_mu_periodic():
     mu_bins = np.linspace(0,1.0,N_mu_bins)
     Npts = len(random_sample)
 
-    result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins, 
+    result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins,
         period=period, num_threads=num_threads)
 
     msg = 'The returned result is an unexpected shape.'
@@ -65,7 +65,7 @@ def test_npairs_s_mu_periodic():
     result = np.diff(result,axis=1)
     result = np.sum(result, axis=1)+ Npts
 
-    test_result = npairs_3d(random_sample, random_sample, s_bins, 
+    test_result = npairs_3d(random_sample, random_sample, s_bins,
         period=period, num_threads=num_threads)
 
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
@@ -94,5 +94,3 @@ def test_npairs_s_mu_nonperiodic():
 
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(result == test_result), msg
-
-

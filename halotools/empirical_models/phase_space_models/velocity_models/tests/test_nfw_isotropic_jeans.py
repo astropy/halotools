@@ -5,7 +5,7 @@ __all__ = ['TestNFWJeansVelocity']
 from unittest import TestCase
 
 class TestNFWJeansVelocity(TestCase):
-    """ Class used to test `~halotools.empirical_models.NFWPhaseSpace`. 
+    """ Class used to test `~halotools.empirical_models.NFWPhaseSpace`.
     """
 
     def setup_class(self):

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-This module contains general purpose helper functions 
-used by many of the Halotools models.  
+This module contains general purpose helper functions
+used by many of the Halotools models.
 """
 
 __all__ = (
-    ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 
-    'bind_default_kwarg_mixin_safe', 
+    ['solve_for_polynomial_coefficients', 'polynomial_from_table',
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype',
+    'bind_default_kwarg_mixin_safe',
     'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory']
     )
 
@@ -16,51 +16,51 @@ __author__ = ['Andrew Hearin', 'Surhud More']
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
-from warnings import warn 
+from warnings import warn
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
 def solve_for_polynomial_coefficients(abscissa, ordinates):
-    """ Solves for coefficients of the unique, 
-    minimum-degree polynomial that passes through 
-    the input abscissa and attains values equal the input ordinates.  
+    """ Solves for coefficients of the unique,
+    minimum-degree polynomial that passes through
+    the input abscissa and attains values equal the input ordinates.
 
     Parameters
     ----------
-    abscissa : array 
-        Elements are the abscissa at which the desired values of the polynomial 
+    abscissa : array
+        Elements are the abscissa at which the desired values of the polynomial
         have been tabulated.
 
-    ordinates : array 
+    ordinates : array
         Elements are the desired values of the polynomial when evaluated at the abscissa.
 
     Returns
     -------
-    polynomial_coefficients : array 
-        Elements are the coefficients determining the polynomial. 
+    polynomial_coefficients : array
+        Elements are the coefficients determining the polynomial.
         Element i of polynomial_coefficients gives the degree i polynomial coefficient.
 
     Notes
     --------
-    Input arrays abscissa and ordinates can in principle be of any dimension Ndim, 
+    Input arrays abscissa and ordinates can in principle be of any dimension Ndim,
     and there will be Ndim output coefficients.
 
-    The input ordinates specify the desired values of the polynomial 
+    The input ordinates specify the desired values of the polynomial
     when evaluated at the Ndim inputs specified by the input abscissa.
-    There exists a unique, order Ndim polynomial that returns the input 
+    There exists a unique, order Ndim polynomial that returns the input
     ordinates when the polynomial is evaluated at the input abscissa.
-    The coefficients of that unique polynomial are the output of the function. 
+    The coefficients of that unique polynomial are the output of the function.
 
-    As an example, suppose that a model in which the quenched fraction is 
-    :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`. 
-    Then this function takes [12, 15] as the input abscissa, 
-    [0.25, 0.9] as the input ordinates, 
-    and returns the array :math:`[c_{0}, c_{1}]`. 
-    The unique polynomial linear in :math:`log_{10}M`  
-    that passes through the input ordinates and abscissa is given by 
+    As an example, suppose that a model in which the quenched fraction is
+    :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`.
+    Then this function takes [12, 15] as the input abscissa,
+    [0.25, 0.9] as the input ordinates,
+    and returns the array :math:`[c_{0}, c_{1}]`.
+    The unique polynomial linear in :math:`log_{10}M`
+    that passes through the input ordinates and abscissa is given by
     :math:`F(logM) = c_{0} + c_{1}*log_{10}logM`.
-    
+
     """
 
     columns = np.ones(len(abscissa))
@@ -75,26 +75,26 @@ def solve_for_polynomial_coefficients(abscissa, ordinates):
     return np.array(polynomial_coefficients)
 
 def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
-    """ Method to evaluate an input polynomial at the input_abscissa. 
-    The input polynomial is determined by `solve_for_polynomial_coefficients` 
-    from table_abscissa and table_ordinates. 
+    """ Method to evaluate an input polynomial at the input_abscissa.
+    The input polynomial is determined by `solve_for_polynomial_coefficients`
+    from table_abscissa and table_ordinates.
 
     Parameters
     ----------
-    table_abscissa : array 
-        Elements are the abscissa determining the input polynomial. 
+    table_abscissa : array
+        Elements are the abscissa determining the input polynomial.
 
-    table_ordinates : array 
-        Elements are the desired values of the input polynomial 
+    table_ordinates : array
+        Elements are the desired values of the input polynomial
         when evaluated at table_abscissa
 
-    input_abscissa : array 
-        Points at which to evaluate the input polynomial. 
+    input_abscissa : array
+        Points at which to evaluate the input polynomial.
 
-    Returns 
+    Returns
     -------
-    output_ordinates : array 
-        Values of the input polynomial when evaluated at input_abscissa. 
+    output_ordinates : array
+        Values of the input polynomial when evaluated at input_abscissa.
 
     """
     if not isinstance(input_abscissa, np.ndarray):
@@ -108,33 +108,33 @@ def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
 
     return output_ordinates
 
-def enforce_periodicity_of_box(coords, box_length, 
+def enforce_periodicity_of_box(coords, box_length,
     check_multiple_box_lengths = False, **kwargs):
-    """ Function used to apply periodic boundary conditions 
+    """ Function used to apply periodic boundary conditions
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
     Parameters
     ----------
     coords : array_like
-        float or ndarray containing a set of points with values ranging between 
+        float or ndarray containing a set of points with values ranging between
         [-box_length, 2*box_length]
-        
+
     box_length : float
         the size of simulation box (currently hard-coded to be Mpc/h units)
 
-    velocity : array_like, optional 
-        velocity in the same dimension as the input coords. 
-        For all coords outside the box, the corresponding velocities 
-        will receive a sign flip. 
+    velocity : array_like, optional
+        velocity in the same dimension as the input coords.
+        For all coords outside the box, the corresponding velocities
+        will receive a sign flip.
 
-    check_multiple_box_lengths : bool, optional 
-        If True, an exception will be raised if the points span a range 
-        of more than 2Lbox. Default is False.     
+    check_multiple_box_lengths : bool, optional
+        If True, an exception will be raised if the points span a range
+        of more than 2Lbox. Default is False.
 
     Returns
     -------
     periodic_coords : array_like
-        array with values and shape equal to input coords, 
+        array with values and shape equal to input coords,
         but with periodic boundary conditions enforced
 
     """
@@ -152,43 +152,43 @@ def enforce_periodicity_of_box(coords, box_length,
     try:
         velocity = kwargs['velocity']
         outbox = ((coords > box_length) | (coords < 0))
-        newcoords = coords % box_length 
+        newcoords = coords % box_length
         new_velocity = np.where(outbox, -velocity, velocity)
         return newcoords, new_velocity
     except:
         return coords % box_length
 
 
-def piecewise_heaviside(bin_midpoints, bin_width, 
+def piecewise_heaviside(bin_midpoints, bin_width,
     values_inside_bins, value_outside_bins, abscissa):
-    """ Piecewise heaviside function. 
+    """ Piecewise heaviside function.
 
-    The function returns values_inside_bins  
-    when evaluated at points within bin_width/2 of bin_midpoints. 
-    Otherwise, the output function returns value_outside_bins. 
+    The function returns values_inside_bins
+    when evaluated at points within bin_width/2 of bin_midpoints.
+    Otherwise, the output function returns value_outside_bins.
 
-    Parameters 
+    Parameters
     ----------
-    bin_midpoints : array_like 
-        Length-Nbins array containing the midpoint of the abscissa bins. 
-        Bin boundaries may touch, but overlapping bins will raise an exception. 
+    bin_midpoints : array_like
+        Length-Nbins array containing the midpoint of the abscissa bins.
+        Bin boundaries may touch, but overlapping bins will raise an exception.
 
-    bin_width : float  
-        Width of the abscissa bins. 
+    bin_width : float
+        Width of the abscissa bins.
 
-    values_inside_bins : array_like 
-        Length-Nbins array providing values of the desired function when evaluated 
+    values_inside_bins : array_like
+        Length-Nbins array providing values of the desired function when evaluated
         at a point inside one of the bins.
 
-    value_outside_bins : float 
+    value_outside_bins : float
         value of the desired function when evaluated at any point outside the bins.
 
-    abscissa : array_like 
+    abscissa : array_like
         Points at which to evaluate binned_heaviside
 
-    Returns 
+    Returns
     -------
-    output : array_like  
+    output : array_like
         Values of the function when evaluated at the input abscissa
 
     """
@@ -209,14 +209,14 @@ def piecewise_heaviside(bin_midpoints, bin_width,
     output = np.zeros(custom_len(abscissa)) + value_outside_bins
 
     if custom_len(bin_midpoints)==1:
-        idx_abscissa_in_bin = np.where( 
-            (abscissa >= bin_midpoints - bin_width/2.) & (abscissa < bin_midpoints + bin_width/2.) )[0]
+        idx_abscissa_in_bin = np.where(
+            (abscissa >= bin_midpoints - bin_width/2.) & (abscissa < bin_midpoints + bin_width/2.))[0]
         print(idx_abscissa_in_bin)
         output[idx_abscissa_in_bin] = values_inside_bins
     else:
         for ii, x in enumerate(bin_midpoints):
             idx_abscissa_in_binii = np.where(
-                (abscissa >= bin_midpoints[ii] - bin_width/2.) & 
+                (abscissa >= bin_midpoints[ii] - bin_width/2.) &
                 (abscissa < bin_midpoints[ii] + bin_width/2.)
                 )[0]
             output[idx_abscissa_in_binii] = values_inside_bins[ii]
@@ -225,38 +225,38 @@ def piecewise_heaviside(bin_midpoints, bin_width,
 
 
 def custom_spline(table_abscissa, table_ordinates, **kwargs):
-    """ Convenience wrapper around `~scipy.interpolate.InterpolatedUnivariateSpline`, 
-    written specifically to handle the edge case of a spline table being 
-    built from a single point.  
+    """ Convenience wrapper around `~scipy.interpolate.InterpolatedUnivariateSpline`,
+    written specifically to handle the edge case of a spline table being
+    built from a single point.
 
-    Parameters 
+    Parameters
     ----------
     table_abscissa : array_like
-        abscissa values defining the interpolation 
+        abscissa values defining the interpolation
 
     table_ordinates : array_like
-        ordinate values defining the interpolation 
+        ordinate values defining the interpolation
 
     k : int, optional
-        Degree of the desired spline interpolation. 
-        Default is 1. 
+        Degree of the desired spline interpolation.
+        Default is 1.
 
-    Returns 
+    Returns
     -------
-    output : object  
-        Function object to use to evaluate the interpolation of 
-        the input table_abscissa & table_ordinates 
+    output : object
+        Function object to use to evaluate the interpolation of
+        the input table_abscissa & table_ordinates
 
-    Notes 
+    Notes
     -----
-    Only differs from `~scipy.interpolate.UnivariateSpline` in two respects. 
-    First, the degree of the spline interpolation is automatically chosen to 
-    be the maximum allowable degree permitted by the number of abscissa points. 
-    Second, the behavior differs for the case where the input tables 
-    have only a single element. In this case, the default behavior 
-    of the scipy function is to raise an exception.  
-    The `custom_spline` instead returns a constant-valued function 
-    where the returned value is simply the scalar value of the input ordinates. 
+    Only differs from `~scipy.interpolate.UnivariateSpline` in two respects.
+    First, the degree of the spline interpolation is automatically chosen to
+    be the maximum allowable degree permitted by the number of abscissa points.
+    Second, the behavior differs for the case where the input tables
+    have only a single element. In this case, the default behavior
+    of the scipy function is to raise an exception.
+    The `custom_spline` instead returns a constant-valued function
+    where the returned value is simply the scalar value of the input ordinates.
 
     """
     if custom_len(table_abscissa) != custom_len(table_ordinates):
@@ -277,39 +277,39 @@ def custom_spline(table_abscissa, table_ordinates, **kwargs):
         if custom_len(table_ordinates) != 1:
             raise HalotoolsError("In spline_degree=0 edge case, "
                 "table_abscissa and table_abscissa must be 1-element arrays")
-        return lambda x : np.zeros(custom_len(x)) + table_ordinates[0]
+        return lambda x: np.zeros(custom_len(x)) + table_ordinates[0]
     else:
         spline_function = spline(table_abscissa, table_ordinates, k=k)
         return spline_function
 
 def call_func_table(func_table, abscissa, func_indices):
-    """ Returns the output of an array of functions evaluated at a set of input points 
-    if the indices of required functions is known. 
+    """ Returns the output of an array of functions evaluated at a set of input points
+    if the indices of required functions is known.
 
-    Parameters 
+    Parameters
     ----------
-    func_table : array_like 
+    func_table : array_like
         Length k array of function objects
 
-    abscissa : array_like 
-        Length Npts array of points at which to evaluate the functions. 
+    abscissa : array_like
+        Length Npts array of points at which to evaluate the functions.
 
-    func_indices : array_like 
-        Length Npts array providing the indices to use to choose which function 
-        operates on each abscissa element. Thus func_indices is an array of integers 
-        ranging between 0 and k-1. 
+    func_indices : array_like
+        Length Npts array providing the indices to use to choose which function
+        operates on each abscissa element. Thus func_indices is an array of integers
+        ranging between 0 and k-1.
 
-    Returns 
+    Returns
     -------
-    out : array_like 
-        Length Npts array giving the evaluation of the appropriate function on each 
-        abscissa element. 
+    out : array_like
+        Length Npts array giving the evaluation of the appropriate function on each
+        abscissa element.
 
     """
     func_table = convert_to_ndarray(func_table)
     abscissa = convert_to_ndarray(abscissa)
     func_indices = convert_to_ndarray(func_indices)
-    
+
     func_argsort = func_indices.argsort()
     func_ranges = list(np.searchsorted(func_indices[func_argsort], list(range(len(func_table)))))
     func_ranges.append(None)
@@ -320,28 +320,28 @@ def call_func_table(func_table, abscissa, func_indices):
     return out
 
 def bind_required_kwargs(required_kwargs, obj, **kwargs):
-    """ Method binds each element of ``required_kwargs`` to 
-    the input object ``obj``, or raises and exception for cases 
-    where a mandatory keyword argument was not passed to the 
+    """ Method binds each element of ``required_kwargs`` to
+    the input object ``obj``, or raises and exception for cases
+    where a mandatory keyword argument was not passed to the
     ``obj`` constructor.
 
-    Used throughout the package when a required keyword argument 
-    has no obvious default value. 
+    Used throughout the package when a required keyword argument
+    has no obvious default value.
 
-    Parameters 
+    Parameters
     ----------
-    required_kwargs : list 
-        List of strings of the keyword arguments that are required 
-        when instantiating the input ``obj``. 
+    required_kwargs : list
+        List of strings of the keyword arguments that are required
+        when instantiating the input ``obj``.
 
-    obj : object 
-        The object being instantiated. 
+    obj : object
+        The object being instantiated.
 
-    Notes 
+    Notes
     -----
-    The `bind_required_kwargs` method assumes that each 
-    required keyword argument should be bound to ``obj`` 
-    as attribute with the same name as the keyword. 
+    The `bind_required_kwargs` method assumes that each
+    required keyword argument should be bound to ``obj``
+    as attribute with the same name as the keyword.
     """
     for key in required_kwargs:
         if key in list(kwargs.keys()):
@@ -349,28 +349,28 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
         else:
             class_name = obj.__class__.__name__
             msg = (
-                key + ' is a required keyword argument ' + 
+                key + ' is a required keyword argument ' +
                 'to instantiate the '+class_name+' class'
                 )
             raise KeyError(msg)
 
 def create_composite_dtype(dtype_list):
-    """ Find the union of the dtypes in the input list, and return a composite 
-    dtype after verifying consistency of typing of possibly repeated fields. 
+    """ Find the union of the dtypes in the input list, and return a composite
+    dtype after verifying consistency of typing of possibly repeated fields.
 
-    Parameters 
+    Parameters
     ----------
-    dtype_list : list 
-        List of dtypes with possibly repeated field names. 
+    dtype_list : list
+        List of dtypes with possibly repeated field names.
 
-    Returns 
+    Returns
     --------
-    composite_dtype : dtype 
-        Numpy dtype object composed of the union of the input dtypes. 
+    composite_dtype : dtype
+        Numpy dtype object composed of the union of the input dtypes.
 
-    Notes 
+    Notes
     -----
-    Basically an awkward workaround to the fact 
+    Basically an awkward workaround to the fact
     that numpy dtype objects are not iterable.
     """
     name_list = list(set([name for d in dtype_list for name in d.names]))
@@ -384,8 +384,8 @@ def create_composite_dtype(dtype_list):
                     if tmp[name].type == dt[name].type:
                         pass
                     else:
-                        msg = ("Inconsistent dtypes for name = ``%s``.\n" 
-                            "    dtype1 = %s\n    dtype2 = %s\n" % 
+                        msg = ("Inconsistent dtypes for name = ``%s``.\n"
+                            "    dtype1 = %s\n    dtype2 = %s\n" %
                             (name, tmp[name].type, dt[name].type))
                         raise HalotoolsError(msg)
                 else:
@@ -394,29 +394,29 @@ def create_composite_dtype(dtype_list):
     return composite_dtype
 
 def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, default_value):
-    """ Function used to ensure that a keyword argument passed to the constructor 
+    """ Function used to ensure that a keyword argument passed to the constructor
     of an orthogonal mix-in class is not already an attribute bound to self.
-    If it is safe to bind the keyword_argument to the object, 
+    If it is safe to bind the keyword_argument to the object,
     `bind_default_kwarg_mixin_safe` will do so.
 
-    Parameters 
+    Parameters
     ----------
-    obj : class instance 
+    obj : class instance
         Instance of the class to which we want to bind the input ``keyword_argument``.
 
-    keyword_argument : string 
+    keyword_argument : string
         name of the attribute that will be bound to the object if the action is deemed mix-in safe.
 
-    constructor_kwargs : dict 
+    constructor_kwargs : dict
         keyword argument dictionary passed to the constructor of the input ``obj``.
 
-    default_value : object 
-        Whatever the default value for the attribute should be if ``keyword_argument`` does not 
+    default_value : object
+        Whatever the default value for the attribute should be if ``keyword_argument`` does not
         appear in kwargs nor is it already bound to the ``obj``.
 
-    Notes 
+    Notes
     ------
-    See the constructor of `~halotools.empirical_models.conc_mass_models.ConcMass` for a usage example.    
+    See the constructor of `~halotools.empirical_models.conc_mass_models.ConcMass` for a usage example.
     """
     if hasattr(obj, keyword_argument):
         if keyword_argument in constructor_kwargs:
@@ -435,24 +435,24 @@ def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, def
 
 
 def custom_incomplete_gamma(a, x):
-    """ Incomplete gamma function. 
-    
-    For the case covered by scipy, a > 0, scipy is called. Otherwise the gamma function 
-    recurrence relations are called, extending the scipy behavior. The only other difference from the 
-    scipy function is that in `custom_incomplete_gamma` only supports 
+    """ Incomplete gamma function.
+
+    For the case covered by scipy, a > 0, scipy is called. Otherwise the gamma function
+    recurrence relations are called, extending the scipy behavior. The only other difference from the
+    scipy function is that in `custom_incomplete_gamma` only supports
     the case where the input ``a`` is a scalar.
-    
+
     Parameters
     -----------
-    a : float 
-    
-    x : array_like 
-    
-    Returns 
-    --------
-    gamma : array_like 
+    a : float
 
-    Examples 
+    x : array_like
+
+    Returns
+    --------
+    gamma : array_like
+
+    Examples
     --------
     >>> a, x = 1, np.linspace(1, 10, 100)
     >>> g = custom_incomplete_gamma(a, x)
@@ -473,31 +473,31 @@ custom_incomplete_gamma.__author__ = ['Surhud More']
 
 def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning = True):
     """
-    Function returns a decorator that can be used to clip the values 
-    of an original function to produce a modified function whose 
-    values are replaced by the input ``lower_bound`` and ``upper_bound`` whenever 
-    the original function returns out of range values. 
+    Function returns a decorator that can be used to clip the values
+    of an original function to produce a modified function whose
+    values are replaced by the input ``lower_bound`` and ``upper_bound`` whenever
+    the original function returns out of range values.
 
-    Parameters 
+    Parameters
     -----------
-    lower_bound : float or int 
-        Lower bound defining the output decorator 
+    lower_bound : float or int
+        Lower bound defining the output decorator
 
-    upper_bound : float or int 
-        Upper bound defining the output decorator 
+    upper_bound : float or int
+        Upper bound defining the output decorator
 
-    warning : bool, optional 
-        If True, decorator will raise a warning for cases where the values of the 
-        undecorated function fall outside the boundaries. Default is True. 
+    warning : bool, optional
+        If True, decorator will raise a warning for cases where the values of the
+        undecorated function fall outside the boundaries. Default is True.
 
-    Returns 
+    Returns
     --------
-    decorator : object 
-        Python decorator used to apply to any function for which you wish to 
-        enforce that that the returned values of the original function are modified 
-        to be bounded by ``lower_bound`` and ``upper_bound``. 
+    decorator : object
+        Python decorator used to apply to any function for which you wish to
+        enforce that that the returned values of the original function are modified
+        to be bounded by ``lower_bound`` and ``upper_bound``.
 
-    Examples 
+    Examples
     --------
     >>> def original_function(x): return x + 4
     >>> lower_bound, upper_bound = 0, 5
@@ -533,9 +533,3 @@ def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning = True)
         return output_func
 
     return decorator
-
-
-
-
-
-

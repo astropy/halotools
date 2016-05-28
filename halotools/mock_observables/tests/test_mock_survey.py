@@ -1,4 +1,4 @@
-""" Module providing unit-testing for the functions in 
+""" Module providing unit-testing for the functions in
 the `~halotools.mock_observables.mock_survey` module
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -22,15 +22,15 @@ def test_distant_observer():
     test distant observer function
     """
     redshifts = distant_observer_redshift(x,v)
-    
+
     assert len(redshifts)==N, "redshift array is not the correct size"
-    
+
     redshifts = distant_observer_redshift(x,v,period=period)
-    
+
     from astropy.constants import c
     c_km_s = c.to('km/s').value
     z_cos_max = period[2]*100.00/c_km_s
-    
+
     assert len(redshifts)==N, "redshift array is not the correct size"
     assert np.max(redshifts)<=z_cos_max, "PBC is not handeled correctly for redshifts"
 
@@ -42,9 +42,9 @@ def test_ra_dec_z():
     """
     from astropy import cosmology
     cosmo = cosmology.FlatLambdaCDM(H0=0.7, Om0=0.3)
-    
+
     ra, dec, z = ra_dec_z(x,v,cosmo=cosmo)
-    
+
     assert len(ra)==N
     assert len(dec)==N
     assert len(z)==N

@@ -1,10 +1,10 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_3d` function
+used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
+from functools import partial
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
@@ -19,7 +19,7 @@ def npairs_3d(sample1, sample2, rbins, period = None,
     verbose = False, num_threads = 1,
     approx_cell1_size = None, approx_cell2_size = None):
     """
-    Function counts the number of pairs of points separated by 
+    Function counts the number of pairs of points separated by
     a three-dimensional distance smaller than the input ``rbins``.
 
     Note that if sample1 == sample2 that the
@@ -36,46 +36,46 @@ def npairs_3d(sample1, sample2, rbins, period = None,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
+        Npts2 x 3 array containing 3-D positions of points.
 
     rbins : array_like
         Boundaries defining the bins in which pairs are counted.
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
 
     verbose : Boolean, optional
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -114,10 +114,10 @@ def npairs_3d(sample1, sample2, rbins, period = None,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -133,7 +133,7 @@ def npairs_3d(sample1, sample2, rbins, period = None,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_3d_engine, 
+    engine = partial(npairs_3d_engine,
         double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins)
 
     # Calculate the cell1 indices that will be looped over by the engine
@@ -150,7 +150,7 @@ def npairs_3d(sample1, sample2, rbins, period = None,
 
     return np.array(counts)
 
-def _npairs_3d_process_args(sample1, sample2, rbins, period, 
+def _npairs_3d_process_args(sample1, sample2, rbins, period,
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
@@ -160,7 +160,7 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
         if not isinstance(num_threads,int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
-    
+
     # Passively enforce that we are working with ndarrays
     x1 = sample1[:,0]
     y1 = sample1[:,1]
@@ -169,9 +169,9 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
     y2 = sample2[:,1]
     z2 = sample2[:,2]
     rbins = np.atleast_1d(rbins).astype('f8')
-    
+
     rmax = np.max(rbins)
-    
+
     try:
         assert rbins.ndim == 1
         assert len(rbins) > 1
@@ -185,7 +185,7 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2, 
+            _enclose_in_box(x1, y1, z1, x2, y2, z2,
                 min_size=[rmax*3.0,rmax*3.0,rmax*3.0]))
     else:
         PBCs = True
@@ -203,18 +203,11 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
         approx_cell1_size = [rmax, rmax, rmax]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
-    if approx_cell2_size is None:    
+    if approx_cell2_size is None:
         approx_cell2_size = [rmax, rmax, rmax]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
-        
-    return (x1, y1, z1, x2, y2, z2, 
-        rbins, period, num_threads, PBCs, 
+
+    return (x1, y1, z1, x2, y2, z2,
+        rbins, period, num_threads, PBCs,
         approx_cell1_size, approx_cell2_size)
-
-
-
-
-
-
-

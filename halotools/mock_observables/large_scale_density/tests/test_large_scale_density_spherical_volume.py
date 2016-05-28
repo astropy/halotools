@@ -1,7 +1,7 @@
 """
 """
 from __future__ import (absolute_import, division, print_function)
-import numpy as np 
+import numpy as np
 from astropy.tests.helper import pytest
 
 from ..large_scale_density_spherical_volume import large_scale_density_spherical_volume
@@ -66,4 +66,3 @@ def test_large_scale_density_spherical_volume2():
     environment_volume = (4/3.)*np.pi*radius**3
     correct_answer = 200/environment_volume/mean_density
     assert np.allclose(result, correct_answer, rtol=0.001)
-

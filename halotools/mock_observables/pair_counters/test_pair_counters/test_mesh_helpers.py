@@ -70,7 +70,3 @@ def test_enforce_maximum_search_length_case7():
 
     search_length, period = (1, 4, 2), (4, 100, 7)
     _enforce_maximum_search_length(search_length, period)
-
-
-
-

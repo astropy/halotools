@@ -107,7 +107,3 @@ def test_npairs_jackknife_3d_nonperiodic():
 
     for icell in range(1, grid_jackknife_ncells**3-1):
         assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
-
-
-
-

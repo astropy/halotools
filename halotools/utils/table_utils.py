@@ -366,24 +366,3 @@ class SampleSelector(object):
             result[i] = table[first_idx:last_idx]
 
         return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

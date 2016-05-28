@@ -36,7 +36,3 @@ def test_behroozi10_redshift_safety():
         result1 = model.mean_stellar_mass(prim_haloprop = 1e12, redshift = 4)
     result2 = model.mean_stellar_mass(prim_haloprop = 1e12, redshift = model.redshift)
     assert result0 == result2
-
-
-
-

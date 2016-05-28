@@ -1,19 +1,19 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_3d` function
+used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
+from functools import partial
 
 from .npairs_3d import _npairs_3d_process_args
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .rectangular_mesh import RectangularDoubleMesh
 
-from .marked_cpairs import marked_npairs_3d_engine 
+from .marked_cpairs import marked_npairs_3d_engine
 
 from ...utils.array_utils import convert_to_ndarray
-from ...custom_exceptions import HalotoolsError 
+from ...custom_exceptions import HalotoolsError
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
@@ -37,23 +37,23 @@ def marked_npairs_3d(sample1, sample2, rbins,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
+        Npts2 x 3 array containing 3-D positions of points.
 
     rbins : array_like
         numpy array of length *Nrbins+1* defining the boundaries of bins in which
         pairs are counted.
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
 
     weights1 : array_like, optional
         Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
@@ -74,25 +74,25 @@ def marked_npairs_3d(sample1, sample2, rbins,
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -102,7 +102,7 @@ def marked_npairs_3d(sample1, sample2, rbins,
     Examples
     --------
     For demonstration purposes we create randomly distributed sets of points within a
-    periodic unit cube, using random weights. 
+    periodic unit cube, using random weights.
 
     >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
@@ -132,10 +132,10 @@ def marked_npairs_3d(sample1, sample2, rbins,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
     # Process the input weights and with the helper function
     weights1, weights2 = _marked_npairs_process_weights(sample1, sample2,
@@ -155,8 +155,8 @@ def marked_npairs_3d(sample1, sample2, rbins,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(marked_npairs_3d_engine, double_mesh, 
-        x1in, y1in, z1in, x2in, y2in, z2in, 
+    engine = partial(marked_npairs_3d_engine, double_mesh,
+        x1in, y1in, z1in, x2in, y2in, z2in,
         weights1, weights2, weight_func_id, rbins)
 
     # Calculate the cell1 indices that will be looped over by the engine
@@ -176,13 +176,13 @@ def marked_npairs_3d(sample1, sample2, rbins,
 def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
     """
     """
-    
+
     correct_num_weights = _func_signature_int_from_wfunc(weight_func_id)
     npts_sample1 = np.shape(sample1)[0]
     npts_sample2 = np.shape(sample2)[0]
     correct_shape1 = (npts_sample1, correct_num_weights)
     correct_shape2 = (npts_sample2, correct_num_weights)
-    
+
     ### Process the input weights1
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
@@ -203,7 +203,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "for the input `weights1`. Instead, an array of \n"
                    "dimension %i was received.")
             raise HalotoolsError(msg % ndim1)
-    
+
     npts_weights1 = np.shape(weights1)[0]
     num_weights1 = np.shape(weights1)[1]
     # At this point, weights1 is guaranteed to be a 2-d ndarray
@@ -221,9 +221,9 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "`sample1` has length %i. The input value of `weight_func_id` = %i \n"
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights1` is (%i, %i)\n")
-            raise HalotoolsError(msg % 
+            raise HalotoolsError(msg %
                 (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
-    
+
     ### Process the input weights2
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
@@ -244,7 +244,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "for the input `weights2`. Instead, an array of \n"
                    "dimension %i was received.")
             raise HalotoolsError(msg % ndim2)
-    
+
     npts_weights2 = np.shape(weights2)[0]
     num_weights2 = np.shape(weights2)[1]
     # At this point, weights2 is guaranteed to be a 2-d ndarray
@@ -262,20 +262,20 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "`sample2` has length %i. The input value of `weight_func_id` = %i \n"
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights2` is (%i, %i)\n")
-            raise HalotoolsError(msg % 
+            raise HalotoolsError(msg %
                 (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
-    
+
     return weights1, weights2
 
 def _func_signature_int_from_wfunc(weight_func_id):
     """
-    Return the function signature available weighting functions. 
+    Return the function signature available weighting functions.
     """
-    
+
     if type(weight_func_id) != int:
         msg = "\n weight_func_id parameter must be an integer ID of a weighting function."
         raise ValueError(msg)
-    
+
     if weight_func_id == 1:
         return 1
     elif weight_func_id == 2:
@@ -299,12 +299,3 @@ def _func_signature_int_from_wfunc(weight_func_id):
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")
         raise HalotoolsError(msg % weight_func_id)
-
-
-
-
-
-
-
-
-

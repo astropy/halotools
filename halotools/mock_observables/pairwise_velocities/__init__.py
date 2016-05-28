@@ -1,5 +1,5 @@
-""" Sub-package of `~halotools.mock_observables` containing functions used to   
-calculate pairwise velocity statistics. 
+""" Sub-package of `~halotools.mock_observables` containing functions used to
+calculate pairwise velocity statistics.
 """
 from __future__ import absolute_import
 

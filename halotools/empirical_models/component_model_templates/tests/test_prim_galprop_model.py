@@ -11,8 +11,8 @@ __all__ = ['TestPrimGalpropModel']
 
 class TestPrimGalpropModel(TestCase):
 
-    """ Class providing testing for the 
-    `~halotools.empirical_models.PrimGalpropModel`. 
+    """ Class providing testing for the
+    `~halotools.empirical_models.PrimGalpropModel`.
     """
     def setUp(self):
 
@@ -112,7 +112,7 @@ class TestPrimGalpropModel(TestCase):
 
         npts = int(1e3)
         halo_mass = np.zeros(npts) + 1e10
-        
+
         mean_baryonic_mass = model.mean_baryonic_mass(prim_haloprop = 1e10)
 
         mc_baryonic_mass = model.mc_baryonic_mass(
@@ -127,13 +127,13 @@ class TestPrimGalpropModel(TestCase):
 
         npts = int(1e3)
         halo_mass = np.zeros(npts) + 1e10
-        
+
         mc_baryonic_mass = model.mc_baryonic_mass(
             prim_haloprop = halo_mass, seed=43)
 
         measured_scatter = np.std(np.log10(mc_baryonic_mass))
-        assert np.allclose(model.param_dict['scatter_model_param1'], 
-            measured_scatter, 
+        assert np.allclose(model.param_dict['scatter_model_param1'],
+            measured_scatter,
             rtol=0.05)
 
     def test_param_dict_propagation(self):
@@ -144,7 +144,7 @@ class TestPrimGalpropModel(TestCase):
         halo_mass = np.zeros(npts) + 1e10
 
         model.param_dict['scatter_model_param1'] = 0.01
-        
+
         mc_baryonic_mass = model.mc_baryonic_mass(
             prim_haloprop = halo_mass, seed=43)
 
@@ -154,13 +154,3 @@ class TestPrimGalpropModel(TestCase):
 
     def tearDown(self):
         pass
-
-
-
-
-
-
-
-
-
-

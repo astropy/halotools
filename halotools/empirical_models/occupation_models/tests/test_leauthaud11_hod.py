@@ -1,4 +1,4 @@
-""" Module providing unit-testing for the component models in 
+""" Module providing unit-testing for the component models in
 `halotools.empirical_models.occupation_components.leauthaud11_components` module"
 """
 import numpy as np
@@ -8,8 +8,8 @@ from .. import Leauthaud11Cens, Leauthaud11Sats
 __all__ = ('test_Leauthaud11Cens', 'test_Leauthaud11Sats')
 
 def test_Leauthaud11Cens():
-    """ Function to test 
-    `~halotools.empirical_models.Leauthaud11Cens`. 
+    """ Function to test
+    `~halotools.empirical_models.Leauthaud11Cens`.
     """
 
     # Verify that the mean and Monte Carlo occupations are both reasonable and in agreement
@@ -41,8 +41,8 @@ def test_Leauthaud11Cens():
 
 
 def test_Leauthaud11Sats():
-    """ Function to test 
-    `~halotools.empirical_models.Leauthaud11Cens`. 
+    """ Function to test
+    `~halotools.empirical_models.Leauthaud11Cens`.
     """
 
     # Verify that the mean and Monte Carlo occupations are both reasonable and in agreement
@@ -95,11 +95,4 @@ def test_Leauthaud11Sats():
     ncen10 = model10.central_occupation_model.mean_occupation(prim_haloprop = 5e12)
     ncen105 = model105.central_occupation_model.mean_occupation(prim_haloprop = 5e12)
     ncen11 = model11.central_occupation_model.mean_occupation(prim_haloprop = 5e12)
-    assert ncen10 > ncen105 > ncen11 
-
-
-
-
-
-
-
+    assert ncen10 > ncen105 > ncen11

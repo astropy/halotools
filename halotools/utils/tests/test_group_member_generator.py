@@ -200,7 +200,3 @@ class TestGroupMemberGenerator(TestCase):
 
     def tearDown(self):
         del self.halo_table
-
-
-
-

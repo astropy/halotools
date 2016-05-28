@@ -5,7 +5,7 @@ from copy import copy, deepcopy
 
 from astropy.tests.helper import pytest
 from unittest import TestCase
-import warnings 
+import warnings
 
 from .. import occupation_model_template, zheng07_components
 
@@ -17,11 +17,11 @@ __all__ = ('TestZheng07Cens', 'TestZheng07Sats')
 
 
 class TestZheng07Cens(TestCase):
-    """ Class providing testing of the `~halotools.empirical_models.Zheng07Cens` model. 
+    """ Class providing testing of the `~halotools.empirical_models.Zheng07Cens` model.
 
-    The following list provides a brief summary of the tests performed: 
+    The following list provides a brief summary of the tests performed:
 
-        * The basic metadata of the model is correct, e.g., ``self._upper_occupation_bound = 1`` 
+        * The basic metadata of the model is correct, e.g., ``self._upper_occupation_bound = 1``
 
         * The `mean_occupation` function is bounded by zero and unity for the full range of reasonable input masses, :math:`0 <= \\langle N_{\mathrm{cen}}(M) \\rangle <=1` for :math:`\\log_{10}M/M_{\odot} \\in [10, 16]`
 
@@ -29,7 +29,7 @@ class TestZheng07Cens(TestCase):
 
         * The model correctly navigates having either array or halo catalog arguments, and returns the identical result regardless of how the inputs are bundled
 
-        * The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses. 
+        * The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses.
 
     """
     def setUp(self):
@@ -81,12 +81,12 @@ class TestZheng07Cens(TestCase):
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
         occ2_highmass = self.model2.mean_occupation(prim_haloprop=self.highmass)
         occ3_highmass = self.model3.mean_occupation(prim_haloprop=self.highmass)
-        assert defocc_highmass > occ3_highmass 
+        assert defocc_highmass > occ3_highmass
         assert occ3_highmass > occ2_highmass
 
     def test_param_dict_propagation1(self):
 
-        ### Verify that directly changing model parameters 
+        ### Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
 
@@ -98,7 +98,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation2(self):
 
-        ### Verify that directly changing model parameters 
+        ### Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
 
@@ -110,7 +110,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation3(self):
 
-        ### Verify that directly changing model parameters 
+        ### Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
 
@@ -122,7 +122,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation4(self):
 
-        ### Verify that directly changing model parameters 
+        ### Verify that directly changing model parameters
         # without a new instantiation also behaves properly
 
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
@@ -146,7 +146,7 @@ class TestZheng07Cens(TestCase):
         assert hasattr(model, 'mean_occupation')
 
         mvir_array = np.logspace(10, 16, 10)
-        mean_occ = model.mean_occupation(prim_haloprop=mvir_array) 
+        mean_occ = model.mean_occupation(prim_haloprop=mvir_array)
 
         # Check that the range is in [0,1]
         assert np.all(mean_occ<= 1)
@@ -200,7 +200,7 @@ class TestZheng07Cens(TestCase):
     def test_raises_correct_exception(self):
         with pytest.raises(HalotoolsError) as err:
             _ = self.default_model.mean_occupation(x = 4)
-        substr = "You must pass either a ``table`` or ``prim_haloprop`` argument" 
+        substr = "You must pass either a ``table`` or ``prim_haloprop`` argument"
         assert substr in err.value.args[0]
 
     def test_get_published_parameters1(self):
@@ -208,7 +208,7 @@ class TestZheng07Cens(TestCase):
 
     def test_get_published_parameters2(self):
         with pytest.raises(KeyError) as err:
-            d2 = self.default_model.get_published_parameters(self.default_model.threshold, 
+            d2 = self.default_model.get_published_parameters(self.default_model.threshold,
                 publication='Parejko13')
         substr = "For Zheng07Cens, only supported best-fit models are currently Zheng et al. 2007"
         assert substr == err.value.args[0]
@@ -228,11 +228,11 @@ class TestZheng07Cens(TestCase):
             assert d1 == d2
 
 class TestZheng07Sats(TestCase):
-    """ Class providing testing of the `~halotools.empirical_models.Zheng07Sats` model. 
+    """ Class providing testing of the `~halotools.empirical_models.Zheng07Sats` model.
 
-        The following list provides a brief summary of the tests performed: 
+        The following list provides a brief summary of the tests performed:
 
-        * The basic metadata of the model is correct, e.g., ``self._upper_occupation_bound = 1`` 
+        * The basic metadata of the model is correct, e.g., ``self._upper_occupation_bound = 1``
 
         * The `mean_occupation` function is bounded by zero and unity for the full range of reasonable input masses, :math:`0 <= \\langle N_{\mathrm{cen}}(M) \\rangle <=1` for :math:`\\log_{10}M/M_{\odot} \\in [10, 16]`
 
@@ -240,20 +240,20 @@ class TestZheng07Sats(TestCase):
 
         * The model correctly navigates having either array or halo catalog arguments, and returns the identical result regardless of how the inputs are bundled
 
-        * The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses. 
+        * The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses.
     """
 
     def setUp(self):
 
         self.default_model = zheng07_components.Zheng07Sats()
 
-        self.model2 = zheng07_components.Zheng07Sats() 
+        self.model2 = zheng07_components.Zheng07Sats()
         self.model2.param_dict['alpha'] *= 1.25
 
-        self.model3 = zheng07_components.Zheng07Sats() 
+        self.model3 = zheng07_components.Zheng07Sats()
         self.model3.param_dict['logM0'] += np.log10(2)
 
-        self.model4 = zheng07_components.Zheng07Sats() 
+        self.model4 = zheng07_components.Zheng07Sats()
         self.model4.param_dict['logM1'] += np.log10(2)
 
         self.supported_thresholds = np.arange(-22, -17.5, 0.5)
@@ -261,7 +261,7 @@ class TestZheng07Sats(TestCase):
     def test_default_model(self):
 
         ### First test the model with all default settings
-        
+
         self.enforce_required_attributes(self.default_model)
         self.enforce_mean_occupation_behavior(self.default_model)
         self.enforce_mc_occupation_behavior(self.default_model)
@@ -287,7 +287,7 @@ class TestZheng07Sats(TestCase):
         assert hasattr(model, 'mean_occupation')
 
         mvir_array = np.logspace(10, 16, 10)
-        mean_occ = model.mean_occupation(prim_haloprop=mvir_array) 
+        mean_occ = model.mean_occupation(prim_haloprop=mvir_array)
 
         # Check non-negative
         assert np.all(mean_occ >= 0)
@@ -306,7 +306,7 @@ class TestZheng07Sats(TestCase):
         Npts = int(1e3)
         masses = np.ones(Npts)*10.**model.param_dict['logM1']
         mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
-        # We chose a specific seed that has been pre-tested, 
+        # We chose a specific seed that has been pre-tested,
         # so we should always get the same result
         expected_result = 1.0
         np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
@@ -332,7 +332,7 @@ class TestZheng07Sats(TestCase):
 
         logmass = self.model2.param_dict['logM1'] + np.log10(5)
         mass = 10.**logmass
-        assert (self.model2.mean_occupation(prim_haloprop=mass) > 
+        assert (self.model2.mean_occupation(prim_haloprop=mass) >
             self.default_model.mean_occupation(prim_haloprop=mass))
 
     def test_alpha_scaling2_mc_occupation(self):
@@ -341,7 +341,7 @@ class TestZheng07Sats(TestCase):
         Npts = 1000
         masses = np.ones(Npts)*mass
 
-        assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() > 
+        assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() >
             self.default_model.mc_occupation(prim_haloprop=masses,seed=43).mean())
 
     def test_alpha_propagation(self):
@@ -354,22 +354,22 @@ class TestZheng07Sats(TestCase):
 
         alt_default_model.param_dict['alpha'] = self.model2.param_dict['alpha']
 
-        assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() == 
+        assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() ==
             alt_default_model.mc_occupation(prim_haloprop=masses,seed=43).mean())
 
 
     def test_logM0_scaling1_mean_occupation(self):
 
-        # At very low mass, both models should have zero satellites 
+        # At very low mass, both models should have zero satellites
         lowmass = 1e10
-        assert (self.model3.mean_occupation(prim_haloprop=lowmass) == 
+        assert (self.model3.mean_occupation(prim_haloprop=lowmass) ==
             self.default_model.mean_occupation(prim_haloprop=lowmass))
 
     def test_logM0_scaling2_mean_occupation(self):
 
         # At intermediate masses, there should be fewer satellites for larger M0
         midmass = 1e12
-        assert (self.model3.mean_occupation(prim_haloprop=midmass) < 
+        assert (self.model3.mean_occupation(prim_haloprop=midmass) <
             self.default_model.mean_occupation(prim_haloprop=midmass)
             )
 
@@ -378,30 +378,30 @@ class TestZheng07Sats(TestCase):
         # At high masses, the difference should be negligible
         highmass = 1e15
         np.testing.assert_allclose(
-            self.model3.mean_occupation(prim_haloprop=highmass) , 
-            self.default_model.mean_occupation(prim_haloprop=highmass), 
+            self.model3.mean_occupation(prim_haloprop=highmass),
+            self.default_model.mean_occupation(prim_haloprop=highmass),
             rtol=1e-3, atol=1.e-3)
 
 
     def test_logM1_scaling1_mean_occupation(self):
 
-        # At very low mass, both models should have zero satellites 
+        # At very low mass, both models should have zero satellites
         lowmass = 1e10
-        assert (self.model4.mean_occupation(prim_haloprop=lowmass) == 
+        assert (self.model4.mean_occupation(prim_haloprop=lowmass) ==
             self.default_model.mean_occupation(prim_haloprop=lowmass))
 
     def test_logM1_scaling2_mean_occupation(self):
 
         # At intermediate masses, there should be fewer satellites for larger M1
         midmass = 1e12
-        fracdiff_midmass = ((self.model4.mean_occupation(prim_haloprop=midmass) - 
-            self.default_model.mean_occupation(prim_haloprop=midmass)) / 
+        fracdiff_midmass = ((self.model4.mean_occupation(prim_haloprop=midmass) -
+            self.default_model.mean_occupation(prim_haloprop=midmass)) /
             self.default_model.mean_occupation(prim_haloprop=midmass))
         assert fracdiff_midmass < 0
 
         highmass = 1e14
-        fracdiff_highmass = ((self.model4.mean_occupation(prim_haloprop=highmass) - 
-            self.default_model.mean_occupation(prim_haloprop=highmass)) / 
+        fracdiff_highmass = ((self.model4.mean_occupation(prim_haloprop=highmass) -
+            self.default_model.mean_occupation(prim_haloprop=highmass)) /
             self.default_model.mean_occupation(prim_haloprop=highmass))
         assert fracdiff_highmass < 0
 
@@ -411,7 +411,7 @@ class TestZheng07Sats(TestCase):
     def test_raises_correct_exception(self):
         with pytest.raises(HalotoolsError) as err:
             _ = self.default_model.mean_occupation(x = 4)
-        substr = "You must pass either a ``table`` or ``prim_haloprop`` argument" 
+        substr = "You must pass either a ``table`` or ``prim_haloprop`` argument"
         assert substr in err.value.args[0]
 
     def test_get_published_parameters1(self):
@@ -419,7 +419,7 @@ class TestZheng07Sats(TestCase):
 
     def test_get_published_parameters2(self):
         with pytest.raises(KeyError) as err:
-            d2 = self.default_model.get_published_parameters(self.default_model.threshold, 
+            d2 = self.default_model.get_published_parameters(self.default_model.threshold,
                 publication='Parejko13')
         substr = "For Zheng07Sats, only supported best-fit models are currently Zheng et al. 2007"
         assert substr == err.value.args[0]
@@ -437,8 +437,3 @@ class TestZheng07Sats(TestCase):
             d2 = self.default_model.get_published_parameters(self.default_model.threshold)
 
             assert d1 == d2
-
-
-
-
-

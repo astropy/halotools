@@ -9,10 +9,10 @@ from ....sim_manager import CachedHaloCatalog, FakeSim
 from ....custom_exceptions import HalotoolsError
 
 ### Determine whether the machine is mine
-# This will be used to select tests whose 
-# returned values depend on the configuration 
+# This will be used to select tests whose
+# returned values depend on the configuration
 # of my personal cache directory files
-from astropy.config.paths import _find_home 
+from astropy.config.paths import _find_home
 aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
@@ -42,7 +42,7 @@ class TestHearin15(TestCase):
 
     def test_Leauthaud11b(self):
 
-        model = PrebuiltHodModelFactory('leauthaud11') 
+        model = PrebuiltHodModelFactory('leauthaud11')
         halocat = FakeSim(redshift = 2.)
         # Test that an attempt to repopulate with a different halocat raises an exception
         with pytest.raises(HalotoolsError) as exc:
@@ -61,9 +61,3 @@ class TestHearin15(TestCase):
         model = PrebuiltHodModelFactory('hearin15', threshold = 11)
         model.populate_mock(halocat)
         del model
-
-
-
-
-
-

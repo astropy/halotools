@@ -1,66 +1,66 @@
-""" Module containing the `~halotools.utils.crossmatch` function used to 
-calculate indices providing the correspondence between two data tables 
+""" Module containing the `~halotools.utils.crossmatch` function used to
+calculate indices providing the correspondence between two data tables
 sharing a common objectID.
-""" 
-import numpy as np 
+"""
+import numpy as np
 
 def crossmatch(x, y, skip_bounds_checking = False):
     """
-    Finds where the elements of ``x`` appear in the array ``y``, including repeats. 
-    
-    The elements in x may be repeated, but the elements in y must be unique. 
-    The arrays x and y may be only partially overlapping. 
+    Finds where the elements of ``x`` appear in the array ``y``, including repeats.
 
-    The applications of this function envolve cross-matching 
-    two catalogs/data tables which share an objectID. 
-    For example, if you have a primary data table and a secondary data table containing 
-    supplementary information about (some of) the objects, the 
-    `~halotools.utils.crossmatch` function can be used to "value-add" the 
-    primary table with data from the second. 
+    The elements in x may be repeated, but the elements in y must be unique.
+    The arrays x and y may be only partially overlapping.
 
-    For another example, suppose you have a single data table 
-    with an object ID column and also a column for a "host" ID column 
-    (e.g., ``halo_hostid`` in Halotools-provided catalogs), 
-    you can use the `~halotools.utils.crossmatch` function to create new columns 
-    storing properties of the associated host. 
+    The applications of this function envolve cross-matching
+    two catalogs/data tables which share an objectID.
+    For example, if you have a primary data table and a secondary data table containing
+    supplementary information about (some of) the objects, the
+    `~halotools.utils.crossmatch` function can be used to "value-add" the
+    primary table with data from the second.
+
+    For another example, suppose you have a single data table
+    with an object ID column and also a column for a "host" ID column
+    (e.g., ``halo_hostid`` in Halotools-provided catalogs),
+    you can use the `~halotools.utils.crossmatch` function to create new columns
+    storing properties of the associated host.
 
     See :ref:`crossmatching_halo_catalogs` and :ref:`crossmatching_galaxy_catalogs`
-    for tutorials on common usages of this function with halo and galaxy catalogs. 
+    for tutorials on common usages of this function with halo and galaxy catalogs.
 
-    Parameters 
+    Parameters
     ----------
     x : integer array
-        Array of integers with possibly repeated entries. 
+        Array of integers with possibly repeated entries.
 
     y : integer array
-        Array of unique integers. 
+        Array of unique integers.
 
-    skip_bounds_checking : bool, optional 
-        The first step in the `crossmatch` function is to test that the input 
-        arrays satisfy the assumptions of the algorithm 
-        (namely that ``x`` and ``y`` store integers, 
-        and that all values in ``y`` are unique). 
-        If ``skip_bounds_checking`` is set to True, 
-        this testing is bypassed and the function evaluates faster. 
-        Default is False. 
+    skip_bounds_checking : bool, optional
+        The first step in the `crossmatch` function is to test that the input
+        arrays satisfy the assumptions of the algorithm
+        (namely that ``x`` and ``y`` store integers,
+        and that all values in ``y`` are unique).
+        If ``skip_bounds_checking`` is set to True,
+        this testing is bypassed and the function evaluates faster.
+        Default is False.
 
-    Returns 
+    Returns
     -------
     idx_x : integer array
-        Integer array used to apply a mask to x 
-        such that x[idx_x] == y[idx_y] 
+        Integer array used to apply a mask to x
+        such that x[idx_x] == y[idx_y]
 
-    y_idx : integer array  
-        Integer array used to apply a mask to y 
-        such that x[idx_x] == y[idx_y] 
+    y_idx : integer array
+        Integer array used to apply a mask to y
+        such that x[idx_x] == y[idx_y]
 
-    Examples 
+    Examples
     --------
-    Let's create some fake data to demonstrate basic usage of the function. 
-    First, let's suppose we have two tables of objects, ``table1`` and ``table2``. 
-    There are no repeated elements in any table, but these tables only partially overlap. 
-    The example below demonstrates how to transfer column data from ``table2`` 
-    into ``table1`` for the subset of objects that appear in both tables. 
+    Let's create some fake data to demonstrate basic usage of the function.
+    First, let's suppose we have two tables of objects, ``table1`` and ``table2``.
+    There are no repeated elements in any table, but these tables only partially overlap.
+    The example below demonstrates how to transfer column data from ``table2``
+    into ``table1`` for the subset of objects that appear in both tables.
 
     >>> num_table1 = int(1e6)
     >>> x = np.random.rand(num_table1)
@@ -73,23 +73,23 @@ def crossmatch(x, y, skip_bounds_checking = False):
     >>> y = np.random.rand(num_table2)
     >>> table2 = Table({'y': y, 'objid': objid})
 
-    Note that ``table1`` and ``table2`` only partially overlap. In the code below, 
-    we will initialize a new ``y`` column for ``table1``, and for those rows 
-    with an ``objid`` that appears in both ``table1`` and ``table2``, 
-    we'll transfer the values of ``y`` from ``table2`` to ``table1``. 
+    Note that ``table1`` and ``table2`` only partially overlap. In the code below,
+    we will initialize a new ``y`` column for ``table1``, and for those rows
+    with an ``objid`` that appears in both ``table1`` and ``table2``,
+    we'll transfer the values of ``y`` from ``table2`` to ``table1``.
 
     >>> idx_table1, idx_table2 = crossmatch(table1['objid'].data, table2['objid'].data)
     >>> table1['y'] = np.zeros(len(table1), dtype = table2['y'].dtype)
     >>> table1['y'][idx_table1] = table2['y'][idx_table2]
 
-    Now we'll consider a slightly more complicated example in which there 
-    are repeated entries in the input array ``x``. Suppose in this case that 
-    our data ``x`` comes with a natural grouping, for example into those 
-    galaxies that occupy a common halo. If we have a separate table ``y`` that 
-    stores attributes of the group, we may wish to broadcast some group property 
-    such as total group mass amongst all the group members. 
+    Now we'll consider a slightly more complicated example in which there
+    are repeated entries in the input array ``x``. Suppose in this case that
+    our data ``x`` comes with a natural grouping, for example into those
+    galaxies that occupy a common halo. If we have a separate table ``y`` that
+    stores attributes of the group, we may wish to broadcast some group property
+    such as total group mass amongst all the group members.
 
-    First create some new dummy data to demonstrate this application of 
+    First create some new dummy data to demonstrate this application of
     the `crossmatch` function:
 
     >>> num_galaxies = int(1e6)
@@ -103,17 +103,17 @@ def crossmatch(x, y, skip_bounds_checking = False):
     >>> groupid = np.arange(num_groups)
     >>> group_table = Table({'groupmass': groupmass, 'groupid': groupid})
 
-    Now we use the `crossmatch` to paint the appropriate value of ``groupmass`` 
+    Now we use the `crossmatch` to paint the appropriate value of ``groupmass``
     onto each galaxy:
 
     >>> idx_galaxies, idx_groups = crossmatch(galaxy_table['groupid'].data, group_table['groupid'].data)
     >>> galaxy_table['groupmass'] = np.zeros(len(galaxy_table), dtype = group_table['groupmass'].dtype)
     >>> galaxy_table['groupmass'][idx_galaxies] = group_table['groupmass'][idx_groups]
 
-    See the tutorials for additional demonstrations of alternative 
-    uses of the `crossmatch` function. 
+    See the tutorials for additional demonstrations of alternative
+    uses of the `crossmatch` function.
 
-    See also 
+    See also
     ---------
     :ref:`crossmatching_halo_catalogs`
 
@@ -165,7 +165,3 @@ def crossmatch(x, y, skip_bounds_checking = False):
 
     # Undo the original sorting and return the result
     return idx_x_sorted[idx_x], idx_y_sorted[idx_y]
-
-
-
-

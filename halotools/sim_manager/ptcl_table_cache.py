@@ -349,17 +349,3 @@ class PtclTableCache(object):
             raise_non_existence_exception=False,
             update_ascii=update_ascii,
             delete_corresponding_ptcl_catalog=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-

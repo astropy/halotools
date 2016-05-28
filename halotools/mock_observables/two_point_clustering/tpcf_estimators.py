@@ -16,13 +16,13 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     """
     two point correlation function estimator
     """
-    
+
     ND1 = convert_to_ndarray(ND1)
     ND2 = convert_to_ndarray(ND2)
     NR1 = convert_to_ndarray(NR1)
     NR2 = convert_to_ndarray(NR2)
     Ns = np.array([len(ND1),len(ND2),len(NR1),len(NR2)])
-    
+
     if np.any(Ns>1):
         #used for the jackknife calculations
         #the outer dimension is the number of samples.
@@ -31,7 +31,7 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         mult = lambda x,y: (x*y.T).T #annoying and ugly, but works.
     else:
         mult = lambda x,y: x*y #used for all else
-    
+
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
         #DD/RR-1
@@ -53,18 +53,18 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         factor2 = ND1*NR2/(NR1*NR2)
         #(DD - 2.0*DR + RR)/RR
         xi = mult(1.0/factor1,DD/RR) - mult(1.0/factor2,2.0*DR/RR) + 1.0
-    else: 
+    else:
         raise ValueError("unsupported estimator!")
-    
+
     if np.shape(xi)[0]==1: return xi[0]
-    else: return xi #for jackknife 
+    else: return xi #for jackknife
 
 
 def _list_estimators():
     """
     list available tpcf estimators.
     """
-    estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
+    estimators = ['Natural', 'Davis-Peebles', 'Hewett', 'Hamilton', 'Landy-Szalay']
     return estimators
 
 
@@ -92,10 +92,10 @@ def _TP_estimator_requirements(estimator):
         do_DD = True
         do_DR = True
         do_RR = True
-    else: 
+    else:
         available_estimators = _list_estimators()
         if estimator not in available_estimators:
             msg = ("Input `estimator` must be one of the following:{0}".format(available_estimators))
             raise HalotoolsError(msg)
-    
+
     return do_DD, do_DR, do_RR
