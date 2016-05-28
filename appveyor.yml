@@ -15,8 +15,8 @@ environment:
   matrix:
 
       - PYTHON_VERSION: "2.7"
-        ASTROPY_VERSION: "1.0"
-        NUMPY_VERSION: "1.9.1"
+        ASTROPY_VERSION: "stable"
+        NUMPY_VERSION: "stable"
 
 platform:
     -x64
