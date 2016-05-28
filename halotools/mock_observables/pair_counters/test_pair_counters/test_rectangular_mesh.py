@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import itertools
 import numpy as np
-import pytest
+from astropy.tests.helper import pytest
 
 from ..rectangular_mesh import RectangularDoubleMesh, sample1_cell_size
 

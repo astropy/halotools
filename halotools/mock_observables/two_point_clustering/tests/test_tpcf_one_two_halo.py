@@ -8,7 +8,7 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..tpcf_one_two_halo_decomp import tpcf_one_two_halo_decomp
 
-import pytest
+from astropy.tests.helper import pytest
 slow = pytest.mark.slow
 
 __all__=['test_tpcf_one_two_halo_auto_periodic', 'test_tpcf_one_two_halo_cross_periodic']

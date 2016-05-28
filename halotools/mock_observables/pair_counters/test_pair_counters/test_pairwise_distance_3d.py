@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+                        unicode_literals)
 
 import numpy as np
-import pytest
-import numpy as np
-from scipy.sparse import coo_matrix
+
 from astropy.utils.misc import NumpyRNGContext
+from astropy.tests.helper import pytest
 
 from .pure_python_distance_matrix import pure_python_distance_matrix_3d, pure_python_distance_matrix_xy_z
 

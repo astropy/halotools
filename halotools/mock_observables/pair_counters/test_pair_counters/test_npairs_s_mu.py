@@ -8,7 +8,7 @@ from ..npairs_s_mu import npairs_s_mu
 from ....mock_observables import npairs_3d
 # load comparison simple pair counters
 
-import pytest
+from astropy.tests.helper import pytest
 slow = pytest.mark.slow
 
 __all__ = ('test_npairs_s_mu_periodic', 'test_npairs_s_mu_nonperiodic')

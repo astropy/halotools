@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-import pytest
+from astropy.tests.helper import pytest
 
 from ..pairs import wnpairs as pure_python_weighted_pairs
 from ..marked_npairs_3d import marked_npairs_3d, _func_signature_int_from_wfunc
