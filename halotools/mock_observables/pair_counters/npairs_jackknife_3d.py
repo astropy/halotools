@@ -238,9 +238,9 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         raise HalotoolsError("jtags2 must be <= N_samples")
 
     #throw warning if some tags do not exist
-    if not np.array_equal(np.unique(jtags1),np.arange(1,N_samples+1)):
+    if not np.array_equal(np.unique(jtags1), np.arange(1, N_samples+1)):
         warn("Warning: sample1 does not contain points in every jackknife sample.")
-    if not np.array_equal(np.unique(jtags1),np.arange(1,N_samples+1)):
+    if not np.array_equal(np.unique(jtags1), np.arange(1, N_samples+1)):
         warn("Warning: sample2 does not contain points in every jackknife sample.")
 
     if type(N_samples) is not int:

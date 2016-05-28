@@ -38,15 +38,15 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
     x1, y1, z1, x2, y2, z2, Lbox
         shifted positions and box size.
     """
-    xmin = np.min([np.min(x1),np.min(x2)])
-    ymin = np.min([np.min(y1),np.min(y2)])
-    zmin = np.min([np.min(z1),np.min(z2)])
-    xmax = np.max([np.max(x1),np.max(x2)])
-    ymax = np.max([np.max(y1),np.max(y2)])
-    zmax = np.max([np.max(z1),np.max(z2)])
+    xmin = np.min([np.min(x1), np.min(x2)])
+    ymin = np.min([np.min(y1), np.min(y2)])
+    zmin = np.min([np.min(z1), np.min(z2)])
+    xmax = np.max([np.max(x1), np.max(x2)])
+    ymax = np.max([np.max(y1), np.max(y2)])
+    zmax = np.max([np.max(z1), np.max(z2)])
 
-    xyzmin = np.min([xmin,ymin,zmin])
-    xyzmax = np.max([xmax,ymax,zmax])-xyzmin
+    xyzmin = np.min([xmin, ymin, zmin])
+    xyzmax = np.max([xmax, ymax, zmax])-xyzmin
 
     x1 = x1 - xyzmin
     y1 = y1 - xyzmin

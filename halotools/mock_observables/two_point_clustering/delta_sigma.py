@@ -207,7 +207,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     mean_rho = len(particles)/period.prod() #number density of particles
 
     #define function to integrate
-    def f(pi,rp):
+    def f(pi, rp):
         r = np.sqrt(rp**2+pi**2)
         #note that we take 10**xi-1,
         #because we fit the log xi
@@ -215,8 +215,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     #integrate xi to get the surface density as a function of r_p
     surface_density = np.zeros(len(rp_bins)) #initialize to 0.0
-    for i in range(0,len(rp_bins)):
-        surface_density[i] = integrate.quad(f,0.0,pi_max,args=(rp_bins[i],))[0]
+    for i in range(0, len(rp_bins)):
+        surface_density[i] = integrate.quad(f, 0.0, pi_max, args=(rp_bins[i],))[0]
 
     #fit a spline to the surface density
     surface_density = InterpolatedUnivariateSpline(rp_bins, np.log10(surface_density), ext=0)
@@ -230,9 +230,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     #do integral to get mean internal surface density
     mean_internal_surface_density = np.zeros(len(rp_bins))
-    for i in range(0,len(rp_bins)):
+    for i in range(0, len(rp_bins)):
         internal_area = np.pi*rp_bins[i]**2.0
-        mean_internal_surface_density[i] = integrate.quad(f,0.0,rp_bins[i])[0]/(internal_area)
+        mean_internal_surface_density[i] = integrate.quad(f, 0.0, rp_bins[i])[0]/(internal_area)
 
     #calculate an return the change in surface density, delta sigma
     delta_sigma = mean_internal_surface_density - 10**surface_density(rp_bins)
@@ -248,8 +248,8 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, n
 
     galaxies = enforce_sample_has_correct_shape(galaxies)
     particles = enforce_sample_has_correct_shape(particles)
-    enforce_sample_respects_pbcs(galaxies[:,0], galaxies[:,1], galaxies[:,2], period)
-    enforce_sample_respects_pbcs(particles[:,0], particles[:,1], particles[:,2], period)
+    enforce_sample_respects_pbcs(galaxies[:, 0], galaxies[:, 1], galaxies[:, 2], period)
+    enforce_sample_respects_pbcs(particles[:, 0], particles[:, 1], particles[:, 2], period)
 
     rp_bins = get_separation_bins_array(rp_bins)
 

@@ -129,7 +129,7 @@ class MonteCarloGalProf(object):
             parmax = getattr(self, '_' + prof_param_key + '_lookup_table_max')
             dpar = getattr(self, '_' + prof_param_key + '_lookup_table_spacing')
             npts_par = int(np.round((parmax-parmin)/dpar))
-            profile_params = np.linspace(parmin,parmax,npts_par)
+            profile_params = np.linspace(parmin, parmax, npts_par)
             profile_params_list.append(profile_params)
             setattr(self, '_' + prof_param_key + '_lookup_table_bins', profile_params)
 
@@ -143,7 +143,7 @@ class MonteCarloGalProf(object):
             velocity_func_table = []
             start = time()
             for ii, items in enumerate(product(*profile_params_list)):
-                table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
+                table_ordinates = self.cumulative_mass_PDF(radius_array, *items)
                 log_table_ordinates = np.log10(table_ordinates)
                 funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=3)
                 func_table.append(funcobj)
@@ -270,8 +270,8 @@ class MonteCarloGalProf(object):
         if 'seed' in kwargs:
             np.random.seed(kwargs['seed'])
 
-        cos_t = np.random.uniform(-1.,1.,Npts)
-        phi = np.random.uniform(0,2*np.pi,Npts)
+        cos_t = np.random.uniform(-1., 1., Npts)
+        phi = np.random.uniform(0, 2*np.pi, Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
 
         x = sin_t * np.cos(phi)

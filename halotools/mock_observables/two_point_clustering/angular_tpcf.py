@@ -2,7 +2,7 @@
 Module containing the `~halotools.mock_observables.angular_tpcf` function used to
 calculate galaxy clustering as a function of angular separation.
 """
-from __future__ import absolute_import, division, print_function,unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from warnings import warn
@@ -142,19 +142,19 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     chord_bins  = chord_to_cartesian(theta_bins, radians=False)
 
     #convert samples and randoms to cartesian coordinates (x,y,z) on a unit sphere
-    x,y,z = spherical_to_cartesian(sample1[:,0], sample1[:,1])
-    sample1 = np.vstack((x,y,z)).T
+    x, y, z = spherical_to_cartesian(sample1[:, 0], sample1[:, 1])
+    sample1 = np.vstack((x, y, z)).T
     if _sample1_is_sample2:
         sample2 = sample1
     else:
-        x,y,z = spherical_to_cartesian(sample2[:,0], sample2[:,1])
-        sample2 = np.vstack((x,y,z)).T
+        x, y, z = spherical_to_cartesian(sample2[:, 0], sample2[:, 1])
+        sample2 = np.vstack((x, y, z)).T
     if randoms is not None:
-        x,y,z = spherical_to_cartesian(randoms[:,0], randoms[:,1])
-        randoms = np.vstack((x,y,z)).T
+        x, y, z = spherical_to_cartesian(randoms[:, 0], randoms[:, 1])
+        randoms = np.vstack((x, y, z)).T
 
     def random_counts(sample1, sample2, randoms, chord_bins,
-        num_threads,do_RR, do_DR, _sample1_is_sample2):
+        num_threads, do_RR, do_DR, _sample1_is_sample2):
         """
         Count random pairs.
         """
@@ -212,7 +212,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             return D1R, D2R, RR
 
     def pair_counts(sample1, sample2, chord_bins,
-        N_thread, do_auto, do_cross,_sample1_is_sample2):
+        N_thread, do_auto, do_cross, _sample1_is_sample2):
         """
         Count data-data pairs.
         """
@@ -253,7 +253,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         NR = N1
 
     #count data pairs
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, chord_bins,
+    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, chord_bins,
                                  num_threads, do_auto, do_cross, _sample1_is_sample2)
     #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, chord_bins,
@@ -278,20 +278,20 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     #run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
-        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
         return xi_11
     else:
         if (do_auto is True) & (do_cross is True):
-            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_12, xi_22
         elif (do_cross is True):
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return xi_12
         elif (do_auto is True):
-            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
             return xi_11, xi_22
 
 def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
@@ -323,7 +323,7 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
         if (len(sample1) > max_sample_size):
-            inds = np.arange(0,len(sample1))
+            inds = np.arange(0, len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
@@ -332,7 +332,7 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
             warn(msg)
     else:
         if len(sample1) > max_sample_size:
-            inds = np.arange(0,len(sample1))
+            inds = np.arange(0, len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
@@ -340,7 +340,7 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
                    "downsampling `sample1`...")
             warn(msg)
         if len(sample2) > max_sample_size:
-            inds = np.arange(0,len(sample2))
+            inds = np.arange(0, len(sample2))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]

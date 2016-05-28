@@ -65,16 +65,16 @@ def solve_for_polynomial_coefficients(abscissa, ordinates):
 
     columns = np.ones(len(abscissa))
     for i in np.arange(len(abscissa)-1):
-        columns = np.append(columns,[abscissa**(i+1)])
+        columns = np.append(columns, [abscissa**(i+1)])
     quenching_model_matrix = columns.reshape(
-        len(abscissa),len(abscissa)).transpose()
+        len(abscissa), len(abscissa)).transpose()
 
     polynomial_coefficients = np.linalg.solve(
-        quenching_model_matrix,ordinates)
+        quenching_model_matrix, ordinates)
 
     return np.array(polynomial_coefficients)
 
-def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
+def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
     """ Method to evaluate an input polynomial at the input_abscissa.
     The input polynomial is determined by `solve_for_polynomial_coefficients`
     from table_abscissa and table_ordinates.
@@ -100,10 +100,10 @@ def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
     if not isinstance(input_abscissa, np.ndarray):
         input_abscissa = np.array(input_abscissa)
     coefficient_array = solve_for_polynomial_coefficients(
-        table_abscissa,table_ordinates)
+        table_abscissa, table_ordinates)
     output_ordinates = np.zeros(custom_len(input_abscissa))
     # Use coefficients to compute values of the inflection function polynomial
-    for n,coeff in enumerate(coefficient_array):
+    for n, coeff in enumerate(coefficient_array):
         output_ordinates += coeff*input_abscissa**n
 
     return output_ordinates

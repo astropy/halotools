@@ -15,7 +15,7 @@ from ....custom_exceptions import HalotoolsError
 slow = pytest.mark.slow
 
 __all__ = ('test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',
-    'test_tpcf_sample_size_limit','test_tpcf_randoms',
+    'test_tpcf_sample_size_limit', 'test_tpcf_randoms',
     'test_tpcf_period_API', 'test_tpcf_cross_consistency_w_auto')
 
 fixed_seed = 43
@@ -26,10 +26,10 @@ def test_tpcf_auto():
     test the tpcf auto-correlation functionality
     """
 
-    sample1 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     #with randoms
@@ -54,11 +54,11 @@ def test_tpcf_cross():
     test the tpcf cross-correlation functionality
     """
 
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((100, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     #with randoms
@@ -81,10 +81,10 @@ def test_tpcf_estimators():
     test the tpcf different estimators functionality
     """
 
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((100, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     result_1 = tpcf(sample1, rbins, sample2=sample2,
@@ -126,10 +126,10 @@ def test_tpcf_sample_size_limit():
     test the tpcf sample size limit functionality functionality
     """
 
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((1000,3))
-    randoms = np.random.random((1000,3))
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((1000, 3))
+    randoms = np.random.random((1000, 3))
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     result_1 = tpcf(sample1, rbins, sample2=sample2,
@@ -145,11 +145,11 @@ def test_tpcf_randoms():
     test the tpcf possible randoms + PBCs combinations
     """
 
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((100, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     #No PBCs w/ randoms
@@ -191,11 +191,11 @@ def test_tpcf_period_API():
     test the tpcf period API functionality.
     """
 
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     result_1 = tpcf(sample1, rbins, sample2=sample2,
@@ -210,7 +210,7 @@ def test_tpcf_period_API():
                     approx_cell1_size=[rmax, rmax, rmax])
 
     #should throw an error.  period must be positive!
-    period = np.array([1.0,1.0,-1.0])
+    period = np.array([1.0, 1.0, -1.0])
     with pytest.raises(ValueError) as err:
         tpcf(sample1, rbins, sample2=sample2,
              randoms=randoms, period=period,
@@ -230,11 +230,11 @@ def test_tpcf_cross_consistency_w_auto():
     test the tpcf cross-correlation mode consistency with auto-correlation mode
     """
 
-    sample1 = np.random.random((200,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((300,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((200, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((300, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     #with out randoms
@@ -254,8 +254,8 @@ def test_tpcf_cross_consistency_w_auto():
                                           estimator='Natural',
                                           approx_cell1_size=[rmax, rmax, rmax])
 
-    assert np.allclose(result1,result1_p), "cross mode and auto mode are not the same"
-    assert np.allclose(result2,result2_p), "cross mode and auto mode are not the same"
+    assert np.allclose(result1, result1_p), "cross mode and auto mode are not the same"
+    assert np.allclose(result2, result2_p), "cross mode and auto mode are not the same"
 
     #with randoms
     result1 = tpcf(sample1, rbins, sample2=None,
@@ -274,17 +274,17 @@ def test_tpcf_cross_consistency_w_auto():
                                           estimator='Natural',
                                           approx_cell1_size=[rmax, rmax, rmax])
 
-    assert np.allclose(result1,result1_p), "cross mode and auto mode are not the same"
-    assert np.allclose(result2,result2_p), "cross mode and auto mode are not the same"
+    assert np.allclose(result1, result1_p), "cross mode and auto mode are not the same"
+    assert np.allclose(result2, result2_p), "cross mode and auto mode are not the same"
 
 
 def test_RR_precomputed_exception_handling1():
 
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     RR_precomputed = rmax
@@ -300,11 +300,11 @@ def test_RR_precomputed_exception_handling1():
 
 def test_RR_precomputed_exception_handling2():
 
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     RR_precomputed = rbins[:-2]
@@ -321,11 +321,11 @@ def test_RR_precomputed_exception_handling2():
 
 def test_RR_precomputed_exception_handling3():
 
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((100, 3))
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     RR_precomputed = rbins[:-1]
@@ -352,11 +352,11 @@ def test_RR_precomputed_natural_estimator_auto():
     exactly the same results as if we did not pre-compute RR.
 
     """
-    sample1 = np.random.random((1000,3))
+    sample1 = np.random.random((1000, 3))
     sample2 = sample1
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     approx_cell1_size = [rmax, rmax, rmax]
@@ -384,7 +384,7 @@ def test_RR_precomputed_natural_estimator_auto():
     from ..tpcf import _random_counts, _pair_counts
 
     #count data pairs
-    D1D1,D1D2,D2D2 = _pair_counts(
+    D1D1, D1D2, D2D2 = _pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
@@ -399,8 +399,8 @@ def test_RR_precomputed_natural_estimator_auto():
     NR = len(randoms)
 
     factor = N1*N1/(NR*NR)
-    mult = lambda x,y: x*y
-    xi_11 = mult(1.0/factor,D1D1/RR) - 1.0
+    mult = lambda x, y: x*y
+    xi_11 = mult(1.0/factor, D1D1/RR) - 1.0
 
     # The following assertion implies that the RR
     # computed within this testing namespace is the same RR
@@ -433,11 +433,11 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     exactly the same results as if we did not pre-compute RR.
 
     """
-    sample1 = np.random.random((1000,3))
+    sample1 = np.random.random((1000, 3))
     sample2 = sample1
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    randoms = np.random.random((100, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
     approx_cell1_size = [rmax, rmax, rmax]
@@ -465,7 +465,7 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     from ..tpcf import _random_counts, _pair_counts
 
     #count data pairs
-    D1D1,D1D2,D2D2 = _pair_counts(
+    D1D1, D1D2, D2D2 = _pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
@@ -485,8 +485,8 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     factor1 = ND1*ND2/(NR1*NR2)
     factor2 = ND1*NR2/(NR1*NR2)
 
-    mult = lambda x,y: x*y
-    xi_11 = mult(1.0/factor1,D1D1/RR) - mult(1.0/factor2,2.0*D1R/RR) + 1.0
+    mult = lambda x, y: x*y
+    xi_11 = mult(1.0/factor1, D1D1/RR) - mult(1.0/factor2, 2.0*D1R/RR) + 1.0
 
     # # The following assertion implies that the RR
     # # computed within this testing namespace is the same RR
@@ -508,9 +508,9 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
 
 
 def test_tpcf_raises_warning_for_large_samples():
-    sample1 = np.random.random((1000,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.001,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.001, 0.3, 5)
 
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
@@ -518,9 +518,9 @@ def test_tpcf_raises_warning_for_large_samples():
             max_sample_size=int(1e2))
 
 def test_tpcf_raises_exception_for_non_monotonic_rbins():
-    sample1 = np.random.random((1000,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(10,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(10, 0.3, 5)
 
     with pytest.raises(TypeError) as err:
         normal_result = tpcf(sample1, rbins, period=period)
@@ -528,9 +528,9 @@ def test_tpcf_raises_exception_for_non_monotonic_rbins():
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_large_search_length():
-    sample1 = np.random.random((1000,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.1,0.5,5)
+    sample1 = np.random.random((1000, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.1, 0.5, 5)
 
     with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, period=period)
@@ -538,10 +538,10 @@ def test_tpcf_raises_exception_for_large_search_length():
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_incompatible_data_shapes():
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((1000,2))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.1,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((1000, 2))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.1, 0.3, 5)
 
     with pytest.raises(TypeError) as err:
         normal_result = tpcf(sample1, rbins, sample2=sample2, period=period)
@@ -549,10 +549,10 @@ def test_tpcf_raises_exception_for_incompatible_data_shapes():
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_bad_do_auto_instructions():
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((1000,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.1,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((1000, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.1, 0.3, 5)
 
     with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, sample2=sample2, period=period,
@@ -561,10 +561,10 @@ def test_tpcf_raises_exception_for_bad_do_auto_instructions():
     assert substr in err.value.args[0]
 
 def test_tpcf_raises_exception_for_unavailable_estimator():
-    sample1 = np.random.random((1000,3))
-    sample2 = np.random.random((1000,3))
-    period = np.array([1.0,1.0,1.0])
-    rbins = np.linspace(0.1,0.3,5)
+    sample1 = np.random.random((1000, 3))
+    sample2 = np.random.random((1000, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.1, 0.3, 5)
 
     with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, period=period,

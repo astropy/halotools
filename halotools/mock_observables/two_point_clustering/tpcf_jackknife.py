@@ -25,7 +25,7 @@ __author__ = ('Duncan Campbell', )
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
+def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     sample2=None, period=None, do_auto=True, do_cross=True,
     estimator='Natural', num_threads=1, max_sample_size=int(1e6)):
     """
@@ -230,9 +230,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     j_index_random, N_sub_vol = cuboid_subvolume_labels(randoms, Nsub, Lbox)
 
     #number of points in each subvolume
-    NR_subs = get_subvolume_numbers(j_index_random,N_sub_vol)
-    N1_subs = get_subvolume_numbers(j_index_1,N_sub_vol)
-    N2_subs = get_subvolume_numbers(j_index_2,N_sub_vol)
+    NR_subs = get_subvolume_numbers(j_index_random, N_sub_vol)
+    N1_subs = get_subvolume_numbers(j_index_1, N_sub_vol)
+    N2_subs = get_subvolume_numbers(j_index_2, N_sub_vol)
     #number of points in each jackknife sample
     N1_subs = N1 - N1_subs
     N2_subs = N2 - N2_subs
@@ -241,15 +241,15 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(
         sample1, sample2, j_index_1, j_index_2, N_sub_vol,
-        rbins, period, num_threads, do_auto, do_cross,_sample1_is_sample2)
+        rbins, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
 
     #pull out the full and sub sample results
-    D1D1_full = D1D1[0,:]
-    D1D1_sub = D1D1[1:,:]
-    D1D2_full = D1D2[0,:]
-    D1D2_sub = D1D2[1:,:]
-    D2D2_full = D2D2[0,:]
-    D2D2_sub = D2D2[1:,:]
+    D1D1_full = D1D1[0, :]
+    D1D1_sub = D1D1[1:, :]
+    D1D2_full = D1D2[0, :]
+    D1D2_sub = D1D2[1:, :]
+    D2D2_full = D2D2[0, :]
+    D2D2_sub = D2D2[1:, :]
 
     #do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
@@ -263,18 +263,18 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         else: D2R = None
 
     if do_DR is True:
-        D1R_full = D1R[0,:]
-        D1R_sub = D1R[1:,:]
-        D2R_full = D2R[0,:]
-        D2R_sub = D2R[1:,:]
+        D1R_full = D1R[0, :]
+        D1R_sub = D1R[1:, :]
+        D2R_full = D2R[0, :]
+        D2R_sub = D2R[1:, :]
     else:
         D1R_full = None
         D1R_sub = None
         D2R_full = None
         D2R_sub = None
     if do_RR is True:
-        RR_full = RR[0,:]
-        RR_sub = RR[1:,:]
+        RR_full = RR[0, :]
+        RR_sub = RR[1:, :]
     else:
         RR_full = None
         RR_sub = None
@@ -298,11 +298,11 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],
         return xi_11_full, xi_11_cov
     else:
         if (do_auto is True) & (do_cross is True):
-            return xi_11_full,xi_12_full,xi_22_full,xi_11_cov,xi_12_cov,xi_22_cov
+            return xi_11_full, xi_12_full, xi_22_full, xi_11_cov, xi_12_cov, xi_22_cov
         elif do_auto is True:
-            return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
+            return xi_11_full, xi_22_full, xi_11_cov, xi_22_cov
         elif do_cross is True:
-            return xi_12_full,xi_12_cov
+            return xi_12_full, xi_12_cov
 
 
 def _enclose_in_box(data1, data2, data3):
@@ -311,19 +311,19 @@ def _enclose_in_box(data1, data2, data3):
     shift points so cube's origin is at 0,0,0.
     """
 
-    x1,y1,z1 = data1[:,0],data1[:,1],data1[:,2]
-    x2,y2,z2 = data2[:,0],data2[:,1],data2[:,2]
-    x3,y3,z3 = data3[:,0],data3[:,1],data3[:,2]
+    x1, y1, z1 = data1[:, 0], data1[:, 1], data1[:, 2]
+    x2, y2, z2 = data2[:, 0], data2[:, 1], data2[:, 2]
+    x3, y3, z3 = data3[:, 0], data3[:, 1], data3[:, 2]
 
-    xmin = np.min([np.min(x1),np.min(x2), np.min(x3)])
-    ymin = np.min([np.min(y1),np.min(y2), np.min(y3)])
-    zmin = np.min([np.min(z1),np.min(z2), np.min(z3)])
-    xmax = np.max([np.max(x1),np.max(x2), np.min(x3)])
-    ymax = np.max([np.max(y1),np.max(y2), np.min(y3)])
-    zmax = np.max([np.max(z1),np.max(z2), np.min(z3)])
+    xmin = np.min([np.min(x1), np.min(x2), np.min(x3)])
+    ymin = np.min([np.min(y1), np.min(y2), np.min(y3)])
+    zmin = np.min([np.min(z1), np.min(z2), np.min(z3)])
+    xmax = np.max([np.max(x1), np.max(x2), np.min(x3)])
+    ymax = np.max([np.max(y1), np.max(y2), np.min(y3)])
+    zmax = np.max([np.max(z1), np.max(z2), np.min(z3)])
 
-    xyzmin = np.min([xmin,ymin,zmin])
-    xyzmax = np.max([xmax,ymax,zmax])-xyzmin
+    xyzmin = np.min([xmin, ymin, zmin])
+    xyzmax = np.max([xmax, ymax, zmax])-xyzmin
 
     x1 = x1 - xyzmin
     y1 = y1 - xyzmin
@@ -349,9 +349,9 @@ def get_subvolume_numbers(j_index, N_sub_vol):
     #there could be subvolumes with no points, and we
     #need every label to be in there at least once. append a vector
     #of the possible labels, and we can subtract 1 later.
-    temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1)))
+    temp = np.hstack((j_index, np.arange(1, N_sub_vol+1, 1)))
 
-    labels, N = np.unique(temp,return_counts=True)
+    labels, N = np.unique(temp, return_counts=True)
 
     N = N-1 #remove the place holder I added two lines above.
 
@@ -366,7 +366,7 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
         D1D1 = npairs_jackknife_3d(sample1, sample1, rbins, period=period,
             jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
             num_threads=num_threads)
-        D1D1 = np.diff(D1D1,axis=1)
+        D1D1 = np.diff(D1D1, axis=1)
     else:
         D1D1=None
         D2D2=None
@@ -379,13 +379,13 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
             D1D2 = npairs_jackknife_3d(sample1, sample2, rbins, period=period,
                 jtags1=j_index_1, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
-            D1D2 = np.diff(D1D2,axis=1)
+            D1D2 = np.diff(D1D2, axis=1)
         else: D1D2=None
         if do_auto is True:
             D2D2 = npairs_jackknife_3d(sample2, sample2, rbins, period=period,
                 jtags1=j_index_2, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
-            D2D2 = np.diff(D2D2,axis=1)
+            D2D2 = np.diff(D2D2, axis=1)
 
     return D1D1, D1D2, D2D2
 
@@ -399,13 +399,13 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
         DR = npairs_jackknife_3d(sample, randoms, rbins, period=period,
             jtags1=j_index, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
-        DR = np.diff(DR,axis=1)
+        DR = np.diff(DR, axis=1)
     else: DR=None
     if do_RR is True:
         RR = npairs_jackknife_3d(randoms, randoms, rbins, period=period,
             jtags1=j_index_randoms, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
-        RR = np.diff(RR,axis=1)
+        RR = np.diff(RR, axis=1)
     else: RR=None
 
     return DR, RR
@@ -429,7 +429,7 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
     if np.shape(randoms) == (1,):
         N_randoms = randoms[0]
         if PBCs is True:
-            randoms = np.random.random((N_randoms,3))*period
+            randoms = np.random.random((N_randoms, 3))*period
         else:
             msg = ("\n When no `period` parameter is passed, \n"
                    "the user must provide true randoms, and \n"

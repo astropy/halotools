@@ -158,10 +158,10 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = np.array(pool.map(engine, cell1_tuples))
-        counts1, counts2, counts3 = result[:,0], result[:,1], result[:,2]
-        counts1 = np.sum(counts1,axis=0)
-        counts2 = np.sum(counts2,axis=0)
-        counts3 = np.sum(counts3,axis=0)
+        counts1, counts2, counts3 = result[:, 0], result[:, 1], result[:, 2]
+        counts1 = np.sum(counts1, axis=0)
+        counts2 = np.sum(counts2, axis=0)
+        counts3 = np.sum(counts3, axis=0)
         pool.close()
     else:
         counts1, counts2, counts3  = np.array(engine(cell1_tuples[0]))

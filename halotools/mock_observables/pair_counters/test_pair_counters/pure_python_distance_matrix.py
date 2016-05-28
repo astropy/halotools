@@ -24,9 +24,9 @@ def pure_python_distance_matrix_3d(
 
     for i in range(npts1):
         for j in range(npts2):
-            dx = sample1[i,0] - sample2[j,0]
-            dy = sample1[i,1] - sample2[j,1]
-            dz = sample1[i,2] - sample2[j,2]
+            dx = sample1[i, 0] - sample2[j, 0]
+            dy = sample1[i, 1] - sample2[j, 1]
+            dz = sample1[i, 2] - sample2[j, 2]
 
             if dx > xperiod/2.:
                 dx = xperiod - dx
@@ -68,9 +68,9 @@ def pure_python_distance_matrix_xy_z(
 
     for i in range(npts1):
         for j in range(npts2):
-            dx = sample1[i,0] - sample2[j,0]
-            dy = sample1[i,1] - sample2[j,1]
-            dz = sample1[i,2] - sample2[j,2]
+            dx = sample1[i, 0] - sample2[j, 0]
+            dy = sample1[i, 1] - sample2[j, 1]
+            dz = sample1[i, 2] - sample2[j, 2]
 
             if dx > xperiod/2.:
                 dx = xperiod - dx

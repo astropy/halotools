@@ -43,14 +43,14 @@ def test_radial_pvd_vs_r_correctness1():
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     rbins = np.array([0.001, 0.1, 0.3])
 
     s1s1, s1s2, s2s2 = radial_pvd_vs_r(sample1, velocities1, rbins,
         sample2=sample2, velocities2=velocities2)
 
-    correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
+    correct_cross_pvd = np.std(np.repeat(velocities1[:, 2], npts))
 
     assert np.allclose(s1s2[0], 0, rtol=0.1)
     assert np.allclose(s1s2[1], correct_cross_pvd, rtol=0.001)
@@ -85,13 +85,13 @@ def test_radial_pvd_vs_r_correctness2():
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     rbins = np.array([0.001, 0.1, 0.3])
     s1s1, s1s2, s2s2 = radial_pvd_vs_r(sample1, velocities1, rbins,
         sample2=sample2, velocities2=velocities2, period=1)
 
-    correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
+    correct_cross_pvd = np.std(np.repeat(velocities1[:, 2], npts))
 
     assert np.allclose(s1s2[0], 0, rtol=0.1)
     assert np.allclose(s1s2[1], correct_cross_pvd, rtol=0.001)
@@ -129,7 +129,7 @@ def test_radial_pvd_vs_r_correctness3():
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     sample = np.concatenate((sample1, sample2))
     velocities = np.concatenate((velocities1, velocities2))
@@ -137,7 +137,7 @@ def test_radial_pvd_vs_r_correctness3():
     rbins = np.array([0.001, 0.1, 0.3])
     s1s1 = radial_pvd_vs_r(sample, velocities, rbins)
 
-    correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
+    correct_cross_pvd = np.std(np.repeat(velocities1[:, 2], npts))
 
     assert np.allclose(s1s1[1], correct_cross_pvd, rtol=0.001)
 
@@ -171,7 +171,7 @@ def test_radial_pvd_vs_r_correctness4():
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     sample = np.concatenate((sample1, sample2))
     velocities = np.concatenate((velocities1, velocities2))
@@ -179,7 +179,7 @@ def test_radial_pvd_vs_r_correctness4():
     rbins = np.array([0.001, 0.1, 0.3])
     s1s1 = radial_pvd_vs_r(sample, velocities, rbins, period=1)
 
-    correct_cross_pvd = np.std(np.repeat(velocities1[:,2], npts))
+    correct_cross_pvd = np.std(np.repeat(velocities1[:, 2], npts))
 
     assert np.allclose(s1s1[1], correct_cross_pvd, rtol=0.001)
 
@@ -198,7 +198,7 @@ def test_radial_pvd_vs_r1():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     rbins = np.linspace(0, 0.3, 10)
     result1 = radial_pvd_vs_r(sample1, velocities1, rbins)
@@ -222,7 +222,7 @@ def test_radial_pvd_vs_r_auto_consistency():
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     rbins = np.linspace(0, 0.3, 10)
     s1s1a, s1s2a, s2s2a = radial_pvd_vs_r(sample1, velocities1, rbins,
@@ -231,8 +231,8 @@ def test_radial_pvd_vs_r_auto_consistency():
         sample2=sample2, velocities2=velocities2,
         do_cross=False)
 
-    assert np.allclose(s1s1a,s1s1b, rtol=0.001)
-    assert np.allclose(s2s2a,s2s2b, rtol=0.001)
+    assert np.allclose(s1s1a, s1s1b, rtol=0.001)
+    assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_cross_consistency():
@@ -250,7 +250,7 @@ def test_radial_pvd_vs_r_cross_consistency():
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
     with NumpyRNGContext(fixed_seed):
-        velocities1[:,2] = np.random.uniform(0, 1, npts)
+        velocities1[:, 2] = np.random.uniform(0, 1, npts)
 
     rbins = np.linspace(0, 0.3, 10)
     s1s1a, s1s2a, s2s2a = radial_pvd_vs_r(sample1, velocities1, rbins,
@@ -259,4 +259,4 @@ def test_radial_pvd_vs_r_cross_consistency():
         sample2=sample2, velocities2=velocities2,
         do_auto=False)
 
-    assert np.allclose(s1s2a,s1s2b, rtol=0.001)
+    assert np.allclose(s1s2a, s1s2b, rtol=0.001)

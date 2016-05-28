@@ -29,10 +29,10 @@ def pure_python_mean_los_velocity_vs_rp(
     running_tally = []
     for i in range(npts1):
         for j in range(npts2):
-            dx = sample1[i,0] - sample2[j,0]
-            dy = sample1[i,1] - sample2[j,1]
-            dz = sample1[i,2] - sample2[j,2]
-            dvz = velocities1[i,2] - velocities2[j,2]
+            dx = sample1[i, 0] - sample2[j, 0]
+            dy = sample1[i, 1] - sample2[j, 1]
+            dz = sample1[i, 2] - sample2[j, 2]
+            dvz = velocities1[i, 2] - velocities2[j, 2]
 
             if dx > xperiod/2.:
                 dx = xperiod - dx
@@ -164,7 +164,7 @@ def test_mean_los_velocity_vs_rp_correctness1():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,2] = 50.
+    velocities1[:, 2] = 50.
 
     rp_bins, pi_max = np.array([0, 0.1, 0.15, 0.21, 0.25]), 0.2
 
@@ -226,7 +226,7 @@ def test_mean_los_velocity_vs_rp_correctness2():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,2] = -50.
+    velocities1[:, 2] = -50.
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
@@ -282,14 +282,14 @@ def test_mean_los_velocity_vs_rp_correctness3():
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,0] = -50.
-    velocities1[:,1] = -10.
-    velocities1[:,2] = +20.
+    velocities1[:, 0] = -50.
+    velocities1[:, 1] = -10.
+    velocities1[:, 2] = +20.
 
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2[:,0] = +25.
-    velocities2[:,1] = +10.
-    velocities2[:,2] = +40.
+    velocities2[:, 0] = +25.
+    velocities2[:, 1] = +10.
+    velocities2[:, 2] = +40.
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
@@ -348,14 +348,14 @@ def test_mean_los_velocity_vs_rp_correctness4():
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,0] = -50.
-    velocities1[:,1] = -10.
-    velocities1[:,2] = +20.
+    velocities1[:, 0] = -50.
+    velocities1[:, 1] = -10.
+    velocities1[:, 2] = +20.
 
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2[:,0] = +25.
-    velocities2[:,1] = +10.
-    velocities2[:,2] = +40.
+    velocities2[:, 0] = +25.
+    velocities2[:, 1] = +10.
+    velocities2[:, 2] = +40.
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
@@ -427,8 +427,8 @@ def test_mean_los_velocity_vs_rp_auto_consistency():
         sample2=sample2, velocities2=velocities2,
         do_cross=False)
 
-    assert np.allclose(s1s1a,s1s1b, rtol=0.001)
-    assert np.allclose(s2s2a,s2s2b, rtol=0.001)
+    assert np.allclose(s1s1a, s1s1b, rtol=0.001)
+    assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
 
 @pytest.mark.slow
@@ -453,4 +453,4 @@ def test_mean_los_velocity_vs_rp_cross_consistency():
         sample2=sample2, velocities2=velocities2,
         do_auto=False)
 
-    assert np.allclose(s1s2a,s1s2b, rtol=0.001)
+    assert np.allclose(s1s2a, s1s2b, rtol=0.001)

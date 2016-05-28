@@ -176,7 +176,7 @@ class HaloTableCacheLogEntry(object):
             msg += tmp_msg
             tmp_msg, num_failures, halo_table = self._verify_table_read(num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_has_required_data_columns(halo_table,num_failures)
+            tmp_msg, num_failures = self._verify_has_required_data_columns(halo_table, num_failures)
             msg += tmp_msg
             tmp_msg, num_failures = self._verify_all_keys_begin_with_halo(halo_table, num_failures)
             msg += tmp_msg
@@ -345,7 +345,7 @@ class HaloTableCacheLogEntry(object):
         try:
             try:
                 halo_id = halo_table['halo_id'].data
-                assert halo_id.dtype.str[1] in ('i','u')
+                assert halo_id.dtype.str[1] in ('i', 'u')
                 assert len(halo_id) == len(set(halo_id))
             except AssertionError:
                 num_failures += 1

@@ -106,7 +106,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
 
     _ = npairs_per_object_3d(sample, tracers, rbins, period=period,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size)
-    result = _[:,0]
+    result = _[:, 0]
 
     environment_volume = (4/3.)*np.pi*radius**3
     number_density = result/environment_volume

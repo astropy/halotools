@@ -17,11 +17,11 @@ class TestModelHelpers(TestCase):
 
         box_length = 250
         Npts = int(1e5)
-        coords = np.random.uniform(0,box_length,Npts*3).reshape(Npts,3)
+        coords = np.random.uniform(0, box_length, Npts*3).reshape(Npts, 3)
 
         perturbation_size = box_length/10.
         coord_perturbations = np.random.uniform(
-            -perturbation_size,perturbation_size,Npts*3).reshape(Npts,3)
+            -perturbation_size, perturbation_size, Npts*3).reshape(Npts, 3)
 
         coords += coord_perturbations
 

@@ -118,20 +118,20 @@ class TestCatalogAnalysisHelpers(TestCase):
         pos_zdist = cat_helpers.return_xyz_formatted_array(
             x, y, z, velocity=self.halo_table['halo_vz'],
             velocity_distortion_dimension='z')
-        assert np.all(pos_zdist[:,0] == pos[:,0])
-        assert np.all(pos_zdist[:,1] == pos[:,1])
-        assert np.any(pos_zdist[:,2] != pos[:,2])
-        assert np.all(abs(pos_zdist[:,2] - pos[:,2]) < 50)
+        assert np.all(pos_zdist[:, 0] == pos[:, 0])
+        assert np.all(pos_zdist[:, 1] == pos[:, 1])
+        assert np.any(pos_zdist[:, 2] != pos[:, 2])
+        assert np.all(abs(pos_zdist[:, 2] - pos[:, 2]) < 50)
 
         pos_zdist_pbc = cat_helpers.return_xyz_formatted_array(
             x, y, z, velocity=self.halo_table['halo_vz'],
             velocity_distortion_dimension='z',
             period=self.Lbox)
-        assert np.all(pos_zdist_pbc[:,0] == pos[:,0])
-        assert np.all(pos_zdist_pbc[:,1] == pos[:,1])
-        assert np.any(pos_zdist_pbc[:,2] != pos[:,2])
+        assert np.all(pos_zdist_pbc[:, 0] == pos[:, 0])
+        assert np.all(pos_zdist_pbc[:, 1] == pos[:, 1])
+        assert np.any(pos_zdist_pbc[:, 2] != pos[:, 2])
 
-        assert np.any(abs(pos_zdist_pbc[:,2] - pos[:,2]) > 50)
+        assert np.any(abs(pos_zdist_pbc[:, 2] - pos[:, 2]) > 50)
 
     def tearDown(self):
         del self.halo_table

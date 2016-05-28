@@ -157,17 +157,17 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
     if num_threads is not 1:
         if num_threads=='max':
             num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
+        if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
 
     # Passively enforce that we are working with ndarrays
-    x1 = sample1[:,0]
-    y1 = sample1[:,1]
-    z1 = sample1[:,2]
-    x2 = sample2[:,0]
-    y2 = sample2[:,1]
-    z2 = sample2[:,2]
+    x1 = sample1[:, 0]
+    y1 = sample1[:, 1]
+    z1 = sample1[:, 2]
+    x2 = sample2[:, 0]
+    y2 = sample2[:, 1]
+    z2 = sample2[:, 2]
     rbins = np.atleast_1d(rbins).astype('f8')
 
     rmax = np.max(rbins)
@@ -186,7 +186,7 @@ def _npairs_3d_process_args(sample1, sample2, rbins, period,
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2,
-                min_size=[rmax*3.0,rmax*3.0,rmax*3.0]))
+                min_size=[rmax*3.0, rmax*3.0, rmax*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)

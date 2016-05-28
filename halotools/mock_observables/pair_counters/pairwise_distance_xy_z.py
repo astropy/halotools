@@ -154,13 +154,13 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period=None,
 
     #unpack the results
     for i in range(len(result)):
-        d_perp = np.append(d_perp,result[i][0])
-        d_para = np.append(d_para,result[i][1])
-        i_inds = np.append(i_inds,result[i][2])
-        j_inds = np.append(j_inds,result[i][3])
+        d_perp = np.append(d_perp, result[i][0])
+        d_para = np.append(d_para, result[i][1])
+        i_inds = np.append(i_inds, result[i][2])
+        j_inds = np.append(j_inds, result[i][3])
 
-    return (coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))),
-        coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2))))
+    return (coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1), len(data2))),
+        coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1), len(data2))))
 
 
 def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
@@ -171,17 +171,17 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
     if num_threads is not 1:
         if num_threads=='max':
             num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
+        if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
 
     # Passively enforce that we are working with ndarrays
-    x1 = data1[:,0]
-    y1 = data1[:,1]
-    z1 = data1[:,2]
-    x2 = data2[:,0]
-    y2 = data2[:,1]
-    z2 = data2[:,2]
+    x1 = data1[:, 0]
+    y1 = data1[:, 1]
+    z1 = data1[:, 2]
+    x2 = data2[:, 0]
+    y2 = data2[:, 1]
+    z2 = data2[:, 2]
 
     rp_max = float(rp_max)
     pi_max = float(pi_max)
@@ -191,7 +191,7 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2,
-                min_size=[rp_max*3.0,rp_max*3.0,pi_max*3.0]))
+                min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)

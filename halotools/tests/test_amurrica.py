@@ -18,9 +18,9 @@ def source_code_string_generator(fname):
 
 def filtered_filename_generator(filepat, top):
     for path, dirlist, filelist in os.walk(top):
-        for name in fnmatch.filter(filelist,filepat):
+        for name in fnmatch.filter(filelist, filepat):
             if 'usa.py' not in name:
-                yield os.path.join(path,name)
+                yield os.path.join(path, name)
 
 def test_usa():
 

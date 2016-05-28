@@ -31,7 +31,7 @@ def retrieve_mock_data(Npts, Npts2, Lbox):
     zz = zz.flatten()
 
     grid_points = np.vstack([xx, yy, zz]).T
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
     period = np.array([Lbox, Lbox, Lbox])
 
     return grid_points, rbins, period
@@ -42,10 +42,10 @@ def test_marked_npairs_3d_periodic():
     """
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
-    ran_weights1 = np.random.random((Npts,1))
+    ran_weights1 = np.random.random((Npts, 1))
 
     period = np.array([1.0, 1.0, 1.0])
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
     result = marked_npairs_3d(random_sample, random_sample,
         rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1)
@@ -53,7 +53,7 @@ def test_marked_npairs_3d_periodic():
     test_result = pure_python_weighted_pairs(random_sample, random_sample, rbins,
         period=period, weights1=ran_weights1, weights2=ran_weights1)
 
-    assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
+    assert np.allclose(test_result, result, rtol=1e-09), "pair counts are incorrect"
 
 def test_marked_npairs_parallelization():
     """
@@ -62,10 +62,10 @@ def test_marked_npairs_parallelization():
 
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
-    ran_weights1 = np.random.random((Npts,1))
+    ran_weights1 = np.random.random((Npts, 1))
 
     period = np.array([1.0, 1.0, 1.0])
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
     serial_result = marked_npairs_3d(random_sample, random_sample,
         rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1)
@@ -78,8 +78,8 @@ def test_marked_npairs_parallelization():
         rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1,
         num_threads=7)
 
-    assert np.allclose(serial_result,parallel_result2,rtol=1e-09), "pair counts are incorrect"
-    assert np.allclose(serial_result,parallel_result7,rtol=1e-09), "pair counts are incorrect"
+    assert np.allclose(serial_result, parallel_result2, rtol=1e-09), "pair counts are incorrect"
+    assert np.allclose(serial_result, parallel_result7, rtol=1e-09), "pair counts are incorrect"
 
 def test_marked_npairs_nonperiodic():
     """
@@ -88,9 +88,9 @@ def test_marked_npairs_nonperiodic():
 
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
-    ran_weights1 = np.random.random((Npts,1))
+    ran_weights1 = np.random.random((Npts, 1))
 
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
     result = marked_npairs_3d(random_sample, random_sample,
         rbins, period=None,
@@ -99,7 +99,7 @@ def test_marked_npairs_nonperiodic():
     test_result = pure_python_weighted_pairs(random_sample, random_sample,
         rbins, period=None, weights1=ran_weights1, weights2=ran_weights1)
 
-    assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
+    assert np.allclose(test_result, result, rtol=1e-09), "pair counts are incorrect"
 
 @slow
 def test_marked_npairs_3d_wfuncs_signatures():
@@ -108,7 +108,7 @@ def test_marked_npairs_3d_wfuncs_signatures():
     """
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
     rmax = rbins.max()
     period = np.array([1.0, 1.0, 1.0])
 

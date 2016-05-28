@@ -106,10 +106,10 @@ def distant_observer_redshift(x, v, period=None, cosmo=None):
     c_km_s = c.to('km/s').value
 
     #get the peculiar velocity component along the line of sight direction (z direction)
-    v_los = v[:,2]
+    v_los = v[:, 2]
 
     #compute cosmological redshift (h=1, note that positions are in Mpc/h)
-    z_cos = x[:,2]*100.0/c_km_s
+    z_cos = x[:, 2]*100.0/c_km_s
 
     #redshift is combination of cosmological and peculiar velocities
     z = z_cos+(v_los/c_km_s)*(1.0+z_cos)
@@ -189,25 +189,25 @@ def ra_dec_z(x, v, cosmo=None):
     x = x/cosmo.h
 
     #compute comoving distance from observer
-    r = np.sqrt(x[:,0]**2+x[:,1]**2+x[:,2]**2)
+    r = np.sqrt(x[:, 0]**2+x[:, 1]**2+x[:, 2]**2)
 
     #compute radial velocity
-    ct = x[:,2]/r
+    ct = x[:, 2]/r
     st = np.sqrt(1.0 - ct**2)
-    cp = x[:,0]/np.sqrt(x[:,0]**2 + x[:,1]**2)
-    sp = x[:,1]/np.sqrt(x[:,0]**2 + x[:,1]**2)
-    vr = v[:,0]*st*cp + v[:,1]*st*sp + v[:,2]*ct
+    cp = x[:, 0]/np.sqrt(x[:, 0]**2 + x[:, 1]**2)
+    sp = x[:, 1]/np.sqrt(x[:, 0]**2 + x[:, 1]**2)
+    vr = v[:, 0]*st*cp + v[:, 1]*st*sp + v[:, 2]*ct
 
     #compute cosmological redshift and add contribution from perculiar velocity
-    yy = np.arange(0,1.0,0.001)
+    yy = np.arange(0, 1.0, 0.001)
     xx = cosmo.comoving_distance(yy).value
     f = interp1d(xx, yy, kind='cubic')
     z_cos = f(r)
     redshift = z_cos+(vr/c_km_s)*(1.0+z_cos)
 
     #calculate spherical coordinates
-    theta = np.arccos(x[:,2]/r)
-    phi = np.arctan2(x[:,1],x[:,0])
+    theta = np.arccos(x[:, 2]/r)
+    phi = np.arctan2(x[:, 1], x[:, 0])
 
     #convert spherical coordinates into ra,dec
     ra  = phi

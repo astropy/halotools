@@ -118,7 +118,7 @@ def downsample_inputs_exceeding_max_sample_size(
 
     if _sample1_is_sample2 is True:
         if (len(sample1) > max_sample_size):
-            inds = np.arange(0,len(sample1))
+            inds = np.arange(0, len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
@@ -129,7 +129,7 @@ def downsample_inputs_exceeding_max_sample_size(
             pass
     else:
         if len(sample1) > max_sample_size:
-            inds = np.arange(0,len(sample1))
+            inds = np.arange(0, len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
@@ -139,7 +139,7 @@ def downsample_inputs_exceeding_max_sample_size(
         else:
             pass
         if len(sample2) > max_sample_size:
-            inds = np.arange(0,len(sample2))
+            inds = np.arange(0, len(sample2))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]

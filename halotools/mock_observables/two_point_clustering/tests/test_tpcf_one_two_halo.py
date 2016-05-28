@@ -14,8 +14,8 @@ slow = pytest.mark.slow
 __all__=['test_tpcf_one_two_halo_auto_periodic', 'test_tpcf_one_two_halo_cross_periodic']
 
 #create toy data to test functions
-period = np.array([1.0,1.0,1.0])
-rbins = np.linspace(0.001,0.3,5)
+period = np.array([1.0, 1.0, 1.0])
+rbins = np.linspace(0.001, 0.3, 5)
 rmax = rbins.max()
 
 fixed_seed = 43
@@ -27,8 +27,8 @@ def test_tpcf_one_two_halo_auto_periodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        IDs1 = np.random.random_integers(0,10,Npts)
-        sample1 = np.random.random((Npts,3))
+        IDs1 = np.random.random_integers(0, 10, Npts)
+        sample1 = np.random.random((Npts, 3))
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=None,
       randoms=None, period=period,
@@ -43,13 +43,13 @@ def test_tpcf_one_two_halo_cross_periodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        IDs1 = np.random.random_integers(0,10,Npts)
-        IDs2 = np.random.random_integers(0,10,Npts)
-        sample1 = np.random.random((Npts,3))
-        sample2 = np.random.random((Npts,3))
+        IDs1 = np.random.random_integers(0, 10, Npts)
+        IDs2 = np.random.random_integers(0, 10, Npts)
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2,randoms=None,
+      sample2_host_halo_id=IDs2, randoms=None,
       period=period, max_sample_size=int(1e4),
       estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
       approx_cell2_size=[rmax, rmax, rmax],

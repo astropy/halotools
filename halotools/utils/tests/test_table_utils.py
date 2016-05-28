@@ -19,7 +19,7 @@ class TestSampleSelector(TestCase):
         Npts = 10
         x = np.linspace(0, 9, Npts)
 
-        d = {'x':x}
+        d = {'x': x}
         t = Table(d)
         ax = np.array(x, dtype=[('x', 'f4')])
 

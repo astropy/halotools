@@ -76,17 +76,17 @@ def test_get_period():
     assert np.all(period == 1)
     assert PBCs is True
 
-    period, PBCs = get_period([1,1,1])
+    period, PBCs = get_period([1, 1, 1])
     assert np.all(period == 1)
     assert PBCs is True
 
     with pytest.raises(ValueError) as err:
-        period, PBCs = get_period([1,1])
+        period, PBCs = get_period([1, 1])
     substr = "Input ``period`` must be either a scalar or a 3-element sequence."
     assert substr in err.value.args[0]
 
     with pytest.raises(ValueError) as err:
-        period, PBCs = get_period([1,1, np.inf])
+        period, PBCs = get_period([1, 1, np.inf])
     substr = "All values must bounded positive numbers."
     assert substr in err.value.args[0]
 
@@ -104,7 +104,7 @@ def test_enforce_sample_has_correct_shape():
 
 def test_get_separation_bins_array():
 
-    good_rbins = [1,2]
+    good_rbins = [1, 2]
     _ = get_separation_bins_array(good_rbins)
 
     good_rbins = np.linspace(1, 2, 10)
@@ -124,7 +124,7 @@ def test_get_separation_bins_array():
 
 def test_get_line_of_sight_bins_array():
 
-    good_pi_bins = [1,2]
+    good_pi_bins = [1, 2]
     _ = get_line_of_sight_bins_array(good_pi_bins)
 
     good_pi_bins = np.linspace(1, 2, 10)

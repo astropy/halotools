@@ -8,11 +8,11 @@ from astropy.tests.helper import pytest
 
 from ..wp import wp
 
-__all__ = ('test_wp_auto_nonperiodic','test_wp_auto_periodic','test_wp_cross_periodic',
+__all__ = ('test_wp_auto_nonperiodic', 'test_wp_auto_periodic', 'test_wp_cross_periodic',
     'test_wp_cross_nonperiodic')
 
-period = np.array([1.0,1.0,1.0])
-rp_bins = np.linspace(0.001,0.3,3)
+period = np.array([1.0, 1.0, 1.0])
+rp_bins = np.linspace(0.001, 0.3, 3)
 pi_max = 0.3
 
 fixed_seed = 43
@@ -23,8 +23,8 @@ def test_wp_auto_nonperiodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
-        randoms = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts, 3))
 
     result = wp(sample1, rp_bins, pi_max, sample2=None,
                   randoms=randoms, period=None,
@@ -39,7 +39,7 @@ def test_wp_auto_periodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
 
     result = wp(sample1, rp_bins, pi_max, sample2=None,
                 randoms=None, period=period,
@@ -54,8 +54,8 @@ def test_wp_cross_periodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
-        sample2 = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
 
     result = wp(sample1, rp_bins, pi_max, sample2=sample2,
                 randoms=None, period=period,
@@ -72,9 +72,9 @@ def test_wp_cross_nonperiodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
-        sample2 = np.random.random((Npts,3))
-        randoms = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts, 3))
 
     result = wp(sample1, rp_bins, pi_max, sample2=sample2,
                 randoms=randoms, period=None,

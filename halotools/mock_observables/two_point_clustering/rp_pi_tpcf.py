@@ -205,29 +205,29 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         NR = N1
 
     #count pairs
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins,
+    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins,
         period, num_threads, do_auto, do_cross,
-        _sample1_is_sample2,approx_cell1_size, approx_cell2_size)
+        _sample1_is_sample2, approx_cell1_size, approx_cell2_size)
 
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rp_bins, pi_bins,
         period, PBCs, num_threads, do_RR, do_DR,
         _sample1_is_sample2, approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
     if _sample1_is_sample2:
-        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
         return xi_11
     else:
         if (do_auto is True) & (do_cross is True):
-            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_12, xi_22
         elif (do_cross is True):
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return xi_12
         elif (do_auto is True):
-            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
             return xi_11
 
 def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
@@ -237,9 +237,9 @@ def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
     Count data pairs.
     """
     D1D1 = npairs_xy_z(sample1, sample1, rp_bins, pi_bins, period=period,
-        num_threads=num_threads,approx_cell1_size=approx_cell1_size,
+        num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)
-    D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
+    D1D1 = np.diff(np.diff(D1D1, axis=0), axis=1)
     if _sample1_is_sample2:
         D1D2 = D1D1
         D2D2 = D1D1
@@ -249,23 +249,23 @@ def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
-            D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+            D1D2 = np.diff(np.diff(D1D2, axis=0), axis=1)
         else: D1D2=None
         if do_auto is True:
             D2D2 = npairs_xy_z(sample2, sample2, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
-            D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+            D2D2 = np.diff(np.diff(D2D2, axis=0), axis=1)
         else: D2D2=None
 
     return D1D1, D1D2, D2D2
 
-def cylinder_volume(R,h):
+def cylinder_volume(R, h):
     """
     Calculate the volume of a cylinder(s), used for the analytical randoms.
     """
-    return pi*np.outer(R**2.0,h)
+    return pi*np.outer(R**2.0, h)
 
 def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
         PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
@@ -285,17 +285,17 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
     if randoms is not None:
         if do_RR is True:
             RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins,
-                period=period,num_threads=num_threads,
+                period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cellran_size,
                 approx_cell2_size=approx_cellran_size)
-            RR = np.diff(np.diff(RR,axis=0),axis=1)
+            RR = np.diff(np.diff(RR, axis=0), axis=1)
         else: RR=None
         if do_DR is True:
             D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cellran_size)
-            D1R = np.diff(np.diff(D1R,axis=0),axis=1)
+            D1R = np.diff(np.diff(D1R, axis=0), axis=1)
         else: D1R=None
         if _sample1_is_sample2: #calculating the cross-correlation
             D2R = None
@@ -305,7 +305,7 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
                     period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cellran_size)
-                D2R = np.diff(np.diff(D2R,axis=0),axis=1)
+                D2R = np.diff(np.diff(D2R, axis=0), axis=1)
             else: D2R=None
 
         return D1R, D2R, RR
@@ -316,8 +316,8 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
         NR = len(sample1)
 
         #do volume calculations
-        v = cylinder_volume(rp_bins,2.0*pi_bins) #volume of spheres
-        dv = np.diff(np.diff(v, axis=0),axis=1) #volume of annuli
+        v = cylinder_volume(rp_bins, 2.0*pi_bins) #volume of spheres
+        dv = np.diff(np.diff(v, axis=0), axis=1) #volume of annuli
         global_volume = period.prod()
 
         #calculate randoms for sample1
@@ -339,7 +339,7 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
 
 def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
     period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size,approx_cellran_size):
+    approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.redshift_space_tpcf`.

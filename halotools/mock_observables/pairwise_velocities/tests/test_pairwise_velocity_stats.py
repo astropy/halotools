@@ -30,8 +30,8 @@ def test_mean_los_velocity_vs_rp_auto_consistency():
         sample2=sample2, velocities2=velocities2,
         do_cross=False)
 
-    assert np.allclose(s1s1a,s1s1b, rtol=0.001)
-    assert np.allclose(s2s2a,s2s2b, rtol=0.001)
+    assert np.allclose(s1s1a, s1s1b, rtol=0.001)
+    assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
 
 @pytest.mark.slow
@@ -54,7 +54,7 @@ def test_mean_los_velocity_vs_rp_cross_consistency():
         sample2=sample2, velocities2=velocities2,
         do_auto=False)
 
-    assert np.allclose(s1s2a,s1s2b, rtol=0.001)
+    assert np.allclose(s1s2a, s1s2b, rtol=0.001)
 
 
 @pytest.mark.slow
@@ -77,8 +77,8 @@ def test_los_pvd_vs_rp_auto_consistency():
         sample2=sample2, velocities2=velocities2,
         do_cross=False)
 
-    assert np.allclose(s1s1a,s1s1b, rtol=0.001)
-    assert np.allclose(s2s2a,s2s2b, rtol=0.001)
+    assert np.allclose(s1s1a, s1s1b, rtol=0.001)
+    assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
 @pytest.mark.slow
 def test_los_pvd_vs_rp_cross_consistency():
@@ -100,4 +100,4 @@ def test_los_pvd_vs_rp_cross_consistency():
         sample2=sample2, velocities2=velocities2,
         do_auto=False)
 
-    assert np.allclose(s1s2a,s1s2b, rtol=0.001)
+    assert np.allclose(s1s2a, s1s2b, rtol=0.001)

@@ -7,11 +7,11 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..rp_pi_tpcf import rp_pi_tpcf
 
-__all__ = ('test_rp_pi_tpcf_auto_nonperiodic','test_rp_pi_tpcf_auto_periodic',
-    'test_rp_pi_tpcf_cross_periodic','test_rp_pi_tpcf_cross_nonperiodic')
+__all__ = ('test_rp_pi_tpcf_auto_nonperiodic', 'test_rp_pi_tpcf_auto_periodic',
+    'test_rp_pi_tpcf_cross_periodic', 'test_rp_pi_tpcf_cross_nonperiodic')
 
 #create toy data to test functions
-period = np.array([1.0,1.0,1.0])
+period = np.array([1.0, 1.0, 1.0])
 rp_bins = np.linspace(0.001, 0.3, 5)
 pi_bins = np.linspace(0, 0.3, 5)
 
@@ -23,8 +23,8 @@ def test_rp_pi_tpcf_auto_nonperiodic():
     """
     Npts=100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
-        randoms = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None,
         randoms=randoms, period=None,
@@ -38,7 +38,7 @@ def test_rp_pi_tpcf_auto_periodic():
     """
     Npts=100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None,
         randoms=None, period=period,
@@ -53,8 +53,8 @@ def test_rp_pi_tpcf_cross_periodic():
     """
     Npts=100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
-        sample2 = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=sample2,
         randoms=None, period=period,
@@ -72,9 +72,9 @@ def test_rp_pi_tpcf_cross_nonperiodic():
     """
     Npts=100
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts,3))
-        sample2 = np.random.random((Npts,3))
-        randoms = np.random.random((Npts,3))
+        sample1 = np.random.random((Npts, 3))
+        sample2 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=sample2,
         randoms=randoms, period=None,

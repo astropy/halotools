@@ -92,7 +92,7 @@ class PtclTableCache(object):
         result = []
         for entry in log_table:
             constructor_kwargs = (
-                {key:entry[key] for key in PtclTableCacheLogEntry.log_attributes})
+                {key: entry[key] for key in PtclTableCacheLogEntry.log_attributes})
             result.append(PtclTableCacheLogEntry(**constructor_kwargs))
         return result
 

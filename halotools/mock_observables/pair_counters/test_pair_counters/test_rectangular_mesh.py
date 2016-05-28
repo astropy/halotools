@@ -103,8 +103,8 @@ def test_mesh_variations():
         search_xlength, search_ylength, search_zlength = 3*[options[4]]
         PBCs = options[5]
         double_mesh = RectangularDoubleMesh(
-            points1[:,0], points1[:,1], points1[:,2],
-            points2[:,0], points2[:,1], points2[:,2],
+            points1[:, 0], points1[:, 1], points1[:, 2],
+            points2[:, 0], points2[:, 1], points2[:, 2],
             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
             search_xlength, search_ylength, search_zlength,
@@ -119,9 +119,9 @@ def test_mesh_variations():
         enforce_reasonable_cell_id_indices(double_mesh.mesh1, npts1)
         enforce_reasonable_cell_id_indices(double_mesh.mesh2, npts2)
         enforce_correct_cell_id(double_mesh.mesh1,
-            points1[:,0][double_mesh.mesh1.idx_sorted],
-            points1[:,1][double_mesh.mesh1.idx_sorted],
-            points1[:,2][double_mesh.mesh1.idx_sorted])
+            points1[:, 0][double_mesh.mesh1.idx_sorted],
+            points1[:, 1][double_mesh.mesh1.idx_sorted],
+            points1[:, 2][double_mesh.mesh1.idx_sorted])
 
 def test_sample1_cell_size():
     period, search_length, approx_cell_size = 1, 0.5, 0.1
@@ -141,8 +141,8 @@ def test_search_length_enforcement():
 
     with pytest.raises(ValueError) as err:
         double_mesh = RectangularDoubleMesh(
-            points1[:,0], points1[:,1], points1[:,2],
-            points2[:,0], points2[:,1], points2[:,2],
+            points1[:, 0], points1[:, 1], points1[:, 2],
+            points2[:, 0], points2[:, 1], points2[:, 2],
             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
             search_xlength, search_ylength, search_zlength,

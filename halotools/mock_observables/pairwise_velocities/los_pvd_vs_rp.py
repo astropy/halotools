@@ -145,15 +145,15 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         _pairwise_velocity_stats_process_args(*function_args)
 
     rp_bins, pi_max = _process_rp_bins(rp_bins, pi_max, period, PBCs)
-    pi_bins = np.array([0.0,pi_max])
+    pi_bins = np.array([0.0, pi_max])
 
     #calculate velocity difference scale
-    std_v1 = np.sqrt(np.std(velocities1[2,:]))
-    std_v2 = np.sqrt(np.std(velocities2[2,:]))
+    std_v1 = np.sqrt(np.std(velocities1[2, :]))
+    std_v2 = np.sqrt(np.std(velocities2[2, :]))
 
     #build the marks.
-    shift1 = np.repeat(std_v1,len(sample1))
-    shift2 = np.repeat(std_v2,len(sample2))
+    shift1 = np.repeat(std_v1, len(sample1))
+    shift2 = np.repeat(std_v2, len(sample2))
     marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
     marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
 
@@ -172,11 +172,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell1_size)
-            D1D1 = np.diff(D1D1,axis=1)[:,0]
+            D1D1 = np.diff(D1D1, axis=1)[:, 0]
             D1D1 = np.diff(D1D1)
-            S1S1 = np.diff(S1S1,axis=1)[:,0]
+            S1S1 = np.diff(S1S1, axis=1)[:, 0]
             S1S1 = np.diff(S1S1)
-            N1N1 = np.diff(N1N1,axis=1)[:,0]
+            N1N1 = np.diff(N1N1, axis=1)[:, 0]
             N1N1 = np.diff(N1N1)
         else:
             D1D1=None
@@ -201,11 +201,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                     weight_func_id=weight_func_id, period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell1_size,
                     approx_cell2_size=approx_cell2_size)
-                D1D2 = np.diff(D1D2,axis=1)[:,0]
+                D1D2 = np.diff(D1D2, axis=1)[:, 0]
                 D1D2 = np.diff(D1D2)
-                S1S2 = np.diff(S1S2,axis=1)[:,0]
+                S1S2 = np.diff(S1S2, axis=1)[:, 0]
                 S1S2 = np.diff(S1S2)
-                N1N2 = np.diff(N1N2,axis=1)[:,0]
+                N1N2 = np.diff(N1N2, axis=1)[:, 0]
                 N1N2 = np.diff(N1N2)
             else:
                 D1D2=None
@@ -218,11 +218,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                     weight_func_id=weight_func_id, period=period, num_threads=num_threads,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cell2_size)
-                D2D2 = np.diff(D2D2,axis=1)[:,0]
+                D2D2 = np.diff(D2D2, axis=1)[:, 0]
                 D2D2 = np.diff(D2D2)
-                S2S2 = np.diff(S2S2,axis=1)[:,0]
+                S2S2 = np.diff(S2S2, axis=1)[:, 0]
                 S2S2 = np.diff(S2S2)
-                N2N2 = np.diff(N2N2,axis=1)[:,0]
+                N2N2 = np.diff(N2N2, axis=1)[:, 0]
                 N2N2 = np.diff(N2N2)
             else:
                 D2D2=None
@@ -231,7 +231,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
 
     weight_func_id = 14
-    V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
+    V1V1, V1V2, V2V2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2 = marked_pair_counts(
         sample1, sample2, rp_bins, pi_bins, period,
         num_threads, do_auto, do_cross,
         marks1, marks2, weight_func_id,
@@ -247,21 +247,21 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
 
     #return results
     if _sample1_is_sample2:
-        sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
+        sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
         return np.where(np.isfinite(sigma_11), sigma_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True):
-            sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-            sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
-            sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
+            sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
+            sigma_12 = _shifted_std(N1N2, V1V2, S1S2)
+            sigma_22 = _shifted_std(N2N2, V2V2, S2S2)
             return (np.where(np.isfinite(sigma_11), sigma_11, 0.),
                 np.where(np.isfinite(sigma_12), sigma_12, 0.),
                 np.where(np.isfinite(sigma_22), sigma_22, 0.))
         elif (do_cross is True):
-            sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
+            sigma_12 = _shifted_std(N1N2, V1V2, S1S2)
             return np.where(np.isfinite(sigma_12), sigma_12, 0.)
         elif (do_auto is True):
-            sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-            sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
+            sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
+            sigma_22 = _shifted_std(N2N2, V2V2, S2S2)
             return (np.where(np.isfinite(sigma_11), sigma_11, 0.),
                 np.where(np.isfinite(sigma_22), sigma_22, 0.))

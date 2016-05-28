@@ -264,7 +264,7 @@ class HodMockFactory(MockFactory):
             # the pre-allocated array self.gal_type,
             # set each string-type entry equal to the gal_type string
             self.galaxy_table['gal_type'][gal_type_slice] = (
-                np.repeat(gal_type, self._total_abundance[gal_type],axis=0))
+                np.repeat(gal_type, self._total_abundance[gal_type], axis=0))
 
             # Store all other relevant host halo properties into their
             # appropriate pre-allocated array

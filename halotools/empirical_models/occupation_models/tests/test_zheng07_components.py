@@ -165,36 +165,36 @@ class TestZheng07Cens(TestCase):
         Npts = int(1e3)
         masses = np.ones(Npts)*mvir_midpoint
         mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
-        assert set(mc_occ).issubset([0,1])
+        assert set(mc_occ).issubset([0, 1])
         expected_result = 0.48599999
         np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-5, atol=1.e-5)
 
         # Now check that the model is ~ 1.0 when evaluated for a cluster
         masses = np.ones(Npts)*5.e15
         mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
-        assert set(mc_occ).issubset([0,1])
+        assert set(mc_occ).issubset([0, 1])
         expected_result = 1.0
         np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
         # Now check that the model is ~ 0.0 when evaluated for a tiny halo
         masses = np.ones(Npts)*1.e10
         mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
-        assert set(mc_occ).issubset([0,1])
+        assert set(mc_occ).issubset([0, 1])
         expected_result = 0.0
         np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
     def enforce_correct_argument_inference_from_halo_catalog(self, model):
         mvir_array = np.logspace(10, 16, 10)
         key = model.prim_haloprop_key
-        mvir_dict = {key:mvir_array}
+        mvir_dict = {key: mvir_array}
         halo_catalog = Table(mvir_dict)
         # First test mean occupations
         meanocc_from_array = model.mean_occupation(prim_haloprop=mvir_array)
         meanocc_from_halos = model.mean_occupation(table=halo_catalog)
         assert np.all(meanocc_from_array == meanocc_from_halos)
         # Now test Monte Carlo occupations
-        mcocc_from_array = model.mc_occupation(prim_haloprop=mvir_array,seed=43)
-        mcocc_from_halos = model.mc_occupation(table=halo_catalog,seed=43)
+        mcocc_from_array = model.mc_occupation(prim_haloprop=mvir_array, seed=43)
+        mcocc_from_halos = model.mc_occupation(table=halo_catalog, seed=43)
         assert np.all(mcocc_from_array == mcocc_from_halos)
 
     def test_raises_correct_exception(self):
@@ -341,8 +341,8 @@ class TestZheng07Sats(TestCase):
         Npts = 1000
         masses = np.ones(Npts)*mass
 
-        assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() >
-            self.default_model.mc_occupation(prim_haloprop=masses,seed=43).mean())
+        assert (self.model2.mc_occupation(prim_haloprop=masses, seed=43).mean() >
+            self.default_model.mc_occupation(prim_haloprop=masses, seed=43).mean())
 
     def test_alpha_propagation(self):
         logmass = self.model2.param_dict['logM1'] + np.log10(5)
@@ -354,8 +354,8 @@ class TestZheng07Sats(TestCase):
 
         alt_default_model.param_dict['alpha'] = self.model2.param_dict['alpha']
 
-        assert (self.model2.mc_occupation(prim_haloprop=masses,seed=43).mean() ==
-            alt_default_model.mc_occupation(prim_haloprop=masses,seed=43).mean())
+        assert (self.model2.mc_occupation(prim_haloprop=masses, seed=43).mean() ==
+            alt_default_model.mc_occupation(prim_haloprop=masses, seed=43).mean())
 
 
     def test_logM0_scaling1_mean_occupation(self):

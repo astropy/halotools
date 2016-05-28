@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 
-__all__=['npairs','wnpairs','xy_z_npairs','xy_z_wnpairs','pairs']
+__all__=['npairs', 'wnpairs', 'xy_z_npairs', 'xy_z_wnpairs', 'pairs']
 __author__ = ['Duncan Campbell']
 
 
@@ -71,8 +71,8 @@ def npairs(sample1, sample2, rbins, period=None):
     N1 = len(sample1)
     N2 = len(sample2)
     dd = np.zeros((N1*N2,)) #store radial pair separations
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = sample1[i,:]
+    for i in range(0, N1): #calculate distance between every point and every other point
+        x1 = sample1[i, :]
         x2 = sample2
         dd[i*N2:i*N2+N2] = distance(x1, x2, period)
 
@@ -82,7 +82,7 @@ def npairs(sample1, sample2, rbins, period=None):
     n = np.zeros((rbins.size,), dtype=np.int)
     for i in range(rbins.size):
         if rbins[i]>np.min(period)/2.0:
-            print("r=", rbins[i], "  min(period)/2=",np.min(period)/2.0)
+            print("r=", rbins[i], "  min(period)/2=", np.min(period)/2.0)
         n[i] = len(np.where(dd<=rbins[i])[0])
 
     return n
@@ -153,18 +153,18 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,2)) #store pair separations
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = sample1[i,:]
+    dd = np.zeros((N1*N2, 2)) #store pair separations
+    for i in range(0, N1): #calculate distance between every point and every other point
+        x1 = sample1[i, :]
         x2 = sample2
-        dd[i*N2:i*N2+N2,1] = parallel_distance(x1, x2, period)
-        dd[i*N2:i*N2+N2,0] = perpendicular_distance(x1, x2, period)
+        dd[i*N2:i*N2+N2, 1] = parallel_distance(x1, x2, period)
+        dd[i*N2:i*N2+N2, 0] = perpendicular_distance(x1, x2, period)
 
     #count number less than r
-    n = np.zeros((rp_bins.size,pi_bins.size), dtype=np.int)
+    n = np.zeros((rp_bins.size, pi_bins.size), dtype=np.int)
     for i in range(rp_bins.size):
         for j in range(pi_bins.size):
-            n[i,j] = np.sum((dd[:,0]<=rp_bins[i]) & (dd[:,1]<=pi_bins[j]))
+            n[i, j] = np.sum((dd[:, 0]<=rp_bins[i]) & (dd[:, 1]<=pi_bins[j]))
 
     return n
 
@@ -248,19 +248,19 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1,N2), dtype=np.float64) #store radial pair separations
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = sample1[i,:]
+    dd = np.zeros((N1, N2), dtype=np.float64) #store radial pair separations
+    for i in range(0, N1): #calculate distance between every point and every other point
+        x1 = sample1[i, :]
         x2 = sample2
-        dd[i,:] = distance(x1, x2, period)
+        dd[i, :] = distance(x1, x2, period)
 
     #count number less than r
     n = np.zeros((r.size,), dtype=np.float64)
     for i in range(r.size):
         if r[i]>np.min(period)/2:
-            print("r=", r[i], "  min(period)/2=",np.min(period)/2)
+            print("r=", r[i], "  min(period)/2=", np.min(period)/2)
         for j in range(N1):
-            n[i] += np.sum(np.extract(dd[j,:]<=r[i],weights2))*weights1[j]
+            n[i] += np.sum(np.extract(dd[j, :]<=r[i], weights2))*weights1[j]
 
     return n
 
@@ -354,20 +354,20 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,2)) #store pair separations
-    ww = np.zeros((N1*N2,1)) #store pair separations
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = sample1[i,:]
+    dd = np.zeros((N1*N2, 2)) #store pair separations
+    ww = np.zeros((N1*N2, 1)) #store pair separations
+    for i in range(0, N1): #calculate distance between every point and every other point
+        x1 = sample1[i, :]
         x2 = sample2
-        dd[i*N2:i*N2+N2,1] = parallel_distance(x1, x2, period)
-        dd[i*N2:i*N2+N2,0] = perpendicular_distance(x1, x2, period)
+        dd[i*N2:i*N2+N2, 1] = parallel_distance(x1, x2, period)
+        dd[i*N2:i*N2+N2, 0] = perpendicular_distance(x1, x2, period)
         ww[i*N2:i*N2+N2] = weights1[i]*weights2
 
     #count number less than r
-    n = np.zeros((rp_bins.size,pi_bins.size), dtype=np.float64)
+    n = np.zeros((rp_bins.size, pi_bins.size), dtype=np.float64)
     for i in range(rp_bins.size):
         for j in range(pi_bins.size):
-                n[i,j] += np.sum(np.extract((dd[:,0]<=rp_bins[i]) & (dd[:,1]<=pi_bins[j]),ww))
+                n[i, j] += np.sum(np.extract((dd[:, 0]<=rp_bins[i]) & (dd[:, 1]<=pi_bins[j]), ww))
 
     return n
 
@@ -427,26 +427,26 @@ def pairs(sample1, r, sample2=None, period=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1,N2)) #store radial pair separations
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = sample1[i,:]
+    dd = np.zeros((N1, N2)) #store radial pair separations
+    for i in range(0, N1): #calculate distance between every point and every other point
+        x1 = sample1[i, :]
         x2 = sample2
-        dd[i,:] = distance(x1, x2, period)
+        dd[i, :] = distance(x1, x2, period)
 
     pairs = np.argwhere(dd<=r)
 
     spairs = set()
     for i in range(len(pairs)):
         if self_match is False:
-            if pairs[i,0] != pairs[i,1]:
-                spairs.add((min(pairs[i]),max(pairs[i])))
+            if pairs[i, 0] != pairs[i, 1]:
+                spairs.add((min(pairs[i]), max(pairs[i])))
         if self_match is True:
-            spairs.add((min(pairs[i]),max(pairs[i])))
+            spairs.add((min(pairs[i]), max(pairs[i])))
 
     return spairs
 
 
-def distance(x1,x2,period=None):
+def distance(x1, x2, period=None):
     """
     Find the Euclidean distance between x1 & x2, accounting for box periodicity.
 
@@ -484,12 +484,12 @@ def distance(x1,x2,period=None):
         raise ValueError("period must have length equal to the dimension of x1 and x2.")
 
     m = np.minimum(np.fabs(x1 - x2), period - np.fabs(x1 - x2))
-    distance = np.sqrt(np.sum(m*m,axis=len(np.shape(m))-1))
+    distance = np.sqrt(np.sum(m*m, axis=len(np.shape(m))-1))
 
     return distance
 
 
-def parallel_distance(x1,x2,period=None):
+def parallel_distance(x1, x2, period=None):
     """
     Find the parallel distance between x1 & x2, accounting for box periodicity.
 
@@ -528,13 +528,13 @@ def parallel_distance(x1,x2,period=None):
     if np.shape(period)[0] != np.shape(x1)[-1]:
         raise ValueError("period must have length equal to the dimension of x1 and x2.")
 
-    m = np.minimum(np.fabs(x1[:,-1] - x2[:,-1]), period[-1] - np.fabs(x1[:,-1] - x2[:,-1]))
+    m = np.minimum(np.fabs(x1[:, -1] - x2[:, -1]), period[-1] - np.fabs(x1[:, -1] - x2[:, -1]))
     distance = np.sqrt(m*m)
 
     return distance
 
 
-def perpendicular_distance(x1,x2,period=None):
+def perpendicular_distance(x1, x2, period=None):
     """
     Find the perpendicular distance between x1 & x2, accounting for box periodicity.
 
@@ -573,7 +573,7 @@ def perpendicular_distance(x1,x2,period=None):
     if np.shape(period)[0] != np.shape(x1)[-1]:
         raise ValueError("period must have length equal to the dimension of x1 and x2.")
 
-    m = np.minimum(np.fabs(x1[:,:-1] - x2[:,:-1]), period[:-1] - np.fabs(x1[:,:-1] - x2[:,:-1]))
-    distance = np.sqrt(np.sum(m*m,axis=len(np.shape(m))-1))
+    m = np.minimum(np.fabs(x1[:, :-1] - x2[:, :-1]), period[:-1] - np.fabs(x1[:, :-1] - x2[:, :-1]))
+    distance = np.sqrt(np.sum(m*m, axis=len(np.shape(m))-1))
 
     return distance

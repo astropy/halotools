@@ -27,7 +27,7 @@ def test_large_scale_density_spherical_volume_exception_handling():
 
     with pytest.raises(HalotoolsError) as err:
         result = large_scale_density_spherical_volume(
-            sample, tracers, radius, period=[1,1])
+            sample, tracers, radius, period=[1, 1])
     substr = "Input ``period`` must either be a float or length-3 sequence"
     assert substr in err.value.args[0]
 
@@ -60,7 +60,7 @@ def test_large_scale_density_spherical_volume2():
     tracers = generate_locus_of_3d_points(npts2, xc=0.95, yc=0.1, zc=0.1)
     radius = 0.2
     result = large_scale_density_spherical_volume(
-        sample, tracers, radius, period=[1,1,1], norm_by_mean_density=True)
+        sample, tracers, radius, period=[1, 1, 1], norm_by_mean_density=True)
     mean_density = float(npts2)
 
     environment_volume = (4/3.)*np.pi*radius**3

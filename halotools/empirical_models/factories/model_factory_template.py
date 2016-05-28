@@ -54,9 +54,9 @@ def _test_mock_consistency(mock,
     if simname != mock.simname:
         raise HalotoolsError(inconsistent_simname_error_msg % (mock.simname, simname))
     if halo_finder != mock.halo_finder:
-        raise HalotoolsError(inconsistent_halo_finder_error_msg % (mock.halo_finder,halo_finder))
+        raise HalotoolsError(inconsistent_halo_finder_error_msg % (mock.halo_finder, halo_finder))
     if version_name != mock.version_name:
-        raise HalotoolsError(inconsistent_version_name_error_msg % (mock.version_name,version_name))
+        raise HalotoolsError(inconsistent_version_name_error_msg % (mock.version_name, version_name))
     print(("version_name = %s" % version_name))
 
 @six.add_metaclass(ABCMeta)
@@ -230,7 +230,7 @@ class ModelFactory(object):
 
         additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC')
         mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
-        mockpop_kwargs = {key:kwargs[key] for key in mockpop_keys}
+        mockpop_kwargs = {key: kwargs[key] for key in mockpop_keys}
         self.mock.populate(**mockpop_kwargs)
 
 

@@ -308,28 +308,28 @@ def marked_tpcf(sample1, rbins, sample2=None,
         randomize_marks = _marked_tpcf_process_args(*function_args)
 
     #calculate marked pairs
-    W1W1,W1W2,W2W2 = marked_pair_counts(sample1, sample2, rbins, period,
-        num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,_sample1_is_sample2)
+    W1W1, W1W2, W2W2 = marked_pair_counts(sample1, sample2, rbins, period,
+        num_threads, do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2)
 
     if normalize_by=='number_counts':
-        R1R1,R1R2,R2R2 = pair_counts(sample1, sample2, rbins, period,
+        R1R1, R1R2, R2R2 = pair_counts(sample1, sample2, rbins, period,
             num_threads, do_auto, do_cross, _sample1_is_sample2, None, None)
     #calculate randomized marked pairs
     elif normalize_by=='random_marks':
         if iterations > 1:
             #create storage arrays of the right shape
-            R1R1 = np.zeros((iterations,len(rbins)-1))
-            R1R2 = np.zeros((iterations,len(rbins)-1))
-            R2R2 = np.zeros((iterations,len(rbins)-1))
+            R1R1 = np.zeros((iterations, len(rbins)-1))
+            R1R2 = np.zeros((iterations, len(rbins)-1))
+            R2R2 = np.zeros((iterations, len(rbins)-1))
             for i in range(iterations):
                 print(i)
                 #get arrays to randomize marks
-                permutate1 = np.random.permutation(np.arange(0,len(sample1)))
-                permutate2 = np.random.permutation(np.arange(0,len(sample2)))
-                R1R1[i,:],R1R2[i,:],R2R2[i,:] = random_counts(
-                    sample1, sample2, rbins, period,num_threads,
-                    do_auto, do_cross,marks1, marks2, weight_func_id,
-                    _sample1_is_sample2,permutate1, permutate2, randomize_marks)
+                permutate1 = np.random.permutation(np.arange(0, len(sample1)))
+                permutate2 = np.random.permutation(np.arange(0, len(sample2)))
+                R1R1[i, :], R1R2[i, :], R2R2[i, :] = random_counts(
+                    sample1, sample2, rbins, period, num_threads,
+                    do_auto, do_cross, marks1, marks2, weight_func_id,
+                    _sample1_is_sample2, permutate1, permutate2, randomize_marks)
             #take mean of the iterations
             # R1R1_err = np.std(R1R1, axis=0)
             R1R1 = np.median(R1R1, axis=0)
@@ -339,9 +339,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
             R2R2 = np.median(R2R2, axis=0)
         else:
             #get arrays to randomize marks
-            permutate1 = np.random.permutation(np.arange(0,len(sample1)))
-            permutate2 = np.random.permutation(np.arange(0,len(sample2)))
-            R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,
+            permutate1 = np.random.permutation(np.arange(0, len(sample1)))
+            permutate2 = np.random.permutation(np.arange(0, len(sample2)))
+            R1R1, R1R2, R2R2 = random_counts(sample1, sample2, rbins, period,
                 num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,
                 _sample1_is_sample2, permutate1, permutate2, randomize_marks)
     else:
@@ -411,10 +411,10 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
     permuted_marks2 = marks2
     for i in range(marks1.shape[1]):
         if randomize_marks[i]:
-            permuted_marks1[:,i] = marks1[permutate1,i]
+            permuted_marks1[:, i] = marks1[permutate1, i]
     for i in range(marks2.shape[1]):
         if randomize_marks[i]:
-            permuted_marks2[:,i] = marks2[permutate2,i]
+            permuted_marks2[:, i] = marks2[permutate2, i]
 
     if do_auto is True:
         R1R1 = marked_npairs_3d(sample1, sample1, rbins,
@@ -503,7 +503,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
         raise ValueError(msg)
 
     #process normalize_by parameter
-    if normalize_by not in ['random_marks','number_counts']:
+    if normalize_by not in ['random_marks', 'number_counts']:
         msg = ("\n `normalize_by` parameter not recognized.")
         raise ValueError(msg)
 

@@ -4,7 +4,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-__all__=['spherical_to_cartesian','chord_to_cartesian','sample_spherical_surface']
+__all__=['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
 __author__ = ('Duncan Campbell', )
 
 def spherical_to_cartesian(ra, dec):
@@ -100,6 +100,6 @@ def sample_spherical_surface(N_points):
     ran_ra = ran1
     ran_dec = ran2
 
-    coords = list(zip(ran_ra,ran_dec))
+    coords = list(zip(ran_ra, ran_dec))
 
     return coords

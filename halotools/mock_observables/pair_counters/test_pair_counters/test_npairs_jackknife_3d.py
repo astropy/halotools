@@ -51,7 +51,7 @@ def test_npairs_jackknife_3d_periodic():
     test npairs_jackknife_3d with periodic boundary conditions.
     """
 
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
     #define the jackknife sample labels
     Npts = len(random_sample)
@@ -66,7 +66,7 @@ def test_npairs_jackknife_3d_periodic():
         weights1=weights1, weights2=weights1, num_threads=num_threads)
 
     msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
+    assert np.shape(result)==(N_jsamples+1, len(rbins)), msg
 
     # Now verify that when computing jackknife pairs on a regularly spaced grid,
     # the counts in all subvolumes are identical
@@ -84,7 +84,7 @@ def test_npairs_jackknife_3d_nonperiodic():
     test npairs_jackknife_3d without periodic boundary conditions.
     """
 
-    rbins = np.array([0.0,0.1,0.2,0.3])
+    rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
     #define the jackknife sample labels
     Npts = len(random_sample)
@@ -99,7 +99,7 @@ def test_npairs_jackknife_3d_nonperiodic():
         weights1=weights1, weights2=weights1, num_threads=num_threads)
 
     msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
+    assert np.shape(result)==(N_jsamples+1, len(rbins)), msg
 
     grid_result = npairs_jackknife_3d(grid_points, grid_points, rbins, period=None,
         jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,

@@ -15,18 +15,18 @@ except ImportError:
 
 from ..fof_groups import FoFGroups
 
-__all__ = ['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality']
+__all__ = ['test_fof_groups_init', 'test_fof_group_IDs', 'test_igraph_functionality']
 
 #set random seed to get consistent behavior
 N = 1000
-Lbox = np.array([1.0,1.0,1.0])
+Lbox = np.array([1.0, 1.0, 1.0])
 period = Lbox
 b_perp = 0.5
 b_para = 0.5
 
 fixed_seed = 43
 with NumpyRNGContext(fixed_seed):
-    sample = np.random.random((N,3))
+    sample = np.random.random((N, 3))
 
 @pytest.mark.slow
 def test_fof_groups_init():
@@ -36,8 +36,8 @@ def test_fof_groups_init():
 
     fof_group = FoFGroups(sample, b_perp, b_para, Lbox=Lbox, period=period)
 
-    assert isinstance(fof_group.m_perp,coo_matrix)
-    assert isinstance(fof_group.m_para,coo_matrix)
+    assert isinstance(fof_group.m_perp, coo_matrix)
+    assert isinstance(fof_group.m_para, coo_matrix)
 
 @pytest.mark.slow
 def test_fof_group_IDs():
@@ -67,7 +67,7 @@ def test_igraph_functionality():
     if igraph_available is True:
 
         fof_group.create_graph()
-        assert isinstance(fof_group.g,igraph.Graph)
+        assert isinstance(fof_group.g, igraph.Graph)
 
         degree = fof_group.get_degree()
         assert len(degree) == N

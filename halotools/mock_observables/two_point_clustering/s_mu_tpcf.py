@@ -221,7 +221,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         #this is arbitrarily set, but must remain consistent!
         NR = N1
 
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,
+    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
 
@@ -232,23 +232,23 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     #return results.  remember to reverse the final result because we used sin(theta_los)
     #bins instead of the user passed in mu = cos(theta_los).
     if _sample1_is_sample2:
-        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)[:,::-1]
+        xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
         return xi_11
     else:
         if (do_auto is True) & (do_cross is True):
-            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)[:,::-1]
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)[:,::-1]
-            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)[:,::-1]
+            xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
+            xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11, xi_12, xi_22
         elif (do_cross is True):
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)[:,::-1]
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
             return xi_12
         elif (do_auto is True):
-            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)[:,::-1]
-            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)[:,::-1]
+            xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)[:, ::-1]
+            xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11
 
-def spherical_sector_volume(s,mu):
+def spherical_sector_volume(s, mu):
     """
     This function is used to calculate analytical randoms.
 
@@ -258,7 +258,7 @@ def spherical_sector_volume(s,mu):
     Note that the extra *2 is to get the reflection.
     """
     theta = np.arcsin(mu)
-    vol = (2.0*np.pi/3.0) * np.outer((s**3.0),(1.0-np.cos(theta)))*2.0
+    vol = (2.0*np.pi/3.0) * np.outer((s**3.0), (1.0-np.cos(theta)))*2.0
     return vol
 
 def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
@@ -283,14 +283,14 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
                              num_threads=num_threads,
                              approx_cell1_size=approx_cellran_size,
                              approx_cell2_size=approx_cellran_size)
-            RR = np.diff(np.diff(RR,axis=0),axis=1)
+            RR = np.diff(np.diff(RR, axis=0), axis=1)
         else: RR=None
         if do_DR is True:
             D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
                               num_threads=num_threads,
                               approx_cell1_size=approx_cell1_size,
                               approx_cell2_size=approx_cellran_size)
-            D1R = np.diff(np.diff(D1R,axis=0),axis=1)
+            D1R = np.diff(np.diff(D1R, axis=0), axis=1)
         else: D1R=None
         if _sample1_is_sample2: #calculating the cross-correlation
             D2R = None
@@ -300,7 +300,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
                                   num_threads=num_threads,
                                   approx_cell1_size=approx_cell2_size,
                                   approx_cell2_size=approx_cellran_size)
-                D2R = np.diff(np.diff(D2R,axis=0),axis=1)
+                D2R = np.diff(np.diff(D2R, axis=0), axis=1)
             else: D2R=None
 
         return D1R, D2R, RR
@@ -311,7 +311,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
         NR = len(sample1)
 
         #do volume calculations
-        dv = spherical_sector_volume(s_bins,mu_bins)
+        dv = spherical_sector_volume(s_bins, mu_bins)
         dv = np.diff(dv, axis=1) #volume of wedges
         dv = np.diff(dv, axis=0) #volume of wedge 'pieces'
         global_volume = period.prod()
@@ -344,7 +344,7 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
             num_threads=num_threads,
             approx_cell1_size=approx_cell1_size,
             approx_cell2_size=approx_cell1_size)
-        D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
+        D1D1 = np.diff(np.diff(D1D1, axis=0), axis=1)
     else:
         D1D1=None
         D2D2=None
@@ -358,14 +358,14 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
-            D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+            D1D2 = np.diff(np.diff(D1D2, axis=0), axis=1)
         else: D1D2=None
         if do_auto is True:
             D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
-            D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+            D2D2 = np.diff(np.diff(D2D2, axis=0), axis=1)
         else: D2D2=None
 
     return D1D1, D1D2, D2D2

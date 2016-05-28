@@ -29,7 +29,7 @@ def test_large_scale_density_spherical_annulus_exception_handling():
 
     with pytest.raises(HalotoolsError) as err:
         result = large_scale_density_spherical_annulus(
-            sample, tracers, inner_radius, outer_radius, period=[1,1])
+            sample, tracers, inner_radius, outer_radius, period=[1, 1])
     substr = "Input ``period`` must either be a float or length-3 sequence"
     assert substr in err.value.args[0]
 
@@ -70,7 +70,7 @@ def test_large_scale_density_spherical_annulus2():
     inner_radius, outer_radius = 0.1, 0.2
     result = large_scale_density_spherical_annulus(
         sample, tracers, inner_radius, outer_radius,
-        period=[1,1,1], norm_by_mean_density=True)
+        period=[1, 1, 1], norm_by_mean_density=True)
 
     environment_volume = (4/3.)*np.pi*(outer_radius**3 - inner_radius**3)
     mean_density = float(npts2)

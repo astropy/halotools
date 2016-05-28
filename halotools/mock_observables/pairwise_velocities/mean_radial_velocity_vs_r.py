@@ -158,7 +158,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
 
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
@@ -217,7 +217,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
 
     #count the sum of radial velocities and number of pairs
     weight_func_id = 11
-    V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 =\
+    V1V1, V1V2, V2V2, N1N1, N1N2, N2N2 =\
         marked_pair_counts(sample1, sample2, rbins, period,
             num_threads, do_auto, do_cross,
             marks1, marks2, weight_func_id,

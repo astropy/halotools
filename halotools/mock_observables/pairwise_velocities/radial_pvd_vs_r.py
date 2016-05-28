@@ -20,7 +20,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     velocities2=None, period=None, do_auto=True, do_cross=True,
     num_threads=1, max_sample_size=int(1e6),
-    approx_cell1_size=None,approx_cell2_size=None):
+    approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the pairwise velocity dispersion (PVD), :math:`\\sigma_{12}(r)`.
 
@@ -132,19 +132,19 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     rbins = _process_radial_bins(rbins, period, PBCs)
 
     #calculate velocity difference scale
-    std_v1 = np.sqrt(np.std(velocities1[0,:]))
-    std_v2 = np.sqrt(np.std(velocities2[0,:]))
+    std_v1 = np.sqrt(np.std(velocities1[0, :]))
+    std_v2 = np.sqrt(np.std(velocities2[0, :]))
 
     #build the marks.
-    shift1 = np.repeat(std_v1,len(sample1))
-    shift2 = np.repeat(std_v2,len(sample2))
+    shift1 = np.repeat(std_v1, len(sample1))
+    shift2 = np.repeat(std_v2, len(sample2))
     marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
     marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
 
 
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
-        weight_func_id, _sample1_is_sample2, approx_cell1_size,approx_cell2_size):
+        weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
         """
         Count velocity weighted data pairs.
         """
@@ -208,7 +208,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
 
     weight_func_id = 12
-    V1V1,V1V2,V2V2, S1S1, S1S2, S2S2, N1N1,N1N2,N2N2 = marked_pair_counts(
+    V1V1, V1V2, V2V2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2 = marked_pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross,
         marks1, marks2, weight_func_id,
@@ -225,21 +225,21 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
 
     #return results
     if _sample1_is_sample2:
-        sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
+        sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
         return np.where(np.isfinite(sigma_11), sigma_11, 0.)
     else:
         if (do_auto is True) & (do_cross is True):
-            sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-            sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
-            sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
+            sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
+            sigma_12 = _shifted_std(N1N2, V1V2, S1S2)
+            sigma_22 = _shifted_std(N2N2, V2V2, S2S2)
             return (np.where(np.isfinite(sigma_11), sigma_11, 0.),
             np.where(np.isfinite(sigma_12), sigma_12, 0.),
             np.where(np.isfinite(sigma_22), sigma_22, 0.))
         elif (do_cross is True):
-            sigma_12 = _shifted_std(N1N2,V1V2,S1S2)
+            sigma_12 = _shifted_std(N1N2, V1V2, S1S2)
             return np.where(np.isfinite(sigma_12), sigma_12, 0.)
         elif (do_auto is True):
-            sigma_11 = _shifted_std(N1N1,V1V1,S1S1)
-            sigma_22 = _shifted_std(N2N2,V2V2,S2S2)
+            sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
+            sigma_22 = _shifted_std(N2N2, V2V2, S2S2)
             return (np.where(np.isfinite(sigma_11), sigma_11, 0.),
                 np.where(np.isfinite(sigma_22), sigma_22, 0.))

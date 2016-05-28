@@ -157,7 +157,7 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     N_max = mean_rho*vol*u
 
     num_underdense_spheres = np.array(
-        [sum(result[:,i] <= N_max[i]) for i in range(len(N_max))])
+        [sum(result[:, i] <= N_max[i]) for i in range(len(N_max))])
     return num_underdense_spheres/n_ran
 
 

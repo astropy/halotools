@@ -47,8 +47,8 @@ def test_pairwise_distance_3d_periodic_mesh_grid_1():
     assert np.all(m.diagonal()==0.0)
 
     #off diagonal should all be 0.1
-    i,j = m.nonzero()
-    assert np.allclose(np.asarray(m.todense()[i,j]),0.1)
+    i, j = m.nonzero()
+    assert np.allclose(np.asarray(m.todense()[i, j]), 0.1)
 
 
 def test_pairwise_distance_3d_nonperiodic_mesh_grid_1():
@@ -74,8 +74,8 @@ def test_pairwise_distance_3d_nonperiodic_mesh_grid_1():
     assert np.all(m.diagonal()==0.0)
 
     #off diagonal should all be 0.1
-    i,j = m.nonzero()
-    assert np.allclose(np.asarray(m.todense()[i,j]),0.1)
+    i, j = m.nonzero()
+    assert np.allclose(np.asarray(m.todense()[i, j]), 0.1)
 
 
 def test_pairwise_distance_3d_nonperiodic_random_1():
@@ -84,7 +84,7 @@ def test_pairwise_distance_3d_nonperiodic_random_1():
     """
     #random points
     Npts = 10
-    random_sample = np.random.random((Npts,3))
+    random_sample = np.random.random((Npts, 3))
     period = 1.0
 
     rmax=10.0

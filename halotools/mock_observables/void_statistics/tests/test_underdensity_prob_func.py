@@ -20,11 +20,11 @@ def test_upf1():
 
     Npts = 100
     Lbox = 1
-    period = np.array([Lbox,Lbox,Lbox])
+    period = np.array([Lbox, Lbox, Lbox])
     sample1 = np.random.random((Npts, 3))
     n_ran = 100
 
-    rbins = np.logspace(-2,-1,20)
+    rbins = np.logspace(-2, -1, 20)
     upf = underdensity_prob_func(sample1, rbins,
         n_ran=n_ran, period=period)
 
@@ -40,12 +40,12 @@ def test_upf2():
 
     Npts = 1000
     Lbox = 1
-    period = np.array([Lbox,Lbox,Lbox])
+    period = np.array([Lbox, Lbox, Lbox])
     sample1 = np.random.random((Npts, 3))
     random_sphere_centers = np.random.random((Npts, 3))
 
 
-    rbins = np.logspace(-1.5,-1,5)
+    rbins = np.logspace(-1.5, -1, 5)
     upf = underdensity_prob_func(sample1, rbins,
         random_sphere_centers=random_sphere_centers, period=period, u=0.5)
     upf2 = underdensity_prob_func(sample1, rbins,
@@ -62,7 +62,7 @@ def test_upf3():
 
     Npts = 1000
     Lbox = 1
-    period = np.array([Lbox,Lbox,Lbox])
+    period = np.array([Lbox, Lbox, Lbox])
     sample1 = np.random.random((Npts, 3))
     random_sphere_centers = np.random.random((Npts, 3))
 
@@ -85,10 +85,10 @@ def test_upf4():
 
     Npts = 1000
     Lbox = 1
-    period = np.array([Lbox,Lbox,Lbox])
+    period = np.array([Lbox, Lbox, Lbox])
     sample1 = generate_locus_of_3d_points(Npts)
     n_ran = 1000
 
-    rbins = np.logspace(-1.5,-1,5)
+    rbins = np.logspace(-1.5, -1, 5)
     upf = underdensity_prob_func(sample1, rbins, n_ran=n_ran, period=period)
     vpf = void_prob_func(sample1, rbins, n_ran=n_ran, period=period)

@@ -170,17 +170,17 @@ def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
     if num_threads is not 1:
         if num_threads=='max':
             num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
+        if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
 
     # Passively enforce that we are working with ndarrays
-    x1 = sample1[:,0]
-    y1 = sample1[:,1]
-    z1 = sample1[:,2]
-    x2 = sample2[:,0]
-    y2 = sample2[:,1]
-    z2 = sample2[:,2]
+    x1 = sample1[:, 0]
+    y1 = sample1[:, 1]
+    z1 = sample1[:, 2]
+    x2 = sample2[:, 0]
+    y2 = sample2[:, 1]
+    z2 = sample2[:, 2]
 
     rp_bins = np.atleast_1d(rp_bins).astype('f8')
     try:

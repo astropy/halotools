@@ -396,7 +396,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func5():
     sample1 = np.zeros((1, 3)) + 0.2
     sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros((len(sample2), 2))
-    stellar_mass2[:,0] = 2e10
+    stellar_mass2[:, 0] = 2e10
 
     # First verify that unconditioned spherical isolation behaves properly for this sample
     r_max = 0.05
@@ -413,72 +413,72 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func5():
 
     r_max = 0.05
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 1e10
-    stellar_mass1[:,1] = 1
+    stellar_mass1[:, 0] = 1e10
+    stellar_mass1[:, 1] = 1
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
 
     r_max = 0.2
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 1e10
-    stellar_mass1[:,1] = 1
-    iso = conditional_spherical_isolation(sample1, sample2,
-        r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
-    assert np.all(iso == True)
-
-    r_max = 0.05
-    stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 1e10
-    stellar_mass1[:,1] = 2e10
-    iso = conditional_spherical_isolation(sample1, sample2,
-        r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
-    assert np.all(iso == True)
-
-    r_max = 0.2
-    stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 1e10
-    stellar_mass1[:,1] = 2e10
+    stellar_mass1[:, 0] = 1e10
+    stellar_mass1[:, 1] = 1
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
 
     r_max = 0.05
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 3e10
-    stellar_mass1[:,1] = 2
+    stellar_mass1[:, 0] = 1e10
+    stellar_mass1[:, 1] = 2e10
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
 
     r_max = 0.2
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 3e10
-    stellar_mass1[:,1] = 2
+    stellar_mass1[:, 0] = 1e10
+    stellar_mass1[:, 1] = 2e10
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
-    assert np.all(iso == False)
+    assert np.all(iso == True)
 
-    r_max = 0.2
+    r_max = 0.05
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 2e10
-    stellar_mass1[:,1] = 0.
+    stellar_mass1[:, 0] = 3e10
+    stellar_mass1[:, 1] = 2
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
 
     r_max = 0.2
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 3e10
-    stellar_mass1[:,1] = 0
+    stellar_mass1[:, 0] = 3e10
+    stellar_mass1[:, 1] = 2
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == False)
 
     r_max = 0.2
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 3e10
-    stellar_mass1[:,1] = 3e10
+    stellar_mass1[:, 0] = 2e10
+    stellar_mass1[:, 1] = 0.
+    iso = conditional_spherical_isolation(sample1, sample2,
+        r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
+    assert np.all(iso == True)
+
+    r_max = 0.2
+    stellar_mass1 = np.zeros((len(sample1), 2))
+    stellar_mass1[:, 0] = 3e10
+    stellar_mass1[:, 1] = 0
+    iso = conditional_spherical_isolation(sample1, sample2,
+        r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
+    assert np.all(iso == False)
+
+    r_max = 0.2
+    stellar_mass1 = np.zeros((len(sample1), 2))
+    stellar_mass1[:, 0] = 3e10
+    stellar_mass1[:, 1] = 3e10
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
@@ -497,22 +497,22 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func6():
     sample1 = np.zeros((1, 3)) + 0.2
     sample2 = generate_3d_regular_mesh(5) # grid-coords = 0.1, 0.3, 0.5, 0.7, 0.9
     stellar_mass2 = np.zeros((len(sample2), 2))
-    stellar_mass2[:,0] = 2e10
+    stellar_mass2[:, 0] = 2e10
 
     cond_func = 6
 
     r_max = 0.2
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 3e10
-    stellar_mass1[:,1] = 2
+    stellar_mass1[:, 0] = 3e10
+    stellar_mass1[:, 1] = 2
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
 
     r_max = 0.2
     stellar_mass1 = np.zeros((len(sample1), 2))
-    stellar_mass1[:,0] = 1e10
-    stellar_mass1[:,1] = 2
+    stellar_mass1[:, 0] = 1e10
+    stellar_mass1[:, 1] = 2
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == False)

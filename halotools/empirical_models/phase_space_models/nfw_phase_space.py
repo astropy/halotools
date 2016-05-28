@@ -180,8 +180,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         vy = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
         vz = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
 
-        t = Table({'x':x, 'y':y, 'z':z,
-            'vx':vx, 'vy':vy, 'vz':vz,
+        t = Table({'x': x, 'y': y, 'z': z,
+            'vx': vx, 'vy': vy, 'vz': vz,
             'radial_position': r, 'radial_velocity': vrad})
 
         return t

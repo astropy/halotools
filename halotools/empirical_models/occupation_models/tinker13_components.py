@@ -570,7 +570,7 @@ class Tinker13ActiveSats(OccupationComponent):
 
         # The _mock_generation_calling_sequence determines which methods
         # will be called during mock population, as well as in what order they will be called
-        self._mock_generation_calling_sequence = ['mc_occupation','mc_sfr_designation']
+        self._mock_generation_calling_sequence = ['mc_occupation', 'mc_sfr_designation']
         self._galprop_dtypes_to_allocate = np.dtype([
             ('halo_num_'+ self.gal_type, 'i4'),
             (self.sfr_designation_key, object),

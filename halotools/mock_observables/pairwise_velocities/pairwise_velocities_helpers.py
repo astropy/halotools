@@ -12,7 +12,7 @@ from multiprocessing import cpu_count
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['_pairwise_velocity_stats_process_args','_process_radial_bins','_process_rp_bins']
+__all__ = ['_pairwise_velocity_stats_process_args', '_process_radial_bins', '_process_rp_bins']
 __author__ = ['Duncan Campbell']
 
 def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
@@ -48,7 +48,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
         if (len(sample1) > max_sample_size):
-            inds = np.arange(0,len(sample1))
+            inds = np.arange(0, len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
@@ -56,14 +56,14 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
             print('\n downsampling `sample1`...')
     else:
         if len(sample1) > max_sample_size:
-            inds = np.arange(0,len(sample1))
+            inds = np.arange(0, len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             velocities1 = velocities1[inds]
             print('\n downsampling `sample1`...')
         if len(sample2) > max_sample_size:
-            inds = np.arange(0,len(sample2))
+            inds = np.arange(0, len(sample2))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]
@@ -100,7 +100,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
            do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
-def _process_radial_bins(rbins,period, PBCs):
+def _process_radial_bins(rbins, period, PBCs):
     """
     process radial bin parameter
     """
@@ -129,7 +129,7 @@ def _process_radial_bins(rbins,period, PBCs):
 
     return rbins
 
-def _process_rp_bins(rp_bins,pi_max,period,PBCs):
+def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     """
     process projected radial bin and pi_max parameters
     """

@@ -17,7 +17,7 @@ try:
 except ImportError:
     igraph_available=False
 if igraph_available is True: #there is another package called igraph--need to distinguish.
-    if not hasattr(igraph,'Graph'):
+    if not hasattr(igraph, 'Graph'):
         igraph_available is False
 no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
     "See http://igraph.org/ and note that there are two packages called 'igraph'.")
@@ -132,7 +132,7 @@ class FoFGroups(object):
 
         self.b_perp = float(b_perp) #perpendicular linking length
         self.b_para = float(b_para) #parallel linking length
-        self.positions=np.asarray(positions,dtype=np.float64) #coordinates of galaxies
+        self.positions=np.asarray(positions, dtype=np.float64) #coordinates of galaxies
 
         #process Lbox parameter
         if (Lbox is None) & (period is None):
@@ -151,7 +151,7 @@ class FoFGroups(object):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
 
         self.period = period #simulation box periodic boundary conditions
-        self.Lbox = np.asarray(Lbox,dtype='float64') #simulation box periodic boundary conditions
+        self.Lbox = np.asarray(Lbox, dtype='float64') #simulation box periodic boundary conditions
 
         #calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)
@@ -161,7 +161,7 @@ class FoFGroups(object):
 
         self.m_perp, self.m_para = pairwise_distance_xy_z(
             self.positions, self.positions, self.d_perp, self.d_para,
-            period=self.period,num_threads=num_threads)
+            period=self.period, num_threads=num_threads)
 
         self.m = self.m_perp.multiply(self.m_perp)+self.m_para.multiply(self.m_para)
         self.m = self.m.sqrt()
@@ -180,9 +180,9 @@ class FoFGroups(object):
             array of group IDs for each galaxy
 
         """
-        if getattr(self,'_group_ids',None) is None:
+        if getattr(self, '_group_ids', None) is None:
             self._n_groups, self._group_ids = csgraph.connected_components(
-                self.m_perp, directed=False,return_labels=True)
+                self.m_perp, directed=False, return_labels=True)
         return self._group_ids
 
     @property
@@ -196,9 +196,9 @@ class FoFGroups(object):
             number of distinct groups
 
         """
-        if getattr(self,'_n_groups',None) is None:
+        if getattr(self, '_n_groups', None) is None:
             self._n_groups = csgraph.connected_components(self.m_perp,
-                directed=False,return_labels=False)
+                directed=False, return_labels=False)
         return self._n_groups
 
     def create_graph(self):
@@ -320,14 +320,14 @@ def _scipy_to_igraph(matrix, coords, directed=False):
     sources, targets = matrix.nonzero()
     weights = matrix[sources, targets].tolist()[0]
 
-    x = coords[:,0]
-    y = coords[:,1]
-    z = coords[:,2]
+    x = coords[:, 0]
+    y = coords[:, 1]
+    z = coords[:, 2]
     if igraph_available:
         g = igraph.Graph(list(zip(sources, targets)),
             n=matrix.shape[0], directed=directed,
             edge_attrs={'weight': weights},
-            vertex_attrs={'x':x, 'y':y, 'z':z})
+            vertex_attrs={'x': x, 'y': y, 'z': z})
         return g
     else:
         raise HalotoolsError(no_igraph_msg)

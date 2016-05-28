@@ -41,7 +41,7 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     Analytical counts are N**2*dv*rho, where dv is the volume of the spherical
     shells, which is the correct volume to use for a continious cubical volume with PBCs.
     """
-    def nball_volume(R,k=3):
+    def nball_volume(R, k=3):
         """
         Calculate the volume of a n-shpere.
         This is used for the analytical randoms.
@@ -348,7 +348,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
             NR = N1
 
     #count data pairs
-    D1D1,D1D2,D2D2 = _pair_counts(sample1, sample2, rbins, period,
+    D1D1, D1D2, D2D2 = _pair_counts(sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
 
@@ -377,20 +377,20 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
 
     #run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
-        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
         return xi_11
     else:
         if (do_auto is True) & (do_cross is True):
-            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_12, xi_22
         elif (do_cross is True):
-            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return xi_12
         elif (do_auto is True):
-            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
             return xi_11, xi_22
 
 

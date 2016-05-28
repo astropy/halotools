@@ -197,16 +197,16 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     if period is None:
         x1in, y1in, z1in, x2in, y2in, z2in, period = (
             _enclose_in_box(
-                sample1[:,0], sample1[:,2], sample1[:,2],
-                sample2[:,0], sample2[:,2], sample2[:,2],
-                min_size=[max_rbins_absolute*3.0,max_rbins_absolute*3.0,max_rbins_absolute*3.0]))
+                sample1[:, 0], sample1[:, 2], sample1[:, 2],
+                sample2[:, 0], sample2[:, 2], sample2[:, 2],
+                min_size=[max_rbins_absolute*3.0, max_rbins_absolute*3.0, max_rbins_absolute*3.0]))
     else:
-        x1in = sample1[:,0]
-        y1in = sample1[:,1]
-        z1in = sample1[:,2]
-        x2in = sample2[:,0]
-        y2in = sample2[:,1]
-        z2in = sample2[:,2]
+        x1in = sample1[:, 0]
+        y1in = sample1[:, 1]
+        z1in = sample1[:, 2]
+        x2in = sample2[:, 0]
+        y2in = sample2[:, 1]
+        z2in = sample2[:, 2]
     xperiod, yperiod, zperiod = period
     enforce_maximum_search_length_3d(rbins_normalized, normalize_rbins_by, period)
 

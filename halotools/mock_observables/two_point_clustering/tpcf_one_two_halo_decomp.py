@@ -216,14 +216,14 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
 
     #calculate 1-halo pairs
     weight_func_id=3
-    one_halo_D1D1,one_halo_D1D2, one_halo_D2D2 = marked_pair_counts(
+    one_halo_D1D1, one_halo_D1D2, one_halo_D2D2 = marked_pair_counts(
         sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
             sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
 
     #calculate 2-halo pairs
     weight_func_id=4
-    two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 = marked_pair_counts(
+    two_halo_D1D1, two_halo_D1D2, two_halo_D2D2 = marked_pair_counts(
         sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
             sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
@@ -231,7 +231,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
                                  PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-                                 approx_cell1_size,approx_cell2_size,approx_cellran_size)
+                                 approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
     #check to see if any of the random counts contain 0 pairs.
     if D1R is not None:
@@ -252,32 +252,32 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
 
     #run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
-        one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-        two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+        two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
         return one_halo_xi_11, two_halo_xi_11
     else:
         if (do_auto is True) & (do_cross is True):
-            one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            one_halo_xi_12 = _TP_estimator(one_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            one_halo_xi_22 = _TP_estimator(one_halo_D2D2,D2R,RR,N2,N2,NR,NR,estimator)
-            two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            two_halo_xi_12 = _TP_estimator(two_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            two_halo_xi_22 = _TP_estimator(two_halo_D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            one_halo_xi_12 = _TP_estimator(one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            one_halo_xi_22 = _TP_estimator(one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
+            two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_12,\
                    two_halo_xi_12, one_halo_xi_22, two_halo_xi_22
         elif (do_cross is True):
-            one_halo_xi_12 = _TP_estimator(one_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            two_halo_xi_12 = _TP_estimator(two_halo_D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            one_halo_xi_12 = _TP_estimator(one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return one_halo_xi_12, two_halo_xi_12
         elif (do_auto is True):
-            one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            one_halo_xi_22 = _TP_estimator(one_halo_D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
-            two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            two_halo_xi_22 = _TP_estimator(two_halo_D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
+            one_halo_xi_22 = _TP_estimator(one_halo_D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
+            two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
+            two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_22, two_halo_xi_22
 
 
-def nball_volume(R,k=3):
+def nball_volume(R, k=3):
     """
     Calculate the volume of a n-shpere.
     This is used for the analytical randoms.
@@ -360,8 +360,8 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     """
 
     #add ones to weights, so returned value is return 1.0*1.0
-    marks1 = np.vstack((marks1,np.ones(len(marks1)))).T
-    marks2 = np.vstack((marks2,np.ones(len(marks2)))).T
+    marks1 = np.vstack((marks1, np.ones(len(marks1)))).T
+    marks2 = np.vstack((marks2, np.ones(len(marks2)))).T
 
     if do_auto is True:
         D1D1 = marked_npairs_3d(sample1, sample1, rbins,
@@ -396,8 +396,8 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
     sample2, sample2_host_halo_id, randoms,
-    period, do_auto, do_cross, estimator,num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size,approx_cellran_size):
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+    approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf_one_two_halo_decomp`.

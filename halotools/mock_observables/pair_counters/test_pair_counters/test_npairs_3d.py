@@ -51,7 +51,7 @@ def test_rectangular_mesh_pairs_tight_locus3():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins, num_threads='max')
     assert np.all(counts == correct_result)
@@ -66,7 +66,7 @@ def test_rectangular_mesh_pairs_tight_locus4():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins, num_threads=1)
     assert np.all(counts == correct_result)
@@ -81,7 +81,7 @@ def test_rectangular_mesh_pairs_tight_locus5():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins, period=1.)
     assert np.all(counts == correct_result)
@@ -96,7 +96,7 @@ def test_rectangular_mesh_pairs_tight_locus6():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins, approx_cell1_size=[0.1, 0.1, 0.1])
     assert np.all(counts == correct_result)
@@ -111,7 +111,7 @@ def test_rectangular_mesh_pairs_tight_locus7():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins,
         approx_cell1_size=[0.1, 0.1, 0.1],
@@ -128,7 +128,7 @@ def test_rectangular_mesh_pairs_tight_locus8():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins,
         approx_cell1_size=0.1, approx_cell2_size=0.1, period=1)
@@ -144,7 +144,7 @@ def test_rectangular_mesh_pairs_tight_locus9():
     points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
     points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
     rbins = np.array([0.1, 0.2, 0.3])
-    correct_result = np.array([0, npts1*npts2,npts1*npts2])
+    correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
     counts = npairs_3d(points1, points2, rbins,
         approx_cell1_size=[0.2, 0.2, 0.2],
@@ -200,7 +200,7 @@ def test_npairs_brute_force_periodic():
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
     period = np.array([1.0, 1.0, 1.0])
-    rbins = np.array([0.001,0.1,0.2,0.3])
+    rbins = np.array([0.001, 0.1, 0.2, 0.3])
 
     result = npairs_3d(random_sample, random_sample, rbins, period=period)
 
@@ -220,7 +220,7 @@ def test_npairs_brute_force_nonperiodic():
 
     Npts = 1000
     random_sample = np.random.random((Npts, 3))
-    rbins = np.array([0.001,0.1,0.2,0.3])
+    rbins = np.array([0.001, 0.1, 0.2, 0.3])
 
     result = npairs_3d(random_sample, random_sample, rbins, period=None)
 

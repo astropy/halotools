@@ -151,11 +151,11 @@ def pairwise_distance_3d(data1, data2, rmax, period=None,
 
     #unpack the results
     for i in range(len(result)):
-        d = np.append(d,result[i][0])
-        i_inds = np.append(i_inds,result[i][1])
-        j_inds = np.append(j_inds,result[i][2])
+        d = np.append(d, result[i][0])
+        i_inds = np.append(i_inds, result[i][1])
+        j_inds = np.append(j_inds, result[i][2])
 
-    return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1),len(data2)))
+    return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1), len(data2)))
 
 
 def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
@@ -166,17 +166,17 @@ def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
     if num_threads is not 1:
         if num_threads=='max':
             num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
+        if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
 
     # Passively enforce that we are working with ndarrays
-    x1 = data1[:,0]
-    y1 = data1[:,1]
-    z1 = data1[:,2]
-    x2 = data2[:,0]
-    y2 = data2[:,1]
-    z2 = data2[:,2]
+    x1 = data1[:, 0]
+    y1 = data1[:, 1]
+    z1 = data1[:, 2]
+    x2 = data2[:, 0]
+    y2 = data2[:, 1]
+    z2 = data2[:, 2]
 
     rmax = float(rmax)
 
@@ -185,7 +185,7 @@ def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2,
-                min_size=[rmax*3.0,rmax*3.0,rmax*3.0]))
+                min_size=[rmax*3.0, rmax*3.0, rmax*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)

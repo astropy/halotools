@@ -279,7 +279,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
     def _build_param_dict(self):
 
         self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abscissa))]
-        self.param_dict = {key:value for key, value in zip(self._ordinates_keys, self._ordinates)}
+        self.param_dict = {key: value for key, value in zip(self._ordinates_keys, self._ordinates)}
 
     def _mean_galprop_fraction(self, **kwargs):
         """

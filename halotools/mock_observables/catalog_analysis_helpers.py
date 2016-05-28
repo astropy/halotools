@@ -77,7 +77,7 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
             "``error_on_mean`` or ``variance``\n")
         raise HalotoolsError(msg)
 
-    modified_kwargs = {key:kwargs[key] for key in kwargs if key != 'error_estimator'}
+    modified_kwargs = {key: kwargs[key] for key in kwargs if key != 'error_estimator'}
     result = binned_statistic(x, y, statistic='mean', **modified_kwargs)
     mean, bin_edges, binnumber = result
     bin_midpoints = (bin_edges[1:] + bin_edges[:-1])/2.
@@ -285,6 +285,6 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     #take care of the case where a point falls on the boundary
     for i in range(3):
         index[:, i] = np.where(index[:, i] == Nsub[i], Nsub[i] - 1, index[:, i])
-    index = inds[index[:,0],index[:,1],index[:,2]].astype(int)
+    index = inds[index[:, 0], index[:, 1], index[:, 2]].astype(int)
 
     return index, int(N_sub_vol)

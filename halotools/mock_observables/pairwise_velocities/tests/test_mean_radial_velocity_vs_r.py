@@ -33,12 +33,12 @@ def pure_python_mean_radial_velocity_vs_r(
     running_tally = []
     for i in range(npts1):
         for j in range(npts2):
-            dx = sample1[i,0] - sample2[j,0]
-            dy = sample1[i,1] - sample2[j,1]
-            dz = sample1[i,2] - sample2[j,2]
-            dvx = velocities1[i,0] - velocities2[j,0]
-            dvy = velocities1[i,1] - velocities2[j,1]
-            dvz = velocities1[i,2] - velocities2[j,2]
+            dx = sample1[i, 0] - sample2[j, 0]
+            dy = sample1[i, 1] - sample2[j, 1]
+            dz = sample1[i, 2] - sample2[j, 2]
+            dvx = velocities1[i, 0] - velocities2[j, 0]
+            dvy = velocities1[i, 1] - velocities2[j, 1]
+            dvz = velocities1[i, 2] - velocities2[j, 2]
 
             xsign_flip, ysign_flip, zsign_flip = 1, 1, 1
             if dx > xperiod/2.:
@@ -146,8 +146,8 @@ def test_pure_python():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,0] = 50.
-    velocities2[:,0] = 25.
+    velocities1[:, 0] = 50.
+    velocities2[:, 0] = 25.
 
     rbins = np.array([0, 0.05, 0.3])
 
@@ -201,7 +201,7 @@ def test_mean_radial_velocity_vs_r_correctness1():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,2] = 50.
+    velocities1[:, 2] = 50.
 
     rbins = np.array([0, 0.1, 0.3])
 
@@ -263,7 +263,7 @@ def test_mean_radial_velocity_vs_r_correctness2():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,2] = 50.
+    velocities1[:, 2] = 50.
 
     rbins = np.array([0, 0.1, 0.3])
 
@@ -340,8 +340,8 @@ def test_mean_radial_velocity_vs_r_correctness3():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,0] = 50.
-    velocities2[:,0] = 25.
+    velocities1[:, 0] = 50.
+    velocities2[:, 0] = 25.
 
     rbins = np.array([0, 0.05, 0.3])
 
@@ -416,9 +416,9 @@ def test_mean_radial_velocity_vs_r_correctness4():
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,1] = -50.
+    velocities1[:, 1] = -50.
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2[:,1] = 25.
+    velocities2[:, 1] = 25.
 
     rbins = np.array([0, 0.05, 0.3])
 
@@ -492,8 +492,8 @@ def test_mean_radial_velocity_vs_r_correctness5():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,:] = 50.
-    velocities2[:,:] = -50.
+    velocities1[:, :] = 50.
+    velocities2[:, :] = -50.
 
     rbins = np.array([0, 0.1, 0.3])
 
@@ -546,8 +546,8 @@ def test_mean_radial_velocity_vs_r_parallel1():
 
     velocities1 = np.zeros(npts*3).reshape(npts, 3)
     velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:,:] = 50.
-    velocities2[:,:] = 0.
+    velocities1[:, :] = 50.
+    velocities2[:, :] = 0.
 
     rbins = np.array([0, 0.1, 0.3])
 
@@ -637,8 +637,8 @@ def test_mean_radial_velocity_vs_r_auto_consistency():
         sample2=sample2, velocities2=velocities2,
         do_cross=False)
 
-    assert np.allclose(s1s1a,s1s1b, rtol=0.001)
-    assert np.allclose(s2s2a,s2s2b, rtol=0.001)
+    assert np.allclose(s1s1a, s1s1b, rtol=0.001)
+    assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
 
 @pytest.mark.slow
@@ -662,4 +662,4 @@ def test_mean_radial_velocity_vs_r_cross_consistency():
         sample2=sample2, velocities2=velocities2,
         do_auto=False)
 
-    assert np.allclose(s1s2a,s1s2b, rtol=0.001)
+    assert np.allclose(s1s2a, s1s2b, rtol=0.001)

@@ -97,7 +97,7 @@ class HaloTableCache(object):
         result = []
         for entry in log_table:
             constructor_kwargs = (
-                {key:entry[key] for key in HaloTableCacheLogEntry.log_attributes})
+                {key: entry[key] for key in HaloTableCacheLogEntry.log_attributes})
             result.append(HaloTableCacheLogEntry(**constructor_kwargs))
         return result
 
