@@ -8,6 +8,7 @@ SOURCES = ("distances.pyx", "pairwise_distances.pyx",
     "pairwise_distance_3d_engine.pyx", "pairwise_distance_xy_z_engine.pyx")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
+
 def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace('.pyx', '') for src in SOURCES]

@@ -35,6 +35,8 @@ prim_haloprop_key = 'halo_mvir'
 sec_haloprop_key = 'halo_nfw_conc'
 
 halo_mass_definition = 'vir'
+
+
 def get_halo_boundary_key(mdef):
     """ For the input mass definition,
     return the string used to access halo table column
@@ -55,6 +57,8 @@ def get_halo_boundary_key(mdef):
     radius_key : str
     """
     return 'halo_r'+mdef
+
+
 def get_halo_mass_key(mdef):
     """ For the input mass definition,
     return the string used to access halo table column

@@ -13,6 +13,7 @@ from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
 
+
 def convert_to_ndarray(x, dt=None):
     """ Method checks to see in the input array x is an ndarray
     or an Astropy Table. If not, returns an array version of x.
@@ -97,7 +98,6 @@ def convert_to_ndarray(x, dt=None):
                     return x.astype(dt)
 
 
-
 def custom_len(x):
     """ Simple method to return a zero-valued 1-D numpy array
     with the length of the input x.
@@ -134,6 +134,7 @@ def custom_len(x):
         array_length = 1
 
     return array_length
+
 
 def find_idx_nearest_val(array, value):
     """ Method returns the index where the input array is closest
@@ -209,6 +210,7 @@ def randomly_downsample_data(array, num_downsample):
         randomizer = np.random.random(input_array_length)
         idx_sorted = np.argsort(randomizer)
         return array[idx_sorted[0:num_downsample]]
+
 
 def array_is_monotonic(array, strict=False):
     """

@@ -13,6 +13,7 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
 __all__ = ['leauthaud11_model_dictionary']
 
+
 def leauthaud11_model_dictionary(threshold=model_defaults.default_stellar_mass_threshold,
     **kwargs):
     """
@@ -95,7 +96,6 @@ def leauthaud11_model_dictionary(threshold=model_defaults.default_stellar_mass_t
     satellites_occupation = leauthaud11_components.Leauthaud11Sats(threshold=threshold, **kwargs)
     # Build the profile model
     satellites_profile = NFWPhaseSpace(**kwargs)
-
 
     return ({'centrals_occupation': centrals_occupation,
         'centrals_profile': centrals_profile,

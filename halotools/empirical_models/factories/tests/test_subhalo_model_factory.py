@@ -19,6 +19,7 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestSubhaloModelFactory']
 
+
 class TestSubhaloModelFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`.
     """
@@ -27,7 +28,6 @@ class TestSubhaloModelFactory(TestCase):
         """ Pre-load various arrays into memory for use by all tests.
         """
         pass
-
 
     def test_behroozi10_dictionary(self):
         """

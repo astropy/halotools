@@ -20,6 +20,7 @@ __all__ = ('test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',
 
 fixed_seed = 43
 
+
 @slow
 def test_tpcf_auto():
     """
@@ -75,6 +76,7 @@ def test_tpcf_cross():
                   approx_cell1_size=[rmax, rmax, rmax])
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
+
 @slow
 def test_tpcf_estimators():
     """
@@ -113,12 +115,12 @@ def test_tpcf_estimators():
                     approx_cell1_size=[rmax, rmax, rmax],
                     approx_cellran_size=[rmax, rmax, rmax])
 
-
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_3)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_4)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_5)==3, "wrong number of correlation functions returned erroneously."
+
 
 @slow
 def test_tpcf_sample_size_limit():
@@ -138,6 +140,7 @@ def test_tpcf_sample_size_limit():
                     approx_cell1_size=[rmax, rmax, rmax])
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
+
 
 @slow
 def test_tpcf_randoms():
@@ -185,6 +188,7 @@ def test_tpcf_randoms():
     assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_3)==3, "wrong number of correlation functions returned erroneously."
 
+
 @slow
 def test_tpcf_period_API():
     """
@@ -218,7 +222,6 @@ def test_tpcf_period_API():
              approx_cell1_size=[rmax, rmax, rmax])
     substr = "All values must bounded positive numbers."
     assert substr in err.value.args[0]
-
 
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
@@ -370,7 +373,6 @@ def test_RR_precomputed_natural_estimator_auto():
         approx_cell1_size=approx_cell1_size,
         approx_cellran_size=approx_cellran_size)
 
-
     # The following quantities are computed inside the
     # tpcf namespace. We reproduce them here because they are
     # necessary inputs to the _random_counts and _pair_counts
@@ -451,7 +453,6 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
         approx_cell1_size=approx_cell1_size,
         approx_cellran_size=approx_cellran_size)
 
-
     # The following quantities are computed inside the
     # tpcf namespace. We reproduce them here because they are
     # necessary inputs to the _random_counts and _pair_counts
@@ -480,7 +481,6 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     ND2 = len(sample2)
     NR1 = len(randoms)
     NR2 = len(randoms)
-
 
     factor1 = ND1*ND2/(NR1*NR2)
     factor2 = ND1*NR2/(NR1*NR2)
@@ -517,6 +517,7 @@ def test_tpcf_raises_warning_for_large_samples():
         normal_result = tpcf(sample1, rbins, period=period,
             max_sample_size=int(1e2))
 
+
 def test_tpcf_raises_exception_for_non_monotonic_rbins():
     sample1 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
@@ -527,6 +528,7 @@ def test_tpcf_raises_exception_for_non_monotonic_rbins():
     substr = "Input separation bins must be a monotonically increasing"
     assert substr in err.value.args[0]
 
+
 def test_tpcf_raises_exception_for_large_search_length():
     sample1 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
@@ -536,6 +538,7 @@ def test_tpcf_raises_exception_for_large_search_length():
         normal_result = tpcf(sample1, rbins, period=period)
     substr = "search length cannot exceed period/3 in any dimension."
     assert substr in err.value.args[0]
+
 
 def test_tpcf_raises_exception_for_incompatible_data_shapes():
     sample1 = np.random.random((1000, 3))
@@ -548,6 +551,7 @@ def test_tpcf_raises_exception_for_incompatible_data_shapes():
     substr = "Input sample of points must be a Numpy ndarray of shape (Npts, 3)."
     assert substr in err.value.args[0]
 
+
 def test_tpcf_raises_exception_for_bad_do_auto_instructions():
     sample1 = np.random.random((1000, 3))
     sample2 = np.random.random((1000, 3))
@@ -559,6 +563,7 @@ def test_tpcf_raises_exception_for_bad_do_auto_instructions():
             do_auto='Jose Canseco')
     substr = "`do_auto` and `do_cross` keywords must be boolean-valued."
     assert substr in err.value.args[0]
+
 
 def test_tpcf_raises_exception_for_unavailable_estimator():
     sample1 = np.random.random((1000, 3))

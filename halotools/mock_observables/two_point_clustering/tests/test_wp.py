@@ -17,6 +17,7 @@ pi_max = 0.3
 
 fixed_seed = 43
 
+
 def test_wp_auto_nonperiodic():
     """
     test wp autocorrelation without periodic boundary conditions
@@ -33,6 +34,7 @@ def test_wp_auto_nonperiodic():
     print(result)
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
+
 def test_wp_auto_periodic():
     """
     test wp autocorrelation with periodic boundary conditions
@@ -45,8 +47,8 @@ def test_wp_auto_periodic():
                 randoms=None, period=period,
                 max_sample_size=int(1e4), estimator='Natural')
 
-
     assert result.ndim == 1, "More than one correlation function returned erroneously."
+
 
 def test_wp_cross_periodic():
     """
@@ -65,6 +67,7 @@ def test_wp_cross_periodic():
     assert result[0].ndim == 1, "dimension of auto incorrect"
     assert result[1].ndim == 1, "dimension of cross incorrect"
     assert result[2].ndim == 1, "dimension auto incorrect"
+
 
 def test_wp_cross_nonperiodic():
     """

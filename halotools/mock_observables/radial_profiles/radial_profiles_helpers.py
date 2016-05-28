@@ -7,6 +7,7 @@ import numpy as np
 
 __all__ = ('bounds_check_sample2_quantity', )
 
+
 def bounds_check_sample2_quantity(sample2, sample2_quantity):
     """ Function enforces that input ``sample2_quantity`` has the appropriate shape.
     """
@@ -20,6 +21,7 @@ def bounds_check_sample2_quantity(sample2, sample2_quantity):
             "but input ``sample2`` has %i elements.\n" % (npts_quantity2, npts2))
         raise ValueError(msg)
     return sample2_quantity
+
 
 def get_normalized_rbins(rbins_absolute, rbins_normalized, normalize_rbins_by, sample1):
     """ Function processes the various options for the input rbins arguments and returns
@@ -74,6 +76,7 @@ def get_normalized_rbins(rbins_absolute, rbins_normalized, normalize_rbins_by, s
         raise ValueError(msg)
 
     return rbins_normalized, normalize_rbins_by
+
 
 def enforce_maximum_search_length_3d(rbins_normalized, normalize_rbins_by, period):
     """ Require that the input rbins does not result in an attempt to count pairs

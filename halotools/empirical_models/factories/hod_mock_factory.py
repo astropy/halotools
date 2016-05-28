@@ -33,6 +33,7 @@ missing_halo_upid_msg = ("All HOD-style models populate host halos with mock gal
     "with halo_upid = -1 for host halos and !=-1 for subhalos.\n"
     "The halo catalog you passed to the HodMockFactory does not have the ``halo_upid`` column.\n")
 
+
 class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a
     population of mock galaxies based on an HOD-style model

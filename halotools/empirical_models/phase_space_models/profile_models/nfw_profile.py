@@ -28,6 +28,7 @@ __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 
 __all__ = ['NFWProfile']
 
+
 class NFWProfile(AnalyticDensityProf, ConcMass):
     """ Model for the spatial distribution of mass
     and/or galaxies residing in an NFW halo profile,

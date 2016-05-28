@@ -13,6 +13,7 @@ from ...tests.cf_helpers import generate_3d_regular_mesh
 
 __all__ = ('test_rectangular_mesh_pairs_tight_locus_xy1', )
 
+
 def test_rectangular_mesh_pairs_tight_locus_xy1():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
     the correct counts for two tight loci of points.
@@ -28,6 +29,7 @@ def test_rectangular_mesh_pairs_tight_locus_xy1():
 
     result = npairs_projected(data1, data2, rp_bins, pi_max, period=1)
     assert np.all(result == [0, npts1*npts2, npts1*npts2])
+
 
 def test_rectangular_mesh_pairs_tight_locus_z1():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
@@ -49,6 +51,7 @@ def test_rectangular_mesh_pairs_tight_locus_z1():
     result = npairs_projected(data1, data2, rp_bins, pi_max, period=1)
     assert np.all(result == [npts1*npts2, npts1*npts2, npts1*npts2])
 
+
 def test_rectangular_mesh_pairs_tight_locus_xy2():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
     the correct counts for two tight loci of points.
@@ -67,6 +70,7 @@ def test_rectangular_mesh_pairs_tight_locus_xy2():
 
     result = npairs_projected(data1, data2, rp_bins, pi_max)
     assert np.all(result == [0, 0, 0])
+
 
 def test_rectangular_mesh_pairs_tight_locus_z2():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
@@ -95,6 +99,7 @@ def test_rectangular_mesh_pairs_tight_locus_z2():
     pi_max = 0.05
     result = npairs_projected(data1, data2, rp_bins, pi_max)
     assert np.all(result == [0, 0, 0])
+
 
 def test_rectangular_mesh_pairs_tight_locus_cell1_sizes():
     """ Verify that the pair counters return the correct results
@@ -164,6 +169,7 @@ def test_rectangular_mesh_pairs_tight_locus_cell2_sizes():
         approx_cell2_size=[0.1, 0.2, 0.3])
     assert np.all(result5 == [0, npts1*npts2, npts1*npts2])
 
+
 def test_rectangular_mesh_pairs_tight_locus_cell1_cell2_sizes():
     """ Verify that the pair counters return the correct results
     when operating on a tight locus of points.
@@ -209,6 +215,7 @@ def test_rectangular_mesh_pairs_tight_locus_cell1_cell2_sizes():
         approx_cell1_size=[0.1, 0.2, 0.3], approx_cell2_size=[0.23, 0.32, 0.11])
     assert np.all(result3 == [0, npts1*npts2, npts1*npts2])
 
+
 def test_rectangular_mesh_pairs1():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
     the correct counts for two regularly spaced grids of points in the limit
@@ -231,6 +238,7 @@ def test_rectangular_mesh_pairs1():
     assert np.all(result ==
         [npts_per_dim**3, 5*npts_per_dim**3, 9*npts_per_dim**3, 9*npts_per_dim**3])
 
+
 def test_rectangular_mesh_pairs2():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
     the correct counts for two regularly spaced grids of points in the limit
@@ -252,6 +260,7 @@ def test_rectangular_mesh_pairs2():
         period=Lbox, approx_cell1_size=0.1)
     assert np.all(result ==
         [3*npts_per_dim**3, 15*npts_per_dim**3, 27*npts_per_dim**3, 27*npts_per_dim**3])
+
 
 def test_parallel():
     """ Verify that `halotools.mock_observables.npairs_projected` returns
@@ -303,6 +312,7 @@ def test_npairs_projected_brute_force_periodic():
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(test_result[:, 1]==result), msg
 
+
 def test_npairs_projected_brute_force_non_periodic():
     """
     Function tests npairs with periodic boundary conditions.
@@ -325,6 +335,7 @@ def test_npairs_projected_brute_force_non_periodic():
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(test_result[:, 1]==result), msg
 
+
 def test_sensible_num_threads():
     npts1, npts2 = 100, 100
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
@@ -339,6 +350,7 @@ def test_sensible_num_threads():
     substr = "Input ``num_threads`` argument must be an integer or the string 'max'"
     assert substr in err.value.args[0]
 
+
 def test_sensible_rp_bins():
     npts1, npts2 = 100, 100
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
@@ -351,6 +363,7 @@ def test_sensible_rp_bins():
         result = npairs_projected(data1, data2, rp_bins, pi_max, period=1)
     substr = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries"
     assert substr in err.value.args[0]
+
 
 def test_sensible_period():
     npts1, npts2 = 100, 100

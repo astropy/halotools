@@ -30,6 +30,7 @@ else:
 
 __all__ = ['TestHaloCatNFWConsistency']
 
+
 class TestHaloCatNFWConsistency(TestCase):
     """ Tests of `~halotools.empirical_models.NFWProfile` in which comparisons are made to a Bolshoi halo catalog.
 
@@ -56,7 +57,6 @@ class TestHaloCatNFWConsistency(TestCase):
         self.nfw_profile = NFWProfile(cosmology=halocat.cosmology,
             redshift=0., mdef='vir')
 
-
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
     def test_conc_nfw_consistency(self):
@@ -75,7 +75,6 @@ class TestHaloCatNFWConsistency(TestCase):
                 table=halos[mask])
 
             assert np.allclose(carr[mask], predicted_conc, rtol=0.001)
-
 
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')

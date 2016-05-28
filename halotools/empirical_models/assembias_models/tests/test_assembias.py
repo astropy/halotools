@@ -16,6 +16,7 @@ from ....sim_manager import FakeSim
 __all__ = ('TestAssembias', )
 __author__ = ('Andrew Hearin', )
 
+
 class TestAssembias(TestCase):
     """
     """

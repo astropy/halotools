@@ -46,6 +46,7 @@ grid_indices = np.ravel_multi_index([ixx, iyy, izz],
     [grid_jackknife_ncells, grid_jackknife_ncells, grid_jackknife_ncells])
 grid_indices += 1
 
+
 def test_npairs_jackknife_3d_periodic():
     """
     test npairs_jackknife_3d with periodic boundary conditions.
@@ -75,9 +76,9 @@ def test_npairs_jackknife_3d_periodic():
         jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
         num_threads=num_threads)
 
-
     for icell in range(1, grid_jackknife_ncells**3-1):
         assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
+
 
 def test_npairs_jackknife_3d_nonperiodic():
     """

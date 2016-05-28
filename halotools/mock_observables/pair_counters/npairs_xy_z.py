@@ -16,6 +16,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_
 
 __all__ = ('npairs_xy_z', )
 
+
 def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
     verbose=False, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):
@@ -162,6 +163,7 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         counts = engine(cell1_tuples[0])
 
     return np.array(counts)
+
 
 def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
     verbose, num_threads, approx_cell1_size, approx_cell2_size):

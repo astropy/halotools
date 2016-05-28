@@ -98,5 +98,4 @@ def smhm_binary_sfr_model_dictionary(
 
     model_dictionary = {'stellar_mass': sm_model, 'quiescent': sfr_model}
 
-
     return model_dictionary

@@ -21,6 +21,7 @@ else:
 
 __all__ = ('TestTinker13', )
 
+
 class TestTinker13(TestCase):
 
     def test_tinker13_default(self):

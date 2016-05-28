@@ -7,6 +7,7 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ('_get_r_max', '_set_isolation_approx_cell_sizes')
 
+
 def _get_r_max(sample1, r_max):
     """ Helper function process the input ``r_max`` value and returns
     the appropriate array after requiring the input is the appropriate
@@ -32,6 +33,7 @@ def _get_r_max(sample1, r_max):
         raise ValueError(msg)
 
     return r_max
+
 
 def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size,
     xsearch_length, ysearch_length, zsearch_length):
@@ -66,6 +68,7 @@ def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size,
         raise ValueError(msg)
 
     return approx_cell1_size, approx_cell2_size
+
 
 def _func_signature_int_from_cond_func(cond_func):
     """
@@ -103,6 +106,7 @@ def _func_signature_int_from_cond_func(cond_func):
         "or `~halotools.mock_observables.conditional_spherical_isolation` for a list of available options.\n")
         raise HalotoolsError(msg % cond_func)
 
+
 def reshape_input_marks(marks, npts_sample, correct_num_marks, cond_func):
     """
     """
@@ -133,6 +137,7 @@ def reshape_input_marks(marks, npts_sample, correct_num_marks, cond_func):
         raise ValueError(msg % (cond_func, correct_num_marks, num_input_marks_per_point))
 
     return marks
+
 
 def _conditional_isolation_process_marks(sample1, sample2, marks1, marks2, cond_func):
     """

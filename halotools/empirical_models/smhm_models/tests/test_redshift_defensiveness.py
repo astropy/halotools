@@ -7,6 +7,7 @@ from ...smhm_models import Behroozi10SmHm
 from ....sim_manager import sim_defaults
 from ....custom_exceptions import HalotoolsError
 
+
 def test_behroozi10_redshift_safety():
     """
     """

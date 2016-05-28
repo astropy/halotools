@@ -24,11 +24,13 @@ __author__ = ['Andrew Hearin']
 
 __all__ = ['TrivialProfile']
 
+
 class TrivialProfile(AnalyticDensityProf):
     """ Profile of dark matter halos with
     all their mass concentrated at exactly the halo center.
 
     """
+
     def __init__(self,
         cosmology=sim_defaults.default_cosmology,
         redshift=sim_defaults.default_redshift,
@@ -61,7 +63,6 @@ class TrivialProfile(AnalyticDensityProf):
         """
 
         super(TrivialProfile, self).__init__(cosmology, redshift, mdef)
-
 
     def dimensionless_mass_density(self, scaled_radius, total_mass):
         """

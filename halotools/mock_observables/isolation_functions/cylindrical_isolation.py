@@ -24,6 +24,7 @@ __author__ = ['Andrew Hearin', 'Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
+
 def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
@@ -198,6 +199,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     is_isolated = np.array(counts, dtype=bool)
 
     return is_isolated
+
 
 def _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period,
     num_threads, approx_cell1_size, approx_cell2_size):

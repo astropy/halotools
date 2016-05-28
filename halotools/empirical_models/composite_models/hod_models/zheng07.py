@@ -87,7 +87,6 @@ def zheng07_model_dictionary(
     # Build the profile model
     satellites_profile = NFWPhaseSpace(redshift=redshift, **kwargs)
 
-
     return ({'centrals_occupation': centrals_occupation,
         'centrals_profile': centrals_profile,
         'satellites_occupation': satellites_occupation,

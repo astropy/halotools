@@ -101,7 +101,6 @@ class HaloTableCache(object):
             result.append(HaloTableCacheLogEntry(**constructor_kwargs))
         return result
 
-
     def _log_table_from_log(self, log):
         log_table = self._get_empty_log_table(len(log))
         for ii, entry in enumerate(log):
@@ -264,7 +263,6 @@ class HaloTableCache(object):
                     "`raise_non_existence_exception` to False.\n")
                 raise HalotoolsError(msg)
 
-
         if delete_corresponding_halo_catalog is True:
             try:
                 os.remove(fname)
@@ -283,7 +281,6 @@ class HaloTableCache(object):
                     "has not been deleted from your disk because you set "
                     "``delete_corresponding_halo_catalog`` to False.\n")
         print(msg)
-
 
     def determine_log_entry_from_fname(self, fname, overwrite_fname_metadata=False):
         """ Method tries to construct a `~halotools.sim_manager.HaloTableCacheLogEntry`

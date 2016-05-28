@@ -230,6 +230,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
             xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
             return xi_11
 
+
 def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size):
@@ -261,11 +262,13 @@ def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
 
     return D1D1, D1D2, D2D2
 
+
 def cylinder_volume(R, h):
     """
     Calculate the volume of a cylinder(s), used for the analytical randoms.
     """
     return pi*np.outer(R**2.0, h)
+
 
 def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
         PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,

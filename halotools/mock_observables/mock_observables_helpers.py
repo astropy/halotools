@@ -15,6 +15,7 @@ num_available_cores = multiprocessing.cpu_count()
 __all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period',
     'enforce_sample_has_correct_shape', 'get_separation_bins_array')
 
+
 def enforce_sample_respects_pbcs(x, y, z, period):
     """ Verify that the input sample is properly bounded in all dimensions by the input period.
 
@@ -55,6 +56,7 @@ def enforce_sample_respects_pbcs(x, y, z, period):
             "of the input data that exceed this value")
         raise ValueError(msg % period[2])
 
+
 def get_num_threads(input_num_threads, enforce_max_cores=False):
     """ Helper function requires that ``input_num_threads`` either be an
     integer or the string ``max``. If ``input_num_threads`` exceeds the
@@ -84,6 +86,7 @@ def get_num_threads(input_num_threads, enforce_max_cores=False):
 
     return num_threads
 
+
 def get_period(period):
     """ Helper function used to process the input ``period`` argument.
     If ``period`` is set to None, function returns period, PBCs = (None, False).
@@ -108,6 +111,7 @@ def get_period(period):
             raise ValueError(msg)
 
     return period, PBCs
+
 
 def enforce_sample_has_correct_shape(sample):
     """ Function inspects the input ``sample`` and enforces that it is of shape (Npts, 3).
@@ -148,6 +152,7 @@ def get_separation_bins_array(separation_bins):
         raise TypeError(msg)
 
     return separation_bins
+
 
 def get_line_of_sight_bins_array(pi_bins):
     """ Function verifies that the input ``pi_bins`` is a monotonically increasing

@@ -19,7 +19,6 @@ __author__ = ('Andrew Hearin', )
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-
 def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_radius,
     period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
     norm_by_mean_density=False):

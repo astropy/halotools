@@ -16,6 +16,7 @@ __all__ = ('test_spherical_isolation1', 'test_spherical_isolation2',
 
 fixed_seed = 43
 
+
 def test_spherical_isolation1():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
     returns all points as isolated for two distant localizations of points.
@@ -29,6 +30,7 @@ def test_spherical_isolation1():
     iso = spherical_isolation(sample1, sample2, r_max)
     assert np.all(iso == True)
 
+
 def test_spherical_isolation2():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
     returns no points as isolated when a subset of ``sample2`` lies within ``sample1``
@@ -40,6 +42,7 @@ def test_spherical_isolation2():
     r_max = 0.3
     iso = spherical_isolation(sample1, sample2, r_max)
     assert np.all(iso == False)
+
 
 def test_spherical_isolation3():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
@@ -57,6 +60,7 @@ def test_spherical_isolation3():
 
     assert np.all(iso[:100] == False)
     assert np.all(iso[100:] == True)
+
 
 def test_spherical_isolation4():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
@@ -125,6 +129,7 @@ def test_spherical_isolation_grid2():
     r_max = 0.2
     iso = spherical_isolation(sample1, sample2, r_max)
     assert np.all(iso == False)
+
 
 def test_shifted_randoms():
     """ Begin with a set of randomly distributed points in the unit box.

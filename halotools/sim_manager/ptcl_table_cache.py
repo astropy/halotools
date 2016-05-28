@@ -168,7 +168,6 @@ class PtclTableCache(object):
                                     raise_non_existence_exception=True,
                                     update_ascii=True,
                                     delete_corresponding_ptcl_catalog=False):
-
         """
         If the log stores an entry matching the input metadata, the entry
         will be deleted and the ascii file storing the log will be
@@ -249,7 +248,6 @@ class PtclTableCache(object):
                     "you must call this method again setting "
                     "`raise_non_existence_exception` to False.\n")
                 raise HalotoolsError(msg)
-
 
     def determine_log_entry_from_fname(self, fname, overwrite_fname_metadata=False):
         """ Method tries to construct a `~halotools.sim_manager.PtclTableCacheLogEntry`

@@ -95,7 +95,6 @@ def compute_conditional_percentiles(**kwargs):
                 "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
             raise HalotoolsError(msg)
 
-
     def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
         """
         Parameters
@@ -185,8 +184,6 @@ def compute_conditional_percentiles(**kwargs):
         output[indices_of_prim_haloprop_bin] = percentiles
 
     return output
-
-
 
 
 class SampleSelector(object):
@@ -359,7 +356,6 @@ class SampleSelector(object):
             raise ValueError("The input percentiles spacing is too fine.\n"
                 "For example, there are no table elements in the percentile range (%.2f, %.2f)" %
                   (percentiles[idx_too_few], percentiles[idx_too_few+1]))
-
 
         result = np.zeros(len(indices)-1, dtype=object)
         for i, first_idx, last_idx in zip(list(range(len(result))), indices[:-1], indices[1:]):

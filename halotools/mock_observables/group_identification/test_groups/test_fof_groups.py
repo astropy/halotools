@@ -28,6 +28,7 @@ fixed_seed = 43
 with NumpyRNGContext(fixed_seed):
     sample = np.random.random((N, 3))
 
+
 @pytest.mark.slow
 def test_fof_groups_init():
     """
@@ -38,6 +39,7 @@ def test_fof_groups_init():
 
     assert isinstance(fof_group.m_perp, coo_matrix)
     assert isinstance(fof_group.m_para, coo_matrix)
+
 
 @pytest.mark.slow
 def test_fof_group_IDs():

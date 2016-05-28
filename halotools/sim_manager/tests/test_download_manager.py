@@ -31,7 +31,6 @@ __all__ = ('TestDownloadManager', )
 
 class TestDownloadManager(TestCase):
 
-
     def setUp(self):
 
         homedir = _find_home()
@@ -170,7 +169,6 @@ class TestDownloadManager(TestCase):
             halo_finder='bdm')
         assert file_list != []
 
-
     @remote_data
     def test_ptcl_tables_available_for_download2(self):
         """ Test that there is exactly one ptcl_table available for Bolshoi.
@@ -187,13 +185,11 @@ class TestDownloadManager(TestCase):
         x = self.downman._ptcl_tables_available_for_download(simname='multidark')
         assert len(x) == 1
 
-
     def test_get_scale_factor_substring(self):
         """
         """
         f = self.downman._get_scale_factor_substring('hlist_0.50648.particles.hdf5')
         assert f == '0.50648'
-
 
     def test_closest_fname(self):
         """
@@ -219,7 +215,6 @@ class TestDownloadManager(TestCase):
             self.downman.download_processed_halo_table(simname=simname,
                 halo_finder=halo_finder, redshift=redshift,
                 overwrite=False, download_dirname=self.halocat_dir)
-
 
     def test_orig_halo_table_web_location(self):
         """ Test will fail unless the web locations are held fixed
@@ -325,7 +320,6 @@ class TestDownloadManager(TestCase):
         substr = "no web locations"
         assert substr in err.value.args[0]
 
-
     @remote_data
     def test_download_processed_halo_table2(self):
         """
@@ -395,7 +389,6 @@ class TestDownloadManager(TestCase):
                 overwrite=False, download_dirname=self.halocat_dir)
         substr = "The closest redshift for these catalogs is"
         assert substr in err.value.args[0]
-
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data

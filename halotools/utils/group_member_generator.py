@@ -9,6 +9,7 @@ from .array_utils import array_is_monotonic
 
 __all__ = ('group_member_generator', )
 
+
 def group_member_generator(data, grouping_key, requested_columns):
     """
     Generator used to loop over grouped data and yield
@@ -149,7 +150,6 @@ def group_member_generator(data, grouping_key, requested_columns):
             msg = ("\nEach element of the input ``requested_columns`` must be \n"
                 "an existing column name of the input ``data``.\n")
         raise KeyError(msg)
-
 
     group_id_array = np.copy(data[grouping_key])
     try:

@@ -21,6 +21,7 @@ from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_str
 from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import HalotoolsError
 
+
 def _infer_redshift_from_input_fname(fname):
     """ Method extracts the portion of the Rockstar hlist fname
     that contains the scale factor of the snapshot, and returns a
@@ -445,7 +446,6 @@ class RockstarHlistReader(TabularAsciiReader):
                         "or choose a different ``version_name`` for your catalog.\n")
                     raise HalotoolsError(msg)
 
-
     def _enforce_halo_catalog_formatting_requirements(self):
         """ Private method enforces the halo_table formatting conventions of the package.
         """
@@ -713,7 +713,6 @@ class RockstarHlistReader(TabularAsciiReader):
             f.attrs.create(attrname, cut_value)
 
         f.close()
-
 
     def update_cache_log(self):
         """ Method updates the cache log with the new catalog,

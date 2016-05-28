@@ -12,6 +12,7 @@ __all__ = ('test_find_idx_nearest_val',
     'test_convert_to_ndarray11', 'test_convert_to_ndarray12',
     'test_convert_to_ndarray13')
 
+
 def test_find_idx_nearest_val():
 
     # Create an array of randomly sorted integers
@@ -58,6 +59,7 @@ def test_find_idx_nearest_val():
     assert np.all(result >= 10)
     assert np.all(result <= 11)
 
+
 def test_convert_to_ndarray1():
     """
     """
@@ -76,6 +78,7 @@ def test_convert_to_ndarray2():
     assert len(xarr) == 1
     assert xarr[0] == 0
 
+
 def test_convert_to_ndarray3():
     """
     """
@@ -84,6 +87,7 @@ def test_convert_to_ndarray3():
     assert type(yarr) == np.ndarray
     assert len(yarr) == 1
     assert y[0] == 0
+
 
 def test_convert_to_ndarray4():
     """
@@ -94,6 +98,7 @@ def test_convert_to_ndarray4():
     assert len(yarr) == 1
     assert y[0] == 0
 
+
 def test_convert_to_ndarray5():
     """
     """
@@ -102,6 +107,7 @@ def test_convert_to_ndarray5():
     assert type(zarr) == np.ndarray
     assert len(zarr) == 1
     assert zarr[0] is None
+
 
 def test_convert_to_ndarray6():
     """
@@ -112,6 +118,7 @@ def test_convert_to_ndarray6():
     assert len(tarr) == 1
     assert tarr[0] == 1
 
+
 def test_convert_to_ndarray7():
     """
     """
@@ -120,6 +127,7 @@ def test_convert_to_ndarray7():
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
     assert tarr[0] == 1
+
 
 def test_convert_to_ndarray8():
     """
@@ -130,6 +138,7 @@ def test_convert_to_ndarray8():
     assert len(uarr) == 1
     assert uarr[0] == 1
 
+
 def test_convert_to_ndarray9():
     """
     """
@@ -138,6 +147,7 @@ def test_convert_to_ndarray9():
     assert type(uarr) == np.ndarray
     assert len(uarr) == 1
     assert uarr[0] == 1
+
 
 def test_convert_to_ndarray10():
     """
@@ -148,6 +158,7 @@ def test_convert_to_ndarray10():
     assert len(varr) == 1
     assert str(varr[0]) == str('abc')
 
+
 def test_convert_to_ndarray11():
     """
     """
@@ -156,6 +167,7 @@ def test_convert_to_ndarray11():
     assert type(varr) == np.ndarray
     assert len(varr) == 1
     assert str(varr[0]) == str('abc')
+
 
 def test_convert_to_ndarray12():
     """
@@ -166,6 +178,7 @@ def test_convert_to_ndarray12():
     assert len(varr) == 1
     assert str(varr[0]) == str('abc')
 
+
 def test_convert_to_ndarray13():
     """
     """
@@ -175,11 +188,13 @@ def test_convert_to_ndarray13():
     assert len(varr) == 1
     assert str(varr[0]) == str('abc')
 
+
 def test_convert_to_ndarray14():
     """
     """
     v = []
     varr = array_utils.convert_to_ndarray(v)
+
 
 def test_convert_to_ndarray15():
     """

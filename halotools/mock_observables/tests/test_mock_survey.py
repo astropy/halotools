@@ -16,6 +16,7 @@ x = np.random.random((N, 3))
 v = np.random.random((N, 3))*0.1
 period = np.array([1.0, 1.0, 1.0])
 
+
 @pytest.mark.slow
 def test_distant_observer():
     """

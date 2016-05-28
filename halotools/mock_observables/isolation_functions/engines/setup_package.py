@@ -7,6 +7,7 @@ SOURCES = ("spherical_isolation_engine.pyx", "cylindrical_isolation_engine.pyx",
     "isolation_criteria_marking_functions.pyx")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
+
 def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace('.pyx', '') for src in SOURCES]

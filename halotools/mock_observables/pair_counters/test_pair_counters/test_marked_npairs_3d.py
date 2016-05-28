@@ -18,6 +18,7 @@ error_msg = ("\nThe `test_marked_npairs_wfuncs_behavior` function performs \n"
 
 __all__ = ('test_marked_npairs_3d_periodic', )
 
+
 def retrieve_mock_data(Npts, Npts2, Lbox):
 
     #set up a regular grid of points to test pair counters
@@ -35,6 +36,7 @@ def retrieve_mock_data(Npts, Npts2, Lbox):
     period = np.array([Lbox, Lbox, Lbox])
 
     return grid_points, rbins, period
+
 
 def test_marked_npairs_3d_periodic():
     """
@@ -54,6 +56,7 @@ def test_marked_npairs_3d_periodic():
         period=period, weights1=ran_weights1, weights2=ran_weights1)
 
     assert np.allclose(test_result, result, rtol=1e-09), "pair counts are incorrect"
+
 
 def test_marked_npairs_parallelization():
     """
@@ -81,6 +84,7 @@ def test_marked_npairs_parallelization():
     assert np.allclose(serial_result, parallel_result2, rtol=1e-09), "pair counts are incorrect"
     assert np.allclose(serial_result, parallel_result7, rtol=1e-09), "pair counts are incorrect"
 
+
 def test_marked_npairs_nonperiodic():
     """
     Function tests marked_npairs with without periodic boundary conditions.
@@ -100,6 +104,7 @@ def test_marked_npairs_nonperiodic():
         rbins, period=None, weights1=ran_weights1, weights2=ran_weights1)
 
     assert np.allclose(test_result, result, rtol=1e-09), "pair counts are incorrect"
+
 
 @slow
 def test_marked_npairs_3d_wfuncs_signatures():
@@ -136,6 +141,7 @@ def test_marked_npairs_3d_wfuncs_signatures():
             result = marked_npairs_3d(random_sample, random_sample, rbins, period=period,
                 weights1=weights, weights2=weights, weight_func_id=wfunc_index)
 
+
 @slow
 def test_marked_npairs_behavior_weight_func_id1():
     """
@@ -156,6 +162,7 @@ def test_marked_npairs_behavior_weight_func_id1():
     weights1=weights, weights2=weights, weight_func_id=1, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 9.*test_result), error_msg
 
+
 @slow
 def test_marked_npairs_behavior_weight_func_id2():
     """
@@ -175,6 +182,7 @@ def test_marked_npairs_behavior_weight_func_id2():
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
     weights1=weights, weights2=weights, weight_func_id=2, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 6.*test_result), error_msg
+
 
 @slow
 def test_marked_npairs_behavior_weight_func_id3():
@@ -204,6 +212,7 @@ def test_marked_npairs_behavior_weight_func_id3():
     weights1=weights, weights2=weights, weight_func_id=3, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 4.*test_result), error_msg
 
+
 @slow
 def test_marked_npairs_behavior_weight_func_id4():
     """
@@ -226,6 +235,7 @@ def test_marked_npairs_behavior_weight_func_id4():
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
     weights1=weights, weights2=weights, weight_func_id=4, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
+
 
 @slow
 def test_marked_npairs_behavior_weight_func_id5():
@@ -250,6 +260,7 @@ def test_marked_npairs_behavior_weight_func_id5():
     weights1=weights, weights2=weights, weight_func_id=5, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
 
+
 @slow
 def test_marked_npairs_behavior_weight_func_id6():
     """
@@ -272,6 +283,7 @@ def test_marked_npairs_behavior_weight_func_id6():
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
     weights1=weights, weights2=weights, weight_func_id=6, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 0), error_msg
+
 
 @slow
 def test_marked_npairs_behavior_weight_func_id7():
@@ -296,6 +308,7 @@ def test_marked_npairs_behavior_weight_func_id7():
     weights1=weights, weights2=weights, weight_func_id=7, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == -test_result), error_msg
 
+
 @slow
 def test_marked_npairs_behavior_weight_func_id8():
     """
@@ -319,6 +332,7 @@ def test_marked_npairs_behavior_weight_func_id8():
     weights1=weights, weights2=weights, weight_func_id=8, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 3*test_result), error_msg
 
+
 @slow
 def test_marked_npairs_behavior_weight_func_id9():
     """
@@ -341,6 +355,7 @@ def test_marked_npairs_behavior_weight_func_id9():
     result = marked_npairs_3d(grid_points, grid_points, rbins, period=period,
     weights1=weights, weights2=weights, weight_func_id=9, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == 3*test_result), error_msg
+
 
 @slow
 def test_marked_npairs_behavior_weight_func_id10():

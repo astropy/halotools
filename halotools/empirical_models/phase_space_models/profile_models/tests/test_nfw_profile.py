@@ -20,6 +20,7 @@ __all__ = (
     'monte_carlo_density_outer_shell_normalization']
     )
 
+
 def analytic_nfw_density_outer_shell_normalization(radii, conc):
     """ Density of an NFW profile normalized by the density evaluated at the outermost value of the input ``radii`` array.
 
@@ -51,6 +52,7 @@ def analytic_nfw_density_outer_shell_normalization(radii, conc):
     denominator = radii*(1 + conc*radii)**2
     return numerator/denominator
 
+
 def monte_carlo_density_outer_shell_normalization(rbins, radial_positions):
     """ Density of a Monte Carlo realization of a spherically symmetric profile normalized by the density evaluated at the midpoint of the outermost bin of the input ``rbins`` array.
 
@@ -76,7 +78,6 @@ def monte_carlo_density_outer_shell_normalization(rbins, radial_positions):
     outer_radius = rbin_midpoints[-1]
     outer_counts = counts[-1]
     return rbin_midpoints, (counts/rbin_midpoints**2)/(outer_counts/outer_radius**2)
-
 
 
 class TestNFWProfile(TestCase):
@@ -126,7 +127,6 @@ class TestNFWProfile(TestCase):
                 model.dimensionless_mass_density(scaled_radius, conc)
                 )
             assert np.allclose(derived_result, result, rtol=1e-4)
-
 
     def test_cumulative_mass_PDF(self):
         """ Require the `~halotools.empirical_models.NFWProfile.cumulative_mass_PDF` method in all model variants to respect a number of consistency conditions.

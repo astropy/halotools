@@ -11,6 +11,7 @@ from ....sim_manager import FakeSim
 
 __all__ = ['test_Zheng07_composite']
 
+
 def test_Zheng07_composite():
     """ Method to test the basic behavior of
     `~halotools.empirical_models.Zheng07`,

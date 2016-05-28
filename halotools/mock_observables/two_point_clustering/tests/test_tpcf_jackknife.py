@@ -20,6 +20,7 @@ rmax = rbins.max()
 
 fixed_seed = 43
 
+
 @pytest.mark.slow
 def test_tpcf_jackknife_corr_func():
     """
@@ -37,6 +38,7 @@ def test_tpcf_jackknife_corr_func():
         randoms=randoms, period=period, num_threads=1)
 
     assert np.allclose(result_1, result_2, rtol=1e-09), "correlation functions do not match"
+
 
 @pytest.mark.slow
 def test_tpcf_jackknife_cov_matrix():

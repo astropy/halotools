@@ -34,6 +34,7 @@ def write_tabular_data(fname):
         f.write('102  300.  1e11  3999494331\n')
         f.write('103  400.  1e12  3999494332\n')
 
+
 class TestTabularAsciiReader(TestCase):
 
     def setUp(self):
@@ -223,7 +224,6 @@ class TestTabularAsciiReader(TestCase):
         assert np.any(arr['vmax'] < 101)
         assert np.any(arr['vmax'] > 399)
         assert np.any(arr['upid'] != -1)
-
 
     @pytest.mark.slow
     def test_read_dummy_halo_catalog6(self):

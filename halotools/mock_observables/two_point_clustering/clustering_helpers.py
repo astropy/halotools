@@ -24,6 +24,7 @@ tpcf_estimator_dd_dr_rr_requirements = ({
     'Landy-Szalay': (True, True, True)
     })
 
+
 def verify_tpcf_estimator(estimator):
     """ Require that the input ``estimator`` string is one of the available options.
 

@@ -15,6 +15,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_
 
 __all__ = ('npairs_3d', )
 
+
 def npairs_3d(sample1, sample2, rbins, period=None,
     verbose=False, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):
@@ -149,6 +150,7 @@ def npairs_3d(sample1, sample2, rbins, period=None,
         counts = engine(cell1_tuples[0])
 
     return np.array(counts)
+
 
 def _npairs_3d_process_args(sample1, sample2, rbins, period,
     verbose, num_threads, approx_cell1_size, approx_cell2_size):

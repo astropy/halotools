@@ -26,6 +26,7 @@ __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 
 __all__ = ['AnalyticDensityProf']
 
+
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
     """ Container class for any analytical radial profile model.
@@ -292,7 +293,6 @@ class AnalyticDensityProf(object):
 
         """
         return np.sqrt(self.cumulative_mass_PDF(scaled_radius, *prof_params)/scaled_radius)
-
 
     def virial_velocity(self, total_mass):
         """ The circular velocity evaluated at the halo boundary,

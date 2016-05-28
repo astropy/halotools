@@ -55,7 +55,6 @@ class TestBinaryGalpropInterpolModel(TestCase):
         np.testing.assert_allclose(mean_mcfrac135, frac135, rtol=1e-2, atol=1.e-2)
         np.testing.assert_allclose(mean_mcfrac15, frac15, rtol=1e-2, atol=1.e-2)
 
-
     def test_abscissa_check(self):
         with pytest.raises(HalotoolsError) as err:
             model = BinaryGalpropInterpolModel(galprop_name='late_type',
@@ -71,7 +70,6 @@ class TestBinaryGalpropInterpolModel(TestCase):
                 prim_haloprop_key='vpeak_host', gal_type='sats')
         substr = "All values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive."
         assert substr in err.value.args[0]
-
 
     def test_galprop_ordinates_consistency(self):
         with pytest.raises(HalotoolsError) as err:

@@ -8,6 +8,7 @@ import fnmatch
 from ..custom_exceptions import AmurricaError
 from . import usa
 
+
 def source_code_string_generator(fname):
     """ Yield each line of source code.
     Each line will be checked for all misspellings.
@@ -16,11 +17,13 @@ def source_code_string_generator(fname):
         for i, l in enumerate(f):
             yield i, l
 
+
 def filtered_filename_generator(filepat, top):
     for path, dirlist, filelist in os.walk(top):
         for name in fnmatch.filter(filelist, filepat):
             if 'usa.py' not in name:
                 yield os.path.join(path, name)
+
 
 def test_usa():
 

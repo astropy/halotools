@@ -15,6 +15,7 @@ __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 __all__ = ('_set_approximate_cell_sizes', '_cell1_parallelization_indices')
 
+
 def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
     """
     Build box which encloses all points, shifting the points so that
@@ -64,6 +65,7 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
 
     return x1, y1, z1, x2, y2, z2, Lbox
 
+
 def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
     """
     process the approximate cell size parameters.
@@ -97,6 +99,7 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
             raise ValueError(msg)
 
     return approx_cell1_size, approx_cell2_size
+
 
 def _cell1_parallelization_indices(ncells, num_threads):
     """ Return a list of tuples that will be passed to multiprocessing.pool.map

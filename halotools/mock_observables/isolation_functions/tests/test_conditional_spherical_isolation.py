@@ -26,6 +26,7 @@ __all__ = ('test_agreement_with_unconditioned_calculation',
 
 fixed_seed = 43
 
+
 def test_agreement_with_unconditioned_calculation():
     """ Verify that the `~halotools.mock_observables.spherical_isolation` function
     agrees exactly with the `~halotools.mock_observables.conditional_spherical_isolation` function
@@ -83,6 +84,7 @@ def test_conditional_spherical_isolation_cond_func1():
     assert np.all(marked_iso1a == False)
     assert np.all(marked_iso1b == True)
 
+
 def test_conditional_spherical_isolation_cond_func2():
     """ For cond_func = 2, and for a set of points that are spatially
     nearby each other when properly accounting for PBCs, verify that the
@@ -105,6 +107,7 @@ def test_conditional_spherical_isolation_cond_func2():
         marks2, marks1, cond_func, period=1)
     assert np.all(marked_iso2a == True)
     assert np.all(marked_iso2b == False)
+
 
 def test_conditional_spherical_isolation_cond_func3():
     """ For cond_func = 3, and for a set of points that are spatially
@@ -155,6 +158,7 @@ def test_conditional_spherical_isolation_cond_func4():
         marks1, marks1, cond_func, period=1)
     assert np.all(marked_iso4 == True)
 
+
 def test_conditional_spherical_isolation_cond_func5():
     """ For cond_func = 5, consider a set of points that are spatially
     nearby each other when properly accounting for PBCs.
@@ -196,6 +200,7 @@ def test_conditional_spherical_isolation_cond_func5():
     marked_iso5 = conditional_spherical_isolation(sample1, sample2, r_max,
         marks1, marks2, cond_func, period=1)
     assert np.all(marked_iso5 == False)
+
 
 def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func1():
     """ Create a regular 3d grid for sample2 and create a single point
@@ -243,6 +248,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func1():
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == False)
 
+
 def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func2():
     """ Create a regular 3d grid for sample2 and create a single point
     for sample1 that lies in the center of one of the grid cells.
@@ -288,6 +294,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func2():
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
+
 
 def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func3():
     """ Create a regular 3d grid for sample2 and create a single point
@@ -381,6 +388,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func4():
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
+
 
 def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func5():
     """ Create a regular 3d grid for sample2 and create a single point
@@ -482,6 +490,7 @@ def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func5():
     iso = conditional_spherical_isolation(sample1, sample2,
         r_max, stellar_mass1, stellar_mass2, cond_func, period=1)
     assert np.all(iso == True)
+
 
 def test_stellar_mass_conditional_spherical_isolation_correctness_cond_func6():
     """ Create a regular 3d grid for sample2 and create a single point

@@ -11,6 +11,7 @@ from ... import profile_models
 
 __all__ = ['TestAnalyticDensityProf']
 
+
 class TestAnalyticDensityProf(TestCase):
     """ Test the existence and reasonableness of all instances of
     sub-classes of `~halotools.empirical_models.AnalyticDensityProf`.

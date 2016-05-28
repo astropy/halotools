@@ -24,11 +24,11 @@ from ... import sim_manager
 from ...custom_exceptions import HalotoolsError, HalotoolsModelInputError
 
 
-
 class Tinker13Cens(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
     """
+
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift=sim_manager.sim_defaults.default_redshift,
@@ -157,7 +157,6 @@ class Tinker13Cens(OccupationComponent):
 
         return fraction
 
-
     def mc_sfr_designation(self, **kwargs):
         """
         """
@@ -216,7 +215,6 @@ class Tinker13Cens(OccupationComponent):
         result = np.where(sfr_designation == 'quiescent', quiescent_result, active_result)
 
         return result
-
 
     def mean_occupation_active(self, **kwargs):
         """
@@ -284,10 +282,12 @@ class Tinker13Cens(OccupationComponent):
             if stripped_key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[stripped_key] = value
 
+
 class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
     """
+
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift=sim_manager.sim_defaults.default_redshift,
@@ -354,12 +354,11 @@ class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
             **kwargs)
 
 
-
-
 class Tinker13QuiescentSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
     """
+
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
@@ -462,12 +461,10 @@ class Tinker13QuiescentSats(OccupationComponent):
 
         return mean_nsat
 
-
     def mc_sfr_designation(self, table):
         """
         """
         table[self.sfr_designation_key][:] = 'quiescent'
-
 
     def _initialize_param_dict(self):
         """ Set the initial values of ``self.param_dict`` according to
@@ -494,7 +491,6 @@ class Tinker13QuiescentSats(OccupationComponent):
 
         self._update_satellite_params()
 
-
     def _update_satellite_params(self):
         """ Private method to update the model parameters.
 
@@ -518,10 +514,12 @@ class Tinker13QuiescentSats(OccupationComponent):
             knee_mass*self.param_dict['bcut_quiescent']*
             (knee_threshold / knee_mass)**self.param_dict['betacut_quiescent'])
 
+
 class Tinker13ActiveSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/active stellar-to-halo-mass relations.
     """
+
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
@@ -650,7 +648,6 @@ class Tinker13ActiveSats(OccupationComponent):
         self.param_dict['smhm_gamma_0_active'] = 1.48
 
         self._update_satellite_params()
-
 
     def _update_satellite_params(self):
         """ Private method to update the model parameters.

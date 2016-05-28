@@ -227,7 +227,6 @@ class CachedHaloCatalog(object):
                     msg += "``" + acceptable_key + "``\n"
                 raise HalotoolsError(msg)
 
-
     def _determine_cache_log_entry(self, **kwargs):
         """
         """
@@ -342,7 +341,6 @@ class CachedHaloCatalog(object):
 
         return log_entry
 
-
     def _retrieve_matching_ptcl_cache_log_entry(self):
         """
         """
@@ -390,7 +388,6 @@ class CachedHaloCatalog(object):
             "within dz_tol = "+str(self._dz_tol)+" of these inputs.\n"
             )
 
-
         if len(matching_entries) == 0:
             suggestion_preamble = ("\nThe following entries in the cache log "
                 "most closely match your inputs:\n\n")
@@ -420,7 +417,6 @@ class CachedHaloCatalog(object):
                 msg += str(entry) + "\n"
             raise InvalidCacheLogEntry(msg)
 
-
     def _retrieve_matching_log_entry_from_metadata(self,
         simname, halo_finder, version_name, redshift):
         """
@@ -433,7 +429,6 @@ class CachedHaloCatalog(object):
                 "If you have previously used the package before, \n"
                 "try running the halotools/scripts/rebuild_halo_table_cache_log.py script.\n")
             raise HalotoolsError(msg)
-
 
         gen0 = self.halo_table_cache.matching_log_entry_generator(
             simname=simname, halo_finder=halo_finder,

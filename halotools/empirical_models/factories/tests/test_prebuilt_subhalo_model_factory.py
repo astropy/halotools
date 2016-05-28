@@ -13,9 +13,11 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestPrebuiltSubhaloModelFactory']
 
+
 class TestPrebuiltSubhaloModelFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.PrebuiltSubhaloModelFactory`.
     """
+
     def test_behroozi_composite(self):
         """ Require that the `~halotools.empirical_models.behroozi10_model_dictionary`
         model dictionary builds without raising an exception.

@@ -17,6 +17,7 @@ __author__ = ['Andrew Hearin']
 
 __all__ = ['NFWJeansVelocity']
 
+
 class NFWJeansVelocity(IsotropicJeansVelocity):
     """ Orthogonal mix-in class providing the solution to the Jeans equation
     for galaxies orbiting in an isotropic NFW profile with no spatial bias.

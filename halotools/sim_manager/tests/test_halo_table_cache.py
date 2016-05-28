@@ -144,7 +144,6 @@ class TestHaloTableCache(TestCase):
         f.attrs.create('version_name', tmp)
         f.close()
 
-
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_entry_to_cache_log(self):
         cache = HaloTableCache(read_log_from_standard_loc=False)
@@ -213,7 +212,6 @@ class TestHaloTableCache(TestCase):
 
         new_entry = cache.determine_log_entry_from_fname(new_fname)
         assert new_entry in cache.log
-
 
     def tearDown(self):
         try:

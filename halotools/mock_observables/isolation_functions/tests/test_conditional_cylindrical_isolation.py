@@ -20,6 +20,7 @@ __all__ = ('test_agreement_with_unconditioned_calculation',
 
 fixed_seed = 43
 
+
 def test_agreement_with_unconditioned_calculation():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
     agrees exactly with the `~halotools.mock_observables.conditional_cylindrical_isolation` function
@@ -53,6 +54,7 @@ def test_agreement_with_unconditioned_calculation():
     unconditioned_result = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
     conditioned_result = conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
     assert np.all(unconditioned_result == conditioned_result)
+
 
 def test_conditional_cylindrical_isolation_cond_func1():
     """ For cond_func = 1, and for a set of points that are spatially
@@ -103,6 +105,7 @@ def test_conditional_cylindrical_isolation_cond_func2():
     assert np.all(marked_iso2a == True)
     assert np.all(marked_iso2b == False)
 
+
 def test_conditional_cylindrical_isolation_cond_func3():
     """ For cond_func = 3, and for a set of points that are spatially
     nearby each other when properly accounting for PBCs, verify that the
@@ -129,6 +132,7 @@ def test_conditional_cylindrical_isolation_cond_func3():
         rp_max, pi_max, marks1, marks1, cond_func, period=1)
     assert np.all(marked_iso3 == False)
 
+
 def test_conditional_cylindrical_isolation_cond_func4():
     """ For cond_func = 4, and for a set of points that are spatially
     nearby each other when properly accounting for PBCs, verify that the
@@ -154,6 +158,7 @@ def test_conditional_cylindrical_isolation_cond_func4():
     marked_iso4 = conditional_cylindrical_isolation(sample1, sample2,
         rp_max, pi_max, marks1, marks1, cond_func, period=1)
     assert np.all(marked_iso4 == True)
+
 
 def test_conditional_cylindrical_isolation_cond_func5():
     """ For cond_func = 5, consider a set of points that are spatially

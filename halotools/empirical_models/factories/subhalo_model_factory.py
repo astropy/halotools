@@ -20,7 +20,6 @@ from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
 
 
-
 class SubhaloModelFactory(ModelFactory):
     """ Class used to build models of the galaxy-halo connection
     in which galaxies live at the centers of subhalos.
@@ -322,7 +321,6 @@ class SubhaloModelFactory(ModelFactory):
             self._enforce_component_model_format(input_model_dictionary)
             return input_model_dictionary, supplementary_kwargs
 
-
     def _enforce_component_model_format(self, candidate_model_dictionary):
         """ Private method to ensure that the input model dictionary is properly formatted.
         """
@@ -344,7 +342,6 @@ class SubhaloModelFactory(ModelFactory):
                     "The structure of Halotools model dictionaries is strictly to accept \n"
                     "component model instances, not component model classes. \n" + msg_conclusion)
                 raise HalotoolsError(msg % feature_key)
-
 
     def build_model_feature_calling_sequence(self, supplementary_kwargs):
         """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available.
@@ -416,7 +413,6 @@ class SubhaloModelFactory(ModelFactory):
 
         return model_feature_calling_sequence
 
-
     def set_inherited_methods(self):
         """ Function determines which component model methods are inherited by the composite model.
 
@@ -470,7 +466,6 @@ class SubhaloModelFactory(ModelFactory):
                 component_model._attrs_to_inherit = []
 
             _attrs_repetition_check.extend(component_model._attrs_to_inherit)
-
 
         # Check that we do not have any method names to inherit that appear
         # in more than one component model
@@ -535,7 +530,6 @@ class SubhaloModelFactory(ModelFactory):
                 new_attr_name = attrname
                 attr = getattr(component_model, attrname)
                 setattr(self, new_attr_name, attr)
-
 
     def update_param_dict_decorator(self, component_model, func_name):
         """
@@ -647,7 +641,6 @@ class SubhaloModelFactory(ModelFactory):
                     msg += ("For modelname = ``" + modelname + "``, the "
                         +clname+" instance has redshift = " + zs + "\n")
             raise HalotoolsError(msg)
-
 
     def build_prim_sec_haloprop_list(self):
         """ Method builds the ``_haloprop_list`` of strings.

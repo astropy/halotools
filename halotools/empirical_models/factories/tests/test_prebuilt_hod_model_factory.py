@@ -15,6 +15,7 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestPrebuiltHodModelFactory']
 
+
 class TestPrebuiltHodModelFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.PrebuiltHodModelFactory`.
     """

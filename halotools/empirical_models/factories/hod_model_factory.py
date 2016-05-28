@@ -22,7 +22,6 @@ from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
 
 
-
 class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection.
 
@@ -332,7 +331,6 @@ class HodModelFactory(ModelFactory):
 
             return input_model_dictionary, supplementary_kwargs
 
-
     def build_model_feature_calling_sequence(self, supplementary_kwargs):
         """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available.
         If no such argument was passed, the default sequence
@@ -412,7 +410,6 @@ class HodModelFactory(ModelFactory):
 
         return model_feature_calling_sequence
 
-
     def _test_model_feature_calling_sequence_consistency(self,
         model_feature_calling_sequence, gal_type_list):
         """
@@ -482,7 +479,6 @@ class HodModelFactory(ModelFactory):
                     (component_model_class_name, component_model_feature_name,
                         model_feature_calling_sequence_element,
                         feature_name, model_feature_calling_sequence_element))
-
 
     def _infer_gal_type_and_feature_name(self, model_dictionary_key, gal_type_list,
         known_gal_type=None, known_feature_name=None):
@@ -554,7 +550,6 @@ class HodModelFactory(ModelFactory):
                 "the constructor of the HodModelFactory.\n")
             raise HalotoolsError(msg % model_dictionary_key)
 
-
     def set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute.
         If there are both centrals and satellites, method ensures that centrals
@@ -565,7 +560,6 @@ class HodModelFactory(ModelFactory):
         for component_model in list(self.model_dictionary.values()):
             _gal_type_list.append(component_model.gal_type)
         self.gal_types = list(set(_gal_type_list))
-
 
     def set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `HodModelFactory`
@@ -621,7 +615,6 @@ class HodModelFactory(ModelFactory):
             if hasattr(component_model, 'threshold'):
                 setattr(self, 'threshold_' + gal_type, component_model.threshold)
                 self.threshold = getattr(self, 'threshold_' + gal_type)
-
 
     def update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes in the composite model param_dict
@@ -759,9 +752,6 @@ class HodModelFactory(ModelFactory):
                     msg += ("For gal_type = ``" + gal_type + "``, the "
                         +clname+" instance has redshift = " + zs + "\n")
             raise HalotoolsError(msg)
-
-
-
 
     def build_prim_sec_haloprop_list(self):
         """ Method builds the ``_haloprop_list`` of strings.
@@ -925,7 +915,6 @@ class HodModelFactory(ModelFactory):
             if not hasattr(component_model, '_attrs_to_inherit'):
                 component_model._attrs_to_inherit = []
 
-
     def set_calling_sequence(self):
         """ Method used to determine the sequence of function calls that will be made during
         mock population. The methods of each component model will be called one after the other;
@@ -956,7 +945,6 @@ class HodModelFactory(ModelFactory):
                 self._mock_generation_calling_sequence.extend(component_method_list)
             else:
                 warn(missing_calling_sequence_msg % (component_model.feature_name, component_model.gal_type))
-
 
     def _test_dictionary_consistency(self):
         """

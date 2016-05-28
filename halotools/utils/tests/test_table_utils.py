@@ -11,6 +11,7 @@ from ...sim_manager import FakeSim
 
 __all__ = ('TestSampleSelector', 'TestComputeConditionalPercentiles')
 
+
 class TestSampleSelector(TestCase):
     """
     """

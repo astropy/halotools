@@ -18,6 +18,7 @@ from .monte_carlo_helpers import MonteCarloGalProf
 
 from .. import model_defaults
 
+
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
     """ Model for the phase space distribution of mass and/or galaxies
     in isotropic Jeans equilibrium in an NFW halo profile, based on Navarro, Frenk and White (1995).
@@ -107,7 +108,6 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         """
         MonteCarloGalProf.mc_pos(self, table=table)
         MonteCarloGalProf.mc_vel(self, table=table)
-
 
     def mc_generate_nfw_phase_space_points(self, Ngals=int(1e4), conc=5, mass=1e12, verbose=True):
         """ Stand-alone convenience function for returning
@@ -704,7 +704,6 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         """
         return MonteCarloGalProf._mc_dimensionless_radial_distance(
             self, concentration_array, **kwargs)
-
 
     def mc_unit_sphere(self, Npts, **kwargs):
         """ Returns Npts random points on the unit sphere.

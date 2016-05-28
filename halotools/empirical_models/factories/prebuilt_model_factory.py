@@ -12,6 +12,7 @@ from ..factories import SubhaloModelFactory, HodModelFactory
 
 from ...custom_exceptions import HalotoolsError
 
+
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
     """
     Factory class providing instances of
@@ -91,7 +92,6 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
 
         SubhaloModelFactory.__init__(self, **super_class_kwargs)
 
-
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
         """
@@ -102,7 +102,6 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
                     "do not pass a ``%s`` keyword argument to the SubhaloModelFactory constructor.\n"
                     "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
                 raise HalotoolsError(msg % kwarg)
-
 
         model_nickname = model_nickname.lower()
 
@@ -211,7 +210,6 @@ class PrebuiltHodModelFactory(HodModelFactory):
 
         HodModelFactory.__init__(self, **super_class_kwargs)
 
-
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
         """
@@ -222,7 +220,6 @@ class PrebuiltHodModelFactory(HodModelFactory):
                     "do not pass a ``%s`` keyword argument to the HodModelFactory constructor.\n"
                     "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
                 raise HalotoolsError(msg % kwarg)
-
 
         from ..composite_models import hod_models
 

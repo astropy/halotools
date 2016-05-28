@@ -198,7 +198,6 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
                )
         warn(msg)
 
-
     #fit a spline to the tpcf
     #note that we fit the log10 of xi+1.0
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0 #note these are the true centers, not log
@@ -238,6 +237,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     delta_sigma = mean_internal_surface_density - 10**surface_density(rp_bins)
 
     return delta_sigma
+
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, num_threads):
     """

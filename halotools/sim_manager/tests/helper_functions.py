@@ -25,10 +25,12 @@ __all__ = ('add_new_row_to_cache_log', )
 dummy_cache_baseloc = os.path.join(detected_home, 'Desktop', 'tmp_dummy_cache')
 cache_basename = 'halo_table_cache_log.txt'
 
+
 def get_scenario_cache_fname(scenario):
     if type(scenario) is not str:
         scenario = str(scenario)
     return os.path.join(dummy_cache_baseloc, scenario)
+
 
 def add_new_row_to_cache_log(scenario,
     simname, halo_finder, redshift, version_name, **kwargs):

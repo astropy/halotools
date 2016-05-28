@@ -11,6 +11,7 @@ from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mesh_variations', )
 
+
 def enforce_cell_size_divide_box_size(mesh):
     xmsg = ("xcell_size = %.3f, num_xdivs = %i, xperiod = %.3f" %
         (mesh.xcell_size, mesh.num_xdivs, mesh.xperiod))
@@ -23,8 +24,10 @@ def enforce_cell_size_divide_box_size(mesh):
     assert np.isclose([mesh.ycell_size*mesh.num_ydivs], [mesh.yperiod]), ymsg
     assert np.isclose([mesh.zcell_size*mesh.num_zdivs], [mesh.zperiod]), zmsg
 
+
 def enforce_correct_ncells(mesh):
     assert mesh.ncells == mesh.num_xdivs*mesh.num_ydivs*mesh.num_zdivs
+
 
 def enforce_cell2_fits_in_cell1(double_mesh):
     assert double_mesh.num_xcell2_per_xcell1 == (double_mesh.mesh2.num_xdivs //
@@ -45,16 +48,19 @@ def enforce_cell2_fits_in_cell1(double_mesh):
     assert double_mesh.mesh2.num_ydivs >= double_mesh.mesh1.num_ydivs
     assert double_mesh.mesh2.num_zdivs >= double_mesh.mesh1.num_zdivs
 
+
 def enforce_search_length_is_covered(double_mesh):
     assert double_mesh.search_xlength <= double_mesh.mesh1.xcell_size
     assert double_mesh.search_ylength <= double_mesh.mesh1.ycell_size
     assert double_mesh.search_zlength <= double_mesh.mesh1.zcell_size
+
 
 def enforce_reasonable_cell_id_indices(mesh, npts):
     assert np.all(mesh.cell_id_indices <= npts)
     assert np.all(np.diff(mesh.cell_id_indices) >= 0)
     assert np.sum(np.diff(mesh.cell_id_indices)) == npts
     assert len(mesh.cell_id_indices) == mesh.ncells+1
+
 
 def enforce_correct_cell_id(mesh, x, y, z):
     cell_tuple_generator = itertools.product(
@@ -73,6 +79,7 @@ def enforce_correct_cell_id(mesh, x, y, z):
         assert np.all(y[ifirst:ilast] <= yhigh)
         assert np.all(z[ifirst:ilast] >= zlow)
         assert np.all(z[ifirst:ilast] <= zhigh)
+
 
 def test_mesh_variations():
     npts1, npts2 = 90, 200
@@ -123,12 +130,14 @@ def test_mesh_variations():
             points1[:, 1][double_mesh.mesh1.idx_sorted],
             points1[:, 2][double_mesh.mesh1.idx_sorted])
 
+
 def test_sample1_cell_size():
     period, search_length, approx_cell_size = 1, 0.5, 0.1
     with pytest.raises(ValueError) as err:
         _ = sample1_cell_size(period, search_length, approx_cell_size)
     substr = "Input ``search_length`` cannot exceed period/3"
     assert substr in err.value.args[0]
+
 
 def test_search_length_enforcement():
     points1 = np.random.random((100, 3))

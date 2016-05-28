@@ -279,7 +279,6 @@ class DownloadManager(object):
         print(("\nTotal runtime to download pre-processed "
             "halo catalog = %.1f seconds\n" % runtime))
 
-
         # overwrite the fname metadata so that
         # it is consistent with the downloaded location
         try:
@@ -352,8 +351,6 @@ class DownloadManager(object):
             return new_log_entry
         else:
             print(success_msg)
-
-
 
     def download_ptcl_table(self, simname, redshift,
         dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_ptcl_version_name,
@@ -881,8 +878,6 @@ class DownloadManager(object):
             output = all_ptcl_tables
 
         return output
-
-
 
     def _processed_halo_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and

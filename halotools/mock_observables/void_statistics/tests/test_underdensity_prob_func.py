@@ -13,6 +13,7 @@ from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_upf1', 'test_upf2', 'test_upf3', 'test_upf4')
 
+
 def test_upf1():
     """ Verify that the UPF raises no exceptions
     for several reasonable choices of rbins.
@@ -32,6 +33,7 @@ def test_upf1():
     upf = underdensity_prob_func(sample1, rbins,
         n_ran=n_ran, period=period)
 
+
 @pytest.mark.slow
 def test_upf2():
     """ Verify that the UPF behaves properly when changing the
@@ -44,7 +46,6 @@ def test_upf2():
     sample1 = np.random.random((Npts, 3))
     random_sphere_centers = np.random.random((Npts, 3))
 
-
     rbins = np.logspace(-1.5, -1, 5)
     upf = underdensity_prob_func(sample1, rbins,
         random_sphere_centers=random_sphere_centers, period=period, u=0.5)
@@ -53,6 +54,7 @@ def test_upf2():
     print(upf)
     print(upf2)
     assert np.all(upf >= upf2)
+
 
 @pytest.mark.slow
 def test_upf3():
@@ -76,6 +78,7 @@ def test_upf3():
         random_sphere_centers=random_sphere_centers, period=period)
     assert np.all(upf == vpf)
     assert np.all(upf2 >= vpf)
+
 
 @pytest.mark.slow
 def test_upf4():

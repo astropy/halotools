@@ -11,6 +11,7 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ('test_large_scale_density_spherical_volume1', )
 
+
 def test_large_scale_density_spherical_volume_exception_handling():
     """
     """
@@ -36,6 +37,7 @@ def test_large_scale_density_spherical_volume_exception_handling():
             sample, tracers, radius, period=1, sample_volume=0.4)
     substr = "If period is not None, do not pass in sample_volume"
     assert substr in err.value.args[0]
+
 
 def test_large_scale_density_spherical_volume1():
     """

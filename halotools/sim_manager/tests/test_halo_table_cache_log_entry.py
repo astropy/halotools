@@ -36,7 +36,6 @@ else:
 __all__ = ('TestHaloTableCacheLogEntry')
 
 
-
 class TestHaloTableCacheLogEntry(TestCase):
     """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`.
     """
@@ -46,7 +45,6 @@ class TestHaloTableCacheLogEntry(TestCase):
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests.
         """
-
 
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
@@ -91,7 +89,6 @@ class TestHaloTableCacheLogEntry(TestCase):
             'halo_z': [1, 2, 3],
             'halo_mass': [1, 2, 3],
             })
-
 
     def get_scenario_kwargs(self, num_scenario):
         return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario],

@@ -18,6 +18,7 @@ __all__ = ('test_mean_radial_velocity_vs_r_correctness1',
 
 fixed_seed = 43
 
+
 def pure_python_mean_radial_velocity_vs_r(
     sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=None):
     """ Brute force pure python function calculating mean radial velocities
@@ -72,6 +73,7 @@ def pure_python_mean_radial_velocity_vs_r(
         return np.mean(running_tally)
     else:
         return 0.
+
 
 def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
     """ This function tests that the
@@ -130,6 +132,7 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
         sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
     assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
+
 def test_pure_python():
     """ Verify that the brute-force pairwise velocity function returns the
     correct result for an analytically calculable case.
@@ -162,6 +165,7 @@ def test_pure_python():
     pure_python_s1s2 = pure_python_mean_radial_velocity_vs_r(
         sample1, velocities1, sample2, velocities2, rmin, rmax, Lbox=1)
     assert np.allclose(pure_python_s1s2, correct_relative_velocity, rtol=0.01), msg
+
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_correctness1():
@@ -299,6 +303,7 @@ def test_mean_radial_velocity_vs_r_correctness2():
     s1s1 = mean_radial_velocity_vs_r(sample, velocities, rbins)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s1[1], 0, rtol=0.01)
+
 
 def test_mean_radial_velocity_vs_r_correctness3():
     """ This function tests that the
@@ -454,6 +459,7 @@ def test_mean_radial_velocity_vs_r_correctness4():
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s1[1], 0, rtol=0.01)
 
+
 def test_mean_radial_velocity_vs_r_correctness5():
     """ This function tests that the
     `~halotools.mock_observables.mean_radial_velocity_vs_r` function returns correct
@@ -529,6 +535,7 @@ def test_mean_radial_velocity_vs_r_correctness5():
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s1[1], 0, rtol=0.01)
 
+
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel1():
     """
@@ -561,6 +568,7 @@ def test_mean_radial_velocity_vs_r_parallel1():
     assert np.all(s1s2_serial == s1s2_parallel)
     assert np.all(s2s2_serial == s2s2_parallel)
 
+
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel2():
     """
@@ -587,6 +595,7 @@ def test_mean_radial_velocity_vs_r_parallel2():
     assert np.allclose(s1s1_serial, s1s1_parallel, rtol=0.001)
     assert np.allclose(s1s2_serial, s1s2_parallel, rtol=0.001)
     assert np.allclose(s2s2_serial, s2s2_parallel, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_mean_radial_velocity_vs_r_parallel3():

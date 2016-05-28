@@ -39,6 +39,7 @@ else:
 
 __all__ = ('TestUserSuppliedPtclCatalog', )
 
+
 class TestUserSuppliedPtclCatalog(TestCase):
     """ Class providing tests of the `~halotools.sim_manager.UserSuppliedPtclCatalog`.
     """
@@ -95,7 +96,6 @@ class TestUserSuppliedPtclCatalog(TestCase):
         substr = "The ``redshift`` metadata must be a float."
         assert substr in err.value.args[0]
 
-
     def test_successful_load(self):
 
         ptclcat = UserSuppliedPtclCatalog(Lbox=200,
@@ -142,7 +142,6 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat = UserSuppliedPtclCatalog(Lbox=200,
                 particle_mass=100, redshift=self.redshift,
                 **bad_ptclcat_args)
-
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache1(self):
@@ -225,6 +224,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         assert os.path.isfile(fname)
 
         dummy_string = '  '
+
         class Dummy(object):
             pass
 
@@ -238,8 +238,6 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 overwrite=True)
         substr = "must all be strings."
         assert substr in err.value.args[0]
-
-
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache6(self):
@@ -272,7 +270,6 @@ class TestUserSuppliedPtclCatalog(TestCase):
             raise_non_existence_exception=True,
             update_ascii=True,
             delete_corresponding_ptcl_catalog=True)
-
 
     def tearDown(self):
         try:

@@ -19,11 +19,13 @@ from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
 import collections
 
+
 class HeavisideAssembias(object):
     """ Class used as an orthogonal mix-in to introduce step function-style
     assembly-biased behavior into any component model.
 
     """
+
     def __init__(self, **kwargs):
         """
         No positional arguments accepted; all argument are strictly keyword arguments.
@@ -105,7 +107,6 @@ class HeavisideAssembias(object):
             self.publications.append('arXiv:1512.03050')
         except:
             self.publications = ['arXiv:1512.03050']
-
 
     def _interpret_constructor_inputs(self, loginterp=True,
         sec_haloprop_key=model_defaults.sec_haloprop_key, **kwargs):
@@ -288,7 +289,6 @@ class HeavisideAssembias(object):
 
         return result
 
-
     @model_helpers.bounds_enforcing_decorator_factory(-1, 1)
     def assembias_strength(self, prim_haloprop):
         """
@@ -318,7 +318,6 @@ class HeavisideAssembias(object):
             result = spline_function(prim_haloprop)
 
         return result
-
 
     def _get_assembias_param_dict_key(self, ipar):
         """

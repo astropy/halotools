@@ -18,6 +18,7 @@ from .. import model_helpers
 from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
+
 @six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(object):
     """
@@ -79,7 +80,6 @@ class BinaryGalpropModel(object):
 
         self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
-
     def _mc_galprop(self, seed=None, **kwargs):
         """ Return a Monte Carlo realization of the galaxy property
         based on draws from a nearest-integer distribution.
@@ -120,6 +120,7 @@ class BinaryGalpropModel(object):
         if 'table' in kwargs:
             kwargs['table'][self.galprop_name] = result
         return result
+
 
 class BinaryGalpropInterpolModel(BinaryGalpropModel):
     """
@@ -274,7 +275,6 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         except AssertionError:
             msg = ("\nAll values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive.")
             raise HalotoolsError(msg)
-
 
     def _build_param_dict(self):
 

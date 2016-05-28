@@ -104,7 +104,6 @@ class SubhaloMockFactory(MockFactory):
             except KeyError:
                 raise HalotoolsError(unavailable_haloprop_msg % key)
 
-
     def precompute_galprops(self):
         """ Method pre-processes the input subhalo catalog, and pre-computes
         all halo properties that will be inherited by the ``galaxy_table``.
@@ -157,7 +156,6 @@ class SubhaloMockFactory(MockFactory):
                     "length-N halo table as a ``table`` keyword argument, \n"
                     "and returns a length-N array of strings.\n")
                 raise HalotoolsError(msg)
-
 
     def populate(self):
         """

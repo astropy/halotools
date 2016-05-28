@@ -12,10 +12,12 @@ from .... import model_defaults
 
 __all__ = ['TestConcMass']
 
+
 class TestConcMass(TestCase):
     """ Tests of `~halotools.empirical_models.ConcMass` class.
 
     """
+
     def setup_class(self):
         """ Pre-load various arrays into memory for use by all tests.
         """

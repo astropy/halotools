@@ -20,6 +20,7 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 __all__ = ('marked_npairs_3d', )
 
+
 def marked_npairs_3d(sample1, sample2, rbins,
                   period=None, weights1=None, weights2=None,
                   weight_func_id=0, verbose=False, num_threads=1,
@@ -173,6 +174,7 @@ def marked_npairs_3d(sample1, sample2, rbins,
 
     return np.array(counts)
 
+
 def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
     """
     """
@@ -266,6 +268,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                 (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
 
     return weights1, weights2
+
 
 def _func_signature_int_from_wfunc(weight_func_id):
     """

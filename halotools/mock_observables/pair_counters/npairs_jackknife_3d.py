@@ -19,6 +19,7 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ('npairs_jackknife_3d', )
 
+
 def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, weights2=None,
     jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):

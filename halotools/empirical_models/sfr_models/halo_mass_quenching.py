@@ -12,6 +12,7 @@ from ..component_model_templates import BinaryGalpropInterpolModel
 
 from ...utils.array_utils import convert_to_ndarray
 
+
 class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
     """ Model for the quiescent fraction as a function of halo mass
     defined by interpolating between a set of input control points.
@@ -92,7 +93,6 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
 
         halo_mass_abscissa = convert_to_ndarray(halo_mass_abscissa)
         log10_halo_mass_abscissa = np.log10(halo_mass_abscissa)
-
 
         BinaryGalpropInterpolModel.__init__(self,
             galprop_name='quiescent', prim_haloprop_key=halo_mass_key,

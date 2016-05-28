@@ -95,6 +95,7 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
 
     return bin_midpoints, mean, err
 
+
 def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     """ Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
@@ -196,6 +197,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
         return pos[mask]
     except KeyError:
         return pos
+
 
 def cuboid_subvolume_labels(sample, Nsub, Lbox):
     """

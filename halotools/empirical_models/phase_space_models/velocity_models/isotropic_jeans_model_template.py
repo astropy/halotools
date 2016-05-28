@@ -14,7 +14,6 @@ __author__ = ['Andrew Hearin']
 __all__ = ['IsotropicJeansVelocity']
 
 
-
 @six.add_metaclass(ABCMeta)
 class IsotropicJeansVelocity(object):
     """ Orthogonal mix-in class used to transform a configuration

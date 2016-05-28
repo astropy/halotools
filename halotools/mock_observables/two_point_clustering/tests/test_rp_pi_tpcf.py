@@ -17,6 +17,7 @@ pi_bins = np.linspace(0, 0.3, 5)
 
 fixed_seed = 43
 
+
 def test_rp_pi_tpcf_auto_nonperiodic():
     """
     test rp_pi_tpcf autocorrelation without periodic boundary conditions
@@ -31,6 +32,7 @@ def test_rp_pi_tpcf_auto_nonperiodic():
         max_sample_size=int(1e4), estimator='Natural')
 
     assert result.ndim == 2, "More than one correlation function returned erroneously."
+
 
 def test_rp_pi_tpcf_auto_periodic():
     """

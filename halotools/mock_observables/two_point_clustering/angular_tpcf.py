@@ -294,6 +294,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
             return xi_11, xi_22
 
+
 def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     do_auto, do_cross, estimator, num_threads, max_sample_size):
     """

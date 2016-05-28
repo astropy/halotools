@@ -19,6 +19,7 @@ supported_sim_list = ('bolshoi', 'bolplanck', 'consuelo', 'multidark')
 ########## Simulation classes defined below ##########
 ######################################################
 
+
 @six.add_metaclass(ABCMeta)
 class NbodySimulation(object):
     """ Abstract base class for any object used as a container for
@@ -68,6 +69,7 @@ class NbodySimulation(object):
             'softening_length', 'initial_redshift', 'cosmology']
             )
 
+
 class Bolshoi(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology
     with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h.
@@ -84,6 +86,7 @@ class Bolshoi(NbodySimulation):
 
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/')
+
 
 class BolPlanck(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology
@@ -120,6 +123,7 @@ class MultiDark(NbodySimulation):
 
         self.orig_ascii_web_location = (
             'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/')
+
 
 class Consuelo(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5-like cosmology

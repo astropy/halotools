@@ -144,6 +144,7 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         [sum(result[:, i] == 0) for i in range(result.shape[1])])
     return num_empty_spheres/n_ran
 
+
 def _void_prob_func_process_args(sample1, rbins,
     n_ran, random_sphere_centers, period, num_threads,
     approx_cell1_size, approx_cellran_size):

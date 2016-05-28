@@ -15,6 +15,7 @@ from .....sim_manager import sim_defaults
 
 __all__ = ['TestTrivialProfile']
 
+
 class TestTrivialProfile(TestCase):
     """ Tests of `~halotools.empirical_models.TrivialProfile`.
 
@@ -24,6 +25,7 @@ class TestTrivialProfile(TestCase):
     just enforces that the necessary attributes of ``TrivialProfile`` instances exist.
 
     """
+
     def setup_class(self):
         """ Pre-load various arrays into memory for use by all tests.
         """

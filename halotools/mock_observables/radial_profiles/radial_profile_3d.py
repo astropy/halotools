@@ -21,6 +21,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. mark
 __author__ = ('Andrew Hearin', )
 __all__ = ('radial_profile_3d', )
 
+
 def radial_profile_3d(sample1, sample2, sample2_quantity,
     rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
     return_counts=False, period=None, num_threads=1,

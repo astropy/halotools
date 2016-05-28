@@ -13,6 +13,7 @@ __all__ = ('test_radial_pvd_vs_r1', 'test_radial_pvd_vs_r_auto_consistency',
 
 fixed_seed = 43
 
+
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness1():
     """ This function tests that the
@@ -55,6 +56,7 @@ def test_radial_pvd_vs_r_correctness1():
     assert np.allclose(s1s2[0], 0, rtol=0.1)
     assert np.allclose(s1s2[1], correct_cross_pvd, rtol=0.001)
 
+
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness2():
     """ This function tests that the
@@ -95,6 +97,7 @@ def test_radial_pvd_vs_r_correctness2():
 
     assert np.allclose(s1s2[0], 0, rtol=0.1)
     assert np.allclose(s1s2[1], correct_cross_pvd, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness3():
@@ -140,6 +143,7 @@ def test_radial_pvd_vs_r_correctness3():
     correct_cross_pvd = np.std(np.repeat(velocities1[:, 2], npts))
 
     assert np.allclose(s1s1[1], correct_cross_pvd, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_correctness4():
@@ -206,6 +210,7 @@ def test_radial_pvd_vs_r1():
         approx_cell1_size=[0.2, 0.2, 0.2])
     assert np.allclose(result1, result2, rtol=0.0001)
 
+
 @pytest.mark.slow
 def test_radial_pvd_vs_r_auto_consistency():
     """ Verify that we get self-consistent auto-correlation results
@@ -233,6 +238,7 @@ def test_radial_pvd_vs_r_auto_consistency():
 
     assert np.allclose(s1s1a, s1s1b, rtol=0.001)
     assert np.allclose(s2s2a, s2s2b, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_radial_pvd_vs_r_cross_consistency():

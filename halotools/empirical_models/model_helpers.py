@@ -21,6 +21,7 @@ from warnings import warn
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
+
 def solve_for_polynomial_coefficients(abscissa, ordinates):
     """ Solves for coefficients of the unique,
     minimum-degree polynomial that passes through
@@ -74,6 +75,7 @@ def solve_for_polynomial_coefficients(abscissa, ordinates):
 
     return np.array(polynomial_coefficients)
 
+
 def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
     """ Method to evaluate an input polynomial at the input_abscissa.
     The input polynomial is determined by `solve_for_polynomial_coefficients`
@@ -107,6 +109,7 @@ def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
         output_ordinates += coeff*input_abscissa**n
 
     return output_ordinates
+
 
 def enforce_periodicity_of_box(coords, box_length,
     check_multiple_box_lengths=False, **kwargs):
@@ -282,6 +285,7 @@ def custom_spline(table_abscissa, table_ordinates, **kwargs):
         spline_function = spline(table_abscissa, table_ordinates, k=k)
         return spline_function
 
+
 def call_func_table(func_table, abscissa, func_indices):
     """ Returns the output of an array of functions evaluated at a set of input points
     if the indices of required functions is known.
@@ -319,6 +323,7 @@ def call_func_table(func_table, abscissa, func_indices):
         out[ix] = f(abscissa[ix])
     return out
 
+
 def bind_required_kwargs(required_kwargs, obj, **kwargs):
     """ Method binds each element of ``required_kwargs`` to
     the input object ``obj``, or raises and exception for cases
@@ -353,6 +358,7 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
                 'to instantiate the '+class_name+' class'
                 )
             raise KeyError(msg)
+
 
 def create_composite_dtype(dtype_list):
     """ Find the union of the dtypes in the input list, and return a composite
@@ -392,6 +398,7 @@ def create_composite_dtype(dtype_list):
                     composite_list.append((name, dt[name].type))
     composite_dtype = np.dtype(composite_list)
     return composite_dtype
+
 
 def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, default_value):
     """ Function used to ensure that a keyword argument passed to the constructor

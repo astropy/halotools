@@ -2,7 +2,9 @@ import sphinx
 from sphinx.ext.autosummary import *
 from distutils.version import LooseVersion
 
+
 class FixedAutosummary(Autosummary):
+
     def get_items(self, names):
         """Try to import the given names, and return a list of
         ``[(name, signature, summary_string, real_name), ...]``.
@@ -99,8 +101,6 @@ class FixedAutosummary(Autosummary):
             items.append((display_name, sig, summary, real_name))
 
         return items
-
-
 
 
 def setup(app):

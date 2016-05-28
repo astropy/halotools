@@ -23,6 +23,7 @@ else:
 
 __all__ = ('TestHearin15', )
 
+
 class TestHearin15(TestCase):
 
     def setup_class(self):

@@ -8,11 +8,13 @@ from math import floor
 __all__ = ('RectangularDoubleMesh', )
 __author__ = ('Andrew Hearin', )
 
+
 def digitized_position(p, cell_size, num_divs):
     """ Function returns a discretized spatial position of input point(s).
     """
     ip = np.floor(p // cell_size).astype(int)
     return np.where(ip >= num_divs, num_divs-1, ip)
+
 
 def sample1_cell_size(period, search_length, approx_cell_size,
     max_cells_per_dimension=50):
@@ -38,6 +40,7 @@ def sample1_cell_size(period, search_length, approx_cell_size,
 
     return cell_size
 
+
 def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
     max_cells_per_dimension=50):
     """ Function determines the size of the cells of mesh2.
@@ -55,6 +58,7 @@ def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
         num_sample2_cells = num2_per_num1*num_sample1_cells
     cell_size = period/float(num_sample2_cells)
     return cell_size
+
 
 class RectangularMesh(object):
     """ Underlying mesh structure used to place points into rectangular cells
@@ -142,7 +146,6 @@ class RectangularMesh(object):
 
         """
 
-
         self.npts = x1in.shape[0]
 
         self.xperiod = xperiod
@@ -172,6 +175,7 @@ class RectangularMesh(object):
 
     def cell_id_from_cell_tuple(self, ix, iy, iz):
         return ix*(self.num_ydivs*self.num_zdivs) + iy*self.num_zdivs + iz
+
 
 class RectangularDoubleMesh(object):
     """ Fundamental data structure of the `~halotools.mock_observables` sub-package.

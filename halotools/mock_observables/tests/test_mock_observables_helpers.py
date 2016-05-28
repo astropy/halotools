@@ -16,6 +16,7 @@ __all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads',
 
 fixed_seed = 43
 
+
 def test_enforce_sample_respects_pbcs():
     npts = 10
     x = np.linspace(0, 1, npts)
@@ -45,6 +46,7 @@ def test_enforce_sample_respects_pbcs():
     substr = "your input data has negative values"
     assert substr in err.value.args[0]
 
+
 def test_get_num_threads():
 
     input_num_threads = 1
@@ -71,6 +73,7 @@ def test_get_num_threads():
     substr = "Input ``num_threads`` must be an integer"
     assert err.value.args[0] in substr
 
+
 def test_get_period():
     period, PBCs = get_period(1)
     assert np.all(period == 1)
@@ -90,6 +93,7 @@ def test_get_period():
     substr = "All values must bounded positive numbers."
     assert substr in err.value.args[0]
 
+
 def test_enforce_sample_has_correct_shape():
 
     npts = 100
@@ -101,6 +105,7 @@ def test_enforce_sample_has_correct_shape():
         _ = enforce_sample_has_correct_shape(bad_sample)
     substr = "Input sample of points must be a Numpy ndarray of shape (Npts, 3)."
     assert substr in err.value.args[0]
+
 
 def test_get_separation_bins_array():
 
@@ -121,6 +126,7 @@ def test_get_separation_bins_array():
         _ = get_separation_bins_array(bad_rbins)
     substr = "Input separation bins must be a monotonically increasing "
     assert substr in err.value.args[0]
+
 
 def test_get_line_of_sight_bins_array():
 

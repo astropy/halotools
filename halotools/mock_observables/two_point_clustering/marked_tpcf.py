@@ -24,6 +24,7 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
+
 def marked_tpcf(sample1, rbins, sample2=None,
     marks1=None, marks2=None, period=None, do_auto=True, do_cross=True,
     num_threads=1, max_sample_size=int(1e6), weight_func_id=1,
@@ -298,7 +299,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
     within the statistical errors.
     """
 
-
     #process parameters
     function_args = (sample1, rbins, sample2, marks1, marks2,
         period, do_auto, do_cross, num_threads, max_sample_size,
@@ -366,6 +366,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
             M_22 = W2W2/R2R2
             return M_11, M_22
 
+
 def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
     """
@@ -399,6 +400,7 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         else: D2D2=None
 
     return D1D1, D1D2, D2D2
+
 
 def random_counts(sample1, sample2, rbins, period, num_threads,
     do_auto, do_cross, marks1, marks2, weight_func_id,
@@ -445,6 +447,7 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
 
     return R1R1, R1R2, R2R2
 
+
 def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
     _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
     """
@@ -479,7 +482,6 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
         else: D2D2=None
 
     return D1D1, D1D2, D2D2
-
 
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
@@ -567,7 +569,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
         sample1, sample2, _sample1_is_sample2, max_sample_size)
-
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

@@ -13,6 +13,7 @@ from ...sim_manager import sim_defaults
 
 __all__ = ['Moster13SmHm']
 
+
 class Moster13SmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on
     Moster et al. (2013), arXiv:1205.5807.

@@ -32,6 +32,7 @@ class TestZheng07Cens(TestCase):
         * The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses.
 
     """
+
     def setUp(self):
         self.supported_thresholds = np.arange(-22, -17.5, 0.5)
 
@@ -227,6 +228,7 @@ class TestZheng07Cens(TestCase):
 
             assert d1 == d2
 
+
 class TestZheng07Sats(TestCase):
     """ Class providing testing of the `~halotools.empirical_models.Zheng07Sats` model.
 
@@ -272,7 +274,6 @@ class TestZheng07Sats(TestCase):
             thresh_model = zheng07_components.Zheng07Sats(threshold=threshold)
             self.enforce_required_attributes(thresh_model)
             self.enforce_mean_occupation_behavior(thresh_model)
-
 
     def enforce_required_attributes(self, model):
         assert isinstance(model, occupation_model_template.OccupationComponent)
@@ -357,7 +358,6 @@ class TestZheng07Sats(TestCase):
         assert (self.model2.mc_occupation(prim_haloprop=masses, seed=43).mean() ==
             alt_default_model.mc_occupation(prim_haloprop=masses, seed=43).mean())
 
-
     def test_logM0_scaling1_mean_occupation(self):
 
         # At very low mass, both models should have zero satellites
@@ -381,7 +381,6 @@ class TestZheng07Sats(TestCase):
             self.model3.mean_occupation(prim_haloprop=highmass),
             self.default_model.mean_occupation(prim_haloprop=highmass),
             rtol=1e-3, atol=1.e-3)
-
 
     def test_logM1_scaling1_mean_occupation(self):
 

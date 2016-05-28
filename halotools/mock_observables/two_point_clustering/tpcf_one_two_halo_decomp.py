@@ -200,7 +200,6 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =\
     _tpcf_one_two_halo_decomp_process_args(*function_args)
 
-
     #What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
 
@@ -284,6 +283,7 @@ def nball_volume(R, k=3):
     """
     return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
 
+
 def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
     approx_cell2_size, approx_cellran_size):
@@ -353,6 +353,7 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
 
         return D1R, D2R, RR
 
+
 def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
     """
@@ -390,8 +391,6 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         else: D2D2=None
 
     return D1D1, D1D2, D2D2
-
-
 
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,

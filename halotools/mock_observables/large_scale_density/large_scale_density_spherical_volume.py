@@ -127,7 +127,6 @@ def _large_scale_density_spherical_volume_process_args(
     _ = convert_to_ndarray(radius, dt=float)
     rbins = np.append(_, _[0]+0.0001)
 
-
     if period is None:
         if sample_volume is None:
             msg = ("If period is None, you must pass in ``sample_volume``.")

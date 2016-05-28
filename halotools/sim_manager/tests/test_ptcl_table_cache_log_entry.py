@@ -33,7 +33,6 @@ else:
 __all__ = ('TestPtclTableCacheLogEntry',)
 
 
-
 class TestPtclTableCacheLogEntry(TestCase):
     """ Class providing unit testing for `~halotools.sim_manager.PtclTableCacheLogEntry`.
     """
@@ -250,7 +249,6 @@ class TestPtclTableCacheLogEntry(TestCase):
         substr = "must be bounded by [0, Lbox]."
         assert substr in log_entry._cache_safety_message
 
-
     @pytest.mark.skipif('not HAS_H5PY')
     def test_passing_scenario(self):
         num_scenario = 4
@@ -273,7 +271,6 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache is True, log_entry._cache_safety_message
         substr =  "The particle catalog is safe to add to the cache log."
         assert substr in log_entry._cache_safety_message
-
 
     def tearDown(self):
         try:

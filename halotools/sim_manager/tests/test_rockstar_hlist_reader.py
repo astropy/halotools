@@ -69,7 +69,6 @@ class TestRockstarHlistReader(TestCase):
         _t = Table({'x': [0]})
         _t.write(self.dummy_fname, format='ascii')
 
-
         self.good_columns_to_keep_dict = ({
             'halo_x': (1, 'f4'),
             'halo_y': (2, 'f4'),
@@ -176,7 +175,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "appears more than once in your ``columns_to_keep_dict``"
         assert substr in err.value.args[0]
 
-
     @pytest.mark.slow
     @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
@@ -205,7 +203,6 @@ class TestRockstarHlistReader(TestCase):
         reader.read_halocat(columns_to_convert_from_kpc_to_mpc=[],
             write_to_disk=True)
 
-
     @pytest.mark.slow
     @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
@@ -218,7 +215,6 @@ class TestRockstarHlistReader(TestCase):
             'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'),
             'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4')
             })
-
 
         cache = HaloTableCache()
         entry = cache.log[0]
@@ -316,8 +312,6 @@ class TestRockstarHlistReader(TestCase):
             chunk_memory_size=100)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
             chunk_memory_size=101)
-
-
 
     def tearDown(self):
         try:

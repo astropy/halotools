@@ -8,6 +8,7 @@ SOURCES = ("velocity_marked_npairs_3d_engine.pyx",
 
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
+
 def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace('.pyx', '') for src in SOURCES]

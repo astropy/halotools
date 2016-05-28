@@ -10,6 +10,7 @@ from ..clustering_helpers import process_optional_input_sample2
 
 __all__ = ('test_verify_tpcf_estimator', )
 
+
 def test_verify_tpcf_estimator():
     """
     """
@@ -20,6 +21,7 @@ def test_verify_tpcf_estimator():
     substr = "is not in the list of available estimators:"
     assert substr in err.value.args[0]
 
+
 def test_downsample_inputs_exceeding_max_sample_size_case1():
 
     _sample1_is_sample2 = True
@@ -29,6 +31,7 @@ def test_downsample_inputs_exceeding_max_sample_size_case1():
 
     sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
         sample1_in, sample1_in, _sample1_is_sample2, max_sample_size=max_sample_size)
+
 
 def test_downsample_inputs_exceeding_max_sample_size_case2():
 
@@ -41,6 +44,7 @@ def test_downsample_inputs_exceeding_max_sample_size_case2():
     assert len(sample1_out) == 20
     assert len(sample2_out) == npts2
 
+
 def test_downsample_inputs_exceeding_max_sample_size_case3():
 
     _sample1_is_sample2 = False
@@ -51,6 +55,7 @@ def test_downsample_inputs_exceeding_max_sample_size_case3():
 
     sample1_out, sample2_out = downsample_inputs_exceeding_max_sample_size(
         sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
+
 
 def test_downsample_inputs_exceeding_max_sample_size_case4():
 
@@ -64,6 +69,7 @@ def test_downsample_inputs_exceeding_max_sample_size_case4():
     assert len(sample1_out) == max_sample_size
     assert len(sample2_out) == npts2
 
+
 def test_downsample_inputs_exceeding_max_sample_size_case5():
 
     _sample1_is_sample2 = False
@@ -75,6 +81,7 @@ def test_downsample_inputs_exceeding_max_sample_size_case5():
         sample1_in, sample2_in, _sample1_is_sample2, max_sample_size=max_sample_size)
     assert len(sample1_out) == npts1
     assert len(sample2_out) == max_sample_size
+
 
 def test_downsample_inputs_exceeding_max_sample_size_case6():
 
@@ -102,6 +109,7 @@ def test_process_optional_input_sample2_case1():
     assert _sample1_is_sample2 is True
     assert do_cross == do_cross_in
 
+
 def test_process_optional_input_sample2_case2():
 
     npts1, npts2 = 1000, 1000
@@ -119,6 +127,7 @@ def test_process_optional_input_sample2_case2():
     sample2_out, _sample1_is_sample2, do_cross = process_optional_input_sample2(
         sample1_in, sample2_in, do_cross_in)
     assert do_cross == do_cross_in
+
 
 def test_process_optional_input_sample2_case3():
 

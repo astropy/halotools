@@ -16,6 +16,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_
 
 __all__ = ('npairs_projected', )
 
+
 def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
     verbose=False, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):
@@ -157,6 +158,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
         counts = engine(cell1_tuples[0])
 
     return np.array(counts)
+
 
 def _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
     verbose, num_threads, approx_cell1_size, approx_cell2_size):

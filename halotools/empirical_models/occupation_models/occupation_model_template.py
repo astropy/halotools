@@ -17,6 +17,7 @@ from .. import model_defaults, model_helpers
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import HalotoolsError
 
+
 @six.add_metaclass(ABCMeta)
 class OccupationComponent(object):
     """ Abstract base class of any occupation model.
@@ -25,6 +26,7 @@ class OccupationComponent(object):
     standardize the attributes and methods
     required of any HOD-style model for halo occupation statistics.
     """
+
     def __init__(self, **kwargs):
         """
         Parameters

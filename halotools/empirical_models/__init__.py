@@ -3,7 +3,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-
 from .model_defaults import *
 from .model_helpers import *
 

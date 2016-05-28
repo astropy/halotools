@@ -15,6 +15,7 @@ from .npairs_3d import _npairs_3d_process_args
 
 __all__ = ('npairs_per_object_3d', )
 
+
 def npairs_per_object_3d(sample1, sample2, rbins, period=None,
     verbose=False, num_threads=1,
     approx_cell1_size=None, approx_cell2_size=None):

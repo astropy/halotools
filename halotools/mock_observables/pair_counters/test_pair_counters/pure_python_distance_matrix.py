@@ -7,6 +7,7 @@ import numpy as np
 
 __all__ = ('pure_python_distance_matrix_3d', )
 
+
 def pure_python_distance_matrix_3d(
     sample1, sample2, r_max, Lbox=None):
     """ Brute force pure python function calculating the distance
@@ -48,6 +49,7 @@ def pure_python_distance_matrix_3d(
                 pair_matrix[i, j] = r
 
     return pair_matrix
+
 
 def pure_python_distance_matrix_xy_z(
     sample1, sample2, rp_max, pi_max, Lbox=None):

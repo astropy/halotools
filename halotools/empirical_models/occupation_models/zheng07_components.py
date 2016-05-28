@@ -20,7 +20,6 @@ from ..assembias_models import HeavisideAssembias
 from ...custom_exceptions import HalotoolsError
 
 
-
 class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies,
     introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses
@@ -135,7 +134,6 @@ class Zheng07Cens(OccupationComponent):
 
         return mean_ncen
 
-
     def get_published_parameters(self, threshold, publication='Zheng07'):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
@@ -200,6 +198,7 @@ class Zheng07Cens(OccupationComponent):
             return param_dict
         else:
             raise KeyError("For Zheng07Cens, only supported best-fit models are currently Zheng et al. 2007")
+
 
 class Zheng07Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies,
@@ -454,9 +453,11 @@ class Zheng07Sats(OccupationComponent):
         else:
             raise KeyError("For Zheng07Sats, only supported best-fit models are currently Zheng et al. 2007")
 
+
 class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
     """ Assembly-biased modulation of `Zheng07Sats`.
     """
+
     def __init__(self, **kwargs):
         """
         Parameters
@@ -513,6 +514,7 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
 class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
     """ Assembly-biased modulation of `Zheng07Cens`.
     """
+
     def __init__(self, **kwargs):
         """
         Parameters

@@ -9,6 +9,7 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestModelHelpers']
 
+
 class TestModelHelpers(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.model_helpers`.
     """

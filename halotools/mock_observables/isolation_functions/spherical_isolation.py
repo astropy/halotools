@@ -23,6 +23,7 @@ __author__ = ['Andrew Hearin', 'Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
+
 def spherical_isolation(sample1, sample2, r_max, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """

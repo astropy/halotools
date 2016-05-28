@@ -27,6 +27,7 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
+
 def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
     approx_cell2_size, approx_cellran_size):
@@ -104,6 +105,7 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
         RR = (dv*rhor)
 
         return D1R, D2R, RR
+
 
 def _pair_counts(sample1, sample2, rbins,
     period, num_threads, do_auto, do_cross,
@@ -412,7 +414,6 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
         sample1, sample2, _sample1_is_sample2, max_sample_size)
-
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

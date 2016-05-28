@@ -52,7 +52,6 @@ class MonteCarloGalProf(object):
             ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'),
             ])
 
-
     def setup_prof_lookup_tables(self, *lookup_table_binning):
         """
         Method used to set up the lookup table grid.
@@ -416,7 +415,6 @@ class MonteCarloGalProf(object):
         z *= halo_radius
         return x, y, z
 
-
     def mc_pos(self, *profile_params, **kwargs):
         """ Method to generate random, three-dimensional positions of galaxies.
 
@@ -505,7 +503,6 @@ class MonteCarloGalProf(object):
                 return None
             else:
                 return x, y, z
-
 
     def _vrad_disp_from_lookup(self, scaled_radius, *profile_params, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model.

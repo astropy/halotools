@@ -14,6 +14,7 @@ __all__ = ['tpcf_multipole']
 
 __author__ = ['Duncan Campbell']
 
+
 def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     """
     Calculate the multipoles of the two point correlation function

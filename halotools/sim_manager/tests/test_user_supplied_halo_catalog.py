@@ -41,6 +41,7 @@ else:
 
 __all__ = ('TestUserSuppliedHaloCatalog', )
 
+
 class TestUserSuppliedHaloCatalog(TestCase):
     """ Class providing tests of the `~halotools.sim_manager.UserSuppliedHaloCatalog`.
     """
@@ -102,7 +103,6 @@ class TestUserSuppliedHaloCatalog(TestCase):
                 **self.good_halocat_args)
         substr = "The ``redshift`` metadata must be a float."
         assert substr in err.value.args[0]
-
 
     def test_successful_load(self):
 
@@ -354,6 +354,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert os.path.isfile(fname)
 
         dummy_string = '  '
+
         class Dummy(object):
             pass
 
@@ -381,6 +382,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert os.path.isfile(fname)
 
         dummy_string = '  '
+
         class Dummy(object):
             pass
 
@@ -394,7 +396,6 @@ class TestUserSuppliedHaloCatalog(TestCase):
                 overwrite=True, some_more_metadata=not_representable_as_string)
         substr = "keyword is not representable as a string."
         assert substr in err.value.args[0]
-
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache6(self):

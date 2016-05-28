@@ -46,6 +46,7 @@ grid_indices = np.ravel_multi_index([ixx, iyy, izz],
     [grid_jackknife_ncells, grid_jackknife_ncells, grid_jackknife_ncells])
 grid_indices += 1
 
+
 def test_npairs_s_mu_periodic():
     """
     test npairs_s_mu with periodic boundary conditions.

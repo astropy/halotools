@@ -21,10 +21,12 @@ from ..assembias_models import HeavisideAssembias
 from ... import sim_manager
 from ...custom_exceptions import HalotoolsModelInputError
 
+
 class Leauthaud11Cens(OccupationComponent):
     """ HOD-style model for any central galaxy occupation that derives from
     a stellar-to-halo-mass relation.
     """
+
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
@@ -52,7 +54,6 @@ class Leauthaud11Cens(OccupationComponent):
 
         """
         upper_occupation_bound = 1.0
-
 
         # Call the super class constructor, which binds all the
         # arguments to the instance.
@@ -92,7 +93,6 @@ class Leauthaud11Cens(OccupationComponent):
         d['smhm_gamma_0'] = 1.54
         d['scatter_model_param1'] = 0.206
         return d
-
 
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo.
@@ -176,11 +176,11 @@ class Leauthaud11Cens(OccupationComponent):
             redshift=self.redshift)
 
 
-
 class Leauthaud11Sats(OccupationComponent):
     """ HOD-style model for any satellite galaxy occupation that derives from
     a stellar-to-halo-mass relation.
     """
+
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift=sim_manager.sim_defaults.default_redshift,
@@ -295,7 +295,6 @@ class Leauthaud11Sats(OccupationComponent):
 
         self._update_satellite_params()
 
-
     def _update_satellite_params(self):
         """ Private method to update the model parameters.
 
@@ -322,6 +321,7 @@ class Leauthaud11Sats(OccupationComponent):
 class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
     """ Assembly-biased modulation of `Leauthaud11Cens`.
     """
+
     def __init__(self, **kwargs):
         """
         Parameters
@@ -379,6 +379,7 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
 class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
     """ Assembly-biased modulation of `Leauthaud11Sats`.
     """
+
     def __init__(self, **kwargs):
         """
         Parameters

@@ -218,7 +218,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     else:
         Lbox = period
 
-
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
 
     N1 = len(sample1)
@@ -341,6 +340,7 @@ def _enclose_in_box(data1, data2, data3):
            np.vstack((x2, y2, z2)).T,\
            np.vstack((x3, y3, z3)).T, Lbox
 
+
 def get_subvolume_numbers(j_index, N_sub_vol):
     """
     calculate how many points are in each subvolume.
@@ -356,6 +356,7 @@ def get_subvolume_numbers(j_index, N_sub_vol):
     N = N-1 #remove the place holder I added two lines above.
 
     return N
+
 
 def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
     period, num_threads, do_auto, do_cross, _sample1_is_sample2):
@@ -389,6 +390,7 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
 
     return D1D1, D1D2, D2D2
 
+
 def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
     period, num_threads, do_DR, do_RR):
     """
@@ -409,6 +411,7 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
     else: RR=None
 
     return DR, RR
+
 
 def _tpcf_jackknife_process_args(sample1, randoms, rbins,
     Nsub, sample2, period, do_auto, do_cross,

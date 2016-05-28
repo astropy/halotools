@@ -7,6 +7,7 @@ from .. import Leauthaud11Cens, Leauthaud11Sats
 
 __all__ = ('test_Leauthaud11Cens', 'test_Leauthaud11Sats')
 
+
 def test_Leauthaud11Cens():
     """ Function to test
     `~halotools.empirical_models.Leauthaud11Cens`.
@@ -80,7 +81,6 @@ def test_Leauthaud11Sats():
     nsat2b = model2b.mean_occupation(prim_haloprop=5.e12)
     assert model2b.central_occupation_model.mean_occupation(prim_haloprop=5.e12) < 1
     assert nsat2b < nsat2a
-
 
     # Check that increasing stellar mass thresholds decreases the mean occupation
     model10 = Leauthaud11Sats(threshold=10)

@@ -17,6 +17,7 @@ __all__ = ('test_marked_tpcf_auto_periodic',
     'test_marked_tpcf_auto_nonperiodic',
     'test_marked_tpcf_cross1', 'test_marked_tpcf_cross_consistency')
 
+
 def test_marked_tpcf_auto_periodic():
     """
     test marked_tpcf auto correlation with periodic boundary conditions
@@ -57,6 +58,7 @@ def test_marked_tpcf_auto_nonperiodic():
 
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
+
 def test_marked_tpcf_cross1():
     """
     """
@@ -75,6 +77,7 @@ def test_marked_tpcf_cross1():
     result = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
         period=period, num_threads='max', weight_func_id=weight_func_id)
+
 
 def test_marked_tpcf_cross_consistency():
     """

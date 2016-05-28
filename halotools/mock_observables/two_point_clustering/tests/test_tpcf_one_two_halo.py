@@ -20,6 +20,7 @@ rmax = rbins.max()
 
 fixed_seed = 43
 
+
 @slow
 def test_tpcf_one_two_halo_auto_periodic():
     """
@@ -35,6 +36,7 @@ def test_tpcf_one_two_halo_auto_periodic():
       max_sample_size=int(1e4), estimator='Natural')
 
     assert len(result)==2, "wrong number of correlation functions returned."
+
 
 @slow
 def test_tpcf_one_two_halo_cross_periodic():

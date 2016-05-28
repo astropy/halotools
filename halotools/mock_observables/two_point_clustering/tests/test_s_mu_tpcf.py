@@ -11,6 +11,7 @@ __all__=['test_s_mu_tpcf_auto_periodic', 'test_s_mu_tpcf_auto_nonperiodic']
 
 fixed_seed = 43
 
+
 def test_s_mu_tpcf_auto_nonperiodic():
     """
     test s_mu_tpcf autocorrelation without periodic boundary conditons.

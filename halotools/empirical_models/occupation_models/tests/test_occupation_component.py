@@ -69,6 +69,7 @@ class TestOccupationComponent(TestCase):
     def test_required_methods1(self):
 
         constructor_kwargs = self.good_constructor_kwargs
+
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self):
@@ -82,6 +83,7 @@ class TestOccupationComponent(TestCase):
     def test_required_methods2(self):
 
         constructor_kwargs = self.good_constructor_kwargs
+
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self):
@@ -92,11 +94,11 @@ class TestOccupationComponent(TestCase):
 
         model = MyOccupationComponent()
 
-
     def test_nonstandard_upper_occupation_bound1(self):
 
         constructor_kwargs = self.good_constructor_kwargs
         constructor_kwargs['upper_occupation_bound'] = 2
+
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self):
@@ -118,6 +120,7 @@ class TestOccupationComponent(TestCase):
 
         constructor_kwargs = self.good_constructor_kwargs
         constructor_kwargs['upper_occupation_bound'] = 2
+
         class MyOccupationComponent(OccupationComponent):
 
             def __init__(self, threshold):
@@ -144,7 +147,6 @@ class TestOccupationComponent(TestCase):
         new_model.populate_mock(halocat)
         cenmask = new_model.mock.galaxy_table['gal_type'] == 'centrals'
         assert len(new_model.mock.galaxy_table[cenmask]) > 0
-
 
     @pytest.mark.slow
     def test_nonstandard_upper_occupation_bound3(self):
@@ -177,8 +179,6 @@ class TestOccupationComponent(TestCase):
         halocat = FakeSim()
         new_model.populate_mock(halocat)
 
-
-
     @pytest.mark.slow
     def test_nonexistent_prim_haloprop_key(self):
 
@@ -203,7 +203,6 @@ class TestOccupationComponent(TestCase):
 
         halocat = FakeSim()
         new_model.populate_mock(halocat)
-
 
     def tearDown(self):
         pass

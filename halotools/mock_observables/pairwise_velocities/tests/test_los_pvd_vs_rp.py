@@ -14,6 +14,7 @@ __all__ = ('test_los_pvd_vs_rp_correctness1', 'test_los_pvd_vs_rp_correctness2',
 
 fixed_seed = 43
 
+
 @pytest.mark.slow
 def test_los_pvd_vs_rp_correctness1():
     """ This function tests that the
@@ -56,6 +57,7 @@ def test_los_pvd_vs_rp_correctness1():
     assert np.allclose(s1s2[0], 0, rtol=0.1)
     assert np.allclose(s1s2[1], correct_cross_pvd, rtol=0.001)
 
+
 @pytest.mark.slow
 def test_los_pvd_vs_rp_correctness2():
     """ This function tests that the
@@ -97,6 +99,7 @@ def test_los_pvd_vs_rp_correctness2():
 
     assert np.allclose(s1s2[0], 0, rtol=0.1)
     assert np.allclose(s1s2[1], correct_cross_pvd, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_los_pvd_vs_rp_correctness3():
@@ -144,6 +147,7 @@ def test_los_pvd_vs_rp_correctness3():
 
     assert np.allclose(s1s1[1], correct_cross_pvd, rtol=0.001)
 
+
 @pytest.mark.slow
 def test_los_pvd_vs_rp_auto_consistency():
     """ Verify that we get self-consistent auto-correlation results
@@ -172,6 +176,7 @@ def test_los_pvd_vs_rp_auto_consistency():
 
     assert np.allclose(s1s1a, s1s1b, rtol=0.001)
     assert np.allclose(s2s2a, s2s2b, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_los_pvd_vs_rp_cross_consistency():

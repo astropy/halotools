@@ -248,6 +248,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11
 
+
 def spherical_sector_volume(s, mu):
     """
     This function is used to calculate analytical randoms.
@@ -260,6 +261,7 @@ def spherical_sector_volume(s, mu):
     theta = np.arcsin(mu)
     vol = (2.0*np.pi/3.0) * np.outer((s**3.0), (1.0-np.cos(theta)))*2.0
     return vol
+
 
 def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
     period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
@@ -333,6 +335,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
     else:
         raise ValueError('Un-supported combination of PBCs and randoms provided.')
 
+
 def pair_counts(sample1, sample2, s_bins, mu_bins, period,
     num_threads, do_auto, do_cross, _sample1_is_sample2,
     approx_cell1_size, approx_cell2_size):
@@ -369,6 +372,7 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
         else: D2D2=None
 
     return D1D1, D1D2, D2D2
+
 
 def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     period, do_auto, do_cross, estimator, num_threads, max_sample_size,

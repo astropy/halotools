@@ -24,6 +24,7 @@ else:
 
 __all__ = ['TestHodMockFactory']
 
+
 class TestHodMockFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.HodMockFactory`.
     """
@@ -75,7 +76,6 @@ class TestHodMockFactory(TestCase):
         assert np.all(cens['halo_x'] == cens['x'])
         sats = self.galaxy_table2[~cenmask]
         assert np.any(sats['halo_x'] != sats['x'])
-
 
     @pytest.mark.slow
     def test_censat_positions2(self):

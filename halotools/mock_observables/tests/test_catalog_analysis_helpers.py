@@ -23,6 +23,7 @@ __all__ = ('TestCatalogAnalysisHelpers', )
 
 fixed_seed = 43
 
+
 def test_cuboid_subvolume_labels_bounds_checking():
     Npts = 100
     with NumpyRNGContext(fixed_seed):
@@ -52,6 +53,7 @@ def test_cuboid_subvolume_labels_bounds_checking():
     substr = "Input ``Lbox`` must be a scalar or length-3 sequence"
     assert substr in err.value.args[0]
 
+
 def test_cuboid_subvolume_labels_correctness():
     Npts = 100
     Nsub = 2
@@ -72,7 +74,6 @@ def test_cuboid_subvolume_labels_correctness():
     sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.9, zc=0.1, seed=fixed_seed)
     labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     assert np.all(labels == 3)
-
 
 
 class TestCatalogAnalysisHelpers(TestCase):

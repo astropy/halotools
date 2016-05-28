@@ -35,6 +35,7 @@ inconsistent_version_name_error_msg = ("Inconsistency between the version_name "
     "and the version_name passed as a keyword argument = ``%s``.\n"
     "You should instantiate a new model object if you wish to switch halo catalogs.")
 
+
 def _test_mock_consistency(mock,
     redshift=sim_defaults.default_redshift,
     simname=sim_defaults.default_simname,
@@ -58,6 +59,7 @@ def _test_mock_consistency(mock,
     if version_name != mock.version_name:
         raise HalotoolsError(inconsistent_version_name_error_msg % (mock.version_name, version_name))
     print(("version_name = %s" % version_name))
+
 
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):
@@ -107,7 +109,6 @@ class ModelFactory(object):
             self.halo_selection_func = kwargs['halo_selection_func']
         except KeyError:
             pass
-
 
     def populate_mock(self, halocat,
         Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
@@ -232,7 +233,6 @@ class ModelFactory(object):
         mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
         mockpop_kwargs = {key: kwargs[key] for key in mockpop_keys}
         self.mock.populate(**mockpop_kwargs)
-
 
     def update_param_dict_decorator(self, component_model, func_name):
         """

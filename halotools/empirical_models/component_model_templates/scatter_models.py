@@ -18,6 +18,7 @@ from ...utils.array_utils import custom_len, convert_to_ndarray
 __all__ = ('LogNormalScatterModel', )
 __author__ = ('Andrew Hearin', )
 
+
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter
     in a stellar-to-halo-mass type relation.

@@ -18,6 +18,7 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 __all__ = ('marked_npairs_xy_z', )
 
+
 def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                   period=None, weights1=None, weights2=None,
                   weight_func_id=0, verbose=False, num_threads=1,

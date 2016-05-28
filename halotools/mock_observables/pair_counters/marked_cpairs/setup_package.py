@@ -8,6 +8,7 @@ SOURCES = ("custom_weighting_func.pyx",
 
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
+
 def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace('.pyx', '') for src in SOURCES]

@@ -13,6 +13,7 @@ __all__ = ('test_cylindrical_isolation1', 'test_cylindrical_isolation2',
 
 fixed_seed = 43
 
+
 def test_cylindrical_isolation1():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
     returns all points as isolated for two distant localizations of points.
@@ -27,6 +28,7 @@ def test_cylindrical_isolation1():
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max)
     assert np.all(iso == True)
 
+
 def test_cylindrical_isolation2():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
     returns no points as isolated when a subset of ``sample2`` lies within ``sample1``
@@ -37,6 +39,7 @@ def test_cylindrical_isolation2():
     rp_max = 0.1
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
     assert np.all(iso == False)
+
 
 def test_cylindrical_isolation3():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
@@ -55,6 +58,7 @@ def test_cylindrical_isolation3():
 
     assert np.all(iso[:100] == False)
     assert np.all(iso[100:] == True)
+
 
 def test_cylindrical_isolation4():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
@@ -76,6 +80,7 @@ def test_cylindrical_isolation4():
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
     assert np.all(iso[:100] == True)
     assert np.all(iso[100:] == False)
+
 
 def test_cylindrical_isolation5():
     """ For two tight localizations of distant points,
@@ -103,6 +108,7 @@ def test_cylindrical_isolation5():
     rp_max, pi_max = 0.2, 0.05
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)
     assert np.all(iso == True)
+
 
 def test_cylindrical_isolation_indices():
     """ Create two regular meshes such that all points in the meshes are isolated from each other.

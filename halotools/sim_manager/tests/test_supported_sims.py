@@ -19,6 +19,7 @@ from ..cached_halo_catalog import CachedHaloCatalog
 
 __all__ = ('TestSupportedSims', )
 
+
 class TestSupportedSims(TestCase):
     """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`.
     """

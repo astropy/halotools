@@ -214,7 +214,6 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
 
         return D1D1, D1D2, D2D2, N1N1, N1N2, N2N2
 
-
     #count the sum of radial velocities and number of pairs
     weight_func_id = 11
     V1V1, V1V2, V2V2, N1N1, N1N2, N2N2 =\

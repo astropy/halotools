@@ -14,6 +14,7 @@ class TestPrimGalpropModel(TestCase):
     """ Class providing testing for the
     `~halotools.empirical_models.PrimGalpropModel`.
     """
+
     def setUp(self):
 
         class BaryonicMass(PrimGalpropModel):
@@ -150,7 +151,6 @@ class TestPrimGalpropModel(TestCase):
 
         measured_scatter = np.std(np.log10(mc_baryonic_mass))
         assert np.allclose(0.01, measured_scatter, rtol=0.05)
-
 
     def tearDown(self):
         pass

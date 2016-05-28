@@ -39,6 +39,7 @@ class MockFactory(object):
     `SubhaloMockFactory` are the objects used
     to populate simulations with galaxies.
     """
+
     def __init__(self, **kwargs):
         """
         Parameters
@@ -77,7 +78,6 @@ class MockFactory(object):
 
         # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
-
 
         if hasattr(self.model, '_haloprop_list'):
             self.additional_haloprops.extend(self.model._haloprop_list)
@@ -281,7 +281,6 @@ class MockFactory(object):
                 approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, xi11, xi12, xi22
 
-
     def compute_galaxy_matter_cross_clustering(self, include_complement=False, **kwargs):
         """
         Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function.
@@ -426,7 +425,6 @@ class MockFactory(object):
                 period=self.Lbox, num_threads=num_threads, do_auto=False,
                 approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, clustering, clustering2
-
 
     def compute_fof_group_ids(self, zspace=True,
         b_perp=model_defaults.default_b_perp,

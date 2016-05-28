@@ -14,6 +14,7 @@ from ..custom_exceptions import HalotoolsError
 
 __all__ = ('broadcast_host_halo_property', 'add_halo_hostid')
 
+
 def broadcast_host_halo_property(table, halo_property_key,
     delete_possibly_existing_column=False):
     """ Calculate a property of the host of a group system
@@ -109,7 +110,6 @@ def add_halo_hostid(table, delete_possibly_existing_column=False):
         raise HalotoolsError(msg)
     elif ('halo_hostid' in list(table.keys())) & (delete_possibly_existing_column is True):
         del table['halo_hostid']
-
 
     host_mask = table['halo_upid'] == -1
     halo_hostid = np.zeros(len(table), dtype='i8')

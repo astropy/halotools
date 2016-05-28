@@ -12,7 +12,6 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ('test_large_scale_density_spherical_annulus_exception_handling', )
 
 
-
 def test_large_scale_density_spherical_annulus_exception_handling():
     """
     """
@@ -45,6 +44,7 @@ def test_large_scale_density_spherical_annulus_exception_handling():
     substr = "Input ``outer_radius`` must be larger than input ``inner_radius``"
     assert substr in err.value.args[0]
 
+
 def test_large_scale_density_spherical_annulus1():
     """
     """
@@ -60,6 +60,7 @@ def test_large_scale_density_spherical_annulus1():
     print(result)
     print(correct_answer)
     assert np.allclose(result, correct_answer, rtol=0.001)
+
 
 def test_large_scale_density_spherical_annulus2():
     """

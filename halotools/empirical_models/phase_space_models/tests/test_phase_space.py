@@ -9,6 +9,7 @@ from ..profile_models.tests import monte_carlo_density_outer_shell_normalization
 
 __all__ = ['TestNFWPhaseSpace']
 
+
 class TestNFWPhaseSpace(TestCase):
     """ Class used to test `~halotools.empirical_models.NFWPhaseSpace`.
     """
@@ -45,7 +46,6 @@ class TestNFWPhaseSpace(TestCase):
             'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw,
             'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_mvir': mass,
             'x': zeros, 'y': zeros, 'z': zeros, 'vx': halo_vx, 'vy': halo_vy, 'vz': halo_vz})
-
 
     def test_constructor(self):
         """ Test that composite phase space models have all the appropriate attributes.
@@ -113,7 +113,6 @@ class TestNFWPhaseSpace(TestCase):
             analytical_ratio = (
                 analytic_nfw_density_outer_shell_normalization(rbin_midpoints, c))
             assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.05)
-
 
     def test_mc_solid_sphere(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`.
@@ -247,7 +246,6 @@ class TestNFWPhaseSpace(TestCase):
         analytical_result = vmax[0]/np.sqrt(3.)
         assert np.allclose(vr_dispersion_from_monte_carlo, analytical_result, rtol=0.1)
 
-
     def test_mc_vel(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_vel`.
 
@@ -261,7 +259,6 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw.mc_vel(self._dummy_halo_table)
         assert np.any(self._dummy_halo_table['vx'] != self._dummy_halo_table['halo_vx'])
 
-
     ### OLD TESTS OF THE NFW PROFILE MODEL
     ### THESE ARE STILL RELEVANT BUT NEED TO BE REVAMPED TO THE NEW SYNTAX
     # # Check that the lookup table attributes are correct
@@ -269,7 +266,6 @@ class TestNFWPhaseSpace(TestCase):
 
     # assert np.all(model_instance.NFWmodel_conc_lookup_table_bins > 0)
     # assert np.all(model_instance.NFWmodel_conc_lookup_table_bins < 1000)
-
 
     # assert len(model_instance.NFWmodel_conc_lookup_table_bins) >= 10
     # assert (len(model_instance.cumu_inv_func_table) ==

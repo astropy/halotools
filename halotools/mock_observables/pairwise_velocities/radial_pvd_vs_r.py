@@ -17,6 +17,7 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
+
 def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     velocities2=None, period=None, do_auto=True, do_cross=True,
     num_threads=1, max_sample_size=int(1e6),
@@ -141,7 +142,6 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
     marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
 
-
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         do_auto, do_cross, marks1, marks2,
         weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
@@ -214,7 +214,6 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         marks1, marks2, weight_func_id,
         _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
-
 
     def _shifted_std(N, sum_x, sum_x_sqr):
         """

@@ -11,6 +11,7 @@ from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_vpf1', 'test_vpf2', 'test_vpf3')
 
+
 def test_vpf1():
     """ Verify that the VPF raises no exceptions
     for several reasonable choices of rbins.
@@ -30,6 +31,7 @@ def test_vpf1():
     rbins = np.linspace(0.1, 0.3, 10)
     vpf = void_prob_func(sample1, rbins, n_ran=n_ran, period=period)
 
+
 def test_vpf2():
     """ Verify that the VPF raises no exceptions
     for several reasonable choices of rbins.
@@ -45,6 +47,7 @@ def test_vpf2():
 
     rbins = np.logspace(-2, -1, 20)
     vpf = void_prob_func(sample1, rbins, n_ran, period)
+
 
 @pytest.mark.slow
 def test_vpf3():

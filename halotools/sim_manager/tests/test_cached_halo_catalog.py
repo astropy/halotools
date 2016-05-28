@@ -66,7 +66,6 @@ class TestCachedHaloCatalog(TestCase):
         substr = "CachedHaloCatalog got an unexpected keyword"
         assert substr in err.value.args[0]
 
-
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_all_catalogs(self):
         """ Verify that the default halo catalog loads.
@@ -122,11 +121,8 @@ class TestCachedHaloCatalog(TestCase):
                 hf.close()
                 pf.close()
 
-
             except InvalidCacheLogEntry:
                 pass
-
-
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_default_catalog(self):

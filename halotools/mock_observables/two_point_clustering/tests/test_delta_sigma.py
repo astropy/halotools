@@ -11,6 +11,7 @@ __all__ = ['test_delta_sigma1']
 
 fixed_seed = 43
 
+
 def test_delta_sigma1():
     """ Simple unit-test of delta_sigma. Does not verify correctness.
     """

@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division, print_function,
 __all__=['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
 __author__ = ('Duncan Campbell', )
 
+
 def spherical_to_cartesian(ra, dec):
     """
     Calculate cartesian coordinates on a unit sphere given two angular coordinates.

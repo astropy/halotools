@@ -20,10 +20,12 @@ inconsistent_redshift_msg = ("\nYou passed a redshift = %.2f argument to the con
     "in which case the redshift you passed to the constructor will be automatically chosen.\n\n"
     )
 
+
 def get_inconsistent_redshift_msg(input_redshift, constructor_redshift, class_name, method_name):
     return (inconsistent_redshift_msg %
         (constructor_redshift, class_name, class_name, input_redshift, method_name,
             class_name, method_name, method_name, method_name))
+
 
 def safely_retrieve_redshift(obj, method_name, **kwargs):
     """

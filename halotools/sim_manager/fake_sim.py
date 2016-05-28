@@ -12,6 +12,7 @@ from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 __all__ = ('FakeSim', 'FakeSimHalosNearBoundaries')
 
+
 class FakeSim(UserSuppliedHaloCatalog):
     """ Fake simulation data used in the test suite of `~halotools.empirical_models`.
 
@@ -67,7 +68,6 @@ class FakeSim(UserSuppliedHaloCatalog):
         except KeyError:
             self.version_name = 'dummy_version'
         self.redshift = redshift
-
 
         self.seed = seed
         np.random.seed(self.seed)
@@ -145,6 +145,7 @@ class FakeSim(UserSuppliedHaloCatalog):
             halo_mass_accretion_rate=dmdt,
             user_supplied_ptclcat=ptclcat
             )
+
 
 class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
     """ Fake simulation data used in the test suite of `~halotools.empirical_models`.

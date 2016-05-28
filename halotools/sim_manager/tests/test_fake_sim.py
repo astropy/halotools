@@ -10,9 +10,11 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestFakeSim', 'TestFakeSimHalosNearBoundaries']
 
+
 class TestFakeSim(TestCase):
     """
     """
+
     def setUp(self):
         self.fake_sim = FakeSim()
 
@@ -33,9 +35,11 @@ class TestFakeSim(TestCase):
     def tearDown(self):
         del self.fake_sim
 
+
 class TestFakeSimHalosNearBoundaries(TestCase):
     """
     """
+
     def setUp(self):
         self.fake_sim = FakeSimHalosNearBoundaries()
 

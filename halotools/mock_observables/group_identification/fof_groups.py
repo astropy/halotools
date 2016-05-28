@@ -25,6 +25,7 @@ no_igraph_msg = ("igraph package not installed.  Some functions will not be avai
 __all__ = ['FoFGroups']
 __author__ = ['Duncan Campbell']
 
+
 class FoFGroups(object):
     """
     Friends-of-friends (FoF) groups class.

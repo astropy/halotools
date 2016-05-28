@@ -17,6 +17,7 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 __all__ = ('velocity_marked_npairs_xy_z', )
 
+
 def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
     weights1=None, weights2=None,
     weight_func_id=0, verbose=False, num_threads=1,
@@ -167,6 +168,7 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         counts1, counts2, counts3  = np.array(engine(cell1_tuples[0]))
 
     return counts1, counts2, counts3
+
 
 def _velocity_marked_npairs_xy_z_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
     """

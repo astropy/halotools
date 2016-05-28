@@ -21,6 +21,7 @@ __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
+
 def conditional_spherical_isolation(sample1, sample2, r_max,
     marks1=None, marks2=None, cond_func=0, period=None,
     num_threads=1, approx_cell1_size=None, approx_cell2_size=None):

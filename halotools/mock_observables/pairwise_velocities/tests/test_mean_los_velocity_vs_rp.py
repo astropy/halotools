@@ -14,6 +14,7 @@ __all__ = ('test_mean_los_velocity_vs_rp_correctness1', 'test_mean_los_velocity_
 
 fixed_seed = 43
 
+
 def pure_python_mean_los_velocity_vs_rp(
     sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox=None):
     """ Brute force pure python function calculating mean los velocities
@@ -105,7 +106,6 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
         sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
     assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
-
     # ############################################
     # # Run the test with PBCs operative
     s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
@@ -189,6 +189,7 @@ def test_mean_los_velocity_vs_rp_correctness1():
     assert np.allclose(s1s1[2], correct_relative_velocity, rtol=0.01)
     assert np.allclose(s1s1[3], 0, rtol=0.01)
 
+
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness2():
     """ This function tests that the
@@ -246,6 +247,7 @@ def test_mean_los_velocity_vs_rp_correctness2():
     s1s1 = mean_los_velocity_vs_rp(sample, velocities, rp_bins, pi_max)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s1[1], correct_relative_velocity, rtol=0.01)
+
 
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness3():
@@ -309,6 +311,7 @@ def test_mean_los_velocity_vs_rp_correctness3():
     s1s1 = mean_los_velocity_vs_rp(sample, velocities, rp_bins, pi_max, period=1)
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s1[1], correct_relative_velocity, rtol=0.01)
+
 
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness4():
@@ -376,6 +379,7 @@ def test_mean_los_velocity_vs_rp_correctness4():
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s1[1], correct_relative_velocity, rtol=0.01)
 
+
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_parallel():
     """
@@ -404,6 +408,7 @@ def test_mean_los_velocity_vs_rp_parallel():
     assert np.allclose(s1s1_serial, s1s1_parallel, rtol=0.001)
     assert np.allclose(s1s2_serial, s1s2_parallel, rtol=0.001)
     assert np.allclose(s2s2_serial, s2s2_parallel, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_auto_consistency():

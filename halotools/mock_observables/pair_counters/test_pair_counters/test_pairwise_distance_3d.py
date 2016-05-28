@@ -26,6 +26,7 @@ __all__ = ["test_pairwise_distance_3d_periodic_mesh_grid_1",
            "test_pairwise_distance_3d_nonperiodic_tight_locus2"
            ]
 
+
 def test_pairwise_distance_3d_periodic_mesh_grid_1():
     """
     test that each point is paired with its neighbor on a regular grid
@@ -172,6 +173,7 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
     #each point has 0 connections including 1 self connection
     assert m.getnnz()==Npts1*Npts2
 
+
 @pytest.mark.slow
 def test_3d_brute_force_elementwise_comparison():
     Npts1, Npts2 = int(1e2), int(1e2)
@@ -192,6 +194,7 @@ def test_3d_brute_force_elementwise_comparison():
             brute_force_element = pure_python_dense_matrix[i, j]
             sparse_matrix_element = dense_matrix[i, j]
             assert np.allclose(brute_force_element, sparse_matrix_element, rtol=0.001)
+
 
 @pytest.mark.slow
 def test_xy_z_brute_force_elementwise_comparison():

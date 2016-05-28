@@ -16,12 +16,14 @@ from .. import model_defaults
 
 from ...sim_manager import sim_defaults
 
+
 class TrivialPhaseSpace(object):
     """ Profile of central galaxies residing at the exact center of their
     host halo with the exact same velocity as the halo velocity.
 
     :math:`P(\\vec{x}_{\\rm cen}, \\vec{v}_{\\rm cen}) = \\delta^{(6)}(\\vec{x}_{\\rm halo}, \\vec{v}_{\\rm halo})`.
     """
+
     def __init__(self,
         cosmology=sim_defaults.default_cosmology,
         redshift=sim_defaults.default_redshift,

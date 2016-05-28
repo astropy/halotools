@@ -16,6 +16,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ('npairs_s_mu', )
 
+
 def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """

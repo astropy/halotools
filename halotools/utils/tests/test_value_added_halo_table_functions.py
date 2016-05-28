@@ -26,6 +26,7 @@ __all__ = ['TestValueAddedHaloTableFunctions']
 class TestValueAddedHaloTableFunctions(TestCase):
     """ Class providing tests of the `~halotools.utils.value_added_halo_table_functions`.
     """
+
     def setUp(self):
         fake_sim = FakeSim()
         self.table = fake_sim.halo_table
@@ -137,7 +138,6 @@ class TestValueAddedHaloTableFunctions(TestCase):
 
         add_halo_hostid(t, delete_possibly_existing_column=True)
         assert np.all(t['halo_hostid'] == existing_halo_hostid)
-
 
     def tearDown(self):
         del self.table

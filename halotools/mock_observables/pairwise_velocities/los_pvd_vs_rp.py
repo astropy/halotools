@@ -18,6 +18,7 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
+
 def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     velocities2=None, period=None, do_auto=True, do_cross=True,
     num_threads=1, max_sample_size=int(1e6),
@@ -156,7 +157,6 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     shift2 = np.repeat(std_v2, len(sample2))
     marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
     marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
-
 
     def marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period, num_threads,
         do_auto, do_cross, marks1, marks2,

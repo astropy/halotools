@@ -28,6 +28,7 @@ __all__ = ('density_threshold', 'delta_vir',
 
 __author__ = ['Benedikt Diemer', 'Andrew Hearin']
 
+
 def density_threshold(cosmology, redshift, mdef):
     """
     The threshold density for a given spherical-overdensity mass definition.
@@ -93,7 +94,6 @@ def density_threshold(cosmology, redshift, mdef):
         if mdef != 'vir':
             raise HalotoolsError(mdef_msg)
 
-
     rho_crit = cosmology.critical_density(redshift)
     rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/cosmology.h**2
 
@@ -114,6 +114,7 @@ def density_threshold(cosmology, redshift, mdef):
         raise HalotoolsError(mdef_msg)
 
     return rho_threshold
+
 
 def delta_vir(cosmology, redshift):
     """
@@ -157,6 +158,7 @@ def delta_vir(cosmology, redshift):
     delta = 18 * np.pi**2 + 82.0 * x - 39.0 * x**2
 
     return delta
+
 
 def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
     """
@@ -205,6 +207,7 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 
     return radius
 
+
 def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
     """
     Spherical overdensity mass as a function of the input radius.
@@ -247,6 +250,7 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
     rho = density_threshold(cosmology, redshift, mdef)
     mass = 4.0 / 3.0 * np.pi * rho * radius**3
     return mass
+
 
 def halo_mass_to_virial_velocity(total_mass, cosmology, redshift, mdef):
     """ The circular velocity evaluated at the halo boundary,

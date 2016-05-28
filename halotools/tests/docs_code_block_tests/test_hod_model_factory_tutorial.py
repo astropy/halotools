@@ -117,7 +117,6 @@ class TestHodModelFactoryTutorial(TestCase):
                 )
             assert len(w) == 0
 
-
         assert hasattr(model_instance, 'mean_quiescent_fraction_centrals')
         assert hasattr(model_instance, 'mean_quiescent_fraction_satellites')
 
@@ -294,7 +293,6 @@ class TestHodModelFactoryTutorial(TestCase):
         except ValueError:
             # in this Monte Carlo realization, there were zero disrupted satellites
             pass
-
 
     @pytest.mark.slow
     def test_hod_modeling_tutorial5(self):

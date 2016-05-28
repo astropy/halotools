@@ -11,6 +11,7 @@ from ... import model_defaults
 
 __all__ = ['test_Moster13SmHm_initialization', 'test_LogNormalScatterModel_initialization']
 
+
 def test_Moster13SmHm_initialization():
     """ Function testing the initialization of
     `~halotools.empirical_models.Moster13SmHm`.
@@ -48,6 +49,7 @@ def test_Moster13SmHm_initialization():
     macc_model = Moster13SmHm(prim_haloprop_key='macc')
     assert macc_model.prim_haloprop_key == 'macc'
     assert macc_model.scatter_model.prim_haloprop_key == 'macc'
+
 
 def test_Moster13SmHm_behavior():
     """
@@ -160,7 +162,6 @@ def test_LogNormalScatterModel_behavior():
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, model_defaults.default_smhm_scatter, decimal=2)
 
-
     input_abscissa = [12, 15]
     input_ordinates = [0.3, 0.1]
     scatter_model2 = LogNormalScatterModel(
@@ -184,7 +185,6 @@ def test_LogNormalScatterModel_behavior():
     scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, table=halos12)
     disp = np.std(scatter_realization)
     np.testing.assert_almost_equal(disp, 0.3, decimal=2)
-
 
     # Test the mean_scatter method of a non-trivial model at the second abscissa
     testmass15 = 1e15
@@ -326,7 +326,6 @@ class TestBehroozi10SmHm(TestCase):
         self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.model.littleh)
         self.logmh_z05 = np.log10((10.**self.logmh_z05)/self.model.littleh)
         self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.model.littleh)
-
 
     def test_behroozi10_smhm_blackbox(self):
         """

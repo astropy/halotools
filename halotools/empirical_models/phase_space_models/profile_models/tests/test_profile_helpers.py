@@ -16,6 +16,7 @@ from .....custom_exceptions import HalotoolsError
 
 __all__ = ['TestProfileHelpers']
 
+
 class TestProfileHelpers(TestCase):
     """ Container class for tests of all the methods in the `~halotools.empirical_models.profile_helpers` module.
     """
@@ -24,7 +25,6 @@ class TestProfileHelpers(TestCase):
         """ Pre-load various arrays into memory for use by all tests.
         """
         pass
-
 
     def test_halo_radius_to_halo_mass(self):
         """ Check that the `~halotools.empirical_models.profile_helpers.halo_mass_to_halo_radius`
@@ -56,8 +56,6 @@ class TestProfileHelpers(TestCase):
         wmap9_delta_vir_z10 = density_threshold(WMAP9, z, 'vir')/rho_m
 
         assert np.allclose(wmap9_delta_vir_z10, bn98_result, rtol=0.01)
-
-
 
     def test_density_threshold(self):
         """ Verify that the `~halotools.empirical_models.profile_helpers.density_threshold`

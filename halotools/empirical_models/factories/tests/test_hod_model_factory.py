@@ -14,6 +14,7 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestHodModelFactory']
 
+
 class TestHodModelFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`.
     """
@@ -74,8 +75,6 @@ class TestHodModelFactory(TestCase):
             m.populate_mock(halocat=halocat)
         substr = "does not have the ``halo_upid`` column."
         assert substr in err.value.args[0]
-
-
 
     def tearDown(self):
         pass

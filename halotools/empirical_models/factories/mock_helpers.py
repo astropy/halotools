@@ -11,6 +11,7 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ('three_dim_pos_bundle', 'infer_mask_from_kwargs')
 
+
 def three_dim_pos_bundle(table, key1, key2, key3,
     return_complement=False, **kwargs):
     """

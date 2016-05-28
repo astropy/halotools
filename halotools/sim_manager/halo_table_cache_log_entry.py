@@ -208,7 +208,6 @@ class HaloTableCacheLogEntry(object):
             halo_table = Table()
         return msg, num_failures, halo_table
 
-
     def _verify_metadata_consistency(self, num_failures):
         """ Enforce that the hdf5 metadata agrees with the
         values in the log entry.
@@ -259,7 +258,6 @@ class HaloTableCacheLogEntry(object):
                 pass
 
         return msg, num_failures
-
 
     def _verify_all_keys_begin_with_halo(self, halo_table, num_failures):
         """

@@ -80,6 +80,7 @@ def test_los_pvd_vs_rp_auto_consistency():
     assert np.allclose(s1s1a, s1s1b, rtol=0.001)
     assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
+
 @pytest.mark.slow
 def test_los_pvd_vs_rp_cross_consistency():
     np.random.seed(43)
