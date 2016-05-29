@@ -28,7 +28,7 @@ def test_tpcf_one_two_halo_auto_periodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        IDs1 = np.random.random_integers(0, 10, Npts)
+        IDs1 = np.random.randint(0, 11, Npts)
         sample1 = np.random.random((Npts, 3))
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=None,
@@ -45,8 +45,8 @@ def test_tpcf_one_two_halo_cross_periodic():
     """
     Npts = 100
     with NumpyRNGContext(fixed_seed):
-        IDs1 = np.random.random_integers(0, 10, Npts)
-        IDs2 = np.random.random_integers(0, 10, Npts)
+        IDs1 = np.random.randint(0, 11, Npts)
+        IDs2 = np.random.randint(0, 11, Npts)
         sample1 = np.random.random((Npts, 3))
         sample2 = np.random.random((Npts, 3))
 

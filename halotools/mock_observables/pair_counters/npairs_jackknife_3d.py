@@ -139,8 +139,8 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
     use randomly assigned sub-volumes as this has no impact on the calling signature:
 
     >>> N_samples = 10
-    >>> jtags1 = np.random.random_integers(1, N_samples, Npts1)
-    >>> jtags2 = np.random.random_integers(1, N_samples, Npts2)
+    >>> jtags1 = np.random.randint(1, N_samples+1, Npts1)
+    >>> jtags2 = np.random.randint(1, N_samples+1, Npts2)
 
     >>> result = npairs_jackknife_3d(sample1, sample2, rbins, period = period, jtags1=jtags1, jtags2=jtags2, N_samples = N_samples)
 

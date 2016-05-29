@@ -97,7 +97,7 @@ def crossmatch(x, y, skip_bounds_checking=False):
     >>> x = np.random.rand(num_galaxies)
     >>> objid = np.arange(num_galaxies)
     >>> num_groups = int(1e4)
-    >>> groupid = np.random.random_integers(0, num_groups-1, num_galaxies)
+    >>> groupid = np.random.randint(0, num_groups, num_galaxies)
     >>> galaxy_table = Table({'x': x, 'objid': objid, 'groupid': groupid})
 
     >>> groupmass = np.random.rand(num_groups)

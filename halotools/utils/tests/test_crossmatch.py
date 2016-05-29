@@ -57,7 +57,7 @@ def test_crossmatch5():
     xmax = 100
     numx = 10000
     with NumpyRNGContext(fixed_seed):
-        x = np.random.random_integers(0, xmax, numx)
+        x = np.random.randint(0, xmax+1, numx)
 
     y = np.arange(-xmax, xmax)[::10]
     np.random.shuffle(y)

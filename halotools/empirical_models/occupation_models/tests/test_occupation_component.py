@@ -132,7 +132,7 @@ class TestOccupationComponent(TestCase):
 
             def mc_occupation(self, **kwargs):
                 table = kwargs['table']
-                result = np.random.random_integers(0, 1, len(table))
+                result = np.random.randint(0, 2, len(table))
                 table['halo_num_centrals'] = result
                 return result
 
