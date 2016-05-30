@@ -2,26 +2,26 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-from astropy.tests.helper import pytest 
+from astropy.tests.helper import pytest
 import os
 import shutil
 
 from astropy.table import Table
 
 try:
-    import h5py 
+    import h5py
     HAS_H5PY = True
 except ImportError:
     HAS_H5PY = False
 
-from astropy.config.paths import _find_home 
+from astropy.config.paths import _find_home
 
 from . import helper_functions
 from ..ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
 ### Determine whether the machine is mine
-# This will be used to select tests whose 
-# returned values depend on the configuration 
+# This will be used to select tests whose
+# returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
 detected_home = _find_home()
@@ -30,17 +30,16 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestPtclTableCacheLogEntry',  )
-
+__all__ = ('TestPtclTableCacheLogEntry',)
 
 
 class TestPtclTableCacheLogEntry(TestCase):
-    """ Class providing unit testing for `~halotools.sim_manager.PtclTableCacheLogEntry`. 
+    """ Class providing unit testing for `~halotools.sim_manager.PtclTableCacheLogEntry`.
     """
     hard_coded_log_attrs = ['simname', 'version_name', 'redshift', 'fname']
 
     def setUp(self):
-        """ Pre-load various arrays into memory for use by all tests. 
+        """ Pre-load various arrays into memory for use by all tests.
         """
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
 
@@ -50,39 +49,39 @@ class TestPtclTableCacheLogEntry(TestCase):
             pass
         os.makedirs(self.dummy_cache_baseloc)
 
-        self.simnames = ('bolshoi', 'consuelo', 
+        self.simnames = ('bolshoi', 'consuelo',
             'bolshoi', 'bolshoi', 'multidark')
         self.version_names = ('v0', 'v1', 'v2', 'v3', 'v4')
         self.redshifts = (1.2, -0.1, 1.339, 1.3, 100.)
 
-        self.basenames = ('non_existent.hdf5', 'existent.file', 
+        self.basenames = ('non_existent.hdf5', 'existent.file',
             'existent.hdf5', 'existent.hdf5', 'good.hdf5')
-        self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name) 
+        self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name)
             for name in self.basenames)
 
         self.table1 = Table({'x': [1, 2, 3]})
-        
+
         self.good_table = Table(
-            {'ptcl_id': [1, 2, 3], 
-            'x': [1, 2, 3], 
-            'y': [1, 2, 3], 
-            'z': [1, 2, 3], 
-            'vx': [1, 2, 3], 
-            'vy': [1, 2, 3], 
-            'vz': [1, 2, 3], 
+            {'ptcl_id': [1, 2, 3],
+            'x': [1, 2, 3],
+            'y': [1, 2, 3],
+            'z': [1, 2, 3],
+            'vx': [1, 2, 3],
+            'vy': [1, 2, 3],
+            'vz': [1, 2, 3],
             })
 
     def get_scenario_kwargs(self, num_scenario):
-        return ({'simname': self.simnames[num_scenario],  
-            'version_name': self.version_names[num_scenario], 
-            'redshift': self.redshifts[num_scenario], 
+        return ({'simname': self.simnames[num_scenario],
+            'version_name': self.version_names[num_scenario],
+            'redshift': self.redshifts[num_scenario],
             'fname': self.fnames[num_scenario]})
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_instantiation(self):
         """ We can instantiate the log entry with a complete set of metadata
         """
-        
+
         for i in range(len(self.simnames)):
             constructor_kwargs = self.get_scenario_kwargs(i)
             log_entry = PtclTableCacheLogEntry(**constructor_kwargs)
@@ -161,7 +160,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
-        _ =  log_entry.safe_for_cache
+        _ = log_entry.safe_for_cache
         assert "``particle_mass``" not in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
@@ -250,7 +249,6 @@ class TestPtclTableCacheLogEntry(TestCase):
         substr = "must be bounded by [0, Lbox]."
         assert substr in log_entry._cache_safety_message
 
-
     @pytest.mark.skipif('not HAS_H5PY')
     def test_passing_scenario(self):
         num_scenario = 4
@@ -271,17 +269,11 @@ class TestPtclTableCacheLogEntry(TestCase):
         f.close()
 
         assert log_entry.safe_for_cache is True, log_entry._cache_safety_message
-        substr =  "The particle catalog is safe to add to the cache log." 
+        substr = "The particle catalog is safe to add to the cache log."
         assert substr in log_entry._cache_safety_message
-
 
     def tearDown(self):
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
-
-
-
-
-

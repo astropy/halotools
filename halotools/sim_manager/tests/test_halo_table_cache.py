@@ -113,7 +113,7 @@ class TestHaloTableCache(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_determine_log_entry_from_fname(self):
-        cache = HaloTableCache(read_log_from_standard_loc = False)
+        cache = HaloTableCache(read_log_from_standard_loc=False)
 
         entry = self.good_log_entry
         fname = entry.fname
@@ -144,62 +144,61 @@ class TestHaloTableCache(TestCase):
         f.attrs.create('version_name', tmp)
         f.close()
 
-
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_entry_to_cache_log(self):
-        cache = HaloTableCache(read_log_from_standard_loc = False)
+        cache = HaloTableCache(read_log_from_standard_loc=False)
         assert len(cache.log) == 0
 
         with pytest.raises(TypeError) as err:
-            cache.add_entry_to_cache_log('abc', update_ascii = False)
+            cache.add_entry_to_cache_log('abc', update_ascii=False)
         substr = "You can only add instances of HaloTableCacheLogEntry to the cache log"
         assert substr in err.value.args[0]
 
-        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii=False)
         assert len(cache.log) == 1
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+            cache.add_entry_to_cache_log(self.good_log_entry, update_ascii=False)
             substr = "cache log already contains the entry"
             assert substr in str(w[-1].message)
         assert len(cache.log) == 1
 
-        cache.add_entry_to_cache_log(self.good_log_entry2, update_ascii = False)
+        cache.add_entry_to_cache_log(self.good_log_entry2, update_ascii=False)
         assert len(cache.log) == 2
 
         with pytest.raises(InvalidCacheLogEntry) as err:
-            cache.add_entry_to_cache_log(self.bad_log_entry, update_ascii = False)
+            cache.add_entry_to_cache_log(self.bad_log_entry, update_ascii=False)
         substr = "The input filename does not exist."
         assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_remove_entry_from_cache_log(self):
-        cache = HaloTableCache(read_log_from_standard_loc = False)
-        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
-        cache.add_entry_to_cache_log(self.good_log_entry2, update_ascii = False)
+        cache = HaloTableCache(read_log_from_standard_loc=False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii=False)
+        cache.add_entry_to_cache_log(self.good_log_entry2, update_ascii=False)
         assert len(cache.log) == 2
 
         entry = self.good_log_entry
         args = [getattr(entry, attr) for attr in entry.log_attributes]
-        cache.remove_entry_from_cache_log(*args, update_ascii = False)
+        cache.remove_entry_from_cache_log(*args, update_ascii=False)
         assert len(cache.log) == 1
 
         with pytest.raises(HalotoolsError) as err:
-            cache.remove_entry_from_cache_log(*args, update_ascii = False)
+            cache.remove_entry_from_cache_log(*args, update_ascii=False)
         substr = "This entry does not appear in the log."
         assert substr in err.value.args[0]
 
-        cache.remove_entry_from_cache_log(*args, update_ascii = False,
-            raise_non_existence_exception = False)
+        cache.remove_entry_from_cache_log(*args, update_ascii=False,
+            raise_non_existence_exception=False)
         assert len(cache.log) == 1
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_update_cached_file_location(self):
         """
         """
-        cache = HaloTableCache(read_log_from_standard_loc = False)
-        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+        cache = HaloTableCache(read_log_from_standard_loc=False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii=False)
         old_fname = self.good_log_entry.fname
         old_basename = os.path.basename(old_fname)
         new_basename = "dummy" + old_basename
@@ -208,16 +207,14 @@ class TestHaloTableCache(TestCase):
 
         assert self.good_log_entry in cache.log
         cache.update_cached_file_location(new_fname, old_fname,
-            update_ascii = False)
+            update_ascii=False)
         assert self.good_log_entry not in cache.log
 
         new_entry = cache.determine_log_entry_from_fname(new_fname)
         assert new_entry in cache.log
-
 
     def tearDown(self):
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
-

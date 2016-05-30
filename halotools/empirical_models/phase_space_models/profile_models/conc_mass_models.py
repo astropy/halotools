@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Classes and functions defining relations between NFW concentration and halo mass. 
+Classes and functions defining relations between NFW concentration and halo mass.
 
 """
 
@@ -16,44 +16,45 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ['ConcMass']
 __author__ = ('Andrew Hearin', )
 
+
 class ConcMass(object):
-    """ Container class for commonly used concentration-mass relations in the literature. 
+    """ Container class for commonly used concentration-mass relations in the literature.
 
-    `ConcMass` can be instantiated as a stand-alone class, or used as an orthogonal mix-in 
-    with the `~halotools.empirical_models.NFWProfile` or any of its sub-classes. 
+    `ConcMass` can be instantiated as a stand-alone class, or used as an orthogonal mix-in
+    with the `~halotools.empirical_models.NFWProfile` or any of its sub-classes.
 
-    Notes 
+    Notes
     ------
-    Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
+    Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class.
 
     """
 
-    def __init__(self, conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+    def __init__(self, conc_mass_model=model_defaults.conc_mass_model, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        cosmology : object, optional 
+        cosmology : object, optional
             Astropy cosmology object. Default is set in `~halotools.sim_manager.sim_defaults`.
 
-        redshift : float, optional  
+        redshift : float, optional
             Default is set in `~halotools.sim_manager.sim_defaults`.
 
-        mdef: str, optional 
-            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+        mdef: str, optional
+            String specifying the halo mass definition, e.g., 'vir' or '200m'.
              Default is set in `~halotools.empirical_models.model_defaults`.
 
-        conc_mass_model : string, optional  
-            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+        conc_mass_model : string, optional
+            Specifies the calibrated fitting function used to model the concentration-mass relation.
              Default is set in `~halotools.empirical_models.model_defaults`.
 
-        concentration_key : string, optional 
-            Key of the ``table`` column storing the halo catalog concentration. 
-            The only concentration-mass model requiring this constructor input is the 
-            ``direct_from_halo_catalog`` model. Default is ``halo_nfw_conc``, which is consistent 
+        concentration_key : string, optional
+            Key of the ``table`` column storing the halo catalog concentration.
+            The only concentration-mass model requiring this constructor input is the
+            ``direct_from_halo_catalog`` model. Default is ``halo_nfw_conc``, which is consistent
             with all halo catalogs provided by Halotools but may differ from the convention
-            adopted in custom halo catalogs. 
+            adopted in custom halo catalogs.
 
-        Examples 
+        Examples
         ---------
         >>> conc_mass_model = ConcMass()
         >>> conc_mass_model = ConcMass(redshift = 2, mdef = '500c')
@@ -74,30 +75,30 @@ class ConcMass(object):
             self.concentration_key = model_defaults.concentration_key
 
     def compute_concentration(self, **kwargs):
-        """ Method used to evaluate the mean NFW concentration as a function of 
-        halo mass. 
+        """ Method used to evaluate the mean NFW concentration as a function of
+        halo mass.
 
-        This is the primary method seen by the outside world. It has no functionality 
-        of its own, it only calls the desired function based on the model keyword. 
+        This is the primary method seen by the outside world. It has no functionality
+        of its own, it only calls the desired function based on the model keyword.
 
         Parameters
-        ----------        
-        prim_haloprop : array, optional  
-            Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
+        ----------
+        prim_haloprop : array, optional
+            Array of mass-like variable upon which occupation statistics are based.
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed.
 
-        table : object, optional  
-            Data table storing halo catalog. 
-            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+        table : object, optional
+            Data table storing halo catalog.
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed.
 
-        Returns 
+        Returns
         -------
         c : array_like
-            Concentrations of the input halos. 
+            Concentrations of the input halos.
 
-        Notes 
+        Notes
         ------
-        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
+        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class.
 
         """
         conc_mass_func = getattr(self, self.conc_mass_model)
@@ -105,20 +106,20 @@ class ConcMass(object):
 
     def direct_from_halo_catalog(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        table : object, optional  
-            Data table storing halo catalog. 
-            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+        table : object, optional
+            Data table storing halo catalog.
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed.
 
-        Returns 
+        Returns
         -------
         c : array_like
-            Concentrations of the input halos. 
+            Concentrations of the input halos.
 
-        Notes 
+        Notes
         ------
-        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
+        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class.
 
         """
         key = self.concentration_key
@@ -138,17 +139,17 @@ class ConcMass(object):
                 "The current ConcMass instance is set to use %s as the ``concentration_key``, \n"
                 "which does not correspond to a column of the input ``table``.\n")
             raise HalotoolsError(msg % key)
-        
+
         ### Impose the model_defaults constraints
-        c = np.where(c > model_defaults.max_permitted_conc, 
+        c = np.where(c > model_defaults.max_permitted_conc,
             model_defaults.max_permitted_conc, c)
-        c = np.where(c < model_defaults.min_permitted_conc, 
+        c = np.where(c < model_defaults.min_permitted_conc,
             model_defaults.min_permitted_conc, c)
 
         return c
 
     def dutton_maccio14(self, **kwargs):
-        """ Power-law fit to the concentration-mass relation from 
+        """ Power-law fit to the concentration-mass relation from
         Equations 12 & 13 of Dutton & Maccio 2014, arXiv:1402.7073.
 
         :math:`a = 0.537 + (1.025 - 0.537)\\exp(-0.718z^{1.08})`
@@ -159,28 +160,28 @@ class ConcMass(object):
 
         :math:`\\log_{10}c(M) = a + b\\log_{10}(M / M_{0})`
 
-        Parameters 
+        Parameters
         ----------
-        prim_haloprop : array, optional  
-            Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
+        prim_haloprop : array, optional
+            Array of mass-like variable upon which occupation statistics are based.
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed.
 
-        table : object, optional  
-            Data table storing halo catalog. 
-            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+        table : object, optional
+            Data table storing halo catalog.
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed.
 
-        Returns 
+        Returns
         -------
         c : array_like
-            Concentrations of the input halos. 
+            Concentrations of the input halos.
 
-        Notes 
-        -----        
+        Notes
+        -----
         This model was only calibrated for the Planck 1-year cosmology.
 
         Model assumes that halo mass definition is Mvir.
 
-        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
+        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class.
 
         """
 

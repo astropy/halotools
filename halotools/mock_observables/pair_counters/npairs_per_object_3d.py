@@ -1,23 +1,24 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_3d` function
+used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
-
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
+from functools import partial
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .cpairs import npairs_per_object_3d_engine
 from .npairs_3d import _npairs_3d_process_args
 
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
+
 __all__ = ('npairs_per_object_3d', )
 
-def npairs_per_object_3d(sample1, sample2, rbins, period = None,
-    verbose = False, num_threads = 1,
-    approx_cell1_size = None, approx_cell2_size = None):
+
+def npairs_per_object_3d(sample1, sample2, rbins, period=None,
+        verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of times the pair count between two samples exceeds a
     threshold value as a function of the 3d spatial separation *r*.
@@ -26,18 +27,18 @@ def npairs_per_object_3d(sample1, sample2, rbins, period = None,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points. 
+        Npts2 x 3 array containing 3-D positions of points.
 
     rbins : array_like
         Boundaries defining the bins in which pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.
@@ -50,25 +51,25 @@ def npairs_per_object_3d(sample1, sample2, rbins, period = None,
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -105,10 +106,10 @@ def npairs_per_object_3d(sample1, sample2, rbins, period = None,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax 
+    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -124,7 +125,7 @@ def npairs_per_object_3d(sample1, sample2, rbins, period = None,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_per_object_3d_engine, 
+    engine = partial(npairs_per_object_3d_engine,
         double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rbins)
 
     # Calculate the cell1 indices that will be looped over by the engine
@@ -141,4 +142,3 @@ def npairs_per_object_3d(sample1, sample2, rbins, period = None,
         counts = np.vstack(result)
 
     return np.array(counts)
-

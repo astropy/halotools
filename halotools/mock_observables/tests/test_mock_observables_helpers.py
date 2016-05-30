@@ -1,20 +1,21 @@
-""" Module providing unit-testing for 
-`~halotools.mock_observables.mock_observables_helpers` functions. 
+""" Module providing unit-testing for
+`~halotools.mock_observables.mock_observables_helpers` functions.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import numpy as np 
-import pytest 
-import multiprocessing 
+import numpy as np
+import pytest
+import multiprocessing
 
 from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 from ..mock_observables_helpers import enforce_sample_has_correct_shape, get_separation_bins_array
-from ..mock_observables_helpers import get_line_of_sight_bins_array 
+from ..mock_observables_helpers import get_line_of_sight_bins_array
 
-__all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads', 
+__all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads',
     'test_get_period')
 
 fixed_seed = 43
+
 
 def test_enforce_sample_respects_pbcs():
     npts = 10
@@ -45,50 +46,53 @@ def test_enforce_sample_respects_pbcs():
     substr = "your input data has negative values"
     assert substr in err.value.args[0]
 
+
 def test_get_num_threads():
 
     input_num_threads = 1
-    result = get_num_threads(input_num_threads, enforce_max_cores = False)
+    result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == 1
 
     input_num_threads = 'max'
-    result = get_num_threads(input_num_threads, enforce_max_cores = False)
+    result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == multiprocessing.cpu_count()
 
     max_cores = multiprocessing.cpu_count()
 
     input_num_threads = max_cores + 1
-    result = get_num_threads(input_num_threads, enforce_max_cores = False)
+    result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == input_num_threads
 
     input_num_threads = max_cores + 1
-    result = get_num_threads(input_num_threads, enforce_max_cores = True)
+    result = get_num_threads(input_num_threads, enforce_max_cores=True)
     assert result == max_cores
 
     input_num_threads = '$'
     with pytest.raises(ValueError) as err:
-        result = get_num_threads(input_num_threads, enforce_max_cores = True)
+        result = get_num_threads(input_num_threads, enforce_max_cores=True)
     substr = "Input ``num_threads`` must be an integer"
     assert err.value.args[0] in substr
+
 
 def test_get_period():
     period, PBCs = get_period(1)
     assert np.all(period == 1)
     assert PBCs is True
 
-    period, PBCs = get_period([1,1,1])
+    period, PBCs = get_period([1, 1, 1])
     assert np.all(period == 1)
     assert PBCs is True
 
     with pytest.raises(ValueError) as err:
-        period, PBCs = get_period([1,1])
+        period, PBCs = get_period([1, 1])
     substr = "Input ``period`` must be either a scalar or a 3-element sequence."
     assert substr in err.value.args[0]
 
     with pytest.raises(ValueError) as err:
-        period, PBCs = get_period([1,1, np.inf])
+        period, PBCs = get_period([1, 1, np.inf])
     substr = "All values must bounded positive numbers."
     assert substr in err.value.args[0]
+
 
 def test_enforce_sample_has_correct_shape():
 
@@ -102,9 +106,10 @@ def test_enforce_sample_has_correct_shape():
     substr = "Input sample of points must be a Numpy ndarray of shape (Npts, 3)."
     assert substr in err.value.args[0]
 
+
 def test_get_separation_bins_array():
 
-    good_rbins = [1,2]
+    good_rbins = [1, 2]
     _ = get_separation_bins_array(good_rbins)
 
     good_rbins = np.linspace(1, 2, 10)
@@ -122,9 +127,10 @@ def test_get_separation_bins_array():
     substr = "Input separation bins must be a monotonically increasing "
     assert substr in err.value.args[0]
 
+
 def test_get_line_of_sight_bins_array():
 
-    good_pi_bins = [1,2]
+    good_pi_bins = [1, 2]
     _ = get_line_of_sight_bins_array(good_pi_bins)
 
     good_pi_bins = np.linspace(1, 2, 10)
@@ -145,7 +151,3 @@ def test_get_line_of_sight_bins_array():
         _ = get_line_of_sight_bins_array(bad_pi_bins)
     substr = "Input separation bins must be a monotonically increasing "
     assert substr in err.value.args[0]
-
-
-
-

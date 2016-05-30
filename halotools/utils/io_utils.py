@@ -49,7 +49,3 @@ def download_file_from_url(url, fname):
         sys.stdout.flush()
 
     urllib.request.urlretrieve(url, fname, reporthook)
-
-
-
-

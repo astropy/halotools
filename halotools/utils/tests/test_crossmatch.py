@@ -1,17 +1,18 @@
 """ Module providing unit-testing of `~halotools.utils.crossmatch` function.
 """
-import numpy as np 
+import numpy as np
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..crossmatch import crossmatch 
+from ..crossmatch import crossmatch
 
 __all__ = ('test_crossmatch1', )
 
 fixed_seed = 43
 
+
 def test_crossmatch1():
-    """ x has unique entries. All y values are in x. All x values are in y. 
+    """ x has unique entries. All y values are in x. All x values are in y.
     """
     x = np.array([1, 3, 5])
     y = np.array([5, 1])
@@ -19,8 +20,9 @@ def test_crossmatch1():
 
     assert np.all(x[x_idx] == y[y_idx])
 
+
 def test_crossmatch2():
-    """ x has repeated entries. All y values are in x. All x values are in y. 
+    """ x has repeated entries. All y values are in x. All x values are in y.
     """
     x = np.array([1, 3, 5, 3, 1, 1, 3, 5])
     y = np.array([5, 1])
@@ -28,8 +30,9 @@ def test_crossmatch2():
 
     assert np.all(x[x_idx] == y[y_idx])
 
+
 def test_crossmatch3():
-    """ x has repeated entries. All y values are in x. Some x values are not in y. 
+    """ x has repeated entries. All y values are in x. Some x values are not in y.
     """
     x = np.array([0, 1, 3, 5, 3, -1, 1, 3, 5, -1])
     y = np.array([5, 1])
@@ -37,8 +40,9 @@ def test_crossmatch3():
 
     assert np.all(x[x_idx] == y[y_idx])
 
+
 def test_crossmatch4():
-    """ x has repeated entries. Some y values are not in x. Some x values are not in y. 
+    """ x has repeated entries. Some y values are not in x. Some x values are not in y.
     """
     x = np.array([1, 3, 5, 3, 1, -1, 3, 5, -10, -10])
     y = np.array([5, 1, 100, 20])
@@ -46,8 +50,9 @@ def test_crossmatch4():
 
     assert np.all(x[x_idx] == y[y_idx])
 
+
 def test_crossmatch5():
-    """ x has repeated entries. Some y values are not in x. Some x values are not in y. 
+    """ x has repeated entries. Some y values are not in x. Some x values are not in y.
     """
     xmax = 100
     numx = 10000
@@ -61,6 +66,7 @@ def test_crossmatch5():
 
     assert np.all(x[x_idx] == y[y_idx])
 
+
 def test_crossmatch6():
     """ x and y have zero overlap.
     """
@@ -70,6 +76,7 @@ def test_crossmatch6():
     assert len(x_idx) == 0
     assert len(y_idx) == 0
     assert np.all(x[x_idx] == y[y_idx])
+
 
 def test_error_handling1():
     """ Verify that we raise the proper exception when y has repeated entries.
@@ -82,6 +89,7 @@ def test_error_handling1():
     substr = "Input array y must be a 1d sequence of unique integers"
     assert substr in err.value.args[0]
 
+
 def test_error_handling2():
     """ Verify that we raise the proper exception when y has non-integer values.
     """
@@ -92,6 +100,7 @@ def test_error_handling2():
         result = crossmatch(x, y)
     substr = "Input array y must be a 1d sequence of unique integers"
     assert substr in err.value.args[0]
+
 
 def test_error_handling3():
     """ Verify that we raise the proper exception when y is multi-dimensional.
@@ -104,6 +113,7 @@ def test_error_handling3():
     substr = "Input array y must be a 1d sequence of unique integers"
     assert substr in err.value.args[0]
 
+
 def test_error_handling4():
     """ Verify that we raise the proper exception when x has non-integer values.
     """
@@ -115,6 +125,7 @@ def test_error_handling4():
     substr = "Input array x must be a 1d sequence of integers"
     assert substr in err.value.args[0]
 
+
 def test_error_handling5():
     """ Verify that we raise the proper exception when x is multi-dimensional.
     """
@@ -125,8 +136,3 @@ def test_error_handling5():
         result = crossmatch(x, y)
     substr = "Input array x must be a 1d sequence of integers"
     assert substr in err.value.args[0]
-
-
-
-
-

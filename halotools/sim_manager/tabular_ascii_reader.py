@@ -49,9 +49,10 @@ class TabularAsciiReader(object):
     and that the first subsequent appearance of an empty line demarcates the end
     of the data stream.
     """
+
     def __init__(self, input_fname, columns_to_keep_dict,
-        header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {},
-        row_cut_eq_dict = {}, row_cut_neq_dict = {}):
+            header_char='#', row_cut_min_dict={}, row_cut_max_dict={},
+            row_cut_eq_dict={}, row_cut_neq_dict={}):
         """
         Parameters
         -----------
@@ -254,7 +255,6 @@ class TabularAsciiReader(object):
             except KeyError:
                 pass
 
-
     def _verify_eq_neq_consistency(self, **kwargs):
         """ Verify that no neq_cut column has a value equal to the corresponding eq_cut.
 
@@ -415,7 +415,7 @@ class TabularAsciiReader(object):
         Nheader = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
-                if ( (l[0:len(self.header_char)]==self.header_char) or (l=="\n") ):
+                if ((l[0:len(self.header_char)]==self.header_char) or (l=="\n")):
                     Nheader += 1
                 else:
                     break
@@ -448,7 +448,7 @@ class TabularAsciiReader(object):
         Nrows_data = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
-                if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
+                if ((l[0:len(self.header_char)]!=self.header_char) and (l!="\n")):
                     Nrows_data += 1
         return Nrows_data
 
@@ -495,7 +495,7 @@ class TabularAsciiReader(object):
         --------
         cut_array : Numpy array
         """
-        mask = np.ones(len(array_chunk), dtype = bool)
+        mask = np.ones(len(array_chunk), dtype=bool)
 
         for colname, lower_bound in self.row_cut_min_dict.items():
             mask *= array_chunk[colname] > lower_bound
@@ -598,6 +598,3 @@ class TabularAsciiReader(object):
         print("\a")
 
         return full_array
-
-
-

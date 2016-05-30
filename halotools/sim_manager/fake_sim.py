@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 
-Simple module used to generate fake simulation data 
-used to test the `~halotools.empirical_models` modules. 
+Simple module used to generate fake simulation data
+used to test the `~halotools.empirical_models` modules.
 
 """
 import numpy as np
@@ -12,42 +12,43 @@ from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 __all__ = ('FakeSim', 'FakeSimHalosNearBoundaries')
 
-class FakeSim(UserSuppliedHaloCatalog):
-    """ Fake simulation data used in the test suite of `~halotools.empirical_models`. 
 
-    The `FakeSim` object has all the attributes required by 
-    Mock Factories such as `~halotools.empirical_models.HodMockFactory` to 
-    create a mock galaxy population. 
-    The columns of the `halo_table` and `ptcl_table` attributes of `FakeSim` 
-    are generated with ``np.random``. Thus mock catalogs built into `FakeSim` 
+class FakeSim(UserSuppliedHaloCatalog):
+    """ Fake simulation data used in the test suite of `~halotools.empirical_models`.
+
+    The `FakeSim` object has all the attributes required by
+    Mock Factories such as `~halotools.empirical_models.HodMockFactory` to
+    create a mock galaxy population.
+    The columns of the `halo_table` and `ptcl_table` attributes of `FakeSim`
+    are generated with ``np.random``. Thus mock catalogs built into `FakeSim`
     will not have physically realistic spatial distributions, mass functions, etc.
-    All the same, `FakeSim` is quite useful for testing purposes, 
-    as it permits the testing of `~halotools.sim_manager` and `~halotools.empirical_models` 
-    to be completely decoupled. Default behavior is to use a fixed seed in the random 
-    number generation, so that an identical instance of `FakeSim` is created 
-    for calls with the same arguments. 
+    All the same, `FakeSim` is quite useful for testing purposes,
+    as it permits the testing of `~halotools.sim_manager` and `~halotools.empirical_models`
+    to be completely decoupled. Default behavior is to use a fixed seed in the random
+    number generation, so that an identical instance of `FakeSim` is created
+    for calls with the same arguments.
     """
 
-    def __init__(self, num_massbins = 10, num_halos_per_massbin = int(100), 
-        num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
+    def __init__(self, num_massbins=10, num_halos_per_massbin=int(100),
+            num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        num_massbins : int, optional 
-            Number of distinct masses that will appear in the halo catalog. 
+        num_massbins : int, optional
+            Number of distinct masses that will appear in the halo catalog.
             Default is 6.
 
-        num_halos_per_massbin : int, optional 
+        num_halos_per_massbin : int, optional
             Default is 1000
 
         num_ptcl : int, optional
-            Number of dark matter particles. Default is 1000. 
+            Number of dark matter particles. Default is 1000.
 
-        seed : int, optional 
-            Random number seed used to generate the fake halos and particles. 
+        seed : int, optional
+            Random number seed used to generate the fake halos and particles.
             Default is 43.
 
-        Examples 
+        Examples
         --------
         >>> halocat = FakeSim()
 
@@ -68,7 +69,6 @@ class FakeSim(UserSuppliedHaloCatalog):
             self.version_name = 'dummy_version'
         self.redshift = redshift
 
-
         self.seed = seed
         np.random.seed(self.seed)
 
@@ -77,7 +77,7 @@ class FakeSim(UserSuppliedHaloCatalog):
         self.num_halos = self.num_massbins*self.num_halos_per_massbin
         self.num_ptcl = num_ptcl
 
-        halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype = 'i8')
+        halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype='i8')
         np.random.shuffle(halo_id)
         halo_id = halo_id[:self.num_halos]
 
@@ -88,8 +88,8 @@ class FakeSim(UserSuppliedHaloCatalog):
         host_mask = upid == -1
         host_ids = halo_id[host_mask]
         upid[~host_mask] = np.random.choice(host_ids, len(upid[~host_mask]))
-        
-        halo_hostid = np.zeros(len(halo_id), dtype = 'i8')
+
+        halo_hostid = np.zeros(len(halo_id), dtype='i8')
         halo_hostid[host_mask] = halo_id[host_mask]
         halo_hostid[~host_mask] = upid[~host_mask]
 
@@ -121,59 +121,60 @@ class FakeSim(UserSuppliedHaloCatalog):
         pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
         pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
         ptclcat = UserSuppliedPtclCatalog(
-            Lbox = Lbox, redshift = redshift, particle_mass = particle_mass, 
-            x = px, y = py, z = pz, vx = pvx, vy = pvy, vz = pvz)
+            Lbox=Lbox, redshift=redshift, particle_mass=particle_mass,
+            x=px, y=py, z=pz, vx=pvx, vy=pvy, vz=pvz)
 
-        UserSuppliedHaloCatalog.__init__(self, 
-            Lbox = Lbox, particle_mass = particle_mass, 
-            redshift = redshift, 
-            halo_id = halo_id, 
-            halo_x = x, halo_y = y, halo_z = z, 
-            halo_vx = vx, halo_vy = vy, halo_vz = vz, 
-            halo_upid = upid, 
-            halo_hostid = halo_hostid, 
-            halo_mvir = mvir, 
-            halo_mpeak = mpeak, 
-            halo_m200b = mvir, 
-            halo_rvir = rvir, 
-            halo_rs = rs, 
-            halo_zhalf = zhalf, 
-            halo_nfw_conc = conc, 
-            halo_vmax = vmax, 
-            halo_vpeak = vpeak, 
-            halo_spin = spin, 
-            halo_mass_accretion_rate = dmdt, 
-            user_supplied_ptclcat = ptclcat
+        UserSuppliedHaloCatalog.__init__(self,
+            Lbox=Lbox, particle_mass=particle_mass,
+            redshift=redshift,
+            halo_id=halo_id,
+            halo_x=x, halo_y=y, halo_z=z,
+            halo_vx=vx, halo_vy=vy, halo_vz=vz,
+            halo_upid=upid,
+            halo_hostid=halo_hostid,
+            halo_mvir=mvir,
+            halo_mpeak=mpeak,
+            halo_m200b=mvir,
+            halo_rvir=rvir,
+            halo_rs=rs,
+            halo_zhalf=zhalf,
+            halo_nfw_conc=conc,
+            halo_vmax=vmax,
+            halo_vpeak=vpeak,
+            halo_spin=spin,
+            halo_mass_accretion_rate=dmdt,
+            user_supplied_ptclcat=ptclcat
             )
 
-class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
-    """ Fake simulation data used in the test suite of `~halotools.empirical_models`. 
 
-    The only difference between `FakeSim` and `FakeSimHalosNearBoundaries` 
-    is that all halos reside right near the very edge of the box. 
-    Useful for unit-testing the treatment of periodic boundary conditions. 
+class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
+    """ Fake simulation data used in the test suite of `~halotools.empirical_models`.
+
+    The only difference between `FakeSim` and `FakeSimHalosNearBoundaries`
+    is that all halos reside right near the very edge of the box.
+    Useful for unit-testing the treatment of periodic boundary conditions.
     """
 
-    def __init__(self, num_massbins = 6, num_halos_per_massbin = int(100), 
-        num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
+    def __init__(self, num_massbins=6, num_halos_per_massbin=int(100),
+            num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        num_massbins : int, optional 
-            Number of distinct masses that will appear in the halo catalog. 
+        num_massbins : int, optional
+            Number of distinct masses that will appear in the halo catalog.
             Default is 6.
 
-        num_halos_per_massbin : int, optional 
+        num_halos_per_massbin : int, optional
             Default is 1000
 
         num_ptcl : int, optional
-            Number of dark matter particles. Default is 1000. 
+            Number of dark matter particles. Default is 1000.
 
-        seed : int, optional 
-            Random number seed used to generate the fake halos and particles. 
+        seed : int, optional
+            Random number seed used to generate the fake halos and particles.
             Default is 43.
 
-        Examples 
+        Examples
         --------
         >>> fakesim = FakeSimHalosNearBoundaries()
         """
@@ -237,39 +238,24 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
         pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
         pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
         ptclcat = UserSuppliedPtclCatalog(
-            Lbox = Lbox, redshift = redshift, particle_mass = particle_mass, 
-            x = px, y = py, z = pz, vx = pvx, vy = pvy, vz = pvz)
+            Lbox=Lbox, redshift=redshift, particle_mass=particle_mass,
+            x=px, y=py, z=pz, vx=pvx, vy=pvy, vz=pvz)
 
-        UserSuppliedHaloCatalog.__init__(self, 
-            Lbox = Lbox, particle_mass = particle_mass, 
-            redshift = redshift, 
-            halo_id = halo_id, 
-            halo_x = x, halo_y = y, halo_z = z, 
-            halo_vx = vx, halo_vy = vy, halo_vz = vz, 
-            halo_upid = upid, 
-            halo_hostid = halo_hostid, 
-            halo_mvir = mvir, 
-            halo_mpeak = mpeak, 
-            halo_rvir = rvir, 
-            halo_rs = rs, 
-            halo_zhalf = zhalf, 
-            halo_nfw_conc = conc, 
-            halo_vmax = vmax, 
-            halo_vpeak = vpeak, 
-            user_supplied_ptclcat = ptclcat
+        UserSuppliedHaloCatalog.__init__(self,
+            Lbox=Lbox, particle_mass=particle_mass,
+            redshift=redshift,
+            halo_id=halo_id,
+            halo_x=x, halo_y=y, halo_z=z,
+            halo_vx=vx, halo_vy=vy, halo_vz=vz,
+            halo_upid=upid,
+            halo_hostid=halo_hostid,
+            halo_mvir=mvir,
+            halo_mpeak=mpeak,
+            halo_rvir=rvir,
+            halo_rs=rs,
+            halo_zhalf=zhalf,
+            halo_nfw_conc=conc,
+            halo_vmax=vmax,
+            halo_vpeak=vpeak,
+            user_supplied_ptclcat=ptclcat
             )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

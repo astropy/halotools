@@ -65,9 +65,9 @@ class DownloadManager(object):
         self.ptcl_table_cache = PtclTableCache()
 
     def download_processed_halo_table(self, simname, halo_finder, redshift,
-        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name,
-        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False,
-        **kwargs):
+            dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_version_name,
+            download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
+            **kwargs):
         """ Method to download one of the pre-processed binary files
         storing a reduced halo catalog.
 
@@ -159,8 +159,8 @@ class DownloadManager(object):
         # Identify candidate file to download
 
         available_fnames_to_download = (
-            self._processed_halo_tables_available_for_download(simname = simname,
-                halo_finder = halo_finder, version_name = version_name)
+            self._processed_halo_tables_available_for_download(simname=simname,
+                halo_finder=halo_finder, version_name=version_name)
             )
 
         if len(available_fnames_to_download) == 0:
@@ -211,8 +211,8 @@ class DownloadManager(object):
         ############################################################
         # Now we check the cache log to see if there are any matching entries
         exact_match_generator = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder, version_name = version_name,
-            redshift = closest_redshift, dz_tol = 0.)
+            simname=simname, halo_finder=halo_finder, version_name=version_name,
+            redshift=closest_redshift, dz_tol=0.)
         exact_matches = list(exact_match_generator)
 
         if len(exact_matches) > 0:
@@ -234,8 +234,8 @@ class DownloadManager(object):
                 warn(msg)
 
         close_match_generator = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder, version_name = version_name,
-            redshift = closest_redshift, dz_tol = dz_tol)
+            simname=simname, halo_finder=halo_finder, version_name=version_name,
+            redshift=closest_redshift, dz_tol=dz_tol)
         close_matches = list(close_match_generator)
 
         if ((len(close_matches) > 0)
@@ -278,7 +278,6 @@ class DownloadManager(object):
         runtime = (end - start)
         print(("\nTotal runtime to download pre-processed "
             "halo catalog = %.1f seconds\n" % runtime))
-
 
         # overwrite the fname metadata so that
         # it is consistent with the downloaded location
@@ -353,12 +352,10 @@ class DownloadManager(object):
         else:
             print(success_msg)
 
-
-
     def download_ptcl_table(self, simname, redshift,
-        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_ptcl_version_name,
-        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False,
-        **kwargs):
+            dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_ptcl_version_name,
+            download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
+            **kwargs):
         """ Method to download one of the binary files storing a
         random downsampling of dark matter particles.
 
@@ -445,7 +442,7 @@ class DownloadManager(object):
         # Identify candidate file to download
 
         available_fnames_to_download = self._ptcl_tables_available_for_download(
-            simname = simname, version_name = version_name)
+            simname=simname, version_name=version_name)
 
         if len(available_fnames_to_download) == 0:
             msg = "You made the following request for a pre-processed halo catalog:\n"
@@ -494,8 +491,8 @@ class DownloadManager(object):
         ############################################################
         # Now we check the cache log to see if there are any matching entries
         exact_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
-            simname = simname, version_name = version_name,
-            redshift = closest_redshift, dz_tol = 0.)
+            simname=simname, version_name=version_name,
+            redshift=closest_redshift, dz_tol=0.)
         exact_matches = list(exact_match_generator)
 
         if len(exact_matches) > 0:
@@ -517,8 +514,8 @@ class DownloadManager(object):
                 warn(msg)
 
         close_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
-            simname = simname, version_name = version_name,
-            redshift = closest_redshift, dz_tol = dz_tol)
+            simname=simname, version_name=version_name,
+            redshift=closest_redshift, dz_tol=dz_tol)
         close_matches = list(close_match_generator)
 
         if ((len(close_matches) > 0)
@@ -716,7 +713,7 @@ class DownloadManager(object):
         return output_fname, closest_available_redshift
 
     def _closest_catalog_on_web(self, catalog_type,
-        simname, desired_redshift, **kwargs):
+            simname, desired_redshift, **kwargs):
         """
         Parameters
         ----------
@@ -804,13 +801,13 @@ class DownloadManager(object):
 
         if catalog_type is 'particles':
             filename_list = (
-                self._ptcl_tables_available_for_download(simname = simname,
-                    version_name = ptcl_version_name)
+                self._ptcl_tables_available_for_download(simname=simname,
+                    version_name=ptcl_version_name)
                 )
         elif catalog_type is 'halos':
             filename_list = (
-                self._processed_halo_tables_available_for_download(simname = simname,
-                    halo_finder = halo_finder, version_name = version_name)
+                self._processed_halo_tables_available_for_download(simname=simname,
+                    halo_finder=halo_finder, version_name=version_name)
                 )
 
         output_fname, actual_redshift = (
@@ -820,7 +817,7 @@ class DownloadManager(object):
         return output_fname, actual_redshift
 
     def _ptcl_tables_available_for_download(self,
-        version_name = sim_defaults.default_ptcl_version_name, **kwargs):
+            version_name=sim_defaults.default_ptcl_version_name, **kwargs):
         """ Method searches the appropriate web location and
         returns a list of the filenames of all reduced
         halo catalog binaries processed by Halotools
@@ -881,8 +878,6 @@ class DownloadManager(object):
             output = all_ptcl_tables
 
         return output
-
-
 
     def _processed_halo_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and
@@ -978,6 +973,3 @@ class DownloadManager(object):
             output = all_halocats
 
         return output
-
-
-

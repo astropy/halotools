@@ -1,28 +1,29 @@
-""" Module containing the `~halotools.mock_observables.npairs_xy_z` function 
-used to count pairs as a function of separation. 
+""" Module containing the `~halotools.mock_observables.npairs_xy_z` function
+used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import numpy as np 
+import numpy as np
 import multiprocessing
-from functools import partial 
-
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
+from functools import partial
 
 from .rectangular_mesh import RectangularDoubleMesh
-from .mesh_helpers import (_set_approximate_cell_sizes, _enclose_in_box, 
+from .mesh_helpers import (_set_approximate_cell_sizes, _enclose_in_box,
     _cell1_parallelization_indices)
 from .cpairs import npairs_xy_z_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
 
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
+
 __all__ = ('npairs_xy_z', )
 
-def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
-    verbose = False, num_threads = 1,
-    approx_cell1_size = None, approx_cell2_size = None):
+
+def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
+        verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
     """
-    Function counts the number of pairs of points with separation in the xy-plane 
-    less than the input ``rp_bins`` and separation in the z-dimension less than 
-    the input ``pi_bins``. 
+    Function counts the number of pairs of points with separation in the xy-plane
+    less than the input ``rp_bins`` and separation in the z-dimension less than
+    the input ``pi_bins``.
 
     Note that if sample1 == sample2 that the
     `~halotools.mock_observables.npairs_xy_z` function double-counts pairs.
@@ -38,55 +39,55 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
     ----------
     sample1 : array_like
         Npts1 x 3 numpy array containing 3-D positions of points.
-        See the :ref:`mock_obs_pos_formatting` documentation page, or the 
-        Examples section below, for instructions on how to transform 
-        your coordinate position arrays into the 
-        format accepted by the ``sample1`` and ``sample2`` arguments.   
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like
-        Npts2 x 3 array containing 3-D positions of points. 
+        Npts2 x 3 array containing 3-D positions of points.
 
     rp_bins : array_like
-        array of boundaries defining the radial bins perpendicular to the LOS in which 
+        array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_bins : array_like
-        array of boundaries defining the p radial bins parallel to the LOS in which 
+        array of boundaries defining the p radial bins parallel to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
-        Length-3 sequence defining the periodic boundary conditions 
-        in each dimension. If you instead provide a single scalar, Lbox, 
-        period is assumed to be the same in all Cartesian directions. 
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity.
-        Length units assumed to be in Mpc/h, here and throughout Halotools. 
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     verbose : Boolean, optional
         If True, print out information and progress.
 
     num_threads : int, optional
-        Number of threads to use in calculation, where parallelization is performed 
-        using the python ``multiprocessing`` module. Default is 1 for a purely serial 
-        calculation, in which case a multiprocessing Pool object will 
-        never be instantiated. A string 'max' may be used to indicate that 
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    approx_cell1_size : array_like, optional 
-        Length-3 array serving as a guess for the optimal manner by how points 
-        will be apportioned into subvolumes of the simulation box. 
-        The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use Lbox/10 in each dimension, 
-        which will return reasonable result performance for most use-cases. 
-        Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
-        performance-critical calculations. 
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
-        ``approx_cell1_size`` for details. 
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
@@ -126,11 +127,11 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
-    xperiod, yperiod, zperiod = period 
+    xperiod, yperiod, zperiod = period
 
     rp_max = np.max(rp_bins)
     pi_max = np.max(pi_bins)
-    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max 
+    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -146,7 +147,7 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_xy_z_engine, 
+    engine = partial(npairs_xy_z_engine,
         double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rp_bins, pi_bins)
 
     # # Calculate the cell1 indices that will be looped over by the engine
@@ -163,43 +164,44 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period = None,
 
     return np.array(counts)
 
-def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period, 
-    verbose, num_threads, approx_cell1_size, approx_cell2_size):
+
+def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
+        verbose, num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
     if num_threads is not 1:
         if num_threads=='max':
             num_threads = multiprocessing.cpu_count()
-        if not isinstance(num_threads,int):
+        if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
-    
+
     # Passively enforce that we are working with ndarrays
-    x1 = sample1[:,0]
-    y1 = sample1[:,1]
-    z1 = sample1[:,2]
-    x2 = sample2[:,0]
-    y2 = sample2[:,1]
-    z2 = sample2[:,2]
+    x1 = sample1[:, 0]
+    y1 = sample1[:, 1]
+    z1 = sample1[:, 2]
+    x2 = sample2[:, 0]
+    y2 = sample2[:, 1]
+    z2 = sample2[:, 2]
 
     rp_bins = np.atleast_1d(rp_bins).astype('f8')
     try:
         assert rp_bins.ndim == 1
         assert len(rp_bins) > 1
         if len(rp_bins) > 2:
-            assert array_is_monotonic(rp_bins, strict = True) == 1
+            assert array_is_monotonic(rp_bins, strict=True) == 1
     except AssertionError:
         msg = ("Input ``rp_bins`` must be a monotonically increasing 1D array "
             "with at least two entries")
         raise ValueError(msg)
-    rp_max = np.max(rp_bins)        
+    rp_max = np.max(rp_bins)
 
     pi_bins = np.atleast_1d(pi_bins).astype('f8')
     try:
         assert pi_bins.ndim == 1
         assert len(pi_bins) > 1
         if len(pi_bins) > 2:
-            assert array_is_monotonic(pi_bins, strict = True) == 1
+            assert array_is_monotonic(pi_bins, strict=True) == 1
     except AssertionError:
         msg = "Input ``pi_bins`` must be a monotonically increasing 1D array with at least two entries"
         raise ValueError(msg)
@@ -209,7 +211,7 @@ def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2, 
+            _enclose_in_box(x1, y1, z1, x2, y2, z2,
                 min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
     else:
         PBCs = True
@@ -236,15 +238,11 @@ def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
         approx_cell1_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
-    if approx_cell2_size is None:    
+    if approx_cell2_size is None:
         approx_cell2_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
 
-    return (x1, y1, z1, x2, y2, z2, 
-        rp_bins, pi_bins, period, num_threads, PBCs, 
+    return (x1, y1, z1, x2, y2, z2,
+        rp_bins, pi_bins, period, num_threads, PBCs,
         approx_cell1_size, approx_cell2_size)
-
-
-
-

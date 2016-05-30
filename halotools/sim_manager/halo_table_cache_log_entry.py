@@ -176,7 +176,7 @@ class HaloTableCacheLogEntry(object):
             msg += tmp_msg
             tmp_msg, num_failures, halo_table = self._verify_table_read(num_failures)
             msg += tmp_msg
-            tmp_msg, num_failures = self._verify_has_required_data_columns(halo_table,num_failures)
+            tmp_msg, num_failures = self._verify_has_required_data_columns(halo_table, num_failures)
             msg += tmp_msg
             tmp_msg, num_failures = self._verify_all_keys_begin_with_halo(halo_table, num_failures)
             msg += tmp_msg
@@ -187,7 +187,7 @@ class HaloTableCacheLogEntry(object):
             tmp_msg, num_failures = self._verify_halo_rvir_mpc_units(halo_table, num_failures)
             msg += tmp_msg
 
-            if num_failures > 0: 
+            if num_failures > 0:
                 self._cache_safety_message = message_preamble + msg
 
             self._num_failures = num_failures
@@ -207,7 +207,6 @@ class HaloTableCacheLogEntry(object):
                 ">>> halo_data = Table.read(fname, path='data')\n\n")
             halo_table = Table()
         return msg, num_failures, halo_table
-
 
     def _verify_metadata_consistency(self, num_failures):
         """ Enforce that the hdf5 metadata agrees with the
@@ -259,7 +258,6 @@ class HaloTableCacheLogEntry(object):
                 pass
 
         return msg, num_failures
-
 
     def _verify_all_keys_begin_with_halo(self, halo_table, num_failures):
         """
@@ -345,7 +343,7 @@ class HaloTableCacheLogEntry(object):
         try:
             try:
                 halo_id = halo_table['halo_id'].data
-                assert halo_id.dtype.str[1] in ('i','u')
+                assert halo_id.dtype.str[1] in ('i', 'u')
                 assert len(halo_id) == len(set(halo_id))
             except AssertionError:
                 num_failures += 1
@@ -437,24 +435,3 @@ class HaloTableCacheLogEntry(object):
                 pass
 
         return msg, num_failures
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

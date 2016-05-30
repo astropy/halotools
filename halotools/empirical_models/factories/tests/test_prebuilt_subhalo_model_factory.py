@@ -1,6 +1,6 @@
-""" Module providing unit-testing for 
+""" Module providing unit-testing for
 the `~halotools.empirical_models.PrebuiltSubhaloModelFactory` class
-""" 
+"""
 from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
@@ -13,19 +13,21 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestPrebuiltSubhaloModelFactory']
 
+
 class TestPrebuiltSubhaloModelFactory(TestCase):
-    """ Class providing tests of the `~halotools.empirical_models.PrebuiltSubhaloModelFactory`. 
+    """ Class providing tests of the `~halotools.empirical_models.PrebuiltSubhaloModelFactory`.
     """
+
     def test_behroozi_composite(self):
-        """ Require that the `~halotools.empirical_models.behroozi10_model_dictionary` 
-        model dictionary builds without raising an exception. 
+        """ Require that the `~halotools.empirical_models.behroozi10_model_dictionary`
+        model dictionary builds without raising an exception.
         """
         model = PrebuiltSubhaloModelFactory('behroozi10')
         alt_model = SubhaloModelFactory(**model.model_dictionary)
 
     def test_smhm_binary_sfr_composite(self):
-        """ Require that the `~halotools.empirical_models.smhm_binary_sfr_model_dictionary` 
-        model dictionary builds without raising an exception. 
+        """ Require that the `~halotools.empirical_models.smhm_binary_sfr_model_dictionary`
+        model dictionary builds without raising an exception.
         """
         model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')
         alt_model = SubhaloModelFactory(**model.model_dictionary)
@@ -43,7 +45,7 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
                 model2.populate_mock(halocat)
             substr = "Inconsistency between the model redshift"
             assert substr in err.value.args[0]
-            halocat = FakeSim(redshift = 2.)
+            halocat = FakeSim(redshift=2.)
             model2.populate_mock(halocat)
 
     @pytest.mark.slow
@@ -59,15 +61,3 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
         model = PrebuiltSubhaloModelFactory(modelname)
         model.compute_average_galaxy_matter_cross_clustering(
             num_iterations=1, simname='fake')
-
-
-
-
-
-
-
-
-
-
-
-

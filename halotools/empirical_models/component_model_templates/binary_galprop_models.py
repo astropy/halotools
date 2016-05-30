@@ -5,9 +5,6 @@
 from __future__ import (
     division, print_function, absolute_import)
 
-__all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
-__author__ = ('Andrew Hearin', )
-
 import numpy as np
 from astropy.extern import six
 from abc import ABCMeta
@@ -18,39 +15,43 @@ from .. import model_helpers
 from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
+__all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
+__author__ = ('Andrew Hearin', )
+
+
 @six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(object):
     """
-    Container class for any component model of a binary-valued galaxy property. 
+    Container class for any component model of a binary-valued galaxy property.
 
     """
 
-    def __init__(self, 
-        prim_haloprop_key = model_defaults.default_binary_galprop_haloprop,
-        **kwargs):
+    def __init__(self,
+            prim_haloprop_key=model_defaults.default_binary_galprop_haloprop,
+            **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        galprop_name : string, keyword argument 
-            Name of the galaxy property being assigned. 
+        galprop_name : string, keyword argument
+            Name of the galaxy property being assigned.
 
-        prim_haloprop_key : string, optional  
-            String giving the column name of the primary halo property governing 
-            the galaxy propery being modeled.  
-            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+        prim_haloprop_key : string, optional
+            String giving the column name of the primary halo property governing
+            the galaxy propery being modeled.
+            Default is set in the `~halotools.empirical_models.model_defaults` module.
 
-        new_haloprop_func_dict : function object, optional  
-            Dictionary of function objects used to create additional halo properties 
-            that may be needed by the model component. 
-            Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
-            Each dict key of ``new_haloprop_func_dict`` will 
-            be the name of a new column of the halo catalog; each dict value is a function 
-            object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halos`` keyword argument. 
-            The input ``model`` model object has its own new_haloprop_func_dict; 
-            if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
-            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
-            ``model``, and exception will be raised. 
+        new_haloprop_func_dict : function object, optional
+            Dictionary of function objects used to create additional halo properties
+            that may be needed by the model component.
+            Used strictly by the `MockFactory` during call to the `process_halo_catalog` method.
+            Each dict key of ``new_haloprop_func_dict`` will
+            be the name of a new column of the halo catalog; each dict value is a function
+            object that returns a length-N numpy array when passed a length-N Astropy table
+            via the ``halos`` keyword argument.
+            The input ``model`` model object has its own new_haloprop_func_dict;
+            if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory`
+            contains a key that already appears in the ``new_haloprop_func_dict`` bound to
+            ``model``, and exception will be raised.
 
         """
         required_kwargs = ['galprop_name']
@@ -74,42 +75,41 @@ class BinaryGalpropModel(object):
 
         self._mock_generation_calling_sequence = ['mc_'+self.galprop_name]
         self._methods_to_inherit = (
-            ['mean_'+self.galprop_name+'_fraction', 
+            ['mean_'+self.galprop_name+'_fraction',
             'mc_'+self.galprop_name])
 
         self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
-
     def _mc_galprop(self, seed=None, **kwargs):
-        """ Return a Monte Carlo realization of the galaxy property 
-        based on draws from a nearest-integer distribution. 
+        """ Return a Monte Carlo realization of the galaxy property
+        based on draws from a nearest-integer distribution.
 
-        Parameters 
+        Parameters
         ----------
-        prim_haloprop : array, optional  
-            Array of mass-like variable governing the galaxy property. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+        prim_haloprop : array, optional
+            Array of mass-like variable governing the galaxy property.
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table``
+            keyword arguments must be passed.
 
-        halos : object, optional  
-            Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+        halos : object, optional
+            Data table storing halo catalog.
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table``
+            keyword arguments must be passed.
 
-        galaxy_table : object, optional  
-            Data table storing galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+        galaxy_table : object, optional
+            Data table storing galaxy catalog.
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos``
+            keyword arguments must be passed.
 
-        seed : int, optional  
+        seed : int, optional
             Random number seed used to generate the Monte Carlo realization.
-            Default is None. 
+            Default is None.
 
-        Returns 
+        Returns
         -------
-        mc_galprop : array_like 
-            Array storing the values of the primary galaxy property 
-            of the galaxies living in the input halos. 
+        mc_galprop : array_like
+            Array storing the values of the primary galaxy property
+            of the galaxies living in the input halos.
         """
         np.random.seed(seed=seed)
 
@@ -121,76 +121,77 @@ class BinaryGalpropModel(object):
             kwargs['table'][self.galprop_name] = result
         return result
 
+
 class BinaryGalpropInterpolModel(BinaryGalpropModel):
     """
-    Component model for any binary-valued galaxy property 
-    whose assignment is determined by interpolating between points on a grid. 
+    Component model for any binary-valued galaxy property
+    whose assignment is determined by interpolating between points on a grid.
 
-    One example of a model of this class could be used to help build is 
-    Tinker et al. (2013), arXiv:1308.2974. 
-    In this model, a galaxy is either active or quiescent, 
+    One example of a model of this class could be used to help build is
+    Tinker et al. (2013), arXiv:1308.2974.
+    In this model, a galaxy is either active or quiescent,
     and the quiescent fraction is purely a function of halo mass, with
-    separate parameters for centrals and satellites. The value of the quiescent 
-    fraction is computed by interpolating between a grid of values of mass. 
-    `BinaryGalpropInterpolModel` is quite flexible, and can be used as a template for 
-    any binary-valued galaxy property whatsoever. See the examples below for usage instructions. 
+    separate parameters for centrals and satellites. The value of the quiescent
+    fraction is computed by interpolating between a grid of values of mass.
+    `BinaryGalpropInterpolModel` is quite flexible, and can be used as a template for
+    any binary-valued galaxy property whatsoever. See the examples below for usage instructions.
 
     """
 
-    def __init__(self, galprop_abscissa, galprop_ordinates, 
-        logparam=True, interpol_method='spline', **kwargs):
-        """ 
-        Parameters 
+    def __init__(self, galprop_abscissa, galprop_ordinates,
+            logparam=True, interpol_method='spline', **kwargs):
+        """
+        Parameters
         ----------
         galprop_name : array, keyword argument
-            String giving the name of galaxy property being assigned a binary value. 
+            String giving the name of galaxy property being assigned a binary value.
 
-        gal_type : string, optional 
+        gal_type : string, optional
             Name of the galaxy population.
-            Default is None, in which case the model instance will not have 
-            the ``gal_type`` attribute. 
+            Default is None, in which case the model instance will not have
+            the ``gal_type`` attribute.
 
-        prim_haloprop_key : string, optional  
-            String giving the column name of the primary halo property governing 
-            stellar mass.  
-            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+        prim_haloprop_key : string, optional
+            String giving the column name of the primary halo property governing
+            stellar mass.
+            Default is set in the `~halotools.empirical_models.model_defaults` module.
 
-        galprop_abscissa : array, optional  
-            Values of the primary halo property at which the galprop fraction is specified. 
+        galprop_abscissa : array, optional
+            Values of the primary halo property at which the galprop fraction is specified.
 
-        galprop_ordinates : array, optional  
-            Values of the galprop fraction when evaluated at the input abscissa. 
+        galprop_ordinates : array, optional
+            Values of the galprop fraction when evaluated at the input abscissa.
 
-        logparam : bool, optional 
-            If set to True, the interpolation will be done 
-            in the base-10 logarithm of the primary halo property, 
-            rather than linearly. Default is True. 
+        logparam : bool, optional
+            If set to True, the interpolation will be done
+            in the base-10 logarithm of the primary halo property,
+            rather than linearly. Default is True.
 
-        interpol_method : string, optional  
-            Keyword specifying how `mean_galprop_fraction` 
-            evaluates input values of the primary halo property. 
-            The default spline option interpolates the 
-            model's abscissa and ordinates. 
-            The polynomial option uses the unique, degree N polynomial 
-            passing through the ordinates, where N is the number of supplied ordinates. 
+        interpol_method : string, optional
+            Keyword specifying how `mean_galprop_fraction`
+            evaluates input values of the primary halo property.
+            The default spline option interpolates the
+            model's abscissa and ordinates.
+            The polynomial option uses the unique, degree N polynomial
+            passing through the ordinates, where N is the number of supplied ordinates.
 
-        input_spline_degree : int, optional 
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abscissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. Default is 3. 
+        input_spline_degree : int, optional
+            Degree of the spline interpolation for the case of interpol_method='spline'.
+            If there are k abscissa values specifying the model, input_spline_degree
+            is ensured to never exceed k-1, nor exceed 5. Default is 3.
 
         Examples
-        -----------       
-        Suppose we wish to construct a model for whether a central galaxy is 
-        star-forming or quiescent. We want to set the quiescent fraction to 1/3 
-        for Milky Way-type centrals (:math:`M_{\\mathrm{vir}}=10^{12}M_{\odot}`), 
-        and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`). 
+        -----------
+        Suppose we wish to construct a model for whether a central galaxy is
+        star-forming or quiescent. We want to set the quiescent fraction to 1/3
+        for Milky Way-type centrals (:math:`M_{\\mathrm{vir}}=10^{12}M_{\odot}`),
+        and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`).
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
         >>> abscissa, ordinates = [12, 15], [1/3., 0.9]
         >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_name='quiescent', galprop_abscissa=abscissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir')
 
-        The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
+        The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction
         as a function of mass:
 
         >>> quiescent_frac = cen_quiescent_model.mean_quiescent_fraction(prim_haloprop =1e12)
@@ -200,11 +201,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         >>> masses = np.logspace(10, 15, num=100)
         >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop = masses)
 
-        Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``. 
-        Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent. 
+        Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``.
+        Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent.
 
-        Here is another example of how you could use `BinaryGalpropInterpolModel` 
-        to construct a simple model for satellite morphology, where the early- vs. late-type 
+        Here is another example of how you could use `BinaryGalpropInterpolModel`
+        to construct a simple model for satellite morphology, where the early- vs. late-type
         of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
 
         >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_name='late_type', galprop_abscissa=abscissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
@@ -243,7 +244,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                 self._input_spline_degree = 3
             scipy_maxdegree = 5
             self._spline_degree = np.min(
-                [scipy_maxdegree, self._input_spline_degree, 
+                [scipy_maxdegree, self._input_spline_degree,
                 custom_len(self._abscissa)-1])
 
         self._abscissa_key = self.galprop_name+'_abscissa'
@@ -275,30 +276,29 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             msg = ("\nAll values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive.")
             raise HalotoolsError(msg)
 
-
     def _build_param_dict(self):
 
         self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abscissa))]
-        self.param_dict = {key:value for key, value in zip(self._ordinates_keys, self._ordinates)}
+        self.param_dict = {key: value for key, value in zip(self._ordinates_keys, self._ordinates)}
 
     def _mean_galprop_fraction(self, **kwargs):
         """
-        Expectation value of the galprop for galaxies living in the input halos.  
+        Expectation value of the galprop for galaxies living in the input halos.
 
-        Parameters 
+        Parameters
         ----------
-        prim_haloprop : array, optional  
-            Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
+        prim_haloprop : array, optional
+            Array of mass-like variable upon which occupation statistics are based.
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed.
 
-        table : object, optional  
-            Data table storing halo catalog. 
-            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+        table : object, optional
+            Data table storing halo catalog.
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed.
 
-        Returns 
+        Returns
         -------
         mean_galprop_fraction : array_like
-            Values of the galprop fraction evaluated at the input primary halo properties. 
+            Values of the galprop fraction evaluated at the input primary halo properties.
 
         """
         # Retrieve the array storing the mass-like variable
@@ -328,9 +328,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         else:
             raise HalotoolsError("Input interpol_method must be 'polynomial' or 'spline'.")
 
-        # Enforce boundary conditions 
+        # Enforce boundary conditions
         mean_galprop_fraction[mean_galprop_fraction<0]=0
         mean_galprop_fraction[mean_galprop_fraction>1]=1
 
         return mean_galprop_fraction
-

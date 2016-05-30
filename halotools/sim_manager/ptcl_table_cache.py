@@ -92,7 +92,7 @@ class PtclTableCache(object):
         result = []
         for entry in log_table:
             constructor_kwargs = (
-                {key:entry[key] for key in PtclTableCacheLogEntry.log_attributes})
+                {key: entry[key] for key in PtclTableCacheLogEntry.log_attributes})
             result.append(PtclTableCacheLogEntry(**constructor_kwargs))
         return result
 
@@ -136,7 +136,7 @@ class PtclTableCache(object):
                 if key == 'redshift':
                     requested_redshift = float(kwargs[key])
                     redshift_of_entry = float(getattr(entry, key))
-                    yield_entry *=  abs(redshift_of_entry - requested_redshift) <= dz_tol
+                    yield_entry *= abs(redshift_of_entry - requested_redshift) <= dz_tol
                 else:
                     yield_entry *= kwargs[key] == getattr(entry, key)
             if bool(yield_entry) is True:
@@ -168,7 +168,6 @@ class PtclTableCache(object):
                                     raise_non_existence_exception=True,
                                     update_ascii=True,
                                     delete_corresponding_ptcl_catalog=False):
-
         """
         If the log stores an entry matching the input metadata, the entry
         will be deleted and the ascii file storing the log will be
@@ -249,7 +248,6 @@ class PtclTableCache(object):
                     "you must call this method again setting "
                     "`raise_non_existence_exception` to False.\n")
                 raise HalotoolsError(msg)
-
 
     def determine_log_entry_from_fname(self, fname, overwrite_fname_metadata=False):
         """ Method tries to construct a `~halotools.sim_manager.PtclTableCacheLogEntry`
@@ -349,17 +347,3 @@ class PtclTableCache(object):
             raise_non_existence_exception=False,
             update_ascii=update_ascii,
             delete_corresponding_ptcl_catalog=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-

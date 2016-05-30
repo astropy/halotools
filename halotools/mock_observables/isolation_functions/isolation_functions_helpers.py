@@ -1,4 +1,4 @@
-""" Helper functions used to process arguments passed to functions in 
+""" Helper functions used to process arguments passed to functions in
 the isolation_functions sub-package.
 """
 import numpy as np
@@ -7,10 +7,11 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ('_get_r_max', '_set_isolation_approx_cell_sizes')
 
+
 def _get_r_max(sample1, r_max):
-    """ Helper function process the input ``r_max`` value and returns 
-    the appropriate array after requiring the input is the appropriate 
-    size and verifying that all entries are bounded positive numbers. 
+    """ Helper function process the input ``r_max`` value and returns
+    the appropriate array after requiring the input is the appropriate
+    size and verifying that all entries are bounded positive numbers.
     """
     N1 = len(sample1)
     r_max = np.atleast_1d(r_max).astype(float)
@@ -33,8 +34,9 @@ def _get_r_max(sample1, r_max):
 
     return r_max
 
-def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size, 
-    xsearch_length, ysearch_length, zsearch_length):
+
+def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size,
+        xsearch_length, ysearch_length, zsearch_length):
     """
     """
     if approx_cell1_size is None:
@@ -67,12 +69,13 @@ def _set_isolation_approx_cell_sizes(approx_cell1_size, approx_cell2_size,
 
     return approx_cell1_size, approx_cell2_size
 
+
 def _func_signature_int_from_cond_func(cond_func):
     """
-    Return the number of marks-per-point expected by the 
-    marking function chosen by the input ``cond_func``. 
+    Return the number of marks-per-point expected by the
+    marking function chosen by the input ``cond_func``.
     """
-    
+
     try:
         assert int(cond_func) == cond_func
     except:
@@ -81,7 +84,7 @@ def _func_signature_int_from_cond_func(cond_func):
         "See the docstring of either `~halotools.mock_observables.conditional_spherical_isolation`\n"
         "or `~halotools.mock_observables.conditional_spherical_isolation` for a list of available options.\n")
         raise ValueError(msg)
-    
+
     if cond_func == 0:
         return 1
     elif cond_func == 1:
@@ -103,11 +106,12 @@ def _func_signature_int_from_cond_func(cond_func):
         "or `~halotools.mock_observables.conditional_spherical_isolation` for a list of available options.\n")
         raise HalotoolsError(msg % cond_func)
 
+
 def reshape_input_marks(marks, npts_sample, correct_num_marks, cond_func):
     """
     """
     if marks is None:
-        marks = np.ones((npts_sample, correct_num_marks), dtype = np.float64)
+        marks = np.ones((npts_sample, correct_num_marks), dtype=np.float64)
     else:
         marks = np.atleast_1d(marks).astype(np.float64)
         if len(marks.shape) == 1:
@@ -134,22 +138,17 @@ def reshape_input_marks(marks, npts_sample, correct_num_marks, cond_func):
 
     return marks
 
+
 def _conditional_isolation_process_marks(sample1, sample2, marks1, marks2, cond_func):
     """
     private function to process the arguments for conditional isolation functions
     """
-    
+
     correct_num_marks = _func_signature_int_from_cond_func(cond_func)
     npts_sample1 = sample1.shape[0]
     npts_sample2 = sample2.shape[0]
-    
+
     marks1 = reshape_input_marks(marks1, npts_sample1, correct_num_marks, cond_func)
     marks2 = reshape_input_marks(marks2, npts_sample2, correct_num_marks, cond_func)
 
     return marks1, marks2
-
-
-
-
-
-

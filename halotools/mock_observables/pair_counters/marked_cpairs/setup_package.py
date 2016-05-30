@@ -3,10 +3,11 @@ import os
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ("custom_weighting_func.pyx",
-    "distances.pyx", 
+    "distances.pyx",
     "conditional_pairwise_distances.pyx", "marked_npairs_3d_engine.pyx")
 
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
+
 
 def get_extensions():
 
@@ -23,7 +24,7 @@ def get_extensions():
             sources=[source],
             include_dirs=include_dirs,
             libraries=libraries,
-            language = language,
+            language=language,
             extra_compile_args=extra_compile_args))
 
     return extensions

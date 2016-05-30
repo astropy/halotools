@@ -2,10 +2,11 @@ from distutils.extension import Extension
 import os
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ("spherical_isolation_engine.pyx","cylindrical_isolation_engine.pyx", 
-    "marked_spherical_isolation_engine.pyx", "marked_cylindrical_isolation_engine.pyx", 
+SOURCES = ("spherical_isolation_engine.pyx", "cylindrical_isolation_engine.pyx",
+    "marked_spherical_isolation_engine.pyx", "marked_cylindrical_isolation_engine.pyx",
     "isolation_criteria_marking_functions.pyx")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
+
 
 def get_extensions():
 
@@ -22,7 +23,7 @@ def get_extensions():
             sources=[source],
             include_dirs=include_dirs,
             libraries=libraries,
-            language = language,
+            language=language,
             extra_compile_args=extra_compile_args))
 
     return extensions

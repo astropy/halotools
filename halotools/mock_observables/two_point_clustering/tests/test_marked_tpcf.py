@@ -1,21 +1,23 @@
-""" Module providing unit-testing for the `~halotools.mock_observables.marked_tpcf` function. 
+""" Module providing unit-testing for the `~halotools.mock_observables.marked_tpcf` function.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 
+from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
+
 from ..marked_tpcf import marked_tpcf
 
-from astropy.tests.helper import pytest
 slow = pytest.mark.slow
-from astropy.utils.misc import NumpyRNGContext
 
 fixed_seed = 43
 
 
-__all__ = ('test_marked_tpcf_auto_periodic', 
-    'test_marked_tpcf_auto_nonperiodic', 
-    'test_marked_tpcf_cross1', 'test_marked_tpcf_cross_consistency')
+__all__ = ('test_marked_tpcf_auto_periodic',
+           'test_marked_tpcf_auto_nonperiodic',
+           'test_marked_tpcf_cross1', 'test_marked_tpcf_cross_consistency')
+
 
 def test_marked_tpcf_auto_periodic():
     """
@@ -30,11 +32,11 @@ def test_marked_tpcf_auto_periodic():
 
     weight_func_id = 1
     weights1 = np.random.random(Npts)
-    
+
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
         period=period, num_threads=1, weight_func_id=weight_func_id)
-    
+
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 
@@ -50,12 +52,13 @@ def test_marked_tpcf_auto_nonperiodic():
 
     weight_func_id = 1
     weights1 = np.random.random(Npts)
-    
+
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
         period=None, num_threads=1, weight_func_id=weight_func_id)
-    
+
     assert result.ndim == 1, "More than one correlation function returned erroneously."
+
 
 def test_marked_tpcf_cross1():
     """
@@ -72,9 +75,10 @@ def test_marked_tpcf_cross1():
     weights2 = np.random.random(Npts)
     weight_func_id = 1
 
-    result = marked_tpcf(sample1, rbins, sample2=sample2, 
+    result = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
         period=period, num_threads='max', weight_func_id=weight_func_id)
+
 
 def test_marked_tpcf_cross_consistency():
     """
@@ -91,21 +95,18 @@ def test_marked_tpcf_cross_consistency():
     weights2 = np.random.random(Npts)
     weight_func_id = 1
 
-    cross_mark1 = marked_tpcf(sample1, rbins, sample2=sample2, 
+    cross_mark1 = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
-        period=period, num_threads=1, weight_func_id=weight_func_id, 
-        do_auto = False, normalize_by = 'number_counts')
+        period=period, num_threads=1, weight_func_id=weight_func_id,
+        do_auto=False, normalize_by='number_counts')
 
-    auto1, cross_mark2, auto2 = marked_tpcf(sample1, rbins, sample2=sample2, 
+    auto1, cross_mark2, auto2 = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
-        period=period, num_threads=1, weight_func_id=weight_func_id, normalize_by = 'number_counts')
+        period=period, num_threads=1, weight_func_id=weight_func_id, normalize_by='number_counts')
 
-    auto1b, auto2b = marked_tpcf(sample1, rbins, sample2=sample2, 
+    auto1b, auto2b = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
-        period=period, num_threads=1, weight_func_id=weight_func_id, 
-        do_cross = False, normalize_by = 'number_counts')
+        period=period, num_threads=1, weight_func_id=weight_func_id,
+        do_cross=False, normalize_by='number_counts')
 
     assert np.all(cross_mark1 == cross_mark2)
-
-
-

@@ -16,6 +16,7 @@ __all__ = ['TestGroupMemberGenerator']
 class TestGroupMemberGenerator(TestCase):
     """ Class providing tests of the `~halotools.utils.aggregation`.
     """
+
     def setUp(self):
         fake_sim = FakeSim()
         self.halo_table = fake_sim.halo_table
@@ -197,10 +198,5 @@ class TestGroupMemberGenerator(TestCase):
             returned_result = group['mean_mass_weighted_spin'][0]
             np.testing.assert_approx_equal(correct_result, returned_result)
 
-
     def tearDown(self):
         del self.halo_table
-
-
-
-

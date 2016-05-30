@@ -95,7 +95,6 @@ def compute_conditional_percentiles(**kwargs):
                 "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
             raise HalotoolsError(msg)
 
-
     def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
         """
         Parameters
@@ -187,8 +186,6 @@ def compute_conditional_percentiles(**kwargs):
     return output
 
 
-
-
 class SampleSelector(object):
     """ Container class for commonly used sample selections.
     """
@@ -207,8 +204,8 @@ class SampleSelector(object):
             return table[mask], table[~mask]
 
     @staticmethod
-    def property_range(lower_bound = -float("inf"), upper_bound = float("inf"),
-        return_complement = False, host_halos_only=False, subhalos_only=False, **kwargs):
+    def property_range(lower_bound=-float("inf"), upper_bound=float("inf"),
+            return_complement=False, host_halos_only=False, subhalos_only=False, **kwargs):
         """ Method makes a cut on an input table column based on an input upper and lower bound, and
         returns the cut table.
 
@@ -360,30 +357,8 @@ class SampleSelector(object):
                 "For example, there are no table elements in the percentile range (%.2f, %.2f)" %
                   (percentiles[idx_too_few], percentiles[idx_too_few+1]))
 
-
         result = np.zeros(len(indices)-1, dtype=object)
         for i, first_idx, last_idx in zip(list(range(len(result))), indices[:-1], indices[1:]):
             result[i] = table[first_idx:last_idx]
 
         return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

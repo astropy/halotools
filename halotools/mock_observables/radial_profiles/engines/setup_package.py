@@ -5,6 +5,7 @@ PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ("radial_profile_3d_engine.pyx", )
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
+
 def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace('.pyx', '') for src in SOURCES]
@@ -20,7 +21,7 @@ def get_extensions():
             sources=[source],
             include_dirs=include_dirs,
             libraries=libraries,
-            language = language,
+            language=language,
             extra_compile_args=extra_compile_args))
 
     return extensions

@@ -41,6 +41,7 @@ else:
 
 __all__ = ('TestUserSuppliedHaloCatalog', )
 
+
 class TestUserSuppliedHaloCatalog(TestCase):
     """ Class providing tests of the `~halotools.sim_manager.UserSuppliedHaloCatalog`.
     """
@@ -55,7 +56,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         self.halo_y = np.linspace(0, self.Lbox, self.Nhalos)
         self.halo_z = np.linspace(0, self.Lbox, self.Nhalos)
         self.halo_mass = np.logspace(10, 15, self.Nhalos)
-        self.halo_id = np.arange(0, self.Nhalos, dtype = np.int)
+        self.halo_id = np.arange(0, self.Nhalos, dtype=np.int)
         self.good_halocat_args = (
             {'halo_x': self.halo_x, 'halo_y': self.halo_y,
             'halo_z': self.halo_z, 'halo_id': self.halo_id, 'halo_mass': self.halo_mass}
@@ -79,35 +80,34 @@ class TestUserSuppliedHaloCatalog(TestCase):
     def test_particle_mass_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
                 **self.good_halocat_args)
 
     def test_lbox_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(particle_mass = 200,
+            halocat = UserSuppliedHaloCatalog(particle_mass=200,
                 **self.good_halocat_args)
 
     def test_halos_contained_inside_lbox(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(Lbox = 20, particle_mass = 100,
+            halocat = UserSuppliedHaloCatalog(Lbox=20, particle_mass=100,
                 **self.good_halocat_args)
 
     def test_redshift_is_float(self):
 
         with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 100, redshift = '',
+                Lbox=200, particle_mass=100, redshift='',
                 **self.good_halocat_args)
         substr = "The ``redshift`` metadata must be a float."
         assert substr in err.value.args[0]
 
-
     def test_successful_load(self):
 
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
         assert hasattr(halocat, 'Lbox')
         assert halocat.Lbox == 200
@@ -116,9 +116,9 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
     def test_additional_metadata(self):
 
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
-            arnold_schwarzenegger = 'Stick around!',
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
+            arnold_schwarzenegger='Stick around!',
             **self.good_halocat_args)
         assert hasattr(halocat, 'arnold_schwarzenegger')
         assert halocat.arnold_schwarzenegger == 'Stick around!'
@@ -129,8 +129,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = -1
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
 
     def test_positions_contained_inside_lbox_alt_test(self):
@@ -138,8 +138,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = 10000
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
 
     def test_has_halo_x_column(self):
@@ -147,8 +147,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_x']
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
 
     def test_has_halo_id_column(self):
@@ -156,8 +156,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_id']
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
 
     def test_has_halo_mass_column(self):
@@ -165,8 +165,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_mass']
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
 
     def test_halo_prefix_warning(self):
@@ -177,8 +177,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             bad_halocat_args['s'] = np.ones(self.Nhalos)
-            halocat = UserSuppliedHaloCatalog(Lbox = 200,
-                particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox=200,
+                particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
             assert 'interpreted as metadata' in str(w[-1].message)
 
@@ -197,8 +197,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
     def test_ptcl_table_dne(self):
         # Must not have a ptcl_table attribute when none is passed
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
         assert not hasattr(halocat, 'ptcl_table')
 
@@ -206,33 +206,33 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         # Must have ptcl_table attribute when argument is legitimate
         ptclcat = UserSuppliedPtclCatalog(
-            x = np.zeros(self.num_ptcl),
-            y = np.zeros(self.num_ptcl),
-            z = np.zeros(self.num_ptcl),
-            Lbox = 200, particle_mass = 100,
-            redshift = self.redshift
+            x=np.zeros(self.num_ptcl),
+            y=np.zeros(self.num_ptcl),
+            z=np.zeros(self.num_ptcl),
+            Lbox=200, particle_mass=100,
+            redshift=self.redshift
             )
 
         halocat = UserSuppliedHaloCatalog(
-            Lbox = 200, particle_mass = 100, redshift = self.redshift,
-            user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+            Lbox=200, particle_mass=100, redshift=self.redshift,
+            user_supplied_ptclcat=ptclcat, **self.good_halocat_args)
         assert hasattr(halocat, 'ptcl_table')
 
     def test_ptcl_table_bad_args1(self):
 
         # Must have ptcl_table attribute when argument is legitimate
         ptclcat = UserSuppliedPtclCatalog(
-            x = np.zeros(self.num_ptcl),
-            y = np.zeros(self.num_ptcl),
-            z = np.zeros(self.num_ptcl),
-            Lbox = 100, particle_mass = 100,
-            redshift = self.redshift
+            x=np.zeros(self.num_ptcl),
+            y=np.zeros(self.num_ptcl),
+            z=np.zeros(self.num_ptcl),
+            Lbox=100, particle_mass=100,
+            redshift=self.redshift
             )
 
         with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 100, redshift = self.redshift,
-                user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+                Lbox=200, particle_mass=100, redshift=self.redshift,
+                user_supplied_ptclcat=ptclcat, **self.good_halocat_args)
         substr = "Inconsistent values of Lbox"
         assert substr in err.value.args[0]
 
@@ -240,17 +240,17 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         # Must have ptcl_table attribute when argument is legitimate
         ptclcat = UserSuppliedPtclCatalog(
-            x = np.zeros(self.num_ptcl),
-            y = np.zeros(self.num_ptcl),
-            z = np.zeros(self.num_ptcl),
-            Lbox = 200, particle_mass = 200,
-            redshift = self.redshift
+            x=np.zeros(self.num_ptcl),
+            y=np.zeros(self.num_ptcl),
+            z=np.zeros(self.num_ptcl),
+            Lbox=200, particle_mass=200,
+            redshift=self.redshift
             )
 
         with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 100, redshift = self.redshift,
-                user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+                Lbox=200, particle_mass=100, redshift=self.redshift,
+                user_supplied_ptclcat=ptclcat, **self.good_halocat_args)
         substr = "Inconsistent values of particle_mass"
         assert substr in err.value.args[0]
 
@@ -258,17 +258,17 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         # Must have ptcl_table attribute when argument is legitimate
         ptclcat = UserSuppliedPtclCatalog(
-            x = np.zeros(self.num_ptcl),
-            y = np.zeros(self.num_ptcl),
-            z = np.zeros(self.num_ptcl),
-            Lbox = 200, particle_mass = 200,
-            redshift = self.redshift + 0.1
+            x=np.zeros(self.num_ptcl),
+            y=np.zeros(self.num_ptcl),
+            z=np.zeros(self.num_ptcl),
+            Lbox=200, particle_mass=200,
+            redshift=self.redshift + 0.1
             )
 
         with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 200, redshift = self.redshift,
-                user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+                Lbox=200, particle_mass=200, redshift=self.redshift,
+                user_supplied_ptclcat=ptclcat, **self.good_halocat_args)
         substr = "Inconsistent values of redshift"
         assert substr in err.value.args[0]
 
@@ -276,15 +276,15 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 200, redshift = self.redshift,
-                user_supplied_ptclcat = 98, **self.good_halocat_args)
+                Lbox=200, particle_mass=200, redshift=self.redshift,
+                user_supplied_ptclcat=98, **self.good_halocat_args)
         substr = "an instance of UserSuppliedPtclCatalog"
         assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache1(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
 
         basename = 'abc'
@@ -303,13 +303,13 @@ class TestUserSuppliedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat.add_halocat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string, dummy_string,
-                overwrite = True)
+                overwrite=True)
         assert substr not in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache2(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
 
         basename = 'abc'
@@ -323,8 +323,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache3(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
 
         basename = 'abc'
@@ -337,14 +337,14 @@ class TestUserSuppliedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat.add_halocat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string, dummy_string,
-                overwrite = True)
+                overwrite=True)
         substr = "The fname must end with an ``.hdf5`` extension."
         assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache4(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
 
         basename = 'abc.hdf5'
@@ -354,6 +354,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert os.path.isfile(fname)
 
         dummy_string = '  '
+
         class Dummy(object):
             pass
 
@@ -364,14 +365,14 @@ class TestUserSuppliedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat.add_halocat_to_cache(
                 fname, not_representable_as_string, dummy_string, dummy_string, dummy_string,
-                overwrite = True)
+                overwrite=True)
         substr = "must all be strings."
         assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache5(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
 
         basename = 'abc.hdf5'
@@ -381,6 +382,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert os.path.isfile(fname)
 
         dummy_string = '  '
+
         class Dummy(object):
             pass
 
@@ -391,15 +393,14 @@ class TestUserSuppliedHaloCatalog(TestCase):
         with pytest.raises(HalotoolsError) as err:
             halocat.add_halocat_to_cache(
                 fname, dummy_string, dummy_string, dummy_string, dummy_string,
-                overwrite = True, some_more_metadata = not_representable_as_string)
+                overwrite=True, some_more_metadata=not_representable_as_string)
         substr = "keyword is not representable as a string."
         assert substr in err.value.args[0]
 
-
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache6(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200,
-            particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox=200,
+            particle_mass=100, redshift=self.redshift,
             **self.good_halocat_args)
 
         basename = 'abc.hdf5'
@@ -412,7 +413,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         halocat.add_halocat_to_cache(
             fname, simname, halo_finder, version_name, processing_notes,
-            overwrite = True, some_additional_metadata = processing_notes)
+            overwrite=True, some_additional_metadata=processing_notes)
 
         cache = HaloTableCache()
         assert halocat.log_entry in cache.log
@@ -423,21 +424,12 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat.log_entry.version_name,
             halocat.log_entry.redshift,
             halocat.log_entry.fname,
-            raise_non_existence_exception = True,
-            update_ascii = True,
-            delete_corresponding_halo_catalog = True)
+            raise_non_existence_exception=True,
+            update_ascii=True,
+            delete_corresponding_halo_catalog=True)
 
     def tearDown(self):
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
-
-
-
-
-
-
-
-
-

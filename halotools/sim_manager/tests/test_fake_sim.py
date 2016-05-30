@@ -3,16 +3,18 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 
-import numpy as np 
+import numpy as np
 
 from ..fake_sim import FakeSim, FakeSimHalosNearBoundaries
 from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestFakeSim', 'TestFakeSimHalosNearBoundaries']
 
+
 class TestFakeSim(TestCase):
     """
     """
+
     def setUp(self):
         self.fake_sim = FakeSim()
 
@@ -33,9 +35,11 @@ class TestFakeSim(TestCase):
     def tearDown(self):
         del self.fake_sim
 
+
 class TestFakeSimHalosNearBoundaries(TestCase):
     """
     """
+
     def setUp(self):
         self.fake_sim = FakeSimHalosNearBoundaries()
 
@@ -45,9 +49,5 @@ class TestFakeSimHalosNearBoundaries(TestCase):
             assert key in list(self.fake_sim.halo_table.keys())
 
     def test_positions(self):
-        assert not np.any( (self.fake_sim.halo_table['halo_x'] > 1) & 
-            (self.fake_sim.halo_table['halo_x'] < self.fake_sim.Lbox - 1) )
-
-
-
-
+        assert not np.any((self.fake_sim.halo_table['halo_x'] > 1) &
+            (self.fake_sim.halo_table['halo_x'] < self.fake_sim.Lbox - 1))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy as np 
+import numpy as np
 from unittest import TestCase
 from functools import partial
 from astropy.table import Table
@@ -11,6 +11,7 @@ from ...sim_manager import FakeSim
 
 __all__ = ('TestSampleSelector', 'TestComputeConditionalPercentiles')
 
+
 class TestSampleSelector(TestCase):
     """
     """
@@ -19,12 +20,12 @@ class TestSampleSelector(TestCase):
         Npts = 10
         x = np.linspace(0, 9, Npts)
 
-        d = {'x':x}
+        d = {'x': x}
         t = Table(d)
         ax = np.array(x, dtype=[('x', 'f4')])
 
         percentiles = 0.5
-        result = SampleSelector.split_sample(table=t, key='x', percentiles = percentiles)
+        result = SampleSelector.split_sample(table=t, key='x', percentiles=percentiles)
 
         assert len(result) == 2
         assert len(result[0]) == 5
@@ -38,20 +39,20 @@ class TestSampleSelector(TestCase):
         correct_sum = np.sum([5, 6, 7, 8, 9])
         assert result1_sum == correct_sum
 
-        f = partial(SampleSelector.split_sample, table=t[0:4], key='x', 
+        f = partial(SampleSelector.split_sample, table=t[0:4], key='x',
                 percentiles=[0.1, 0.2, 0.3, 0.4, 0.5])
         self.assertRaises(ValueError, f)
 
-        f = partial(SampleSelector.split_sample, table=t, key='x', 
+        f = partial(SampleSelector.split_sample, table=t, key='x',
                 percentiles=[0.1, 0.1, 0.95])
         self.assertRaises(ValueError, f)
 
-        f = partial(SampleSelector.split_sample, table=t, key='y', 
-                percentiles= 0.5)
+        f = partial(SampleSelector.split_sample, table=t, key='y',
+                percentiles=0.5)
         self.assertRaises(KeyError, f)
 
-        f = partial(SampleSelector.split_sample, table=ax, key='x', 
-                percentiles= 0.5)
+        f = partial(SampleSelector.split_sample, table=ax, key='x',
+                percentiles=0.5)
         self.assertRaises(TypeError, f)
 
 
@@ -84,9 +85,9 @@ class TestComputeConditionalPercentiles(TestCase):
     def test_fake_halo_table(self):
 
         percentiles = compute_conditional_percentiles(
-                table = self.fake_halo_table, 
-                prim_haloprop_key = 'halo_mvir', 
-                sec_haloprop_key = 'halo_vmax')
+                table=self.fake_halo_table,
+                prim_haloprop_key='halo_mvir',
+                sec_haloprop_key='halo_vmax')
         split = percentiles < 0.5
         low_vmax, high_vmax = self.fake_halo_table[split], self.fake_halo_table[np.invert(split)]
         #assert len(low_vmax) == len(high_vmax)
@@ -99,16 +100,16 @@ class TestComputeConditionalPercentiles(TestCase):
         manual_high_mass = self.custom_halo_table[np.invert(manual_mass_split)]
         assert np.all(manual_low_mass['halo_mvir'] == 1e12)
         assert np.all(manual_high_mass['halo_mvir'] == 1e14)
-        assert manual_low_mass['halo_zform'].max() == 10 
-        assert manual_low_mass['halo_zform'].min() == 0 
-        assert manual_high_mass['halo_zform'].max() == 30 
-        assert manual_high_mass['halo_zform'].min() == 20 
+        assert manual_low_mass['halo_zform'].max() == 10
+        assert manual_low_mass['halo_zform'].min() == 0
+        assert manual_high_mass['halo_zform'].max() == 30
+        assert manual_high_mass['halo_zform'].min() == 20
 
         percentiles = compute_conditional_percentiles(
-                table = self.custom_halo_table, 
-                prim_haloprop_key = 'halo_mvir', 
-                sec_haloprop_key = 'halo_zform', 
-                prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)
+                table=self.custom_halo_table,
+                prim_haloprop_key='halo_mvir',
+                sec_haloprop_key='halo_zform',
+                prim_haloprop_bin_boundaries=prim_haloprop_bin_boundaries)
 
         assert np.all(percentiles <= 1)
         assert np.all(percentiles >= 0)
@@ -143,16 +144,3 @@ class TestComputeConditionalPercentiles(TestCase):
         split = percentiles <= 0.5
         low_zform, high_zform = self.custom_halo_table[split], self.custom_halo_table[np.invert(split)]
         assert len(low_zform) == len(high_zform)
-
-
-
-
-
-
-
-
-
-
-
-
-

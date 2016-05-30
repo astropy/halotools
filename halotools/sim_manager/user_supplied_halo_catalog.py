@@ -26,6 +26,7 @@ class UserSuppliedHaloCatalog(object):
     See :ref:`user_supplied_halo_catalogs` for a tutorial on this class.
 
     """
+
     def __init__(self, **kwargs):
         """
         Parameters
@@ -176,7 +177,6 @@ class UserSuppliedHaloCatalog(object):
 
         return halo_table_dict, metadata_dict
 
-
     def _test_halo_table_dict(self, halo_table_dict):
         """
         """
@@ -225,7 +225,6 @@ class UserSuppliedHaloCatalog(object):
                 "that are bound by 0 and the input ``Lbox``. \n")
             raise HalotoolsError(msg)
 
-
         try:
             redshift = float(metadata_dict['redshift'])
         except:
@@ -240,7 +239,6 @@ class UserSuppliedHaloCatalog(object):
                         "it does not begin with ``halo_``. If this is your intention, ignore this message.\n"
                         "Otherwise, rename this key to begin with ``halo_``. \n")
                     warn(msg, UserWarning)
-
 
     def _passively_bind_ptcl_table(self, **kwargs):
         """
@@ -292,10 +290,9 @@ class UserSuppliedHaloCatalog(object):
         except KeyError:
             pass
 
-
     def add_halocat_to_cache(self,
-        fname, simname, halo_finder, version_name, processing_notes,
-        overwrite = False, **additional_metadata):
+            fname, simname, halo_finder, version_name, processing_notes,
+            overwrite=False, **additional_metadata):
         """
         Parameters
         ------------
@@ -384,7 +381,6 @@ class UserSuppliedHaloCatalog(object):
                     "format of a string.\nHowever, the value you bound to the "
                     "``"+key+"`` keyword is not representable as a string.\n")
                 raise HalotoolsError(msg)
-
 
         ############################################################
         # Now write the file to disk and add the appropriate metadata

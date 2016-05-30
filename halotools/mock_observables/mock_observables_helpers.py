@@ -1,9 +1,9 @@
-""" Module containing various helper functions used to process the 
-arguments of functions throughout the `~halotools.mock_observables` package. 
-""" 
+""" Module containing various helper functions used to process the
+arguments of functions throughout the `~halotools.mock_observables` package.
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from warnings import warn 
+from warnings import warn
 import numpy as np
 import multiprocessing
 
@@ -12,17 +12,18 @@ from ..utils.array_utils import array_is_monotonic
 
 num_available_cores = multiprocessing.cpu_count()
 
-__all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period', 
+__all__ = ('enforce_sample_respects_pbcs', 'get_num_threads', 'get_period',
     'enforce_sample_has_correct_shape', 'get_separation_bins_array')
+
 
 def enforce_sample_respects_pbcs(x, y, z, period):
     """ Verify that the input sample is properly bounded in all dimensions by the input period.
 
-    Parameters 
+    Parameters
     -----------
-    x, y, z : arrays 
+    x, y, z : arrays
 
-    period : 3-element sequence 
+    period : 3-element sequence
     """
     try:
         assert np.all(x >= 0)
@@ -55,12 +56,13 @@ def enforce_sample_respects_pbcs(x, y, z, period):
             "of the input data that exceed this value")
         raise ValueError(msg % period[2])
 
-def get_num_threads(input_num_threads, enforce_max_cores = False):
-    """ Helper function requires that ``input_num_threads`` either be an 
-    integer or the string ``max``. If ``input_num_threads`` exceeds the 
-    number of available cores, a warning will be issued. 
-    In this event,  ``enforce_max_cores`` is set to True, 
-    then ``num_threads`` is automatically set to num_cores. 
+
+def get_num_threads(input_num_threads, enforce_max_cores=False):
+    """ Helper function requires that ``input_num_threads`` either be an
+    integer or the string ``max``. If ``input_num_threads`` exceeds the
+    number of available cores, a warning will be issued.
+    In this event,  ``enforce_max_cores`` is set to True,
+    then ``num_threads`` is automatically set to num_cores.
     """
     if input_num_threads=='max':
         num_threads = num_available_cores
@@ -84,9 +86,10 @@ def get_num_threads(input_num_threads, enforce_max_cores = False):
 
     return num_threads
 
+
 def get_period(period):
-    """ Helper function used to process the input ``period`` argument. 
-    If ``period`` is set to None, function returns period, PBCs = (None, False). 
+    """ Helper function used to process the input ``period`` argument.
+    If ``period`` is set to None, function returns period, PBCs = (None, False).
     Otherwise, function returns ([period, period, period], True).
     """
 
@@ -109,8 +112,9 @@ def get_period(period):
 
     return period, PBCs
 
+
 def enforce_sample_has_correct_shape(sample):
-    """ Function inspects the input ``sample`` and enforces that it is of shape (Npts, 3). 
+    """ Function inspects the input ``sample`` and enforces that it is of shape (Npts, 3).
     """
     sample = np.atleast_1d(sample)
     try:
@@ -127,20 +131,20 @@ def enforce_sample_has_correct_shape(sample):
 
 
 def get_separation_bins_array(separation_bins):
-    """ Function verifies that the input ``separation_bins`` is a monotonically increasing 
-    1d Numpy array with at least two entries, all of which are required to be strictly positive. 
+    """ Function verifies that the input ``separation_bins`` is a monotonically increasing
+    1d Numpy array with at least two entries, all of which are required to be strictly positive.
 
-    This helper function can be used equally well with 3d separation bins ``rbins`` or 
+    This helper function can be used equally well with 3d separation bins ``rbins`` or
     2d projected separation bins ``rp_bins``.
 
     """
     separation_bins = np.atleast_1d(separation_bins)
-    
+
     try:
         assert separation_bins.ndim == 1
         assert len(separation_bins) > 1
         if len(separation_bins) > 2:
-            assert array_is_monotonic(separation_bins, strict = True) == 1
+            assert array_is_monotonic(separation_bins, strict=True) == 1
         assert np.all(separation_bins > 0)
     except AssertionError:
         msg = ("\n Input separation bins must be a monotonically increasing \n"
@@ -149,29 +153,23 @@ def get_separation_bins_array(separation_bins):
 
     return separation_bins
 
+
 def get_line_of_sight_bins_array(pi_bins):
-    """ Function verifies that the input ``pi_bins`` is a monotonically increasing 
-    1d Numpy array with at least two entries. The  `get_line_of_sight_bins_array` function differs from 
-    the `get_separation_bins_array` function only in that values of zero are permissible. 
+    """ Function verifies that the input ``pi_bins`` is a monotonically increasing
+    1d Numpy array with at least two entries. The  `get_line_of_sight_bins_array` function differs from
+    the `get_separation_bins_array` function only in that values of zero are permissible.
 
     """
     pi_bins = np.atleast_1d(pi_bins)
-    
+
     try:
         assert pi_bins.ndim == 1
         assert len(pi_bins) > 1
         if len(pi_bins) > 2:
-            assert array_is_monotonic(pi_bins, strict = True) == 1
+            assert array_is_monotonic(pi_bins, strict=True) == 1
     except AssertionError:
         msg = ("\n Input separation bins must be a monotonically increasing \n"
                "1-D array with at least two entries.\n")
         raise TypeError(msg)
 
     return pi_bins
-
-
-
-
-
-
-
