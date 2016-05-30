@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from unittest import TestCase
-import pytest
+from astropy.tests.helper import pytest
 
 from ...factories import PrebuiltHodModelFactory
 

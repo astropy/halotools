@@ -4,8 +4,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-import pytest
 import multiprocessing
+from astropy.tests.helper import pytest
 
 from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
 from ..mock_observables_helpers import enforce_sample_has_correct_shape, get_separation_bins_array

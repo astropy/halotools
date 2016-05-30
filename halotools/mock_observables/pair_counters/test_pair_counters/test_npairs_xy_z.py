@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
     unicode_literals)
 
 import numpy as np
-import pytest
+from astropy.tests.helper import pytest
 
 from ..npairs_xy_z import npairs_xy_z
 from ..pairs import xy_z_npairs as pure_python_brute_force_npairs_xy_z

@@ -10,7 +10,7 @@ from ..radial_profile_3d import radial_profile_3d
 from ...tests.cf_helpers import (generate_locus_of_3d_points,
     generate_thin_shell_of_3d_points, generate_3d_regular_mesh)
 
-import pytest
+from astropy.tests.helper import pytest
 
 __all__ = ('test_radial_profile_3d_test1', )
 

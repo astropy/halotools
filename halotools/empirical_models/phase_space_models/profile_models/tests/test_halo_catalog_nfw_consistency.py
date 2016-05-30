@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 
 from unittest import TestCase
-import pytest
+from astropy.tests.helper import pytest
 
 from ..nfw_profile import NFWProfile
 

@@ -8,7 +8,7 @@ import numpy as np
 from ..npairs_jackknife_3d import npairs_jackknife_3d
 # load comparison simple pair counters
 
-import pytest
+from astropy.tests.helper import pytest
 slow = pytest.mark.slow
 
 __all__ = ('test_npairs_jackknife_3d_periodic', 'test_npairs_jackknife_3d_nonperiodic')
