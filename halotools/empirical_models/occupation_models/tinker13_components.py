@@ -4,9 +4,6 @@ This module contains various component features used by
 the HOD-style model introduced in Tinker et al. (2013)
 """
 
-__all__ = ('Tinker13Cens', 'Tinker13QuiescentSats',
-    'Tinker13ActiveSats', 'AssembiasTinker13Cens')
-
 import numpy as np
 import math
 from scipy.special import erf
@@ -22,6 +19,9 @@ from ..model_helpers import bounds_enforcing_decorator_factory
 from ...utils.array_utils import custom_len
 from ... import sim_manager
 from ...custom_exceptions import HalotoolsError, HalotoolsModelInputError
+
+__all__ = ('Tinker13Cens', 'Tinker13QuiescentSats',
+           'Tinker13ActiveSats', 'AssembiasTinker13Cens')
 
 
 class Tinker13Cens(OccupationComponent):

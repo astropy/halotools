@@ -5,9 +5,6 @@ the HOD-style model introduced in Leauthaud et al. (2011)
 
 """
 
-__all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
-    'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
-
 import numpy as np
 import math
 from scipy.special import erf
@@ -20,6 +17,9 @@ from ..assembias_models import HeavisideAssembias
 
 from ... import sim_manager
 from ...custom_exceptions import HalotoolsModelInputError
+
+__all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
+           'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
 
 
 class Leauthaud11Cens(OccupationComponent):

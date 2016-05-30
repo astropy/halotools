@@ -6,12 +6,13 @@ import numpy as np
 import multiprocessing
 from functools import partial
 
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
-
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import npairs_3d_engine
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
+
+
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 __all__ = ('npairs_3d', )
 

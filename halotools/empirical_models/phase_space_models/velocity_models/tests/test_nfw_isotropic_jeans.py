@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-__all__ = ['TestNFWJeansVelocity']
-
 from unittest import TestCase
+
+__all__ = ['TestNFWJeansVelocity']
 
 
 class TestNFWJeansVelocity(TestCase):

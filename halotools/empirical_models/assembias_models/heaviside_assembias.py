@@ -6,9 +6,6 @@ any method of any component model, as in
 `Hearin et al 2015 decorated HODs <http://arxiv.org/abs/1512.03050>`_.
 """
 
-__all__ = ('HeavisideAssembias', )
-__author__ = ('Andrew Hearin', )
-
 import numpy as np
 from warnings import warn
 
@@ -18,6 +15,9 @@ from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
 import collections
+
+__all__ = ('HeavisideAssembias', )
+__author__ = ('Andrew Hearin', )
 
 
 class HeavisideAssembias(object):

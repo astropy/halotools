@@ -5,9 +5,6 @@ the primary factory responsible for building
 HOD-style models of the galaxy-halo connection.
 """
 
-__all__ = ['HodModelFactory']
-__author__ = ['Andrew Hearin']
-
 import numpy as np
 from copy import copy
 from warnings import warn
@@ -20,6 +17,9 @@ from .. import model_helpers
 
 from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ['HodModelFactory']
+__author__ = ['Andrew Hearin']
 
 
 class HodModelFactory(ModelFactory):

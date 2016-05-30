@@ -3,9 +3,10 @@ Module expressing various default settings of the empirical modeling sub-package
 
 """
 
+import numpy as np
+
 __all__ = ['get_halo_boundary_key', 'get_halo_mass_key']
 
-import numpy as np
 
 # Default thresholds for mocks
 default_luminosity_threshold = -20

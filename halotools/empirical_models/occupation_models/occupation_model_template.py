@@ -5,8 +5,6 @@ HOD-style models of the galaxy-halo connection.
 
 """
 
-__all__ = ('OccupationComponent', )
-
 import numpy as np
 from scipy.stats import poisson
 from astropy.extern import six
@@ -16,6 +14,8 @@ from .. import model_defaults, model_helpers
 
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ('OccupationComponent', )
 
 
 @six.add_metaclass(ABCMeta)

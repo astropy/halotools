@@ -19,12 +19,13 @@ import numpy as np
 from astropy import cosmology as astropy_cosmology_obj
 from astropy import units as u
 from astropy.constants import G
-newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 from ....custom_exceptions import HalotoolsError
 
-__all__ = ('density_threshold', 'delta_vir',
-    'halo_mass_to_halo_radius', 'halo_radius_to_halo_mass', 'halo_mass_to_virial_velocity')
+newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
+
+__all__ = ('density_threshold', 'delta_vir', 'halo_mass_to_halo_radius',
+           'halo_radius_to_halo_mass', 'halo_mass_to_virial_velocity')
 
 __author__ = ['Benedikt Diemer', 'Andrew Hearin']
 

@@ -5,9 +5,6 @@ used by the Zheng07 model.
 
 """
 
-__all__ = ('Zheng07Cens', 'Zheng07Sats',
-    'AssembiasZheng07Cens', 'AssembiasZheng07Sats')
-
 import numpy as np
 from scipy.special import erf
 import warnings
@@ -18,6 +15,9 @@ from .. import model_defaults
 from ..assembias_models import HeavisideAssembias
 
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ('Zheng07Cens', 'Zheng07Sats',
+           'AssembiasZheng07Cens', 'AssembiasZheng07Sats')
 
 
 class Zheng07Cens(OccupationComponent):

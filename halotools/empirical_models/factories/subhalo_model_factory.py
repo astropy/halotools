@@ -5,9 +5,6 @@ Module storing the
 that governs how all subhalo-based models are built.
 """
 
-__all__ = ['SubhaloModelFactory']
-__author__ = ['Andrew Hearin']
-
 from copy import copy
 from warnings import warn
 import collections
@@ -18,6 +15,9 @@ from .. import model_helpers
 
 from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ['SubhaloModelFactory']
+__author__ = ['Andrew Hearin']
 
 
 class SubhaloModelFactory(ModelFactory):

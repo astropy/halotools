@@ -4,18 +4,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
+from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
+
 from ..marked_tpcf import marked_tpcf
 
-from astropy.tests.helper import pytest
 slow = pytest.mark.slow
-from astropy.utils.misc import NumpyRNGContext
 
 fixed_seed = 43
 
 
 __all__ = ('test_marked_tpcf_auto_periodic',
-    'test_marked_tpcf_auto_nonperiodic',
-    'test_marked_tpcf_cross1', 'test_marked_tpcf_cross_consistency')
+           'test_marked_tpcf_auto_nonperiodic',
+           'test_marked_tpcf_cross1', 'test_marked_tpcf_cross_consistency')
 
 
 def test_marked_tpcf_auto_periodic():

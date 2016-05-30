@@ -5,12 +5,12 @@ the factories used to generate Halotools-provided composite models
 of the galaxy-halo connection.
 """
 
-__all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
-__author__ = ['Andrew Hearin']
-
 from ..factories import SubhaloModelFactory, HodModelFactory
 
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
+__author__ = ['Andrew Hearin']
 
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):

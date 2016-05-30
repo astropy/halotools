@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-from astropy.tests.helper import pytest
-slow = pytest.mark.slow
-
 from unittest import TestCase
-
 import numpy as np
+
 from astropy.config.paths import _find_home
+from astropy.tests.helper import pytest
+
+from ..cached_halo_catalog import CachedHaloCatalog
+
+slow = pytest.mark.slow
 
 aph_home = '/Users/aphearin'
 detected_home = _find_home()
@@ -14,8 +16,6 @@ if aph_home == detected_home:
     APH_MACHINE = True
 else:
     APH_MACHINE = False
-
-from ..cached_halo_catalog import CachedHaloCatalog
 
 __all__ = ('TestSupportedSims', )
 

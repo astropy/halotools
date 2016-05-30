@@ -8,14 +8,14 @@ import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
 
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
-
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_3d_engine
 
 from ...utils.array_utils import convert_to_ndarray, custom_len
+
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 __all__ = ('pairwise_distance_3d', )
 

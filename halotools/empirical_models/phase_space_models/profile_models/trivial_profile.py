@@ -10,7 +10,6 @@ from __future__ import (
 import numpy as np
 from astropy import units as u
 from astropy.constants import G
-newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 from .profile_model_template import AnalyticDensityProf
 
@@ -19,6 +18,8 @@ from ... import model_defaults
 from ....utils.array_utils import convert_to_ndarray
 from ....sim_manager import sim_defaults
 
+
+newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 __author__ = ['Andrew Hearin']
 

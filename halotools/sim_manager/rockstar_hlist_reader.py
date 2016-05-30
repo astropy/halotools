@@ -5,8 +5,6 @@ publicly available Rockstar hlist files and store them in cache.
 
 """
 
-__all__ = ('RockstarHlistReader', )
-
 import os
 
 from warnings import warn
@@ -20,6 +18,8 @@ from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_str
 
 from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import HalotoolsError
+
+__all__ = ('RockstarHlistReader', )
 
 
 def _infer_redshift_from_input_fname(fname):

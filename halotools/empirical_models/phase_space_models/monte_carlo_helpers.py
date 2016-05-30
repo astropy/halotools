@@ -10,9 +10,6 @@ of the full phase space distribution of galaxies within their halos.
 Testing for this module is done in `~halotools.empirical_models.test_phase_space` module.
 """
 
-__author__ = ['Andrew Hearin']
-__all__ = ['MonteCarloGalProf']
-
 import numpy as np
 
 from itertools import product
@@ -23,6 +20,10 @@ from .. import model_defaults
 
 from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
+
+
+__author__ = ['Andrew Hearin']
+__all__ = ['MonteCarloGalProf']
 
 
 class MonteCarloGalProf(object):

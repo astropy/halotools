@@ -13,7 +13,6 @@ from scipy.integrate import quad as quad_integration
 from scipy.optimize import minimize as scipy_minimize
 from astropy import units as u
 from astropy.constants import G
-newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 from . import profile_helpers
 
@@ -21,6 +20,7 @@ from ... import model_defaults
 
 from ....utils.array_utils import convert_to_ndarray
 
+newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 

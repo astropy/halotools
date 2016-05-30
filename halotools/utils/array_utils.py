@@ -5,13 +5,13 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-__all__ = (['custom_len', 'find_idx_nearest_val',
-    'randomly_downsample_data', 'array_is_monotonic', 'convert_to_ndarray'])
-
 import numpy as np
 from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
+
+__all__ = (['custom_len', 'find_idx_nearest_val', 'randomly_downsample_data',
+            'array_is_monotonic', 'convert_to_ndarray'])
 
 
 def convert_to_ndarray(x, dt=None):

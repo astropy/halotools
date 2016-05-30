@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 from __future__ import (absolute_import, division, print_function)
 
-__all__ = ('test_set_approximate_cell_sizes', )
-
 from astropy.tests.helper import pytest
 
 from ..mesh_helpers import _set_approximate_cell_sizes, _enforce_maximum_search_length
+
+__all__ = ('test_set_approximate_cell_sizes', )
 
 
 def test_set_approximate_cell_sizes():

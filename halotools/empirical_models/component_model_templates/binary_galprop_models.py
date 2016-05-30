@@ -5,9 +5,6 @@
 from __future__ import (
     division, print_function, absolute_import)
 
-__all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
-__author__ = ('Andrew Hearin', )
-
 import numpy as np
 from astropy.extern import six
 from abc import ABCMeta
@@ -17,6 +14,9 @@ from .. import model_helpers
 
 from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
+__author__ = ('Andrew Hearin', )
 
 
 @six.add_metaclass(ABCMeta)

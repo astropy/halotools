@@ -7,14 +7,15 @@ full phase space distribution of galaxies within their halos.
 from __future__ import (
     division, print_function, absolute_import)
 
-__author__ = ['Andrew Hearin']
-__all__ = ['TrivialPhaseSpace']
-
 import numpy as np
 
 from .. import model_defaults
 
 from ...sim_manager import sim_defaults
+
+
+__author__ = ['Andrew Hearin']
+__all__ = ['TrivialPhaseSpace']
 
 
 class TrivialPhaseSpace(object):

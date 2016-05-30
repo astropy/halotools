@@ -4,9 +4,6 @@ an abstract container class used to build
 any composite model of the galaxy-halo connection.
 """
 
-__all__ = ['ModelFactory']
-__author__ = ['Andrew Hearin']
-
 import numpy as np
 from astropy.extern import six
 from abc import ABCMeta
@@ -17,6 +14,10 @@ from .. import model_defaults
 from ...sim_manager import CachedHaloCatalog, FakeSim
 from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
+
+__all__ = ['ModelFactory']
+__author__ = ['Andrew Hearin']
+
 
 inconsistent_redshift_error_msg = ("Inconsistency between the redshift "
     "already bound to the existing mock = ``%f`` "

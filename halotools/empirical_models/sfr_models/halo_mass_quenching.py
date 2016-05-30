@@ -5,12 +5,12 @@
 from __future__ import (
     division, print_function, absolute_import)
 
-__all__ = ['HaloMassInterpolQuenching']
-
 import numpy as np
 from ..component_model_templates import BinaryGalpropInterpolModel
 
 from ...utils.array_utils import convert_to_ndarray
+
+__all__ = ['HaloMassInterpolQuenching']
 
 
 class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):

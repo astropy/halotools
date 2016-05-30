@@ -6,9 +6,6 @@ governing the phase space distribution of massless tracers of an NFW potential.
 from __future__ import (
     division, print_function, absolute_import)
 
-__author__ = ['Andrew Hearin']
-__all__ = ['NFWPhaseSpace']
-
 import numpy as np
 from astropy.table import Table
 
@@ -17,6 +14,9 @@ from .velocity_models import NFWJeansVelocity
 from .monte_carlo_helpers import MonteCarloGalProf
 
 from .. import model_defaults
+
+__author__ = ['Andrew Hearin']
+__all__ = ['NFWPhaseSpace']
 
 
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):

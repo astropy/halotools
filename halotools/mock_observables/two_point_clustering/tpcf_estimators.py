@@ -3,13 +3,13 @@ private functions related to estimating the two point correltion function.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__all__ = ['_TP_estimator', '_list_estimators', '_TP_estimator_requirements']
-__author__ = ['Duncan Campbell']
-
 import numpy as np
 
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import convert_to_ndarray
+
+__all__ = ['_TP_estimator', '_list_estimators', '_TP_estimator_requirements']
+__author__ = ['Duncan Campbell']
 
 
 def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):

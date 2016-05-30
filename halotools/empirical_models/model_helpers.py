@@ -4,15 +4,6 @@ This module contains general purpose helper functions
 used by many of the Halotools models.
 """
 
-__all__ = (
-    ['solve_for_polynomial_coefficients', 'polynomial_from_table',
-    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype',
-    'bind_default_kwarg_mixin_safe',
-    'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory']
-    )
-
-__author__ = ['Andrew Hearin', 'Surhud More']
-
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
@@ -20,6 +11,15 @@ from warnings import warn
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
+
+
+__all__ = (
+    ['solve_for_polynomial_coefficients', 'polynomial_from_table',
+     'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype',
+     'bind_default_kwarg_mixin_safe',
+     'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory'])
+
+__author__ = ['Andrew Hearin', 'Surhud More']
 
 
 def solve_for_polynomial_coefficients(abscissa, ordinates):
