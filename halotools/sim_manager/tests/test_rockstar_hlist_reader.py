@@ -45,7 +45,7 @@ def write_temporary_ascii(num_halos, temp_fname):
     with NumpyRNGContext(fixed_seed):
         d['halo_spin_bullock'] = np.random.random(num_halos).astype('f4')
         d['halo_id'] = np.arange(num_halos).astype('i8')
-        d['halo_upid'] = np.random.random_integers(-1, 5, num_halos).astype('i8')
+        d['halo_upid'] = np.random.randint(-1, 6, num_halos).astype('i8')
         d['halo_x'] = np.random.random(num_halos).astype('f4')
         d['halo_y'] = np.random.random(num_halos).astype('f4')
         d['halo_z'] = np.random.random(num_halos).astype('f4')

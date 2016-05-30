@@ -57,7 +57,7 @@ def test_npairs_jackknife_3d_periodic():
     #define the jackknife sample labels
     Npts = len(random_sample)
     N_jsamples=10
-    jtags1 = np.sort(np.random.random_integers(1, N_jsamples, size=Npts))
+    jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
 
     #define weights
     weights1 = np.random.random(Npts)
@@ -90,7 +90,7 @@ def test_npairs_jackknife_3d_nonperiodic():
     #define the jackknife sample labels
     Npts = len(random_sample)
     N_jsamples=10
-    jtags1 = np.sort(np.random.random_integers(1, N_jsamples, size=Npts))
+    jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
 
     #define weights
     weights1 = np.random.random(Npts)
