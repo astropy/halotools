@@ -97,7 +97,7 @@ def _process_radial_bins(rbins, period, PBCs):
     """
 
     #check the radial bins parameter
-    rbins = convert_to_ndarray(rbins)
+    rbins = np.atleast_1d(rbins)
     rmax = np.max(rbins)
     try:
         assert rbins.ndim == 1

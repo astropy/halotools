@@ -8,10 +8,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from .pairwise_velocities_helpers import (_pairwise_velocity_stats_process_args,
-    _process_radial_bins)
+from .pairwise_velocities_helpers import _pairwise_velocity_stats_process_args
 
 from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
+
+from ..mock_observables_helpers import get_separation_bins_array
 
 __all__ = ('mean_radial_velocity_vs_r', )
 __author__ = ['Duncan Campbell']
@@ -150,7 +151,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     sample1, velocities1, sample2, velocities2, period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)
 
-    rbins = _process_radial_bins(rbins, period, PBCs)
+    rbins = np.atleast_1d(rbins)
 
     #create marks for the marked pair counter.
     marks1 = np.vstack((sample1.T, velocities1.T)).T
