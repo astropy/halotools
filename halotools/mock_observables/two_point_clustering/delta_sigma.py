@@ -144,28 +144,34 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
 
+    Now let's populate this halo catalog with mock galaxies. 
 
-    >>> x = halocat.halo_table['halo_x']
-    >>> y = halocat.halo_table['halo_y']
-    >>> z = halocat.halo_table['halo_z']
+    >>> from halotools.empirical_models import PrebuiltHodModelFactory
+    >>> model = PrebuiltHodModelFactory('hearin15')
+    >>> model.populate_mock(halocat)
 
-    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    Now we retrieve the positions of our mock galaxies and transform the arrays 
+    into the shape of the ndarray expected by the `~halotools.mock_observables.delta_sigma` 
+    function. We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
 
-    >>> galaxies = np.vstack((x,y,z)).T
+    >>> x = model.mock.galaxy_table['x']
+    >>> y = model.mock.galaxy_table['y']
+    >>> z = model.mock.galaxy_table['z']
+    >>> galaxies = np.vstack((x, y, z)).T
 
     Let's do the same thing for a set of particle data
 
-    >>> px = halocat.ptcl_table['x']
-    >>> py = halocat.ptcl_table['y']
-    >>> pz = halocat.ptcl_table['z']
-    >>> particles = np.vstack((px,py,pz)).T
+    >>> px = model.mock.ptcl_table['x']
+    >>> py = model.mock.ptcl_table['y']
+    >>> pz = model.mock.ptcl_table['z']
+    >>> particles = np.vstack((px, py, pz)).T
 
     >>> rp_bins = np.logspace(-1, 1, 10)
-    >>> pi_max = 20
+    >>> pi_max = 15
     >>> redshift = 0.
-    >>> result = delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period=halocat.Lbox)
+    >>> ds = delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, halocat.Lbox)
 
     See also
     --------
@@ -228,8 +234,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
         return (1.0+(10.0**xi(r)-1.0))
 
     # integrate xi to get the surface density as a function of r_p
-    dimless_surface_density = list(integrate.quad(one_plus_xi_gm, 0.0, pi_max, args=(rp,))[0]
-        for rp in rp_bins)
+    dimless_surface_density = list(
+        integrate.quad(one_plus_xi_gm, 0.0, pi_max, args=(rp,))[0] for rp in rp_bins)
 
     # fit a spline to the surface density
     log10_dimless_surface_density = InterpolatedUnivariateSpline(
