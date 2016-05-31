@@ -31,11 +31,13 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
         log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
-    Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
+    Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)` as a function
+    of projected distance.
 
-    This function computes the cross correlation between ``galaxies`` and ``particles``
-    to get the galaxy-matter cross correlation, :math:`\\xi_{\\rm g, m}(r)`, and
-    integrates the result to get :math:`\\Delta\\Sigma(r_p)`.  See the notes for details
+    This function first computes the cross correlation between ``galaxies`` and ``particles``
+    to get the galaxy-matter cross correlation, :math:`\\xi_{\\rm g, m}(r)`.
+    Then the function performs a projection integral of :math:`\\xi_{\\rm g, m}(r)`
+    to get :math:`\\Delta\\Sigma(r_p)`.  See the notes for details
     about the calculation.
 
     Example calls to this function appear in the documentation below.
@@ -110,7 +112,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     -------
     Delta_Sigma : np.array
         :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
-        The units are units(particles)/units(rp_bins)**2.
+        The units of `ds` are :math:`M_{\odot} / Mpc^2`.
+
+        Note that little h = 1 here and throughout Halotools.
 
     Notes
     -----
@@ -144,14 +148,14 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
 
-    Now let's populate this halo catalog with mock galaxies. 
+    Now let's populate this halo catalog with mock galaxies.
 
     >>> from halotools.empirical_models import PrebuiltHodModelFactory
     >>> model = PrebuiltHodModelFactory('hearin15')
     >>> model.populate_mock(halocat)
 
-    Now we retrieve the positions of our mock galaxies and transform the arrays 
-    into the shape of the ndarray expected by the `~halotools.mock_observables.delta_sigma` 
+    Now we retrieve the positions of our mock galaxies and transform the arrays
+    into the shape of the ndarray expected by the `~halotools.mock_observables.delta_sigma`
     function. We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
