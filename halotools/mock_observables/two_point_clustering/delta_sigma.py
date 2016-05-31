@@ -9,17 +9,25 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
 from warnings import warn
 
+from astropy import units as u
+from astropy.constants import G
+
 from .tpcf import tpcf
+from .clustering_helpers import verify_tpcf_estimator
 
 from ..mock_observables_helpers import (get_num_threads, get_separation_bins_array,
     get_period, enforce_sample_respects_pbcs, enforce_sample_has_correct_shape)
-from .clustering_helpers import verify_tpcf_estimator
+
+from ...sim_manager.sim_defaults import default_cosmology
 
 __all__ = ['delta_sigma']
 __author__ = ['Duncan Campbell']
 
+newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
-def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
+
+def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
+        cosmology=default_cosmology,
         log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
@@ -56,6 +64,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         maximum integration parameter, :math:`\\pi_{\\rm max}`
         (see notes for more details).
         Length units assumed to be in Mpc/h, here and throughout Halotools.
+
+    redshift : float
+        Redshift of the galaxy sample.
 
     period : array_like
         Length-3 sequence defining the periodic boundary conditions
@@ -152,7 +163,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     >>> particles = np.vstack((px,py,pz)).T
 
     >>> rp_bins = np.logspace(-1, 1, 10)
-    >>> result = delta_sigma(galaxies, particles, rp_bins, pi_max=20, period=halocat.Lbox)
+    >>> pi_max = 20
+    >>> redshift = 0.
+    >>> result = delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period=halocat.Lbox)
 
     See also
     --------
@@ -203,7 +216,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0  # note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
 
-    mean_rho = len(particles)/period.prod()  # number density of particles
+    rho_crit = cosmology.critical_density(redshift)
+    rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/cosmology.h**2
+    mean_rho = cosmology.Om(redshift)*rho_crit
 
     # define function to integrate
     def one_plus_xi_gm(pi, rp):
