@@ -127,7 +127,7 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     """
 
     #process projected radial bins
-    rp_bins = convert_to_ndarray(rp_bins)
+    rp_bins = np.atleast_1d(rp_bins)
     rp_max = np.max(rp_bins)
     try:
         assert rp_bins.ndim == 1
@@ -137,7 +137,7 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     except AssertionError:
         msg = ("\n Input `rp_bins` must be a monotonically increasing \n"
                "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
+        raise ValueError(msg)
 
     pi_max = float(pi_max)
 
@@ -147,12 +147,13 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
                    "cannot be larger than Lbox/3 in any dimension. \n"
                    "If you need to count pairs on these length scales, \n"
                    "you should use a larger simulation.\n")
-            raise HalotoolsError(msg)
+            raise ValueError(msg)
         if (pi_max >= np.min(period[2])/3.0):
             msg = ("\n The maximum length over which you search for pairs of points \n"
                    "cannot be larger than Lbox/3 in any dimension. \n"
+                   "The input ``pi_max`` = {0}"
                    "If you need to count pairs on these length scales, \n"
-                   "you should use a larger simulation.\n")
-            raise HalotoolsError(msg)
+                   "you should use a larger simulation.\n".format(pi_max))
+            raise ValueError(msg)
 
     return rp_bins, pi_max
