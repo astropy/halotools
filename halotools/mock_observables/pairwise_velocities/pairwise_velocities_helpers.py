@@ -9,6 +9,9 @@ import numpy as np
 from warnings import warn
 from multiprocessing import cpu_count
 
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
+    get_separation_bins_array, get_period, get_num_threads)
+
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
@@ -23,16 +26,17 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
     `~halotools.mock_observables.pairwise_velocity_stats`.
     """
 
-    sample1 = convert_to_ndarray(sample1)
-    velocities1 = convert_to_ndarray(velocities1)
+    sample1 = enforce_sample_has_correct_shape(sample1)
+    velocities1 = np.atleast_1d(velocities1).astype('f4')
 
     if sample2 is not None:
-        sample2 = convert_to_ndarray(sample2)
+        sample2 = np.atleast_1d(sample2)
         if velocities2 is None:
             msg = ("\n If `sample2` is passed as an argument, \n"
                    "`velocities2` must also be specified.")
-            raise HalotoolsError(msg)
-        else: velocities2 = convert_to_ndarray(velocities2)
+            raise ValueError(msg)
+        else:
+            velocities2 = np.atleast_1d(velocities2)
         if np.all(sample1==sample2):
             _sample1_is_sample2 = True
             msg = ("\n Warning: `sample1` and `sample2` are exactly the same, \n"
@@ -71,31 +75,17 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
             velocities2 = velocities2[inds]
             print('\n downsampling `sample2`...')
 
-    #Process period entry and check for consistency.
-    if period is None:
-        PBCs = False
-    else:
-        PBCs = True
-        period = convert_to_ndarray(period)
-        if len(period) == 1:
-            period = np.array([period[0]]*3)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "Input `period` must be a bounded positive number in all dimensions."
-            raise HalotoolsError(msg)
-
-    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
-        msg = ('\n `sample1` and `sample2` must have same dimension.\n')
-        raise HalotoolsError(msg)
+    period, PBCs = get_period(period)
 
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
         msg = ('\n `do_auto` and `do_cross` keywords must be of type boolean.')
         raise HalotoolsError(msg)
+    else:
+        if (do_auto is False) & (do_cross is False):
+            msg = ("Both ``do_auto`` and ``do_cross`` have been set to False")
+            raise ValueError(msg)
 
-    if num_threads == 'max':
-        num_threads = cpu_count()
+    num_threads = get_num_threads(num_threads)
 
     return sample1, velocities1, sample2, velocities2, period, do_auto,\
            do_cross, num_threads, _sample1_is_sample2, PBCs
@@ -107,7 +97,7 @@ def _process_radial_bins(rbins, period, PBCs):
     """
 
     #check the radial bins parameter
-    rbins = convert_to_ndarray(rbins)
+    rbins = np.atleast_1d(rbins)
     rmax = np.max(rbins)
     try:
         assert rbins.ndim == 1
@@ -117,7 +107,7 @@ def _process_radial_bins(rbins, period, PBCs):
     except AssertionError:
         msg = ("\n Input `rbins` must be a monotonically increasing \n"
                "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
+        raise ValueError(msg)
 
     #check for input parameter consistency
     if PBCs:
@@ -126,7 +116,7 @@ def _process_radial_bins(rbins, period, PBCs):
                    "of points cannot be larger than Lbox/3 in any dimension. \n"
                    "If you need to count pairs on these length scales, \n"
                    "you should use a larger simulation. \n")
-            raise HalotoolsError(msg)
+            raise ValueError(msg)
 
     return rbins
 
@@ -137,7 +127,7 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     """
 
     #process projected radial bins
-    rp_bins = convert_to_ndarray(rp_bins)
+    rp_bins = np.atleast_1d(rp_bins)
     rp_max = np.max(rp_bins)
     try:
         assert rp_bins.ndim == 1
@@ -147,7 +137,7 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     except AssertionError:
         msg = ("\n Input `rp_bins` must be a monotonically increasing \n"
                "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
+        raise ValueError(msg)
 
     pi_max = float(pi_max)
 
@@ -157,12 +147,13 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
                    "cannot be larger than Lbox/3 in any dimension. \n"
                    "If you need to count pairs on these length scales, \n"
                    "you should use a larger simulation.\n")
-            raise HalotoolsError(msg)
+            raise ValueError(msg)
         if (pi_max >= np.min(period[2])/3.0):
             msg = ("\n The maximum length over which you search for pairs of points \n"
                    "cannot be larger than Lbox/3 in any dimension. \n"
+                   "The input ``pi_max`` = {0}"
                    "If you need to count pairs on these length scales, \n"
-                   "you should use a larger simulation.\n")
-            raise HalotoolsError(msg)
+                   "you should use a larger simulation.\n".format(pi_max))
+            raise ValueError(msg)
 
     return rp_bins, pi_max

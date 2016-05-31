@@ -177,7 +177,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     if weights1 is None:
         weights1 = np.ones((npts_sample1, 1), dtype=np.float64)
     else:
-        weights1 = convert_to_ndarray(weights1)
+        weights1 = np.atleast_1d(weights1)
         weights1 = weights1.astype("float64")
         if weights1.ndim == 1:
             _converted_to_2d_from_1d = True
@@ -190,7 +190,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
             msg = ("\n You must either pass in a 1-D or 2-D array \n"
                    "for the input `weights1`. Instead, an array of \n"
                    "dimension %i was received.")
-            raise HalotoolsError(msg % ndim1)
+            raise ValueError(msg % ndim1)
 
     npts_weights1 = np.shape(weights1)[0]
     num_weights1 = np.shape(weights1)[1]
@@ -202,14 +202,14 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
                    "does not have the correct length. The number of \n"
                    "points in `sample1` = %i, while the number of points \n"
                    "in your input 1-D `weights1` array = %i")
-            raise HalotoolsError(msg % (npts_sample1, npts_weights1))
+            raise ValueError(msg % (npts_sample1, npts_weights1))
         else:
             msg = ("\n You passed in a 2-D array for `weights1` that \n"
                    "does not have a consistent shape with `sample1`. \n"
                    "`sample1` has length %i. The input value of `weight_func_id` = %i \n"
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights1` is (%i, %i)\n")
-            raise HalotoolsError(msg %
+            raise ValueError(msg %
                 (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
 
     ### Process the input weights2
@@ -218,7 +218,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     if weights2 is None:
         weights2 = np.ones((npts_sample2, 1), dtype=np.float64)
     else:
-        weights2 = convert_to_ndarray(weights2)
+        weights2 = np.atleast_1d(weights2)
         weights2 = weights2.astype("float64")
         if weights2.ndim == 1:
             _converted_to_2d_from_1d = True
@@ -231,7 +231,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
             msg = ("\n You must either pass in a 1-D or 2-D array \n"
                    "for the input `weights2`. Instead, an array of \n"
                    "dimension %i was received.")
-            raise HalotoolsError(msg % ndim2)
+            raise ValueError(msg % ndim2)
 
     npts_weights2 = np.shape(weights2)[0]
     num_weights2 = np.shape(weights2)[1]
@@ -243,14 +243,14 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
                    "does not have the correct length. The number of \n"
                    "points in `sample2` = %i, while the number of points \n"
                    "in your input 1-D `weights2` array = %i")
-            raise HalotoolsError(msg % (npts_sample2, npts_weights2))
+            raise ValueError(msg % (npts_sample2, npts_weights2))
         else:
             msg = ("\n You passed in a 2-D array for `weights2` that \n"
                    "does not have a consistent shape with `sample2`. \n"
                    "`sample2` has length %i. The input value of `weight_func_id` = %i \n"
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights2` is (%i, %i)\n")
-            raise HalotoolsError(msg %
+            raise ValueError(msg %
                 (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
 
     return weights1, weights2
