@@ -198,45 +198,46 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
                )
         warn(msg)
 
-    #fit a spline to the tpcf
-    #note that we fit the log10 of xi+1.0
+    # fit a spline to the tpcf
+    # note that we fit log10(1 + xi)
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0  # note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
 
     mean_rho = len(particles)/period.prod()  # number density of particles
 
-    #define function to integrate
-    def f(pi, rp):
+    # define function to integrate
+    def one_plus_xi_gm(pi, rp):
         r = np.sqrt(rp**2+pi**2)
-        #note that we take 10**xi-1,
-        #because we fit the log xi
-        return mean_rho*(1.0+(10.0**xi(r)-1.0))
+        # note that we take 10**xi-1,
+        # because we fit the log10(1 + xi)
+        return (1.0+(10.0**xi(r)-1.0))
 
-    #integrate xi to get the surface density as a function of r_p
-    surface_density = np.zeros(len(rp_bins))  # initialize to 0.0
-    for i in range(0, len(rp_bins)):
-        surface_density[i] = integrate.quad(f, 0.0, pi_max, args=(rp_bins[i],))[0]
+    # integrate xi to get the surface density as a function of r_p
+    dimless_surface_density = list(integrate.quad(one_plus_xi_gm, 0.0, pi_max, args=(rp,))[0]
+        for rp in rp_bins)
 
-    #fit a spline to the surface density
-    surface_density = InterpolatedUnivariateSpline(rp_bins, np.log10(surface_density), ext=0)
+    # fit a spline to the surface density
+    log10_dimless_surface_density = InterpolatedUnivariateSpline(
+        rp_bins, np.log10(dimless_surface_density), ext=0)
 
-    #integrate surface density to get the mean internal surface density
-    #define function to integrate
-    def f(rp):
-        #note that we take 10**surface_density,
-        #because we fit the log of surface density
-        return 10.0**surface_density(rp)*2.0*np.pi*rp
+    # integrate surface density to get the mean internal surface density
+    # define function to integrate
+    def dimless_mean_internal_surface_density_integrand(rp):
+        # note that we take 10**surface_density,
+        # because we fit the log of surface density
+        return 10.0**log10_dimless_surface_density(rp)*2.0*np.pi*rp
 
-    #do integral to get mean internal surface density
-    mean_internal_surface_density = np.zeros(len(rp_bins))
+    # do integral to get mean internal surface density
+    dimless_mean_internal_surface_density = np.zeros(len(rp_bins))
     for i in range(0, len(rp_bins)):
         internal_area = np.pi*rp_bins[i]**2.0
-        mean_internal_surface_density[i] = integrate.quad(f, 0.0, rp_bins[i])[0]/(internal_area)
+        dimless_mean_internal_surface_density[i] = integrate.quad(
+            dimless_mean_internal_surface_density_integrand, 0.0, rp_bins[i])[0]/(internal_area)
 
-    #calculate an return the change in surface density, delta sigma
-    delta_sigma = mean_internal_surface_density - 10**surface_density(rp_bins)
+    # calculate an return the change in surface density, delta sigma
+    dimless_delta_sigma = dimless_mean_internal_surface_density - 10**log10_dimless_surface_density(rp_bins)
 
-    return delta_sigma
+    return dimless_delta_sigma*mean_rho
 
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, num_threads):
