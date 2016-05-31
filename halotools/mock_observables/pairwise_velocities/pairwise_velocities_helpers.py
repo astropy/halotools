@@ -107,7 +107,7 @@ def _process_radial_bins(rbins, period, PBCs):
     except AssertionError:
         msg = ("\n Input `rbins` must be a monotonically increasing \n"
                "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
+        raise ValueError(msg)
 
     #check for input parameter consistency
     if PBCs:
@@ -116,7 +116,7 @@ def _process_radial_bins(rbins, period, PBCs):
                    "of points cannot be larger than Lbox/3 in any dimension. \n"
                    "If you need to count pairs on these length scales, \n"
                    "you should use a larger simulation. \n")
-            raise HalotoolsError(msg)
+            raise ValueError(msg)
 
     return rbins
 

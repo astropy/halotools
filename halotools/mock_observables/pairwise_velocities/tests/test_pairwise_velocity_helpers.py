@@ -6,7 +6,8 @@ import numpy as np
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..pairwise_velocities_helpers import _pairwise_velocity_stats_process_args
+from ..pairwise_velocities_helpers import (_pairwise_velocity_stats_process_args, 
+    _process_radial_bins)
 
 fixed_seed = 43
 
@@ -142,3 +143,25 @@ def test_pairwise_velocity_stats_process_args6():
         period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
         do_cross, num_threads, _sample1_is_sample2, PBCs = result
+
+def test_process_radial_bins1():
+    input_rbins = np.linspace(0.1, 0.5, 5)
+    period = None
+    PBCs = False
+    rbins = _process_radial_bins(input_rbins, period, PBCs)
+
+def test_process_radial_bins2():
+    input_rbins = np.arange(5)[::-1]
+    period = None
+    PBCs = False
+    with pytest.raises(ValueError) as err:
+        rbins = _process_radial_bins(input_rbins, period, PBCs)
+
+def test_process_radial_bins3():
+    input_rbins = np.linspace(0.1, 2, 5)
+    period = 1
+    PBCs = True
+    with pytest.raises(ValueError) as err:
+        rbins = _process_radial_bins(input_rbins, period, PBCs)
+
+
