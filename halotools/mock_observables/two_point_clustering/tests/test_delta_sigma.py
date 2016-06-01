@@ -20,6 +20,5 @@ def test_delta_sigma1():
         sample2 = np.random.random((10000, 3))
     rp_bins = np.logspace(-2, -1, 5)
     pi_max = 0.1
-    redshift = 0.0
-    ds = delta_sigma(sample1, sample2, rp_bins, pi_max, redshift, period=1, log_bins=False)
+    ds = delta_sigma(sample1, sample2, rp_bins, pi_max, period=1, log_bins=False)
     assert ds.ndim ==1, 'wrong number of results returned'

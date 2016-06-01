@@ -26,7 +26,7 @@ __author__ = ['Duncan Campbell']
 newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 
-def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
+def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         cosmology=default_cosmology,
         log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
@@ -70,9 +70,6 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
         (see notes for more details).
         Length units are comoving and assumed to be in Mpc/h,
         here and throughout Halotools.
-
-    redshift : float
-        Redshift of the galaxy sample.
 
     cosmology : instance of `astropy.cosmology`, optional
         Default value is set in `~halotools.sim_manager.default_cosmology` module.
@@ -123,7 +120,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     Delta_Sigma : np.array
         :math:`\\Delta\\Sigma(r_p)` calculated at projected comoving radial distances ``rp_bins``.
         The units of `ds` are :math:`h * M_{\odot} / Mpc^2`, where distances are in comoving units.
-        You can convert to physical units using the input ``cosmology`` and ``redshift``.
+        You can convert to physical units using the input cosmology and redshift.
         Note that little h = 1 here and throughout Halotools.
 
     Notes
@@ -192,10 +189,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
 
     >>> rp_bins = np.logspace(-1, 1, 10)
     >>> pi_max = 15
-    >>> redshift = 0.
     >>> period = model.mock.Lbox
     >>> cosmology = halocat.cosmology
-    >>> ds = delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period, cosmology=cosmology)
+    >>> ds = delta_sigma(galaxies, particles, rp_bins, pi_max, period, cosmology=cosmology)
 
     See also
     --------
@@ -246,10 +242,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0  # note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
 
-    a = 1./(1. + redshift)
-    rho_crit_comoving = cosmology.critical_density(redshift)/a**3
-    rho_crit_comoving = rho_crit_comoving.to(u.Msun/u.Mpc**3).value/cosmology.h**2
-    mean_rho_comoving = cosmology.Om(redshift)*rho_crit_comoving
+    rho_crit0 = cosmology.critical_density0
+    rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology.h**2
+    mean_rho_comoving = cosmology.Om0*rho_crit0
 
     # define function to integrate
     def one_plus_xi_gm(pi, rp):

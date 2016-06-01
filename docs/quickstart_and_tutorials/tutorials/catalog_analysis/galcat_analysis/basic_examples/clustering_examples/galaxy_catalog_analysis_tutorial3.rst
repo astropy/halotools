@@ -97,19 +97,18 @@ Calculate :math:`\Delta\Sigma(R_{\rm p})`
     
     rp_bins = np.logspace(-1,1,15)
     pi_max = 40
-    redshift = 0.1
 
     result_mstar11_in_mpc = delta_sigma(mstar11_positions, particle_positions, 
-                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+                         rp_bins, pi_max, period=model.mock.Lbox)
     
     result_mstar105_in_mpc = delta_sigma(mstar105_positions, particle_positions, 
-                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+                         rp_bins, pi_max, period=model.mock.Lbox)
     
     result_mstar105_central_in_mpc = delta_sigma(mstar105_central_positions, particle_positions, 
-                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+                         rp_bins, pi_max, period=model.mock.Lbox)
     
     result_mstar105_satellite_in_mpc = delta_sigma(mstar105_satellite_positions, particle_positions, 
-                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+                         rp_bins, pi_max, period=model.mock.Lbox)
 
 
 Recall that all Halotools length units are Mpc/h, but the conventional units to 
@@ -141,7 +140,7 @@ Plot the results
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.xlabel(r'$R_{\rm p} $  $\rm{[Mpc]}$', fontsize=22)
-    plt.ylabel(r'$\Delta\Sigma(R_{\rm p})$  $[M_{\odot} / {\rm pc}^2]$', fontsize=22)
+    plt.ylabel(r'$\Delta\Sigma(R_{\rm p})$  $[h M_{\odot} / {\rm pc}^2]$', fontsize=22)
     plt.legend(loc='best', fontsize=16)
 
 .. image:: gg_lensing_tutorial3.png
