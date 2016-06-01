@@ -1,6 +1,10 @@
 0.2 (unreleased)
 ----------------
 
+- mock_observables.delta_sigma function now requires a positional argument for the redshift. 
+
+- Fixed a bug in mock_observables.delta_sigma. See https://github.com/astropy/halotools/issues/523
+
 - Added velocity_marked_npairs_3d and velocity_marked_npairs_xy_z to pair_counters
 
 - Deleted mock_observables.nearest_neighbor function
