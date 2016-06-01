@@ -112,7 +112,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     -------
     Delta_Sigma : np.array
         :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
-        The units of `ds` are :math:`M_{\odot} / Mpc^2`.
+        The units of `ds` are :math:`M_{\odot} / Mpc^2`, where distances are in physical units.
+        You can convert to comoving units using the input ``cosmology`` and ``redshift``.
 
         Note that little h = 1 here and throughout Halotools.
 
