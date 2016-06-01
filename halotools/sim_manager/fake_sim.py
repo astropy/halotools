@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 """
-
-Simple module used to generate fake simulation data
-used to test the `~halotools.empirical_models` modules.
-
+Module storing the `~halotools.sim_manager.FakeSim` class
+used to generate fake simulation data on-the-fly.
+Primary use is to test the `~halotools.empirical_models` modules,
+particularly with doctests.
 """
 import numpy as np
 
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
 from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
+from .sim_defaults import default_cosmology
 
 __all__ = ('FakeSim', 'FakeSimHalosNearBoundaries')
 
@@ -30,7 +30,8 @@ class FakeSim(UserSuppliedHaloCatalog):
     """
 
     def __init__(self, num_massbins=10, num_halos_per_massbin=int(100),
-            num_ptcl=int(1e4), seed=43, redshift=0., **kwargs):
+            num_ptcl=int(1e4), seed=43, redshift=0., cosmology=default_cosmology,
+            **kwargs):
         """
         Parameters
         ----------
@@ -47,6 +48,9 @@ class FakeSim(UserSuppliedHaloCatalog):
         seed : int, optional
             Random number seed used to generate the fake halos and particles.
             Default is 43.
+
+        cosmology : `astropy.cosmology` instance, optional
+            Default is `halotools.sim_manager.sim_defaults.default_cosmology`.
 
         Examples
         --------
@@ -76,6 +80,7 @@ class FakeSim(UserSuppliedHaloCatalog):
         self.num_halos_per_massbin = num_halos_per_massbin
         self.num_halos = self.num_massbins*self.num_halos_per_massbin
         self.num_ptcl = num_ptcl
+        self.cosmology = cosmology
 
         halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype='i8')
         np.random.shuffle(halo_id)

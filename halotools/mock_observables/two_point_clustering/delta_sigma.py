@@ -62,7 +62,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     rp_bins : array_like
         array of projected radial boundaries defining the bins in which the result is
         calculated.  The minimum of rp_bins must be > 0.0.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     pi_max: float
         maximum integration parameter, :math:`\\pi_{\\rm max}`
@@ -72,6 +73,11 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
 
     redshift : float
         Redshift of the galaxy sample.
+
+    cosmology : instance of `astropy.cosmology`, optional
+        Default value is set in `~halotools.sim_manager.default_cosmology` module.
+        Typically you should use the `cosmology` attribute of the halo catalog
+        you used to populate mock galaxies.
 
     period : array_like
         Length-3 sequence defining the periodic boundary conditions
@@ -115,10 +121,9 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     Returns
     -------
     Delta_Sigma : np.array
-        :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
-        The units of `ds` are :math:`M_{\odot} / Mpc^2`, where distances are in comoving units.
+        :math:`\\Delta\\Sigma(r_p)` calculated at projected comoving radial distances ``rp_bins``.
+        The units of `ds` are :math:`h * M_{\odot} / Mpc^2`, where distances are in comoving units.
         You can convert to physical units using the input ``cosmology`` and ``redshift``.
-
         Note that little h = 1 here and throughout Halotools.
 
     Notes
@@ -156,7 +161,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     Now let's populate this halo catalog with mock galaxies.
 
     >>> from halotools.empirical_models import PrebuiltHodModelFactory
-    >>> model = PrebuiltHodModelFactory('hearin15')
+    >>> model = PrebuiltHodModelFactory('hearin15', threshold = 11.5)
     >>> model.populate_mock(halocat)
 
     Now we retrieve the positions of our mock galaxies and transform the arrays
@@ -177,10 +182,20 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     >>> pz = model.mock.ptcl_table['z']
     >>> particles = np.vstack((px, py, pz)).T
 
+    The default Halotools catalogs come with about one million particles.
+    The code below shows how to (optionally) downsample using a Halotools
+    convenience function. This is just for demonstration purposes. For a real
+    analysis, you should use at least as many dark matter particles as galaxies.
+
+    >>> from halotools.utils import randomly_downsample_data
+    >>> particles = randomly_downsample_data(particles, int(5e3))
+
     >>> rp_bins = np.logspace(-1, 1, 10)
     >>> pi_max = 15
     >>> redshift = 0.
-    >>> ds = delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, halocat.Lbox)
+    >>> period = model.mock.Lbox
+    >>> cosmology = halocat.cosmology
+    >>> ds = delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period, cosmology=cosmology)
 
     See also
     --------
@@ -231,9 +246,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0  # note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
 
-    rho_crit = cosmology.critical_density(redshift)
-    rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/cosmology.h**2
-    mean_rho = cosmology.Om(redshift)*rho_crit
+    a = 1./(1. + redshift)
+    rho_crit_comoving = cosmology.critical_density(redshift)/a**3
+    rho_crit_comoving = rho_crit_comoving.to(u.Msun/u.Mpc**3).value/cosmology.h**2
+    mean_rho_comoving = cosmology.Om(redshift)*rho_crit_comoving
 
     # define function to integrate
     def one_plus_xi_gm(pi, rp):
@@ -267,7 +283,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     # calculate an return the change in surface density, delta sigma
     dimless_delta_sigma = dimless_mean_internal_surface_density - 10**log10_dimless_surface_density(rp_bins)
 
-    return dimless_delta_sigma*mean_rho
+    return dimless_delta_sigma*mean_rho_comoving
 
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, num_threads):
@@ -276,9 +292,14 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, n
     `~halotools.mock_observables.delta_sigma`.
     """
     period, PBCs = get_period(period)
+    if PBCs is False:
+        msg = ("The `delta_sigma` function requires the input ``period`` to be \n"
+            "a bounded positive number in all dimensions")
+        raise ValueError(msg)
 
     galaxies = enforce_sample_has_correct_shape(galaxies)
     particles = enforce_sample_has_correct_shape(particles)
+
     enforce_sample_respects_pbcs(galaxies[:, 0], galaxies[:, 1], galaxies[:, 2], period)
     enforce_sample_respects_pbcs(particles[:, 0], particles[:, 1], particles[:, 2], period)
 
