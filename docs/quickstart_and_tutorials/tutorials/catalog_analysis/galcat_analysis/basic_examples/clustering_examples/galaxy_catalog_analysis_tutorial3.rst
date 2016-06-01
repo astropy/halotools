@@ -113,7 +113,7 @@ Calculate :math:`\Delta\Sigma(R_{\rm p})`
 
 
 Recall that all Halotools length units are Mpc/h, but the conventional units to 
-plot :math:`\Delta\Sigma` are :math:`M_{\dot}/pc^2`, so now we convert units and 
+plot :math:`\Delta\Sigma` are :math:`M_{\odot}/pc^2`, so now we convert units and 
 plot the results. 
 
 .. code:: python
