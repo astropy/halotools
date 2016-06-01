@@ -51,11 +51,13 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     ----------
     galaxies : array_like
         Ngal x 3 numpy array containing 3-d positions of galaxies.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     particles : array_like
         Npart x 3 numpy array containing 3-d positions of particles.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     rp_bins : array_like
         array of projected radial boundaries defining the bins in which the result is
@@ -65,7 +67,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     pi_max: float
         maximum integration parameter, :math:`\\pi_{\\rm max}`
         (see notes for more details).
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     redshift : float
         Redshift of the galaxy sample.
@@ -74,7 +77,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     log_bins : boolean, optional
         integration parameter (see notes for more details).
@@ -112,8 +116,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, redshift, period,
     -------
     Delta_Sigma : np.array
         :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
-        The units of `ds` are :math:`M_{\odot} / Mpc^2`, where distances are in physical units.
-        You can convert to comoving units using the input ``cosmology`` and ``redshift``.
+        The units of `ds` are :math:`M_{\odot} / Mpc^2`, where distances are in comoving units.
+        You can convert to physical units using the input ``cosmology`` and ``redshift``.
 
         Note that little h = 1 here and throughout Halotools.
 
