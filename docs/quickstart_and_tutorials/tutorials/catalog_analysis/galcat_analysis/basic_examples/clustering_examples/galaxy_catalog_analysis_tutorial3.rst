@@ -97,44 +97,52 @@ Calculate :math:`\Delta\Sigma(R_{\rm p})`
     
     rp_bins = np.logspace(-1,1,15)
     pi_max = 40
+    redshift = 0.1
 
-    result_mstar11 = delta_sigma(mstar11_positions, particle_positions, 
-                         rp_bins, pi_max=pi_max, period=model.mock.Lbox)
+    result_mstar11_in_mpc = delta_sigma(mstar11_positions, particle_positions, 
+                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+    
+    result_mstar105_in_mpc = delta_sigma(mstar105_positions, particle_positions, 
+                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+    
+    result_mstar105_central_in_mpc = delta_sigma(mstar105_central_positions, particle_positions, 
+                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
+    
+    result_mstar105_satellite_in_mpc = delta_sigma(mstar105_satellite_positions, particle_positions, 
+                         rp_bins, pi_max, redshift, period=model.mock.Lbox)
 
-    result_mstar105 = delta_sigma(mstar105_positions, particle_positions, 
-                         rp_bins, pi_max=pi_max, period=model.mock.Lbox)
 
-    result_mstar105_central = delta_sigma(mstar105_central_positions, particle_positions, 
-                         rp_bins, pi_max=pi_max, period=model.mock.Lbox)
+Recall that all Halotools length units are Mpc/h, but the conventional units to 
+plot :math:`\Delta\Sigma` are :math:`M_{\dot}/pc^2`, so now we convert units and 
+plot the results. 
 
-    result_mstar105_satellite = delta_sigma(mstar105_satellite_positions, particle_positions, 
-                         rp_bins, pi_max=pi_max, period=model.mock.Lbox)
+.. code:: python
+
+    length_unit_conversion = 1e6
+    result_mstar11_in_pc = result_mstar11_in_mpc/length_unit_conversion**2
+    result_mstar105_in_pc = result_mstar105_in_mpc/length_unit_conversion**2
+    result_mstar105_satellite_in_pc = result_mstar105_satellite_in_mpc/length_unit_conversion**2
+    result_mstar105_central_in_pc = result_mstar105_central_in_mpc/length_unit_conversion**2
+
 
 
 Plot the results 
 ~~~~~~~~~~~~~~~~~~~~
 .. code:: python
 
-    from seaborn import plt
-
-    plt.plot(rp_bins, result_mstar11, 
-                label=r'All galaxies: $M_{\ast} > 10^{11}M_{\odot}$')
-    plt.plot(rp_bins, result_mstar105, 
-                label=r'All galaxies: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
-    plt.plot(rp_bins, result_mstar105_satellite, 
-                label=r'Satellites: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
-    plt.plot(rp_bins, result_mstar105_central, 
-                label=r'Centrals: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar11_in_pc, label=r'All galaxies: $M_{\ast} > 10^{11}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar105_in_pc, label=r'All galaxies: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar105_satellite_in_pc, label=r'Satellites: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar105_central_in_pc, label=r'Centrals: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
     
     plt.xlim(xmin = 0.1, xmax = 10)
-    plt.ylim(ymin = 0.01, ymax = 100)
+    plt.ylim(ymin = 0.1, ymax = 50000)
     plt.loglog()
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.xlabel(r'$R_{\rm p} $  $\rm{[Mpc]}$', fontsize=25)
-    plt.ylabel(r'$\Delta\Sigma(R_{\rm p})$', fontsize=25)
-    plt.legend(loc='best', fontsize=15)
-
+    plt.xlabel(r'$R_{\rm p} $  $\rm{[Mpc]}$', fontsize=22)
+    plt.ylabel(r'$\Delta\Sigma(R_{\rm p})$  $[M_{\odot} / {\rm pc}^2]$', fontsize=22)
+    plt.legend(loc='best', fontsize=16)
 
 .. image:: gg_lensing_tutorial3.png
 
