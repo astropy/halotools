@@ -100,7 +100,7 @@ Although the *sim_manager* provides an object-oriented framework for creating a 
 
 [![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The package is currently being prepared for its first stable release, v0.2. Halotools is and will remain an evolving software package, but the API of the classes, methods and functions in v0.2 is stable. Please contact andrew.hearin@yale.edu with questions and comments about the code. 
+Halotools is a fully open-source package with contributing scientists spread across many universities. The package is currently being prepared for its first stable release, v0.2. Halotools is and will remain an evolving software package, but the API of the classes, methods and functions in v0.2 is stable. 
 
 ---
 
@@ -116,7 +116,7 @@ The google group also serves as a public forum for asking questions about the co
 
 ## Citing Halotools
 
-Halotools is currently preparing for its first “official” public release (v0.2). The v0.2 release will be accompanied with a code-release paper, currently being housed and developed in the repository stored here: https://github.com/aphearin/halotools_release_paper.
+Halotools is currently preparing for its first stable public release (v0.2). The v0.2 release will be accompanied with a code-release paper, currently being housed and developed in the repository stored here: https://github.com/aphearin/halotools_release_paper.
 
 If you use Halotools modules to support your science publication, we ask that you cite this paper in your work. A link to the source of the paper will be added to this section of the documentation as soon as the release-paper is submitted.
 
