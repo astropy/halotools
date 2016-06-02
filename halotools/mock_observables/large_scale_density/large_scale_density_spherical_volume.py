@@ -49,7 +49,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
     radius : float
         Radius of the sphere used to define the volume inside which the
         number density of tracers is calculated.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -57,11 +57,11 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
         period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity,
         and an input ``sample_volume`` must be provided.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample_volume : float, optional
         If period is set to None, you must specify the effective volume of the sample.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed

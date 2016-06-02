@@ -53,17 +53,17 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_bins : array_like
         array of boundaries defining the p radial bins parallel to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
@@ -84,7 +84,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity,
         in which case ``randoms`` must be provided.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     do_auto : boolean, optional
         Boolean determines whether the auto-correlation function will

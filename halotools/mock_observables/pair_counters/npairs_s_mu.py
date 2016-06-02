@@ -45,11 +45,11 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     s_bins : array_like
         numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
@@ -65,7 +65,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     verbose : Boolean, optional
         If True, print out information and progress.

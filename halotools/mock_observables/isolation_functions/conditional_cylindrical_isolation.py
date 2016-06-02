@@ -50,7 +50,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like
         Npts2 x 3 numpy array containing 3-D positions of points.
@@ -58,12 +58,12 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     rp_max : array_like
         radius of the cylinder to search for neighbors around galaxies in ``sample1``.
         If a single float is given, ``rp_max`` is assumed to be the same for each galaxy in
-        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+        ``sample1``. Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_max : float
         half the length of cylinders to search for neighbors around galaxies in ``sample1``.
         If a single float is given, ``pi_max`` is assumed to be the same for each galaxy in
-        ``sample1``. Length units assumed to be in Mpc/h, here and throughout Halotools.
+        ``sample1``. Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     marks1 : array_like, optional
         *Npts1 x N_marks* array of marks.  The supplied marks array must have the
@@ -90,7 +90,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed

@@ -48,7 +48,7 @@ class FoFGroups(object):
         ----------
         positions : array_like
             Npts x 3 numpy array containing 3-D positions of galaxies.
-            Length units assumed to be in Mpc/h, here and throughout Halotools.
+            Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
         b_perp : float
             Maximum linking length in the perpendicular direction,
@@ -62,7 +62,7 @@ class FoFGroups(object):
             Length-3 sequence defining the periodic boundary conditions
             in each dimension. If you instead provide a single scalar, Lbox,
             period is assumed to be the same in all Cartesian directions.
-            Length units assumed to be in Mpc/h, here and throughout Halotools.
+            Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
         Lbox : array_like, optional
             length 3 array defining boundaries of the simulation box.

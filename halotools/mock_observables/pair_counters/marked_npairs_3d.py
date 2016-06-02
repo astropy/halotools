@@ -42,7 +42,7 @@ def marked_npairs_3d(sample1, sample2, rbins,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.

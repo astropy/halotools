@@ -49,14 +49,14 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     randoms : array_like
         Nran x 3 array containing 3-D positions of randomly distributed points.
 
     rbins : array_like
         array of boundaries defining the real space radial bins in which pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     Nsub : array_like, optional
         Lenght-3 numpy array of number of divisions along each dimension defining
@@ -75,7 +75,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     do_auto : boolean, optional
         Boolean determines whether the auto-correlation function will
