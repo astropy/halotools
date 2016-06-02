@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains general purpose helper functions
 used by many of the Halotools models.
@@ -160,71 +159,6 @@ def enforce_periodicity_of_box(coords, box_length,
         return newcoords, new_velocity
     except:
         return coords % box_length
-
-
-def piecewise_heaviside(bin_midpoints, bin_width,
-        values_inside_bins, value_outside_bins, abscissa):
-    """ Piecewise heaviside function.
-
-    The function returns values_inside_bins
-    when evaluated at points within bin_width/2 of bin_midpoints.
-    Otherwise, the output function returns value_outside_bins.
-
-    Parameters
-    ----------
-    bin_midpoints : array_like
-        Length-Nbins array containing the midpoint of the abscissa bins.
-        Bin boundaries may touch, but overlapping bins will raise an exception.
-
-    bin_width : float
-        Width of the abscissa bins.
-
-    values_inside_bins : array_like
-        Length-Nbins array providing values of the desired function when evaluated
-        at a point inside one of the bins.
-
-    value_outside_bins : float
-        value of the desired function when evaluated at any point outside the bins.
-
-    abscissa : array_like
-        Points at which to evaluate binned_heaviside
-
-    Returns
-    -------
-    output : array_like
-        Values of the function when evaluated at the input abscissa
-
-    """
-
-    if custom_len(abscissa) > 1:
-        abscissa = np.array(abscissa)
-    if custom_len(values_inside_bins) > 1:
-        values_inside_bins = np.array(values_inside_bins)
-        bin_midpoints = np.array(bin_midpoints)
-
-    # If there are multiple abscissa bins, make sure they do not overlap
-    if custom_len(bin_midpoints)>1:
-        midpoint_differences = np.diff(bin_midpoints)
-        minimum_separation = midpoint_differences.min()
-        if minimum_separation < bin_width:
-            raise ValueError("abscissa bins are not permitted to overlap")
-
-    output = np.zeros(custom_len(abscissa)) + value_outside_bins
-
-    if custom_len(bin_midpoints)==1:
-        idx_abscissa_in_bin = np.where(
-            (abscissa >= bin_midpoints - bin_width/2.) & (abscissa < bin_midpoints + bin_width/2.))[0]
-        print(idx_abscissa_in_bin)
-        output[idx_abscissa_in_bin] = values_inside_bins
-    else:
-        for ii, x in enumerate(bin_midpoints):
-            idx_abscissa_in_binii = np.where(
-                (abscissa >= bin_midpoints[ii] - bin_width/2.) &
-                (abscissa < bin_midpoints[ii] + bin_width/2.)
-                )[0]
-            output[idx_abscissa_in_binii] = values_inside_bins[ii]
-
-    return output
 
 
 def custom_spline(table_abscissa, table_ordinates, **kwargs):
