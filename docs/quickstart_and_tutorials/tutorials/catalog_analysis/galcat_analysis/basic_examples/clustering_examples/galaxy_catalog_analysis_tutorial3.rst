@@ -111,9 +111,10 @@ Calculate :math:`\Delta\Sigma(R_{\rm p})`
                          rp_bins, pi_max, period=model.mock.Lbox)
 
 
-Recall that all Halotools length units are Mpc/h, but the conventional units to 
-plot :math:`\Delta\Sigma` are :math:`M_{\odot}/pc^2`, so now we convert units and 
-plot the results. 
+Recall that all Halotools length units are comoving and in Mpc/h. However, the conventional units to 
+plot :math:`\Delta\Sigma` are :math:`h*M_{\odot}/pc^2`, since in those units the galaxy-galaxy 
+lensing signal is roughly order unity for typical :math:`L_{\ast}` galaxy samples. 
+So now we convert units and plot the results. 
 
 .. code:: python
 
@@ -139,7 +140,7 @@ Plot the results
     plt.loglog()
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.xlabel(r'$R_{\rm p} $  $\rm{[Mpc]}$', fontsize=22)
+    plt.xlabel(r'$R_{\rm p} $  $\rm{[Mpc / h]}$', fontsize=22)
     plt.ylabel(r'$\Delta\Sigma(R_{\rm p})$  $[h M_{\odot} / {\rm pc}^2]$', fontsize=22)
     plt.legend(loc='best', fontsize=16)
 
