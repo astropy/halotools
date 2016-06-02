@@ -28,6 +28,21 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     x2in, y2in, z2in : arrays 
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
+    weights1in : array 
+        Numpy array storing the weights for points in sample 1
+
+    weights2in : array 
+        Numpy array storing the weights for points in sample 2
+
+    jtags1in : array 
+        Numpy array storing the subvolume label integers for points in sample 1
+
+    jtags2in : array 
+        Numpy array storing the subvolume label integers for points in sample 2
+
+    N_samples : int 
+        Total number of cells into which the simulated box has been subdivided 
+
     rbins : array
         Boundaries defining the bins in which pairs are counted.
 

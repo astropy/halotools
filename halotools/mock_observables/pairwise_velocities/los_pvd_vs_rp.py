@@ -50,7 +50,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         N1pts x 3 array containing the 3-D components of the velocities.
 
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
+        length 3 array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
 
     do_auto : boolean, optional

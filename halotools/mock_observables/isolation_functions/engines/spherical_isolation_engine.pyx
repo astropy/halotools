@@ -1,4 +1,5 @@
-"""
+""" Module containing the `~halotools.mock_observables.isolation_functions.engines.spherical_isolation_engine` 
+cython function driving the `~halotools.mock_observables.spherical_isolation` function. 
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 

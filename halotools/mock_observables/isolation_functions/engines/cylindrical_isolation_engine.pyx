@@ -1,4 +1,5 @@
-"""
+""" Module containing the `~halotools.mock_observables.isolation_functions.engines.cylindrical_isolation_engine` 
+cython function driving the `~halotools.mock_observables.cylindrical_isolation` function. 
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 

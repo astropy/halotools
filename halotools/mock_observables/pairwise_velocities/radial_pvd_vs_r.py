@@ -48,7 +48,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         len(sample12) array of velocities.
 
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
+        length 3 array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
 
     do_auto : boolean, optional

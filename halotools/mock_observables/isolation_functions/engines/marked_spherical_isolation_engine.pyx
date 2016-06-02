@@ -1,4 +1,5 @@
-"""
+""" Module containing the `~halotools.mock_observables.isolation_functions.engines.marked_spherical_isolation_engine` 
+cython function driving the `~halotools.mock_observables.marked_spherical_isolation` function. 
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -22,7 +23,7 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
     """
     Cython engine for determining if points in 'sample 1' are isolated, meaning no 
     neighbors within a spherical volume, with respect to points in 'sample 2', where
-    points are counted as neighbors if and only if a weighting function dependant on 
+    points are counted as neighbors if and only if a weighting function dependent on 
     weights for each point in sample 1 and sample 2 evaulates to true.
     
     Parameters

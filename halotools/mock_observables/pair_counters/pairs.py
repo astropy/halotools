@@ -33,7 +33,7 @@ def npairs(sample1, sample2, rbins, period=None):
         len(rbins) = Nrbins + 1.
 
     period : array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only
+        length k array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
 
@@ -114,7 +114,7 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
         numpy array of boundaries defining the parallel bins in which pairs are counted.
 
     period : array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only
+        length k array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
 
@@ -188,7 +188,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
         len(rbins) = Nrbins + 1.
 
     period : array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only
+        length k array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
 
@@ -291,7 +291,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
         numpy array of boundaries defining the parallel bins in which pairs are counted.
 
     period : array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only
+        length k array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
 
@@ -390,7 +390,7 @@ def pairs(sample1, r, sample2=None, period=None):
         period
 
     period : array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only
+        length k array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
 

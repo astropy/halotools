@@ -36,7 +36,7 @@ def distant_observer_redshift(x, v, period=None, cosmo=None):
         Npts x 3 array containing 3-d velocity components of galaxies in km/s
 
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only
+        Length-3 array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox]*3.
 
     Returns

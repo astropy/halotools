@@ -41,22 +41,22 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     Parameters
     ----------
     x_icell1 : numpy.array
-        array of x positions of lenght N1 (data1)
+        array of x positions of length N1 (data1)
     
     y_icell1 : numpy.array
-        array of y positions of lenght N1 (data1)
+        array of y positions of length N1 (data1)
     
     z_icell1 : numpy.array
-        array of z positions of lenght N1 (data1)
+        array of z positions of length N1 (data1)
     
     x_icell2 : numpy.array
-        array of x positions of lenght N2 (data2)
+        array of x positions of length N2 (data2)
     
     y_icell2 : numpy.array
-        array of y positions of lenght N2 (data2)
+        array of y positions of length N2 (data2)
     
     z_icell2 : numpy.array
-        array of z positions of lenght N2 (data2)
+        array of z positions of length N2 (data2)
     
     max_r : float
         maximum separation to record
@@ -160,22 +160,22 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     Parameters
     ----------
     x_icell1 : numpy.array
-        array of x positions of lenght N1 (data1)
+        array of x positions of length N1 (data1)
     
     y_icell1 : numpy.array
-        array of y positions of lenght N1 (data1)
+        array of y positions of length N1 (data1)
     
     z_icell1 : numpy.array
-        array of z positions of lenght N1 (data1)
+        array of z positions of length N1 (data1)
     
     x_icell2 : numpy.array
-        array of x positions of lenght N2 (data2)
+        array of x positions of length N2 (data2)
     
     y_icell2 : numpy.array
-        array of y positions of lenght N2 (data2)
+        array of y positions of length N2 (data2)
     
     z_icell2 : numpy.array
-        array of z positions of lenght N2 (data2)
+        array of z positions of length N2 (data2)
     
     max_rp : float
         maximum perpendicular separation to record
