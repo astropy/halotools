@@ -286,7 +286,7 @@ class RockstarHlistReader(TabularAsciiReader):
         >>> print(halocat.version_name) # doctest: +SKIP
 
         Now suppose that for your science target of interest,
-        subhalos in your simulation with :math:`M_{\\rm vir} < 10^10 M_{\\odot}`
+        subhalos in your simulation with :math:`M_{\\rm vir} < 10^{10} M_{\\odot}/h`
         are not properly resolved. In this case you can use the ``row_cut_min_dict`` keyword
         argument to discard such halos as the file is read.
 
