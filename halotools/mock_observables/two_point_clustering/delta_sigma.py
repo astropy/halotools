@@ -9,25 +9,35 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
 from warnings import warn
 
+from astropy import units as u
+from astropy.constants import G
+
 from .tpcf import tpcf
+from .clustering_helpers import verify_tpcf_estimator
 
 from ..mock_observables_helpers import (get_num_threads, get_separation_bins_array,
     get_period, enforce_sample_respects_pbcs, enforce_sample_has_correct_shape)
-from .clustering_helpers import verify_tpcf_estimator
+
+from ...sim_manager.sim_defaults import default_cosmology
 
 __all__ = ['delta_sigma']
 __author__ = ['Duncan Campbell']
 
+newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
+
 
 def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
+        cosmology=default_cosmology,
         log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
-    Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
+    Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)` as a function
+    of projected distance.
 
-    This function computes the cross correlation between ``galaxies`` and ``particles``
-    to get the galaxy-matter cross correlation, :math:`\\xi_{\\rm g, m}(r)`, and
-    integrates the result to get :math:`\\Delta\\Sigma(r_p)`.  See the notes for details
+    This function first computes the cross correlation between ``galaxies`` and ``particles``
+    to get the galaxy-matter cross correlation, :math:`\\xi_{\\rm g, m}(r)`.
+    Then the function performs a projection integral of :math:`\\xi_{\\rm g, m}(r)`
+    to get :math:`\\Delta\\Sigma(r_p)`.  See the notes for details
     about the calculation.
 
     Example calls to this function appear in the documentation below.
@@ -41,27 +51,37 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     ----------
     galaxies : array_like
         Ngal x 3 numpy array containing 3-d positions of galaxies.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     particles : array_like
         Npart x 3 numpy array containing 3-d positions of particles.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     rp_bins : array_like
         array of projected radial boundaries defining the bins in which the result is
         calculated.  The minimum of rp_bins must be > 0.0.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     pi_max: float
         maximum integration parameter, :math:`\\pi_{\\rm max}`
         (see notes for more details).
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
+
+    cosmology : instance of `astropy.cosmology`, optional
+        Default value is set in `~halotools.sim_manager.default_cosmology` module.
+        Typically you should use the `cosmology` attribute of the halo catalog
+        you used to populate mock galaxies.
 
     period : array_like
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h,
+        here and throughout Halotools.
 
     log_bins : boolean, optional
         integration parameter (see notes for more details).
@@ -98,8 +118,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     Returns
     -------
     Delta_Sigma : np.array
-        :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
-        The units are units(particles)/units(rp_bins)**2.
+        :math:`\\Delta\\Sigma(r_p)` calculated at projected comoving radial distances ``rp_bins``.
+        The units of `ds` are :math:`h * M_{\odot} / Mpc^2`, where distances are in comoving units.
+        You can convert to physical units using the input cosmology and redshift.
+        Note that little h = 1 here and throughout Halotools.
 
     Notes
     -----
@@ -133,26 +155,43 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
 
+    Now let's populate this halo catalog with mock galaxies.
 
-    >>> x = halocat.halo_table['halo_x']
-    >>> y = halocat.halo_table['halo_y']
-    >>> z = halocat.halo_table['halo_z']
+    >>> from halotools.empirical_models import PrebuiltHodModelFactory
+    >>> model = PrebuiltHodModelFactory('hearin15', threshold = 11.5)
+    >>> model.populate_mock(halocat)
 
-    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    Now we retrieve the positions of our mock galaxies and transform the arrays
+    into the shape of the ndarray expected by the `~halotools.mock_observables.delta_sigma`
+    function. We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
 
-    >>> galaxies = np.vstack((x,y,z)).T
+    >>> x = model.mock.galaxy_table['x']
+    >>> y = model.mock.galaxy_table['y']
+    >>> z = model.mock.galaxy_table['z']
+    >>> galaxies = np.vstack((x, y, z)).T
 
     Let's do the same thing for a set of particle data
 
-    >>> px = halocat.ptcl_table['x']
-    >>> py = halocat.ptcl_table['y']
-    >>> pz = halocat.ptcl_table['z']
-    >>> particles = np.vstack((px,py,pz)).T
+    >>> px = model.mock.ptcl_table['x']
+    >>> py = model.mock.ptcl_table['y']
+    >>> pz = model.mock.ptcl_table['z']
+    >>> particles = np.vstack((px, py, pz)).T
+
+    The default Halotools catalogs come with about one million particles.
+    The code below shows how to (optionally) downsample using a Halotools
+    convenience function. This is just for demonstration purposes. For a real
+    analysis, you should use at least as many dark matter particles as galaxies.
+
+    >>> from halotools.utils import randomly_downsample_data
+    >>> particles = randomly_downsample_data(particles, int(5e3))
 
     >>> rp_bins = np.logspace(-1, 1, 10)
-    >>> result = delta_sigma(galaxies, particles, rp_bins, pi_max=20, period=halocat.Lbox)
+    >>> pi_max = 15
+    >>> period = model.mock.Lbox
+    >>> cosmology = halocat.cosmology
+    >>> ds = delta_sigma(galaxies, particles, rp_bins, pi_max, period, cosmology=cosmology)
 
     See also
     --------
@@ -198,45 +237,48 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
                )
         warn(msg)
 
-    #fit a spline to the tpcf
-    #note that we fit the log10 of xi+1.0
+    # fit a spline to the tpcf
+    # note that we fit log10(1 + xi)
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0  # note these are the true centers, not log
     xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
 
-    mean_rho = len(particles)/period.prod()  # number density of particles
+    rho_crit0 = cosmology.critical_density0
+    rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology.h**2
+    mean_rho_comoving = cosmology.Om0*rho_crit0
 
-    #define function to integrate
-    def f(pi, rp):
+    # define function to integrate
+    def one_plus_xi_gm(pi, rp):
         r = np.sqrt(rp**2+pi**2)
-        #note that we take 10**xi-1,
-        #because we fit the log xi
-        return mean_rho*(1.0+(10.0**xi(r)-1.0))
+        # note that we take 10**xi-1,
+        # because we fit the log10(1 + xi)
+        return (1.0+(10.0**xi(r)-1.0))
 
-    #integrate xi to get the surface density as a function of r_p
-    surface_density = np.zeros(len(rp_bins))  # initialize to 0.0
-    for i in range(0, len(rp_bins)):
-        surface_density[i] = integrate.quad(f, 0.0, pi_max, args=(rp_bins[i],))[0]
+    # integrate xi to get the surface density as a function of r_p
+    dimless_surface_density = list(
+        integrate.quad(one_plus_xi_gm, 0.0, pi_max, args=(rp,))[0] for rp in rp_bins)
 
-    #fit a spline to the surface density
-    surface_density = InterpolatedUnivariateSpline(rp_bins, np.log10(surface_density), ext=0)
+    # fit a spline to the surface density
+    log10_dimless_surface_density = InterpolatedUnivariateSpline(
+        rp_bins, np.log10(dimless_surface_density), ext=0)
 
-    #integrate surface density to get the mean internal surface density
-    #define function to integrate
-    def f(rp):
-        #note that we take 10**surface_density,
-        #because we fit the log of surface density
-        return 10.0**surface_density(rp)*2.0*np.pi*rp
+    # integrate surface density to get the mean internal surface density
+    # define function to integrate
+    def dimless_mean_internal_surface_density_integrand(rp):
+        # note that we take 10**surface_density,
+        # because we fit the log of surface density
+        return 10.0**log10_dimless_surface_density(rp)*2.0*np.pi*rp
 
-    #do integral to get mean internal surface density
-    mean_internal_surface_density = np.zeros(len(rp_bins))
+    # do integral to get mean internal surface density
+    dimless_mean_internal_surface_density = np.zeros(len(rp_bins))
     for i in range(0, len(rp_bins)):
         internal_area = np.pi*rp_bins[i]**2.0
-        mean_internal_surface_density[i] = integrate.quad(f, 0.0, rp_bins[i])[0]/(internal_area)
+        dimless_mean_internal_surface_density[i] = integrate.quad(
+            dimless_mean_internal_surface_density_integrand, 0.0, rp_bins[i])[0]/(internal_area)
 
-    #calculate an return the change in surface density, delta sigma
-    delta_sigma = mean_internal_surface_density - 10**surface_density(rp_bins)
+    # calculate an return the change in surface density, delta sigma
+    dimless_delta_sigma = dimless_mean_internal_surface_density - 10**log10_dimless_surface_density(rp_bins)
 
-    return delta_sigma
+    return dimless_delta_sigma*mean_rho_comoving
 
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, num_threads):
@@ -245,9 +287,14 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, period, estimator, n
     `~halotools.mock_observables.delta_sigma`.
     """
     period, PBCs = get_period(period)
+    if PBCs is False:
+        msg = ("The `delta_sigma` function requires the input ``period`` to be \n"
+            "a bounded positive number in all dimensions")
+        raise ValueError(msg)
 
     galaxies = enforce_sample_has_correct_shape(galaxies)
     particles = enforce_sample_has_correct_shape(particles)
+
     enforce_sample_respects_pbcs(galaxies[:, 0], galaxies[:, 1], galaxies[:, 2], period)
     enforce_sample_respects_pbcs(particles[:, 0], particles[:, 1], particles[:, 2], period)
 

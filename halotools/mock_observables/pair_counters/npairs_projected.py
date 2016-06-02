@@ -43,7 +43,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
@@ -51,7 +51,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
     rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_max : float
         Maximum value in the z-dimension over which pairs will be counted.

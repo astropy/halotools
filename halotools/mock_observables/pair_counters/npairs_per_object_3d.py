@@ -31,14 +31,14 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
 
     rbins : array_like
         Boundaries defining the bins in which pairs are counted.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.

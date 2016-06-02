@@ -44,11 +44,11 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     rbins : float
         size of spheres to search for neighbors
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     n_ran : int, optional
         integer number of randoms to use to search for voids.
@@ -67,7 +67,7 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         to drop down randomly placed spheres in order to compute the VPF. To do so,
         the spheres will be dropped inside a cubical box whose sides are defined by
         the smallest/largest coordinate distance of the input ``sample1``.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed

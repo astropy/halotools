@@ -50,7 +50,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like
         *Npts2 x 3* numpy array containing 3-D positions of points.
@@ -61,7 +61,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         ``sample1``. You may optionally pass in an array of length *Npts1*, in which case
         each point in ``sample1`` will have its own individual neighbor-search radius.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     marks1 : array_like, optional
         *Npts1 x N_marks* array of marks.  The supplied marks array must have the
@@ -88,7 +88,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed

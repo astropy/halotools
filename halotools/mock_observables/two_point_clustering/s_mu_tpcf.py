@@ -50,7 +50,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     s_bins : array_like
         numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
@@ -77,7 +77,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity,
         in which case ``randoms`` must be provided.
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     do_auto : boolean, optional
         Boolean determines whether the auto-correlation function will

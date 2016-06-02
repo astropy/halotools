@@ -45,7 +45,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like
         *Npts2 x 3* numpy array containing 3-D positions of points.
@@ -56,7 +56,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         ``sample1``. You may optionally pass in an array of length *Npts1*, in which case
         each point in ``sample1`` will have its own individual neighbor-search projected radius.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_max : array_like
         Half-length of cylinder to search for neighbors around galaxies in ``sample1``.
@@ -64,14 +64,14 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
         ``sample1``. You may optionally pass in an array of length *Npts1*, in which case
         each point in ``sample1`` will have its own individual neighbor-search cylinder half-length.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
 
-        Length units assumed to be in Mpc/h, here and throughout Halotools.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
