@@ -37,5 +37,12 @@ Processing Simulation Data
 
    processing_simulation_data
 
+Utility Functions 
+=============================
+
+.. toctree::
+   :maxdepth: 1
+
+   utility_functions
 
 
