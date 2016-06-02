@@ -7,7 +7,7 @@ import os
 from warnings import warn
 import datetime
 
-from astropy.table import Table
+from astropy.table import Table, Column
 
 from .halo_table_cache import HaloTableCache
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
@@ -123,6 +123,25 @@ class UserSuppliedHaloCatalog(object):
         >>> ptclcat = UserSuppliedPtclCatalog(x = ptcl_x, y = ptcl_y, z = ptcl_z, Lbox = Lbox, particle_mass = particle_mass, redshift = redshift)
         >>> halo_catalog = UserSuppliedHaloCatalog(user_supplied_ptclcat = ptclcat, redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
+        In some scenarios, you may already have tabular data stored in an Astropy `astropy.table.Table`
+        or a Numpy structured array. If you want to transfer *all* the columns of
+        your ``table_of_halos`` to the `UserSuppliedHaloCatalog`, then you can do so
+        by splatting a python dictionary view of the table:
+
+        >>> from astropy.table import Table
+        >>> table_of_halos = Table()
+        >>> num_halos = int(1e3)
+        >>> Lbox = 250.
+        >>> table_of_halos['halo_mass'] = np.random.uniform(1e10, 1e15, num_halos)
+        >>> table_of_halos['halo_x'] = np.random.uniform(0, Lbox, num_halos)
+        >>> table_of_halos['halo_y'] = np.random.uniform(0, Lbox, num_halos)
+        >>> table_of_halos['halo_z'] = np.random.uniform(0, Lbox, num_halos)
+        >>> table_of_halos['halo_jcvd'] = np.random.random(num_halos)
+
+        >>> table_of_halos['halo_id'] = np.arange(num_halos).astype('i8')
+
+        >>> d = {key:table_of_halos[key] for key in table_of_halos.keys()}
+        >>> halocat = UserSuppliedHaloCatalog(simname = simname, redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, **d)
 
         """
         halo_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
@@ -153,7 +172,7 @@ class UserSuppliedHaloCatalog(object):
         """
 
         try:
-            halo_id = kwargs['halo_id']
+            halo_id = np.array(kwargs['halo_id'])
             assert type(halo_id) is np.ndarray
             Nhalos = custom_len(halo_id)
             assert Nhalos > 1
@@ -163,8 +182,8 @@ class UserSuppliedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         halo_table_dict = (
-            {key: kwargs[key] for key in kwargs
-            if (type(kwargs[key]) is np.ndarray)
+            {key: np.array(kwargs[key]) for key in kwargs
+            if ( (type(kwargs[key]) is np.ndarray) | (type(kwargs[key]) is Column) )
             and (custom_len(kwargs[key]) == Nhalos)
             and (key[:5] == 'halo_')}
             )
