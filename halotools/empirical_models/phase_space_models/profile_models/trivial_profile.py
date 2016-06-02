@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains the `TrivialProfile` class
 used to assign the positions of central galaxies

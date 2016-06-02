@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module storing the `~halotools.empirical_models.HodModelFactory`,
 the primary factory responsible for building

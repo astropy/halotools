@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-This module contains various component features used by
-HOD-style models of the galaxy-halo connection.
-
+This module contains the template class `~halotools.empirical_models.OccupationComponent`,
+which standardizes the form of the classes responsible for governing galaxy abundance
+in all HOD-style models of the galaxy-halo connection.
 """
 
 import numpy as np

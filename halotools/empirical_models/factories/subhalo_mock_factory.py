@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module containing the `~halotools.empirical_models.SubhaloMockFactory` class,
 the primary class used to construct mock galaxy populations

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Module containing classes used to model the mapping between
-stellar mass and subtable.
-
+Module containing the `~halotools.empirical_models.PrimGalpropModel` class
+used to model the mapping between the "primary galaxy property" (usually stellar mass)
+and some underlying halo property (such as halo mass).
 """
 
 from __future__ import (

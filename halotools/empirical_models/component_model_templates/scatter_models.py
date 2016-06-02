@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-Module containing classes used to model
-stochasticity in the mapping between
-stellar mass and halo properties.
+Module containing the `~halotools.empirical_models.LogNormalScatterModel` class
+used to model stochasticity in the mapping between stellar mass and halo properties.
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)

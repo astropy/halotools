@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-This module contains the occupation component features used by
-the HOD-style model introduced in Leauthaud et al. (2011)
-
+This module contains occupation components used by the Leauthaud11 composite model.
 """
 
 import numpy as np

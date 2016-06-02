@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Module contains the classes used to model the velocities
-of galaxies within their halos.
+Module contains the `~halotools.empirical_models.NFWJeansVelocity` class
+used to model the velocities of satellite galaxies orbiting in Jeans equlibrium
+in an NFW potential.
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)

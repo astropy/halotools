@@ -52,7 +52,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         N2pts x 3 array containing the 3-D components of the velocities.
 
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only
+        Length-3 array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
 
     do_auto : boolean, optional

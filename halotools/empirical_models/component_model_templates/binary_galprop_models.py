@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-
+Module containing the `~halotools.empirical_models.BinaryGalpropModel` class
+used to map a binary-valued galaxy property to a halo catalog.
 """
-from __future__ import (
-    division, print_function, absolute_import)
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 from astropy.extern import six

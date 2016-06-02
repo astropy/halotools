@@ -33,12 +33,14 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     x2in, y2in, z2in : arrays 
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    weight_func_id : int, optional
-        weighting function integer ID. 
-
     weights1in : array 
+        Numpy array storing the weights for points in sample 1
 
     weights2in : array 
+        Numpy array storing the weights for points in sample 2
+
+    weight_func_id : int, optional
+        weighting function integer ID. 
 
     rbins : array
         Boundaries defining the bins in which pairs are counted.

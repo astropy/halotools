@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains the `AnalyticalDensityProf` class,
 a container class for the distribution of mass and/or galaxies

@@ -54,7 +54,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
         N2pts x 3 array containing the 3-D components of the velocities.
 
     period : array_like, optional
-        Length-3 array defining axis-aligned periodic boundary conditions. If only
+        Length-3 array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
 
     do_auto : boolean, optional
