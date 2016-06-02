@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Module containing functions related to halo mass definitions,
 the relations between halo mass and radius, and the variation of these
 relations with cosmology and redshift.

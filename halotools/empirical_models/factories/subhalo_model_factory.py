@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module storing the
 `~halotools.empirical_models.SubhaloModelFactory` class

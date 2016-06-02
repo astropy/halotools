@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-This module contains occupation components
-used by the Zheng07 model.
-
+This module contains occupation components used by the Zheng07 composite model.
 """
 
 import numpy as np

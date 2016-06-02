@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-
 This module contains general purpose helper functions
 used to provide convenience wrappers for mock objects
 """

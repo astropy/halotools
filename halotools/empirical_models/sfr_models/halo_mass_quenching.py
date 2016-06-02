@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-
+Module containing the `~halotools.empirical_models.HaloMassInterpolQuenching` class
+responsible for providing a mapping between halo mass and galaxy quenching designation.
 """
 from __future__ import (
     division, print_function, absolute_import)

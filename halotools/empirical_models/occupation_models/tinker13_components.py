@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-This module contains various component features used by
-the HOD-style model introduced in Tinker et al. (2013)
+This module contains occupation components used by the Tinker13 composite model.
 """
 
 import numpy as np

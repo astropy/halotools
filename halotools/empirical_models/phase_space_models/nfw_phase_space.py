@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module defining the `~halotools.empirical_models.NFWPhaseSpace` class
 governing the phase space distribution of massless tracers of an NFW potential.

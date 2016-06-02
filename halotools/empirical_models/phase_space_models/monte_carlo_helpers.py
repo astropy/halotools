@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-The `MonteCarloGalProf` class defined in this module is
+The `~halotools.empirical_models.MonteCarloGalProf` class defined in this module is
 used as an orthogonal mix-in class to supplement the behavior of
 the analytic profile and velocity models.
 The result of using `MonteCarloGalProf` as an orthogonal mix-in class

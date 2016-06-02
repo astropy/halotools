@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-
-Classes and functions defining relations between NFW concentration and halo mass.
-
+This module contains the `~halotools.empirical_models.ConcMass` class
+that contains common functions defining relations between NFW concentration and halo mass.
 """
 
 import numpy as np

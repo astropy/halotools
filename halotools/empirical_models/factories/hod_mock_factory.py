@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module containing the `~halotools.empirical_models.HodMockFactory` class,
 the primary class used to construct mock galaxy populations

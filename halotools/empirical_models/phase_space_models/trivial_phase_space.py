@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-Module composes the behavior of the profile models
-and the velocity models to produce models for the
-full phase space distribution of galaxies within their halos.
+This module contains the `~halotools.empirical_models.TrivialPhaseSpace` class
+used to place central galaxies at the center of, and at rest with respect to, their host halo.
 """
-from __future__ import (
-    division, print_function, absolute_import)
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 
