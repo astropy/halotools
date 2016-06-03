@@ -12,9 +12,9 @@ from pkg_resources import parse_version
 try:
     import cython
     if parse_version(cython.__version__) < parse_version('0.23'):
-        raise ImportError("Halotools requires Cython>=0.23, but your installed "
-                          "Cython is older.  Please upgrade before trying to "
-                          "build Halotools.")
+            raise ImportError("Halotools requires Cython>=0.23, but your installed "
+                                                "Cython is older.  Please upgrade before trying to "
+                                                "build Halotools.")
 except ImportError:
     pass  # Cython not installed, which is fine for release versions
 
@@ -25,8 +25,7 @@ else:
     import __builtin__ as builtins
 builtins._ASTROPY_SETUP_ = True
 
-from astropy_helpers.setup_helpers import (register_commands, get_debug_option,
-                                           get_package_info)
+from astropy_helpers.setup_helpers import (register_commands, get_debug_option, get_package_info)
 from astropy_helpers.git_helpers import get_git_devstr
 from astropy_helpers.version_helpers import generate_version_py
 
@@ -67,12 +66,12 @@ if not RELEASE:
 cmdclassd = register_commands(PACKAGENAME, VERSION, RELEASE)
 
 # Freeze build information in version.py
-generate_version_py(PACKAGENAME, VERSION, RELEASE,
-                    get_debug_option(PACKAGENAME))
+generate_version_py(PACKAGENAME, VERSION, RELEASE, get_debug_option(PACKAGENAME))
 
 # Treat everything in scripts except README.rst as a script to be installed
-scripts = [fname for fname in glob.glob(os.path.join('scripts', '*'))
-           if os.path.basename(fname) != 'README.rst']
+scripts = list(
+    fname for fname in glob.glob(os.path.join('scripts', '*'))
+    if os.path.basename(fname) != 'README.rst')
 
 
 # Get configuration information from all of the various subpackages.
@@ -90,25 +89,25 @@ package_info['package_data'][PACKAGENAME].append('data/*')
 c_files = []
 for root, dirs, files in os.walk(PACKAGENAME):
     for filename in files:
-        if filename.endswith('.c'):
-            c_files.append(
-                os.path.join(
+            if filename.endswith('.c'):
+                c_files.append(os.path.join(
                     os.path.relpath(root, PACKAGENAME), filename))
+
 package_info['package_data'][PACKAGENAME].extend(c_files)
 
 setup(name=PACKAGENAME,
-      version=VERSION,
-      description=DESCRIPTION,
-      scripts=scripts,
-      install_requires=['astropy>=1', 'scipy', 'beautifulsoup4', 'requests'],
-      provides=[PACKAGENAME],
-      author=AUTHOR,
-      author_email=AUTHOR_EMAIL,
-      license=LICENSE,
-      url=URL,
-      long_description=LONG_DESCRIPTION,
-      cmdclass=cmdclassd,
-      zip_safe=False,
-      use_2to3=True,
-      **package_info
+            version=VERSION,
+            description=DESCRIPTION,
+            scripts=scripts,
+            install_requires=['astropy>=1', 'scipy', 'beautifulsoup4', 'requests'],
+            provides=[PACKAGENAME],
+            author=AUTHOR,
+            author_email=AUTHOR_EMAIL,
+            license=LICENSE,
+            url=URL,
+            long_description=LONG_DESCRIPTION,
+            cmdclass=cmdclassd,
+            zip_safe=False,
+            use_2to3=True,
+            **package_info
 )
