@@ -46,7 +46,12 @@ class HaloTableCache(object):
     def _overwrite_log_ascii(self, new_log):
         new_log.sort()
         log_table = self._log_table_from_log(new_log)
-        log_table.write(self.cache_log_fname, format='ascii', overwrite=True)
+        try:
+            os.remove(self.cache_log_fname)
+        except OSError:
+            pass
+        finally:
+            log_table.write(self.cache_log_fname, format='ascii')
 
     def _clean_log_of_repeated_entries(self, input_log):
         cleaned_log = list(set(input_log))
