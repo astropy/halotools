@@ -128,7 +128,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     :math:`\\Delta\\Sigma` is calculated by first calculating,
 
     .. math::
-        \\Sigma(r_p) = \\bar{\\rho}\\int_0^{\\pi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi
+        \\Sigma(r_p) = 2.0 * \\bar{\\rho}\\int_0^{\\pi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi
 
     and then,
 
@@ -247,15 +247,15 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     mean_rho_comoving = cosmology.Om0*rho_crit0
 
     # define function to integrate
-    def one_plus_xi_gm(pi, rp):
+    def twice_one_plus_xi_gm(pi, rp):
         r = np.sqrt(rp**2+pi**2)
         # note that we take 10**xi-1,
         # because we fit the log10(1 + xi)
-        return (1.0+(10.0**xi(r)-1.0))
+        return 2.0*(1.0+(10.0**xi(r)-1.0))
 
     # integrate xi to get the surface density as a function of r_p
     dimless_surface_density = list(
-        integrate.quad(one_plus_xi_gm, 0.0, pi_max, args=(rp,))[0] for rp in rp_bins)
+        integrate.quad(twice_one_plus_xi_gm, 0.0, pi_max, args=(rp,))[0] for rp in rp_bins)
 
     # fit a spline to the surface density
     log10_dimless_surface_density = InterpolatedUnivariateSpline(
