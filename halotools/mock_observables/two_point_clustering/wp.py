@@ -152,7 +152,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     `~halotools.mock_observables.rp_pi_tpcf`:
 
     .. math::
-        w_p(r_p) = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi
+        w_p(r_p) = \\int_0^{\\pi_{\\rm max}}2.0\\xi(r_p,\\pi)\\mathrm{d}\\pi
 
     where :math:`\\pi_{\\rm max}` is ``pi_max`` and :math:`\\xi(r_p,\\pi)`
     is the redshift space correlation function.
