@@ -170,7 +170,6 @@ class ModelFactory(object):
             a table, and returning a boolean numpy array that will be used
             as a fancy indexing mask. All masked halos will be ignored during
             mock population. Default is None.
-            Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
 
         enforce_PBC : bool, optional
             If set to True, after galaxy positions are assigned the

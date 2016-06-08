@@ -834,7 +834,7 @@ class SubhaloModelFactory(ModelFactory):
         self.set_primary_behaviors()
         self.set_calling_sequence()
 
-    def populate_mock(self, halocat):
+    def populate_mock(self, halocat, masking_function=None):
         """
         Method used to populate a simulation with a Monte Carlo realization of a model.
 
@@ -866,6 +866,14 @@ class SubhaloModelFactory(ModelFactory):
         halocat : object
             Either an instance of `~halotools.sim_manager.CachedHaloCatalog`
             or `~halotools.sim_manager.UserSuppliedHaloCatalog`.
+
+        masking_function : function, optional
+            Function object used to place a mask on the halo table prior to
+            calling the mock generating functions. Calling signature of the
+            function should be to accept a single positional argument storing
+            a table, and returning a boolean numpy array that will be used
+            as a fancy indexing mask. All masked halos will be ignored during
+            mock population. Default is None.
 
        Examples
         ----------
@@ -903,7 +911,10 @@ class SubhaloModelFactory(ModelFactory):
         :ref:`subhalo_mock_factory_source_notes`
 
         """
-        ModelFactory.populate_mock(self, halocat)
+        if masking_function is not None:
+            ModelFactory.populate_mock(self, halocat, masking_function=masking_function)
+        else:
+            ModelFactory.populate_mock(self, halocat)
 
     def _test_dictionary_consistency(self):
         """
