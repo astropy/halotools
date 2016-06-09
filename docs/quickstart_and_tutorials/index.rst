@@ -5,11 +5,11 @@
 Quickstart Guides and Tutorials
 ***************************************
 
-This section of the documentation contains both quickstart guides 
-and detailed usage-tutorials. If you are instead looking for 
-a quick reference to the API of some 
-class or function, try looking in :ref:`function_usage_examples`, 
-or otherwise in :ref:`complete_reference_api`. 
+This section of the documentation contains both quickstart guides
+and detailed usage-tutorials. If you are instead looking for
+a quick reference to the API of some
+class or function, try looking in :ref:`function_usage_examples`,
+or otherwise in :ref:`complete_reference_api`.
 
 
 Quickstart Guides
@@ -20,7 +20,7 @@ Quickstart Guides
 
    getting_started_overview
 
-Setting up the simulation data 
+Setting up the simulation data
 ---------------------------------------------------------
 
 .. toctree::
@@ -37,12 +37,13 @@ Halo catalog analysis
 
    quickstart_guides/halo_catalog_analysis_quickstart
 
-Tutorials 
+Tutorials
 =====================
 
 .. toctree::
    :maxdepth: 1
 
+   tutorials/model_building/preloaded_models/index
    tutorials/model_building/index
    tutorials/catalog_analysis/galcat_analysis/index
    tutorials/catalog_analysis/halocat_analysis/index
@@ -52,9 +53,9 @@ Tutorials
 Developer Documentation
 =================================================
 
-The developer documentation contains guidlines for how to 
-stay up-to-date on Halotools development, submit bug reports and 
-contribute to the Halotools code base. 
+The developer documentation contains guidlines for how to
+stay up-to-date on Halotools development, submit bug reports and
+contribute to the Halotools code base.
 
 .. toctree::
    :maxdepth: 1
@@ -63,7 +64,7 @@ contribute to the Halotools code base.
    development/bug_reports
    development/contributors
    development/features_planned_for_next_release
- 
+
 
 
 

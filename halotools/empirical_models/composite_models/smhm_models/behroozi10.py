@@ -20,6 +20,8 @@ def behroozi10_model_dictionary(redshift=sim_defaults.default_redshift, **kwargs
     published in Behroozi et al. (2010),
     `arXiv:1205.5807 <http://arxiv.org/abs/astro-ph/1205.5807/>`_.
 
+    For a tutorial on this composite model, see :ref:`behroozi10_composite_model`.
+
     Parameters
     ----------
     redshift : float, optional
