@@ -2,17 +2,42 @@
 .. _function_usage_examples:
 
 ****************************************
-Function-usage examples by category 
+Function-usage examples by category
 ****************************************
 
-Here we present docstrings of the most commonly used functions and classes 
-grouped together by functionality. 
-Many docstrings contain example code to demonstrate basic usage. 
-For documentation of functions not listed here, see :ref:`complete_reference_api`. 
+Here we present docstrings of the most commonly used functions and classes
+grouped together by functionality.
+Many docstrings contain example code to demonstrate basic usage.
+For documentation of functions not listed here, see :ref:`complete_reference_api`.
 
 Modeling the Galaxy-Halo Connection
 =====================================
 
+Composite models
+------------------
+
+HOD models
+~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 1
+
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/zheng07_composite_model
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/leauthaud11_composite_model
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/tinker13_composite_model
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/hearin15_composite_model
+
+Subhalo-based models
+~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 1
+
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/behroozi10_composite_model
+
+
+Component models
+------------------
 
 .. toctree::
    :maxdepth: 2
@@ -21,7 +46,7 @@ Modeling the Galaxy-Halo Connection
    hod_occupation_functions
    empirical_model_factory_functions
 
-Making Mock Observations 
+Making Mock Observations
 ===========================
 
 .. toctree::
@@ -29,7 +54,7 @@ Making Mock Observations
 
    mock_observables_functions
 
-Processing Simulation Data 
+Processing Simulation Data
 =============================
 
 .. toctree::
@@ -37,7 +62,7 @@ Processing Simulation Data
 
    processing_simulation_data
 
-Utility Functions 
+Utility Functions
 =============================
 
 .. toctree::
