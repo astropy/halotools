@@ -147,6 +147,16 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     All integrals are done use `scipy.integrate.quad`.
 
+    Users of the `~halotools.mock_observables.delta_sigma` function should be aware that
+    the current halotools implementation is only one method of calculation for gg-lensing.
+    One alternative would be to do the entire calculation fully in 2d, using the entire
+    simulation z-axis as the line of sight (this is the approach taken in
+    Hearin et al. 2013, http://arxiv.org/abs/1310.6747). Determing the optimal
+    calculation method for :math:`\Delta\Sigma` is a subject of ongoing research,
+    so if you want to use this function for your own science application, be sure
+    to read the source code implementation and test that the implementation is
+    sufficient for your needs.
+
     Examples
     --------
     For demonstration purposes we will calculate `delta_sigma` using the
