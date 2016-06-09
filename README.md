@@ -1,6 +1,7 @@
 # Halotools
 
-Halotools is a specialized python package for building and testing models of the galaxy-halo connection, and analyzing catalogs of dark matter halos. The core functionality of the package includes:
+Halotools is a specialized python package for building and testing models of the galaxy-halo connection, and analyzing catalogs of dark matter halos. 
+The core feature of Halotools is a modular platform for creating mock universes of galaxies starting from a catalog of dark matter halos obtained from a cosmological simulation. Functionality of the package includes:
 
 * Fast generation of synthetic galaxy populations using HODs, abundance matching, and related methods
 * Efficient algorithms for calculating galaxy clustering, lensing, z-space distortions, and other astronomical statistics 
@@ -20,7 +21,7 @@ The latest build of the documentation can be found at http://halotools.readthedo
 ## Installation 
 
 You can find detailed installation instructions 
-in the *Package Installation* section of halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations. 
+in the *Package Installation* section of http://halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations. 
 
 ---
 
@@ -51,7 +52,8 @@ All Halotools models have a *param_dict* that controls the behavior of the model
 model.param_dict['logMmin'] = 12.1
 model.mock.populate()
 ```
-Note how much faster the call to *mock.populate* is relative to *model.populate_mock(halocat)*. This is due to a large amount of one-time-only pre-processing that is carried out upon creation of the first mock universe. 
+Note how much faster the call to *mock.populate* is relative to *model.populate_mock(halocat)*. This is due to a large amount of one-time-only pre-processing that is carried out upon creation of the first mock universe. The process of varying *param_dict* values and repeatedly calling *model.mock.populate()* is part of a typical workflow in an MCMC-type analysis conducted with Halotools.
+
 
 ### Modeling the galaxy-halo connection
 
@@ -82,7 +84,7 @@ The *sim_manager* package comes with a memory-efficient *TabularAsciiReader* des
 ```
 from halotools.sim_manager import CachedHaloCatalog
 halocat = CachedHaloCatalog(simname = any_simname, redshift = any_redshift, halo_finder = any_halo_finder)
-print(halocat.halo_table[0:9])
+print(halocat.halo_table[0:10])
 ```
 
 You are not limited to use the halo catalogs pre-processed by Halotools. The *UserSuppliedHaloCatalog* allows you to use your own simulation data and transform it into a Halotools-formatted catalog in a simple way. 
@@ -100,7 +102,7 @@ Although the *sim_manager* provides an object-oriented framework for creating a 
 
 [![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The package is currently being prepared for its first stable release, v0.2. Halotools is and will remain an evolving software package, but the API of the classes, methods and functions in v0.2 is stable. 
+Halotools is a fully open-source package with contributing scientists spread across many universities. The first stable release of the package, v0.2, is now available on pip. Halotools is and will remain an evolving software package, but the API of the classes, methods and functions in v0.2 is stable. 
 
 ---
 
@@ -116,9 +118,9 @@ The google group also serves as a public forum for asking questions about the co
 
 ## Citing Halotools
 
-Halotools is currently preparing for its first stable public release (v0.2). The v0.2 release will be accompanied with a code-release paper, currently being housed and developed in the repository stored here: https://github.com/aphearin/halotools_release_paper.
+The v0.2 release will be accompanied with a code-release paper, currently being housed and developed in the repository stored here: https://github.com/aphearin/halotools_release_paper.
 
-If you use Halotools modules to support your science publication, we ask that you cite this paper in your work. A link to the source of the paper will be added to this section of the documentation as soon as the release-paper is submitted.
+If you use Halotools modules to support your science publication, we ask that you cite this paper in your work. A link to the source of the paper will be added to this section of the documentation as soon as the release-paper is submitted. See the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools. 
 
 
 ---
