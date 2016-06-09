@@ -19,6 +19,7 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
     `SubhaloModelFactory` models that come prebuilt with Halotools.
     For documentation on the methods bound to `PrebuiltSubhaloModelFactory`,
     see the docstring of `~halotools.empirical_models.SubhaloModelFactory`.
+    For a tutorial on all prebuilt models, see :ref:`preloaded_models_overview`.
 
     """
     prebuilt_model_nickname_list = ['behroozi10']
@@ -137,6 +138,7 @@ class PrebuiltHodModelFactory(HodModelFactory):
     `HodModelFactory` models that come prebuilt with Halotools.
     For documentation on the methods bound to `PrebuiltHodModelFactory`,
     see the docstring of `~halotools.empirical_models.HodModelFactory`.
+    For a tutorial on all prebuilt models, see :ref:`preloaded_models_overview`.
     """
 
     prebuilt_model_nickname_list = ['zheng07', 'leauthaud11', 'tinker13', 'hearin15']
@@ -177,9 +179,10 @@ class PrebuiltHodModelFactory(HodModelFactory):
         `PrebuiltHodModelFactory` will in turn be passed on to
         `~halotools.empirical_models.zheng07_model_dictionary`.
 
-        >>> model_instance = PrebuiltHodModelFactory('zheng07', threshold = -20)
+        >>> model_instance = PrebuiltHodModelFactory('zheng07', threshold=-20)
+        >>> model_instance = PrebuiltHodModelFactory('zheng07', threshold=-20, modulate_with_cenocc=True)
 
-        The same applies to all pre-built models.
+        This same syntax applies to all pre-built models.
 
         >>> model_instance = PrebuiltHodModelFactory('hearin15', threshold = 10.5, redshift = 2)
 
