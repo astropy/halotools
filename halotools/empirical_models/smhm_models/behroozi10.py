@@ -17,7 +17,14 @@ __all__ = ['Behroozi10SmHm']
 
 class Behroozi10SmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on Behroozi et al. (2010),
-    `arXiv:1205.5807 <http://arxiv.org/abs/astro-ph/1205.5807/>`_.
+    `arXiv:1205.5807 <http://arxiv.org/abs/astro-ph/1205.5807/>`_..
+
+    .. note::
+
+        The `Behroozi10SmHm` model is part of the ``behroozi10``
+        prebuilt composite subhalo-based model. For a tutorial on the ``behroozi10``
+        composite model, see :ref:`behroozi10_composite_model`.
+
     """
 
     def __init__(self, **kwargs):

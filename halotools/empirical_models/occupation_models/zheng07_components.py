@@ -21,6 +21,13 @@ class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies,
     introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values.
+
+    .. note::
+
+        The `Zheng07Cens` model is part of the ``zheng07``
+        prebuilt composite HOD-style model. For a tutorial on the ``zheng07``
+        composite model, see :ref:`zheng07_composite_model`.
+
     """
 
     def __init__(self,
@@ -202,7 +209,13 @@ class Zheng07Sats(OccupationComponent):
     introduced in Kravtsov et al. 2004, arXiv:0308519. This implementation uses
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values.
 
-    :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`
+    :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`.
+
+    .. note::
+
+        The `Zheng07Sats` model is part of the ``zheng07``
+        prebuilt composite HOD-style model. For a tutorial on the ``zheng07``
+        composite model, see :ref:`zheng07_composite_model`.
 
     """
 

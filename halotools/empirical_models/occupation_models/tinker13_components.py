@@ -25,6 +25,13 @@ __all__ = ('Tinker13Cens', 'Tinker13QuiescentSats',
 class Tinker13Cens(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
+
+    .. note::
+
+        The `Tinker13Cens` model is part of the ``tinker13``
+        prebuilt composite HOD-style model. For a tutorial on the ``tinker13``
+        composite model, see :ref:`tinker13_composite_model`.
+
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
@@ -355,6 +362,12 @@ class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
 class Tinker13QuiescentSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/quiescent stellar-to-halo-mass relations.
+
+    .. note::
+
+        The `Tinker13QuiescentSats` model is part of the ``tinker13``
+        prebuilt composite HOD-style model. For a tutorial on the ``tinker13``
+        composite model, see :ref:`tinker13_composite_model`.
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
@@ -516,6 +529,12 @@ class Tinker13QuiescentSats(OccupationComponent):
 class Tinker13ActiveSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
     two distinct active/active stellar-to-halo-mass relations.
+
+    .. note::
+
+        The `Tinker13ActiveSats` model is part of the ``tinker13``
+        prebuilt composite HOD-style model. For a tutorial on the ``tinker13``
+        composite model, see :ref:`tinker13_composite_model`.
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,

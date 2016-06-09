@@ -22,6 +22,13 @@ __all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
 class Leauthaud11Cens(OccupationComponent):
     """ HOD-style model for any central galaxy occupation that derives from
     a stellar-to-halo-mass relation.
+
+    .. note::
+
+        The `Leauthaud11Cens` model is part of the ``leauthaud11``
+        prebuilt composite HOD-style model. For a tutorial on the ``leauthaud11``
+        composite model, see :ref:`leauthaud11_composite_model`.
+
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
@@ -176,6 +183,12 @@ class Leauthaud11Cens(OccupationComponent):
 class Leauthaud11Sats(OccupationComponent):
     """ HOD-style model for any satellite galaxy occupation that derives from
     a stellar-to-halo-mass relation.
+
+    .. note::
+
+        The `Leauthaud11Sats` model is part of the ``leauthaud11``
+        prebuilt composite HOD-style model. For a tutorial on the ``leauthaud11``
+        composite model, see :ref:`leauthaud11_composite_model`.
     """
 
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
