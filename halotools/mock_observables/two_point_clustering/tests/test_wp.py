@@ -6,6 +6,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 from astropy.tests.helper import pytest
 
+from .locate_external_unit_testing_data import wp_corrfunc_comparison_files_exist
 from ..wp import wp
 
 __all__ = ('test_wp_auto_nonperiodic', 'test_wp_auto_periodic', 'test_wp_cross_periodic',
@@ -16,6 +17,8 @@ rp_bins = np.linspace(0.001, 0.3, 3)
 pi_max = 0.3
 
 fixed_seed = 43
+
+WP_CORRFUNC_FILES_EXIST = wp_corrfunc_comparison_files_exist()
 
 
 def test_wp_auto_nonperiodic():
@@ -87,3 +90,28 @@ def test_wp_cross_nonperiodic():
     assert result[0].ndim == 1, "dimension of auto incorrect"
     assert result[1].ndim == 1, "dimension of cross incorrect"
     assert result[2].ndim == 1, "dimension auto incorrect"
+
+
+@pytest.mark.skipif('not WP_CORRFUNC_FILES_EXIST')
+def test_wp_vs_corrfunc():
+    """
+    """
+    msg = ("This unit-test compares the wp results from halotools \n"
+        "against the results derived from the Corrfunc code managed by \n"
+        "Manodeep Sinha. ")
+    __, aph_fname1, aph_fname2, aph_fname3, deep_fname1, deep_fname2 = (
+        wp_corrfunc_comparison_files_exist(return_fnames=True))
+
+    sinha_sample1_wp = np.load(deep_fname1)[:, 0]
+    sinha_sample2_wp = np.load(deep_fname2)[:, 0]
+
+    sample1 = np.load(aph_fname1)
+    sample2 = np.load(aph_fname2)
+    rp_bins = np.load(aph_fname3)
+    pi_max = 40.0
+
+    halotools_result1 = wp(sample1, rp_bins, pi_max, period=250.0)
+    assert np.allclose(halotools_result1, sinha_sample1_wp, rtol=1e-3), msg
+
+    halotools_result2 = wp(sample2, rp_bins, pi_max, period=250.0)
+    assert np.allclose(halotools_result2, sinha_sample2_wp, rtol=1e-3), msg

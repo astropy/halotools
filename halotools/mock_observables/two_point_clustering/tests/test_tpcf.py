@@ -8,6 +8,8 @@ import warnings
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
+from .locate_external_unit_testing_data import tpcf_corrfunc_comparison_files_exist
+
 from ..tpcf import tpcf
 
 from ....custom_exceptions import HalotoolsError
@@ -19,6 +21,7 @@ __all__ = ('test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',
     'test_tpcf_period_API', 'test_tpcf_cross_consistency_w_auto')
 
 fixed_seed = 43
+TPCF_CORRFUNC_FILES_EXIST = tpcf_corrfunc_comparison_files_exist()
 
 
 @slow
@@ -576,3 +579,28 @@ def test_tpcf_raises_exception_for_unavailable_estimator():
             estimator='Jose Canseco')
     substr = "is not in the list of available estimators:"
     assert substr in err.value.args[0]
+
+
+@pytest.mark.skipif('not TPCF_CORRFUNC_FILES_EXIST')
+def test_tpcf_vs_corrfunc():
+    """
+    """
+    msg = ("This unit-test compares the tpcf results from halotools \n"
+        "against the results derived from the Corrfunc code managed by \n"
+        "Manodeep Sinha. ")
+    __, aph_fname1, aph_fname2, aph_fname3, deep_fname1, deep_fname2 = (
+        tpcf_corrfunc_comparison_files_exist(return_fnames=True))
+
+    sinha_sample1_xi = np.load(deep_fname1)[:, 0]
+    sinha_sample2_xi = np.load(deep_fname2)[:, 0]
+
+    sample1 = np.load(aph_fname1)
+    sample2 = np.load(aph_fname2)
+    rbins = np.load(aph_fname3)
+
+    halotools_result1 = tpcf(sample1, rbins, period=250.0)
+    assert np.allclose(halotools_result1, sinha_sample1_xi, rtol=1e-5), msg
+
+    halotools_result2 = tpcf(sample2, rbins, period=250.0)
+    assert np.allclose(halotools_result2, sinha_sample2_xi, rtol=1e-5), msg
+
