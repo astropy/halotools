@@ -136,7 +136,14 @@ class LogNormalScatterModel(object):
 
         np.random.seed(seed=seed)
 
-        return np.random.normal(loc=0, scale=scatter_scale)
+        #initialize result with zero scatter result
+        result = np.zeros(len(scatter_scale))
+
+        #only draw from a normal distribution for non-zero values of scatter
+        mask = (scatter_scale > 0.0)
+        result[mask] =  np.random.normal(loc=0, scale=scatter_scale[mask])
+
+        return result
 
     def _update_interpol(self):
         """ Private method that updates the interpolating functon used to
