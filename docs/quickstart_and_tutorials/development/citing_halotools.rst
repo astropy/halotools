@@ -3,37 +3,33 @@
 .. _citing_halotools:
 
 ==============================================
-License and Citation Information 
+License and Citation Information
 ==============================================
 
 Citing Halotools
 ------------------
 
-Halotools is currently preparing for its first "official" public release (v0.2). 
-The v0.2 release will be accompanied with a code-release paper, currently 
-being housed and developed in the repository stored here: 
-https://github.com/aphearin/halotools_release_paper. 
+Halotools is currently preparing for its first "official" public release (v0.2).
+The v0.2 release is accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication,
+we ask that you cite this paper in your work.
 
-If you use Halotools modules to support your science publication, 
-we ask that you cite this paper in your work. A link to the source of the paper will be added to this section of the documentation as soon as the release-paper is submitted. 
+Because Halotools is a large package
+with modular functionality, it will promote reproducibility of your results
+if you explicitly state which features of the code you used
+(and which version of the package you used). If you used one of the Halotools-provided catalogs,
+be sure to explicitly declare which catalog, including its ``version_name``.
 
-Because Halotools is a large package 
-with modular functionality, explicitly stating which features you used 
-(and which version of the package you used) will promote the reproducibility 
-of your results. If you used one of the Halotools-provided catalogs, 
-be sure to explicitly declare which catalog, including its ``version_name``. 
+Throughout the course of your project,
+one of the Halotools development team may support your work by incorporating a new feature
+into Halotools, and/or by accelerating the development of an existing feature branch
+for the sake of your project.
+In such an event, please consider a co-authorship invitation for that member of the development team
+in addition to citing the Halotools release-paper.
+You can always request such support by
+either a private email or by raising a public issue on GitHub and
+tagging the issue with the ``feature request`` label and/or ``question`` label.
 
-Throughout the course of your project, 
-one of the Halotools development team may support your work by incorporating a new feature 
-into Halotools, and/or by accelerating the development of an existing feature branch 
-for the sake of your project. 
-In such an event, please consider a co-authorship invitation for that member of the development team 
-in addition to citing the Halotools release-paper. 
-You can always request such support by 
-either a private email or by raising a public issue on GitHub and 
-tagging the issue with the ``feature request`` label and/or ``question`` label. 
-
-Halotools License 
+Halotools License
 ---------------------
 
 Halotools is licensed under a 3-clause BSD style license - see the licenses/LICENSE.rst file.
