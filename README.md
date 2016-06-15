@@ -118,9 +118,7 @@ The google group also serves as a public forum for asking questions about the co
 
 ## Citing Halotools
 
-The v0.2 release will be accompanied with a code-release paper, currently being housed and developed in the repository stored here: https://github.com/aphearin/halotools_release_paper.
-
-If you use Halotools modules to support your science publication, we ask that you cite this paper in your work. A link to the source of the paper will be added to this section of the documentation as soon as the release-paper is submitted. See the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools. 
+The v0.2 release is accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication, we ask that you cite this paper in your work. See the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools. 
 
 
 ---
