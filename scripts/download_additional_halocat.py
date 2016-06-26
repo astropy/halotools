@@ -50,7 +50,8 @@ parser.add_argument("-dirname",
 
 parser.add_argument("-ptcls_only",
     help=("Only download a random downsampling of 1e6 dark matter particles from the snapshot."
-        "Downsampled particles are necessary to calculate galaxy-galaxy lensing."),
+        "Downsampled particles are necessary to calculate galaxy-galaxy lensing."
+        "High-redshift particles are not available for the bolshoi simulation."),
     action="store_true")
 
 parser.add_argument("-halos_only",
@@ -99,6 +100,16 @@ if args.halos_only is True:
     download_ptcls = False
 else:
     download_ptcls = True
+
+#  Raise a special message if high-redshift bolshoi particles are requested.
+hiz_bolsohoi_error_msg = (
+    "High-redshift particles are not available for the bolshoi simulation.\n"
+    "To download the high-z bolshoi halos you have requested, "
+    "throw the -halos_only flag.")
+
+if download_ptcls is True:
+    if (redshift > 0.1) & (simname == 'bolshoi'):
+        raise ValueError(hiz_bolsohoi_error_msg)
 
 # Done parsing inputs
 
