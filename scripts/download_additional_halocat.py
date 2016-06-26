@@ -50,13 +50,17 @@ parser.add_argument("-dirname",
 
 parser.add_argument("-ptcls_only",
     help=("Only download a random downsampling of 1e6 dark matter particles from the snapshot."
-        "Downsampled particles are necessary to calculate galaxy-galaxy lensing."
-        "High-redshift particles are not available for the bolshoi simulation."),
+        "Downsampled particles are necessary to calculate galaxy-galaxy lensing. "
+        "z>0 particles are currently not available for the bolshoi simulation."),
     action="store_true")
 
 parser.add_argument("-halos_only",
     help=("Only download the halo catalog data of the snapshot, "
-        "and ignore the downsampled particle data. "),
+        "and ignore the downsampled particle data. "
+        "Since z>0 particles are currently not available "
+        "for the bolshoi simulation, "
+        "this flag must be thrown in order to download z>0 halo catalogs "
+        "for bolshoi."),
     action="store_true")
 
 parser.add_argument("simname", type=str,
@@ -175,18 +179,18 @@ msg = (
     str(downman.halo_table_cache.cache_log_fname) + "\n" +
     str(downman.ptcl_table_cache.cache_log_fname) + "\n\n"
     "These two ASCII files maintain a record of the \nhalo and particle catalogs "
-    "you use with Halotools.\n"
-    "The "+halo_table_cache_basename+" cache log now has an entry \n"
-    "reflecting the data you just downloaded.\n")
+    "you use with Halotools.\n")
 
 if download_halos is True:
-    msg += ("The halo catalog is now stored in the following location:\n\n"
+    msg += ("The "+halo_table_cache_basename+" cache log now has an entry \n"
+        "corresponding to the newly downloaded halo catalog,\n"
+        "which is stored in the following location:\n\n"
         + new_halo_log_entry.fname + "\n\n")
 
 if download_ptcls is True:
-    msg += ("The "+ptcl_table_cache_basename+" cache log also has an entry \n"
-        "corresponding to a random downsampling of "
-        "~1e6 dark matter particles from the same snapshot; "
+    msg += ("The "+ptcl_table_cache_basename+" cache log now has an entry \n"
+        "corresponding to a random downsampling of \n"
+        "~1e6 dark matter particles from the requested snapshot; "
         "\nthe particle catalog is stored in the following location:\n\n"
         + new_ptcl_log_entry.fname + "\n\n")
 
@@ -202,7 +206,7 @@ if download_halos is True:
     msg += ">>> halos = halocat.halo_table\n"
 
 if download_ptcls is True:
-    ">>> particles = halocat.ptcl_table\n\n"
+    msg += ">>> particles = halocat.ptcl_table\n\n"
 
 
 print(msg)
