@@ -67,10 +67,10 @@ This will install the master branch of the code that is currently under developm
 
 .. note::
 
-	If you need to fine-tune the optimization of an especially
+	**Optional:** If you need to fine-tune the optimization of an especially
 	performance-critical science application,
 	we recommend that you install the package from source.
-	This will also give you the opportunity to manually
+	This will give you the opportunity to manually
 	throw your own compiler flags that are enabled by
 	your version of gcc. For example, throwing the
 	``-Ofast`` and ``-march=native`` flags
@@ -78,12 +78,16 @@ This will install the master branch of the code that is currently under developm
 	functions by 10-40% (with zero impact on the performance
 	of the mock-making algorithm implemented in `~halotools.empirical_models`).
 	To compile Halotools with these flags thrown,
-	simply add one or both of the strings ``-Ofast`` and/or ``-march=native``
-	to the ``extra_compiler_args`` list in every file named ``setup_package.py``.
+	simply add two new elements to the
+	``extra_compiler_args`` list in every source code file
+	named ``setup_package.py``: the string ``'-Ofast'`` and
+	the string ``'-march=native'``.
 	When you've made these modifications to the code,
-	install Halotools by following the *Building fom source* instructions
+	install Halotools by following the *Building fom source* instructions above
 	using with your locally modified source code.
-
+	Alternatively, if you have an older version of gcc that
+	does not support the default choice for these flags made by Halotools,
+	you may need to *remove* the flag causing the installation problem.
 
 .. _halotools_dependencies:
 
