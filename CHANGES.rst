@@ -1,7 +1,9 @@
 0.3 (unreleased)
 ----------------
 
-- No changes yet
+- Removed distant_observer_redshift function from mock_survey module
+
+- Removed -march=native compiler flag to resolve installation problems on some architectures
 
 
 0.2 (2016-06-09)
