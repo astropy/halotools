@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Module containing container classes for
 the simulations provided by Halotools.
 The attributes of the classes defined below
@@ -12,8 +11,6 @@ from astropy import cosmology
 
 __all__ = ('NbodySimulation',
            'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo')
-
-supported_sim_list = ('bolshoi', 'bolplanck', 'consuelo', 'multidark')
 
 ######################################################
 ########## Simulation classes defined below ##########
@@ -87,6 +84,8 @@ class Bolshoi(NbodySimulation):
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/')
 
+        self.publications = ['arXiv:1002.3660', 'arXiv:1110.4372', 'arXiv:1110.4370']
+
 
 class BolPlanck(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology
@@ -106,6 +105,9 @@ class BolPlanck(NbodySimulation):
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/')
 
+        self.publications = (['arXiv:1411.4001', 'arXiv:1110.4372',
+            'arXiv:1110.4370', 'arXiv:1602.04813'])
+
 
 class MultiDark(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology
@@ -124,6 +126,8 @@ class MultiDark(NbodySimulation):
         self.orig_ascii_web_location = (
             'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/')
 
+        self.publications = ['arXiv:1109.0003', 'arXiv:1110.4372', 'arXiv:1110.4370']
+
 
 class Consuelo(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5-like cosmology
@@ -141,3 +145,13 @@ class Consuelo(NbodySimulation):
 
         self.orig_ascii_web_location = (
             'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/')
+
+        self.publications = (['arXiv:1110.4372', 'arXiv:1110.4370',
+            'http://adsabs.harvard.edu/abs/2011AAS...21724907M'])
+
+
+#  Create a convenience dictionary providing the correspondence between simname and simclass
+supported_sim_dict = (
+    {'bolshoi': Bolshoi, 'bolplanck': BolPlanck,
+    'consuelo': Consuelo, 'multidark': MultiDark})
+supported_sim_list = list(supported_sim_dict.keys())
