@@ -241,7 +241,7 @@ class Leauthaud11Sats(OccupationComponent):
         self.publications = self.central_occupation_model.publications
 
     def mean_occupation(self, **kwargs):
-        """ Expected number of central galaxies in a halo of mass halo_mass.
+        """ Expected number of satellite galaxies in a halo of mass halo_mass.
         See Equation 12-14 of arXiv:1103.2077.
 
         Parameters
@@ -255,7 +255,7 @@ class Leauthaud11Sats(OccupationComponent):
         Returns
         -------
         mean_nsat : array
-            Mean number of central galaxies in the halo of the input mass.
+            Mean number of satellite galaxies in the halo of the input mass.
 
         Examples
         --------
