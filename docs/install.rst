@@ -14,8 +14,12 @@ The simplest way to install the latest release of the code is with pip. Before i
 
 	pip install halotools
 
-This will install the latest official release of the code.
-If you want the latest master branch,
+Alternatively, you can install using conda::
+
+	conda install -c astropy halotools
+
+Either pip or conda will install the latest official release of the code.
+If instead you want the latest master branch,
 you will need to build the code from source following the instructions in the next section.
 
 .. note::
@@ -138,6 +142,9 @@ Whether you installed the master branch or a release branch, the message that co
 
 Once you have installed the package, see :ref:`getting_started` for instructions on how to get up and running.
 
+Troubleshooting
+==================
+See :ref:`installation_troubleshooting` for solutions to known installation-related problems.
 
 
 
