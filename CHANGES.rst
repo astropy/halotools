@@ -1,4 +1,4 @@
-0.3 (unreleased)
+0.3 (2016-06-28)
 ----------------
 
 - Removed distant_observer_redshift function from mock_survey module
