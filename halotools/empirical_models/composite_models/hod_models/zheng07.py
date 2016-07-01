@@ -80,8 +80,10 @@ def zheng07_model_dictionary(
 
     ####################################
     # Build the occupation model
+    cenocc_model = centrals_occupation if modulate_with_cenocc else None
+    #if the user asks to modulate with cenocc, do it!
     satellites_occupation = zheng07_components.Zheng07Sats(
-        threshold=threshold, redshift=redshift, **kwargs)
+        threshold=threshold, redshift=redshift, cenocc_model = cenocc_model, **kwargs)
     satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model
