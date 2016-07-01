@@ -222,7 +222,7 @@ class Zheng07Sats(OccupationComponent):
     def __init__(self,
             threshold=model_defaults.default_luminosity_threshold,
             prim_haloprop_key=model_defaults.prim_haloprop_key,
-            modulate_with_cenocc=False,
+            cenocc_model = None,
             **kwargs):
         """
         Parameters
@@ -238,12 +238,13 @@ class Zheng07Sats(OccupationComponent):
             the occupation statistics of gal_type galaxies.
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        modulate_with_cenocc : bool, optional
-            If True, the first satellite moment will be multiplied by the
-            the first central moment. Default is False.
-            If ``modulate_with_cenocc`` is True,
+        cenocc_model : bool, OccupationComponent 
+            If passed in, the first satellite moment will be multiplied by the
+            the first central moment. Default is None.
+            If ``cenocc_model`` is not None,
             the mean occupation method of `Zheng07Sats` will
-            be multiplied by the the first moment of `Zheng07Cens`,
+            be multiplied by the the first moment of the new central occupation model. For example, 
+            if cenocc_model is an instance of Zheng07Cens the result will be 
             as in Zheng et al. 2007, so that:
 
             :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\mathrm{cen}}\\rangle_{M}`
@@ -268,12 +269,12 @@ class Zheng07Sats(OccupationComponent):
         A common convention in HOD modeling of satellite populations is for the first
         occupation moment of the satellites to be multiplied by the first occupation
         moment of the associated central population.
-        The ``modulate_with_cenocc`` keyword arguments allows you
+        The ``cenocc_model`` keyword arguments allows you
         to study the impact of this choice:
 
         >>> sat_model1 = Zheng07Sats(threshold=-18)
         >>> cen_model_instance = Zheng07Cens(threshold = sat_model1.threshold)
-        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, modulate_with_cenocc=True)
+        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, cenocc_model=cen_model_instance)
 
         Now ``sat_model1`` and ``sat_model2`` are identical in every respect,
         excepting only the following difference:
@@ -298,13 +299,13 @@ class Zheng07Sats(OccupationComponent):
 
         self.param_dict = self.get_published_parameters(self.threshold)
 
-        self.modulate_with_cenocc = modulate_with_cenocc
-        if self.modulate_with_cenocc is True:
-            self.central_occupation_model = Zheng07Cens(
-                prim_haloprop_key=prim_haloprop_key,
-                threshold=threshold)
+        self.central_occupation_model = cenocc_model 
+        '''
+        if self.cenocc_model is not None:
+            #Not sure if necessary, since they will presum
             for key, value in self.central_occupation_model.param_dict.items():
                 self.param_dict[key] = value
+        '''
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
@@ -358,10 +359,13 @@ class Zheng07Sats(OccupationComponent):
         >>> mean_nsat = sat_model.mean_occupation(table=fake_sim.halo_table)
 
         """
-        if self.modulate_with_cenocc is True:
+        #not necessary here, as it's the same object!
+        '''
+        if self.central_occupation_model is not None:
             for key, value in self.param_dict.items():
                 if key in self.central_occupation_model.param_dict:
                     self.central_occupation_model.param_dict[key] = value
+        '''
 
         # Retrieve the array storing the mass-like variable
         if 'table' in list(kwargs.keys()):
@@ -393,7 +397,7 @@ class Zheng07Sats(OccupationComponent):
 
         # If a central occupation model was passed to the constructor,
         # multiply mean_nsat by an overall factor of mean_ncen
-        if self.modulate_with_cenocc is True:
+        if self.central_occupation_model is not None:
             mean_ncen = self.central_occupation_model.mean_occupation(**kwargs)
             mean_nsat *= mean_ncen
 
