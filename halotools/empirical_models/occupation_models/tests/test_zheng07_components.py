@@ -315,7 +315,7 @@ class TestZheng07Sats(TestCase):
     def test_ncen_inheritance_behavior(self):
         satmodel_nocens = zheng07_components.Zheng07Sats()
         cenmodel = zheng07_components.Zheng07Cens()
-        satmodel_cens = zheng07_components.Zheng07Sats(modulate_with_cenocc=True)
+        satmodel_cens = zheng07_components.Zheng07Sats(cenocc_model=cenmodel)
 
         Npts = 100
         masses = np.logspace(10, 15, Npts)

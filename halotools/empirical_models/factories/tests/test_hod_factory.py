@@ -60,8 +60,9 @@ def test_alt_Zheng07_composites():
     default_model_dictionary = default_model._input_model_dictionary
     default_satocc_component = default_model_dictionary['satellites_occupation']
 
+    cenocc_model = Zheng07Cens()
     cenmod_satocc_compoent = Zheng07Sats(
-        threshold=default_satocc_component.threshold, modulate_with_cenocc=True,
+        threshold=default_satocc_component.threshold, cenocc_model=cenocc_model,
         gal_type_centrals='centrals')
 
     cenmod_model_dictionary = copy(default_model_dictionary)
