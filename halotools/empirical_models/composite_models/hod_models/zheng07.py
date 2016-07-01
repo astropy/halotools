@@ -18,7 +18,7 @@ __all__ = ['zheng07_model_dictionary']
 
 def zheng07_model_dictionary(
         threshold=model_defaults.default_luminosity_threshold,
-        redshift=sim_defaults.default_redshift, **kwargs):
+        redshift=sim_defaults.default_redshift, modulate_with_cenocc=False,**kwargs):
     """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457.
 
     See :ref:`zheng07_composite_model` for a tutorial on this model.
@@ -49,6 +49,10 @@ def zheng07_model_dictionary(
         If you will be using the model instance to populate mock catalogs,
         you must choose a redshift that is consistent with the halo catalog.
         Default is set in the `~halotools.empirical_models.model_defaults` module.
+
+    modulate_with_cenocc: boolean, optional
+        If True, will pass in the central occupation model to modulate the satellite fraction. See
+        Zheng et al 2007 for details. 
 
     Returns
     -------
