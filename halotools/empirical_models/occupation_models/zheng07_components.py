@@ -287,6 +287,8 @@ class Zheng07Sats(OccupationComponent):
         TestZheng07Sats
 
         """
+        #NOTE can put an assertion test here to ensure the user passed in a sensible cenocc_model.
+        #For now, trust the user *gulp*
         upper_occupation_bound = float("inf")
 
         # Call the super class constructor, which binds all the
