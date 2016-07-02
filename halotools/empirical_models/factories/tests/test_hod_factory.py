@@ -59,10 +59,10 @@ def test_alt_Zheng07_composites():
     default_model = PrebuiltHodModelFactory('zheng07')
     default_model_dictionary = default_model._input_model_dictionary
     default_satocc_component = default_model_dictionary['satellites_occupation']
+    default_cenocc_component = default_model_dictionary['centrals_occupation']
 
-    cenocc_model = Zheng07Cens()
     cenmod_satocc_compoent = Zheng07Sats(
-        threshold=default_satocc_component.threshold, cenocc_model=cenocc_model,
+        threshold=default_satocc_component.threshold, cenocc_model=default_cenocc_component,
         gal_type_centrals='centrals')
 
     cenmod_model_dictionary = copy(default_model_dictionary)
@@ -81,6 +81,7 @@ def test_alt_Zheng07_composites():
 
     cenmod_model.param_dict['logMmin'] *= 1.1
     nsat3 = cenmod_model.mean_occupation_satellites(prim_haloprop=2.e12)
+    print nsat3, nsat2
     assert nsat3 < nsat2
 
     nsat3 = default_model.mean_occupation_satellites(prim_haloprop=2.e12)
