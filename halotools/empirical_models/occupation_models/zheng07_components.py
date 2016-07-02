@@ -302,12 +302,12 @@ class Zheng07Sats(OccupationComponent):
         self.param_dict = self.get_published_parameters(self.threshold)
 
         self.central_occupation_model = cenocc_model 
-        '''
-        if self.cenocc_model is not None:
+
+        if self.central_occupation_model is not None:
             #Not sure if necessary, since they will presum
             for key, value in self.central_occupation_model.param_dict.items():
                 self.param_dict[key] = value
-        '''
+
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
@@ -362,12 +362,12 @@ class Zheng07Sats(OccupationComponent):
 
         """
         #not necessary here, as it's the same object!
-        '''
+
         if self.central_occupation_model is not None:
             for key, value in self.param_dict.items():
                 if key in self.central_occupation_model.param_dict:
                     self.central_occupation_model.param_dict[key] = value
-        '''
+
 
         # Retrieve the array storing the mass-like variable
         if 'table' in list(kwargs.keys()):
