@@ -361,8 +361,8 @@ class Zheng07Sats(OccupationComponent):
         >>> mean_nsat = sat_model.mean_occupation(table=fake_sim.halo_table)
 
         """
-        #not necessary here, as it's the same object!
-
+        #Turns out this is necessary
+        #probably should have a check that parameters aren't being overwritten
         if self.central_occupation_model is not None:
             for key, value in self.param_dict.items():
                 if key in self.central_occupation_model.param_dict:
