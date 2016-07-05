@@ -1,13 +1,18 @@
-#!/usr/bin/env python
+"""
+"""
 import numpy as np
 
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
+
 from unittest import TestCase
 import warnings
 
 from ...sim_manager import FakeSim
 
 __all__ = ['TestHodModelFactoryTutorial']
+
+fixed_seed = 43
 
 
 class TestHodModelFactoryTutorial(TestCase):
@@ -229,7 +234,8 @@ class TestHodModelFactoryTutorial(TestCase):
                     halo_mass = kwargs['prim_haloprop']
 
                 disrupted_fraction = self.disrupted_fraction_vs_halo_mass(halo_mass)
-                randomizer = np.random.uniform(0, 1, len(halo_mass))
+                with NumpyRNGContext(fixed_seed):
+                    randomizer = np.random.uniform(0, 1, len(halo_mass))
                 is_disrupted = randomizer < disrupted_fraction
 
                 if 'table' in list(kwargs.keys()):
@@ -241,7 +247,8 @@ class TestHodModelFactoryTutorial(TestCase):
                 table = kwargs['table']
                 mask = table['disrupted'] == True
                 num_disrupted = len(table['disrupted'][mask])
-                table['axis_ratio'][mask] = np.random.random(num_disrupted)
+                with NumpyRNGContext(fixed_seed):
+                    table['axis_ratio'][mask] = np.random.random(num_disrupted)
                 table['axis_ratio'][~mask] = 0.3
 
             def disrupted_fraction_vs_halo_mass(self, mass):
@@ -307,7 +314,8 @@ class TestHodModelFactoryTutorial(TestCase):
 
             def assign_shape(self, **kwargs):
                 table = kwargs['table']
-                randomizer = np.random.random(len(table))
+                with NumpyRNGContext(fixed_seed):
+                    randomizer = np.random.random(len(table))
                 table['shape'][:] = np.where(randomizer > 0.5, 'elliptical', 'disk')
 
         class Size(object):
@@ -368,7 +376,8 @@ class TestHodModelFactoryTutorial(TestCase):
 
             def assign_shape(self, **kwargs):
                 table = kwargs['table']
-                randomizer = np.random.random(len(table))
+                with NumpyRNGContext(fixed_seed):
+                    randomizer = np.random.random(len(table))
                 table['shape'][:] = np.where(randomizer > 0.5, 'elliptical', 'disk')
 
         class Size(object):
