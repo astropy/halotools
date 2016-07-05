@@ -5,12 +5,12 @@ This module contains occupation components used by the Tinker13 composite model.
 import numpy as np
 import math
 from scipy.special import erf
+from astropy.utils.misc import NumpyRNGContext
 
 from .occupation_model_template import OccupationComponent
 
 from .. import model_defaults, model_helpers
 from ..smhm_models import Behroozi10SmHm
-
 from ..assembias_models import HeavisideAssembias
 from ..model_helpers import bounds_enforcing_decorator_factory
 
@@ -162,14 +162,13 @@ class Tinker13Cens(OccupationComponent):
 
         return fraction
 
-    def mc_sfr_designation(self, **kwargs):
+    def mc_sfr_designation(self, seed=None, **kwargs):
         """
         """
         quiescent_fraction = self.mean_quiescent_fraction(**kwargs)
 
-        if 'seed' in kwargs:
-            np.random.seed(seed=kwargs['seed'])
-        mc_generator = np.random.random(custom_len(quiescent_fraction))
+        with NumpyRNGContext(seed):
+            mc_generator = np.random.random(custom_len(quiescent_fraction))
 
         result = np.where(mc_generator < quiescent_fraction, 'quiescent', 'active')
         if 'table' in kwargs:
