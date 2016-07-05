@@ -21,7 +21,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         velocities2=None, period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6),
-        approx_cell1_size=None, approx_cell2_size=None):
+        approx_cell1_size=None, approx_cell2_size=None, seed=None):
     """
     Calculate the pairwise velocity dispersion (PVD), :math:`\\sigma_{12}(r)`.
 
@@ -65,6 +65,10 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         Defines maximum size of the sample that will be passed to the pair counter.
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled
         such that the subsample is equal to max_sample_size.
+
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
 
     Returns
     -------
@@ -124,7 +128,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     #process input arguments
     function_args = (sample1, velocities1, sample2, velocities2, period,
         do_auto, do_cross, num_threads, max_sample_size,
-        approx_cell1_size, approx_cell2_size)
+        approx_cell1_size, approx_cell2_size, seed)
     sample1, velocities1, sample2, velocities2,\
         period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs =\
