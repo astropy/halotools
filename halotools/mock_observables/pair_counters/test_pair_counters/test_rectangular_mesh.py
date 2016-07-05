@@ -1,15 +1,19 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import itertools
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..rectangular_mesh import RectangularDoubleMesh, sample1_cell_size
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mesh_variations', )
+
+fixed_seed = 43
 
 
 def enforce_cell_size_divide_box_size(mesh):
@@ -140,8 +144,9 @@ def test_sample1_cell_size():
 
 
 def test_search_length_enforcement():
-    points1 = np.random.random((100, 3))
-    points2 = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        points1 = np.random.random((100, 3))
+        points2 = np.random.random((100, 3))
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = 0.1, 0.1, 0.1
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = 0.1, 0.1, 0.1
     search_xlength, search_ylength, search_zlength = 0.5, 0.5, 0.5

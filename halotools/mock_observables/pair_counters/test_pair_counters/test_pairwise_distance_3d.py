@@ -1,6 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 
@@ -84,7 +84,8 @@ def test_pairwise_distance_3d_nonperiodic_random_1():
     """
     #random points
     Npts = 10
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     period = 1.0
 
     rmax=10.0

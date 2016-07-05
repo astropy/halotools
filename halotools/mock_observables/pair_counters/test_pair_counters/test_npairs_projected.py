@@ -1,9 +1,10 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..npairs_projected import npairs_projected
 from ..pairs import xy_z_npairs as pure_python_brute_force_npairs_projected
@@ -12,6 +13,8 @@ from ...tests.cf_helpers import generate_locus_of_3d_points
 from ...tests.cf_helpers import generate_3d_regular_mesh
 
 __all__ = ('test_rectangular_mesh_pairs_tight_locus_xy1', )
+
+fixed_seed = 43
 
 
 def test_rectangular_mesh_pairs_tight_locus_xy1():
@@ -294,7 +297,8 @@ def test_npairs_projected_brute_force_periodic():
     Function tests npairs with periodic boundary conditions.
     """
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     period = np.array([1.0, 1.0, 1.0])
     rp_bins = np.array([0.001, 0.1, 0.2, 0.3])
     pi_max = 0.1
@@ -318,7 +322,8 @@ def test_npairs_projected_brute_force_non_periodic():
     Function tests npairs with periodic boundary conditions.
     """
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     rp_bins = np.array([0.001, 0.1, 0.2, 0.3])
     pi_max = 0.1
     pi_bins = [0, pi_max]

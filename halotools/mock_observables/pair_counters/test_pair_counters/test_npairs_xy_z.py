@@ -1,9 +1,10 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..npairs_xy_z import npairs_xy_z
 from ..pairs import xy_z_npairs as pure_python_brute_force_npairs_xy_z
@@ -12,6 +13,8 @@ from ...tests.cf_helpers import generate_locus_of_3d_points
 from ...tests.cf_helpers import generate_3d_regular_mesh
 
 __all__ = ('test_npairs_xy_z_tight_locus1', )
+
+fixed_seed = 43
 
 
 def test_npairs_xy_z_tight_locus1():
@@ -228,8 +231,9 @@ def test_npairs_xy_z_brute_force_periodic():
     test npairs_xy_z with periodic boundary conditions.
     """
     npts1, npts2 = 100, 90
-    data1 = np.random.random((npts1, 3))
-    data2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        data1 = np.random.random((npts1, 3))
+        data2 = np.random.random((npts2, 3))
 
     rp_bins = np.arange(0, 0.31, 0.1)
     pi_bins = np.arange(0, 0.31, 0.1)
@@ -246,8 +250,9 @@ def test_npairs_xy_z_brute_force_non_periodic():
     test npairs_xy_z with periodic boundary conditions.
     """
     npts1, npts2 = 100, 90
-    data1 = np.random.random((npts1, 3))
-    data2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        data1 = np.random.random((npts1, 3))
+        data2 = np.random.random((npts2, 3))
 
     rp_bins = np.arange(0, 0.31, 0.1)
     pi_bins = np.arange(0, 0.31, 0.1)

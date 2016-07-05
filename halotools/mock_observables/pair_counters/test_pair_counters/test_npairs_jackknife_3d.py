@@ -1,6 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 
@@ -9,14 +9,18 @@ from ..npairs_jackknife_3d import npairs_jackknife_3d
 # load comparison simple pair counters
 
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
+
 slow = pytest.mark.slow
 
 __all__ = ('test_npairs_jackknife_3d_periodic', 'test_npairs_jackknife_3d_nonperiodic')
 
+fixed_seed = 43
+
 # set up random points to test pair counters
-np.random.seed(1)
 Npts = 1000
-random_sample = np.random.random((Npts, 3))
+with NumpyRNGContext(fixed_seed):
+    random_sample = np.random.random((Npts, 3))
 period = np.array([1.0, 1.0, 1.0])
 num_threads = 2
 
@@ -57,7 +61,8 @@ def test_npairs_jackknife_3d_periodic():
     #define the jackknife sample labels
     Npts = len(random_sample)
     N_jsamples=10
-    jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
+    with NumpyRNGContext(fixed_seed):
+        jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
 
     #define weights
     weights1 = np.random.random(Npts)
@@ -90,10 +95,10 @@ def test_npairs_jackknife_3d_nonperiodic():
     #define the jackknife sample labels
     Npts = len(random_sample)
     N_jsamples=10
-    jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
-
-    #define weights
-    weights1 = np.random.random(Npts)
+    with NumpyRNGContext(fixed_seed):
+        jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
+        #define weights
+        weights1 = np.random.random(Npts)
 
     result = npairs_jackknife_3d(random_sample, random_sample, rbins, period=None,
         jtags1=jtags1, jtags2=jtags1, N_samples=10,
