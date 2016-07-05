@@ -25,7 +25,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         period=None, do_auto=True, do_cross=True, estimator='Natural',
         num_threads=1, max_sample_size=int(1e6), approx_cell1_size=None,
-        approx_cell2_size=None, approx_cellran_size=None):
+        approx_cell2_size=None, approx_cellran_size=None, seed=None):
     """
     Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`
 
@@ -124,6 +124,10 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     correlation_function(s) : np.ndarray
@@ -203,7 +207,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     #process arguments
     function_args = (sample1, s_bins, mu_bins, sample2, randoms, period,
         do_auto, do_cross, estimator, num_threads, max_sample_size,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size)
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
 
     sample1, s_bins, mu_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _s_mu_tpcf_process_args(*function_args)
@@ -376,7 +380,7 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
 
 def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
         period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size):
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.s_mu_tpcf`.
@@ -391,7 +395,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
         randoms = np.atleast_1d(randoms)
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size)
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     #process radial bins
     s_bins = get_separation_bins_array(s_bins)

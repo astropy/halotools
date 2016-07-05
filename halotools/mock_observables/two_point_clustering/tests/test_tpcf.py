@@ -29,9 +29,9 @@ def test_tpcf_auto():
     """
     test the tpcf auto-correlation functionality
     """
-
-    sample1 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -57,10 +57,10 @@ def test_tpcf_cross():
     """
     test the tpcf cross-correlation functionality
     """
-
-    sample1 = np.random.random((100, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((100, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -85,10 +85,10 @@ def test_tpcf_estimators():
     """
     test the tpcf different estimators functionality
     """
-
-    sample1 = np.random.random((100, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((100, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
@@ -130,10 +130,10 @@ def test_tpcf_sample_size_limit():
     """
     test the tpcf sample size limit functionality functionality
     """
-
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((1000, 3))
-    randoms = np.random.random((1000, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((1000, 3))
+        randoms = np.random.random((1000, 3))
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
@@ -150,10 +150,10 @@ def test_tpcf_randoms():
     """
     test the tpcf possible randoms + PBCs combinations
     """
-
-    sample1 = np.random.random((100, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((100, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -197,10 +197,10 @@ def test_tpcf_period_API():
     """
     test the tpcf period API functionality.
     """
-
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -235,10 +235,10 @@ def test_tpcf_cross_consistency_w_auto():
     """
     test the tpcf cross-correlation mode consistency with auto-correlation mode
     """
-
-    sample1 = np.random.random((200, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((300, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((200, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((300, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -285,10 +285,10 @@ def test_tpcf_cross_consistency_w_auto():
 
 
 def test_RR_precomputed_exception_handling1():
-
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -305,10 +305,10 @@ def test_RR_precomputed_exception_handling1():
 
 
 def test_RR_precomputed_exception_handling2():
-
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -326,10 +326,10 @@ def test_RR_precomputed_exception_handling2():
 
 
 def test_RR_precomputed_exception_handling3():
-
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((100, 3))
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((100, 3))
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -358,9 +358,10 @@ def test_RR_precomputed_natural_estimator_auto():
     exactly the same results as if we did not pre-compute RR.
 
     """
-    sample1 = np.random.random((1000, 3))
-    sample2 = sample1
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = sample1
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -438,9 +439,10 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     exactly the same results as if we did not pre-compute RR.
 
     """
-    sample1 = np.random.random((1000, 3))
-    sample2 = sample1
-    randoms = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = sample1
+        randoms = np.random.random((100, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
@@ -511,7 +513,8 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
 
 
 def test_tpcf_raises_warning_for_large_samples():
-    sample1 = np.random.random((1000, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
 
@@ -522,7 +525,8 @@ def test_tpcf_raises_warning_for_large_samples():
 
 
 def test_tpcf_raises_exception_for_non_monotonic_rbins():
-    sample1 = np.random.random((1000, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(10, 0.3, 5)
 
@@ -533,7 +537,8 @@ def test_tpcf_raises_exception_for_non_monotonic_rbins():
 
 
 def test_tpcf_raises_exception_for_large_search_length():
-    sample1 = np.random.random((1000, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.1, 0.5, 5)
 
@@ -544,8 +549,9 @@ def test_tpcf_raises_exception_for_large_search_length():
 
 
 def test_tpcf_raises_exception_for_incompatible_data_shapes():
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((1000, 2))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((1000, 2))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.1, 0.3, 5)
 
@@ -556,8 +562,9 @@ def test_tpcf_raises_exception_for_incompatible_data_shapes():
 
 
 def test_tpcf_raises_exception_for_bad_do_auto_instructions():
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((1000, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.1, 0.3, 5)
 
@@ -569,8 +576,9 @@ def test_tpcf_raises_exception_for_bad_do_auto_instructions():
 
 
 def test_tpcf_raises_exception_for_unavailable_estimator():
-    sample1 = np.random.random((1000, 3))
-    sample2 = np.random.random((1000, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((1000, 3))
+        sample2 = np.random.random((1000, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.1, 0.3, 5)
 

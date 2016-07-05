@@ -31,12 +31,12 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 
 def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
-                             sample2=None, sample2_host_halo_id=None,
-                             randoms=None, period=None,
-                             do_auto=True, do_cross=True, estimator='Natural',
-                             num_threads=1, max_sample_size=int(1e6),
-                             approx_cell1_size=None, approx_cell2_size=None,
-                             approx_cellran_size=None):
+        sample2=None, sample2_host_halo_id=None,
+        randoms=None, period=None,
+        do_auto=True, do_cross=True, estimator='Natural',
+        num_threads=1, max_sample_size=int(1e6),
+        approx_cell1_size=None, approx_cell2_size=None,
+        approx_cellran_size=None, seed=None):
     """
     Calculate the real space one-halo and two-halo decomposed two-point correlation
     functions, :math:`\\xi^{1h}(r)` and :math:`\\xi^{2h}(r)`.
@@ -136,6 +136,10 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     correlation_function(s) : numpy.array
@@ -193,7 +197,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     #check input arguments using clustering helper functions
     function_args = (sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
         randoms, period, do_auto, do_cross, estimator, num_threads,
-        max_sample_size, approx_cell1_size, approx_cell2_size, approx_cellran_size)
+        max_sample_size, approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
 
     #pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,\
@@ -396,7 +400,7 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         sample2, sample2_host_halo_id, randoms,
         period, do_auto, do_cross, estimator, num_threads, max_sample_size,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size):
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf_one_two_halo_decomp`.
@@ -430,7 +434,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         raise HalotoolsError(msg)
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size)
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.max(rbins)

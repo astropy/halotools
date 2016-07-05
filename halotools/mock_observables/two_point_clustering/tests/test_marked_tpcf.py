@@ -31,7 +31,8 @@ def test_marked_tpcf_auto_periodic():
     period = 1
 
     weight_func_id = 1
-    weights1 = np.random.random(Npts)
+    with NumpyRNGContext(fixed_seed):
+        weights1 = np.random.random(Npts)
 
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
@@ -51,7 +52,8 @@ def test_marked_tpcf_auto_nonperiodic():
     rbins = np.linspace(0.001, 0.25, 5)
 
     weight_func_id = 1
-    weights1 = np.random.random(Npts)
+    with NumpyRNGContext(fixed_seed):
+        weights1 = np.random.random(Npts)
 
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
@@ -71,8 +73,9 @@ def test_marked_tpcf_cross1():
     rbins = np.linspace(0.001, 0.25, 5)
     period = 1
 
-    weights1 = np.random.random(Npts)
-    weights2 = np.random.random(Npts)
+    with NumpyRNGContext(fixed_seed):
+        weights1 = np.random.random(Npts)
+        weights2 = np.random.random(Npts)
     weight_func_id = 1
 
     result = marked_tpcf(sample1, rbins, sample2=sample2,
@@ -91,8 +94,9 @@ def test_marked_tpcf_cross_consistency():
     rbins = np.linspace(0.001, 0.25, 5)
     period = 1
 
-    weights1 = np.random.random(Npts)
-    weights2 = np.random.random(Npts)
+    with NumpyRNGContext(fixed_seed):
+        weights1 = np.random.random(Npts)
+        weights2 = np.random.random(Npts)
     weight_func_id = 1
 
     cross_mark1 = marked_tpcf(sample1, rbins, sample2=sample2,
