@@ -10,6 +10,8 @@ from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
 from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 from .sim_defaults import default_cosmology
 
+from ..utils import crossmatch
+
 __all__ = ('FakeSim', 'FakeSimHalosNearBoundaries')
 
 
@@ -112,6 +114,10 @@ class FakeSim(UserSuppliedHaloCatalog):
         zhalf = np.random.uniform(0, 10, self.num_halos)
         dmdt = np.random.uniform(-1, 10, self.num_halos)
 
+        idxA, idxB = crossmatch(halo_hostid, halo_id)
+        halo_mvir_host_halo = np.copy(mvir)
+        halo_mvir_host_halo[idxA] = mvir[idxB]
+
         x = np.random.uniform(0, Lbox, self.num_halos)
         y = np.random.uniform(0, Lbox, self.num_halos)
         z = np.random.uniform(0, Lbox, self.num_halos)
@@ -148,6 +154,7 @@ class FakeSim(UserSuppliedHaloCatalog):
             halo_vpeak=vpeak,
             halo_spin=spin,
             halo_mass_accretion_rate=dmdt,
+            halo_mvir_host_halo=halo_mvir_host_halo,
             user_supplied_ptclcat=ptclcat
             )
 
