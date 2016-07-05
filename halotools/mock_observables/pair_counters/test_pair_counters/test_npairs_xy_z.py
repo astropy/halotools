@@ -25,7 +25,7 @@ def test_npairs_xy_z_tight_locus1():
     """
     npts1, npts2 = 100, 90
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.105, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_bins = np.array([0, 0.15])
