@@ -7,6 +7,7 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 from astropy.extern import six
 from abc import ABCMeta
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults
 from .. import model_helpers
@@ -110,11 +111,11 @@ class BinaryGalpropModel(object):
             Array storing the values of the primary galaxy property
             of the galaxies living in the input halos.
         """
-        np.random.seed(seed=seed)
 
         mean_func = getattr(self, 'mean_'+self.galprop_name+'_fraction')
         mean_galprop_fraction = mean_func(**kwargs)
-        mc_generator = np.random.random(custom_len(mean_galprop_fraction))
+        with NumpyRNGContext(seed):
+            mc_generator = np.random.random(custom_len(mean_galprop_fraction))
         result = np.where(mc_generator < mean_galprop_fraction, True, False)
         if 'table' in kwargs:
             kwargs['table'][self.galprop_name] = result
