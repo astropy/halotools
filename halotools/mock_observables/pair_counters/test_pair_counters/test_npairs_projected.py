@@ -24,8 +24,8 @@ def test_rectangular_mesh_pairs_tight_locus_xy1():
     In this test, PBCs are irrelevant
     """
     npts1, npts2 = 100, 90
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = np.max(rp_bins)
@@ -41,8 +41,8 @@ def test_rectangular_mesh_pairs_tight_locus_z1():
     In this test, PBCs are irrelevant
     """
     npts1, npts2 = 100, 110
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
 
@@ -62,8 +62,8 @@ def test_rectangular_mesh_pairs_tight_locus_xy2():
     In this test, PBCs are important.
     """
     npts1, npts2 = 100, 300
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.05, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.95, zc=0.1)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.05, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.95, zc=0.1, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = 0.1
@@ -82,8 +82,8 @@ def test_rectangular_mesh_pairs_tight_locus_z2():
     In this test, PBCs are important.
     """
     npts1, npts2 = 100, 101
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.05)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.95)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.05, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.95, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
 
@@ -112,8 +112,8 @@ def test_rectangular_mesh_pairs_tight_locus_cell1_sizes():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 90
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = np.max(rp_bins)
@@ -146,8 +146,8 @@ def test_rectangular_mesh_pairs_tight_locus_cell2_sizes():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 90
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = np.max(rp_bins)
@@ -180,8 +180,8 @@ def test_rectangular_mesh_pairs_tight_locus_cell1_cell2_sizes():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 90
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.2, zc=0.1, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = np.max(rp_bins)
@@ -343,8 +343,8 @@ def test_npairs_projected_brute_force_non_periodic():
 
 def test_sensible_num_threads():
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = 0.1
@@ -358,8 +358,8 @@ def test_sensible_num_threads():
 
 def test_sensible_rp_bins():
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
 
     rp_bins = 0.1
     pi_max = 0.1
@@ -372,8 +372,8 @@ def test_sensible_rp_bins():
 
 def test_sensible_period():
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
     rp_bins = np.array((0.05, 0.15, 0.3))
     pi_max = 0.1
 

@@ -67,8 +67,8 @@ def test_conditional_spherical_isolation_cond_func1():
     `~halotools.mock_observables.conditional_spherical_isolation` function
     always returns False when every mark1 exceeds every mark2, and conversely.
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     r_max = 0.2
     marks1 = np.ones(len(sample1))
     marks2 = np.zeros(len(sample2))
@@ -91,8 +91,8 @@ def test_conditional_spherical_isolation_cond_func2():
     `~halotools.mock_observables.conditional_spherical_isolation` function
     always returns True when every mark1 exceeds every mark2, and conversely.
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     r_max = 0.2
     marks1 = np.ones(len(sample1))
     marks2 = np.zeros(len(sample2))
@@ -115,8 +115,8 @@ def test_conditional_spherical_isolation_cond_func3():
     `~halotools.mock_observables.conditional_spherical_isolation` function
     always returns True when every mark1 is distinct from every mark2, and conversely.
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     r_max = 0.2
     marks1 = np.ones(len(sample1))
     marks2 = np.zeros(len(sample2))
@@ -140,8 +140,8 @@ def test_conditional_spherical_isolation_cond_func4():
     `~halotools.mock_observables.conditional_spherical_isolation` function
     always returns False when every mark1 is distinct from every mark2, and conversely.
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     r_max = 0.2
     marks1 = np.ones(len(sample1))
     marks2 = np.zeros(len(sample2))
@@ -166,8 +166,8 @@ def test_conditional_spherical_isolation_cond_func5():
     always returns the appropriate answer in both appropriate limits of
     w_1[0] to (w_2[0]+w_1[1]).
     """
-    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05)
-    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95)
+    sample1 = generate_locus_of_3d_points(10, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(10, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     r_max = 0.25
 
     # First verify that the two points are not isolated when ignoring the marks

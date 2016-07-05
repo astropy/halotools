@@ -107,8 +107,8 @@ def test_mesh_variations():
         xc1, yc1, zc1 = 0.1*xperiod, 0.1*yperiod, 0.1*zperiod
         zc_multiplier = options[1]
         zc2 = zc_multiplier*period
-        points1 = generate_locus_of_3d_points(npts1, xc=xc1, yc=yc1, zc=zc1)
-        points2 = generate_locus_of_3d_points(npts2, xc=xc1, yc=yc1, zc=zc2)
+        points1 = generate_locus_of_3d_points(npts1, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
+        points2 = generate_locus_of_3d_points(npts2, xc=xc1, yc=yc1, zc=zc2, seed=fixed_seed)
         approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = 3*[options[2]]
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = 3*[options[3]]
         search_xlength, search_ylength, search_zlength = 3*[options[4]]

@@ -95,7 +95,7 @@ def test_upf4():
     Npts = 1000
     Lbox = 1
     period = np.array([Lbox, Lbox, Lbox])
-    sample1 = generate_locus_of_3d_points(Npts)
+    sample1 = generate_locus_of_3d_points(Npts, seed=fixed_seed)
     n_ran = 1000
 
     rbins = np.logspace(-1.5, -1, 5)

@@ -11,13 +11,15 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ('test_large_scale_density_spherical_annulus_exception_handling', )
 
+fixed_seed = 43
+
 
 def test_large_scale_density_spherical_annulus_exception_handling():
     """
     """
     npts1, npts2 = 100, 200
-    sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    tracers = generate_locus_of_3d_points(npts2, xc=0.15, yc=0.1, zc=0.1)
+    sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    tracers = generate_locus_of_3d_points(npts2, xc=0.15, yc=0.1, zc=0.1, seed=fixed_seed)
     inner_radius, outer_radius = 0.1, 0.2
 
     with pytest.raises(HalotoolsError) as err:
@@ -49,8 +51,8 @@ def test_large_scale_density_spherical_annulus1():
     """
     """
     npts1, npts2 = 10, 200
-    sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    tracers = generate_locus_of_3d_points(npts2, xc=0.15, yc=0.1, zc=0.1)
+    sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    tracers = generate_locus_of_3d_points(npts2, xc=0.15, yc=0.1, zc=0.1, seed=fixed_seed)
     inner_radius, outer_radius = 0.04, 0.1
     result = large_scale_density_spherical_annulus(
         sample, tracers, inner_radius, outer_radius, period=1)
@@ -66,8 +68,8 @@ def test_large_scale_density_spherical_annulus2():
     """
     """
     npts1, npts2 = 100, 200
-    sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    tracers = generate_locus_of_3d_points(npts2, xc=0.95, yc=0.1, zc=0.1)
+    sample = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    tracers = generate_locus_of_3d_points(npts2, xc=0.95, yc=0.1, zc=0.1, seed=fixed_seed)
     inner_radius, outer_radius = 0.1, 0.2
     result = large_scale_density_spherical_annulus(
         sample, tracers, inner_radius, outer_radius,
