@@ -56,7 +56,7 @@ def broadcast_host_halo_property(table, halo_property_key,
         assert halo_property_key in list(table.keys())
         assert 'halo_id' in list(table.keys())
     except AssertionError:
-        msg = ("\nThe input table does not the input ``halo_property_key``"" = "+str(halo_property_key)+" column")
+        msg = ("\nThe input table does not have the input ``halo_property_key``"" = "+str(halo_property_key)+" column")
         raise HalotoolsError(msg)
 
     new_colname = halo_property_key + '_host_halo'

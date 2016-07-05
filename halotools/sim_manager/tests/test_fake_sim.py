@@ -32,6 +32,13 @@ class TestFakeSim(TestCase):
         for key in keylist:
             assert key in list(self.fake_sim.halo_table.keys())
 
+    def test_halo_mvir_host_halo(self):
+        assert 'halo_mvir_host_halo' in self.fake_sim.halo_table.keys()
+        mask = self.fake_sim.halo_table['halo_upid'] == -1
+        assert np.all(self.fake_sim.halo_table['halo_mvir'][mask] == self.fake_sim.halo_table['halo_mvir_host_halo'][mask])
+        assert np.any(self.fake_sim.halo_table['halo_mvir'][~mask] != self.fake_sim.halo_table['halo_mvir_host_halo'][~mask])
+        assert 0. not in self.fake_sim.halo_table['halo_mvir_host_halo'].data
+
     def tearDown(self):
         del self.fake_sim
 
