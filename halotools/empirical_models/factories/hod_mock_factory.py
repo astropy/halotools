@@ -11,6 +11,7 @@ and Halotools models.
 import numpy as np
 from copy import copy
 from astropy.table import Table
+from astropy.utils.misc import NumpyRNGContext
 
 from .mock_factory_template import MockFactory
 
@@ -165,7 +166,7 @@ class HodMockFactory(MockFactory):
 
         self.model.build_lookup_tables()
 
-    def populate(self, **kwargs):
+    def populate(self, seed=None, **kwargs):
         """
         Method populating host halos with mock galaxies.
         By calling the `populate` method of your mock, you will repopulate
@@ -194,6 +195,10 @@ class HodMockFactory(MockFactory):
             ever be set to False when using the ``masking_function`` to
             populate a specific spatial subvolume, as in that case PBCs
             no longer apply.
+
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Examples
         ----------
@@ -250,7 +255,7 @@ class HodMockFactory(MockFactory):
         except:
             self.halo_table = self._orig_halo_table
 
-        self.allocate_memory()
+        self.allocate_memory(seed=seed)
 
         # Loop over all gal_types in the model
         for gal_type in self.gal_types:
@@ -282,7 +287,7 @@ class HodMockFactory(MockFactory):
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
             gal_type_slice = self._gal_type_indices[func.gal_type]
-            func(table=self.galaxy_table[gal_type_slice])
+            func(table=self.galaxy_table[gal_type_slice], seed=seed)
 
         if self.enforce_PBC is True:
             self.galaxy_table['x'], self.galaxy_table['vx'] = (
@@ -310,7 +315,7 @@ class HodMockFactory(MockFactory):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
             self.galaxy_table = self.galaxy_table[mask]
 
-    def allocate_memory(self):
+    def allocate_memory(self, seed=None):
         """ Method allocates the memory for all the numpy arrays
         that will store the information about the mock.
         These arrays are bound directly to the mock object.
@@ -337,7 +342,7 @@ class HodMockFactory(MockFactory):
                 break
             else:
                 func = getattr(self.model, func_name)
-                func(table=self.halo_table)
+                func(table=self.halo_table, seed=seed)
                 galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
                 galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
                 self._remaining_methods_to_call.remove(func_name)
@@ -362,7 +367,7 @@ class HodMockFactory(MockFactory):
             occupation_func = getattr(self.model, occupation_func_name)
             # Call the component model to get a Monte Carlo
             # realization of the abundance of gal_type galaxies
-            self._occupation[gal_type] = occupation_func(table=self.halo_table)
+            self._occupation[gal_type] = occupation_func(table=self.halo_table, seed=seed)
 
             # Now use the above result to set up the indexing scheme
             self._total_abundance[gal_type] = (

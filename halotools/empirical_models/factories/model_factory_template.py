@@ -181,6 +181,10 @@ class ModelFactory(object):
             no longer apply.
             Currently only supported for instances of `~halotools.empirical_models.HodModelFactory`.
 
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
+
         Examples
         ----------
         We'll use a pre-built HOD-style model to demonstrate basic usage.
@@ -229,7 +233,7 @@ class ModelFactory(object):
             pass
         self.mock = self.mock_factory(**mock_factory_init_args)
 
-        additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC')
+        additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC', 'seed')
         mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
         mockpop_kwargs = {key: kwargs[key] for key in mockpop_keys}
         self.mock.populate(**mockpop_kwargs)
