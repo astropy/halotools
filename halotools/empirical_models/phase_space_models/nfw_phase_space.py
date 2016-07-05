@@ -85,7 +85,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         self._mock_generation_calling_sequence = ['assign_phase_space']
 
-    def assign_phase_space(self, table):
+    def assign_phase_space(self, table, seed=None):
         """ Primary method of the `NFWPhaseSpace` class called during the mock-population sequence.
 
         Parameters
@@ -94,6 +94,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Data table storing halo catalog.
             After calling the `assign_phase_space` method, the `x`, `y`, `z`, `vx`, `vy`, and `vz`
             columns of the input ``table`` will be over-written.
+
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Notes
         ------
@@ -105,10 +109,11 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         * `~halotools.empirical_models.monte_carlo_helpers.MonteCarloGalProf.mc_vel`
 
         """
-        MonteCarloGalProf.mc_pos(self, table=table)
-        MonteCarloGalProf.mc_vel(self, table=table)
+        MonteCarloGalProf.mc_pos(self, table=table, seed=seed)
+        MonteCarloGalProf.mc_vel(self, table=table, seed=seed)
 
-    def mc_generate_nfw_phase_space_points(self, Ngals=int(1e4), conc=5, mass=1e12, verbose=True):
+    def mc_generate_nfw_phase_space_points(self, Ngals=int(1e4), conc=5, mass=1e12,
+            verbose=True, seed=None):
         """ Stand-alone convenience function for returning
         a Monte Carlo realization of points in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
@@ -129,6 +134,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         verbose : bool, optional
             If True, a message prints with an estimate of the build time.
             Default is True.
+
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         --------
@@ -170,14 +179,14 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass=m)
 
         x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, c,
-            halo_radius=rvir)
+            halo_radius=rvir, seed=seed)
         r = np.sqrt(x**2 + y**2 + z**2)
         scaled_radius = r/rvir
 
-        vrad = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
-        vx = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
-        vy = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
-        vz = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
+        vrad = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
+        vx = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
+        vy = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
+        vz = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
 
         t = Table({'x': x, 'y': y, 'z': z,
             'vx': vx, 'vy': vy, 'vz': vz,
@@ -687,7 +696,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Length-Ngals numpy array storing the concentrations of the mock galaxies.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -713,7 +723,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Number of 3d points to generate
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -741,7 +752,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             If ``table`` is not passed, ``concentration_array`` must be passed.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -777,7 +789,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             ``table`` must be passed.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -829,6 +842,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             assumes that the ``x``, ``y``, and ``z`` columns already store
             the position of the host halo center.
 
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
+
         Notes
         ------
         This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function.
@@ -879,7 +896,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Length-Ngals numpy array storing the concentrations of the mock galaxies.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -894,7 +912,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         return MonteCarloGalProf.mc_radial_velocity(self,
             scaled_radius, total_mass, *concentration_array, **kwargs)
 
-    def mc_vel(self, table):
+    def mc_vel(self, table, seed=None):
         """ Method assigns a Monte Carlo realization of the Jeans velocity
         solution to the halos in the input ``table``.
 
@@ -905,8 +923,12 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Calling the `mc_vel` method will over-write the existing values of
             the ``vx``, ``vy`` and ``vz`` columns.
 
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
+
         Notes
         ------
         This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_vel` function.
         """
-        MonteCarloGalProf.mc_vel(self, table)
+        MonteCarloGalProf.mc_vel(self, table, seed=seed)
