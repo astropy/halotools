@@ -471,7 +471,7 @@ class Tinker13QuiescentSats(OccupationComponent):
 
         return mean_nsat
 
-    def mc_sfr_designation(self, table):
+    def mc_sfr_designation(self, table, **kwargs):
         """
         """
         table[self.sfr_designation_key][:] = 'quiescent'
@@ -637,7 +637,7 @@ class Tinker13ActiveSats(OccupationComponent):
 
         return mean_nsat
 
-    def mc_sfr_designation(self, table):
+    def mc_sfr_designation(self, table, **kwargs):
         """
         """
         table[self.sfr_designation_key][:] = 'active'
