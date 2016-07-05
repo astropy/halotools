@@ -53,7 +53,7 @@ class TrivialPhaseSpace(object):
         self.mdef = mdef
         self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
 
-    def assign_phase_space(self, table):
+    def assign_phase_space(self, table, **kwargs):
         """
         """
         phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
