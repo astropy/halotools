@@ -186,7 +186,7 @@ class TestHodModelFactoryTutorial(TestCase):
                 self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
                 self.list_of_haloprops_needed = ['halo_spin']
 
-            def assign_size(self, table):
+            def assign_size(self, table, **kwargs):
 
                 table['galsize'][:] = table['halo_spin']/5.
 
