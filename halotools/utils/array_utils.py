@@ -3,97 +3,12 @@ Modules performing small, commonly used tasks throughout the package.
 """
 
 import numpy as np
-from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 
 from ..custom_exceptions import HalotoolsError
 
-__all__ = (['custom_len', 'find_idx_nearest_val', 'randomly_downsample_data',
-            'array_is_monotonic', 'convert_to_ndarray'])
-
-
-def convert_to_ndarray(x, dt=None):
-    """ Method checks to see in the input array x is an ndarray
-    or an Astropy Table. If not, returns an array version of x.
-
-    Parameters
-    -----------
-    x : array_like
-        Any sequence or scalar.
-
-    dt : numpy dtype, optional
-        np.dtype of the returned array.
-        Default is to return the same dtype as the input ``x``
-
-    Returns
-    -------
-    y : array
-        Numpy ndarray
-
-    Examples
-    --------
-    >>> x, y, z  = 0, [0], None
-    >>> xarr, yarr, zarr = convert_to_ndarray(x), convert_to_ndarray(y), convert_to_ndarray(z)
-    >>> assert len(xarr) == len(yarr) == len(zarr) == 1
-
-    >>> t, u, v = np.array(1), np.array([1]), np.array('abc')
-    >>> tarr, uarr, varr = convert_to_ndarray(t), convert_to_ndarray(u), convert_to_ndarray(v)
-    >>> assert len(tarr) == len(uarr) == len(varr) == 1
-
-    """
-    if dt is not None:
-        if type(dt) is not type(np.dtype):
-            raise HalotoolsError("The input dt must be a numpy dtype object")
-
-    if type(x) is np.ndarray:
-        try:
-            iterator = iter(x)
-            if len(x) == 0:
-                return np.array([], dtype=dt)
-            if dt is None:
-                return x.astype(type(x.flatten()[0]))
-            else:
-                return x.astype(dt)
-        except TypeError:
-            try:
-                x = x.reshape(1)
-            except ValueError:
-                return np.array([], dtype=dt)
-            if dt is None:
-                return x.astype(type(x.flatten()[0]))
-            else:
-                return x.astype(dt)
-    elif type(x) is Table:
-        return x
-    elif (type(x) is str) or (type(x) is str):
-        x = np.array([x])
-        if dt is None:
-            return x.astype(type(x.flatten()[0]))
-        else:
-            return x.astype(dt)
-    else:
-        try:
-            l = len(x)
-            x = np.array(x)
-            if len(x) == 0:
-                return np.array([])
-            if dt is None:
-                return x.astype(type(x.flatten()[0]))
-            else:
-                return x.astype(dt)
-        except TypeError:
-            x = np.array([x])
-            x = x.flatten()
-            if dt is None:
-                if len(x) == 0:
-                    return np.array([])
-                else:
-                    return x.astype(type(x.flatten()[0]))
-            else:
-                if len(x) == 0:
-                    return np.array([], dtype=dt)
-                else:
-                    return x.astype(dt)
+__all__ = ('custom_len', 'find_idx_nearest_val', 'randomly_downsample_data',
+            'array_is_monotonic')
 
 
 def custom_len(x):

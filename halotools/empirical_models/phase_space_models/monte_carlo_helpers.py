@@ -18,7 +18,6 @@ from astropy.utils.misc import NumpyRNGContext
 from ..model_helpers import custom_spline, call_func_table
 from .. import model_defaults
 
-from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
 
@@ -218,7 +217,7 @@ class MonteCarloGalProf(object):
         # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
-            input_profile_params = convert_to_ndarray(profile_params[param_index])
+            input_profile_params = np.atleast_1d(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_profile_params, param_bins, right=True)
             digitized_params[digitized_params==len(param_bins)] -= 1
@@ -412,7 +411,7 @@ class MonteCarloGalProf(object):
             halo_radius = table[self.halo_boundary_key]
         else:
             try:
-                halo_radius = convert_to_ndarray(kwargs['halo_radius'])
+                halo_radius = np.atleast_1d(kwargs['halo_radius'])
             except KeyError:
                 raise HalotoolsError("If not passing an input ``table`` "
                     "keyword argument to mc_halo_centric_pos,\n"
@@ -502,7 +501,7 @@ class MonteCarloGalProf(object):
         else:
             try:
                 # profile_params = kwargs['profile_params']
-                halo_radius = convert_to_ndarray(kwargs['halo_radius'])
+                halo_radius = np.atleast_1d(kwargs['halo_radius'])
                 assert len(halo_radius) == len(profile_params[0])
             except KeyError:
                 raise HalotoolsError("\nIf not passing a ``table`` keyword argument "
@@ -538,10 +537,7 @@ class MonteCarloGalProf(object):
             of galaxies within their halos,
             scaled by the size of the halo's virial velocity.
         """
-        scaled_radius = convert_to_ndarray(scaled_radius, dt=np.float64)
-        # x = convert_to_ndarray(kwargs['x'])
-        # x = x.astype(float)
-        # profile_params = kwargs['profile_params']
+        scaled_radius = np.atleast_1d(scaled_radius.astype(np.float64))
 
         if not hasattr(self, 'vel_prof_func_table'):
             self.build_lookup_tables()
@@ -550,7 +546,7 @@ class MonteCarloGalProf(object):
         # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
-            input_profile_params = convert_to_ndarray(profile_params[param_index])
+            input_profile_params = np.atleast_1d(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_profile_params, param_bins, right=True)
             digitized_params[digitized_params==len(param_bins)] -= 1

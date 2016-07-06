@@ -10,7 +10,7 @@ from astropy.utils.misc import NumpyRNGContext
 from .. import model_defaults
 from .. import model_helpers as model_helpers
 
-from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...utils.array_utils import custom_len
 
 
 __all__ = ('LogNormalScatterModel', )
@@ -65,8 +65,8 @@ class LogNormalScatterModel(object):
         self.prim_haloprop_key = prim_haloprop_key
 
         if ('scatter_abscissa' in list(kwargs.keys())) and ('scatter_ordinates' in list(kwargs.keys())):
-            self.abscissa = convert_to_ndarray(kwargs['scatter_abscissa'])
-            self.ordinates = convert_to_ndarray(kwargs['scatter_ordinates'])
+            self.abscissa = np.atleast_1d(kwargs['scatter_abscissa'])
+            self.ordinates = np.atleast_1d(kwargs['scatter_ordinates'])
         else:
             self.abscissa = [12]
             self.ordinates = [default_scatter]

@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 from copy import copy
-from ...utils.array_utils import convert_to_ndarray
 
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
@@ -59,7 +58,7 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
     Lbox = np.array([xyzmax, xyzmax, xyzmax])
 
     if min_size is not None:
-        min_size = convert_to_ndarray(min_size)
+        min_size = np.atleast_1d(min_size)
         if np.any(Lbox<min_size):
             Lbox[(Lbox<min_size)] = min_size[(Lbox<min_size)]
 
@@ -77,7 +76,7 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
     if approx_cell1_size is None:
         approx_cell1_size = period/10.0
     else:
-        approx_cell1_size = convert_to_ndarray(approx_cell1_size)
+        approx_cell1_size = np.atleast_1d(approx_cell1_size)
         try:
             assert len(approx_cell1_size) == 3
             assert type(approx_cell1_size) is np.ndarray
@@ -89,7 +88,7 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
     if approx_cell2_size is None:
         approx_cell2_size = copy(approx_cell1_size)
     else:
-        approx_cell2_size = convert_to_ndarray(approx_cell2_size)
+        approx_cell2_size = np.atleast_1d(approx_cell2_size)
         try:
             assert len(approx_cell2_size) == 3
             assert type(approx_cell2_size) is np.ndarray

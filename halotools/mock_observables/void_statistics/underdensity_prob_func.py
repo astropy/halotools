@@ -12,7 +12,7 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..pair_counters import npairs_per_object_3d
 
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
+from ...utils.array_utils import array_is_monotonic
 from ...custom_exceptions import HalotoolsError
 
 
@@ -172,9 +172,9 @@ def _underdensity_prob_func_process_args(sample1, rbins,
         approx_cell1_size, approx_cellran_size, seed):
     """
     """
-    sample1 = convert_to_ndarray(sample1)
+    sample1 = np.atleast_1d(sample1)
 
-    rbins = convert_to_ndarray(rbins)
+    rbins = np.atleast_1d(rbins)
     try:
         assert rbins.ndim == 1
         assert len(rbins) > 1
@@ -196,7 +196,7 @@ def _underdensity_prob_func_process_args(sample1, rbins,
         else:
             sample_volume = float(sample_volume)
     else:
-        period = convert_to_ndarray(period)
+        period = np.atleast_1d(period)
         if len(period) == 1:
             period = np.array([period, period, period])
         elif len(period) == 3:
@@ -218,7 +218,7 @@ def _underdensity_prob_func_process_args(sample1, rbins,
             msg = ("You must pass either ``n_ran`` or ``random_sphere_centers``")
             raise HalotoolsError(msg)
         else:
-            random_sphere_centers = convert_to_ndarray(random_sphere_centers)
+            random_sphere_centers = np.atleast_1d(random_sphere_centers)
             try:
                 assert random_sphere_centers.shape[1] == 3
             except AssertionError:

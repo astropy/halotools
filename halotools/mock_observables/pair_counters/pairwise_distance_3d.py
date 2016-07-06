@@ -13,7 +13,7 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_3d_engine
 
-from ...utils.array_utils import convert_to_ndarray, custom_len
+from ...utils.array_utils import custom_len
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
@@ -189,7 +189,7 @@ def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
                 min_size=[rmax*3.0, rmax*3.0, rmax*3.0]))
     else:
         PBCs = True
-        period = convert_to_ndarray(period).astype(float)
+        period = np.atleast_1d(period).astype(float)
         if len(period) == 1:
             period = np.array([period[0]]*3)
         try:

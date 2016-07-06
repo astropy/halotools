@@ -8,8 +8,6 @@ from __future__ import (
 import numpy as np
 from ..component_model_templates import BinaryGalpropInterpolModel
 
-from ...utils.array_utils import convert_to_ndarray
-
 __all__ = ['HaloMassInterpolQuenching']
 
 
@@ -89,9 +87,9 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
         The purpose for this distinction is to provide disambiguation for composite models
         that use the `HaloMassInterpolQuenching` class for more than one galaxy population.
         """
-        quiescent_fraction_control_values = convert_to_ndarray(quiescent_fraction_control_values)
+        quiescent_fraction_control_values = np.atleast_1d(quiescent_fraction_control_values)
 
-        halo_mass_abscissa = convert_to_ndarray(halo_mass_abscissa)
+        halo_mass_abscissa = np.atleast_1d(halo_mass_abscissa)
         log10_halo_mass_abscissa = np.log10(halo_mass_abscissa)
 
         BinaryGalpropInterpolModel.__init__(self,
