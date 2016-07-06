@@ -11,14 +11,14 @@ from ...occupation_models import zheng07_components
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
 from ....sim_manager import sim_defaults
-
+from ....custom_exceptions import HalotoolsError
 
 __all__ = ['zheng07_model_dictionary']
 
 
 def zheng07_model_dictionary(
         threshold=model_defaults.default_luminosity_threshold,
-        redshift=sim_defaults.default_redshift, modulate_with_cenocc=False,**kwargs):
+        redshift=sim_defaults.default_redshift, modulate_with_cenocc=False, **kwargs):
     """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457.
 
     See :ref:`zheng07_composite_model` for a tutorial on this model.
@@ -50,9 +50,14 @@ def zheng07_model_dictionary(
         you must choose a redshift that is consistent with the halo catalog.
         Default is set in the `~halotools.empirical_models.model_defaults` module.
 
-    modulate_with_cenocc: boolean, optional
-        If True, will pass in the central occupation model to modulate the satellite fraction. See
-        Zheng et al 2007 for details. 
+    modulate_with_cenocc : bool, optional
+        If set to True, the `Zheng07Sats.mean_occupation` method will
+        be multiplied by the the first moment of the centrals:
+
+        :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\\mathrm{cen}}\\rangle_{M}`
+
+        The :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` function is calculated
+        according to `Zheng07Cens.mean_occupation`.
 
     Returns
     -------
@@ -72,6 +77,16 @@ def zheng07_model_dictionary(
     >>> halocat = FakeSim(redshift = model_instance.redshift)
     >>> model_instance.populate_mock(halocat)
 
+    Notes
+    ------
+    Although the ``cenocc_model`` is a legitimate keyword for the
+    `~halotools.empirical_models.Zheng07Sats` class, this keyword is not permissible
+    when building the ``zheng07`` composite model with
+    the `~halotools.empirical_models.PrebuiltHodModelFactory`.
+    To build a composite model that uses this feature,
+    you will need to use the `~halotools.empirical_models.HodModelFactory`
+    directly. See :ref:`zheng07_using_cenocc_model_tutorial` for explicit instructions.
+
     """
 
     ####################################
@@ -85,9 +100,14 @@ def zheng07_model_dictionary(
     ####################################
     # Build the occupation model
     cenocc_model = centrals_occupation if modulate_with_cenocc else None
-    #if the user asks to modulate with cenocc, do it!
+
+    if 'cenocc_model' in kwargs.keys():
+        msg = ("Do not pass in the ``cenocc_model`` keyword to ``zheng07_model_dictionary``.\n"
+            "The model bound to this keyword will be automatically chosen to be Zheng07Cens \n")
+        raise HalotoolsError(msg)
+
     satellites_occupation = zheng07_components.Zheng07Sats(
-        threshold=threshold, redshift=redshift, cenocc_model = cenocc_model, **kwargs)
+        threshold=threshold, redshift=redshift, cenocc_model=cenocc_model, **kwargs)
     satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model
