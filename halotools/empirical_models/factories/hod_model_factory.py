@@ -217,7 +217,9 @@ class HodModelFactory(ModelFactory):
 
         self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
-            #Why a copy?
+            #  Making a copy is not strictly necessary, but we do it here to emphasize
+            #  at the syntax-level that the model_dictionary and _input_model_dictionary
+            #  are fully independent, not pointers to the same locations in memory
             self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
         # Build up and bind several lists from the component models
