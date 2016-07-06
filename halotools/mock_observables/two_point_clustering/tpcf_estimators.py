@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from ...custom_exceptions import HalotoolsError
-from ...utils.array_utils import convert_to_ndarray
 
 __all__ = ['_TP_estimator', '_list_estimators', '_TP_estimator_requirements']
 __author__ = ['Duncan Campbell']
@@ -17,10 +16,10 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     two point correlation function estimator
     """
 
-    ND1 = convert_to_ndarray(ND1)
-    ND2 = convert_to_ndarray(ND2)
-    NR1 = convert_to_ndarray(NR1)
-    NR2 = convert_to_ndarray(NR2)
+    ND1 = np.atleast_1d(ND1)
+    ND2 = np.atleast_1d(ND2)
+    NR1 = np.atleast_1d(NR1)
+    NR2 = np.atleast_1d(NR2)
     Ns = np.array([len(ND1), len(ND2), len(NR1), len(NR2)])
 
     if np.any(Ns>1):

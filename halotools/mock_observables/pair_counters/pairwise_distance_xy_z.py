@@ -12,7 +12,7 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_xy_z_engine
 
-from ...utils.array_utils import convert_to_ndarray, custom_len
+from ...utils.array_utils import custom_len
 
 __all__ = ('pairwise_distance_xy_z', )
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
@@ -195,7 +195,7 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
                 min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
     else:
         PBCs = True
-        period = convert_to_ndarray(period).astype(float)
+        period = np.atleast_1d(period).astype(float)
         if len(period) == 1:
             period = np.array([period[0]]*3)
         try:

@@ -9,7 +9,6 @@ from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from .velocity_marked_npairs_3d import _func_signature_int_from_vel_weight_func_id
 from .engines import velocity_marked_npairs_xy_z_engine
 
-from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
@@ -186,7 +185,7 @@ def _velocity_marked_npairs_xy_z_process_weights(sample1, sample2, weights1, wei
     if weights1 is None:
         weights1 = np.ones((npts_sample1, 1), dtype=np.float64)
     else:
-        weights1 = convert_to_ndarray(weights1)
+        weights1 = np.atleast_1d(weights1)
         weights1 = weights1.astype("float64")
         if weights1.ndim == 1:
             _converted_to_2d_from_1d = True
@@ -227,7 +226,7 @@ def _velocity_marked_npairs_xy_z_process_weights(sample1, sample2, weights1, wei
     if weights2 is None:
         weights2 = np.ones((npts_sample2, 1), dtype=np.float64)
     else:
-        weights2 = convert_to_ndarray(weights2)
+        weights2 = np.atleast_1d(weights2)
         weights2 = weights2.astype("float64")
         if weights2.ndim == 1:
             _converted_to_2d_from_1d = True

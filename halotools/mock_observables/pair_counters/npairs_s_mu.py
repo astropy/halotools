@@ -10,7 +10,7 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .cpairs import npairs_s_mu_engine
 from .npairs_3d import _npairs_3d_process_args
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
+from ...utils.array_utils import array_is_monotonic
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
