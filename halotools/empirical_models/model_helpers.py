@@ -8,7 +8,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
 from warnings import warn
 
-from ..utils.array_utils import custom_len, convert_to_ndarray
+from ..utils.array_utils import custom_len
 from ..custom_exceptions import HalotoolsError
 
 
@@ -243,9 +243,9 @@ def call_func_table(func_table, abscissa, func_indices):
         abscissa element.
 
     """
-    func_table = convert_to_ndarray(func_table)
-    abscissa = convert_to_ndarray(abscissa)
-    func_indices = convert_to_ndarray(func_indices)
+    func_table = np.atleast_1d(func_table)
+    abscissa = np.atleast_1d(abscissa)
+    func_indices = np.atleast_1d(func_indices)
 
     func_argsort = func_indices.argsort()
     func_ranges = list(np.searchsorted(func_indices[func_argsort], list(range(len(func_table)))))

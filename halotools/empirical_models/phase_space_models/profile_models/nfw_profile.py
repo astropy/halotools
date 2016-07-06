@@ -20,7 +20,6 @@ from .profile_model_template import AnalyticDensityProf
 from ... import model_defaults
 from ...model_helpers import custom_spline
 
-from ....utils.array_utils import convert_to_ndarray
 from ....custom_exceptions import HalotoolsError
 from ....sim_manager import sim_defaults
 
@@ -252,7 +251,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         >>> Npts = 25
         >>> result = model.g(np.logspace(-1, 1, Npts))
         """
-        x = convert_to_ndarray(x, dt=np.float64)
+        x = np.atleast_1d(x).astype(np.float64)
         return np.log(1.0+x) - (x/(1.0+x))
 
     def cumulative_mass_PDF(self, scaled_radius, conc):
@@ -612,14 +611,14 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
                     "argument ``halo_mass`` must be specified.\n")
                 raise HalotoolsError(msg)
 
-        halo_radius = convert_to_ndarray(halo_radius, dt=np.float64)
+        halo_radius = np.atleast_1d(halo_radius).astype(np.float64)
         try:
             assert len(halo_radius) == 1
         except AssertionError:
             msg = ("Input ``halo_radius`` or ``halo_mass`` must be a float")
             raise HalotoolsError(msg)
 
-        conc = convert_to_ndarray(conc, dt=np.float64)
+        conc = np.atleast_1d(conc).astype(np.float64)
         try:
             assert len(conc) == 1
         except AssertionError:

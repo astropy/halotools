@@ -14,7 +14,6 @@ from .profile_model_template import AnalyticDensityProf
 
 from ... import model_defaults
 
-from ....utils.array_utils import convert_to_ndarray
 from ....sim_manager import sim_defaults
 
 
@@ -116,5 +115,5 @@ class TrivialProfile(AnalyticDensityProf):
             The mass enclosed within radius r, in :math:`M_{\odot}/h`;
             has the same dimensions as the input ``radius``.
         """
-        radius = convert_to_ndarray(radius, dt=np.float64)
+        radius = np.atleast_1d(radius).astype(np.float64)
         return np.where(radius > 0, total_mass, 0)

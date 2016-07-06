@@ -11,7 +11,7 @@ from warnings import warn
 
 from .. import model_defaults, model_helpers
 
-from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...utils.array_utils import custom_len
 from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
 import collections
@@ -422,14 +422,14 @@ class HeavisideAssembias(object):
                     raise HalotoolsError(msg % (self.prim_haloprop_key), self.sec_haloprop_key)
             else:
                 try:
-                    prim_haloprop = convert_to_ndarray(kwargs['prim_haloprop'])
+                    prim_haloprop = np.atleast_1d(kwargs['prim_haloprop'])
                 except KeyError:
                     msg = ("\nIf not passing an input ``table`` to the "
                         "``assembias_decorator`` method,\n"
                         "you must pass ``prim_haloprop`` argument.\n")
                     raise HalotoolsError(msg)
                 try:
-                    sec_haloprop = convert_to_ndarray(kwargs['sec_haloprop'])
+                    sec_haloprop = np.atleast_1d(kwargs['sec_haloprop'])
                 except KeyError:
                     if 'sec_haloprop_percentile' not in kwargs:
                         msg = ("\nIf not passing an input ``table`` to the "

@@ -17,8 +17,6 @@ from . import profile_helpers
 
 from ... import model_defaults
 
-from ....utils.array_utils import convert_to_ndarray
-
 newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 __author__ = ['Andrew Hearin', 'Benedikt Diemer']
@@ -215,7 +213,7 @@ class AnalyticDensityProf(object):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details.
         """
-        x = convert_to_ndarray(scaled_radius, dt=np.float64)
+        x = np.atleast_1d(scaled_radius).astype(np.float64)
         enclosed_mass = np.zeros_like(x)
 
         for i in range(len(x)):
@@ -259,7 +257,7 @@ class AnalyticDensityProf(object):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details.
         """
-        radius = convert_to_ndarray(radius, dt=np.float64)
+        radius = np.atleast_1d(radius).astype(np.float64)
         scaled_radius = radius / self.halo_mass_to_halo_radius(total_mass)
         mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass
 
@@ -344,7 +342,7 @@ class AnalyticDensityProf(object):
 
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
-        scaled_radius = convert_to_ndarray(radius) / halo_radius
+        scaled_radius = np.atleast_1d(radius) / halo_radius
         return self.dimensionless_circular_velocity(
             scaled_radius, *prof_params)*self.virial_velocity(total_mass)
 
