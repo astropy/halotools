@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -9,14 +10,17 @@ from ....mock_observables import npairs_3d
 # load comparison simple pair counters
 
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
+
 slow = pytest.mark.slow
+fixed_seed = 43
 
 __all__ = ('test_npairs_s_mu_periodic', 'test_npairs_s_mu_nonperiodic')
 
 # set up random points to test pair counters
-np.random.seed(1)
 Npts = 1000
-random_sample = np.random.random((Npts, 3))
+with NumpyRNGContext(fixed_seed):
+    random_sample = np.random.random((Npts, 3))
 period = np.array([1.0, 1.0, 1.0])
 num_threads = 2
 

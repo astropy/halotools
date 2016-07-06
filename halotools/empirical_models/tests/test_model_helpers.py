@@ -1,13 +1,17 @@
-#!/usr/bin/env python
+"""
+"""
 
 import numpy as np
 from unittest import TestCase
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_helpers as occuhelp
 from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestModelHelpers']
+
+fixed_seed = 43
 
 
 class TestModelHelpers(TestCase):
@@ -18,11 +22,13 @@ class TestModelHelpers(TestCase):
 
         box_length = 250
         Npts = int(1e5)
-        coords = np.random.uniform(0, box_length, Npts*3).reshape(Npts, 3)
+        with NumpyRNGContext(fixed_seed):
+            coords = np.random.uniform(0, box_length, Npts*3).reshape(Npts, 3)
 
         perturbation_size = box_length/10.
-        coord_perturbations = np.random.uniform(
-            -perturbation_size, perturbation_size, Npts*3).reshape(Npts, 3)
+        with NumpyRNGContext(fixed_seed):
+            coord_perturbations = np.random.uniform(
+                -perturbation_size, perturbation_size, Npts*3).reshape(Npts, 3)
 
         coords += coord_perturbations
 

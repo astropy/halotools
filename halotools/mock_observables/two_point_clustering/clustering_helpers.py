@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from warnings import warn
+from astropy.utils.misc import NumpyRNGContext
 
 from ..mock_observables_helpers import enforce_sample_has_correct_shape
 
@@ -96,7 +97,7 @@ def process_optional_input_sample2(sample1, sample2, do_cross):
 
 
 def downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size):
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=None):
     """ Function used to downsample sample1 and/or sample2
     if either samples exceed max_sample_size
 
@@ -110,6 +111,10 @@ def downsample_inputs_exceeding_max_sample_size(
 
     max_sample_size : int
 
+    seed : int, optional
+        Random number seed used to randomly downsample data.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     ---------
     sample1 : array_like
@@ -120,7 +125,8 @@ def downsample_inputs_exceeding_max_sample_size(
     if _sample1_is_sample2 is True:
         if (len(sample1) > max_sample_size):
             inds = np.arange(0, len(sample1))
-            np.random.shuffle(inds)
+            with NumpyRNGContext(seed):
+                np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             msg = ("\n `sample1` exceeds `max_sample_size` \n"
@@ -131,7 +137,8 @@ def downsample_inputs_exceeding_max_sample_size(
     else:
         if len(sample1) > max_sample_size:
             inds = np.arange(0, len(sample1))
-            np.random.shuffle(inds)
+            with NumpyRNGContext(seed):
+                np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             msg = ("\n `sample1` exceeds `max_sample_size` \n"
@@ -141,7 +148,8 @@ def downsample_inputs_exceeding_max_sample_size(
             pass
         if len(sample2) > max_sample_size:
             inds = np.arange(0, len(sample2))
-            np.random.shuffle(inds)
+            with NumpyRNGContext(seed):
+                np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]
             msg = ("\n `sample2` exceeds `max_sample_size` \n"

@@ -4,12 +4,15 @@ import numpy as np
 from unittest import TestCase
 from functools import partial
 from astropy.table import Table
+from astropy.utils.misc import NumpyRNGContext
 
 from ..table_utils import SampleSelector, compute_conditional_percentiles
 
 from ...sim_manager import FakeSim
 
 __all__ = ('TestSampleSelector', 'TestComputeConditionalPercentiles')
+
+fixed_seed = 43
 
 
 class TestSampleSelector(TestCase):
@@ -69,7 +72,8 @@ class TestComputeConditionalPercentiles(TestCase):
 
         d = {'halo_mvir': mass, 'halo_zform': zform}
         t = Table(d)
-        randomizer = np.random.random(len(t))
+        with NumpyRNGContext(fixed_seed):
+            randomizer = np.random.random(len(t))
         random_idx = np.argsort(randomizer)
         t = t[random_idx]
         self.custom_halo_table = t

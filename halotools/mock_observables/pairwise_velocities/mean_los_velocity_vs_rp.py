@@ -19,11 +19,10 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 
 def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-                            sample2=None, velocities2=None,
-                            period=None, do_auto=True, do_cross=True,
-                            num_threads=1, max_sample_size=int(1e6),
-                            approx_cell1_size=None,
-                            approx_cell2_size=None):
+        sample2=None, velocities2=None,
+        period=None, do_auto=True, do_cross=True,
+        num_threads=1, max_sample_size=int(1e6),
+        approx_cell1_size=None, approx_cell2_size=None, seed=None):
     """
     Calculate the mean pairwise line-of-sight (LOS) velocity
     as a function of projected separation, :math:`\\bar{v}_{z,12}(r_p)`.
@@ -84,6 +83,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         Analogous to ``approx_cell1_size``, but for `sample2`.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     vz_12 : numpy.array
@@ -137,7 +140,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     """
 
     function_args = (sample1, velocities1, sample2, velocities2, period,
-        do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size, seed)
 
     sample1, velocities1, sample2, velocities2, period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)

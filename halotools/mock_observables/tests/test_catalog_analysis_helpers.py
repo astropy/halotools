@@ -1,7 +1,7 @@
 """ Module providing unit-testing for the functions in
 `~halotools.mock_observables.catalog_analysis_helpers` module.
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 

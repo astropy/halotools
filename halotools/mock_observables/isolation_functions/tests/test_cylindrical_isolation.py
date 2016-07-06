@@ -33,8 +33,8 @@ def test_cylindrical_isolation2():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
     returns no points as isolated when a subset of ``sample2`` lies within ``sample1``
     """
-    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1)
-    sample2 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1)
+    sample1 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    sample2 = generate_locus_of_3d_points(100, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
     pi_max = 0.1
     rp_max = 0.1
     iso = cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=1)

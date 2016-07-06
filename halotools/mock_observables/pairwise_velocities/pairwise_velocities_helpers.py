@@ -2,25 +2,24 @@
 Helper functions used by modules in `~halotools.mock_observables.pairwise_velocities`
 to process arguments and raise appropriate exceptions.
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from warnings import warn
-from multiprocessing import cpu_count
+from astropy.utils.misc import NumpyRNGContext
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
-    get_separation_bins_array, get_period, get_num_threads)
+    get_period, get_num_threads)
 
 from ...custom_exceptions import HalotoolsError
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
+from ...utils.array_utils import array_is_monotonic
 
 __all__ = ['_pairwise_velocity_stats_process_args', '_process_radial_bins', '_process_rp_bins']
 __author__ = ['Duncan Campbell']
 
 
 def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size):
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.pairwise_velocity_stats`.
@@ -54,7 +53,8 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
     if _sample1_is_sample2 is True:
         if (len(sample1) > max_sample_size):
             inds = np.arange(0, len(sample1))
-            np.random.shuffle(inds)
+            with NumpyRNGContext(seed):
+                np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             velocities1 = velocities1[inds]
@@ -62,14 +62,16 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
     else:
         if len(sample1) > max_sample_size:
             inds = np.arange(0, len(sample1))
-            np.random.shuffle(inds)
+            with NumpyRNGContext(seed):
+                np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             velocities1 = velocities1[inds]
             print('\n downsampling `sample1`...')
         if len(sample2) > max_sample_size:
             inds = np.arange(0, len(sample2))
-            np.random.shuffle(inds)
+            with NumpyRNGContext(seed):
+                np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]
             velocities2 = velocities2[inds]

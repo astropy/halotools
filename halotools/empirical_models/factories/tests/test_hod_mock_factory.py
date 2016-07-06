@@ -24,6 +24,8 @@ else:
 
 __all__ = ['TestHodMockFactory']
 
+fixed_seed = 43
+
 
 class TestHodMockFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.HodMockFactory`.
@@ -204,6 +206,42 @@ class TestHodMockFactory(TestCase):
         assert xi_1h[-1] == -1
 
         del model
+
+    def test_deterministic_mock_making(self):
+        """ Test ensuring that mock population is purely deterministic
+        when using the seed keyword.
+
+        This is a regression test associated with https://github.com/astropy/halotools/issues/551.
+        """
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed)
+        h1 = deepcopy(model.mock.galaxy_table)
+        del model
+        del halocat
+
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed)
+        h2 = deepcopy(model.mock.galaxy_table)
+        del model
+        del halocat
+
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed+1)
+        h3 = deepcopy(model.mock.galaxy_table)
+        del model
+        del halocat
+
+        assert len(h1) == len(h2)
+        assert len(h1) != len(h3)
+
+        for key in h1.keys():
+            try:
+                assert np.allclose(h1[key], h2[key], rtol=0.001)
+            except TypeError:
+                pass
 
     def tearDown(self):
         del self.model

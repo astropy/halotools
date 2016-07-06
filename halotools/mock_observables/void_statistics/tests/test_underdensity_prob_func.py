@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..underdensity_prob_func import underdensity_prob_func
 from ..void_prob_func import void_prob_func
@@ -12,6 +13,8 @@ from ..void_prob_func import void_prob_func
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_upf1', 'test_upf2', 'test_upf3', 'test_upf4')
+
+fixed_seed = 43
 
 
 def test_upf1():
@@ -22,7 +25,8 @@ def test_upf1():
     Npts = 100
     Lbox = 1
     period = np.array([Lbox, Lbox, Lbox])
-    sample1 = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
     n_ran = 100
 
     rbins = np.logspace(-2, -1, 20)
@@ -44,7 +48,8 @@ def test_upf2():
     Lbox = 1
     period = np.array([Lbox, Lbox, Lbox])
     sample1 = np.random.random((Npts, 3))
-    random_sphere_centers = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sphere_centers = np.random.random((Npts, 3))
 
     rbins = np.logspace(-1.5, -1, 5)
     upf = underdensity_prob_func(sample1, rbins,
@@ -65,8 +70,9 @@ def test_upf3():
     Npts = 1000
     Lbox = 1
     period = np.array([Lbox, Lbox, Lbox])
-    sample1 = np.random.random((Npts, 3))
-    random_sphere_centers = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+        random_sphere_centers = np.random.random((Npts, 3))
 
     rbins = np.logspace(-2, -0.5, 5)
 
@@ -89,7 +95,7 @@ def test_upf4():
     Npts = 1000
     Lbox = 1
     period = np.array([Lbox, Lbox, Lbox])
-    sample1 = generate_locus_of_3d_points(Npts)
+    sample1 = generate_locus_of_3d_points(Npts, seed=fixed_seed)
     n_ran = 1000
 
     rbins = np.logspace(-1.5, -1, 5)

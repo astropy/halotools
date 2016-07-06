@@ -13,6 +13,7 @@ import numpy as np
 
 from itertools import product
 from time import time
+from astropy.utils.misc import NumpyRNGContext
 
 from ..model_helpers import custom_spline, call_func_table
 from .. import model_defaults
@@ -205,9 +206,12 @@ class MonteCarloGalProf(object):
         # Draw random values for the cumulative mass PDF
         # These will be turned into random radial positions
         # by inverting the tabulated cumulative_mass_PDF
-        if 'seed' in kwargs:
-            np.random.seed(kwargs['seed'])
-        rho = np.random.random(len(profile_params[0]))
+        try:
+            seed = kwargs['seed']
+        except KeyError:
+            seed = None
+        with NumpyRNGContext(seed):
+            rho = np.random.random(len(profile_params[0]))
 
         # Discretize each profile parameter for every galaxy
         # Store the collection of arrays in digitized_param_list
@@ -254,7 +258,8 @@ class MonteCarloGalProf(object):
             Number of 3d points to generate
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -266,11 +271,13 @@ class MonteCarloGalProf(object):
         This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function.
 
         """
-        if 'seed' in kwargs:
-            np.random.seed(kwargs['seed'])
-
-        cos_t = np.random.uniform(-1., 1., Npts)
-        phi = np.random.uniform(0, 2*np.pi, Npts)
+        try:
+            seed = kwargs['seed']
+        except KeyError:
+            seed = None
+        with NumpyRNGContext(seed):
+            cos_t = np.random.uniform(-1., 1., Npts)
+            phi = np.random.uniform(0, 2*np.pi, Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
 
         x = sin_t * np.cos(phi)
@@ -297,7 +304,8 @@ class MonteCarloGalProf(object):
             If ``table`` is not passed, ``profile_params`` must be passed.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -330,9 +338,9 @@ class MonteCarloGalProf(object):
         x, y, z = self.mc_unit_sphere(Ngals, **kwargs)
 
         # Get the radial positions of the galaxies scaled by the halo radius
-        if 'seed' in kwargs:
+        try:
             seed = kwargs['seed']
-        else:
+        except KeyError:
             seed = None
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
             *profile_params, seed=seed)
@@ -381,7 +389,8 @@ class MonteCarloGalProf(object):
             ``table`` must be passed.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -448,7 +457,8 @@ class MonteCarloGalProf(object):
             values of ``x``, ``y`` and ``z``. Default is False.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -595,7 +605,8 @@ class MonteCarloGalProf(object):
             The sequence must have the same order as ``self.prof_param_keys``.
 
         seed : int, optional
-            Random number seed used in Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         -------
@@ -610,15 +621,17 @@ class MonteCarloGalProf(object):
         virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
-        if 'seed' in list(kwargs.keys()):
-            np.random.seed(kwargs['seed'])
-
-        radial_velocities = np.random.normal(scale=radial_dispersions)
+        try:
+            seed = kwargs['seed']
+        except KeyError:
+            seed = None
+        with NumpyRNGContext(seed):
+            radial_velocities = np.random.normal(scale=radial_dispersions)
 
         return radial_velocities
 
     def mc_vel(self, table, overwrite_table_velocities=True,
-            return_velocities=False):
+            return_velocities=False, seed=None):
         """ Method assigns a Monte Carlo realization of the Jeans velocity
         solution to the halos in the input ``table``.
 
@@ -634,6 +647,10 @@ class MonteCarloGalProf(object):
         return_velocities : bool, optional
             If True, method will return the computed values of ``vx``, ``vy`` and ``vz``.
             Default is False.
+
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Notes
         -------
@@ -661,9 +678,9 @@ class MonteCarloGalProf(object):
 
         total_mass = table[self.prim_haloprop_key]
 
-        vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
-        vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
-        vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
+        vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
+        vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
+        vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
 
         if overwrite_table_velocities is True:
             table['vx'][:] += vx

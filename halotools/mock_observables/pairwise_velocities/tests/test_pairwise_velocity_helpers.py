@@ -29,7 +29,8 @@ def test_pairwise_velocity_stats_process_args1():
 
     with pytest.raises(ValueError) as err:
         result = _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
-            period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+            period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size,
+            fixed_seed)
     substr = "Both ``do_auto`` and ``do_cross`` have been set to False"
     assert substr in err.value.args[0]
 
@@ -50,7 +51,8 @@ def test_pairwise_velocity_stats_process_args2():
         velocities2 = np.random.random((10, 3))
 
     result = _pairwise_velocity_stats_process_args(sample1, velocities1, None, None,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size,
+        fixed_seed)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
         do_cross, num_threads, _sample1_is_sample2, PBCs = result
     assert (do_auto is True) & (do_cross is False)
@@ -72,7 +74,8 @@ def test_pairwise_velocity_stats_process_args3():
         velocities2 = np.random.random((10, 3))
 
     result = _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size,
+        fixed_seed)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
         do_cross, num_threads, _sample1_is_sample2, PBCs = result
 
@@ -95,7 +98,8 @@ def test_pairwise_velocity_stats_process_args4():
     max_sample_size = 5
 
     result = _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size,
+        fixed_seed)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
         do_cross, num_threads, _sample1_is_sample2, PBCs = result
     assert _sample1_is_sample2 is False
@@ -121,7 +125,8 @@ def test_pairwise_velocity_stats_process_args5():
     max_sample_size = 5
 
     result = _pairwise_velocity_stats_process_args(sample1, velocities1, None, None,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size,
+        fixed_seed)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
         do_cross, num_threads, _sample1_is_sample2, PBCs = result
 
@@ -140,7 +145,8 @@ def test_pairwise_velocity_stats_process_args6():
         velocities1 = np.random.random((10, 3))
 
     result = _pairwise_velocity_stats_process_args(sample1, velocities1, sample1, velocities1,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size,
+        fixed_seed)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
         do_cross, num_threads, _sample1_is_sample2, PBCs = result
 

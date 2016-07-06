@@ -1,9 +1,10 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..npairs_3d import npairs_3d
 from ..pairs import npairs as pure_python_brute_force_npairs_3d
@@ -13,6 +14,8 @@ from ...tests.cf_helpers import generate_3d_regular_mesh
 
 __all__ = ('test_rectangular_mesh_pairs_tight_locus1', )
 
+fixed_seed = 43
+
 
 def test_rectangular_mesh_pairs_tight_locus1():
     """ Verify that `halotools.mock_observables.npairs_3d` returns
@@ -21,8 +24,8 @@ def test_rectangular_mesh_pairs_tight_locus1():
     In this test, PBCs are irrelevant
     """
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
 
     rbins = np.array((0.05, 0.15, 0.3))
     result = npairs_3d(data1, data2, rbins, period=1)
@@ -36,8 +39,8 @@ def test_rectangular_mesh_pairs_tight_locus2():
     In this test, PBCs are important.
     """
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.05)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.95)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.05, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.95, seed=fixed_seed)
 
     rbins = np.array((0.05, 0.15, 0.3))
     result = npairs_3d(data1, data2, rbins, period=1)
@@ -51,8 +54,8 @@ def test_rectangular_mesh_pairs_tight_locus3():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -67,8 +70,8 @@ def test_rectangular_mesh_pairs_tight_locus4():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -83,8 +86,8 @@ def test_rectangular_mesh_pairs_tight_locus5():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -99,8 +102,8 @@ def test_rectangular_mesh_pairs_tight_locus6():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -115,8 +118,8 @@ def test_rectangular_mesh_pairs_tight_locus7():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -133,8 +136,8 @@ def test_rectangular_mesh_pairs_tight_locus8():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -150,8 +153,8 @@ def test_rectangular_mesh_pairs_tight_locus9():
     For this test, PBCs have no impact.
     """
     npts1, npts2 = 100, 200
-    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25)
+    points1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    points2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.25, seed=fixed_seed)
     rbins = np.array([0.1, 0.2, 0.3])
     correct_result = np.array([0, npts1*npts2, npts1*npts2])
 
@@ -210,7 +213,8 @@ def test_npairs_brute_force_periodic():
     Function tests npairs with periodic boundary conditions.
     """
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.array([0.001, 0.1, 0.2, 0.3])
 
@@ -232,7 +236,8 @@ def test_npairs_brute_force_nonperiodic():
     """
 
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     rbins = np.array([0.001, 0.1, 0.2, 0.3])
 
     result = npairs_3d(random_sample, random_sample, rbins, period=None)
@@ -249,8 +254,8 @@ def test_npairs_brute_force_nonperiodic():
 
 def test_sensible_num_threads():
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
 
     rbins = np.array((0.05, 0.15, 0.3))
     with pytest.raises(ValueError) as err:
@@ -262,8 +267,8 @@ def test_sensible_num_threads():
 
 def test_sensible_rbins():
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
 
     rbins = 0.1
     with pytest.raises(ValueError) as err:
@@ -274,8 +279,8 @@ def test_sensible_rbins():
 
 def test_sensible_period():
     npts1, npts2 = 100, 100
-    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1)
-    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2)
+    data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
     rbins = np.array((0.05, 0.15, 0.3))
 
     with pytest.raises(ValueError) as err:

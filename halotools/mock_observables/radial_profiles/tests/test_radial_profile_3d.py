@@ -1,6 +1,5 @@
 """ Module providing unit-testing of `~halotools.mock_observables.radial_profile_3d`.
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -190,8 +189,9 @@ def test_args_processing1a():
 
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.ones(len(sample2))
     dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
@@ -208,8 +208,9 @@ def test_args_processing1b():
 
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.ones(len(sample2))
     dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
@@ -227,8 +228,9 @@ def test_args_processing1c():
 
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.ones(len(sample2))
     dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
@@ -246,8 +248,9 @@ def test_args_processing1d():
 
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.ones(len(sample2))
     dummy_rbins = np.array([0.0001, 0.0002, 0.0003])
@@ -265,8 +268,9 @@ def test_args_processing1e():
 
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.ones(len(sample2))
     dummy_rbins = np.array([0.000, 0.0002, 0.0003])
@@ -284,8 +288,9 @@ def test_args_processing2():
     have the same number of elements.
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.ones(len(sample2))
     rbins_normalized = np.array([0.0001, 0.0002, 0.0003])
@@ -302,8 +307,9 @@ def test_args_processing3():
     have the same number of elements.
     """
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.arange(5)
     rbins_absolute = np.array([0.0001, 0.0002, 0.0003])
@@ -317,8 +323,9 @@ def test_args_processing3():
 def test_enforce_search_length():
 
     npts1, npts2 = 100, 200
-    sample1 = np.random.random((npts1, 3))
-    sample2 = np.random.random((npts2, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
 
     quantity = np.zeros(npts2)
     rbins_absolute = np.array([0.0001, 0.0002, 0.4])

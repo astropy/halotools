@@ -1,15 +1,19 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import itertools
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..rectangular_mesh import RectangularDoubleMesh, sample1_cell_size
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mesh_variations', )
+
+fixed_seed = 43
 
 
 def enforce_cell_size_divide_box_size(mesh):
@@ -103,8 +107,8 @@ def test_mesh_variations():
         xc1, yc1, zc1 = 0.1*xperiod, 0.1*yperiod, 0.1*zperiod
         zc_multiplier = options[1]
         zc2 = zc_multiplier*period
-        points1 = generate_locus_of_3d_points(npts1, xc=xc1, yc=yc1, zc=zc1)
-        points2 = generate_locus_of_3d_points(npts2, xc=xc1, yc=yc1, zc=zc2)
+        points1 = generate_locus_of_3d_points(npts1, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
+        points2 = generate_locus_of_3d_points(npts2, xc=xc1, yc=yc1, zc=zc2, seed=fixed_seed)
         approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = 3*[options[2]]
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = 3*[options[3]]
         search_xlength, search_ylength, search_zlength = 3*[options[4]]
@@ -140,8 +144,9 @@ def test_sample1_cell_size():
 
 
 def test_search_length_enforcement():
-    points1 = np.random.random((100, 3))
-    points2 = np.random.random((100, 3))
+    with NumpyRNGContext(fixed_seed):
+        points1 = np.random.random((100, 3))
+        points2 = np.random.random((100, 3))
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = 0.1, 0.1, 0.1
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = 0.1, 0.1, 0.1
     search_xlength, search_ylength, search_zlength = 0.5, 0.5, 0.5

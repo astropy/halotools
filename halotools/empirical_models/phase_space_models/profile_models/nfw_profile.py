@@ -12,6 +12,7 @@ from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .conc_mass_models import ConcMass
 from .profile_model_template import AnalyticDensityProf
@@ -541,7 +542,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
 
-    def mc_generate_nfw_radial_positions(self, num_pts=int(1e4), conc=5, **kwargs):
+    def mc_generate_nfw_radial_positions(self, num_pts=int(1e4), conc=5, seed=None, **kwargs):
         """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
 
         See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique.
@@ -574,7 +575,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             bound to the NFWProfile instance as ``mdef``.
 
         seed : int, optional
-            Random number seed used in the Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         --------
@@ -624,9 +626,6 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             msg = ("Input ``conc`` must be a float")
             raise HalotoolsError(msg)
 
-        if 'seed' in kwargs:
-            np.random.seed(kwargs['seed'])
-
         # Build lookup table from which to tabulate the inverse cumulative_mass_PDF
         Npts_radius_table = int(1e3)
         radius_array = np.logspace(-4, 0, Npts_radius_table)
@@ -637,7 +636,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         # Use method of Inverse Transform Sampling to generate a Monte Carlo realization
         ### of the radial positions
-        randoms = np.random.uniform(0, 1, num_pts)
+        with NumpyRNGContext(seed):
+            randoms = np.random.uniform(0, 1, num_pts)
         log_randoms = np.log10(randoms)
         log_scaled_radial_positions = funcobj(log_randoms)
         scaled_radial_positions = 10.**log_scaled_radial_positions

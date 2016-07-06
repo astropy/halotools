@@ -5,15 +5,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..mock_survey import ra_dec_z
 
 __all__ = ('test_ra_dec_z', )
 
+fixed_seed = 43
+
 #create some toy data to test functions
 N=100
-x = np.random.random((N, 3))
-v = np.random.random((N, 3))*0.1
+with NumpyRNGContext(fixed_seed):
+    x = np.random.random((N, 3))
+    v = np.random.random((N, 3))*0.1
 period = np.array([1.0, 1.0, 1.0])
 
 

@@ -60,7 +60,8 @@ def test_crossmatch5():
         x = np.random.randint(0, xmax+1, numx)
 
     y = np.arange(-xmax, xmax)[::10]
-    np.random.shuffle(y)
+    with NumpyRNGContext(fixed_seed):
+        np.random.shuffle(y)
 
     x_idx, y_idx = crossmatch(x, y)
 

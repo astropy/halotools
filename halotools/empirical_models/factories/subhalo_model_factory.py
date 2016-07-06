@@ -834,7 +834,7 @@ class SubhaloModelFactory(ModelFactory):
         self.set_primary_behaviors()
         self.set_calling_sequence()
 
-    def populate_mock(self, halocat, masking_function=None):
+    def populate_mock(self, halocat, masking_function=None, **kwargs):
         """
         Method used to populate a simulation with a Monte Carlo realization of a model.
 
@@ -912,9 +912,9 @@ class SubhaloModelFactory(ModelFactory):
 
         """
         if masking_function is not None:
-            ModelFactory.populate_mock(self, halocat, masking_function=masking_function)
+            ModelFactory.populate_mock(self, halocat, masking_function=masking_function, **kwargs)
         else:
-            ModelFactory.populate_mock(self, halocat)
+            ModelFactory.populate_mock(self, halocat, **kwargs)
 
     def _test_dictionary_consistency(self):
         """

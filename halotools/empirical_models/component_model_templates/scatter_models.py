@@ -2,10 +2,10 @@
 Module containing the `~halotools.empirical_models.LogNormalScatterModel` class
 used to model stochasticity in the mapping between stellar mass and halo properties.
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults
 from .. import model_helpers as model_helpers
@@ -134,14 +134,13 @@ class LogNormalScatterModel(object):
 
         scatter_scale = self.mean_scatter(**kwargs)
 
-        np.random.seed(seed=seed)
-
         #initialize result with zero scatter result
         result = np.zeros(len(scatter_scale))
 
         #only draw from a normal distribution for non-zero values of scatter
         mask = (scatter_scale > 0.0)
-        result[mask] =  np.random.normal(loc=0, scale=scatter_scale[mask])
+        with NumpyRNGContext(seed):
+            result[mask] = np.random.normal(loc=0, scale=scatter_scale[mask])
 
         return result
 

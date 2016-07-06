@@ -120,10 +120,10 @@ class RectangularMesh(object):
 
         Let's create some fake data to demonstrate the mesh structure:
 
-        >>> np.random.seed(43)
-        >>> x = np.random.uniform(0, Lbox, Npts)
-        >>> y = np.random.uniform(0, Lbox, Npts)
-        >>> z = np.random.uniform(0, Lbox, Npts)
+        >>> from astropy.utils.misc import NumpyRNGContext
+        >>> fixed_seed = 43
+        >>> with NumpyRNGContext(fixed_seed): pos = np.random.uniform(0, Lbox, 3*Npts).reshape(Npts, 3)
+        >>> x, y, z = pos[:,0], pos[:,1], pos[:,2]
         >>> mesh = RectangularMesh(x, y, z, xperiod, yperiod, zperiod, approx_xcell_size, approx_ycell_size, approx_zcell_size)
 
         Since we used approximate cell sizes *Lbox/10* that
