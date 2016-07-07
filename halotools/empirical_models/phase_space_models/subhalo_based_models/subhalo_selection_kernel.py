@@ -12,7 +12,7 @@ __all__ = ('subhalo_indexing_array', )
 
 def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids,
         host_halo_bin_numbers, fill_remaining_satellites=True,
-        seed=None, testing_mode=False):
+        seed=None, testing_mode=False, min_required_entries_per_bin=None):
     """ Function driving the selection of subhalos during HOD mock population.
     Given a catalog of subhalos, host halos and a desired number of satellites
     in each host, the `subhalo_indexing_array` function can be used to return the
@@ -85,6 +85,11 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
         situation occurs whenever and entry of ``desired_occupations``
         exceeds the number of subhalos in that host halo,
         as described in the Notes.
+
+    min_required_entries_per_bin : int, optional
+        Minimum requirement on the number of subhalos in each bin.
+        Default is set by the
+        `~halotools.utils.array_indexing_manipulations.random_indices_within_bin` function.
 
     Examples
     --------
@@ -166,7 +171,8 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
         idx_remaining_subhalos = (
             calculate_selection_of_remaining_satellites(remaining_occupations,
                 subhalo_occupations, subhalo_multiplicity, host_halo_bin_numbers,
-                seed=seed, testing_mode=testing_mode)
+                seed=seed, testing_mode=testing_mode,
+                min_required_entries_per_bin=min_required_entries_per_bin)
             )
     else:
         idx_remaining_subhalos = np.zeros(remaining_occupations.sum()) - 1
@@ -194,7 +200,7 @@ def calculate_selection_of_true_subhalos(subhalo_hostids, satellite_occupations,
 
 def calculate_selection_of_remaining_satellites(remaining_occupations,
         subhalo_occupations, subhalo_multiplicity, host_halo_bin_numbers, seed=None,
-        testing_mode=False):
+        testing_mode=False, min_required_entries_per_bin=None):
     """
     Calculate the indices of subhalos that should be selected as satellites to
     address the remaining cases where a given host halo did not have as many
@@ -226,12 +232,18 @@ def calculate_selection_of_remaining_satellites(remaining_occupations,
         Useful when deterministic results are desired, such as during unit-testing.
         Default is None, producing stochastic results.
 
+    min_required_entries_per_bin : int, optional
+        Minimum requirement on the number of subhalos in each bin.
+        Default is set by the
+        `~halotools.utils.array_indexing_manipulations.random_indices_within_bin` function.
+
     """
 
     binned_subhalo_multiplicity = sum_in_bins(subhalo_multiplicity, host_halo_bin_numbers)
     binned_remaining_occupations = sum_in_bins(remaining_occupations, host_halo_bin_numbers)
     remaining_indices = random_indices_within_bin(
-        binned_subhalo_multiplicity, binned_remaining_occupations, seed)
+        binned_subhalo_multiplicity, binned_remaining_occupations,
+        seed=seed, min_required_entries_per_bin=min_required_entries_per_bin)
 
     return remaining_indices
 
@@ -296,7 +308,7 @@ def array_weave(val1, val2, mult1, mult2, testing_mode=False):
         assert len(mult1) == len(mult2)
     except AssertionError:
         msg = "Input ``mult1`` and ``mult2`` arrays must have equal length"
-        raise AssertionError(msg)
+        raise ValueError(msg)
 
     if testing_mode is True:
         total_val1_values = np.sum(mult1)
@@ -324,7 +336,7 @@ def array_weave(val1, val2, mult1, mult2, testing_mode=False):
 
 
 def indices_of_selected_subhalos(subhalo_hostids, subhalo_occupations, subhalo_multiplicity,
-            testing_mode=False):
+        testing_mode=False):
     """
     Given a sorted array of integers ``subhalo_hostids`` whose entries store the
     ID of the host halo in which the subhalos reside,

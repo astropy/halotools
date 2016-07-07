@@ -3,7 +3,7 @@
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
-import pytest
+from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from .. import subhalo_selection_kernel as ssk
@@ -48,36 +48,54 @@ def test_subhalo_indexing_array1():
 
 
 def test_subhalo_indexing_array2():
+    """ Create a sequence of randomly selected inputs and verify that
+    the subhalo_indexing_array function returns sensible results
     """
-    """
-    nhosts= 8
-    nbins = int(nhosts/4)
+    nhosts= 1000
     for seed in seed_array:
         with NumpyRNGContext(seed):
-            host_halo_ids = np.random.permutation(np.arange(0, int(1e5)))[0:nhosts]
-            subhalo_multiplicity = np.random.randint(0, 3, nhosts)
+            host_halo_ids = np.sort(np.random.permutation(np.arange(0, int(1e5)))[0:nhosts])
+
+            max_num_subs_per_halo = np.random.randint(3, 5)
+            subhalo_multiplicity = np.random.randint(0, max_num_subs_per_halo, nhosts)
             subhalo_hostids = np.repeat(host_halo_ids, subhalo_multiplicity)
-            satellite_occupations = np.random.randint(0, 3, nhosts)
-            host_halo_bin_numbers = np.sort(np.random.randint(0, nbins, nhosts))
+
+            max_num_sats_per_halo = np.random.randint(3, 5)
+            satellite_occupations = np.random.randint(0, max_num_sats_per_halo, nhosts)
+
+            subhalo_occupations = ssk.calculate_subhalo_occupations(
+                satellite_occupations, subhalo_multiplicity)
+            non_subhalo_occupations = satellite_occupations - subhalo_occupations
+
+            nbins = np.random.randint(1, min(10, int(nhosts/10)))
+
+            __ = np.random.randint(0, nbins, nhosts)
+            __[0:nbins] = np.arange(nbins)
+            host_halo_bin_numbers = np.sort(__)
 
             satellite_selection_indices, missing_subhalo_mask = ssk.subhalo_indexing_array(
                 subhalo_hostids, satellite_occupations, host_halo_ids, host_halo_bin_numbers,
-                testing_mode=True, fill_remaining_satellites=False)
+                testing_mode=True, fill_remaining_satellites=False, seed=seed)
 
+            # Verify that the correct number of indices are returned
             assert len(satellite_selection_indices) == satellite_occupations.sum()
+            assert len(satellite_selection_indices[missing_subhalo_mask]) == non_subhalo_occupations.sum()
 
-            nosub_satellite_occupations = satellite_occupations - subhalo_multiplicity
-            correct_num_fake_satellites = nosub_satellite_occupations.sum()
-            returned_num_fake_satellites = len(satellite_selection_indices[missing_subhalo_mask])
-            assert returned_num_fake_satellites == correct_num_fake_satellites
+            # Verify that all masked entries are -1, and no others
+            assert np.all(satellite_selection_indices[missing_subhalo_mask] == -1)
+            assert not np.any(satellite_selection_indices[~missing_subhalo_mask] == -1)
 
+            satellite_selection_indices2, missing_subhalo_mask2 = ssk.subhalo_indexing_array(
+                subhalo_hostids, satellite_occupations, host_halo_ids, host_halo_bin_numbers,
+                testing_mode=True, fill_remaining_satellites=True, seed=None)
 
-            # subhalo_occupations = ssk.calculate_subhalo_occupations(
-            #     satellite_occupations, subhalo_multiplicity)
-            # correct_num_selected_subhalos = subhalo_occupations.sum()
-            # num_selected_subhalos = len(satellite_selection_indices[satellite_selection_indices != -1])
-            # assert num_selected_subhalos == correct_num_selected_subhalos
-            # assert len(satellite_selection_indices[missing_subhalo_mask]) == satellite_occupations.sum() - subhalo_occupations.sum()
+            # Verify that the returned array can successfully serve as a fancy indexing mask
+            __ = subhalo_hostids[satellite_selection_indices2]
+
+            #  Selection of true subhalos should be deterministic
+            result1 = subhalo_hostids[satellite_selection_indices[~missing_subhalo_mask]]
+            result2 = subhalo_hostids[satellite_selection_indices2[~missing_subhalo_mask2]]
+            assert np.all(result1 == result2)
 
 
 def test_indices_of_selected_subhalos():
@@ -89,3 +107,52 @@ def test_indices_of_selected_subhalos():
     result = ssk.indices_of_selected_subhalos(objID, occupations, multiplicity)
     correct_result = np.array([2, 3, 5, 6, 7])
     assert np.all(result == correct_result)
+
+
+def test_array_weave1():
+    nhosts1, nhosts2 = 5, 4
+    mult1 = np.ones(nhosts1, dtype=int)
+    mult2 = np.ones(nhosts2, dtype=int)
+    uval1 = np.arange(len(mult1))
+    uval2 = np.arange(len(mult2))
+    val1 = np.repeat(uval1, mult1)
+    val2 = np.repeat(uval2, mult2)
+
+    with pytest.raises(ValueError) as err:
+        __ = ssk.array_weave(val1, val2, mult1, mult2, testing_mode=True)
+    substr = "Input ``mult1`` and ``mult2`` arrays must have equal length"
+    assert substr in err.value.args[0]
+
+
+def test_array_weave2():
+    nhosts1, nhosts2 = 5, 5
+    mult1 = np.ones(nhosts1, dtype=int)
+    mult2 = np.ones(nhosts2, dtype=int)
+    uval1 = np.arange(len(mult1))
+    uval2 = np.arange(len(mult2))
+    val1 = np.repeat(uval1, mult1)
+    val2 = np.repeat(uval2, mult2)
+
+    with pytest.raises(ValueError) as err:
+        __ = ssk.array_weave(val1[1:], val2, mult1, mult2, testing_mode=True)
+    substr = "The sum of the ``mult1`` entries should equal the length of ``val1``"
+    assert substr in err.value.args[0]
+
+
+def test_array_weave3():
+    nhosts1, nhosts2 = 5, 5
+    mult1 = np.ones(nhosts1, dtype=int)
+    mult2 = np.ones(nhosts2, dtype=int)
+    uval1 = np.arange(len(mult1))
+    uval2 = np.arange(len(mult2))
+    val1 = np.repeat(uval1, mult1)
+    val2 = np.repeat(uval2, mult2)
+
+    with pytest.raises(ValueError) as err:
+        __ = ssk.array_weave(val1, val2[1:], mult1, mult2, testing_mode=True)
+    substr = "The sum of the ``mult2`` entries should equal the length of ``val2``"
+    assert substr in err.value.args[0]
+
+
+
+
