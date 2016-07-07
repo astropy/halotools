@@ -4,3 +4,4 @@ from .monte_carlo_helpers import *
 
 from .profile_models import *
 from .velocity_models import *
+from .subhalo_based_models import *
