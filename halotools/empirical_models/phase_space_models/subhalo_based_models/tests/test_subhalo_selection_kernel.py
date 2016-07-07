@@ -123,39 +123,3 @@ def test_random_indices_within_bin3():
     assert test_exists_with_more_subs_than_sats is True
     assert test_exists_with_more_sats_than_subs is True
     assert test_exists_with_more_sats_than_subs_alt_corner_case is True
-
-
-def test_calculate_first_idx_unique_array_vals1():
-    arr = np.array([1, 1, 2, 2, 2, 3, 3])
-    result = ssk.calculate_first_idx_unique_array_vals(arr)
-    correct_result = np.array([0, 2, 5])
-    assert np.all(result == correct_result)
-
-
-def test_calculate_first_idx_unique_array_vals2():
-    arr = np.array([1, 2, 3])
-    result = ssk.calculate_first_idx_unique_array_vals(arr)
-    correct_result = np.array([0, 1, 2])
-    assert np.all(result == correct_result)
-
-
-def test_calculate_last_idx_unique_array_vals1():
-    arr = np.array([1, 1, 2, 2, 2, 3, 3])
-    result = ssk.calculate_last_idx_unique_array_vals(arr)
-    correct_result = np.array([1, 4, 6])
-    assert np.all(result == correct_result)
-
-
-def test_calculate_last_idx_unique_array_vals2():
-    arr = np.array([1, 2, 3])
-    result = ssk.calculate_last_idx_unique_array_vals(arr)
-    correct_result = np.array([0, 1, 2])
-    assert np.all(result == correct_result)
-
-
-def test_sum_in_bins1():
-    sorted_bin_numbers = np.array([1, 1, 2, 2, 2, 3, 3])
-    values_in_bins = np.array([0.1, 0.1, 0.2, 0.2, 0.2, 0.3, 0.3])
-    result = ssk.sum_in_bins(values_in_bins, sorted_bin_numbers)
-    correct_result = np.array([0.2, 0.6, 0.6])
-    assert np.allclose(result, correct_result)
