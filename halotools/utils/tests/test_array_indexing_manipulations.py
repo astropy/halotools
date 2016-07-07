@@ -13,6 +13,19 @@ __all__ = ('test_calculate_first_idx_unique_array_vals1',
     'test_calculate_last_idx_unique_array_vals2', 'test_sum_in_bins1')
 
 
+def test_calculate_first_idx_unique_array_vals0():
+    """ This function ensures that the appropriate exception
+    will be raised when the function is executed with
+    testing_mode set to True.
+    """
+    arr = np.arange(5)[::-1]
+    __ = aim.calculate_first_idx_unique_array_vals(arr, testing_mode=False)
+    with pytest.raises(ValueError) as err:
+        __ = aim.calculate_first_idx_unique_array_vals(arr, testing_mode=True)
+    substr = "Input ``sorted_array`` array must be sorted in ascending order"
+    assert substr in err.value.args[0]
+
+
 def test_calculate_first_idx_unique_array_vals1():
     arr = np.array([1, 1, 2, 2, 2, 3, 3])
     result = aim.calculate_first_idx_unique_array_vals(arr)
@@ -67,6 +80,20 @@ def test_calculate_first_idx_unique_array_vals3():
                 assert arr[first] != arr[first-1]
                 assert arr[first] != arr[last+1]
                 assert arr[last] != arr[last+1]
+
+
+def test_calculate_last_idx_unique_array_vals0():
+    """ This function ensures that the appropriate exception
+    will be raised when the function is executed with
+    testing_mode set to True.
+    """
+    arr = np.arange(5)[::-1]
+    __ = aim.calculate_last_idx_unique_array_vals(arr, testing_mode=False)
+
+    with pytest.raises(ValueError) as err:
+        __ = aim.calculate_last_idx_unique_array_vals(arr, testing_mode=True)
+    substr = "Input ``sorted_array`` array must be sorted in ascending order"
+    assert substr in err.value.args[0]
 
 
 def test_calculate_last_idx_unique_array_vals1():
@@ -265,7 +292,51 @@ def test_calculate_entry_multiplicity():
             assert np.all(multiplicity == correct_multiplicity)
 
 
+def test_calculate_entry_multiplicity2():
+    """ Verify that the calculate_entry_multiplicity catches an unsorted input
+    and raises the correct error message.
+    """
+    sorted_repeated_hostids = np.arange(10)[::-1]
+    unique_possible_hostids = np.arange(10)
 
+    # The following line should not raise an exception
+    __ = aim.calculate_entry_multiplicity( sorted_repeated_hostids, unique_possible_hostids,
+        testing_mode=False)
+
+    with pytest.raises(ValueError) as err:
+        __ = aim.calculate_entry_multiplicity(
+            sorted_repeated_hostids, unique_possible_hostids, testing_mode=True)
+    substr = "Input ``sorted_repeated_hostids`` array is not sorted in ascending order"
+    assert substr in err.value.args[0]
+
+
+def test_calculate_entry_multiplicity3():
+    """ Verify that the calculate_entry_multiplicity catches a unique_possible_hostids
+    array with repeated entries and raises the correct error message.
+    """
+    sorted_repeated_hostids = np.arange(10)
+    unique_possible_hostids = np.append(np.arange(10), 0)
+
+    with pytest.raises(ValueError) as err:
+        __ = aim.calculate_entry_multiplicity(
+            sorted_repeated_hostids, unique_possible_hostids, testing_mode=True)
+    substr = "All entries of ``unique_possible_hostids`` must be unique"
+    assert substr in err.value.args[0]
+
+
+def test_calculate_entry_multiplicity4():
+    """ Verify that the calculate_entry_multiplicity catches an entry of
+    sorted_repeated_hostids that does not appear in unique_possible_hostids
+    and raises the correct error message.
+    """
+    sorted_repeated_hostids = np.arange(11)
+    unique_possible_hostids = np.arange(10)
+
+    with pytest.raises(ValueError) as err:
+        __ = aim.calculate_entry_multiplicity(
+            sorted_repeated_hostids, unique_possible_hostids, testing_mode=True)
+    substr = "must appear in unique_possible_hostids."
+    assert substr in err.value.args[0]
 
 
 

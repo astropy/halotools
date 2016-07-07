@@ -10,7 +10,7 @@ __all__ = ('calculate_first_idx_unique_array_vals',
     'random_indices_within_bin', 'calculate_entry_multiplicity')
 
 
-def calculate_first_idx_unique_array_vals(sorted_array):
+def calculate_first_idx_unique_array_vals(sorted_array, testing_mode=False):
     """ Given an integer array with possibly repeated entries in ascending order,
     return the indices of the first appearance of each unique value.
 
@@ -18,6 +18,15 @@ def calculate_first_idx_unique_array_vals(sorted_array):
     ----------
     sorted_array : array
         Integer array of host halo IDs, sorted in ascending order
+
+    testing_mode : bool, optional
+        Boolean specifying whether input arrays will be tested to see if they
+        satisfy the assumptions required by the algorithm.
+        Setting ``testing_mode`` to True is useful for unit-testing purposes,
+        while setting it to False improves performance.
+        Default is False.
+        If this function raises an unexpected exception, try setting ``testing_mode``
+        to True to identify which specific assumption about the inputs is not being met.
 
     Returns
     --------
@@ -36,10 +45,17 @@ def calculate_first_idx_unique_array_vals(sorted_array):
     >>> result = calculate_first_idx_unique_array_vals(sorted_array)
     >>> assert np.all(result == (0, 2, 4, 5, 7))
     """
+    if testing_mode is True:
+        try:
+            assert np.all(np.diff(sorted_array) >= 0)
+        except AssertionError:
+            msg = "Input ``sorted_array`` array must be sorted in ascending order"
+            raise ValueError(msg)
+
     return np.concatenate(([0], np.flatnonzero(np.diff(sorted_array)) + 1))
 
 
-def calculate_last_idx_unique_array_vals(sorted_array):
+def calculate_last_idx_unique_array_vals(sorted_array, testing_mode=False):
     """ Given an integer array with possibly repeated entries in ascending order,
     return the indices of the last appearance of each unique value.
 
@@ -47,6 +63,15 @@ def calculate_last_idx_unique_array_vals(sorted_array):
     ----------
     sorted_array : array
         Integer array of host halo IDs, sorted in ascending order
+
+    testing_mode : bool, optional
+        Boolean specifying whether input arrays will be tested to see if they
+        satisfy the assumptions required by the algorithm.
+        Setting ``testing_mode`` to True is useful for unit-testing purposes,
+        while setting it to False improves performance.
+        Default is False.
+        If this function raises an unexpected exception, try setting ``testing_mode``
+        to True to identify which specific assumption about the inputs is not being met.
 
     Returns
     --------
@@ -65,6 +90,13 @@ def calculate_last_idx_unique_array_vals(sorted_array):
     >>> result = calculate_last_idx_unique_array_vals(sorted_array)
     >>> assert np.all(result == (1, 3, 4, 6, 7))
     """
+    if testing_mode is True:
+        try:
+            assert np.all(np.diff(sorted_array) >= 0)
+        except AssertionError:
+            msg = "Input ``sorted_array`` array must be sorted in ascending order"
+            raise ValueError(msg)
+
     return np.append(np.flatnonzero(np.diff(sorted_array)), len(sorted_array)-1)
 
 
@@ -215,7 +247,8 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
     return absolute_indices
 
 
-def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostids):
+def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostids,
+        testing_mode=False):
     """ Given an array of possible hostids, and a sorted array of
     (possibly repeated) hostids, return the number of appearances of each hostid.
 
@@ -226,6 +259,7 @@ def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostid
     ----------
     sorted_repeated_hostids : array
         Length-*num_entries* integer array storing a collection of hostids.
+
         The entries of ``sorted_repeated_hostids`` may be repeated,
         but must be in ascending order.
         Each entry of ``sorted_repeated_hostids`` must appear in the
@@ -235,8 +269,9 @@ def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostid
         of some set of subhalos.
 
     unique_possible_hostids : array
-        Length-*num_hostids* integer array storing the set of all available
-        values for hostid.
+        Length-*num_hostids* integer array storing
+        the set of all available values for hostid.
+
         All entries must be unique.
         An entry of ``unique_possible_hostids`` need not necessarily appear in
         ``sorted_repeated_hostids``.
@@ -244,6 +279,15 @@ def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostid
 
         For halo analysis applications, this would be the ``halo_id`` column
         of the complete set of *host* halos.
+
+    testing_mode : bool, optional
+        Boolean specifying whether input arrays will be tested to see if they
+        satisfy the assumptions required by the algorithm.
+        Setting ``testing_mode`` to True is useful for unit-testing purposes,
+        while setting it to False improves performance.
+        Default is False.
+        If this function raises an unexpected exception, try setting ``testing_mode``
+        to True to identify which specific assumption about the inputs is not being met.
 
     Returns
     ---------
@@ -260,6 +304,32 @@ def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostid
     >>> assert np.all(entry_multiplicity == (0, 2, 3, 0, 1, 1, 2))
 
     """
+    if testing_mode:
+        try:
+            assert np.all(np.diff(sorted_repeated_hostids) >= 0)
+        except AssertionError:
+            msg = "Input ``sorted_repeated_hostids`` array is not sorted in ascending order"
+            raise ValueError(msg)
+
+        s1 = set(unique_possible_hostids)
+        try:
+            assert len(s1) == len(unique_possible_hostids)
+        except AssertionError:
+            msg = "All entries of ``unique_possible_hostids`` must be unique"
+            raise ValueError(msg)
+
+        s2 = set(sorted_repeated_hostids)
+        try:
+            unmatched_entries = s2 - s1
+            assert len(unmatched_entries) == 0
+        except AssertionError:
+            example_unmatched_entry = list(unmatched_entries)[0]
+            msg = ("Each entry of sorted_repeated_hostids "
+                "must appear in unique_possible_hostids.\n"
+                "The following entry appears in ``sorted_repeated_hostids`` "
+                "but not in ``unique_possible_hostids``:\n\n{0}\n\n".format(example_unmatched_entry))
+            raise ValueError(msg)
+
     unique_appearances_of_hostid, unique_entry_multiplicity = (
         np.unique(sorted_repeated_hostids, return_counts=True))
     hostid_has_match = np.in1d(unique_possible_hostids, unique_appearances_of_hostid,
