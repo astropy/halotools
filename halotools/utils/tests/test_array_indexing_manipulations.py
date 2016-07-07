@@ -249,3 +249,32 @@ def test_random_indices_within_bin3():
     assert test_exists_with_more_sats_than_subs_alt_corner_case is True
 
 
+def test_calculate_entry_multiplicity():
+    """
+    """
+    low, high = -1000, 1000
+    unique_possible_hostids = np.arange(low, high)
+    seed_list = [1, 100, 500, 999]
+    for seed in seed_list:
+        with NumpyRNGContext(seed):
+            correct_multiplicity = np.random.randint(0, 5, len(unique_possible_hostids))
+            sorted_repeated_hostids = np.repeat(unique_possible_hostids, correct_multiplicity)
+
+            multiplicity = aim.calculate_entry_multiplicity(
+                sorted_repeated_hostids, unique_possible_hostids)
+            assert np.all(multiplicity == correct_multiplicity)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

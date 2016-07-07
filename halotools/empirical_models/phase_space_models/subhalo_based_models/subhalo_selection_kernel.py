@@ -3,10 +3,9 @@
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
-from astropy.utils.misc import NumpyRNGContext
 
 from ....utils import (calculate_first_idx_unique_array_vals, sum_in_bins,
-    random_indices_within_bin)
+    random_indices_within_bin, calculate_entry_multiplicity)
 
 __all__ = ('subhalo_indexing_array', )
 
@@ -183,7 +182,7 @@ def calculate_selection_of_true_subhalos(subhalo_hostids, satellite_occupations,
         testing_mode=False):
     """
     """
-    subhalo_multiplicity = calculate_subhalo_multiplicity(subhalo_hostids, host_halo_ids)
+    subhalo_multiplicity = calculate_entry_multiplicity(subhalo_hostids, host_halo_ids)
 
     subhalo_occupations = calculate_subhalo_occupations(satellite_occupations, subhalo_multiplicity)
 
@@ -235,47 +234,6 @@ def calculate_selection_of_remaining_satellites(remaining_occupations,
         binned_subhalo_multiplicity, binned_remaining_occupations, seed)
 
     return remaining_indices
-
-
-def calculate_subhalo_multiplicity(subhalo_hostids, host_halo_ids):
-    """ Determine the number of subhalos in each host halo.
-
-    Parameters
-    ----------
-    subhalo_hostids : array
-        Length-*Nsubs* integer array storing
-        the ID of the halo hosting each subhalo.
-        The entries of ``subhalo_hostids`` may be repeated,
-        but must be in ascending order.
-
-    host_halo_ids : array
-        Length-*Nhosts* integer array storing the ID
-        of the host halos in which the subhalos (may) reside.
-        All entries must be unique. Entries of ``host_halo_id``
-        with no accompanying subhalos are permissible,
-        and the ``host_halo_ids`` array can be sorted in any order.
-
-    Returns
-    ---------
-    subhalo_multiplicity : array
-        Length-*Nhosts* integer array storing the number of
-        subhalos in each host halo.
-
-    Examples
-    --------
-    >>> subhalo_hostids = np.array((1, 1, 2, 2, 2, 4, 5, 6, 6))
-    >>> host_halo_ids = np.arange(7)
-    >>> subhalo_multiplicity = calculate_subhalo_multiplicity(subhalo_hostids, host_halo_ids)
-    >>> assert np.all(subhalo_multiplicity == (0, 2, 3, 0, 1, 1, 2))
-
-    """
-    unique_subhalo_hostid, unique_subhalo_multiplicity = (
-        np.unique(subhalo_hostids, return_counts=True))
-    host_halo_has_a_subhalo = np.in1d(host_halo_ids, unique_subhalo_hostid, assume_unique=True)
-
-    subhalo_multiplicity = np.zeros_like(host_halo_ids)
-    subhalo_multiplicity[host_halo_has_a_subhalo] = unique_subhalo_multiplicity
-    return subhalo_multiplicity
 
 
 def array_weave(val1, val2, mult1, mult2, testing_mode=False):

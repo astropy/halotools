@@ -7,7 +7,7 @@ from astropy.utils.misc import NumpyRNGContext
 
 __all__ = ('calculate_first_idx_unique_array_vals',
     'calculate_last_idx_unique_array_vals', 'sum_in_bins',
-    'random_indices_within_bin')
+    'random_indices_within_bin', 'calculate_entry_multiplicity')
 
 
 def calculate_first_idx_unique_array_vals(sorted_array):
@@ -213,3 +213,58 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
 
     absolute_indices = intra_bin_indices + repeated_first_bin_indices
     return absolute_indices
+
+
+def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostids):
+    """ Given an array of possible hostids, and a sorted array of
+    (possibly repeated) hostids, return the number of appearances of each hostid.
+
+    This function can serve as the kernel, for example, for the calculation of
+    the number of subhalos in each host halo.
+
+    Parameters
+    ----------
+    sorted_repeated_hostids : array
+        Length-*num_entries* integer array storing a collection of hostids.
+        The entries of ``sorted_repeated_hostids`` may be repeated,
+        but must be in ascending order.
+        Each entry of ``sorted_repeated_hostids`` must appear in the
+        ``unique_possible_hostids``.
+
+        For halo analysis applications, this would be the ``halo_hostid`` column
+        of some set of subhalos.
+
+    unique_possible_hostids : array
+        Length-*num_hostids* integer array storing the set of all available
+        values for hostid.
+        All entries must be unique.
+        An entry of ``unique_possible_hostids`` need not necessarily appear in
+        ``sorted_repeated_hostids``.
+        The ``unique_possible_hostids`` array can be sorted in any order.
+
+        For halo analysis applications, this would be the ``halo_id`` column
+        of the complete set of *host* halos.
+
+    Returns
+    ---------
+    entry_multiplicity : array
+        Length-*num_hostids* integer array storing the number of
+        times each entry of ``unique_possible_hostids`` appears
+        in ``sorted_repeated_hostids``.
+
+    Examples
+    --------
+    >>> sorted_repeated_hostids = np.array((1, 1, 2, 2, 2, 4, 5, 6, 6))
+    >>> unique_possible_hostids = np.arange(7)
+    >>> entry_multiplicity = calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostids)
+    >>> assert np.all(entry_multiplicity == (0, 2, 3, 0, 1, 1, 2))
+
+    """
+    unique_appearances_of_hostid, unique_entry_multiplicity = (
+        np.unique(sorted_repeated_hostids, return_counts=True))
+    hostid_has_match = np.in1d(unique_possible_hostids, unique_appearances_of_hostid,
+        assume_unique=True)
+
+    entry_multiplicity = np.zeros_like(unique_possible_hostids)
+    entry_multiplicity[hostid_has_match] = unique_entry_multiplicity
+    return entry_multiplicity
