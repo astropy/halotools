@@ -23,6 +23,11 @@ def calculate_first_idx_unique_array_vals(sorted_array):
         Integer array storing the indices of the first appearance of
         each unique entry in sorted_array
 
+    Notes
+    ------
+    By construction, the first element of `calculate_first_idx_unique_array_vals`
+    will always be zero.
+
     Examples
     --------
     >>> sorted_array = np.array((0, 0, 1, 1, 4, 8, 8, 10))
@@ -46,6 +51,11 @@ def calculate_last_idx_unique_array_vals(sorted_array):
     idx_unique_array_vals : array
         Integer array storing the indices of the last appearance of
         each unique entry in sorted_array
+
+    Notes
+    ------
+    By construction, the first element of `calculate_first_idx_unique_array_vals`
+    will always be len(sorted_array)-1.
 
     Examples
     --------
