@@ -3,9 +3,11 @@
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 __all__ = ('calculate_first_idx_unique_array_vals',
-    'calculate_last_idx_unique_array_vals', 'sum_in_bins')
+    'calculate_last_idx_unique_array_vals', 'sum_in_bins',
+    'random_indices_within_bin')
 
 
 def calculate_first_idx_unique_array_vals(sorted_array):
@@ -124,3 +126,90 @@ def sum_in_bins(arr, sorted_bin_numbers, testing_mode=False):
     binned_sum = np.diff(np.cumsum(arr)[last_idx])
     binned_sum = np.concatenate(([first_entry], binned_sum))
     return binned_sum
+
+
+def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
+        seed=None, min_required_entries_per_bin=1):
+    """ Given two equal-length arrays, with ``desired_binned_occupations``
+    defining the number of desired random draws per bin,
+    and ``binned_multiplicity`` defining the number of indices in each bin
+    that are available to be randomly drawn,
+    return a set of indices such that
+    only the appropriate indices will be drawn for each bin, and the total
+    number of such random draws is in accord with the input ``desired_binned_occupations``.
+
+    The ``random_indices_within_bin`` function is the kernel of the calculation in which
+    satellites are assigned to host halos that do not have enough subhalos
+    to serve as satellites. The algorithm implemented here enables, for example,
+    the random selection of a subhalo that resides in a host of a nearby mass.
+
+    Parameters
+    -----------
+    binned_multiplicity : array
+        Array of length-*Nbins* storing how many total items
+        reside in each bin.
+
+        All entries of ``binned_multiplicity`` must be at least as large
+        as ``min_required_entries_per_bin``, enforcing a user-specified requirement
+        that in each bin, you must have "enough" entries to draw from.
+
+    desired_binned_occupations : array
+        Array of non-negative integers of length-*Nbins* storing
+        the number of times to draw from each bin.
+
+    seed : integer, optional
+        Random number seed used when drawing random numbers with `numpy.random`.
+        Useful when deterministic results are desired, such as during unit-testing.
+        Default is None, producing stochastic results.
+
+    min_required_entries_per_bin : int, optional
+        Minimum requirement on the number of entries in each bin. Default is 1.
+
+    Returns
+    -------
+    indices : array
+        Integer array of length equal to desired_binned_occupations.sum()
+        whose values can be used to index the appropriate entries of the subhalo table.
+
+    Examples
+    ---------
+    >>> binned_multiplicity = np.array([1, 2, 2, 1, 3])
+    >>> desired_binned_occupations = np.array([2, 1, 3, 0, 2])
+    >>> idx = random_indices_within_bin(binned_multiplicity, desired_binned_occupations)
+
+    The ``idx`` array has *desired_binned_occupations.sum()* total entries,
+    with each entry storing the index of the subhalo table that will serve as a
+    randomly selected satellite.
+    """
+    try:
+        assert np.all(binned_multiplicity >= min_required_entries_per_bin)
+    except AssertionError:
+        msg = ("Input ``binned_multiplicity`` array must contain at least \n"
+        "min_required_entries_per_bin = {0} entries. \nThis indicates that "
+        "the host halo mass bins should be broader.\n".format(min_required_entries_per_bin))
+        raise ValueError(msg)
+
+    try:
+        assert np.all(desired_binned_occupations >= 0)
+    except AssertionError:
+        msg = ("All entries of input ``desired_binned_occupations``\n"
+            "must be non-negative integers.\n")
+        raise ValueError(msg)
+
+    num_draws = desired_binned_occupations.sum()
+    if num_draws == 0:
+        return np.array([], dtype=int)
+
+    with NumpyRNGContext(seed):
+        uniform_random = np.random.rand(num_draws)
+
+    num_available_subs = np.repeat(binned_multiplicity.astype(int),
+        desired_binned_occupations.astype(int))
+    intra_bin_indices = np.floor(uniform_random*num_available_subs)
+
+    first_bin_indices = np.concatenate(([0], np.cumsum(binned_multiplicity)[:-1]))
+    repeated_first_bin_indices = np.repeat(first_bin_indices,
+        desired_binned_occupations.astype(int))
+
+    absolute_indices = intra_bin_indices + repeated_first_bin_indices
+    return absolute_indices
