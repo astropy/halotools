@@ -8,6 +8,8 @@ import fnmatch
 from .test_amurrica import source_code_string_generator
 from ..custom_exceptions import HalotoolsError
 
+__all__ = ('test_halotools_usage_of_np_random_seed', )
+
 msg = ("The test suite detected a call to np.random.seed in the following filename:\n"
     "{0} \nCalls to np.random.seed choose the random number seed \n"
     "by setting a global environment variable, \n"
