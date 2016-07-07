@@ -161,7 +161,7 @@ def sum_in_bins(arr, sorted_bin_numbers, testing_mode=False):
 
 
 def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
-        seed=None, min_required_entries_per_bin=1):
+        seed=None, min_required_entries_per_bin=None):
     """ Given two equal-length arrays, with ``desired_binned_occupations``
     defining the number of desired random draws per bin,
     and ``binned_multiplicity`` defining the number of indices in each bin
@@ -186,7 +186,7 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
         that in each bin, you must have "enough" entries to draw from.
 
     desired_binned_occupations : array
-        Array of non-negative integers of length-*Nbins* storing
+        Array of length-*Nbins* of non-negative integers storing
         the number of times to draw from each bin.
 
     seed : integer, optional
@@ -196,6 +196,8 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
 
     min_required_entries_per_bin : int, optional
         Minimum requirement on the number of entries in each bin. Default is 1.
+        This requirement is only applied for bins with non-zero
+        values of ``desired_binned_occupations``.
 
     Returns
     -------
@@ -213,13 +215,8 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
     with each entry storing the index of the subhalo table that will serve as a
     randomly selected satellite.
     """
-    try:
-        assert np.all(binned_multiplicity >= min_required_entries_per_bin)
-    except AssertionError:
-        msg = ("Input ``binned_multiplicity`` array must contain at least \n"
-        "min_required_entries_per_bin = {0} entries. \nThis indicates that "
-        "the host halo mass bins should be broader.\n".format(min_required_entries_per_bin))
-        raise ValueError(msg)
+    if min_required_entries_per_bin is None:
+        min_required_entries_per_bin = 1
 
     try:
         assert np.all(desired_binned_occupations >= 0)
@@ -231,6 +228,14 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
     num_draws = desired_binned_occupations.sum()
     if num_draws == 0:
         return np.array([], dtype=int)
+
+    try:
+        assert np.all(binned_multiplicity[desired_binned_occupations>0] >= min_required_entries_per_bin)
+    except AssertionError:
+        msg = ("Input ``binned_multiplicity`` array must contain at least \n"
+        "min_required_entries_per_bin = {0} entries. \nThis indicates that "
+        "the host halo mass bins should be broader.\n".format(min_required_entries_per_bin))
+        raise ValueError(msg)
 
     with NumpyRNGContext(seed):
         uniform_random = np.random.rand(num_draws)

@@ -208,6 +208,20 @@ def test_sum_in_bins4():
                 assert np.allclose(correct_result, result_i, rtol=0.0001)
 
 
+def test_random_indices_within_bin_stochasticity():
+    binned_multiplicity = np.ones(100)*5
+    desired_binned_occupations = np.arange(100)
+    result1 = aim.random_indices_within_bin(
+        binned_multiplicity, desired_binned_occupations, seed=43)
+    result2 = aim.random_indices_within_bin(
+        binned_multiplicity, desired_binned_occupations, seed=43)
+    result3 = aim.random_indices_within_bin(
+        binned_multiplicity, desired_binned_occupations, seed=44)
+
+    assert np.all(result1 == result2)
+    assert not np.all(result1 == result3)
+
+
 def test_random_indices_within_bin1():
     binned_multiplicity = np.array([1, 1, 1])
     desired_binned_occupations = np.array([2, 3, 4])
@@ -229,6 +243,10 @@ def test_random_indices_within_bin2():
     assert substr in err.value.args[0]
     substr = "min_required_entries_per_bin = 1"
     assert substr in err.value.args[0]
+
+    # Verify that this limit does not apply for entries with desired_binned_occupations = 0
+    result = aim.random_indices_within_bin(
+        binned_multiplicity, np.array([0, 3, 4]), seed=43)
 
     with pytest.raises(ValueError) as err:
         result = aim.random_indices_within_bin(
