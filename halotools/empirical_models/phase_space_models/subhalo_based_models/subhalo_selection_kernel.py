@@ -1,4 +1,5 @@
-"""
+""" This module contains the primary functions used to select subhalos
+to serve as satellites during HOD mock population.
 """
 from __future__ import division, print_function, absolute_import, unicode_literals
 
@@ -44,18 +45,21 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
 
     host_halo_ids : array
         Integer array of length *Nhosts* storing each host halo's unique id,
-        typically the ``halo_id`` column in a Halotools-catalog.
+        typically the ``halo_id`` column in a Halotools-formatted catalog.
 
     host_halo_bin_numbers : array
-        Integer array of length *Nhosts* storing the bin number of each host halo.
+        Integer array of length *Nhosts* storing the bin number of each host halo,
+        e.g., the returned value of np.digitize(host_halo_masses, mass_bins).
 
     fill_remaining_satellites : bool, optional
-        To address cases of a host halo with fewer available subhalos
+        To address cases where a host halo has fewer subhalos
         than the desired number of satellites, the indices of randomly selected
         subhalos from the same host mass bin will be selected provided that
         ``fill_remaining_satellites`` is set to True.
         If ``fill_remaining_satellites`` is instead set to False, then the value
-        -1 will be returned for all such entries. Default is True.
+        -1 will be returned for all such entries, permitting an alternative
+        special treatment of such cases (such as drawing from an NFW profile).
+        Default is True.
 
     seed : integer, optional
         Random number seed used when drawing random numbers with `numpy.random`.
@@ -73,23 +77,29 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     -------
     satellite_selection_indices : array
         Integer array storing the indices of the selected subhalos.
-        Some indices have been multiplied by -1.
-        This indicates that in one or more host halos, there were more desired
-        satellites than the number of subhalos in that halo.
-        In such a case, the index of a randomly selected subhalo in a similar
-        host mass is selected, and this index is multiplied by -1.
+
+        If ``fill_remaining_satellites`` is set to False,
+        then some values of ``satellite_selection_indices`` may be -1.
 
     missing_subhalo_mask : array
         Boolean array that can be used to select the indices corresponding to
         satellites with no true subhalo in the associated host halo. This
         situation occurs whenever and entry of ``desired_occupations``
-        exceeds the number of subhalos in that host halo,
-        as described in the Notes.
+        exceeds the number of subhalos in that host halo.
+        Thus if ``fill_remaining_satellites`` is set to False,
+        then all values of satellite_selection_indices[missing_subhalo_mask]
+        will be equal to -1.
 
     min_required_entries_per_bin : int, optional
         Minimum requirement on the number of subhalos in each bin.
         Default is set by the
         `~halotools.utils.array_indexing_manipulations.random_indices_within_bin` function.
+
+    Notes
+    ------
+    Every bin of host halos must contain enough subhalos to draw from, or the
+    function will raise an exception. If this occurs, you will either need
+    to choose wider bins and/or use a subhalo catalog that is more densely populated.
 
     Examples
     --------
@@ -103,25 +113,14 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
 
-    We are going to group our (sub)halos together by host halo mass. However,
-    the `~halotools.sim_manager.FakeSim` does not come with a column for
-    host halo mass, so we will need to calculate this ourselves using
-    the `halotools.utils.crossmatch` function, using the algorithm described
-    in the tutorial on :ref:`crossmatching_halo_catalogs`.
-
-    >>> from halotools.utils import crossmatch
-    >>> idxA, idxB = crossmatch(halocat.halo_table['halo_hostid'], halocat.halo_table['halo_id'])
-    >>> halocat.halo_table['halo_mvir_host_halo'] = 0.
-    >>> halocat.halo_table['halo_mvir_host_halo'][idxA] = halocat.halo_table['halo_mvir'][idxB]
-
     The `subhalo_indexing_array` algorithm requires that
     every entry of the input ``subhalo_hostids`` has a matching entry in
     the input ``host_halo_ids`` array. To address this, we will mask out
     those rare subhalos with no matching host halo
     (this situation occurs in <0.1% for typical Rockstar catalogs).
 
-    >>> unmatched_mask = halocat.halo_table['halo_mvir_host_halo'] == 0. #  initialized column value
-    >>> halos = halocat.halo_table[~unmatched_mask]
+    >>> matched_mask = np.in1d(halocat.halo_table['halo_hostid'], halocat.halo_table['halo_id'])
+    >>> halos = halocat.halo_table[matched_mask]
 
     Now we will sort the catalog by the ``sorting_keys`` list.
 
@@ -184,9 +183,50 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     return satellite_selection_indices, missing_subhalo_mask
 
 
-def calculate_selection_of_true_subhalos(subhalo_hostids, satellite_occupations, host_halo_ids,
-        testing_mode=False):
+def calculate_selection_of_true_subhalos(subhalo_hostids, satellite_occupations,
+        host_halo_ids, testing_mode=False):
     """
+    Function used to select subhalos to serve as satellites.
+
+    Parameters
+    ----------
+    subhalo_hostids : array
+        Integer array of length *Nsubs* storing the id of the associated host halo.
+        ``subhalo_hostids`` may have repeated values and must be in ascending order.
+
+    satellite_occupations : array
+        Integer array of length *Nhosts* storing the desired
+        number of satellites in each host halo.
+
+    host_halo_ids : array
+        Integer array of length *Nhosts* storing each host halo's unique id,
+        typically the ``halo_id`` column in a Halotools-formatted catalog.
+
+    testing_mode : bool, optional
+        Boolean specifying whether input arrays will be tested to see if they
+        satisfy the assumptions required by the algorithm.
+        Setting ``testing_mode`` to True is useful for unit-testing purposes,
+        while setting it to False improves performance.
+        Default is False.
+
+    Returns
+    --------
+    idx_selected_subhalos : array
+        Integer array of length *num_selected_subhalos* that may be used
+        as indices of any length *Nsubs* array to select subhalo properties.
+
+    subhalo_occupations : array
+        Integer array of length *Nhosts* storing the number of satellites
+        residing in true subhalos in each host halo.
+
+        The sum of the entries of ``subhalo_occupations``
+        defines *num_selected_subhalos*,
+        the length of the returned ``idx_selected_subhalos`` array.
+
+    subhalo_multiplicity : array
+        Integer array of length *Nhosts* storing the number of subhalos
+        in each host halo.
+
     """
     subhalo_multiplicity = calculate_entry_multiplicity(subhalo_hostids, host_halo_ids)
 
@@ -237,6 +277,14 @@ def calculate_selection_of_remaining_satellites(remaining_occupations,
         Default is set by the
         `~halotools.utils.array_indexing_manipulations.random_indices_within_bin` function.
 
+    Returns
+    -------
+    remaining_indices : array
+        Integer array of length *num_remaining_satellites* that may be used
+        as indices of any length *Nsubs* array to select subhalo properties.
+        Here *Nsubs* is the total number of subhalos in the original catalog
+        passed to the `~halotools.empirical_models.subhalo_indexing_array` function,
+        and *num_remaining_satellites* is the sum of the entries of ``remaining_occupations``.
     """
 
     binned_subhalo_multiplicity = sum_in_bins(subhalo_multiplicity, host_halo_bin_numbers)
