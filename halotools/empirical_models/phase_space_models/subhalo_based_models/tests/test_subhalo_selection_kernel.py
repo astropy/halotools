@@ -98,17 +98,6 @@ def test_subhalo_indexing_array2():
             assert np.all(result1 == result2)
 
 
-def test_indices_of_selected_subhalos():
-    """
-    """
-    objID = np.array([0, 0, 5, 5, 5, 7, 8, 8])
-    multiplicity = np.array([2, 3, 1, 2])
-    occupations = np.array([0, 2, 1, 2])
-    result = ssk.indices_of_selected_subhalos(objID, occupations, multiplicity)
-    correct_result = np.array([2, 3, 5, 6, 7])
-    assert np.all(result == correct_result)
-
-
 def test_array_weave1():
     nhosts1, nhosts2 = 5, 4
     mult1 = np.ones(nhosts1, dtype=int)
@@ -154,5 +143,69 @@ def test_array_weave3():
     assert substr in err.value.args[0]
 
 
+def test_indices_of_selected_subhalos1():
+    """
+    """
+    objID = np.array([0, 0, 5, 5, 5, 7, 8, 8])
+    multiplicity = np.array([2, 3, 1, 2])
+    occupations = np.array([0, 2, 1, 2])
+    result = ssk.indices_of_selected_subhalos(objID, occupations, multiplicity)
+    correct_result = np.array([2, 3, 5, 6, 7])
+    assert np.all(result == correct_result)
+
+
+def test_indices_of_selected_subhalos2():
+    """
+    """
+    objID = np.array([0, 0, 5, 5, 5, 7, 8, 8])
+    multiplicity = np.array([2, 3, 1, 2])
+    occupations = np.array([0, 2, 1, 2])
+    with pytest.raises(ValueError) as err:
+        __ = ssk.indices_of_selected_subhalos(objID, occupations[1:], multiplicity,
+            testing_mode=True)
+    substr = "Input ``subhalo_occupations`` and ``subhalo_multiplicity`` must have the same length"
+    assert substr in err.value.args[0]
+
+
+def test_indices_of_selected_subhalos3():
+    """
+    """
+    objID = np.arange(8)
+    multiplicity = np.array([2, 3, 1, 2])
+    occupations = np.array([0, 2, 1, 2])
+    with pytest.raises(ValueError) as err:
+        __ = ssk.indices_of_selected_subhalos(objID, occupations, multiplicity,
+            testing_mode=True)
+    substr = "The host halo of each subhalo must be represented"
+    assert substr in err.value.args[0]
+
+
+def test_indices_of_selected_subhalos4():
+    """
+    """
+    objID = np.array([0, 0, 5, 5, 5, 7, 8, 8])
+    multiplicity = np.array([2, 3, 1, 2])
+    occupations = np.array([0, 1, 2, 2])
+    with pytest.raises(ValueError) as err:
+        __ = ssk.indices_of_selected_subhalos(objID, occupations, multiplicity,
+            testing_mode=True)
+    substr = "No entry of ``subhalo_occupations`` may exceed"
+    assert substr in err.value.args[0]
+
+
+def test_indices_of_selected_subhalos5():
+    """
+    """
+    objID = np.array([0, 0, 5, 5, 5, 7, 8, 8])
+    multiplicity = np.array([2, 2, 1, 2])
+    occupations = np.array([0, 2, 1, 2])
+
+    with pytest.raises(ValueError) as err:
+        __ = ssk.indices_of_selected_subhalos(objID, occupations, multiplicity,
+            testing_mode=True)
+    substr = "The sum of ``subhalo_multiplicity`` is"
+    assert substr in err.value.args[0]
+    substr = "which is inconsistent with the total number of entries of ``subhalo_hostids``"
+    assert substr in err.value.args[0]
 
 
