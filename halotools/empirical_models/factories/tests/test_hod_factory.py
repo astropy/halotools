@@ -48,10 +48,6 @@ def test_Zheng07_composite():
     satocc_restored = model.mean_occupation_satellites(prim_haloprop=testmass2)
     assert satocc_restored == satocc_orig
 
-    #######################################################
-    # fakesim = FakeSim()
-    # model.populate_mock(halocat = fakesim)
-
 
 def test_alt_Zheng07_composites():
 
@@ -61,12 +57,12 @@ def test_alt_Zheng07_composites():
     default_satocc_component = default_model_dictionary['satellites_occupation']
     default_cenocc_component = default_model_dictionary['centrals_occupation']
 
-    cenmod_satocc_compoent = Zheng07Sats(
-        threshold=default_satocc_component.threshold, cenocc_model=default_cenocc_component,
+    cenmod_satocc_component = Zheng07Sats(
+        threshold=default_satocc_component.threshold, modulate_with_cenocc=True,
         gal_type_centrals='centrals')
 
     cenmod_model_dictionary = copy(default_model_dictionary)
-    cenmod_model_dictionary['satellites_occupation'] = cenmod_satocc_compoent
+    cenmod_model_dictionary['satellites_occupation'] = cenmod_satocc_component
     cenmod_model_dictionary['centrals_occupation'] = default_cenocc_component
     cenmod_model = factories.HodModelFactory(**cenmod_model_dictionary)
 
@@ -88,10 +84,6 @@ def test_alt_Zheng07_composites():
     default_model.param_dict['logMmin'] *= 1.1
     nsat4 = default_model.mean_occupation_satellites(prim_haloprop=2.e12)
     assert nsat3 == nsat4
-
-    fakesim = FakeSim()
-    # cenmod_model.populate_mock(halocat = fakesim)
-    # default_model.populate_mock(halocat = fakesim)
 
 
 def test_Leauthaud11_composite():
