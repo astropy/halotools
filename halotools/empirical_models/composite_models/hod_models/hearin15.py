@@ -110,6 +110,8 @@ def hearin15_model_dictionary(central_assembias_strength=1,
 
     ##############################
     ### Build the occupation model
+
+    #I'm not sure if centrals_occupation should be passed in here.
     if satellite_assembias_strength == 0:
         satellites_occupation = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:

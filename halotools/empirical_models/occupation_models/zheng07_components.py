@@ -334,8 +334,7 @@ class Zheng07Sats(OccupationComponent):
 
             self.central_occupation_model = cenocc_model
 
-            for key, value in self.central_occupation_model.param_dict.items():
-                self.param_dict[key] = value
+            self.param_dict.update(self.central_occupation_model.param_dict)
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
@@ -389,8 +388,7 @@ class Zheng07Sats(OccupationComponent):
         >>> mean_nsat = sat_model.mean_occupation(table=fake_sim.halo_table)
 
         """
-        #Turns out this is necessary
-        #probably should have a check that parameters aren't being overwritten
+
         if self.modulate_with_cenocc:
             for key, value in self.param_dict.items():
                 if key in self.central_occupation_model.param_dict:
