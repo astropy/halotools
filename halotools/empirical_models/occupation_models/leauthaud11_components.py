@@ -474,11 +474,6 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
 
 
         """
-        #Ensure the right default is passed in
-        if 'modulate_with_cenocc' not in kwargs or kwargs['modulate_with_cenocc']:
-            if 'cenocc_model' not in kwargs:
-                kwargs['cenocc_model'] = AssembiasLeauthaud11Cens(**kwargs)
-
         Leauthaud11Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
             lower_assembias_bound=self._lower_occupation_bound,
