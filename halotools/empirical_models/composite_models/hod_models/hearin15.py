@@ -110,13 +110,14 @@ def hearin15_model_dictionary(central_assembias_strength=1,
 
     ##############################
     ### Build the occupation model
+
     if satellite_assembias_strength == 0:
         satellites_occupation = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:
         satellites_occupation = leauthaud11_components.AssembiasLeauthaud11Sats(
             assembias_strength=satellite_assembias_strength,
             assembias_strength_abscissa=satellite_assembias_strength_abscissa,
-            **kwargs)
+            cenocc_model=centrals_occupation, **kwargs)
         # There is no need for a redundant new_haloprop_func_dict
         # if this is already possessed by the central model
         if hasattr(centrals_occupation, 'new_haloprop_func_dict'):
