@@ -290,3 +290,70 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     index = inds[index[:, 0], index[:, 1], index[:, 2]].astype(int)
 
     return index, int(N_sub_vol)
+
+
+def sign_pbc(x1, x2, period=None, equality_fill_val=0.):
+    """ Return the sign of the unit vector pointing from x2 towards x1,
+    that is, the sign of (x1 - x2), accounting for periodic boundary conditions.
+
+    If x1 > x2, returns 1. If x1 < x2, returns -1. If x1 == x2, returns equality_fill_val.
+
+    Parameters
+    ----------
+    x1 : array
+        1-d array of length *Npts*.
+        If period is not None, all values must be contained in [0, Lbox)
+
+    x2 : array
+        1-d array of length *Npts*.
+        If period is not None, all values must be contained in [0, Lbox)
+
+    period : float, optional
+        Size of the periodic box. Default is None for non-periodic case.
+
+    equality_fill_val : float, optional
+        Value to return for cases where x1 == x2. Default is 0.
+
+    Returns
+    -------
+    sgn : array
+        1-d array of length *Npts*.
+
+    Examples
+    --------
+    >>> Lbox = 250.0
+    >>> x1 = 1.
+    >>> x2 = 249.
+    >>> result = sign_pbc(x1, x2, period=Lbox)
+    >>> assert result == 1
+
+    >>> result = sign_pbc(x1, x2, period=None)
+    >>> assert result == -1
+
+    >>> npts = 100
+    >>> x1 = np.random.uniform(0, Lbox, npts)
+    >>> x2 = np.random.uniform(0, Lbox, npts)
+    >>> result = sign_pbc(x1, x2, period=Lbox)
+    """
+    x1 = np.atleast_1d(x1)
+    x2 = np.atleast_1d(x2)
+    result = np.sign(x1 - x2)
+
+    if period is not None:
+        try:
+            assert np.all(x1 >= 0)
+            assert np.all(x2 >= 0)
+            assert np.all(x1 < period)
+            assert np.all(x2 < period)
+        except AssertionError:
+            msg = "If period is not None, all values of x and y must be between [0, 1)"
+            raise ValueError(msg)
+
+        d = np.abs(x1-x2)
+        pbc_correction = np.sign(period/2. - d)
+        result = pbc_correction*result
+
+    if equality_fill_val != 0:
+        result = np.where(result == 0, equality_fill_val, result)
+
+    return result
