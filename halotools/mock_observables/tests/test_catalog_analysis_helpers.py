@@ -76,6 +76,50 @@ def test_cuboid_subvolume_labels_correctness():
     assert np.all(labels == 3)
 
 
+def test_sign_pbc1():
+    x1 = np.array([1, 2, 3, 4, 5])
+    x2 = np.array([0, 2, 4, 5, 0])
+
+    s = cat_helpers.sign_pbc(x1, x2)
+    assert np.all(s == [1, 0, -1, -1, 1])
+
+    s = cat_helpers.sign_pbc(x1, x2, equality_fill_val=9)
+    assert np.all(s == [1, 9, -1, -1, 1])
+
+
+def test_sign_pbc2():
+    x1 = np.array((1, 4, 6, 9.))
+
+    x2 = np.array((0, 3, 5, 8))
+    s = cat_helpers.sign_pbc(x1, x2, period=10)
+    assert np.all(s == [1, 1, 1., 1])
+
+
+def test_sign_pbc3():
+    x1 = np.array((1, 4, 6, 9.))
+    x2 = np.array((9, 9.9, 0, 0))
+
+    s = cat_helpers.sign_pbc(x1, x2, period=10)
+    assert np.all(s == (1, 1, -1, -1))
+
+    s = cat_helpers.sign_pbc(x1, x2)
+    assert np.all(s == (-1, -1, 1, 1))
+
+
+def test_sign_pbc_catches_out_of_bounds():
+    x1 = np.array((1, 4, 6, 9.))
+
+    x2 = np.array((2, 5, 7, 10))
+    with pytest.raises(ValueError) as err:
+        __ = cat_helpers.sign_pbc(x1, x2, period=10)
+    substr = "If period is not None, all values of x and y must be between [0, 1)"
+    assert substr in err.value.args[0]
+
+    s = cat_helpers.sign_pbc(x1, x2)
+    assert np.all(s == (-1, -1, -1, -1))
+
+
+
 class TestCatalogAnalysisHelpers(TestCase):
     """ Class providing tests of the `~halotools.mock_observables.catalog_analysis_helpers`.
     """
