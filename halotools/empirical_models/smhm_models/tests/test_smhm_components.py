@@ -55,8 +55,8 @@ def test_Moster13SmHm_behavior():
     """
     """
     default_model = Moster13SmHm()
-    mstar1 = default_model.mean_stellar_mass(prim_haloprop=1.e12)
-    ratio1 = mstar1/3.4275e10
+    mstar1 = default_model.mean_stellar_mass(prim_haloprop=1.e12*default_model.littleh)
+    ratio1 = mstar1/((3.4275e10)*default_model.littleh**2)
     np.testing.assert_array_almost_equal(ratio1, 1.0, decimal=3)
 
     default_model.param_dict['n10'] *= 1.1
@@ -320,12 +320,12 @@ class TestBehroozi10SmHm(TestCase):
             14.566248, 14.691248]
             )
 
-        self.logmh_z01 = np.log10((10.**self.logmh_z01)/self.model.littleh)
-        self.logmratio_z05 = np.log10((10.**self.logmratio_z05)/self.model.littleh)
-        self.logmh_z1 = np.log10((10.**self.logmh_z1)/self.model.littleh)
-        self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.model.littleh)
-        self.logmh_z05 = np.log10((10.**self.logmh_z05)/self.model.littleh)
-        self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.model.littleh)
+        self.logmh_z01 = np.log10((10.**self.logmh_z01)*self.model.littleh)
+        self.logmratio_z05 = np.log10((10.**self.logmratio_z05)*self.model.littleh)
+        self.logmh_z1 = np.log10((10.**self.logmh_z1)*self.model.littleh)
+        self.logmratio_z01 = np.log10((10.**self.logmratio_z01)*self.model.littleh)
+        self.logmh_z05 = np.log10((10.**self.logmh_z05)*self.model.littleh)
+        self.logmratio_z1 = np.log10((10.**self.logmratio_z1)*self.model.littleh)
 
     def test_behroozi10_smhm_blackbox(self):
         """
