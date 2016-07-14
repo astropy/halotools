@@ -57,22 +57,44 @@ def test_Leauthaud11Sats():
     model.param_dict['alphasat'] *= 1.1
     nsat2 = model.mean_occupation(prim_haloprop=5.e12)
     assert nsat2 < nsat1
-#
+
+    # Msat := Bsat(mhalo_thresh/1e12)**betasat
+    # since mhalo_thresh(logM*=10.5) > 1e12, increasing betasat should increase Msat
+    msat1 = np.copy(model._msat)
     model.param_dict['betasat'] *= 1.1
-    nsat3 = model.mean_occupation(prim_haloprop=5.e12)
-    assert nsat3 > nsat2
-#
-    model.param_dict['betacut'] *= 1.1
-    nsat4 = model.mean_occupation(prim_haloprop=5.e12)
-    assert nsat4 < nsat3
-#
-    model.param_dict['bcut'] *= 1.1
-    nsat5 = model.mean_occupation(prim_haloprop=5.e12)
-    assert nsat5 < nsat4
-#
+    model._update_satellite_params()
+    msat2 = np.copy(model._msat)
+    assert msat2 > msat1
+
+    # Msat := Bsat(mhalo_thresh/1e12)**betasat
+    # Increasing Bsat should increase Msat regardless of mass
+    model._update_satellite_params()
+    msat1 = np.copy(model._msat)
     model.param_dict['bsat'] *= 1.1
-    nsat6 = model.mean_occupation(prim_haloprop=5.e12)
-    assert nsat6 < nsat5
+    model._update_satellite_params()
+    msat2 = np.copy(model._msat)
+    assert msat2 > msat1
+#
+    # Mcut := Bcut(mhalo_thresh/1e12)**betacut
+    # Default value of betacut is -0.13 for default threshold of 10.5
+    # since mhalo_thresh(logM*=10.5) > 1e12, increasing betacut should increase Mcut
+    model.param_dict['betacut'] = -0.13
+    model._update_satellite_params()
+    mcut1 = np.copy(model._mcut)
+    model.param_dict['betacut'] = -0.1
+    model._update_satellite_params()
+    mcut2 = np.copy(model._mcut)
+    assert mcut2 > mcut1
+# #
+    # Mcut := Bcut(mhalo_thresh/1e12)**betacut
+    # Increasing Bcut should increase Mcut regardless of mass
+    model._update_satellite_params()
+    mcut1 = np.copy(model._mcut)
+    model.param_dict['bcut'] *= 1.1
+    model._update_satellite_params()
+    mcut2 = np.copy(model._mcut)
+    assert mcut2 > mcut1
+# #
 #
     # Check that modulate_with_cenocc strictly decreases the mean occupations
     model2a = Leauthaud11Sats(modulate_with_cenocc=False)

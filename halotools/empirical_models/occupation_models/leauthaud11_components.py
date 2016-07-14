@@ -261,7 +261,6 @@ class Leauthaud11Sats(OccupationComponent):
 
         self.central_occupation_model = cenocc_model
 
-
         super(Leauthaud11Sats, self).__init__(
             gal_type='satellites', threshold=threshold,
             upper_occupation_bound=float("inf"),
