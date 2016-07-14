@@ -281,7 +281,7 @@ class MockFactory(object):
                 approx_cell1_size=[rmax, rmax, rmax])
             return rbin_centers, xi11, xi12, xi22
 
-    def compute_galaxy_matter_cross_clustering(self, include_complement=False, **kwargs):
+    def compute_galaxy_matter_cross_clustering(self, include_complement=False, seed=None, **kwargs):
         """
         Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function.
 
@@ -312,6 +312,11 @@ class MockFactory(object):
         num_threads : int, optional
             Number of CPU cores to use in the calculation.
             Default is maximum number available.
+
+        seed : integer, optional
+            Random number seed used when drawing random numbers with `numpy.random`.
+            Useful when deterministic results are desired, such as during unit-testing.
+            Default is None, producing stochastic results.
 
         Returns
         --------
@@ -374,7 +379,7 @@ class MockFactory(object):
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
         if nptcl < len(self.ptcl_table):
-            ptcl_table = randomly_downsample_data(self.ptcl_table, nptcl)
+            ptcl_table = randomly_downsample_data(self.ptcl_table, nptcl, seed=seed)
         else:
             ptcl_table = self.ptcl_table
 

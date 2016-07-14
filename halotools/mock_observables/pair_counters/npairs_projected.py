@@ -10,7 +10,7 @@ from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import (_set_approximate_cell_sizes, _enclose_in_box,
     _cell1_parallelization_indices)
 from .cpairs import npairs_projected_engine
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic, custom_len
+from ...utils.array_utils import array_is_monotonic, custom_len
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
@@ -199,7 +199,7 @@ def _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
                 min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
     else:
         PBCs = True
-        period = convert_to_ndarray(period).astype(float)
+        period = np.atleast_1d(period).astype(float)
         if len(period) == 1:
             period = np.array([period[0]]*3)
         try:

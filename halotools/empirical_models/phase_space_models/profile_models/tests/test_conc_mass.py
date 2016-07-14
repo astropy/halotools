@@ -5,12 +5,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from astropy.table import Table
 from unittest import TestCase
+from astropy.utils.misc import NumpyRNGContext
 
 from ..conc_mass_models import ConcMass
 
 from .... import model_defaults
 
 __all__ = ['TestConcMass']
+
+fixed_seed = 43
 
 
 class TestConcMass(TestCase):
@@ -57,7 +60,8 @@ class TestConcMass(TestCase):
         """
         Npts = int(1e3)
         mass = np.logspace(10, 15, Npts)
-        conc = np.random.uniform(0, 100, Npts)
+        with NumpyRNGContext(fixed_seed):
+            conc = np.random.uniform(0, 100, Npts)
         t = Table({'conc': conc, 'halo_mvir': mass})
         conc_result = self.direct_model.compute_concentration(table=t)
 

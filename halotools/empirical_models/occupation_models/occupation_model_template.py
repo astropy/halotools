@@ -8,6 +8,7 @@ import numpy as np
 from scipy.stats import poisson
 from astropy.extern import six
 from abc import ABCMeta
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults, model_helpers
 
@@ -153,8 +154,8 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input table.
         """
-        np.random.seed(seed=seed)
-        mc_generator = np.random.random(custom_len(first_occupation_moment))
+        with NumpyRNGContext(seed):
+            mc_generator = np.random.random(custom_len(first_occupation_moment))
 
         result = np.where(mc_generator < first_occupation_moment, 1, 0)
         if 'table' in kwargs:
@@ -179,13 +180,13 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input table.
         """
-        np.random.seed(seed=seed)
         # The scipy built-in Poisson number generator raises an exception
         # if its input is zero, so here we impose a simple workaround
         first_occupation_moment = np.where(first_occupation_moment <=0,
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
 
-        result = poisson.rvs(first_occupation_moment)
+        with NumpyRNGContext(seed):
+            result = poisson.rvs(first_occupation_moment)
         if 'table' in kwargs:
             kwargs['table']['halo_num_'+self.gal_type] = result
         return result

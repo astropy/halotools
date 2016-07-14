@@ -35,7 +35,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         """
         """
         t = deepcopy(self.table)
-        broadcast_host_halo_property(t, 'halo_mvir')
+        broadcast_host_halo_property(t, 'halo_mvir', delete_possibly_existing_column=True)
 
         assert 'halo_mvir_host_halo' in list(t.keys())
 
@@ -82,7 +82,7 @@ class TestValueAddedHaloTableFunctions(TestCase):
         t = deepcopy(self.table)
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(t, 'xxx')
-        substr = "The input table does not the input ``halo_property_key``"
+        substr = "The input table does not have the input ``halo_property_key``"
         assert substr in err.value.args[0]
 
         del t
@@ -91,7 +91,6 @@ class TestValueAddedHaloTableFunctions(TestCase):
         """
         """
         t = deepcopy(self.table)
-        broadcast_host_halo_property(t, 'halo_mvir')
 
         with pytest.raises(HalotoolsError) as err:
             broadcast_host_halo_property(t, 'halo_mvir')

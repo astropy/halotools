@@ -9,7 +9,6 @@ from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
 from .engines import velocity_marked_npairs_3d_engine
 
-from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')

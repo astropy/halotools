@@ -1,13 +1,17 @@
-#!/usr/bin/env python
+"""
+"""
 from unittest import TestCase
 import numpy as np
 from astropy.table import Table
+from astropy.utils.misc import NumpyRNGContext
 
 from ..nfw_phase_space import NFWPhaseSpace
 from ..profile_models.tests import analytic_nfw_density_outer_shell_normalization
 from ..profile_models.tests import monte_carlo_density_outer_shell_normalization
 
 __all__ = ['TestNFWPhaseSpace']
+
+fixed_seed = 43
 
 
 class TestNFWPhaseSpace(TestCase):
@@ -30,17 +34,17 @@ class TestNFWPhaseSpace(TestCase):
         npts = int(1e3)
         Lbox = 250
         zeros = np.zeros(npts)
-        x = np.random.uniform(0, Lbox, npts)
-        y = np.random.uniform(0, Lbox, npts)
-        z = np.random.uniform(0, Lbox, npts)
-        halo_vx = np.random.uniform(-250, 250, npts)
-        halo_vy = np.random.uniform(-250, 250, npts)
-        halo_vz = np.random.uniform(-250, 250, npts)
-        d = np.random.uniform(0, 0.25, npts)
-        rvir = np.zeros(npts) + 0.2
-        conc_nfw = np.random.uniform(1.5, 15, npts)
+        with NumpyRNGContext(fixed_seed):
+            x = np.random.uniform(0, Lbox, npts)
+            y = np.random.uniform(0, Lbox, npts)
+            z = np.random.uniform(0, Lbox, npts)
+            halo_vx = np.random.uniform(-250, 250, npts)
+            halo_vy = np.random.uniform(-250, 250, npts)
+            halo_vz = np.random.uniform(-250, 250, npts)
+            d = np.random.uniform(0, 0.25, npts)
+            rvir = np.zeros(npts) + 0.2
+            conc_nfw = np.random.uniform(1.5, 15, npts)
         mass = np.zeros(npts) + 1e12
-        vvir = self.nfw.virial_velocity(total_mass=mass)
 
         self._dummy_halo_table = Table({'halo_x': x, 'halo_y': y, 'halo_z': z,
             'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw,
@@ -81,6 +85,17 @@ class TestNFWPhaseSpace(TestCase):
         norm = np.linalg.norm(pos, axis=1)
         assert np.allclose(norm, 1, rtol=1e-4)
 
+    def test_mc_unit_sphere_stochasticity(self):
+        """ Method used to test correctness of stochasticity/deterministic behavior of
+        `~halotools.empirical_models.NFWPhaseSpace.mc_unit_sphere`.
+        """
+        x1, y1, z1 = self.nfw.mc_unit_sphere(100, seed=43)
+        x2, y2, z2 = self.nfw.mc_unit_sphere(100, seed=43)
+        x3, y3, z3 = self.nfw.mc_unit_sphere(100, seed=None)
+        assert np.allclose(x1, x2, rtol=0.001)
+        assert not np.allclose(x1, x3, rtol=0.001)
+
+
     def test_mc_dimensionless_radial_distance(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`.
 
@@ -114,6 +129,16 @@ class TestNFWPhaseSpace(TestCase):
                 analytic_nfw_density_outer_shell_normalization(rbin_midpoints, c))
             assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.05)
 
+    def test_mc_dimensionless_radial_distance_stochasticity(self):
+        """ Method used to test correctness of stochasticity/deterministic behavior of
+        `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`.
+        """
+        x1 = self.nfw._mc_dimensionless_radial_distance(self.c15, seed=43)
+        x2 = self.nfw._mc_dimensionless_radial_distance(self.c15, seed=43)
+        x3 = self.nfw._mc_dimensionless_radial_distance(self.c15, seed=None)
+        assert np.allclose(x1, x2, rtol=0.001)
+        assert not np.allclose(x1, x3, rtol=0.001)
+
     def test_mc_solid_sphere(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`.
 
@@ -130,6 +155,18 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(y < 1)
         assert np.all(z > -1)
         assert np.all(z < 1)
+
+    def test_mc_solid_sphere_stochasticity(self):
+        """ Method used to test correctness of stochasticity/deterministic behavior of
+        `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`.
+        """
+        x1, y1, z1 = self.nfw.mc_solid_sphere(self.c15, seed=43)
+        x2, y2, z2 = self.nfw.mc_solid_sphere(self.c15, seed=43)
+        x3, y3, z3 = self.nfw.mc_solid_sphere(self.c15, seed=None)
+
+        assert np.allclose(x1, x2, rtol=0.001)
+        assert not np.allclose(x1, x3, rtol=0.001)
+
 
     def test_mc_halo_centric_pos(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`.
@@ -183,6 +220,22 @@ class TestNFWPhaseSpace(TestCase):
 
         t = Table({'c': self.c15})
 
+    def test_mc_halo_centric_pos_stochasticity(self):
+        """ Method used to test stochasticity/deterministic behavior of
+        `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`.
+
+        """
+        r = 0.25
+        halo_radius = np.zeros(len(self.c15)) + r
+        x15a, y15a, z15a = self.nfw.mc_halo_centric_pos(self.c15,
+            halo_radius=halo_radius, seed=43)
+        x15b, y15b, z15b = self.nfw.mc_halo_centric_pos(self.c15,
+            halo_radius=halo_radius, seed=43)
+        x15c, y15c, z15c = self.nfw.mc_halo_centric_pos(self.c15,
+            halo_radius=halo_radius, seed=None)
+        assert np.allclose(x15a, x15b, rtol=0.01)
+        assert not np.allclose(x15a, x15c, rtol=0.01)
+
     def test_mc_pos(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`.
 
@@ -215,7 +268,8 @@ class TestNFWPhaseSpace(TestCase):
         Clearly this particular function would benefit from more robust unit-testing.
 
         """
-        scaled_radius = np.random.uniform(0, 1, len(self.c15))
+        with NumpyRNGContext(fixed_seed):
+            scaled_radius = np.random.uniform(0, 1, len(self.c15))
         vr_disp = self.nfw._vrad_disp_from_lookup(scaled_radius, self.c15, seed=43)
 
         assert np.all(vr_disp < 1)
@@ -246,6 +300,28 @@ class TestNFWPhaseSpace(TestCase):
         analytical_result = vmax[0]/np.sqrt(3.)
         assert np.allclose(vr_dispersion_from_monte_carlo, analytical_result, rtol=0.1)
 
+    def test_mc_radial_velocity_stochasticity(self):
+        """ Method used to verify correct deterministic/stochastic behavior of
+        `~halotools.empirical_models.NFWPhaseSpace.mc_radial_velocity`.
+
+        """
+        npts = int(1e4)
+        conc = 10
+        carr = np.zeros(npts) + conc
+
+        mass = 1e12
+        rmax = self.nfw.rmax(mass, conc)
+        r = np.zeros(npts) + rmax
+        rvir = self.nfw.halo_mass_to_halo_radius(mass)
+        scaled_radius = r/rvir
+
+        mc_vr_seed43a = self.nfw.mc_radial_velocity(scaled_radius, mass, carr, seed=43)
+        mc_vr_seed43b = self.nfw.mc_radial_velocity(scaled_radius, mass, carr, seed=43)
+        mc_vr_seed44 = self.nfw.mc_radial_velocity(scaled_radius, mass, carr, seed=44)
+
+        assert np.allclose(mc_vr_seed43a, mc_vr_seed43b, rtol=0.001)
+        assert not np.allclose(mc_vr_seed43a, mc_vr_seed44, rtol=0.001)
+
     def test_mc_vel(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_vel`.
 
@@ -256,7 +332,7 @@ class TestNFWPhaseSpace(TestCase):
         Clearly this particular function would benefit from more robust unit-testing.
         """
         assert np.all(self._dummy_halo_table['vx'] == self._dummy_halo_table['halo_vx'])
-        self.nfw.mc_vel(self._dummy_halo_table)
+        self.nfw.mc_vel(self._dummy_halo_table, seed=fixed_seed)
         assert np.any(self._dummy_halo_table['vx'] != self._dummy_halo_table['halo_vx'])
 
     ### OLD TESTS OF THE NFW PROFILE MODEL

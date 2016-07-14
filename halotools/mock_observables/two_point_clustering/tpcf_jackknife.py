@@ -6,6 +6,7 @@ calculate the two point correlation function and covariance matrix.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_jackknife_3d
@@ -27,7 +28,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         sample2=None, period=None, do_auto=True, do_cross=True,
-        estimator='Natural', num_threads=1, max_sample_size=int(1e6)):
+        estimator='Natural', num_threads=1, max_sample_size=int(1e6), seed=None):
     """
     Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance
     matrix, :math:`{C}_{ij}`, between ith and jth radial bin.
@@ -122,6 +123,10 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     correlation_function(s) : numpy.array
@@ -207,7 +212,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
 
     #process input parameters
     function_args = (sample1, randoms, rbins, Nsub, sample2, period, do_auto,
-        do_cross, estimator, num_threads, max_sample_size)
+        do_cross, estimator, num_threads, max_sample_size, seed)
     sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _tpcf_jackknife_process_args(*function_args)
 
@@ -415,7 +420,7 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
 
 def _tpcf_jackknife_process_args(sample1, randoms, rbins,
         Nsub, sample2, period, do_auto, do_cross,
-        estimator, num_threads, max_sample_size):
+        estimator, num_threads, max_sample_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.jackknife_tpcf`.
@@ -432,7 +437,8 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
     if np.shape(randoms) == (1,):
         N_randoms = randoms[0]
         if PBCs is True:
-            randoms = np.random.random((N_randoms, 3))*period
+            with NumpyRNGContext(seed):
+                randoms = np.random.random((N_randoms, 3))*period
         else:
             msg = ("\n When no `period` parameter is passed, \n"
                    "the user must provide true randoms, and \n"
@@ -440,7 +446,7 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
             raise HalotoolsError(msg)
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size)
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

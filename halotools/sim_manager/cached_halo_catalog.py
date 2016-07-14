@@ -207,6 +207,16 @@ class CachedHaloCatalog(object):
             _ = self.halo_table
             del _
 
+        self._set_publication_list(self.simname)
+
+    def _set_publication_list(self, simname):
+        try:
+            simclass = supported_sims.supported_sim_dict[simname]
+            simobj = simclass()
+            self.publications = simobj.publications
+        except (KeyError, AttributeError):
+            self.publications = []
+
     def _verify_acceptable_constructor_call(self, *args, **kwargs):
         """
         """

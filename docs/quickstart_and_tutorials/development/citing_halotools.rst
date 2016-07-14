@@ -13,6 +13,11 @@ Halotools is currently preparing for its first "official" public release (v0.2).
 The v0.2 release is accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication,
 we ask that you cite this paper in your work.
 
+Depending on what you use Halotools to do, there may be additional citations that are appropriate.
+For example, if you use a model in the `~halotools.empirical_models` sub-package
+and/or a simulation in the `~halotools.sim_manager` sub-package that has
+a ``publications`` attribute, each of the papers in that list should be cited.
+
 Because Halotools is a large package
 with modular functionality, it will promote reproducibility of your results
 if you explicitly state which features of the code you used

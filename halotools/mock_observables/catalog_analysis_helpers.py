@@ -9,7 +9,8 @@ from ..empirical_models import enforce_periodicity_of_box
 
 from ..custom_exceptions import HalotoolsError
 
-__all__ = ('mean_y_vs_x', 'return_xyz_formatted_array', 'cuboid_subvolume_labels')
+__all__ = ('mean_y_vs_x', 'return_xyz_formatted_array', 'cuboid_subvolume_labels',
+    'relative_positions_and_velocities')
 __author__ = ['Andrew Hearin']
 
 
@@ -290,3 +291,147 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     index = inds[index[:, 0], index[:, 1], index[:, 2]].astype(int)
 
     return index, int(N_sub_vol)
+
+
+def sign_pbc(x1, x2, period=None, equality_fill_val=0.):
+    """ Return the sign of the unit vector pointing from x2 towards x1,
+    that is, the sign of (x1 - x2), accounting for periodic boundary conditions.
+
+    If x1 > x2, returns 1. If x1 < x2, returns -1. If x1 == x2, returns equality_fill_val.
+
+    Parameters
+    ----------
+    x1 : array
+        1-d array of length *Npts*.
+        If period is not None, all values must be contained in [0, Lbox)
+
+    x2 : array
+        1-d array of length *Npts*.
+        If period is not None, all values must be contained in [0, Lbox)
+
+    period : float, optional
+        Size of the periodic box. Default is None for non-periodic case.
+
+    equality_fill_val : float, optional
+        Value to return for cases where x1 == x2. Default is 0.
+
+    Returns
+    -------
+    sgn : array
+        1-d array of length *Npts*.
+
+    Examples
+    --------
+    >>> Lbox = 250.0
+    >>> x1 = 1.
+    >>> x2 = 249.
+    >>> result = sign_pbc(x1, x2, period=Lbox)
+    >>> assert result == 1
+
+    >>> result = sign_pbc(x1, x2, period=None)
+    >>> assert result == -1
+
+    >>> npts = 100
+    >>> x1 = np.random.uniform(0, Lbox, npts)
+    >>> x2 = np.random.uniform(0, Lbox, npts)
+    >>> result = sign_pbc(x1, x2, period=Lbox)
+    """
+    x1 = np.atleast_1d(x1)
+    x2 = np.atleast_1d(x2)
+    result = np.sign(x1 - x2)
+
+    if period is not None:
+        try:
+            assert np.all(x1 >= 0)
+            assert np.all(x2 >= 0)
+            assert np.all(x1 < period)
+            assert np.all(x2 < period)
+        except AssertionError:
+            msg = "If period is not None, all values of x and y must be between [0, period)"
+            raise ValueError(msg)
+
+        d = np.abs(x1-x2)
+        pbc_correction = np.sign(period/2. - d)
+        result = pbc_correction*result
+
+    if equality_fill_val != 0:
+        result = np.where(result == 0, equality_fill_val, result)
+
+    return result
+
+
+def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
+    """ Return the vector pointing from x2 towards x1,
+    that is, x1 - x2, accounting for periodic boundary conditions.
+
+    If keyword arguments ``v1`` and ``v2`` are passed in,
+    additionally return the velocity ``v1`` with respect to ``v2``, with sign convention
+    such that positive (negative) values correspond to receding (approaching) points.
+
+    Parameters
+    -----------
+    x1 : array
+        1-d array of length *Npts*.
+        If period is not None, all values must be contained in [0, Lbox)
+
+    x2 : array
+        1-d array of length *Npts*.
+        If period is not None, all values must be contained in [0, Lbox)
+
+    period : float, optional
+        Size of the periodic box. Default is None for non-periodic case.
+
+    Returns
+    --------
+    xrel : array
+        1-d array of length *Npts* storing x1 - x2.
+        If *x1 > x2* and abs(*x1* - *x2*) > period/2, the sign of *d* will be negative.
+
+    Examples
+    --------
+    >>> Lbox = 250.0
+    >>> x1 = 1.
+    >>> x2 = 249.
+    >>> result = relative_positions_and_velocities(x1, x2, period=Lbox)
+    >>> assert np.isclose(result, 2)
+
+    >>> result = relative_positions_and_velocities(x1, x2, period=None)
+    >>> assert np.isclose(result, -248)
+
+    >>> npts = 100
+    >>> x1 = np.random.uniform(0, Lbox, npts)
+    >>> x2 = np.random.uniform(0, Lbox, npts)
+    >>> result = relative_positions_and_velocities(x1, x2, period=Lbox)
+
+    Now let's frame this result in terms of a physically motivated example.
+    Suppose we have a central galaxy with position *xc* and velocity *vc*,
+    and a satellite galaxy with position *xs* and velocity *vs*.
+    We can calculate the vector pointing from the central to the satellite,
+    as well as the satellites's host-centric velocity:
+
+    >>> xcen, vcen = 249.9, 100
+    >>> xsat, vsat = 0.1, -300
+    >>> xrel, vrel = relative_positions_and_velocities(xsat, xcen, v1=vsat, v2=vcen, period=Lbox)
+    >>> assert np.isclose(xrel, +0.2)
+    >>> assert np.isclose(vrel, -400)
+
+    >>> xcen, vcen = 0.1, 100
+    >>> xsat, vsat = 249.9, -300
+    >>> xrel, vrel = relative_positions_and_velocities(xsat, xcen, v1=vsat, v2=vcen, period=Lbox)
+    >>> assert np.isclose(xrel, -0.2)
+    >>> assert np.isclose(vrel, +400)
+
+    """
+    s = sign_pbc(x1, x2, period=period, equality_fill_val=1.)
+    absd = np.abs(x1 - x2)
+    if period is None:
+        xrel = s*absd
+    else:
+        xrel = s*np.where(absd > period/2., period - absd, absd)
+
+    try:
+        v1 = kwargs['v1']
+        v2 = kwargs['v2']
+        return xrel, s*(v1-v2)
+    except KeyError:
+        return xrel

@@ -6,6 +6,7 @@ calculate the marked two-point correlation function.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .clustering_helpers import (process_optional_input_sample2,
     downsample_inputs_exceeding_max_sample_size)
@@ -28,7 +29,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def marked_tpcf(sample1, rbins, sample2=None,
         marks1=None, marks2=None, period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6), weight_func_id=1,
-        normalize_by='random_marks', iterations=1, randomize_marks=None):
+        normalize_by='random_marks', iterations=1, randomize_marks=None, seed=None):
     """
     Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
 
@@ -115,6 +116,11 @@ def marked_tpcf(sample1, rbins, sample2=None,
         when calculating the random weighted pair counts.  Default is [True]*N_marks.
         This parameter is only applicable if ``normalize_by`` is set to 'random_marks'.
         See Notes for more detail.
+
+    seed : int, optional
+        Random number seed used to shuffle the marks
+        and to randomly downsample data, if applicable.
+        Default is None, in which case downsampling and shuffling will be stochastic.
 
     Returns
     -------
@@ -302,7 +308,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     #process parameters
     function_args = (sample1, rbins, sample2, marks1, marks2,
         period, do_auto, do_cross, num_threads, max_sample_size,
-        weight_func_id, normalize_by, iterations, randomize_marks)
+        weight_func_id, normalize_by, iterations, randomize_marks, seed)
     sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross, num_threads,\
         weight_func_id, normalize_by, _sample1_is_sample2, PBCs,\
         randomize_marks = _marked_tpcf_process_args(*function_args)
@@ -324,8 +330,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
             for i in range(iterations):
                 print(i)
                 #get arrays to randomize marks
-                permutate1 = np.random.permutation(np.arange(0, len(sample1)))
-                permutate2 = np.random.permutation(np.arange(0, len(sample2)))
+                with NumpyRNGContext(seed):
+                    permutate1 = np.random.permutation(np.arange(0, len(sample1)))
+                    permutate2 = np.random.permutation(np.arange(0, len(sample2)))
                 R1R1[i, :], R1R2[i, :], R2R2[i, :] = random_counts(
                     sample1, sample2, rbins, period, num_threads,
                     do_auto, do_cross, marks1, marks2, weight_func_id,
@@ -339,8 +346,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
             R2R2 = np.median(R2R2, axis=0)
         else:
             #get arrays to randomize marks
-            permutate1 = np.random.permutation(np.arange(0, len(sample1)))
-            permutate2 = np.random.permutation(np.arange(0, len(sample2)))
+            with NumpyRNGContext(seed):
+                permutate1 = np.random.permutation(np.arange(0, len(sample1)))
+                permutate2 = np.random.permutation(np.arange(0, len(sample2)))
             R1R1, R1R2, R2R2 = random_counts(sample1, sample2, rbins, period,
                 num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,
                 _sample1_is_sample2, permutate1, permutate2, randomize_marks)
@@ -486,7 +494,7 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
         period, do_auto, do_cross, num_threads, max_sample_size,
-        wfunc, normalize_by, iterations, randomize_marks):
+        wfunc, normalize_by, iterations, randomize_marks, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.marked_tpcf`.
@@ -568,7 +576,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
         raise HalotoolsError(msg)
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size)
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

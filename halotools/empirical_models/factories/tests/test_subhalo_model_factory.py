@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
 import numpy as np
-from copy import copy
+from copy import deepcopy
 
 from ...smhm_models import Behroozi10SmHm, Moster13SmHm
 from ...component_model_templates import BinaryGalpropInterpolModel
@@ -18,6 +19,8 @@ from ....sim_manager import FakeSim
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestSubhaloModelFactory']
+
+fixed_seed = 43
 
 
 class TestSubhaloModelFactory(TestCase):
@@ -162,6 +165,45 @@ class TestSubhaloModelFactory(TestCase):
         substr = "this column is not available in the catalog you attempted to populate"
         assert substr in err.value.args[0]
         assert "``Jose Canseco``" in err.value.args[0]
+
+    def test_deterministic_mock_making(self):
+        """ Test ensuring that mock population is purely deterministic
+        when using the seed keyword.
+
+        This is a regression test associated with https://github.com/astropy/halotools/issues/551.
+        """
+        model = PrebuiltSubhaloModelFactory('behroozi10', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed)
+        mask = model.mock.galaxy_table['stellar_mass'] > 1e10
+        h1 = deepcopy(model.mock.galaxy_table[mask])
+        del model
+        del halocat
+
+        model = PrebuiltSubhaloModelFactory('behroozi10', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed)
+        mask = model.mock.galaxy_table['stellar_mass'] > 1e10
+        h2 = deepcopy(model.mock.galaxy_table[mask])
+        del model
+        del halocat
+
+        model = PrebuiltSubhaloModelFactory('behroozi10', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed+1)
+        mask = model.mock.galaxy_table['stellar_mass'] > 1e10
+        h3 = deepcopy(model.mock.galaxy_table[mask])
+        del model
+        del halocat
+
+        assert len(h1) == len(h2)
+        assert len(h1) != len(h3)
+
+        for key in h1.keys():
+            try:
+                assert np.allclose(h1[key], h2[key], rtol=0.001)
+            except TypeError:
+                pass
 
     def tearDown(self):
         pass

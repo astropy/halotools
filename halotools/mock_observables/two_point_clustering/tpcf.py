@@ -149,7 +149,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
         max_sample_size=int(1e6), approx_cell1_size=None,
         approx_cell2_size=None, approx_cellran_size=None,
-        RR_precomputed=None, NR_precomputed=None):
+        RR_precomputed=None, NR_precomputed=None, seed=None):
     """
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
 
@@ -254,6 +254,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         you must also provide the ``RR_precomputed`` argument.
         Default is None.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     correlation_function(s) : numpy.array
@@ -322,7 +326,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     function_args = (sample1, rbins, sample2, randoms, period,
         do_auto, do_cross, estimator, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, approx_cellran_size,
-        RR_precomputed, NR_precomputed)
+        RR_precomputed, NR_precomputed, seed)
 
     #pass arguments in, and get out processed arguments, plus some control flow variables
     (sample1, rbins, sample2, randoms, period,
@@ -399,7 +403,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
 def _tpcf_process_args(sample1, rbins, sample2, randoms,
         period, do_auto, do_cross, estimator, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, approx_cellran_size,
-        RR_precomputed, NR_precomputed):
+        RR_precomputed, NR_precomputed, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf`.
@@ -413,7 +417,7 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
         randoms = np.atleast_1d(randoms)
 
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size)
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

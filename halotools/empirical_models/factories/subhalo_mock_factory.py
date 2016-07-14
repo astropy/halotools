@@ -156,7 +156,7 @@ class SubhaloMockFactory(MockFactory):
                     "and returns a length-N array of strings.\n")
                 raise HalotoolsError(msg)
 
-    def populate(self):
+    def populate(self, seed=None):
         """
         Method populating subhalos with mock galaxies.
         By calling the `populate` method of your mock, you will repopulate
@@ -166,6 +166,12 @@ class SubhaloMockFactory(MockFactory):
 
         For an in-depth discussion of how this method is implemented,
         see the :ref:`subhalo_mock_factory_source_notes` section of the documentation.
+
+        Parameters
+        ----------
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Examples
         ----------
@@ -199,17 +205,17 @@ class SubhaloMockFactory(MockFactory):
         :ref:`subhalo_mock_factory_source_notes`
 
         """
-        self._allocate_memory()
+        self._allocate_memory(seed=seed)
 
         for method in self.model._mock_generation_calling_sequence:
             func = getattr(self.model, method)
-            func(table=self.galaxy_table)
+            func(table=self.galaxy_table, seed=seed)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
             self.galaxy_table = self.galaxy_table[mask]
 
-    def _allocate_memory(self):
+    def _allocate_memory(self, seed=None):
         """
         """
         Ngals = len(self.galaxy_table)

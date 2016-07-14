@@ -8,7 +8,6 @@ import numpy as np
 
 from ..pair_counters import npairs_per_object_3d
 
-from ...utils.array_utils import convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
 
@@ -125,8 +124,8 @@ def _large_scale_density_spherical_annulus_process_args(
         period, sample_volume, num_threads, approx_cell1_size):
     """
     """
-    sample = convert_to_ndarray(sample)
-    tracers = convert_to_ndarray(tracers)
+    sample = np.atleast_1d(sample)
+    tracers = np.atleast_1d(tracers)
 
     try:
         assert outer_radius > inner_radius
@@ -142,7 +141,7 @@ def _large_scale_density_spherical_annulus_process_args(
         else:
             sample_volume = float(sample_volume)
     else:
-        period = convert_to_ndarray(period)
+        period = np.atleast_1d(period)
         if len(period) == 1:
             period = np.array([period, period, period])
         elif len(period) == 3:

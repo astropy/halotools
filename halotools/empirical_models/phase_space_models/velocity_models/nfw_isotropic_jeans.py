@@ -11,8 +11,6 @@ from scipy.integrate import quad as quad_integration
 
 from .isotropic_jeans_model_template import IsotropicJeansVelocity
 
-from ....utils.array_utils import convert_to_ndarray
-
 __author__ = ['Andrew Hearin']
 
 __all__ = ['NFWJeansVelocity']
@@ -66,7 +64,7 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
             Radial velocity dispersion profile scaled by the virial velocity.
             The returned result has the same dimension as the input ``scaled_radius``.
         """
-        x = convert_to_ndarray(scaled_radius, dt=np.float64)
+        x = np.atleast_1d(scaled_radius).astype(np.float64)
         result = np.zeros_like(x)
 
         prefactor = conc*(conc*x)*(1. + conc*x)**2/self.g(conc)

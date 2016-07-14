@@ -1,7 +1,17 @@
-0.3 (unreleased)
+0.4 (unreleased)
 ----------------
 
-- No changes yet
+- All models now support an optional ``seed`` keyword argument, allowing for deterministic Monte Carlo realizations of models. As a result of this feature, it is now mandatory that all user-defined models obey a new constraint. Any function appearing in the ``mock_generation_calling_sequence`` must now use the kwargs Python syntax to catch any additional inputs passed to these functions by the MockFactory.
+
+- Added relative_positions_and_velocities function to mock_observables
+
+
+0.3 (2016-06-28)
+----------------
+
+- Removed distant_observer_redshift function from mock_survey module
+
+- Removed -march=native compiler flag to resolve installation problems on some architectures
 
 
 0.2 (2016-06-09)

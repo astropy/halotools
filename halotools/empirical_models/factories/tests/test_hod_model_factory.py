@@ -10,6 +10,7 @@ from copy import copy
 from ...factories import HodModelFactory, PrebuiltHodModelFactory
 
 from ....sim_manager import FakeSim
+from ....empirical_models import zheng07_model_dictionary, OccupationComponent
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestHodModelFactory']
@@ -74,6 +75,29 @@ class TestHodModelFactory(TestCase):
         with pytest.raises(HalotoolsError) as err:
             m.populate_mock(halocat=halocat)
         substr = "does not have the ``halo_upid`` column."
+        assert substr in err.value.args[0]
+
+    def test_censat_consistency_check(self):
+        """
+        This test verifies that an informative exception will be raised if
+        a satellite OccupationComponent implements the ``cenocc_model`` feature
+        in a way that is inconsistent with the actual central occupation component
+        used in the composite model.
+
+        See https://github.com/astropy/halotools/issues/577 for context.
+        """
+        model = HodModelFactory(**zheng07_model_dictionary(modulate_with_cenocc=True))
+        model._test_censat_occupation_consistency(model.model_dictionary)
+
+        class DummySatComponent(OccupationComponent):
+            def __init__(self):
+                self.central_occupation_model = 43
+                self.gal_type = 'satellites'
+
+        model.model_dictionary['dummy_key'] = DummySatComponent()
+        with pytest.raises(HalotoolsError) as err:
+            model._test_censat_occupation_consistency(model.model_dictionary)
+        substr ="has a ``central_occupation_model`` attribute with an inconsistent "
         assert substr in err.value.args[0]
 
     def tearDown(self):

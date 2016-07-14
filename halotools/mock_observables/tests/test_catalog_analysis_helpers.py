@@ -1,7 +1,7 @@
 """ Module providing unit-testing for the functions in
 `~halotools.mock_observables.catalog_analysis_helpers` module.
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 
@@ -74,6 +74,163 @@ def test_cuboid_subvolume_labels_correctness():
     sample = generate_locus_of_3d_points(Npts, xc=0.1, yc=0.9, zc=0.1, seed=fixed_seed)
     labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     assert np.all(labels == 3)
+
+
+def test_sign_pbc1():
+    x1 = np.array([1, 2, 3, 4, 5])
+    x2 = np.array([0, 2, 4, 5, 0])
+
+    s = cat_helpers.sign_pbc(x1, x2)
+    assert np.all(s == [1, 0, -1, -1, 1])
+
+    s = cat_helpers.sign_pbc(x1, x2, equality_fill_val=9)
+    assert np.all(s == [1, 9, -1, -1, 1])
+
+
+def test_sign_pbc2():
+    x1 = np.array((1, 4, 6, 9.))
+
+    x2 = np.array((0, 3, 5, 8))
+    s = cat_helpers.sign_pbc(x1, x2, period=10)
+    assert np.all(s == [1, 1, 1., 1])
+
+
+def test_sign_pbc3():
+    x1 = np.array((1, 4, 6, 9.))
+    x2 = np.array((9, 9.9, 0, 0))
+
+    s = cat_helpers.sign_pbc(x1, x2, period=10)
+    assert np.all(s == (1, 1, -1, -1))
+
+    s = cat_helpers.sign_pbc(x1, x2)
+    assert np.all(s == (-1, -1, 1, 1))
+
+
+def test_sign_pbc_catches_out_of_bounds():
+    x1 = np.array((1, 4, 6, 9.))
+
+    x2 = np.array((2, 5, 7, 10))
+    with pytest.raises(ValueError) as err:
+        __ = cat_helpers.sign_pbc(x1, x2, period=10)
+    substr = "If period is not None, all values of x and y must be between [0, period)"
+    assert substr in err.value.args[0]
+
+    s = cat_helpers.sign_pbc(x1, x2)
+    assert np.all(s == (-1, -1, -1, -1))
+
+
+def test_relative_positions_and_velocities_catches_out_of_bounds():
+    x1 = np.array((1, 4, 6, 10.))
+    x2 = x1
+    with pytest.raises(ValueError) as err:
+        __ = cat_helpers.relative_positions_and_velocities(x1, x2, period=10)
+    substr = "If period is not None, all values of x and y must be between [0, period)"
+    assert substr in err.value.args[0]
+
+
+def test_relative_positions_and_velocities1():
+    """ In this test, x1 > x2 and PBCs are irrelevant
+    """
+    period = 10
+    x1 = np.array((1, 4, 6, 9.))
+    x2 = x1 - 1
+    result = cat_helpers.relative_positions_and_velocities(x1, x2, period=period)
+    assert np.all(result == np.ones(len(x1)))
+    result = cat_helpers.relative_positions_and_velocities(x1, x2)
+    assert np.all(result == np.ones(len(x1)))
+
+
+def test_relative_positions_and_velocities2():
+    """ In this test, x1 > x2 and PBCs impact the results
+    """
+    period = 10
+    x1 = np.array((1, 4, 6, 9.))
+    x2 = np.mod(x1 - 1 + period, period)
+    result = cat_helpers.relative_positions_and_velocities(x1, x2, period=period)
+    assert np.all(result == np.ones(len(x1)))
+
+
+def test_relative_positions_and_velocities3():
+    """ In this test, x1 < x2 and PBCs are irrelevant
+    """
+    period = 100
+    x1 = np.array((1, 4, 6, 9.))
+    x2 = x1 + 1
+    result = cat_helpers.relative_positions_and_velocities(x1, x2, period=period)
+    assert np.all(result == -np.ones(len(x1)))
+    result = cat_helpers.relative_positions_and_velocities(x1, x2)
+    assert np.all(result == -np.ones(len(x1)))
+
+
+def test_relative_positions_and_velocities4():
+    """ In this test, x1 < x2 and PBCs impact the results
+    """
+    period = 10
+    x1 = np.array((1, 4, 6, 9.))
+    x2 = np.zeros(len(x1))
+    result = cat_helpers.relative_positions_and_velocities(x1, x2, period=period)
+    assert np.all(result == np.array((1, 4, -4, -1)))
+    result = cat_helpers.relative_positions_and_velocities(x1, x2)
+    assert np.all(result == x1)
+
+
+def test_relative_velocities1():
+    """ In this test, x1 > x2 and PBCs are irrelevant
+    """
+    period = 100
+    x1 = np.array((9, 9, 9, 9))
+    x2 = x1 - 1
+    v1 = np.array((100, 100, 100, 100))
+    v2 = np.array((-100, -10, 90, 110))
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, period=period, v1=v1, v2=v2)
+    assert np.all(vrel == (200, 110, 10, -10))
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, v1=v1, v2=v2)
+    assert np.all(vrel == (200, 110, 10, -10))
+
+
+def test_relative_velocities2():
+    """ In this test, x1 > x2 and PBCs impact the results
+    """
+    period = 10
+    x1 = np.array((9, 9, 9, 9))
+    x2 = np.zeros(len(x1))
+    v1 = np.array((100, 100, 100, 100))
+    v2 = np.array((-100, -10, 90, 110))
+    correct_result = np.array((-200, -110, -10, 10))
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, period=period, v1=v1, v2=v2)
+    assert np.all(vrel == correct_result)
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, v1=v1, v2=v2)
+    assert np.all(vrel == -correct_result)
+
+
+def test_relative_velocities3():
+    """ In this test, x1 < x2 and PBCs are irrelevant
+    """
+    period = 100
+    x1 = np.array((9, 9, 9, 9))
+    x2 = x1 + 1
+    v1 = np.array((100, 100, 100, 100))
+    v2 = np.array((-100, -10, 90, 110))
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, period=period, v1=v1, v2=v2)
+    correct_result = np.array((-200, -110, -10, 10))
+    assert np.all(vrel == correct_result)
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, v1=v1, v2=v2)
+    assert np.all(vrel == correct_result)
+
+
+def test_relative_velocities4():
+    """ In this test, x1 < x2 and PBCs are irrelevant
+    """
+    period = 10
+    x1 = np.zeros(4)
+    x2 = np.zeros(4) + 9.
+    v1 = np.array((100, 100, 100, 100))
+    v2 = np.array((-100, -10, 90, 110))
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, period=period, v1=v1, v2=v2)
+    correct_result = np.array((200, 110, 10, -10))
+    assert np.all(vrel == correct_result)
+    xrel, vrel = cat_helpers.relative_positions_and_velocities(x1, x2, v1=v1, v2=v2)
+    assert np.all(vrel == -correct_result)
 
 
 class TestCatalogAnalysisHelpers(TestCase):

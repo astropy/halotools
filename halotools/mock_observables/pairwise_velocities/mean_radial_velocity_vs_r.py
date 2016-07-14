@@ -12,8 +12,6 @@ from .pairwise_velocities_helpers import _pairwise_velocity_stats_process_args
 
 from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
 
-from ..mock_observables_helpers import get_separation_bins_array
-
 __all__ = ('mean_radial_velocity_vs_r', )
 __author__ = ['Duncan Campbell']
 
@@ -24,7 +22,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
         sample2=None, velocities2=None,
         period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6),
-        approx_cell1_size=None, approx_cell2_size=None):
+        approx_cell1_size=None, approx_cell2_size=None, seed=None):
     """
     Calculate the mean pairwise velocity, :math:`\\bar{v}_{12}(r)`.
 
@@ -86,6 +84,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
         Analogous to ``approx_cell1_size``, but for `sample2`.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     v_12 : numpy.array
@@ -146,7 +148,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     """
 
     function_args = (sample1, velocities1, sample2, velocities2, period,
-        do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size)
+        do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size, seed)
 
     sample1, velocities1, sample2, velocities2, period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)

@@ -5,35 +5,20 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
-from ..mock_survey import distant_observer_redshift, ra_dec_z
+from ..mock_survey import ra_dec_z
 
-__all__=['test_distant_observer', 'test_ra_dec_z']
+__all__ = ('test_ra_dec_z', )
+
+fixed_seed = 43
 
 #create some toy data to test functions
 N=100
-x = np.random.random((N, 3))
-v = np.random.random((N, 3))*0.1
+with NumpyRNGContext(fixed_seed):
+    x = np.random.random((N, 3))
+    v = np.random.random((N, 3))*0.1
 period = np.array([1.0, 1.0, 1.0])
-
-
-@pytest.mark.slow
-def test_distant_observer():
-    """
-    test distant observer function
-    """
-    redshifts = distant_observer_redshift(x, v)
-
-    assert len(redshifts)==N, "redshift array is not the correct size"
-
-    redshifts = distant_observer_redshift(x, v, period=period)
-
-    from astropy.constants import c
-    c_km_s = c.to('km/s').value
-    z_cos_max = period[2]*100.00/c_km_s
-
-    assert len(redshifts)==N, "redshift array is not the correct size"
-    assert np.max(redshifts)<=z_cos_max, "PBC is not handeled correctly for redshifts"
 
 
 @pytest.mark.slow

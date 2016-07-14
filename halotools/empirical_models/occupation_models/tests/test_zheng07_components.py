@@ -312,7 +312,7 @@ class TestZheng07Sats(TestCase):
         expected_result = 1.0
         np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
-    def test_ncen_inheritance_behavior(self):
+    def test_ncen_inheritance_behavior1(self):
         satmodel_nocens = zheng07_components.Zheng07Sats()
         cenmodel = zheng07_components.Zheng07Cens()
         satmodel_cens = zheng07_components.Zheng07Sats(modulate_with_cenocc=True)
@@ -328,6 +328,53 @@ class TestZheng07Sats(TestCase):
 
         mean_occ_cens = satmodel_cens.central_occupation_model.mean_occupation(prim_haloprop=masses)
         assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
+
+    def test_ncen_inheritance_behavior2(self):
+        """ Verify that the ``modulate_with_cenocc`` and ``cenocc_model``
+        keyword arguments behave as expected, including propagation of
+        param_dict values.
+        """
+        from .. import OccupationComponent
+
+        class MyCenModel(OccupationComponent):
+
+            def __init__(self, threshold):
+                OccupationComponent.__init__(self, gal_type='centrals',
+                        threshold=threshold, upper_occupation_bound=1.)
+                self.param_dict['new_cen_param'] = 0.5
+
+            def mean_occupation(self, **kwargs):
+                try:
+                    halo_table = kwargs['table']
+                    num_halos = len(halo_table)
+                except KeyError:
+                    mass_array = kwargs['prim_haloprop']
+                    num_halos = len(mass_array)
+
+                result = np.zeros(num_halos) + self.param_dict['new_cen_param']
+                return result
+
+        my_cen_model = MyCenModel(threshold=-20)
+        my_sat_model1 = zheng07_components.Zheng07Sats(
+            threshold=-20, modulate_with_cenocc=True, cenocc_model=my_cen_model)
+        my_sat_model2 = zheng07_components.Zheng07Sats(
+            threshold=-20, modulate_with_cenocc=True)
+        my_sat_model3 = zheng07_components.Zheng07Sats(
+            threshold=-20, modulate_with_cenocc=False, cenocc_model=my_cen_model)
+
+        mass_array = np.logspace(11, 15, 10)
+        result1a = my_sat_model1.mean_occupation(prim_haloprop=mass_array)
+        result2 = my_sat_model2.mean_occupation(prim_haloprop=mass_array)
+        result3 = my_sat_model3.mean_occupation(prim_haloprop=mass_array)
+
+        assert not np.allclose(result1a, result2, rtol=0.001)
+        assert not np.allclose(result1a, result3, rtol=0.001)
+        assert not np.allclose(result2, result3, rtol=0.001)
+
+        my_sat_model1.param_dict['new_cen_param'] = 1.
+        result1b = my_sat_model1.mean_occupation(prim_haloprop=mass_array)
+        assert not np.allclose(result1a, result1b, rtol=0.001)
+        assert np.allclose(result1b, result3, rtol=0.001)
 
     def test_alpha_scaling1_mean_occupation(self):
 
@@ -411,6 +458,15 @@ class TestZheng07Sats(TestCase):
         with pytest.raises(HalotoolsError) as err:
             _ = self.default_model.mean_occupation(x=4)
         substr = "You must pass either a ``table`` or ``prim_haloprop`` argument"
+        assert substr in err.value.args[0]
+
+    def test_occupation_component_requirement(self):
+        """ Verify that the optional ``cenocc_model`` input is correctly
+        enforced to be an instance of the OccupationComponent class.
+        """
+        with pytest.raises(HalotoolsError) as err:
+            __ = zheng07_components.Zheng07Sats(modulate_with_cenocc=True, cenocc_model=7)
+        substr = "``OccupationComponent`` or one of its sub-classes"
         assert substr in err.value.args[0]
 
     def test_get_published_parameters1(self):

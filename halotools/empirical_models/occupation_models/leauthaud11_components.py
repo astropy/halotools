@@ -5,6 +5,7 @@ This module contains occupation components used by the Leauthaud11 composite mod
 import numpy as np
 import math
 from scipy.special import erf
+import warnings
 
 from .occupation_model_template import OccupationComponent
 
@@ -13,7 +14,7 @@ from ..smhm_models import Behroozi10SmHm
 from ..assembias_models import HeavisideAssembias
 
 from ... import sim_manager
-from ...custom_exceptions import HalotoolsModelInputError
+from ...custom_exceptions import HalotoolsModelInputError, HalotoolsError
 
 __all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
            'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
@@ -194,7 +195,7 @@ class Leauthaud11Sats(OccupationComponent):
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
             prim_haloprop_key=model_defaults.prim_haloprop_key,
             redshift=sim_manager.sim_defaults.default_redshift,
-            modulate_with_cenocc=True,
+            modulate_with_cenocc=True, cenocc_model=None,
             **kwargs):
         """
         Parameters
@@ -216,6 +217,18 @@ class Leauthaud11Sats(OccupationComponent):
             If True, the first satellite moment will be multiplied by the
             the first central moment. Default is True.
 
+        cenocc_model : `OccupationComponent`, optional
+            If the ``cenocc_model`` keyword argument is set to its default value
+            of None, then the :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` prefactor will be
+            calculated according to `leauthaud11Cens.mean_occupation`.
+            However, if an instance of the `OccupationComponent` class is instead
+            passed in via the ``cenocc_model`` keyword,
+            then the first satellite moment will be multiplied by
+            the ``mean_occupation`` function of the ``cenocc_model``.
+            The ``modulate_with_cenocc`` keyword must be set to True in order
+            for the ``cenocc_model`` to be operative.
+            See :ref:`zheng07_using_cenocc_model_tutorial` for further details.
+
         Examples
         --------
         >>> sat_model = Leauthaud11Sats()
@@ -223,25 +236,48 @@ class Leauthaud11Sats(OccupationComponent):
 
         self.littleh = 0.72
 
-        self.central_occupation_model = Leauthaud11Cens(
-            threshold=threshold, prim_haloprop_key=prim_haloprop_key,
-            redshift=redshift, **kwargs)
+        if cenocc_model is None:
+            cenocc_model = Leauthaud11Cens(
+                prim_haloprop_key=prim_haloprop_key, threshold=threshold
+            )
+        else:
+            if modulate_with_cenocc is False:
+                msg = ("You chose to input a ``cenocc_model``, but you set the \n"
+                       "``modulate_with_cenocc`` keyword to False, so your "
+                       "``cenocc_model`` will have no impact on the model's behavior.\n"
+                       "Be sure this is what you intend before proceeding.\n"
+                       "Refer to the Leauthand et al. (2011) composite model tutorial for details.\n")
+                warnings.warn(msg)
+
+        self.modulate_with_cenocc = modulate_with_cenocc
+
+        if self.modulate_with_cenocc:
+            try:
+                assert isinstance(cenocc_model, OccupationComponent)
+            except AssertionError:
+                msg = ("The input ``cenocc_model`` must be an instance of \n"
+                       "``OccupationComponent`` or one of its sub-classes.\n")
+                raise HalotoolsError(msg)
+
+        self.central_occupation_model = cenocc_model
+
 
         super(Leauthaud11Sats, self).__init__(
             gal_type='satellites', threshold=threshold,
             upper_occupation_bound=float("inf"),
             prim_haloprop_key=prim_haloprop_key,
             **kwargs)
+
         self.redshift = redshift
 
         self._initialize_param_dict()
 
-        self.modulate_with_cenocc = modulate_with_cenocc
+        self.param_dict.update(self.central_occupation_model.param_dict)
 
         self.publications = self.central_occupation_model.publications
 
     def mean_occupation(self, **kwargs):
-        """ Expected number of central galaxies in a halo of mass halo_mass.
+        """ Expected number of satellite galaxies in a halo of mass halo_mass.
         See Equation 12-14 of arXiv:1103.2077.
 
         Parameters
@@ -255,7 +291,7 @@ class Leauthaud11Sats(OccupationComponent):
         Returns
         -------
         mean_nsat : array
-            Mean number of central galaxies in the halo of the input mass.
+            Mean number of satellite galaxies in the halo of the input mass.
 
         Examples
         --------

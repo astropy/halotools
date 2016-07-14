@@ -8,10 +8,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from astropy.extern.six.moves import xrange as range
+from astropy.utils.misc import NumpyRNGContext
 
 from ..pair_counters import npairs_per_object_3d
 
-from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
+from ...utils.array_utils import array_is_monotonic
 from ...custom_exceptions import HalotoolsError
 
 
@@ -24,7 +25,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         period=None, num_threads=1,
-        approx_cell1_size=None, approx_cellran_size=None):
+        approx_cell1_size=None, approx_cellran_size=None, seed=None):
     """
     Calculate the void probability function (VPF), :math:`P_0(r)`,
     defined as the probability that a random
@@ -90,6 +91,10 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly lay down spheres, if applicable.
+        Default is None, in which case results will be stochastic.
+
     Returns
     -------
     vpf : numpy.array
@@ -133,7 +138,7 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
     (sample1, rbins, n_ran, random_sphere_centers,
         period, num_threads, approx_cell1_size, approx_cellran_size) = (
         _void_prob_func_process_args(sample1, rbins, n_ran, random_sphere_centers,
-            period, num_threads, approx_cell1_size, approx_cellran_size))
+            period, num_threads, approx_cell1_size, approx_cellran_size, seed))
 
     result = npairs_per_object_3d(random_sphere_centers, sample1, rbins,
         period=period, num_threads=num_threads,
@@ -147,12 +152,12 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
 
 def _void_prob_func_process_args(sample1, rbins,
         n_ran, random_sphere_centers, period, num_threads,
-        approx_cell1_size, approx_cellran_size):
+        approx_cell1_size, approx_cellran_size, seed):
     """
     """
-    sample1 = convert_to_ndarray(sample1)
+    sample1 = np.atleast_1d(sample1)
 
-    rbins = convert_to_ndarray(rbins)
+    rbins = np.atleast_1d(rbins)
     try:
         assert rbins.ndim == 1
         assert len(rbins) > 1
@@ -169,7 +174,7 @@ def _void_prob_func_process_args(sample1, rbins,
         ymin, ymax = np.min(sample1), np.max(sample1)
         zmin, zmax = np.min(sample1), np.max(sample1)
     else:
-        period = convert_to_ndarray(period)
+        period = np.atleast_1d(period)
         if len(period) == 1:
             period = np.array([period, period, period])
         elif len(period) == 3:
@@ -186,7 +191,7 @@ def _void_prob_func_process_args(sample1, rbins,
             msg = ("You must pass either ``n_ran`` or ``random_sphere_centers``")
             raise HalotoolsError(msg)
         else:
-            random_sphere_centers = convert_to_ndarray(random_sphere_centers)
+            random_sphere_centers = np.atleast_1d(random_sphere_centers)
             try:
                 assert random_sphere_centers.shape[1] == 3
             except AssertionError:
@@ -198,9 +203,10 @@ def _void_prob_func_process_args(sample1, rbins,
             msg = ("If passing in ``random_sphere_centers``, do not also pass in ``n_ran``.")
             raise HalotoolsError(msg)
         else:
-            xran = np.random.uniform(xmin, xmax, n_ran)
-            yran = np.random.uniform(ymin, ymax, n_ran)
-            zran = np.random.uniform(zmin, zmax, n_ran)
+            with NumpyRNGContext(seed):
+                xran = np.random.uniform(xmin, xmax, n_ran)
+                yran = np.random.uniform(ymin, ymax, n_ran)
+                zran = np.random.uniform(zmin, zmax, n_ran)
             random_sphere_centers = np.vstack([xran, yran, zran]).T
 
     return (sample1, rbins, n_ran, random_sphere_centers,

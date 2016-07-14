@@ -6,6 +6,7 @@ from copy import copy, deepcopy
 from astropy.tests.helper import pytest
 from unittest import TestCase
 import warnings
+from astropy.utils.misc import NumpyRNGContext
 
 from ..occupation_model_template import OccupationComponent
 
@@ -130,9 +131,10 @@ class TestOccupationComponent(TestCase):
             def mean_occupation(self, **kwargs):
                 return None
 
-            def mc_occupation(self, **kwargs):
+            def mc_occupation(self, seed=None, **kwargs):
                 table = kwargs['table']
-                result = np.random.randint(0, 2, len(table))
+                with NumpyRNGContext(seed):
+                    result = np.random.randint(0, 2, len(table))
                 table['halo_num_centrals'] = result
                 return result
 

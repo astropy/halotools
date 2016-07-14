@@ -20,7 +20,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
         max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,
-        approx_cellran_size=None):
+        approx_cellran_size=None, seed=None):
     """
     Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
     where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS).
@@ -129,6 +129,10 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for
         ``approx_cell1_size`` for details.
 
+    seed : int, optional
+        Random number seed used to randomly downsample data, if applicable.
+        Default is None, in which case downsampling will be stochastic.
+
     Returns
     -------
     correlation_function(s) : numpy.array
@@ -200,7 +204,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     #process input parameters
     function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
         do_cross, estimator, num_threads, max_sample_size,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size)
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
 

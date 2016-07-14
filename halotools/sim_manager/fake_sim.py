@@ -5,10 +5,13 @@ Primary use is to test the `~halotools.empirical_models` modules,
 particularly with doctests.
 """
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
 from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 from .sim_defaults import default_cosmology
+
+from ..utils import crossmatch
 
 __all__ = ('FakeSim', 'FakeSimHalosNearBoundaries')
 
@@ -74,7 +77,6 @@ class FakeSim(UserSuppliedHaloCatalog):
         self.redshift = redshift
 
         self.seed = seed
-        np.random.seed(self.seed)
 
         self.num_massbins = num_massbins
         self.num_halos_per_massbin = num_halos_per_massbin
@@ -83,16 +85,19 @@ class FakeSim(UserSuppliedHaloCatalog):
         self.cosmology = cosmology
 
         halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype='i8')
-        np.random.shuffle(halo_id)
+        with NumpyRNGContext(self.seed):
+            np.random.shuffle(halo_id)
         halo_id = halo_id[:self.num_halos]
 
-        randomizer = np.random.random(self.num_halos)
+        with NumpyRNGContext(self.seed):
+            randomizer = np.random.random(self.num_halos)
         subhalo_fraction = 0.1
         upid = np.where(randomizer > subhalo_fraction, -1, 1)
 
         host_mask = upid == -1
         host_ids = halo_id[host_mask]
-        upid[~host_mask] = np.random.choice(host_ids, len(upid[~host_mask]))
+        with NumpyRNGContext(self.seed):
+            upid[~host_mask] = np.random.choice(host_ids, len(upid[~host_mask]))
 
         halo_hostid = np.zeros(len(halo_id), dtype='i8')
         halo_hostid[host_mask] = halo_id[host_mask]
@@ -106,25 +111,32 @@ class FakeSim(UserSuppliedHaloCatalog):
         logvmaxbins = -4.25 + 0.5*(np.log10(massbins) - logrvirbins)
         vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
         vpeak = vmax
-        spin = np.random.random(self.num_halos)
-        conc = np.random.uniform(4, 15, self.num_halos)
-        rs = rvir/conc
-        zhalf = np.random.uniform(0, 10, self.num_halos)
-        dmdt = np.random.uniform(-1, 10, self.num_halos)
 
-        x = np.random.uniform(0, Lbox, self.num_halos)
-        y = np.random.uniform(0, Lbox, self.num_halos)
-        z = np.random.uniform(0, Lbox, self.num_halos)
-        vx = np.random.uniform(-500, 500, self.num_halos)
-        vy = np.random.uniform(-500, 500, self.num_halos)
-        vz = np.random.uniform(-500, 500, self.num_halos)
+        with NumpyRNGContext(self.seed):
+            spin = np.random.random(self.num_halos)
+            conc = np.random.uniform(4, 15, self.num_halos)
+            rs = rvir/conc
+            zhalf = np.random.uniform(0, 10, self.num_halos)
+            dmdt = np.random.uniform(-1, 10, self.num_halos)
 
-        px = np.random.uniform(0, Lbox, self.num_ptcl)
-        py = np.random.uniform(0, Lbox, self.num_ptcl)
-        pz = np.random.uniform(0, Lbox, self.num_ptcl)
-        pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
-        pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
-        pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+            x = np.random.uniform(0, Lbox, self.num_halos)
+            y = np.random.uniform(0, Lbox, self.num_halos)
+            z = np.random.uniform(0, Lbox, self.num_halos)
+            vx = np.random.uniform(-500, 500, self.num_halos)
+            vy = np.random.uniform(-500, 500, self.num_halos)
+            vz = np.random.uniform(-500, 500, self.num_halos)
+
+            px = np.random.uniform(0, Lbox, self.num_ptcl)
+            py = np.random.uniform(0, Lbox, self.num_ptcl)
+            pz = np.random.uniform(0, Lbox, self.num_ptcl)
+            pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
+            pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
+            pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+
+        idxA, idxB = crossmatch(halo_hostid, halo_id)
+        halo_mvir_host_halo = np.copy(mvir)
+        halo_mvir_host_halo[idxA] = mvir[idxB]
+
         ptclcat = UserSuppliedPtclCatalog(
             Lbox=Lbox, redshift=redshift, particle_mass=particle_mass,
             x=px, y=py, z=pz, vx=pvx, vy=pvy, vz=pvz)
@@ -148,6 +160,7 @@ class FakeSim(UserSuppliedHaloCatalog):
             halo_vpeak=vpeak,
             halo_spin=spin,
             halo_mass_accretion_rate=dmdt,
+            halo_mvir_host_halo=halo_mvir_host_halo,
             user_supplied_ptclcat=ptclcat
             )
 
@@ -190,7 +203,6 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
         self.version_name = 'dummy_version'
 
         self.seed = seed
-        np.random.seed(self.seed)
 
         self.num_massbins = num_massbins
         self.num_halos_per_massbin = num_halos_per_massbin
@@ -199,7 +211,8 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
 
         halo_id = np.arange(1e9, 1e9+self.num_halos)
 
-        randomizer = np.random.random(self.num_halos)
+        with NumpyRNGContext(self.seed):
+            randomizer = np.random.random(self.num_halos)
         subhalo_fraction = 0.1
         upid = np.where(randomizer > subhalo_fraction, -1, 1)
 
@@ -217,31 +230,35 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
         vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
         vpeak = vmax
 
-        conc = np.random.uniform(4, 15, self.num_halos)
-        rs = rvir/conc
-        zhalf = np.random.uniform(0, 10, self.num_halos)
+        with NumpyRNGContext(self.seed):
+            conc = np.random.uniform(4, 15, self.num_halos)
+            rs = rvir/conc
+            zhalf = np.random.uniform(0, 10, self.num_halos)
 
         x = np.zeros(self.num_halos)
         y = np.zeros(self.num_halos)
         z = np.zeros(self.num_halos)
         middle_index = int(self.num_halos/2.)
-        x[:middle_index] = np.random.uniform(0, 0.001, len(x[:middle_index]))
-        x[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(x[middle_index:]))
-        y[:middle_index] = np.random.uniform(0, 0.001, len(y[:middle_index]))
-        y[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(y[middle_index:]))
-        z[:middle_index] = np.random.uniform(0, 0.001, len(z[:middle_index]))
-        z[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(z[middle_index:]))
 
-        vx = np.random.uniform(-500, 500, self.num_halos)
-        vy = np.random.uniform(-500, 500, self.num_halos)
-        vz = np.random.uniform(-500, 500, self.num_halos)
+        with NumpyRNGContext(self.seed):
+            x[:middle_index] = np.random.uniform(0, 0.001, len(x[:middle_index]))
+            x[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(x[middle_index:]))
+            y[:middle_index] = np.random.uniform(0, 0.001, len(y[:middle_index]))
+            y[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(y[middle_index:]))
+            z[:middle_index] = np.random.uniform(0, 0.001, len(z[:middle_index]))
+            z[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(z[middle_index:]))
 
-        px = np.random.uniform(0, Lbox, self.num_ptcl)
-        py = np.random.uniform(0, Lbox, self.num_ptcl)
-        pz = np.random.uniform(0, Lbox, self.num_ptcl)
-        pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
-        pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
-        pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+            vx = np.random.uniform(-500, 500, self.num_halos)
+            vy = np.random.uniform(-500, 500, self.num_halos)
+            vz = np.random.uniform(-500, 500, self.num_halos)
+
+            px = np.random.uniform(0, Lbox, self.num_ptcl)
+            py = np.random.uniform(0, Lbox, self.num_ptcl)
+            pz = np.random.uniform(0, Lbox, self.num_ptcl)
+            pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
+            pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
+            pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+
         ptclcat = UserSuppliedPtclCatalog(
             Lbox=Lbox, redshift=redshift, particle_mass=particle_mass,
             x=px, y=py, z=pz, vx=pvx, vy=pvy, vz=pvz)

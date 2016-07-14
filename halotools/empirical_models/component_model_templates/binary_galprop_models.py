@@ -7,11 +7,12 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 from astropy.extern import six
 from abc import ABCMeta
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults
 from .. import model_helpers
 
-from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...utils.array_utils import custom_len
 from ...custom_exceptions import HalotoolsError
 
 __all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
@@ -110,11 +111,11 @@ class BinaryGalpropModel(object):
             Array storing the values of the primary galaxy property
             of the galaxies living in the input halos.
         """
-        np.random.seed(seed=seed)
 
         mean_func = getattr(self, 'mean_'+self.galprop_name+'_fraction')
         mean_galprop_fraction = mean_func(**kwargs)
-        mc_generator = np.random.random(custom_len(mean_galprop_fraction))
+        with NumpyRNGContext(seed):
+            mc_generator = np.random.random(custom_len(mean_galprop_fraction))
         result = np.where(mc_generator < mean_galprop_fraction, True, False)
         if 'table' in kwargs:
             kwargs['table'][self.galprop_name] = result
@@ -225,8 +226,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._interpol_method = interpol_method
         self._logparam = logparam
 
-        galprop_abscissa = convert_to_ndarray(galprop_abscissa)
-        galprop_ordinates = convert_to_ndarray(galprop_ordinates)
+        galprop_abscissa = np.atleast_1d(galprop_abscissa)
+        galprop_ordinates = np.atleast_1d(galprop_ordinates)
         self._test_abscissa_ordinates(galprop_abscissa, galprop_ordinates)
         self._abscissa = galprop_abscissa
         self._ordinates = galprop_ordinates

@@ -2,15 +2,15 @@
 Module containing the `~halotools.empirical_models.LogNormalScatterModel` class
 used to model stochasticity in the mapping between stellar mass and halo properties.
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults
 from .. import model_helpers as model_helpers
 
-from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...utils.array_utils import custom_len
 
 
 __all__ = ('LogNormalScatterModel', )
@@ -65,8 +65,8 @@ class LogNormalScatterModel(object):
         self.prim_haloprop_key = prim_haloprop_key
 
         if ('scatter_abscissa' in list(kwargs.keys())) and ('scatter_ordinates' in list(kwargs.keys())):
-            self.abscissa = convert_to_ndarray(kwargs['scatter_abscissa'])
-            self.ordinates = convert_to_ndarray(kwargs['scatter_ordinates'])
+            self.abscissa = np.atleast_1d(kwargs['scatter_abscissa'])
+            self.ordinates = np.atleast_1d(kwargs['scatter_ordinates'])
         else:
             self.abscissa = [12]
             self.ordinates = [default_scatter]
@@ -134,14 +134,13 @@ class LogNormalScatterModel(object):
 
         scatter_scale = self.mean_scatter(**kwargs)
 
-        np.random.seed(seed=seed)
-
         #initialize result with zero scatter result
         result = np.zeros(len(scatter_scale))
 
         #only draw from a normal distribution for non-zero values of scatter
         mask = (scatter_scale > 0.0)
-        result[mask] =  np.random.normal(loc=0, scale=scatter_scale[mask])
+        with NumpyRNGContext(seed):
+            result[mask] = np.random.normal(loc=0, scale=scatter_scale[mask])
 
         return result
 

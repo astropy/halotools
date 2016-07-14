@@ -254,3 +254,22 @@ class TestNFWProfile(TestCase):
                     analytic_nfw_density_outer_shell_normalization(rbin_midpoints, conc))
 
                 assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.02)
+
+    def test_mc_generate_nfw_radial_positions_stochasticity(self):
+        halo_radius = 0.5
+        num_pts = int(100)
+        num_rbins = 20
+        rbins = np.linspace(0.05, 1, num_rbins)
+
+        conc = 5
+        model = self.default_nfw
+
+        r1 = model.mc_generate_nfw_radial_positions(
+            halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43)
+        r2 = model.mc_generate_nfw_radial_positions(
+            halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43)
+        r3 = model.mc_generate_nfw_radial_positions(
+            halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=44)
+        assert np.allclose(r1, r2, rtol=0.001)
+        assert not np.allclose(r1, r3, rtol=0.001)
+

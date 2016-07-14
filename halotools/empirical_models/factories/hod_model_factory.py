@@ -14,6 +14,7 @@ from .hod_mock_factory import HodMockFactory
 
 from .. import model_helpers
 
+from ..occupation_models import OccupationComponent
 from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
 
@@ -217,7 +218,12 @@ class HodModelFactory(ModelFactory):
 
         self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
+            #  Making a copy is not strictly necessary, but we do it here to emphasize
+            #  at the syntax-level that the model_dictionary and _input_model_dictionary
+            #  are fully independent, not pointers to the same locations in memory
             self.model_dictionary[key] = copy(self._input_model_dictionary[key])
+
+        self._test_censat_occupation_consistency(self.model_dictionary)
 
         # Build up and bind several lists from the component models
         self.set_gal_types()
@@ -994,6 +1000,50 @@ class HodModelFactory(ModelFactory):
         for method in self._mock_generation_calling_sequence:
             if not hasattr(self, method):
                 raise HalotoolsError(missing_method_msg2)
+
+    def _test_censat_occupation_consistency(self, model_dictionary):
+        """ This private method searches each OccupationComponent instance for a
+        ``central_occupation_model`` attribute. If detected, a check is made on the
+        self-consistency between the class of the object bound to that attribute,
+        and the class of the occupation model actually bound to the centrals population.
+        """
+        occu_model_list = list(obj for obj in model_dictionary.values()
+            if isinstance(obj, OccupationComponent))
+
+        actual_cenocc_model_exists = False
+        for i, occu_model in enumerate(occu_model_list):
+            try:
+                gal_type = occu_model.gal_type
+                if gal_type == 'centrals':
+                    actual_cenocc_model = occu_model
+                    actual_cenocc_model_exists = True
+            except AttributeError:
+                pass
+
+        if not actual_cenocc_model_exists:
+            # There is no central occupation model to be inconsistent with
+            return
+        else:
+            for component_model in occu_model_list:
+                try:
+                    subordinate_cenocc_model = getattr(component_model, 'central_occupation_model')
+                    assert isinstance(subordinate_cenocc_model, actual_cenocc_model.__class__)
+                    try:
+                        assert set(subordinate_cenocc_model.param_dict) == set(actual_cenocc_model.param_dict)
+                    except AttributeError:
+                        raise HalotoolsError("The ``centrals`` occupation model "
+                            "must have a ``param_dict`` attribute\n")
+                except AttributeError:
+                    pass
+                except AssertionError:
+                    msg = ("The occupation component of gal_type = ``{0}`` galaxies \n"
+                        "has a ``central_occupation_model`` attribute with an inconsistent \n"
+                        "implementation with the {1} class controlling the "
+                        "occupation statistics of the ``centrals`` population.\n"
+                        "If you use the ``cenocc_model`` feature, you must build a \n"
+                        "composite model with a self-consistent population of centrals.\n".format(
+                            component_model.gal_type, component_model.__class__.__name__))
+                    raise HalotoolsError(msg)
 
     def populate_mock(self, halocat, **kwargs):
         """

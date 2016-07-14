@@ -12,6 +12,7 @@ from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .conc_mass_models import ConcMass
 from .profile_model_template import AnalyticDensityProf
@@ -19,7 +20,6 @@ from .profile_model_template import AnalyticDensityProf
 from ... import model_defaults
 from ...model_helpers import custom_spline
 
-from ....utils.array_utils import convert_to_ndarray
 from ....custom_exceptions import HalotoolsError
 from ....sim_manager import sim_defaults
 
@@ -251,7 +251,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         >>> Npts = 25
         >>> result = model.g(np.logspace(-1, 1, Npts))
         """
-        x = convert_to_ndarray(x, dt=np.float64)
+        x = np.atleast_1d(x).astype(np.float64)
         return np.log(1.0+x) - (x/(1.0+x))
 
     def cumulative_mass_PDF(self, scaled_radius, conc):
@@ -541,7 +541,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
 
-    def mc_generate_nfw_radial_positions(self, num_pts=int(1e4), conc=5, **kwargs):
+    def mc_generate_nfw_radial_positions(self, num_pts=int(1e4), conc=5, seed=None, **kwargs):
         """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
 
         See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique.
@@ -574,7 +574,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             bound to the NFWProfile instance as ``mdef``.
 
         seed : int, optional
-            Random number seed used in the Monte Carlo realization. Default is None.
+            Random number seed used in the Monte Carlo realization.
+            Default is None, which will produce stochastic results.
 
         Returns
         --------
@@ -610,22 +611,19 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
                     "argument ``halo_mass`` must be specified.\n")
                 raise HalotoolsError(msg)
 
-        halo_radius = convert_to_ndarray(halo_radius, dt=np.float64)
+        halo_radius = np.atleast_1d(halo_radius).astype(np.float64)
         try:
             assert len(halo_radius) == 1
         except AssertionError:
             msg = ("Input ``halo_radius`` or ``halo_mass`` must be a float")
             raise HalotoolsError(msg)
 
-        conc = convert_to_ndarray(conc, dt=np.float64)
+        conc = np.atleast_1d(conc).astype(np.float64)
         try:
             assert len(conc) == 1
         except AssertionError:
             msg = ("Input ``conc`` must be a float")
             raise HalotoolsError(msg)
-
-        if 'seed' in kwargs:
-            np.random.seed(kwargs['seed'])
 
         # Build lookup table from which to tabulate the inverse cumulative_mass_PDF
         Npts_radius_table = int(1e3)
@@ -637,7 +635,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         # Use method of Inverse Transform Sampling to generate a Monte Carlo realization
         ### of the radial positions
-        randoms = np.random.uniform(0, 1, num_pts)
+        with NumpyRNGContext(seed):
+            randoms = np.random.uniform(0, 1, num_pts)
         log_randoms = np.log10(randoms)
         log_scaled_radial_positions = funcobj(log_randoms)
         scaled_radial_positions = 10.**log_scaled_radial_positions

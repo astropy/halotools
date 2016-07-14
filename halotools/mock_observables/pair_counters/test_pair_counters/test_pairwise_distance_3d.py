@@ -1,6 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 
@@ -84,7 +84,8 @@ def test_pairwise_distance_3d_nonperiodic_random_1():
     """
     #random points
     Npts = 10
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     period = 1.0
 
     rmax=10.0
@@ -102,8 +103,8 @@ def test_pairwise_distance_3d_periodic_tight_locus1():
     #tigh locus
     Npts1 = 10
     Npts2 = 10
-    data1 = generate_locus_of_3d_points(Npts1, xc=0.05, yc=0.05, zc=0.05)
-    data2 = generate_locus_of_3d_points(Npts2, xc=0.95, yc=0.95, zc=0.95)
+    data1 = generate_locus_of_3d_points(Npts1, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(Npts2, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     period = 1.0
 
     #should be no connections
@@ -128,8 +129,8 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus1():
     #tight locus
     Npts1 = 10
     Npts2 = 10
-    data1 = generate_locus_of_3d_points(Npts1, xc=0.05, yc=0.05, zc=0.05)
-    data2 = generate_locus_of_3d_points(Npts2, xc=0.95, yc=0.95, zc=0.95)
+    data1 = generate_locus_of_3d_points(Npts1, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(Npts2, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
     period = 1.0
 
     #should be no connections
@@ -154,8 +155,8 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
     #tight locus
     Npts1 = 10
     Npts2 = 10
-    data1 = generate_locus_of_3d_points(Npts1, xc=0.5, yc=0.5, zc=0.5)
-    data2 = generate_locus_of_3d_points(Npts2, xc=0.6, yc=0.6, zc=0.6)
+    data1 = generate_locus_of_3d_points(Npts1, xc=0.5, yc=0.5, zc=0.5, seed=fixed_seed)
+    data2 = generate_locus_of_3d_points(Npts2, xc=0.6, yc=0.6, zc=0.6, seed=fixed_seed)
     period = 1.0
 
     #should be no connections

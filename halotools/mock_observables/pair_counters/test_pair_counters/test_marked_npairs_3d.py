@@ -1,8 +1,10 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..pairs import wnpairs as pure_python_weighted_pairs
 from ..marked_npairs_3d import marked_npairs_3d, _func_signature_int_from_wfunc
@@ -17,6 +19,8 @@ error_msg = ("\nThe `test_marked_npairs_wfuncs_behavior` function performs \n"
     "One such check failed.\n")
 
 __all__ = ('test_marked_npairs_3d_periodic', )
+
+fixed_seed = 43
 
 
 def retrieve_mock_data(Npts, Npts2, Lbox):
@@ -43,8 +47,9 @@ def test_marked_npairs_3d_periodic():
     Function tests marked_npairs with periodic boundary conditions.
     """
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
-    ran_weights1 = np.random.random((Npts, 1))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
+        ran_weights1 = np.random.random((Npts, 1))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.array([0.0, 0.1, 0.2, 0.3])
@@ -64,8 +69,9 @@ def test_marked_npairs_parallelization():
     """
 
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
-    ran_weights1 = np.random.random((Npts, 1))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
+        ran_weights1 = np.random.random((Npts, 1))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.array([0.0, 0.1, 0.2, 0.3])
@@ -91,8 +97,9 @@ def test_marked_npairs_nonperiodic():
     """
 
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
-    ran_weights1 = np.random.random((Npts, 1))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
+        ran_weights1 = np.random.random((Npts, 1))
 
     rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
@@ -112,7 +119,8 @@ def test_marked_npairs_3d_wfuncs_signatures():
     Loop over all wfuncs and ensure that the wfunc signature is handled correctly.
     """
     Npts = 1000
-    random_sample = np.random.random((Npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
     rbins = np.array([0.0, 0.1, 0.2, 0.3])
     rmax = rbins.max()
     period = np.array([1.0, 1.0, 1.0])
@@ -130,14 +138,16 @@ def test_marked_npairs_3d_wfuncs_signatures():
     # Now loop over all all available weight_func_id indices
     for wfunc_index in range(1, num_wfuncs):
         signature = _func_signature_int_from_wfunc(wfunc_index)
-        weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
+        with NumpyRNGContext(fixed_seed):
+            weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
         result = marked_npairs_3d(random_sample, random_sample, rbins, period=period,
             weights1=weights, weights2=weights, weight_func_id=wfunc_index,
             approx_cell1_size=[rmax, rmax, rmax])
 
         with pytest.raises(HalotoolsError):
             signature = _func_signature_int_from_wfunc(wfunc_index) + 1
-            weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
+            with NumpyRNGContext(fixed_seed):
+                weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
             result = marked_npairs_3d(random_sample, random_sample, rbins, period=period,
                 weights1=weights, weights2=weights, weight_func_id=wfunc_index)
 

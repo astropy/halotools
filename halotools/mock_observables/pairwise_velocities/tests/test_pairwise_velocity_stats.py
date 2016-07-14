@@ -4,25 +4,26 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from ..los_pvd_vs_rp import los_pvd_vs_rp
 from ..mean_los_velocity_vs_rp import mean_los_velocity_vs_rp
-from ...tests.cf_helpers import generate_locus_of_3d_points
 
 __all__ = ('test_mean_los_velocity_vs_rp_auto_consistency', )
 
+fixed_seed = 43
 
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_auto_consistency():
-    np.random.seed(43)
 
     npts = 200
-    sample1 = np.random.rand(npts, 3)
-    velocities1 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
-    sample2 = np.random.rand(npts, 3)
-    velocities2 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.rand(npts, 3)
+        velocities1 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        sample2 = np.random.rand(npts, 3)
+        velocities2 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.linspace(0, 0.3, 10)
     pi_max = 0.2
@@ -38,15 +39,15 @@ def test_mean_los_velocity_vs_rp_auto_consistency():
 
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_cross_consistency():
-    np.random.seed(43)
 
     npts = 200
-    sample1 = np.random.rand(npts, 3)
-    velocities1 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
-    sample2 = np.random.rand(npts, 3)
-    velocities2 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.rand(npts, 3)
+        velocities1 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        sample2 = np.random.rand(npts, 3)
+        velocities2 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.linspace(0, 0.3, 10)
     pi_max = 0.3
@@ -61,15 +62,15 @@ def test_mean_los_velocity_vs_rp_cross_consistency():
 
 @pytest.mark.slow
 def test_los_pvd_vs_rp_auto_consistency():
-    np.random.seed(43)
 
     npts = 200
-    sample1 = np.random.rand(npts, 3)
-    velocities1 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
-    sample2 = np.random.rand(npts, 3)
-    velocities2 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.rand(npts, 3)
+        velocities1 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        sample2 = np.random.rand(npts, 3)
+        velocities2 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.linspace(0, 0.3, 10)
     pi_max = 0.2
@@ -85,15 +86,15 @@ def test_los_pvd_vs_rp_auto_consistency():
 
 @pytest.mark.slow
 def test_los_pvd_vs_rp_cross_consistency():
-    np.random.seed(43)
 
     npts = 200
-    sample1 = np.random.rand(npts, 3)
-    velocities1 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
-    sample2 = np.random.rand(npts, 3)
-    velocities2 = np.random.normal(
-        loc=0, scale=100, size=npts*3).reshape((npts, 3))
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.rand(npts, 3)
+        velocities1 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        sample2 = np.random.rand(npts, 3)
+        velocities2 = np.random.normal(
+            loc=0, scale=100, size=npts*3).reshape((npts, 3))
 
     rbins = np.linspace(0, 0.3, 10)
     pi_max = 0.3
