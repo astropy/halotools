@@ -5,6 +5,8 @@
 
 - Added relative_positions_and_velocities function to mock_observables
 
+- Fixed little h bug in the Behroozi10SmHm class. This impacts the Leauthaud11Cens and Leauthaud11Sats classes, as well as the `leauthaud11` composite model.
+
 
 0.3 (2016-06-28)
 ----------------
