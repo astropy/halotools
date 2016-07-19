@@ -132,11 +132,13 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
         Boolean mask that can be used to select the positions
         of a subcollection of the galaxies stored in the ``galaxy_table``.
 
-    period : float, optional
-        Length of the periodic box. Default is np.inf.
-
+    period : array_like, optional
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar,
+        period is assumed to be the same in all Cartesian directions.
         If period is not np.inf, then after applying peculiar velocity distortions
         the new coordinates will be remapped into the periodic box.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     Returns
     --------
@@ -161,7 +163,17 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
 
     """
+    period = np.atleast_1d(period)
+    if len(period) == 1:
+        period = np.repeat(period, 3)
+    elif len(period) == 3:
+        pass
+    else:
+        msg = "Input ``period`` must be a single float or a 3-element sequence"
+        raise ValueError(msg)
+
     posdict = {'x': np.copy(x), 'y': np.copy(y), 'z': np.copy(z)}
+    period_dict = {'x': period[0], 'y': period[1], 'z': period[2]}
 
     a = 'velocity_distortion_dimension' in list(kwargs.keys())
     b = 'velocity' in list(kwargs.keys())
@@ -181,9 +193,10 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
         try:
             assert vel_dist_dim in ('x', 'y', 'z')
             posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + np.copy(velocity/100.)
-            if period != np.inf:
+            Lbox = period_dict[vel_dist_dim]
+            if Lbox != np.inf:
                 posdict[vel_dist_dim] = enforce_periodicity_of_box(
-                    posdict[vel_dist_dim], period)
+                    posdict[vel_dist_dim], Lbox)
         except AssertionError:
             msg = ("\nInput ``velocity_distortion_dimension`` must be either \n"
                 "``'x'``, ``'y'`` or ``'z'``.")
