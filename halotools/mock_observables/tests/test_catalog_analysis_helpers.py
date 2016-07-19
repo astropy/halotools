@@ -233,6 +233,28 @@ def test_relative_velocities4():
     assert np.all(vrel == -correct_result)
 
 
+def test_return_xyz_formatted_array():
+    npts = 10
+    period = [1, 2, 3]
+    x = np.linspace(0.001, period[0]-0.001, npts)
+    y = np.linspace(0.001, period[1]-0.001, npts)
+    z = np.linspace(0.001, period[2]-0.001, npts)
+    v = np.zeros(npts)
+    result1 = cat_helpers.return_xyz_formatted_array(x, y, z)
+    result2 = cat_helpers.return_xyz_formatted_array(x, y, z, velocity=v, velocity_distortion_dimension='x')
+    result3 = cat_helpers.return_xyz_formatted_array(x, y, z, velocity=v, velocity_distortion_dimension='y')
+    result4 = cat_helpers.return_xyz_formatted_array(x, y, z, velocity=v, velocity_distortion_dimension='z')
+    result5 = cat_helpers.return_xyz_formatted_array(x, y, z, velocity=v,
+        velocity_distortion_dimension='x', period=period)
+    result6 = cat_helpers.return_xyz_formatted_array(x, y, z, velocity=v,
+        velocity_distortion_dimension='y', period=period)
+    assert np.all(result1 == result2)
+    assert np.all(result1 == result3)
+    assert np.all(result1 == result4)
+    assert np.all(result1 == result5)
+    assert np.all(result1 == result6)
+
+
 class TestCatalogAnalysisHelpers(TestCase):
     """ Class providing tests of the `~halotools.mock_observables.catalog_analysis_helpers`.
     """
