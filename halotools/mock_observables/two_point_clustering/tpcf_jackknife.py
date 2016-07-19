@@ -183,7 +183,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     within a periodic cube of box length Lbox = 250 Mpc/h.
 
     >>> Npts = 1000
-    >>> Lbox = 250.
+    >>> Lbox = 100.
 
     >>> x = np.random.uniform(0, Lbox, Npts)
     >>> y = np.random.uniform(0, Lbox, Npts)
@@ -197,7 +197,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
 
     Create some 'randoms' in the same way:
 
-    >>> Nran = Npts*2
+    >>> Nran = Npts*500
     >>> xran = np.random.uniform(0, Lbox, Nran)
     >>> yran = np.random.uniform(0, Lbox, Nran)
     >>> zran = np.random.uniform(0, Lbox, Nran)
@@ -206,7 +206,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     Calculate the jackknife covariance matrix by dividing the simulation box
     into 4 samples per dimension (for a total of 4^3 total jackknife samples):
 
-    >>> rbins = np.logspace(-1, 1, 10)
+    >>> rbins = np.logspace(0, 1, 8)
     >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=4, period=Lbox)
     """
 

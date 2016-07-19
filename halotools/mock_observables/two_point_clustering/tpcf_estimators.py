@@ -31,6 +31,8 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     else:
         mult = lambda x, y: x*y  # used for all else
 
+    _test_for_zero_division(DD, DR, RR, ND1, ND2, NR1, NR2, estimator)
+
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
         #DD/RR-1
@@ -98,3 +100,22 @@ def _TP_estimator_requirements(estimator):
             raise HalotoolsError(msg)
 
     return do_DD, do_DR, do_RR
+
+
+def _test_for_zero_division(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
+    zero_msg = ("When calculating the two-point function, there was at least one \n"
+        "separation bin with zero {0} pairs. Since the ``{1}`` estimator you chose \n"
+        "divides by {0}, you will have at least one NaN returned value.\n"
+        "Most likely, the innermost separation bin is the problem.\n"
+        "Try increasing the number of randoms and/or using broader bins.\n"
+        "To estimate the number of required randoms, the following expression \n"
+        "for the expected number of pairs inside a sphere of radius ``r`` may be useful:\n\n"
+        "<Npairs> = (Nran_tot)*(4pi/3)*(r/Lbox)^3 \n\n")
+
+    estimators_dividing_by_rr = ('Natural', 'Davis-Peebles', 'Hewett', 'Landy-Szalay')
+    if (estimator in estimators_dividing_by_rr) & (np.any(RR == 0)):
+        raise ValueError(zero_msg.format('RR', estimator))
+
+    estimators_dividing_by_dr = ('Hamilton', )
+    if (estimator in estimators_dividing_by_dr) & (np.any(DR == 0)):
+        raise ValueError(zero_msg.format('DR', estimator))

@@ -21,7 +21,7 @@ def test_s_mu_tpcf_auto_nonperiodic():
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Nran, 3))
     s_bins = np.linspace(0.001, 0.3, 5)
-    mu_bins = np.linspace(0, 1.0, 10)
+    mu_bins = np.linspace(0, 1.0, 5)
 
     result_1 = s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None,
         randoms=randoms, period=None,
