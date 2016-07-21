@@ -17,14 +17,6 @@ from ...tests.cf_helpers import generate_3d_regular_mesh
 
 fixed_seed = 43
 
-__all__ = ["test_pairwise_distance_3d_periodic_mesh_grid_1",
-           "test_pairwise_distance_3d_nonperiodic_mesh_grid_1",
-           "test_pairwise_distance_3d_nonperiodic_random_1",
-           "test_pairwise_distance_3d_periodic_tight_locus1",
-           "test_pairwise_distance_3d_nonperiodic_tight_locus1",
-           "test_pairwise_distance_3d_nonperiodic_tight_locus2"
-           ]
-
 
 def test_pairwise_distance_3d_periodic_mesh_grid_1():
     """
