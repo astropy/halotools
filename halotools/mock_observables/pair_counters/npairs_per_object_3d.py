@@ -20,8 +20,8 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
         verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
-    Function counts the number of times the pair count between two samples exceeds a
-    threshold value as a function of the 3d spatial separation *r*.
+    Function counts the number of points in ``sample2`` separated by a distance
+    ``r`` from each point in ``sample1``, where ``r`` is defined by the input ``rbins``.
 
     Parameters
     ----------
@@ -74,7 +74,8 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
     Returns
     -------
     num_pairs : array_like
-        Numpy array of length len(rbins) storing the numbers of pairs in the input bins.
+        Numpy array of shape (Npts1, len(rbins)) storing the numbers of points
+        in ``sample2`` inside spheres surrounding each point in ``sample1``.
 
     Examples
     --------
