@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function
+""" Module containing the `~halotools.mock_observables.npairs_per_object_3d` function
 used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -99,7 +99,7 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
     >>> sample1 = np.vstack([x1, y1, z1]).T
     >>> sample2 = np.vstack([x2, y2, z2]).T
 
-    >>> result = npairs_per_object_3d(sample1, sample2, rbins, period = period)
+    >>> result = npairs_per_object_3d(sample1, sample2, rbins, period=period)
     """
 
     ### Process the inputs with the helper function

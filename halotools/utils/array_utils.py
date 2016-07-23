@@ -8,7 +8,7 @@ from astropy.utils.misc import NumpyRNGContext
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('custom_len', 'find_idx_nearest_val', 'randomly_downsample_data',
-            'array_is_monotonic')
+            'array_is_monotonic', 'unsorting_indices')
 
 
 def custom_len(x):
@@ -178,3 +178,33 @@ def array_is_monotonic(array, strict=False):
             return -1
         else:
             return 0
+
+
+def unsorting_indices(sorting_indices):
+    """ For an array that has been sorting according to the
+    input ``sorting_indices``, return the indices that will return
+    the array back to its original order.
+
+    Parameters
+    ----------
+    sorting_indices : array_like
+        Length-Npts array
+
+    Returns
+    -------
+    unsorting_indices : array_like
+        Length-Npts array
+
+    Examples
+    --------
+    >>> x = np.random.rand(100)
+    >>> idx_sorted = np.argsort(x)
+    >>> x_sorted = x[idx_sorted]
+    >>> idx_unsorted = unsorting_indices(idx_sorted)
+    >>> assert np.all(x == x_sorted[idx_unsorted])
+
+    """
+    npts = len(sorting_indices)
+    unsorting_indices = np.zeros_like(sorting_indices, dtype=int)
+    unsorting_indices[sorting_indices] = np.arange(npts).astype(int)
+    return unsorting_indices
