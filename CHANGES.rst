@@ -7,6 +7,8 @@
 
 - Fixed little h bug in the Behroozi10SmHm class. This impacts the Leauthaud11Cens and Leauthaud11Sats classes, as well as the `leauthaud11` composite model.
 
+- Fixed bug in mock_observables.pair_counters.npairs_per_object_3d
+
 
 0.3 (2016-06-28)
 ----------------
