@@ -1,11 +1,13 @@
 """
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 cimport numpy as cnp
 cimport cython
 from libc.math cimport ceil
+
+from ....utils import unsorting_indices
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('npairs_per_object_3d_engine', )
@@ -54,15 +56,22 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rbins = len(rbins)
 
-    cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] z1 = np.ascontiguousarray(z1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] x1_sorted = np.ascontiguousarray(
+        x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y1_sorted = np.ascontiguousarray(
+        y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] z1_sorted = np.ascontiguousarray(
+        z1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] x2_sorted = np.ascontiguousarray(
+        x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y2_sorted = np.ascontiguousarray(
+        y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] z2_sorted = np.ascontiguousarray(
+        z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
     cdef cnp.int64_t[:] inner_counts = np.zeros((num_rbins,), dtype=np.int64)
-    cdef cnp.int64_t[:,:] outer_counts = np.zeros((len(x1), num_rbins), dtype=np.int64)
+    cdef cnp.int64_t[:,:] outer_counts = np.zeros(
+        (len(x1_sorted), num_rbins), dtype=np.int64)
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices, dtype=np.int64)
@@ -105,9 +114,9 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     for icell1 in range(first_cell1_element, last_cell1_element):
         ifirst1 = cell1_indices[icell1]
         ilast1 = cell1_indices[icell1+1]
-        x_icell1 = x1[ifirst1:ilast1]
-        y_icell1 = y1[ifirst1:ilast1]
-        z_icell1 = z1[ifirst1:ilast1]
+        x_icell1 = x1_sorted[ifirst1:ilast1]
+        y_icell1 = y1_sorted[ifirst1:ilast1]
+        z_icell1 = z1_sorted[ifirst1:ilast1]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -158,9 +167,9 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                         ifirst2 = cell2_indices[icell2]
                         ilast2 = cell2_indices[icell2+1]
 
-                        x_icell2 = x2[ifirst2:ilast2]
-                        y_icell2 = y2[ifirst2:ilast2]
-                        z_icell2 = z2[ifirst2:ilast2]
+                        x_icell2 = x2_sorted[ifirst2:ilast2]
+                        y_icell2 = y2_sorted[ifirst2:ilast2]
+                        z_icell2 = z2_sorted[ifirst2:ilast2]
 
                         Nj = ilast2 - ifirst2
                         #loop over points in cell1 points
@@ -188,7 +197,11 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     outer_counts[ifirst1 + i, k] += inner_counts[k]
                                     inner_counts[k] = 0 #re-zero the inner counts
 
-    return np.array(outer_counts)
+    # At this point, we have calculated our counts on the input arrays *after* sorting
+    # Since the order of counts matters in this calculation, we need to undo the sorting
+    sorted_counts = np.array(outer_counts)
+    idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
+    return sorted_counts[idx_unsorted]
 
 
 
