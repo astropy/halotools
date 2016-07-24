@@ -201,7 +201,7 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     # Since the order of counts matters in this calculation, we need to undo the sorting
     sorted_counts = np.array(outer_counts)
     idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
-    return sorted_counts[idx_unsorted]
+    return sorted_counts[idx_unsorted, :]
 
 
 
