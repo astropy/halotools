@@ -16,3 +16,4 @@ from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z,
 from .radial_profiles import *
 from .two_point_clustering import *
 from .large_scale_density import *
+from .counts_in_cells import *
