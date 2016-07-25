@@ -57,219 +57,219 @@ class TestHodMockFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.HodMockFactory`.
     """
 
-#     def setUp(self):
-#         self.model = PrebuiltHodModelFactory('zheng07', threshold=-21)
-#         self.fakesim = FakeSimHalosNearBoundaries()
+    def setUp(self):
+        self.model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        self.fakesim = FakeSimHalosNearBoundaries()
 
-#         self.model.populate_mock(self.fakesim)
+        self.model.populate_mock(self.fakesim)
 
-#         self.galaxy_table1 = deepcopy(self.model.mock.galaxy_table)
-#         f100x = lambda t: t['halo_x'] > 100
-#         self.model.mock.populate(masking_function=f100x)
-#         self.galaxy_table2 = deepcopy(self.model.mock.galaxy_table)
+        self.galaxy_table1 = deepcopy(self.model.mock.galaxy_table)
+        f100x = lambda t: t['halo_x'] > 100
+        self.model.mock.populate(masking_function=f100x)
+        self.galaxy_table2 = deepcopy(self.model.mock.galaxy_table)
 
-#     @pytest.mark.slow
-#     def test_mock_population_mask(self):
+    @pytest.mark.slow
+    def test_mock_population_mask(self):
 
-#         model = PrebuiltHodModelFactory('zheng07')
+        model = PrebuiltHodModelFactory('zheng07')
 
-#         f100x = lambda t: t['halo_x'] > 100
-#         f150z = lambda t: t['halo_z'] > 150
+        f100x = lambda t: t['halo_x'] > 100
+        f150z = lambda t: t['halo_z'] > 150
 
-#         halocat = FakeSim()
-#         model.populate_mock(halocat, masking_function=f100x)
-#         assert np.all(model.mock.galaxy_table['halo_x'] > 100)
-#         model.populate_mock(halocat)
-#         assert np.any(model.mock.galaxy_table['halo_x'] < 100)
-#         model.populate_mock(halocat, masking_function=f100x)
-#         assert np.all(model.mock.galaxy_table['halo_x'] > 100)
+        halocat = FakeSim()
+        model.populate_mock(halocat, masking_function=f100x)
+        assert np.all(model.mock.galaxy_table['halo_x'] > 100)
+        model.populate_mock(halocat)
+        assert np.any(model.mock.galaxy_table['halo_x'] < 100)
+        model.populate_mock(halocat, masking_function=f100x)
+        assert np.all(model.mock.galaxy_table['halo_x'] > 100)
 
-#         model.populate_mock(halocat, masking_function=f150z)
-#         assert np.all(model.mock.galaxy_table['halo_z'] > 150)
-#         assert np.any(model.mock.galaxy_table['halo_x'] < 100)
-#         model.populate_mock(halocat)
-#         assert np.any(model.mock.galaxy_table['halo_z'] < 150)
+        model.populate_mock(halocat, masking_function=f150z)
+        assert np.all(model.mock.galaxy_table['halo_z'] > 150)
+        assert np.any(model.mock.galaxy_table['halo_x'] < 100)
+        model.populate_mock(halocat)
+        assert np.any(model.mock.galaxy_table['halo_z'] < 150)
 
-#     def test_mock_population_pbcs(self):
+    def test_mock_population_pbcs(self):
 
-#         cenmask = self.galaxy_table1['gal_type'] == 'centrals'
-#         cens = self.galaxy_table1[cenmask]
-#         assert np.all(cens['halo_x'] == cens['x'])
+        cenmask = self.galaxy_table1['gal_type'] == 'centrals'
+        cens = self.galaxy_table1[cenmask]
+        assert np.all(cens['halo_x'] == cens['x'])
 
-#         sats = self.galaxy_table1[~cenmask]
-#         assert np.any(sats['halo_x'] != sats['x'])
+        sats = self.galaxy_table1[~cenmask]
+        assert np.any(sats['halo_x'] != sats['x'])
 
-#         cenmask = self.galaxy_table2['gal_type'] == 'centrals'
-#         cens = self.galaxy_table2[cenmask]
-#         assert np.all(cens['halo_x'] == cens['x'])
-#         sats = self.galaxy_table2[~cenmask]
-#         assert np.any(sats['halo_x'] != sats['x'])
+        cenmask = self.galaxy_table2['gal_type'] == 'centrals'
+        cens = self.galaxy_table2[cenmask]
+        assert np.all(cens['halo_x'] == cens['x'])
+        sats = self.galaxy_table2[~cenmask]
+        assert np.any(sats['halo_x'] != sats['x'])
 
-#     @pytest.mark.slow
-#     def test_censat_positions2(self):
+    @pytest.mark.slow
+    def test_censat_positions2(self):
 
-#         model = PrebuiltHodModelFactory('zheng07')
-#         halocat = FakeSim()
-#         model.populate_mock(halocat)
+        model = PrebuiltHodModelFactory('zheng07')
+        halocat = FakeSim()
+        model.populate_mock(halocat)
 
-#         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
-#         cens = model.mock.galaxy_table[cenmask]
-#         assert np.all(cens['halo_x'] == cens['x'])
-#         sats = model.mock.galaxy_table[~cenmask]
-#         assert np.any(sats['halo_x'] != sats['x'])
+        cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
+        cens = model.mock.galaxy_table[cenmask]
+        assert np.all(cens['halo_x'] == cens['x'])
+        sats = model.mock.galaxy_table[~cenmask]
+        assert np.any(sats['halo_x'] != sats['x'])
 
-#         f100x = lambda t: t['halo_x'] > 100
-#         model.populate_mock(halocat, masking_function=f100x)
-#         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
-#         cens = model.mock.galaxy_table[cenmask]
-#         assert np.all(cens['halo_x'] == cens['x'])
-#         sats = model.mock.galaxy_table[~cenmask]
-#         assert np.any(sats['halo_x'] != sats['x'])
+        f100x = lambda t: t['halo_x'] > 100
+        model.populate_mock(halocat, masking_function=f100x)
+        cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
+        cens = model.mock.galaxy_table[cenmask]
+        assert np.all(cens['halo_x'] == cens['x'])
+        sats = model.mock.galaxy_table[~cenmask]
+        assert np.any(sats['halo_x'] != sats['x'])
 
-#     @pytest.mark.slow
-#     def test_nonPBC_positions(self):
+    @pytest.mark.slow
+    def test_nonPBC_positions(self):
 
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+        model = PrebuiltHodModelFactory('zheng07', threshold=-18)
 
-#         halocat = FakeSimHalosNearBoundaries()
-#         model.populate_mock(halocat, enforce_PBC=False)
+        halocat = FakeSimHalosNearBoundaries()
+        model.populate_mock(halocat, enforce_PBC=False)
 
-#         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
-#         cens = model.mock.galaxy_table[cenmask]
-#         sats = model.mock.galaxy_table[~cenmask]
+        cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
+        cens = model.mock.galaxy_table[cenmask]
+        sats = model.mock.galaxy_table[~cenmask]
 
-#         sats_outside_boundary_mask = (
-#             (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
-#             | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
-#             | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
-#         assert np.any(sats_outside_boundary_mask == True)
+        sats_outside_boundary_mask = (
+            (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
+            | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
+            | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
+        assert np.any(sats_outside_boundary_mask == True)
 
-#         cens_outside_boundary_mask = (
-#             (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
-#             | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
-#             | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
-#         assert np.all(cens_outside_boundary_mask == False)
+        cens_outside_boundary_mask = (
+            (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
+            | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
+            | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
+        assert np.all(cens_outside_boundary_mask == False)
 
-#     @pytest.mark.slow
-#     def test_PBC_positions(self):
+    @pytest.mark.slow
+    def test_PBC_positions(self):
 
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+        model = PrebuiltHodModelFactory('zheng07', threshold=-18)
 
-#         halocat = FakeSimHalosNearBoundaries()
-#         model.populate_mock(halocat=halocat, enforce_PBC=True,
-#             _testing_mode=True)
+        halocat = FakeSimHalosNearBoundaries()
+        model.populate_mock(halocat=halocat, enforce_PBC=True,
+            _testing_mode=True)
 
-#         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
-#         cens = model.mock.galaxy_table[cenmask]
-#         sats = model.mock.galaxy_table[~cenmask]
+        cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
+        cens = model.mock.galaxy_table[cenmask]
+        sats = model.mock.galaxy_table[~cenmask]
 
-#         sats_outside_boundary_mask = (
-#             (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
-#             | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
-#             | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
-#         assert np.all(sats_outside_boundary_mask == False)
+        sats_outside_boundary_mask = (
+            (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
+            | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
+            | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
+        assert np.all(sats_outside_boundary_mask == False)
 
-#         cens_outside_boundary_mask = (
-#             (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
-#             | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
-#             | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
-#         assert np.all(cens_outside_boundary_mask == False)
+        cens_outside_boundary_mask = (
+            (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
+            | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
+            | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
+        assert np.all(cens_outside_boundary_mask == False)
 
-#     def test_zero_satellite_edge_case(self):
+    def test_zero_satellite_edge_case(self):
 
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-18)
-#         model.param_dict['logM0'] = 20
+        model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+        model.param_dict['logM0'] = 20
 
-#         halocat = FakeSim()
-#         model.populate_mock(halocat=halocat)
+        halocat = FakeSim()
+        model.populate_mock(halocat=halocat)
 
-#     def test_zero_halo_edge_case(self):
+    def test_zero_halo_edge_case(self):
 
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-18)
-#         model.param_dict['logM0'] = 20
+        model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+        model.param_dict['logM0'] = 20
 
-#         halocat = FakeSim()
-#         with pytest.raises(HalotoolsError) as err:
-#             model.populate_mock(halocat=halocat, Num_ptcl_requirement=1e10)
-#         substr = "Such a cut is not permissible."
-#         assert substr in err.value.args[0]
+        halocat = FakeSim()
+        with pytest.raises(HalotoolsError) as err:
+            model.populate_mock(halocat=halocat, Num_ptcl_requirement=1e10)
+        substr = "Such a cut is not permissible."
+        assert substr in err.value.args[0]
 
-#     @pytest.mark.slow
-#     def test_satellite_positions1(self):
+    @pytest.mark.slow
+    def test_satellite_positions1(self):
 
-#         gals = self.galaxy_table1
-#         x1 = gals['x']
-#         y1 = gals['y']
-#         z1 = gals['z']
-#         x2 = gals['halo_x']
-#         y2 = gals['halo_y']
-#         z2 = gals['halo_z']
-#         dx = np.fabs(x1 - x2)
-#         dx = np.fmin(dx, self.model.mock.Lbox - dx)
-#         dy = np.fabs(y1 - y2)
-#         dy = np.fmin(dy, self.model.mock.Lbox - dy)
-#         dz = np.fabs(z1 - z2)
-#         dz = np.fmin(dz, self.model.mock.Lbox - dz)
-#         d = np.sqrt(dx*dx+dy*dy+dz*dz)
-#         assert np.all(d <= gals['halo_rvir'])
+        gals = self.galaxy_table1
+        x1 = gals['x']
+        y1 = gals['y']
+        z1 = gals['z']
+        x2 = gals['halo_x']
+        y2 = gals['halo_y']
+        z2 = gals['halo_z']
+        dx = np.fabs(x1 - x2)
+        dx = np.fmin(dx, self.model.mock.Lbox - dx)
+        dy = np.fabs(y1 - y2)
+        dy = np.fmin(dy, self.model.mock.Lbox - dy)
+        dz = np.fabs(z1 - z2)
+        dz = np.fmin(dz, self.model.mock.Lbox - dz)
+        d = np.sqrt(dx*dx+dy*dy+dz*dz)
+        assert np.all(d <= gals['halo_rvir'])
 
-#     @pytest.mark.slow
-#     @pytest.mark.skipif('not APH_MACHINE')
-#     def test_one_two_halo_decomposition_on_mock(self):
-#         """ Enforce that the one-halo term is exactly zero
-#         on sufficiently large scales.
-#         """
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-21)
-#         bolshoi_halocat = CachedHaloCatalog(simname='bolshoi')
-#         model.populate_mock(bolshoi_halocat)
-#         gals = model.mock.galaxy_table
-#         pos = return_xyz_formatted_array(gals['x'], gals['y'], gals['z'])
-#         halo_hostid = gals['halo_id']
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_one_two_halo_decomposition_on_mock(self):
+        """ Enforce that the one-halo term is exactly zero
+        on sufficiently large scales.
+        """
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        bolshoi_halocat = CachedHaloCatalog(simname='bolshoi')
+        model.populate_mock(bolshoi_halocat)
+        gals = model.mock.galaxy_table
+        pos = return_xyz_formatted_array(gals['x'], gals['y'], gals['z'])
+        halo_hostid = gals['halo_id']
 
-#         rbins = np.logspace(-1, 1.5, 15)
-#         xi_1h, xi_2h = tpcf_one_two_halo_decomp(pos, halo_hostid, rbins,
-#             period=model.mock.Lbox, num_threads='max')
-#         assert xi_1h[-1] == -1
+        rbins = np.logspace(-1, 1.5, 15)
+        xi_1h, xi_2h = tpcf_one_two_halo_decomp(pos, halo_hostid, rbins,
+            period=model.mock.Lbox, num_threads='max')
+        assert xi_1h[-1] == -1
 
-#         del model
+        del model
 
-#     def test_deterministic_mock_making(self):
-#         """ Test ensuring that mock population is purely deterministic
-#         when using the seed keyword.
+    def test_deterministic_mock_making(self):
+        """ Test ensuring that mock population is purely deterministic
+        when using the seed keyword.
 
-#         This is a regression test associated with https://github.com/astropy/halotools/issues/551.
-#         """
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-21)
-#         halocat = FakeSim(seed=fixed_seed)
-#         model.populate_mock(halocat, seed=fixed_seed)
-#         h1 = deepcopy(model.mock.galaxy_table)
-#         del model
-#         del halocat
+        This is a regression test associated with https://github.com/astropy/halotools/issues/551.
+        """
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed)
+        h1 = deepcopy(model.mock.galaxy_table)
+        del model
+        del halocat
 
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-21)
-#         halocat = FakeSim(seed=fixed_seed)
-#         model.populate_mock(halocat, seed=fixed_seed)
-#         h2 = deepcopy(model.mock.galaxy_table)
-#         del model
-#         del halocat
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed)
+        h2 = deepcopy(model.mock.galaxy_table)
+        del model
+        del halocat
 
-#         model = PrebuiltHodModelFactory('zheng07', threshold=-21)
-#         halocat = FakeSim(seed=fixed_seed)
-#         model.populate_mock(halocat, seed=fixed_seed+1)
-#         h3 = deepcopy(model.mock.galaxy_table)
-#         del model
-#         del halocat
+        model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+        halocat = FakeSim(seed=fixed_seed)
+        model.populate_mock(halocat, seed=fixed_seed+1)
+        h3 = deepcopy(model.mock.galaxy_table)
+        del model
+        del halocat
 
-#         assert len(h1) == len(h2)
-#         assert len(h1) != len(h3)
+        assert len(h1) == len(h2)
+        assert len(h1) != len(h3)
 
-#         for key in h1.keys():
-#             try:
-#                 assert np.allclose(h1[key], h2[key], rtol=0.001)
-#             except TypeError:
-#                 pass
+        for key in h1.keys():
+            try:
+                assert np.allclose(h1[key], h2[key], rtol=0.001)
+            except TypeError:
+                pass
 
-#     def tearDown(self):
-#         del self.model
-#         del self.galaxy_table1
-#         del self.galaxy_table2
+    def tearDown(self):
+        del self.model
+        del self.galaxy_table1
+        del self.galaxy_table2
