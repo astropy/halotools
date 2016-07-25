@@ -8,6 +8,7 @@ import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
 
+from .pairwise_distance_3d import _get_r_max
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_xy_z_engine
@@ -193,12 +194,12 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
     x2 = data2[:, 0]
     y2 = data2[:, 1]
     z2 = data2[:, 2]
-    
+
     rp_max = _get_r_max(data1, rp_max)
     pi_max = _get_r_max(data1, pi_max)
     max_rp_max = np.amax(rp_max)
     max_pi_max = np.amax(pi_max)
-    
+
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
@@ -229,30 +230,3 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
     return (x1, y1, z1, x2, y2, z2,
         rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs,
         approx_cell1_size, approx_cell2_size)
-
-
-def _get_r_max(sample1, r_max):
-    """ Helper function process the input ``r_max`` value and returns
-    the appropriate array after requiring the input is the appropriate
-    size and verifying that all entries are bounded positive numbers.
-    """
-    N1 = len(sample1)
-    r_max = np.atleast_1d(r_max).astype(float)
-
-    if len(r_max) == 1:
-        r_max = np.array([r_max[0]]*N1)
-    else:
-        try:
-            assert len(r_max) == N1
-        except AssertionError:
-            msg = "Input ``r_max`` must be the same length as ``sample1``."
-            raise ValueError(msg)
-
-    try:
-        assert np.all(r_max < np.inf)
-        assert np.all(r_max > 0)
-    except AssertionError:
-        msg = "Input ``r_max`` must be an array of bounded positive numbers."
-        raise ValueError(msg)
-
-    return r_max

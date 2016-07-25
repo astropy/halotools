@@ -26,30 +26,30 @@ def pairwise_distance_3d(data1, data2, r_max, period=None,
     """
     Function returns pairs of points separated by
     a three-dimensional distance smaller than or eqaul to the input ``r_max``.
-    
+
     Note that if data1 == data2 that the
     `~halotools.mock_observables.pairwise_distance_3d` function double-counts pairs.
-    
+
     Parameters
     ----------
     data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions.
         Values of each dimension should be between zero and the corresponding dimension
         of the input period.
-        
+
     data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions.
         Values of each dimension should be between zero and the corresponding dimension
         of the input period.
-        
+
     r_max : array_like
         radius of spheres to search for pairs around galaxies in ``sample1``.
         If a single float is given, ``r_max`` is assumed to be the same for each galaxy in
         ``sample1``. You may optionally pass in an array of length *Npts1*, in which case
         each point in ``sample1`` will have its own individual pair-search radius.
-        
+
         Length units assumed to be in Mpc/h, here and throughout Halotools.
-        
+
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.
         If only one number is specified, the enclosing volume is assumed to
@@ -175,7 +175,7 @@ def _pairwise_distance_3d_process_args(data1, data2, r_max, period,
         if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise ValueError(msg)
-    
+
     # Passively enforce that we are working with ndarrays
     x1 = data1[:, 0]
     y1 = data1[:, 1]
@@ -183,10 +183,10 @@ def _pairwise_distance_3d_process_args(data1, data2, r_max, period,
     x2 = data2[:, 0]
     y2 = data2[:, 1]
     z2 = data2[:, 2]
-    
+
     r_max = _get_r_max(data1, r_max)
     max_r_max = np.amax(r_max)
-    
+
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
