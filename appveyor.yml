@@ -14,7 +14,7 @@ environment:
 
   matrix:
 
-      - PYTHON_VERSION: "2.7"
+      - PYTHON_VERSION: "3.5"
         ASTROPY_VERSION: "stable"
         NUMPY_VERSION: "stable"
 
