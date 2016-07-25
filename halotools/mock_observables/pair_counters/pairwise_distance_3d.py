@@ -20,12 +20,12 @@ __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('pairwise_distance_3d', )
 
 
-def pairwise_distance_3d(data1, data2, rmax, period=None,
+def pairwise_distance_3d(data1, data2, r_max, period=None,
         verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
     Function returns pairs of points separated by
-    a three-dimensional distance smaller than or eqaul to the input ``rmax``.
+    a three-dimensional distance smaller than or eqaul to the input ``r_max``.
 
     Note that if data1 == data2 that the
     `~halotools.mock_observables.pairwise_distance_3d` function double-counts pairs.
@@ -42,8 +42,13 @@ def pairwise_distance_3d(data1, data2, rmax, period=None,
         Values of each dimension should be between zero and the corresponding dimension
         of the input period.
 
-    rmax : array_like
-        maximum separation distance to search for pairs
+    r_max : array_like
+        radius of spheres to search for pairs around galaxies in ``sample1``.
+        If a single float is given, ``r_max`` is assumed to be the same for each galaxy in
+        ``sample1``. You may optionally pass in an array of length *Npts1*, in which case
+        each point in ``sample1`` will have its own individual pair-search radius.
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.
@@ -88,7 +93,7 @@ def pairwise_distance_3d(data1, data2, rmax, period=None,
 
     >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
-    >>> rmax = 1.0
+    >>> r_max = 1.0
 
     >>> x1 = np.random.uniform(0, Lbox, Npts1)
     >>> y1 = np.random.uniform(0, Lbox, Npts1)
@@ -104,18 +109,18 @@ def pairwise_distance_3d(data1, data2, rmax, period=None,
     >>> data1 = np.vstack([x1, y1, z1]).T
     >>> data2 = np.vstack([x2, y2, z2]).T
 
-    >>> dist_matrix = pairwise_distance_3d(data1, data2, rmax, period = period)
+    >>> dist_matrix = pairwise_distance_3d(data1, data2, r_max, period = period)
 
     """
 
     ### Process the inputs with the helper function
-    result = _pairwise_distance_3d_process_args(data1, data2, rmax, period,
+    result = _pairwise_distance_3d_process_args(data1, data2, r_max, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rmax, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    r_max, max_r_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
 
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
+    search_xlength, search_ylength, search_zlength = max_r_max, max_r_max, max_r_max
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -132,7 +137,7 @@ def pairwise_distance_3d(data1, data2, rmax, period=None,
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(pairwise_distance_3d_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rmax)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, r_max)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -159,7 +164,7 @@ def pairwise_distance_3d(data1, data2, rmax, period=None,
     return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1), len(data2)))
 
 
-def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
+def _pairwise_distance_3d_process_args(data1, data2, r_max, period,
         verbose, num_threads, approx_cell1_size, approx_cell2_size):
     """
     helper function to process arguments for `~halotools.mock_observables.pairwise_distance_3d function.
@@ -179,14 +184,15 @@ def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
     y2 = data2[:, 1]
     z2 = data2[:, 2]
 
-    rmax = float(rmax)
+    r_max = _get_r_max(data1, r_max)
+    max_r_max = np.amax(r_max)
 
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2,
-                min_size=[rmax*3.0, rmax*3.0, rmax*3.0]))
+                min_size=[max_r_max*3.0, max_r_max*3.0, max_r_max*3.0]))
     else:
         PBCs = True
         period = np.atleast_1d(period).astype(float)
@@ -200,14 +206,41 @@ def _pairwise_distance_3d_process_args(data1, data2, rmax, period,
             raise ValueError(msg)
 
     if approx_cell1_size is None:
-        approx_cell1_size = [rmax, rmax, rmax]
+        approx_cell1_size = [max_r_max, max_r_max, max_r_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:
-        approx_cell2_size = [rmax, rmax, rmax]
+        approx_cell2_size = [max_r_max, max_r_max, max_r_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
 
     return (x1, y1, z1, x2, y2, z2,
-        rmax, period, num_threads, PBCs,
+        r_max, max_r_max, period, num_threads, PBCs,
         approx_cell1_size, approx_cell2_size)
+
+
+def _get_r_max(sample1, r_max):
+    """ Helper function process the input ``r_max`` value and returns
+    the appropriate array after requiring the input is the appropriate
+    size and verifying that all entries are bounded positive numbers.
+    """
+    N1 = len(sample1)
+    r_max = np.atleast_1d(r_max).astype(float)
+
+    if len(r_max) == 1:
+        r_max = np.array([r_max[0]]*N1)
+    else:
+        try:
+            assert len(r_max) == N1
+        except AssertionError:
+            msg = "Input ``r_max`` must be the same length as ``sample1``."
+            raise ValueError(msg)
+
+    try:
+        assert np.all(r_max < np.inf)
+        assert np.all(r_max > 0)
+    except AssertionError:
+        msg = "Input ``r_max`` must be an array of bounded positive numbers."
+        raise ValueError(msg)
+
+    return r_max

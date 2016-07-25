@@ -9,21 +9,13 @@ from astropy.tests.helper import pytest
 
 from .pure_python_distance_matrix import pure_python_distance_matrix_3d, pure_python_distance_matrix_xy_z
 
-from ..pairwise_distance_3d import pairwise_distance_3d
+from ..pairwise_distance_3d import pairwise_distance_3d, _get_r_max
 from ..pairwise_distance_xy_z import pairwise_distance_xy_z
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 from ...tests.cf_helpers import generate_3d_regular_mesh
 
 fixed_seed = 43
-
-__all__ = ["test_pairwise_distance_3d_periodic_mesh_grid_1",
-           "test_pairwise_distance_3d_nonperiodic_mesh_grid_1",
-           "test_pairwise_distance_3d_nonperiodic_random_1",
-           "test_pairwise_distance_3d_periodic_tight_locus1",
-           "test_pairwise_distance_3d_nonperiodic_tight_locus1",
-           "test_pairwise_distance_3d_nonperiodic_tight_locus2"
-           ]
 
 
 def test_pairwise_distance_3d_periodic_mesh_grid_1():
@@ -223,3 +215,28 @@ def test_xy_z_brute_force_elementwise_comparison():
             brute_force_element = pure_python_dense_matrix_z[i, j]
             sparse_matrix_element = dense_matrix_z[i, j]
             assert np.allclose(brute_force_element, sparse_matrix_element, rtol=0.001)
+
+
+def test_get_rmax1():
+    """
+    """
+    sample1 = np.zeros((100, 3))
+
+    with pytest.raises(ValueError) as err:
+        __ = _get_r_max(sample1, [0.1, 0.2])
+    substr = "Input ``r_max`` must be the same length as ``sample1``."
+    assert substr in err.value.args[0]
+
+
+def test_get_rmax2():
+    """
+    """
+    sample1 = np.zeros((100, 3))
+
+    with pytest.raises(ValueError) as err:
+        __ = _get_r_max(sample1, np.inf)
+    substr = "Input ``r_max`` must be an array of bounded positive numbers."
+    assert substr in err.value.args[0]
+
+
+

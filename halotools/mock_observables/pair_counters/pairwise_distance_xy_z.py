@@ -8,6 +8,7 @@ import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
 
+from .pairwise_distance_3d import _get_r_max
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _enclose_in_box, _cell1_parallelization_indices
 from .cpairs import pairwise_distance_xy_z_engine
@@ -41,10 +42,20 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period=None,
         of the input period.
 
     rp_max : array_like
-        maximum xy-projected separation distance to search for pairs
+        radius of the cylinder to search for neighbors around galaxies in ``data1``.
+        If a single float is given, ``rp_max`` is assumed to be the same for each galaxy in
+        ``data1``. You may optionally pass in an array of length *Npts1*, in which case
+        each point in ``data1`` will have its own individual neighbor-search projected radius.
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_max : array_like
-        maximum z separation distance to search for pairs
+        Half-length of cylinder to search for neighbors around galaxies in ``data1``.
+        If a single float is given, ``pi_max`` is assumed to be the same for each galaxy in
+        ``data1``. You may optionally pass in an array of length *Npts1*, in which case
+        each point in ``data1`` will have its own individual neighbor-search cylinder half-length.
+
+        Length units assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 array defining the periodic boundary conditions.
@@ -114,10 +125,10 @@ def pairwise_distance_xy_z(data1, data2, rp_max, pi_max, period=None,
     result = _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rp_max, pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
 
-    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
+    search_xlength, search_ylength, search_zlength = max_rp_max, max_rp_max, max_pi_max
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -184,15 +195,17 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
     y2 = data2[:, 1]
     z2 = data2[:, 2]
 
-    rp_max = float(rp_max)
-    pi_max = float(pi_max)
+    rp_max = _get_r_max(data1, rp_max)
+    pi_max = _get_r_max(data1, pi_max)
+    max_rp_max = np.amax(rp_max)
+    max_pi_max = np.amax(pi_max)
 
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(x1, y1, z1, x2, y2, z2,
-                min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
+                min_size=[max_rp_max*3.0, max_rp_max*3.0, max_pi_max*3.0]))
     else:
         PBCs = True
         period = np.atleast_1d(period).astype(float)
@@ -206,14 +219,14 @@ def _pairwise_distance_xy_z_process_args(data1, data2, rp_max, pi_max, period,
             raise ValueError(msg)
 
     if approx_cell1_size is None:
-        approx_cell1_size = [rp_max, rp_max, pi_max]
+        approx_cell1_size = [max_rp_max, max_rp_max, max_pi_max]
     elif custom_len(approx_cell1_size) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:
-        approx_cell2_size = [rp_max, rp_max, pi_max]
+        approx_cell2_size = [max_rp_max, max_rp_max, max_pi_max]
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
 
     return (x1, y1, z1, x2, y2, z2,
-        rp_max, pi_max, period, num_threads, PBCs,
+        rp_max, max_rp_max, pi_max, max_pi_max, period, num_threads, PBCs,
         approx_cell1_size, approx_cell2_size)

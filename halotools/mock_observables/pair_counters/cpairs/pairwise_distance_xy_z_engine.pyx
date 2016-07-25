@@ -56,9 +56,6 @@ def pairwise_distance_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
     
     """
     
-    cdef cnp.float64_t rp_max_squared = rp_max*rp_max
-    cdef cnp.float64_t pi_max_squared = pi_max*pi_max
-    
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -67,6 +64,11 @@ def pairwise_distance_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
     cdef int PBCs = double_mesh._PBCs
     
     cdef int Ncell1 = double_mesh.mesh1.ncells
+    
+    rp_max = rp_max*rp_max
+    cdef cnp.float64_t[:] rp_max_squared = np.ascontiguousarray(rp_max[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    pi_max = pi_max*pi_max
+    cdef cnp.float64_t[:] pi_max_squared = np.ascontiguousarray(pi_max[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
@@ -194,7 +196,7 @@ def pairwise_distance_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
                                     dxy_sq = dx*dx + dy*dy
                                     dz_sq = dz*dz
                                     
-                                    if (dxy_sq <= rp_max_squared) & (dz_sq <= pi_max_squared):
+                                    if (dxy_sq <= rp_max_squared[ifirst1+i]) & (dz_sq <= pi_max_squared[ifirst1+i]):
                                         rp_distances.push_back(dxy_sq)
                                         pi_distances.push_back(dz_sq)
                                         i_ind.push_back(ifirst1 + i)
