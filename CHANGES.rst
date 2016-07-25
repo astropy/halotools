@@ -11,6 +11,8 @@
 
 - New counts_in_cells sub-package in mock_observables
 
+- HodMockFactory has new estimate_ngals feature
+
 
 0.3 (2016-06-28)
 ----------------

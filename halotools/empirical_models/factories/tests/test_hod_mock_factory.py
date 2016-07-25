@@ -22,9 +22,35 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ['TestHodMockFactory']
+__all__ = ('test_estimate_ngals1', 'TestHodMockFactory')
 
 fixed_seed = 43
+
+
+def test_estimate_ngals1():
+    model = PrebuiltHodModelFactory('zheng07')
+    halocat = FakeSim(seed=fixed_seed)
+    model.populate_mock(halocat, seed=fixed_seed)
+
+    estimated_ngals = model.mock.estimate_ngals(seed=fixed_seed)
+    actual_ngals = len(model.mock.galaxy_table)
+    assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
+
+    estimated_ngals2 = model.mock.estimate_ngals(seed=fixed_seed)
+    assert estimated_ngals2 == estimated_ngals
+
+    estimated_ngals3 = model.mock.estimate_ngals(seed=fixed_seed+1)
+    assert estimated_ngals3 != estimated_ngals
+
+
+def test_estimate_ngals2():
+    model = PrebuiltHodModelFactory('tinker13')
+    halocat = FakeSim(seed=fixed_seed)
+    model.populate_mock(halocat, seed=fixed_seed)
+
+    estimated_ngals = model.mock.estimate_ngals()
+    actual_ngals = len(model.mock.galaxy_table)
+    assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
 
 
 class TestHodMockFactory(TestCase):
