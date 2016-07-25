@@ -82,9 +82,9 @@ This will install the master branch of the code that is currently under developm
 	functions by 10-40% (with zero impact on the performance
 	of the mock-making algorithm implemented in `~halotools.empirical_models`).
 	To compile Halotools with these flags thrown,
-	simply add two new elements to the
-	``extra_compiler_args`` list in every source code file
-	named ``setup_package.py``: the string ``'-Ofast'`` and
+	simply change the strings stored in the ``mock_observables_extra_compile_args``
+	list defined in cython_config.py so that this list contains two strings:
+	the string ``'-Ofast'`` and
 	the string ``'-march=native'``.
 	When you've made these modifications to the code,
 	install Halotools by following the *Building fom source* instructions above

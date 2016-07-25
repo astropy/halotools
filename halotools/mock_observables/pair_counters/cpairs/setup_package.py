@@ -1,5 +1,6 @@
 from distutils.extension import Extension
 import os
+from ....cython_config import mock_observables_extra_compile_args as mo_args
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ("distances.pyx", "pairwise_distances.pyx",
@@ -16,7 +17,7 @@ def get_extensions():
     include_dirs = ['numpy']
     libraries = []
     language ='c++'
-    extra_compile_args = ['-Ofast']
+    extra_compile_args = mo_args
 
     extensions = []
     for name, source in zip(names, sources):
