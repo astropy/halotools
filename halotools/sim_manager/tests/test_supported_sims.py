@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from unittest import TestCase
 import numpy as np
@@ -18,6 +20,12 @@ if aph_home == detected_home:
     APH_MACHINE = True
 else:
     APH_MACHINE = False
+
+try:
+    import h5py
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
 
 __all__ = ('test_load_halo_catalogs', 'test_halo_rvir_in_correct_units')
 
@@ -67,6 +75,7 @@ def test_bolplanck_particle_mass():
     assert np.allclose(bp.particle_mass, 1.55e8, rtol=0.01)
 
 
+@pytest.mark.skipif('not HAS_H5PY')
 def test_forbidden_sims():
     """
     """
