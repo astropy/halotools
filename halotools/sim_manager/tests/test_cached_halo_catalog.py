@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function)
+"""
+"""
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 import os
@@ -217,7 +218,7 @@ class TestCachedHaloCatalog(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_fname_optional_load(self):
-        fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_alpha_version2.hdf5'
+        fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_v0p4.hdf5'
         halocat = CachedHaloCatalog(fname=fname)
         assert halocat.simname == 'bolplanck'
 
