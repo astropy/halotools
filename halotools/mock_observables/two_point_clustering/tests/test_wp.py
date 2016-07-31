@@ -115,3 +115,39 @@ def test_wp_vs_corrfunc():
 
     halotools_result2 = wp(sample2, rp_bins, pi_max, period=250.0)
     assert np.allclose(halotools_result2, sinha_sample2_wp, rtol=1e-3), msg
+
+
+def test_wp_cross_consistency():
+    Npts1, Npts2 = 100, 200
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    wp_11a, wp_12a, wp_22a = wp(sample1, rp_bins, pi_max, sample2=sample2, period=1,
+        do_auto=True, do_cross=True)
+    assert np.shape(wp_11a) == (len(rp_bins)-1, )
+    assert np.shape(wp_12a) == (len(rp_bins)-1, )
+    assert np.shape(wp_22a) == (len(rp_bins)-1, )
+
+    wp_12b = wp(sample1, rp_bins, pi_max, sample2=sample2, period=1,
+        do_auto=False, do_cross=True)
+    assert np.shape(wp_12b) == (len(rp_bins)-1, )
+
+    assert np.allclose(wp_12a, wp_12b)
+
+
+def test_wp_auto_consistency():
+    Npts1, Npts2 = 100, 200
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    wp_11a, wp_12a, wp_22a = wp(sample1, rp_bins, pi_max, sample2=sample2, period=1,
+        do_auto=True, do_cross=True)
+
+    wp_11b, wp_22b = wp(sample1, rp_bins, pi_max, sample2=sample2, period=1,
+        do_auto=False, do_cross=True)
+
+    assert np.allclose(wp_11a, wp_11b)
+    assert np.allclose(wp_22a, wp_22b)
+
