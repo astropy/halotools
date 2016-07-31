@@ -48,7 +48,7 @@ def test_estimate_ngals2():
     halocat = FakeSim(seed=fixed_seed)
     model.populate_mock(halocat, seed=fixed_seed)
 
-    estimated_ngals = model.mock.estimate_ngals()
+    estimated_ngals = model.mock.estimate_ngals(seed=fixed_seed)
     actual_ngals = len(model.mock.galaxy_table)
     assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
 
