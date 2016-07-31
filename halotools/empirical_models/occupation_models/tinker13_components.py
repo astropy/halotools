@@ -192,7 +192,7 @@ class Tinker13Cens(OccupationComponent):
                 sfr_designation = table[self.sfr_designation_key]
             except KeyError:
                 msg = ("The ``table`` passed as a keyword argument to the ``mean_occupation`` method\n"
-                    "does not have the requested ``%s`` key")
+                    "does not have the requested ``%s`` key used for SFR designation")
                 raise HalotoolsError(msg % self.sfr_designation_key)
         else:
             try:
