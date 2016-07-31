@@ -136,7 +136,6 @@ def test_wp_cross_consistency():
     assert np.allclose(wp_12a, wp_12b)
 
 
-@pytest.mark.xfail
 def test_wp_auto_consistency():
     Npts1, Npts2 = 100, 200
     with NumpyRNGContext(fixed_seed):

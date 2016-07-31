@@ -168,7 +168,6 @@ def test_tpcf_decomposition_cross_consistency():
     assert np.allclose(result_2h_12a, result_2h_12b)
 
 
-@pytest.mark.xfail
 def test_tpcf_decomposition_auto_consistency():
     Npts1, Npts2 = 100, 200
     with NumpyRNGContext(fixed_seed):

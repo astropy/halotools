@@ -72,7 +72,6 @@ def test_s_mu_cross_consistency():
     assert np.allclose(result_12a, result_12b)
 
 
-@pytest.mark.xfail
 def test_s_mu_auto_consistency():
     """
     """
