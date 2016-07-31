@@ -258,7 +258,8 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     #do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
         rbins, period, num_threads, do_DR, do_RR)
-    if np.all(sample1==sample2):
+
+    if _sample1_is_sample2:
         D2R=D1R
     else:
         if do_DR is True:
