@@ -3,6 +3,7 @@ the `~halotools.empirical_models.PrebuiltSubhaloModelFactory` class
 """
 from __future__ import absolute_import, division, print_function
 
+import numpy as np
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
@@ -59,5 +60,18 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
     def test_fake_mock_observations2(self):
         modelname = 'behroozi10'
         model = PrebuiltSubhaloModelFactory(modelname)
+
         model.compute_average_galaxy_matter_cross_clustering(
             num_iterations=1, simname='fake')
+
+        def mask_function(t):
+            return t['halo_upid'] == -1
+
+        result = model.compute_average_galaxy_matter_cross_clustering(
+            num_iterations=1, simname='fake', redshift=0, halo_finder='rockstar',
+            rbins=np.array((0.1, 0.2, 0.3)), mask_function=mask_function,
+            include_complement=True, summary_statistic='mean'
+            )
+        assert np.shape(result) == (3, 2)
+        xi = result[0]
+        assert len(xi) == 2
