@@ -250,7 +250,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         elif (do_auto is True):
             xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)[:, ::-1]
             xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)[:, ::-1]
-            return xi_11
+            return xi_11, xi_22
 
 
 def spherical_sector_volume(s, mu):
