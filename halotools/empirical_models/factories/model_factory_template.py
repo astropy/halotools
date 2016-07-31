@@ -37,31 +37,6 @@ inconsistent_version_name_error_msg = ("Inconsistency between the version_name "
     "You should instantiate a new model object if you wish to switch halo catalogs.")
 
 
-def _test_mock_consistency(mock,
-        redshift=sim_defaults.default_redshift,
-        simname=sim_defaults.default_simname,
-        halo_finder=sim_defaults.default_halo_finder,
-        version_name=sim_defaults.default_version_name,
-        halocat=None):
-
-    if halocat is None:
-        pass
-    else:
-        redshift = halocat.redshift
-        simname = halocat.simname
-        halo_finder = halocat.halo_finder
-
-    if abs(redshift - mock.redshift) > 0.05:
-        raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, mock.redshift))
-    if simname != mock.simname:
-        raise HalotoolsError(inconsistent_simname_error_msg % (mock.simname, simname))
-    if halo_finder != mock.halo_finder:
-        raise HalotoolsError(inconsistent_halo_finder_error_msg % (mock.halo_finder, halo_finder))
-    if version_name != mock.version_name:
-        raise HalotoolsError(inconsistent_version_name_error_msg % (mock.version_name, version_name))
-    print(("version_name = %s" % version_name))
-
-
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):
     """ Abstract container class used to build
