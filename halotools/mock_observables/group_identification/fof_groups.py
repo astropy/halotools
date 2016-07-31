@@ -139,11 +139,15 @@ class FoFGroups(object):
         if (Lbox is None) & (period is None):
             raise ValueError("Lbox and Period cannot be both be None.")
         elif (Lbox is None) & (period is not None):
+            period = np.atleast_1d(period)
+            if len(period) == 1:
+                period = np.array((period[0], period[0], period[0]))
             Lbox = period
-
-        Lbox = np.atleast_1d(Lbox)
-        if len(Lbox) == 1:
-            Lbox = np.array([period, period, period])
+        elif (Lbox is not None) & (period is None):
+            Lbox = np.atleast_1d(Lbox)
+            if len(Lbox) == 1:
+                Lbox = np.array([Lbox[0], Lbox[0], Lbox[0]])
+            period = Lbox
 
         if np.shape(Lbox) != (3,):
             raise ValueError("Lbox must be an array of length 3, or number indicating the "
@@ -153,13 +157,11 @@ class FoFGroups(object):
 
         self.period = period  # simulation box periodic boundary conditions
         self.Lbox = np.asarray(Lbox, dtype='float64')  # simulation box periodic boundary conditions
-
         #calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)
         self.n_gal = len(positions)/self.volume
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
         self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
-
         self.m_perp, self.m_para = pairwise_distance_xy_z(
             self.positions, self.positions, self.d_perp, self.d_para,
             period=self.period, num_threads=num_threads)
