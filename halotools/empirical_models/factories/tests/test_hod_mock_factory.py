@@ -53,6 +53,18 @@ def test_estimate_ngals2():
     assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
 
 
+def test_convenience_functions():
+    model = PrebuiltHodModelFactory('zheng07')
+    halocat = FakeSim(seed=fixed_seed)
+    model.populate_mock(halocat, seed=fixed_seed)
+
+    nd = model.mock.number_density
+    fsat = model.mock.satellite_fraction
+    xi = model.mock.compute_galaxy_matter_cross_clustering(
+        gal_type='centrals', include_complement=True)
+    gn = model.mock.compute_fof_group_ids()
+
+
 class TestHodMockFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.HodMockFactory`.
     """
