@@ -72,7 +72,7 @@ parser.add_argument("halo_finder", type=str, help="Nickname of the halo-finder. 
     choices=['rockstar', 'bdm'])
 
 parser.add_argument("version_name", type=str,
-    choices=['halotools_alpha_version2', 'most_recent'],
+    choices=['halotools_v0p4', 'most_recent'],
     help="Processing version of the requested catalog. "
     "Selecting `most_recent` will automatically choose the most up-to-date catalogs. ")
 

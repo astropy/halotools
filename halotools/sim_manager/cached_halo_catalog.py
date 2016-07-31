@@ -190,6 +190,8 @@ class CachedHaloCatalog(object):
 
         self.halo_table_cache = HaloTableCache()
 
+        self._disallow_catalogs_with_known_bugs(**kwargs)
+
         self.log_entry = self._determine_cache_log_entry(**kwargs)
         self.simname = self.log_entry.simname
         self.halo_finder = self.log_entry.halo_finder
@@ -208,6 +210,7 @@ class CachedHaloCatalog(object):
             del _
 
         self._set_publication_list(self.simname)
+
 
     def _set_publication_list(self, simname):
         try:
@@ -575,7 +578,7 @@ class CachedHaloCatalog(object):
                     except AssertionError:
                         msg = ("The ``" + attr + "`` metadata of the hdf5 file \n"
                             "is inconsistent with the corresponding attribute of the \n"
-                            + matching_sim.__class__.__name__ + "class in the "
+                            + matching_sim.__class__.__name__ + " class in the "
                             "sim_manager.supported_sims module.\n"
                             "Double-check the value of this attribute in the \n"
                             "NbodySimulation sub-class you added to the supported_sims module. \n"
@@ -621,6 +624,18 @@ class CachedHaloCatalog(object):
                 return self._ptcl_table
             else:
                 raise InvalidCacheLogEntry(ptcl_log_entry._cache_safety_message)
+
+    def _disallow_catalogs_with_known_bugs(self, simname=sim_defaults.default_simname,
+            version_name=sim_defaults.default_version_name, **kwargs):
+        """
+        """
+        if (simname == 'bolplanck') and ('halotools_alpha_version' in version_name):
+            msg = ("The ``{0}`` version of the ``{1}`` simulation \n"
+            "is known to be spatially incomplete and should not be used.\n"
+            "See https://github.com/astropy/halotools/issues/598.\n"
+            "You can either download the original ASCII data and process it yourself, \n"
+            "or use version_name = ``halotools_v0p4`` instead.\n")
+            raise HalotoolsError(msg.format(version_name, simname))
 
     def _enforce_halo_ptcl_catalog_consistency(self, halo_log_entry, ptcl_log_entry):
         """

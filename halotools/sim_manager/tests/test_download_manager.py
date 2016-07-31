@@ -120,17 +120,17 @@ class TestDownloadManager(TestCase):
 
         file_list = self.downman._ptcl_tables_available_for_download(simname='bolshoi')
         assert len(file_list) == 1
-        assert 'hlist_1.00035.particles.halotools_alpha_version1.hdf5' == os.path.basename(file_list[0])
+        assert 'hlist_1.00035.particles.halotools_v0p4.hdf5' == os.path.basename(file_list[0])
 
         file_list = self.downman._ptcl_tables_available_for_download(simname='multidark')
         assert len(file_list) == 1
-        assert 'hlist_1.00109.particles.halotools_alpha_version1.hdf5' == os.path.basename(file_list[0])
+        assert 'hlist_1.00109.particles.halotools_v0p4.hdf5' == os.path.basename(file_list[0])
 
         consuelo_set = set(
-            ['hlist_0.33324.particles.halotools_alpha_version1.hdf5',
-            'hlist_0.50648.particles.halotools_alpha_version1.hdf5',
-            'hlist_0.67540.particles.halotools_alpha_version1.hdf5',
-            'hlist_1.00000.particles.halotools_alpha_version1.hdf5']
+            ['hlist_0.33324.particles.halotools_v0p4.hdf5',
+            'hlist_0.50648.particles.halotools_v0p4.hdf5',
+            'hlist_0.67540.particles.halotools_v0p4.hdf5',
+            'hlist_1.00000.particles.halotools_v0p4.hdf5']
             )
         file_list = self.downman._ptcl_tables_available_for_download(simname='consuelo')
         assert len(file_list) == 4
@@ -138,10 +138,10 @@ class TestDownloadManager(TestCase):
         assert file_set == consuelo_set
 
         bolplanck_set = set(
-            ['hlist_0.33406.particles.halotools_alpha_version1.hdf5',
-            'hlist_0.50112.particles.halotools_alpha_version1.hdf5',
-            'hlist_0.66818.particles.halotools_alpha_version1.hdf5',
-            'hlist_1.00231.particles.halotools_alpha_version1.hdf5']
+            ['hlist_0.33406.particles.halotools_v0p4.hdf5',
+            'hlist_0.50112.particles.halotools_v0p4.hdf5',
+            'hlist_0.66818.particles.halotools_v0p4.hdf5',
+            'hlist_1.00231.particles.halotools_v0p4.hdf5']
             )
         file_list = self.downman._ptcl_tables_available_for_download(simname='bolplanck')
         assert len(file_list) == 4
@@ -256,7 +256,7 @@ class TestDownloadManager(TestCase):
         """
         fname, redshift = self.downman._closest_catalog_on_web(simname='bolshoi',
             halo_finder='rockstar', desired_redshift=0., catalog_type='halos')
-        assert 'hlist_1.00035.list.halotools_alpha_version2.hdf5' in fname
+        assert 'hlist_1.00035.list.halotools_v0p4.hdf5' in fname
 
     @remote_data
     def test_closest_halo_catalog_on_web2(self):
@@ -264,7 +264,7 @@ class TestDownloadManager(TestCase):
         """
         fname, redshift = self.downman._closest_catalog_on_web(simname='bolshoi',
             halo_finder='bdm', desired_redshift=0., catalog_type='halos')
-        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version2.hdf5' in fname
+        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_v0p4.hdf5' in fname
 
     @remote_data
     def test_closest_halo_catalog_on_web3(self):
@@ -282,7 +282,7 @@ class TestDownloadManager(TestCase):
         """
         fname, redshift = self.downman._closest_catalog_on_web(simname='bolplanck',
             desired_redshift=2, catalog_type='particles')
-        assert 'bolplanck/hlist_0.33406.particles.halotools_alpha_version1.hdf5' in fname
+        assert 'bolplanck/hlist_0.33406.particles.halotools_v0p4.hdf5' in fname
 
     @classmethod
     def clear_APH_MACHINE_of_highz_file(self,
@@ -370,7 +370,7 @@ class TestDownloadManager(TestCase):
             self.downman.download_processed_halo_table(
                 simname='bolshoi',
                 halo_finder='rockstar',
-                version_name=sim_defaults.default_version_name,
+                version_name='halotools_alpha_version2',
                 redshift=11.7, dz_tol=200,
                 overwrite=True, download_dirname='std_cache_loc')
         substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``"

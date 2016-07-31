@@ -99,7 +99,7 @@ class BolPlanck(NbodySimulation):
     def __init__(self):
 
         super(BolPlanck, self).__init__(simname='bolplanck', Lbox=250.,
-            particle_mass=1.35e8, num_ptcl_per_dim=2048,
+            particle_mass=1.55e8, num_ptcl_per_dim=2048,
             softening_length=1., initial_redshift=80., cosmology=cosmology.Planck13)
 
         self.orig_ascii_web_location = (
