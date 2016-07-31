@@ -14,7 +14,7 @@ from ..smhm_models import Behroozi10SmHm
 from ..assembias_models import HeavisideAssembias
 
 from ... import sim_manager
-from ...custom_exceptions import HalotoolsModelInputError, HalotoolsError
+from ...custom_exceptions import HalotoolsError
 
 __all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
            'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
@@ -308,7 +308,7 @@ class Leauthaud11Sats(OccupationComponent):
             mass = kwargs['prim_haloprop']
         else:
             function_name = "Leauthaud11Sats.mean_occupation"
-            raise HalotoolsModelInputError(function_name)
+            raise HalotoolsError(function_name)
 
         self._update_satellite_params()
 

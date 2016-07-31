@@ -16,7 +16,7 @@ from ..model_helpers import bounds_enforcing_decorator_factory
 
 from ...utils.array_utils import custom_len
 from ... import sim_manager
-from ...custom_exceptions import HalotoolsError, HalotoolsModelInputError
+from ...custom_exceptions import HalotoolsError
 
 __all__ = ('Tinker13Cens', 'Tinker13QuiescentSats',
            'Tinker13ActiveSats', 'AssembiasTinker13Cens')
@@ -457,7 +457,7 @@ class Tinker13QuiescentSats(OccupationComponent):
             mass = kwargs['prim_haloprop']
         else:
             function_name = "Tinker13QuiescentSats.mean_occupation"
-            raise HalotoolsModelInputError(function_name)
+            raise HalotoolsError(function_name)
 
         self._update_satellite_params()
 
@@ -623,7 +623,7 @@ class Tinker13ActiveSats(OccupationComponent):
             mass = kwargs['prim_haloprop']
         else:
             function_name = "Tinker13ActiveSats.mean_occupation"
-            raise HalotoolsModelInputError(function_name)
+            raise HalotoolsError(function_name)
 
         self._update_satellite_params()
 
