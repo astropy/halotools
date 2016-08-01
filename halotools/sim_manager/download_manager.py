@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module storing the DownloadManager class responsible for
 retrieving the Halotools-provided simulation data from the web
