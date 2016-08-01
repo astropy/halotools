@@ -328,7 +328,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
             R1R2 = np.zeros((iterations, len(rbins)-1))
             R2R2 = np.zeros((iterations, len(rbins)-1))
             for i in range(iterations):
-                print(i)
                 #get arrays to randomize marks
                 with NumpyRNGContext(seed):
                     permutate1 = np.random.permutation(np.arange(0, len(sample1)))
@@ -337,12 +336,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
                     sample1, sample2, rbins, period, num_threads,
                     do_auto, do_cross, marks1, marks2, weight_func_id,
                     _sample1_is_sample2, permutate1, permutate2, randomize_marks)
-            #take mean of the iterations
-            # R1R1_err = np.std(R1R1, axis=0)
+
             R1R1 = np.median(R1R1, axis=0)
-            # R1R2_err = np.std(R1R2, axis=0)
             R1R2 = np.median(R1R2, axis=0)
-            # R2R2_err = np.std(R2R2, axis=0)
             R2R2 = np.median(R2R2, axis=0)
         else:
             #get arrays to randomize marks
@@ -352,9 +348,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
             R1R1, R1R2, R2R2 = random_counts(sample1, sample2, rbins, period,
                 num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,
                 _sample1_is_sample2, permutate1, permutate2, randomize_marks)
-    else:
-        msg = 'normalize_by parameter not recognized.'
-        raise ValueError(msg)
 
     #return results
     if _sample1_is_sample2:
@@ -557,7 +550,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
     if len(marks1) != len(sample1):
         msg = ("\n `marks1` must have same length as `sample1`.")
         raise HalotoolsError(msg)
-    if len(marks2) != len(marks2):
+    if len(marks2) != len(sample2):
         msg = ("\n `marks2` must have same length as `sample2`.")
         raise HalotoolsError(msg)
 
