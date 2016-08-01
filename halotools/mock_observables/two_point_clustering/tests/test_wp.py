@@ -146,7 +146,7 @@ def test_wp_auto_consistency():
         do_auto=True, do_cross=True)
 
     wp_11b, wp_22b = wp(sample1, rp_bins, pi_max, sample2=sample2, period=1,
-        do_auto=False, do_cross=True)
+        do_auto=True, do_cross=False)
 
     assert np.allclose(wp_11a, wp_11b)
     assert np.allclose(wp_22a, wp_22b)
