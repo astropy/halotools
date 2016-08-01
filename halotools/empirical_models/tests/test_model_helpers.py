@@ -9,9 +9,74 @@ from astropy.utils.misc import NumpyRNGContext
 from .. import model_helpers as occuhelp
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ['TestModelHelpers']
+__all__ = ('TestModelHelpers', 'test_custom_spline1')
 
 fixed_seed = 43
+
+
+def test_custom_spline1():
+    table_abscissa = (0, 1)
+    table_ordinates = (0, 1, 2)
+    with pytest.raises(HalotoolsError) as err:
+        __ = occuhelp.custom_spline(table_abscissa, table_ordinates)
+    substr = "table_abscissa and table_ordinates must have the same length"
+    assert substr in err.value.args[0]
+
+
+def test_custom_spline2():
+    table_abscissa = (0, 1, 2)
+    table_ordinates = (0, 1, 2)
+    with pytest.raises(HalotoolsError) as err:
+        __ = occuhelp.custom_spline(table_abscissa, table_ordinates, k=-2)
+    substr = "Spline degree must be non-negative"
+    assert substr in err.value.args[0]
+
+
+def test_custom_spline3():
+    table_abscissa = (0, 1, 2)
+    table_ordinates = (0, 1, 2)
+    with pytest.raises(HalotoolsError) as err:
+        __ = occuhelp.custom_spline(table_abscissa, table_ordinates, k=0)
+    substr = "In spline_degree=0 edge case,"
+    assert substr in err.value.args[0]
+
+
+def test_create_composite_dtype():
+    dt1 = np.dtype([('x', 'f4')])
+    dt2 = np.dtype([('x', 'i4')])
+    with pytest.raises(HalotoolsError) as err:
+        result = occuhelp.create_composite_dtype([dt1, dt2])
+    substr = "Inconsistent dtypes for name"
+    assert substr in err.value.args[0]
+
+
+def test_bind_default_kwarg_mixin_safe():
+
+    class DummyClass(object):
+
+        def __init__(self, d):
+            self.abc = 4
+
+    constructor_kwargs = {'abc': 10}
+    obj = DummyClass(constructor_kwargs)
+    keyword_argument = 'abc'
+    default_value = 0
+
+    with pytest.raises(HalotoolsError) as err:
+        __ = occuhelp.bind_default_kwarg_mixin_safe(
+            obj, keyword_argument, constructor_kwargs, default_value)
+    substr = "Do not pass the  ``abc`` keyword argument "
+    assert substr in err.value.args[0]
+
+
+def test_bounds_enforcing_decorator_factory():
+    """
+    """
+    f = lambda x: x
+    decorator = occuhelp.bounds_enforcing_decorator_factory(0, 1, warning=True)
+    decorated_f = decorator(f)
+    result = decorated_f(-1)
+    assert result == 0
 
 
 class TestModelHelpers(TestCase):

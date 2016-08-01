@@ -41,6 +41,8 @@ def test_Leauthaud11Cens():
     ncen6 = model3.mean_occupation(prim_haloprop=5e11)
     assert ncen6 < ncen5 < ncen1
 
+    __ = model2.get_published_parameters()
+
 
 def test_Leauthaud11Sats():
     """ Function to test

@@ -1,8 +1,9 @@
 """
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 __all__=['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
 __author__ = ('Duncan Campbell', )
@@ -27,14 +28,13 @@ def spherical_to_cartesian(ra, dec):
         Cartesian coordinates.
 
     """
-    from numpy import radians, sin, cos
 
-    rar = radians(ra)
-    decr = radians(dec)
+    rar = np.radians(ra)
+    decr = np.radians(dec)
 
-    x = cos(rar) * cos(decr)
-    y = sin(rar) * cos(decr)
-    z = sin(decr)
+    x = np.cos(rar) * np.cos(decr)
+    y = np.sin(rar) * np.cos(decr)
+    z = np.sin(decr)
 
     return x, y, z
 
@@ -58,9 +58,8 @@ def chord_to_cartesian(theta, radians=True):
     C : array
         chord distance
     """
-    import numpy as np
 
-    theta = np.asarray(theta)
+    theta = np.atleast_1d(theta)
 
     if radians is False:
         theta = np.radians(theta)
@@ -70,7 +69,7 @@ def chord_to_cartesian(theta, radians=True):
     return C
 
 
-def sample_spherical_surface(N_points):
+def sample_spherical_surface(N_points, seed=None):
     """
     Randomly sample the sky.
 
@@ -79,24 +78,29 @@ def sample_spherical_surface(N_points):
     N_points : int
         number of points to sample.
 
+    seed : int, optional
+        Random number seed permitting deterministic behavior.
+        Default is None for stochastic results.
+
     Returns
     ----------
     coords : list
         (ra,dec) coordinate pairs in degrees.
+
+    Examples
+    ---------
+    >>> angular_coords_in_degrees = sample_spherical_surface(100, seed=43)
     """
 
-    from numpy import random
-    from numpy import arccos
-    from math import pi
+    with NumpyRNGContext(seed):
+        ran1 = np.random.rand(N_points)  # oversample, to account for box sample
+        ran2 = np.random.rand(N_points)  # oversample, to account for box sample
 
-    ran1 = random.rand(N_points)  # oversample, to account for box sample
-    ran2 = random.rand(N_points)  # oversample, to account for box sample
+    ran1 = ran1 * 2.0 * np.pi  # convert to radians
+    ran2 = np.arccos(2.0 * ran2 - 1.0) - 0.5*np.pi  # convert to radians
 
-    ran1 = ran1 * 2.0 * pi  # convert to radians
-    ran2 = arccos(2.0 * ran2 - 1.0) - 0.5*pi  # convert to radians
-
-    ran1 = ran1 * 360.0 / (2.0 * pi)  # convert to degrees
-    ran2 = ran2 * 360.0 / (2.0 * pi)  # convert to degrees
+    ran1 = ran1 * 360.0 / (2.0 * np.pi)  # convert to degrees
+    ran2 = ran2 * 360.0 / (2.0 * np.pi)  # convert to degrees
 
     ran_ra = ran1
     ran_dec = ran2

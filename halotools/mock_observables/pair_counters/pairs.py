@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 
-__all__=['npairs', 'wnpairs', 'xy_z_npairs', 'xy_z_wnpairs', 'pairs']
+__all__=['npairs', 'wnpairs', 'xy_z_npairs', 'xy_z_wnpairs']
 __author__ = ['Duncan Campbell']
 
 
@@ -370,80 +370,6 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
                 n[i, j] += np.sum(np.extract((dd[:, 0]<=rp_bins[i]) & (dd[:, 1]<=pi_bins[j]), ww))
 
     return n
-
-
-def pairs(sample1, r, sample2=None, period=None):
-    """
-    Calculate the pairs with separations less than or equal to rbins[i].
-
-    Parameters
-    ----------
-    sample1 : array_like
-        N by k numpy array of k-dimensional positions. Should be between zero and
-        period
-
-    r : float
-        radius for which pairs are counted.
-
-    sample2 : array_like, optional
-        N by k numpy array of k-dimensional positions. Should be between zero and
-        period
-
-    period : array_like, optional
-        length k array defining  periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-        If none, PBCs are set to infinity.
-
-    Returns
-    -------
-    pairs : Set of pairs (i,j), with i < j
-
-    """
-
-    #work with arrays!
-    sample1 = np.asarray(sample1)
-    if sample2 is None:
-        sample2 = np.asarray(sample1)
-        self_match=False
-    else:
-        sample2 = np.asarray(sample2)
-        self_match=True
-
-    #Check to make sure both data sets have the same dimension. Otherwise, throw an error!
-    if np.shape(sample1)[-1]!=np.shape(sample2)[-1]:
-        raise ValueError("sample1 and sample2 inputs do not have the same dimension.")
-        return None
-
-    #Process period entry and check for consistency.
-    if period is None:
-            period = np.array([np.inf]*np.shape(sample1)[-1])
-    else:
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
-        if np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have len == dimension of points")
-            return None
-
-    N1 = len(sample1)
-    N2 = len(sample2)
-    dd = np.zeros((N1, N2))  # store radial pair separations
-    for i in range(0, N1):  # calculate distance between every point and every other point
-        x1 = sample1[i, :]
-        x2 = sample2
-        dd[i, :] = distance(x1, x2, period)
-
-    pairs = np.argwhere(dd<=r)
-
-    spairs = set()
-    for i in range(len(pairs)):
-        if self_match is False:
-            if pairs[i, 0] != pairs[i, 1]:
-                spairs.add((min(pairs[i]), max(pairs[i])))
-        if self_match is True:
-            spairs.add((min(pairs[i]), max(pairs[i])))
-
-    return spairs
 
 
 def distance(x1, x2, period=None):

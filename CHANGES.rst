@@ -13,6 +13,8 @@
 
 - HodMockFactory has new estimate_ngals feature
 
+- Fixed buggy behavior for two-point functions called for logical branch `do_auto=True, do_cross=False`
+
 
 0.3 (2016-06-28)
 ----------------

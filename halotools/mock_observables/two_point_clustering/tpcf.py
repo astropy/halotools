@@ -364,23 +364,6 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         approx_cell1_size, approx_cell2_size, approx_cellran_size)
     if RR_precomputed is not None: RR = RR_precomputed
 
-    #check to see if any of the random counts contain 0 pairs.
-    if D1R is not None:
-        if np.any(D1R==0):
-            msg = ("sample1 cross randoms has radial bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-    if D2R is not None:
-        if np.any(D2R==0):
-            msg = ("sample2 cross randoms has radial bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-    if RR is not None:
-        if np.any(RR==0):
-            msg = ("randoms cross randoms has radial bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-
     #run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
@@ -395,8 +378,8 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
             xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return xi_12
         elif (do_auto is True):
-            xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
-            xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
+            xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_22
 
 

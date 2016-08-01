@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
@@ -48,9 +49,21 @@ def test_estimate_ngals2():
     halocat = FakeSim(seed=fixed_seed)
     model.populate_mock(halocat, seed=fixed_seed)
 
-    estimated_ngals = model.mock.estimate_ngals()
+    estimated_ngals = model.mock.estimate_ngals(seed=fixed_seed)
     actual_ngals = len(model.mock.galaxy_table)
     assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
+
+
+def test_convenience_functions():
+    model = PrebuiltHodModelFactory('zheng07')
+    halocat = FakeSim(seed=fixed_seed)
+    model.populate_mock(halocat, seed=fixed_seed)
+
+    nd = model.mock.number_density
+    fsat = model.mock.satellite_fraction
+    xi = model.mock.compute_galaxy_matter_cross_clustering(
+        gal_type='centrals', include_complement=True)
+    gn = model.mock.compute_fof_group_ids()
 
 
 class TestHodMockFactory(TestCase):

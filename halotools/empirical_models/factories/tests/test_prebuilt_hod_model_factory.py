@@ -32,6 +32,12 @@ class TestPrebuiltHodModelFactory(TestCase):
         for modelname in PrebuiltHodModelFactory.prebuilt_model_nickname_list:
             model = PrebuiltHodModelFactory(modelname)
             result = model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
+
         result = model.compute_average_galaxy_clustering(
-            num_iterations=1, simname='fake',
-            gal_type='centrals', include_crosscorr=True)
+            num_iterations=1, simname='fake', summary_statistic='mean',
+            gal_type='centrals', include_crosscorr=True, rbins=np.array((0.1, 0.2, 0.3)),
+            redshift=0, halo_finder='rockstar')
+
+
+
+

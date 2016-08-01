@@ -43,7 +43,7 @@ def verify_tpcf_estimator(estimator):
         raise ValueError(msg)
 
 
-def process_optional_input_sample2(sample1, sample2, do_cross):
+def process_optional_input_sample2(sample1, sample2, do_cross, ndim=3):
     """ Function used to process the input ``sample2`` passed to all two-point clustering
     functions in `~halotools.mock_observables`.
     The input ``sample1`` should have already been run through the
@@ -80,7 +80,7 @@ def process_optional_input_sample2(sample1, sample2, do_cross):
         sample2 = sample1
         _sample1_is_sample2 = True
     else:
-        sample2 = enforce_sample_has_correct_shape(sample2)
+        sample2 = enforce_sample_has_correct_shape(sample2, ndim=ndim)
         if sample1.shape != sample2.shape:
             _sample1_is_sample2 = False
         else:

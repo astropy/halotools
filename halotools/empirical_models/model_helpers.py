@@ -60,7 +60,15 @@ def solve_for_polynomial_coefficients(abscissa, ordinates):
     that passes through the input ordinates and abscissa is given by
     :math:`F(logM) = c_{0} + c_{1}*log_{10}logM`.
 
+    Examples
+    --------
+    >>> abscissa = [0, 2]
+    >>> ordinates = [0, 2]
+    >>> coeff = solve_for_polynomial_coefficients(abscissa, ordinates)
+    >>> assert np.allclose(coeff, (0, 1))
     """
+    abscissa = np.atleast_1d(abscissa)
+    ordinates = np.atleast_1d(ordinates)
 
     columns = np.ones(len(abscissa))
     for i in np.arange(len(abscissa)-1):
@@ -96,9 +104,16 @@ def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
     output_ordinates : array
         Values of the input polynomial when evaluated at input_abscissa.
 
+    Examples
+    ---------
+    >>> table_abscissa = [0, 1, 2, 3]
+    >>> table_ordinates = [0, 2, 4, 6]
+    >>> input_abscissa = 0.5
+    >>> result = polynomial_from_table(table_abscissa, table_ordinates, input_abscissa)
+    >>> assert np.allclose(result, 1.0)
+
     """
-    if not isinstance(input_abscissa, np.ndarray):
-        input_abscissa = np.array(input_abscissa)
+    input_abscissa = np.atleast_1d(input_abscissa)
     coefficient_array = solve_for_polynomial_coefficients(
         table_abscissa, table_ordinates)
     output_ordinates = np.zeros(custom_len(input_abscissa))
@@ -362,7 +377,7 @@ def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, def
         if keyword_argument in constructor_kwargs:
             clname = obj.__class__.__name__
             msg = ("Do not pass the  ``%s`` keyword argument "
-                "to the constructor of the %s class when using the %s class "
+                "to the constructor of the %s class \nwhen using the %s class "
                 "as an orthogonal mix-in" % (keyword_argument, clname, clname))
             raise HalotoolsError(msg)
         else:

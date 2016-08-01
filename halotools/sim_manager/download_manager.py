@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module storing the DownloadManager class responsible for
 retrieving the Halotools-provided simulation data from the web
@@ -9,7 +8,7 @@ import numpy as np
 from warnings import warn
 from time import time
 
-from ..custom_exceptions import HalotoolsError, HalotoolsCacheError
+from ..custom_exceptions import HalotoolsError
 
 try:
     from bs4 import BeautifulSoup
@@ -270,7 +269,7 @@ class DownloadManager(object):
                     "If you really want to overwrite the file, \n"
                     "you must call the same function again \n"
                     "with the keyword argument `overwrite` set to `True`")
-            raise HalotoolsCacheError(msg % output_fname)
+            raise HalotoolsError(msg % output_fname)
 
         start = time()
         download_file_from_url(url, output_fname)
@@ -550,7 +549,7 @@ class DownloadManager(object):
                     "If you really want to overwrite the file, \n"
                     "you must call the same function again \n"
                     "with the keyword argument `overwrite` set to `True`")
-            raise HalotoolsCacheError(msg % output_fname)
+            raise HalotoolsError(msg % output_fname)
 
         download_file_from_url(url, output_fname)
 

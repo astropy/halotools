@@ -1,9 +1,9 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+"""
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+import numpy as np
 from unittest import TestCase
-
 from astropy.cosmology import WMAP9
 
 from ..trivial_profile import TrivialProfile
@@ -13,7 +13,33 @@ from .... import model_defaults
 from .....sim_manager import sim_defaults
 
 
-__all__ = ['TestTrivialProfile']
+__all__ = ('TestTrivialProfile', 'test_enclosed_mass1')
+
+
+def test_enclosed_mass1():
+    """
+    """
+    model = TrivialProfile()
+    m = model.enclosed_mass(0.01, 1e12)
+    assert np.all(m == 1e12)
+
+
+def test_enclosed_mass2():
+    """
+    """
+    model = TrivialProfile()
+    m = model.enclosed_mass([0.1, 0.2], 1e12)
+    assert np.all(m == 1e12)
+
+
+def test_dimensionless_mass_density1():
+    model = TrivialProfile()
+    d = model.dimensionless_mass_density(0.1, 1e12)
+
+
+def test_dimensionless_mass_density2():
+    model = TrivialProfile()
+    d = model.dimensionless_mass_density([0.1, 0.2], 1e12)
 
 
 class TestTrivialProfile(TestCase):
@@ -47,3 +73,4 @@ class TestTrivialProfile(TestCase):
         assert self.default_model.mdef == model_defaults.halo_mass_definition
         assert self.m200_model.mdef == '200m'
         assert self.wmap9_model.mdef == model_defaults.halo_mass_definition
+

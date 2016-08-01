@@ -41,6 +41,65 @@ def test_tpcf_jackknife_corr_func():
 
 
 @pytest.mark.slow
+def test_tpcf_jackknife_no_pbc():
+    """
+    test the correlation function
+    """
+    Npts=100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts*10, 3))
+
+    result_1, err = tpcf_jackknife(sample1, randoms, rbins,
+        Nsub=5, num_threads=1)
+
+
+@pytest.mark.slow
+def test_tpcf_jackknife_cross_corr():
+    """
+    test the correlation function
+    """
+    Npts1, Npts2, Nran =100, 90, 500
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = np.random.random((Nran*10, 3))
+
+    result = tpcf_jackknife(sample1, randoms, rbins,
+        period=period, Nsub=3, num_threads=1, sample2=sample2)
+
+
+@pytest.mark.slow
+def test_tpcf_jackknife_no_randoms():
+    """
+    test the correlation function
+    """
+    Npts1, Npts2, Nran =100, 90, 500
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
+
+    result = tpcf_jackknife(sample1, randoms, rbins,
+        period=period, Nsub=3, num_threads=1, sample2=sample2)
+
+
+@pytest.mark.slow
+def test_tpcf_jackknife_alt_estimator():
+    """
+    test the correlation function
+    """
+    Npts1, Npts2, Nran =100, 90, 500
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
+
+    result = tpcf_jackknife(sample1, randoms, rbins, estimator='Hewett',
+        period=period, Nsub=3, num_threads=1, sample2=sample2)
+
+
+@pytest.mark.slow
 def test_tpcf_jackknife_cov_matrix():
     """
     test the covariance matrix

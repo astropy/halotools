@@ -91,7 +91,7 @@ class TrivialProfile(AnalyticDensityProf):
             Result is an array of the dimension as the input ``scaled_radius``.
 
         """
-        volume = (4*np.pi/3)*scaled_radius**3
+        volume = (4*np.pi/3)*np.atleast_1d(scaled_radius)**3
         return total_mass/volume
 
     def enclosed_mass(self, radius, total_mass):
@@ -116,4 +116,5 @@ class TrivialProfile(AnalyticDensityProf):
             has the same dimensions as the input ``radius``.
         """
         radius = np.atleast_1d(radius).astype(np.float64)
+        total_mass = np.atleast_1d(total_mass).astype(np.float64)
         return np.where(radius > 0, total_mass, 0)

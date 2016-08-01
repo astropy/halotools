@@ -398,7 +398,11 @@ class MockFactory(object):
         rbin_centers = (rbins[1:] + rbins[0:-1])/2.
         rmax = max(rbins)
 
-        mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
+        try:
+            f = kwargs['mask_function']
+            mask = f(self.galaxy_table)
+        except KeyError:
+            mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
         if len(self.galaxy_table['x'][mask]) == 0:
             msg = "Zero mock galaxies pass your cut"
