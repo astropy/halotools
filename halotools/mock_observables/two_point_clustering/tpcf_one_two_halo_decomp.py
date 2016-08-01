@@ -236,23 +236,6 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
                                  PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
                                  approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
-    #check to see if any of the random counts contain 0 pairs.
-    if D1R is not None:
-        if np.any(D1R==0):
-            msg = ("sample1 cross randoms has radial bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-    if D2R is not None:
-        if np.any(D2R==0):
-            msg = ("sample2 cross randoms has radial bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-    if RR is not None:
-        if np.any(RR==0):
-            msg = ("randoms cross randoms has radial bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-
     #run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
         one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
