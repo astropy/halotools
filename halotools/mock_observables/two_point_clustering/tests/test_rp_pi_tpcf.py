@@ -89,11 +89,10 @@ def test_rp_pi_tpcf_cross_nonperiodic():
 
 
 def test_rp_pi_auto_consistency():
-    Npts=100
+    Npts1, Npts2 = 100, 90
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts, 3))
-        sample2 = np.random.random((Npts, 3))
-        randoms = np.random.random((Npts, 3))
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
 
     result_11a, result_12a, result_22a = rp_pi_tpcf(
         sample1, rp_bins, pi_bins, sample2=sample2, period=1,
@@ -108,11 +107,10 @@ def test_rp_pi_auto_consistency():
 
 
 def test_rp_pi_cross_consistency():
-    Npts=100
+    Npts1, Npts2 = 100, 90
     with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts, 3))
-        sample2 = np.random.random((Npts, 3))
-        randoms = np.random.random((Npts, 3))
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
 
     result_11a, result_12a, result_22a = rp_pi_tpcf(
         sample1, rp_bins, pi_bins, sample2=sample2, period=1,
