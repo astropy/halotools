@@ -260,27 +260,10 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     #count data pairs
     D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, chord_bins,
-                                 num_threads, do_auto, do_cross, _sample1_is_sample2)
+        num_threads, do_auto, do_cross, _sample1_is_sample2)
     #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, chord_bins,
-                                 num_threads, do_RR, do_DR, _sample1_is_sample2)
-
-    #check to see if any of the random counts contain 0 pairs.
-    if D1R is not None:
-        if np.any(D1R==0):
-            msg = ("sample1 cross randoms has theta bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-    if D2R is not None:
-        if np.any(D2R==0):
-            msg = ("sample2 cross randoms has theta bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
-    if RR is not None:
-        if np.any(RR==0):
-            msg = ("randoms cross randoms has theta bin(s) which contain no points. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
-            warn(msg)
+        num_threads, do_RR, do_DR, _sample1_is_sample2)
 
     #run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
