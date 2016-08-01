@@ -120,7 +120,7 @@ def test_rp_pi_cross_consistency():
 
     result_12b = rp_pi_tpcf(
         sample1, rp_bins, pi_bins, sample2=sample2, period=1,
-        do_auto=True, do_cross=False)
+        do_auto=False, do_cross=True)
 
     assert np.allclose(result_12a, result_12b)
 
