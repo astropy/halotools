@@ -113,19 +113,19 @@ def get_period(period):
     return period, PBCs
 
 
-def enforce_sample_has_correct_shape(sample):
+def enforce_sample_has_correct_shape(sample, ndim=3):
     """ Function inspects the input ``sample`` and enforces that it is of shape (Npts, 3).
     """
     sample = np.atleast_1d(sample)
     try:
         input_shape = np.shape(sample)
         assert len(input_shape) == 2
-        assert input_shape[1] == 3
+        assert input_shape[1] == ndim
     except:
-        msg = ("Input sample of points must be a Numpy ndarray of shape (Npts, 3).\n"
+        msg = ("Input sample of points must be a Numpy ndarray of shape (Npts, {0}).\n"
             "To convert a sequence of 1d arrays x, y, z into correct shape expected \n"
             "throughout the `mock_observables` package:\n\n"
-            ">>> sample = np.vstack([x, y, z]).T ")
+            ">>> sample = np.vstack([x, y, z]).T ".format(ndim))
         raise TypeError(msg)
     return sample
 
