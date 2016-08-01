@@ -273,10 +273,10 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return one_halo_xi_12, two_halo_xi_12
         elif (do_auto is True):
-            one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
-            one_halo_xi_22 = _TP_estimator(one_halo_D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
-            two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, D1R, N1, N1, NR, NR, estimator)
-            two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, D2R, N2, N2, NR, NR, estimator)
+            one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            one_halo_xi_22 = _TP_estimator(one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
+            two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+            two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_22, two_halo_xi_22
 
 

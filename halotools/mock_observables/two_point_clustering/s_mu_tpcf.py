@@ -248,8 +248,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
             return xi_12
         elif (do_auto is True):
-            xi_11 = _TP_estimator(D1D1, D1R, D1R, N1, N1, NR, NR, estimator)[:, ::-1]
-            xi_22 = _TP_estimator(D2D2, D2R, D2R, N2, N2, NR, NR, estimator)[:, ::-1]
+            xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
+            xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11, xi_22
 
 
