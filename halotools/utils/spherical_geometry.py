@@ -1,8 +1,8 @@
 """
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+import numpy as np
 
 __all__=['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
 __author__ = ('Duncan Campbell', )
@@ -27,14 +27,13 @@ def spherical_to_cartesian(ra, dec):
         Cartesian coordinates.
 
     """
-    from numpy import radians, sin, cos
 
-    rar = radians(ra)
-    decr = radians(dec)
+    rar = np.radians(ra)
+    decr = np.radians(dec)
 
-    x = cos(rar) * cos(decr)
-    y = sin(rar) * cos(decr)
-    z = sin(decr)
+    x = np.cos(rar) * np.cos(decr)
+    y = np.sin(rar) * np.cos(decr)
+    z = np.sin(decr)
 
     return x, y, z
 
@@ -58,9 +57,8 @@ def chord_to_cartesian(theta, radians=True):
     C : array
         chord distance
     """
-    import numpy as np
 
-    theta = np.asarray(theta)
+    theta = np.atleast_1d(theta)
 
     if radians is False:
         theta = np.radians(theta)
@@ -85,18 +83,14 @@ def sample_spherical_surface(N_points):
         (ra,dec) coordinate pairs in degrees.
     """
 
-    from numpy import random
-    from numpy import arccos
-    from math import pi
+    ran1 = np.random.rand(N_points)  # oversample, to account for box sample
+    ran2 = np.random.rand(N_points)  # oversample, to account for box sample
 
-    ran1 = random.rand(N_points)  # oversample, to account for box sample
-    ran2 = random.rand(N_points)  # oversample, to account for box sample
+    ran1 = ran1 * 2.0 * np.pi  # convert to radians
+    ran2 = np.arccos(2.0 * ran2 - 1.0) - 0.5*np.pi  # convert to radians
 
-    ran1 = ran1 * 2.0 * pi  # convert to radians
-    ran2 = arccos(2.0 * ran2 - 1.0) - 0.5*pi  # convert to radians
-
-    ran1 = ran1 * 360.0 / (2.0 * pi)  # convert to degrees
-    ran2 = ran2 * 360.0 / (2.0 * pi)  # convert to degrees
+    ran1 = ran1 * 360.0 / (2.0 * np.pi)  # convert to degrees
+    ran2 = ran2 * 360.0 / (2.0 * np.pi)  # convert to degrees
 
     ran_ra = ran1
     ran_dec = ran2
