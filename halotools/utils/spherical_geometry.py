@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 __all__=['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
 __author__ = ('Duncan Campbell', )
@@ -68,7 +69,7 @@ def chord_to_cartesian(theta, radians=True):
     return C
 
 
-def sample_spherical_surface(N_points):
+def sample_spherical_surface(N_points, seed=None):
     """
     Randomly sample the sky.
 
@@ -77,14 +78,23 @@ def sample_spherical_surface(N_points):
     N_points : int
         number of points to sample.
 
+    seed : int, optional
+        Random number seed permitting deterministic behavior.
+        Default is None for stochastic results.
+
     Returns
     ----------
     coords : list
         (ra,dec) coordinate pairs in degrees.
+
+    Examples
+    ---------
+    >>> angular_coords_in_degrees = sample_spherical_surface(100, seed=43)
     """
 
-    ran1 = np.random.rand(N_points)  # oversample, to account for box sample
-    ran2 = np.random.rand(N_points)  # oversample, to account for box sample
+    with NumpyRNGContext(seed):
+        ran1 = np.random.rand(N_points)  # oversample, to account for box sample
+        ran2 = np.random.rand(N_points)  # oversample, to account for box sample
 
     ran1 = ran1 * 2.0 * np.pi  # convert to radians
     ran2 = np.arccos(2.0 * ran2 - 1.0) - 0.5*np.pi  # convert to radians
