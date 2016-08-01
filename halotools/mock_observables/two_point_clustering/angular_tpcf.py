@@ -9,7 +9,9 @@ from warnings import warn
 from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .clustering_helpers import verify_tpcf_estimator
+from .clustering_helpers import (verify_tpcf_estimator,
+    downsample_inputs_exceeding_max_sample_size, process_optional_input_sample2)
+
 
 from ..pair_counters import npairs_3d
 from ..mock_observables_helpers import get_num_threads
@@ -308,53 +310,14 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
 
     sample1 = np.atleast_1d(sample1)
 
-    if sample2 is not None:
-        sample2 = np.atleast_1d(sample2)
-        if np.all(sample1==sample2):
-            _sample1_is_sample2 = True
-            msg = ("\n `sample1` and `sample2` are exactly the same, \n"
-                   "only the auto-correlation will be returned.\n")
-            warn(msg)
-            do_cross=False
-        else:
-            _sample1_is_sample2 = False
-    else:
-        sample2 = sample1
-        _sample1_is_sample2 = True
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross, ndim=2)
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
 
-    # down sample if sample size exceeds max_sample_size.
-    if _sample1_is_sample2 is True:
-        if (len(sample1) > max_sample_size):
-            with NumpyRNGContext(seed):
-                inds = np.arange(0, len(sample1))
-                np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            msg = ("\n `sample1` exceeds `max_sample_size` \n"
-                   "downsampling `sample1`...")
-            warn(msg)
-    else:
-        if len(sample1) > max_sample_size:
-            inds = np.arange(0, len(sample1))
-            with NumpyRNGContext(seed):
-                np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            msg = ("\n `sample1` exceeds `max_sample_size` \n"
-                   "downsampling `sample1`...")
-            warn(msg)
-        if len(sample2) > max_sample_size:
-            inds = np.arange(0, len(sample2))
-            with NumpyRNGContext(seed):
-                np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample2 = sample2[inds]
-            msg = ("\n `sample2` exceeds `max_sample_size` \n"
-                    "downsampling `sample2`...")
-            warn(msg)
+    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
+        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     theta_bins = np.atleast_1d(theta_bins)
     theta_max = np.max(theta_bins)
@@ -372,10 +335,6 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     if (theta_max >= 180.0):
         msg = ("\n The maximum length over which you search for pairs of points \n"
                 "cannot be larger than 180.0 deg. \n")
-        raise HalotoolsError(msg)
-
-    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
-        msg = ('\n `sample1` and `sample2` must have same dimension.\n')
         raise HalotoolsError(msg)
 
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
