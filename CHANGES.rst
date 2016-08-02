@@ -15,6 +15,8 @@
 
 - Fixed buggy behavior for two-point functions called for logical branch `do_auto=True, do_cross=False`
 
+- Performance enhancement of isolation_functions by 50% - 300%, depending on numerical regime.
+
 
 0.3 (2016-06-28)
 ----------------
