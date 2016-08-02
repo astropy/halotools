@@ -4,8 +4,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
-from libc.math cimport ceil 
+cimport cython
+from libc.math cimport ceil
+from libc.math cimport sqrt
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('npairs_s_mu_engine', )
@@ -13,44 +14,44 @@ __all__ = ('npairs_s_mu_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
-    s_bins, mu_bins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of projected separation. 
+def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
+    s_bins_in, mu_bins_in, cell1_tuple):
+    """ Cython engine for counting pairs of points as a function of projected separation.
 
-    Parameters 
+    Parameters
     ------------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
 
-    x1in, y1in, z1in : arrays 
+    x1in, y1in, z1in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 1
 
-    x2in, y2in, z2in : arrays 
+    x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    s_bins : array_like
+    s_bins_in : array_like
         numpy array of boundaries defining the radial bins in which pairs are counted.
 
-    mu_bins : array_like
+    mu_bins_in : array_like
         numpy array of boundaries defining bins in :math:`\\sin(\\theta_{\\rm los})`
         in which the pairs are counted in.
         Note that using the sine is not common convention for
         calculating the two point correlation function (see notes).
- 
+
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
 
-    Returns 
+    Returns
     --------
-    counts : array 
-        Integer array of length len(s_bins) giving the number of pairs 
-        separated by a distance less than the corresponding entry of ``s_bins``. 
+    counts : array
+        Integer array of length len(s_bins) giving the number of pairs
+        separated by a distance less than the corresponding entry of ``s_bins``.
 
-    """    
-    cdef cnp.float64_t[:] s_bins_squared = s_bins*s_bins
-    cdef cnp.float64_t[:] mu_bins_squared = mu_bins*mu_bins
+    """
+    cdef cnp.float64_t[:] s_bins = s_bins_in
+    cdef cnp.float64_t[:] mu_bins = mu_bins_in
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -126,9 +127,9 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -185,9 +186,9 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     dz_sq = dz*dz
 
                                     #transform to s and mu
-                                    s = np.sqrt(dz_sq + dxy_sq)
-                                    if s!=0: 
-                                        mu = np.sqrt(dz_sq)/s
+                                    s = sqrt(dz_sq + dxy_sq)
+                                    if s!=0:
+                                        mu = sqrt(dz_sq)/s
                                     else:
                                         mu=0.0
 
@@ -200,7 +201,7 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                             if g<0: break
                                         k=k-1
                                         if k<0: break
-                                        
+
     return np.array(counts)
 
 
