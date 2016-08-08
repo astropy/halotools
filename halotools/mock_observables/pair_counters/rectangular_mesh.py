@@ -8,6 +8,9 @@ from math import floor
 __all__ = ('RectangularDoubleMesh', )
 __author__ = ('Andrew Hearin', )
 
+max_cells_per_dimension_cell1=50
+max_cells_per_dimension_cell2=50
+
 
 def digitized_position(p, cell_size, num_divs):
     """ Function returns a discretized spatial position of input point(s).
@@ -17,7 +20,7 @@ def digitized_position(p, cell_size, num_divs):
 
 
 def sample1_cell_size(period, search_length, approx_cell_size,
-        max_cells_per_dimension=50):
+        max_cells_per_dimension=max_cells_per_dimension_cell1):
     """ Function determines the size of the cells of mesh1.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -42,7 +45,7 @@ def sample1_cell_size(period, search_length, approx_cell_size,
 
 
 def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
-        max_cells_per_dimension=50):
+        max_cells_per_dimension=max_cells_per_dimension_cell2):
     """ Function determines the size of the cells of mesh2.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -187,7 +190,9 @@ class RectangularDoubleMesh(object):
             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
             search_xlength, search_ylength, search_zlength,
-            xperiod, yperiod, zperiod, PBCs=True):
+            xperiod, yperiod, zperiod, PBCs=True,
+            max_cells_per_dimension_cell1=max_cells_per_dimension_cell1,
+            max_cells_per_dimension_cell2=max_cells_per_dimension_cell2):
         """
         Parameters
         ----------
@@ -224,6 +229,13 @@ class RectangularDoubleMesh(object):
         PBCs : bool, optional
             Boolean specifying whether or not the box has periodic boundary conditions.
             Default is True.
+
+        max_cells_per_dimension_cell1 : int, optional
+            Maximum number of cells per dimension. Default is 50.
+
+        max_cells_per_dimension_cell2 : int, optional
+            Maximum number of cells per dimension. Default is 50.
+
         """
         self.xperiod = xperiod
         self.yperiod = yperiod
@@ -235,16 +247,21 @@ class RectangularDoubleMesh(object):
 
         self._check_sensible_constructor_inputs()
 
-        approx_x1cell_size = sample1_cell_size(xperiod, search_xlength, approx_x1cell_size)
-        approx_y1cell_size = sample1_cell_size(yperiod, search_ylength, approx_y1cell_size)
-        approx_z1cell_size = sample1_cell_size(zperiod, search_zlength, approx_z1cell_size)
+        approx_x1cell_size = sample1_cell_size(xperiod, search_xlength, approx_x1cell_size,
+            max_cells_per_dimension=max_cells_per_dimension_cell1)
+        approx_y1cell_size = sample1_cell_size(yperiod, search_ylength, approx_y1cell_size,
+            max_cells_per_dimension=max_cells_per_dimension_cell1)
+        approx_z1cell_size = sample1_cell_size(zperiod, search_zlength, approx_z1cell_size,
+                max_cells_per_dimension=max_cells_per_dimension_cell1)
         self.mesh1 = RectangularMesh(x1, y1, z1, xperiod, yperiod, zperiod,
             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size)
 
-        approx_x2cell_size = sample2_cell_sizes(xperiod, self.mesh1.xcell_size, approx_x2cell_size)
-        approx_y2cell_size = sample2_cell_sizes(yperiod, self.mesh1.ycell_size, approx_y2cell_size)
-        approx_z2cell_size = sample2_cell_sizes(zperiod, self.mesh1.zcell_size, approx_z2cell_size)
-
+        approx_x2cell_size = sample2_cell_sizes(xperiod, self.mesh1.xcell_size, approx_x2cell_size,
+            max_cells_per_dimension=max_cells_per_dimension_cell2)
+        approx_y2cell_size = sample2_cell_sizes(yperiod, self.mesh1.ycell_size, approx_y2cell_size,
+            max_cells_per_dimension=max_cells_per_dimension_cell2)
+        approx_z2cell_size = sample2_cell_sizes(zperiod, self.mesh1.zcell_size, approx_z2cell_size,
+            max_cells_per_dimension=max_cells_per_dimension_cell2)
         self.mesh2 = RectangularMesh(x2, y2, z2, xperiod, yperiod, zperiod,
             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size)
 
