@@ -153,6 +153,13 @@ class Behroozi10SmHm(PrimGalpropModel):
         -------
         log_halo_mass : array_like
             Array containing 10-base logarithm of halo mass in h=1 solar mass units.
+
+        Notes
+        ------
+        The parameter values in Behroozi+10 were fit to data assuming h=0.7,
+        but all halotools inputs are in h=1 units. Thus we will transform our
+        input stellar mass to h=0.7 units, evaluate using the behroozi parameters,
+        and then transform back to h=1 units before returning the result.
         """
         redshift = safely_retrieve_redshift(self, 'mean_log_halo_mass', **kwargs)
 
