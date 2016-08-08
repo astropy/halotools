@@ -55,12 +55,11 @@ class Moster13SmHm(PrimGalpropModel):
             ``model``, and exception will be raised.
 
         """
-        
         super(Moster13SmHm, self).__init__(
             galprop_name='stellar_mass', **kwargs)
-        
+
         self.littleh = 0.704
-        
+
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 
     def mean_stellar_mass(self, **kwargs):
@@ -87,6 +86,13 @@ class Moster13SmHm(PrimGalpropModel):
         -------
         mstar : array_like
             Array containing stellar masses living in the input table.
+
+        Notes
+        ------
+        The parameter values in Moster+13 were fit to data assuming h=0.704,
+        but all halotools inputs are in h=1 units. Thus we will transform our
+        input halo mass to h=0.704 units, evaluate using the moster parameters,
+        and then transform back to h=1 units before returning the result.
         """
 
         # Retrieve the array storing the mass-like variable
@@ -104,10 +110,10 @@ class Moster13SmHm(PrimGalpropModel):
             redshift = self.redshift
         else:
             redshift = sim_defaults.default_redshift
-        
-        #convert mass from h=1 to h=0.7
+
+        # convert mass from h=1 to h=0.704
         mass = mass/self.littleh
-        
+
         # compute the parameter values that apply to the input redshift
         a = 1./(1+redshift)
 
@@ -123,6 +129,8 @@ class Moster13SmHm(PrimGalpropModel):
         denom_term2 = m_by_m1**gamma
 
         mstar = norm / (denom_term1 + denom_term2)
+
+        # mstar has been computed in h=0.704 units, so we convert back to h=1 units
         return mstar*self.littleh**2
 
     def retrieve_default_param_dict(self):
@@ -134,12 +142,12 @@ class Moster13SmHm(PrimGalpropModel):
         d : dict
             Dictionary containing parameter values.
         """
-        
+
         # All calculations are done internally using the same h=0.7 units
         # as in Behroozi et al. (2010), so the parameter values here are
-        # the same as in Table 1, even though the 
+        # the same as in Table 1, even though the
         # mean_stellar_mass method accepts and returns arguments in h=1 units.
-        
+
         d = {
         'm10': 11.590,
         'm11': 1.195,

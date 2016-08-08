@@ -163,6 +163,7 @@ class Behroozi10SmHm(PrimGalpropModel):
         """
         redshift = safely_retrieve_redshift(self, 'mean_log_halo_mass', **kwargs)
 
+        # convert mass from h=1 to h=0.7
         stellar_mass = (10.**log_stellar_mass)/(self.littleh**2)
         a = 1./(1. + redshift)
 
@@ -179,6 +180,7 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         log_halo_mass = logm1 + beta*np.log10(stellar_mass_by_m0) + (term3_numerator/term3_denominator) - 0.5
 
+        # convert back from h=0.7 to h=1 and return the result
         return np.log10((10.**log_halo_mass)*self.littleh)
 
     def mean_stellar_mass(self, **kwargs):
