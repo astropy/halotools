@@ -85,5 +85,3 @@ def test_Moster13SmHm_behavior():
     mstar_realization4 = default_model.mc_stellar_mass(prim_haloprop=1e12*np.ones(int(1e4)), seed=43)
     measured_scatter4 = np.std(np.log10(mstar_realization4))
     np.testing.assert_allclose(measured_scatter4, 0.3, rtol=1e-3)
-
-

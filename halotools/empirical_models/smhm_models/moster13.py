@@ -2,13 +2,11 @@
 Module containing classes used to model the mapping between
 stellar mass and halo mass based on Moster et al. (2013).
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ..component_model_templates import PrimGalpropModel
 
 from ...sim_manager import sim_defaults
-
 
 __all__ = ['Moster13SmHm']
 
