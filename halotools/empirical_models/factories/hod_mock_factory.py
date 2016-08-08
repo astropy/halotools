@@ -173,13 +173,13 @@ class HodMockFactory(MockFactory):
         the halo catalog with a new realization of the model based on
         whatever values of the model parameters are currently stored in the
         model ``param_dict``.
-        
+
         Normally, repeated calls to this method should not increase the RAM
         usage of halotools because a new mock catalog is created and the old one
         deleted. However, on certain machines the memory usage was found to
         increase over time. If this is the case and memory usage is critical you
-        can try calling gc.collect() to manually invoke python's garbage
-        collection.
+        can try calling gc.collect() immediately following the call to
+        ``mock.populate`` to manually invoke python's garbage collection.
 
         For an in-depth discussion of how this method is implemented,
         see the :ref:`hod_mock_factory_source_notes` section of the documentation.
