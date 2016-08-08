@@ -8,8 +8,8 @@ from math import floor
 __all__ = ('RectangularDoubleMesh', )
 __author__ = ('Andrew Hearin', )
 
-max_cells_per_dimension_cell1=50
-max_cells_per_dimension_cell2=50
+default_max_cells_per_dimension_cell1=50
+default_max_cells_per_dimension_cell2=50
 
 
 def digitized_position(p, cell_size, num_divs):
@@ -20,7 +20,7 @@ def digitized_position(p, cell_size, num_divs):
 
 
 def sample1_cell_size(period, search_length, approx_cell_size,
-        max_cells_per_dimension=max_cells_per_dimension_cell1):
+        max_cells_per_dimension=default_max_cells_per_dimension_cell1):
     """ Function determines the size of the cells of mesh1.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -45,7 +45,7 @@ def sample1_cell_size(period, search_length, approx_cell_size,
 
 
 def sample2_cell_sizes(period, sample1_cell_size, approx_cell_size,
-        max_cells_per_dimension=max_cells_per_dimension_cell2):
+        max_cells_per_dimension=default_max_cells_per_dimension_cell2):
     """ Function determines the size of the cells of mesh2.
     The conditions that must be met are that the cell size must
     be less than the search length, must evenly divide the box length,
@@ -191,8 +191,8 @@ class RectangularDoubleMesh(object):
             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
             search_xlength, search_ylength, search_zlength,
             xperiod, yperiod, zperiod, PBCs=True,
-            max_cells_per_dimension_cell1=max_cells_per_dimension_cell1,
-            max_cells_per_dimension_cell2=max_cells_per_dimension_cell2):
+            max_cells_per_dimension_cell1=default_max_cells_per_dimension_cell1,
+            max_cells_per_dimension_cell2=default_max_cells_per_dimension_cell2):
         """
         Parameters
         ----------
