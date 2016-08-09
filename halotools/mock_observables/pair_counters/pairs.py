@@ -59,7 +59,7 @@ def npairs(sample1, sample2, rbins, period=None):
 
     # Process period entry and check for consistency.
     if period is None:
-            period = np.array([np.inf]*np.shape(sample1)[-1])
+        period = np.array([np.inf]*np.shape(sample1)[-1])
     else:
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
@@ -142,7 +142,7 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
 
     # Process period entry and check for consistency.
     if period is None:
-            period = np.array([np.inf]*np.shape(sample1)[-1])
+        period = np.array([np.inf]*np.shape(sample1)[-1])
     else:
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
@@ -220,7 +220,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 
     # Process period entry and check for consistency.
     if period is None:
-            period = np.array([np.inf]*np.shape(sample1)[-1])
+        period = np.array([np.inf]*np.shape(sample1)[-1])
     else:
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
@@ -231,7 +231,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 
     # Process weights1 entry and check for consistency.
     if weights1 is None:
-            weights1 = np.array([1.0]*np.shape(sample1)[0], dtype=np.float64)
+        weights1 = np.array([1.0]*np.shape(sample1)[0], dtype=np.float64)
     else:
         weights1 = np.asarray(weights1).astype("float64")
         if np.shape(weights1)[0] != np.shape(sample1)[0]:
@@ -239,7 +239,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
             return None
     # Process weights2 entry and check for consistency.
     if weights2 is None:
-            weights2 = np.array([1.0]*np.shape(sample2)[0], dtype=np.float64)
+        weights2 = np.array([1.0]*np.shape(sample2)[0], dtype=np.float64)
     else:
         weights2 = np.asarray(weights2).astype("float64")
         if np.shape(weights2)[0] != np.shape(sample2)[0]:
@@ -326,7 +326,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 
     # Process period entry and check for consistency.
     if period is None:
-            period = np.array([np.inf]*np.shape(sample1)[-1])
+        period = np.array([np.inf]*np.shape(sample1)[-1])
     else:
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
@@ -337,7 +337,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 
     # Process weights1 entry and check for consistency.
     if weights1 is None:
-            weights1 = np.array([1.0]*np.shape(sample1)[0], dtype=np.float64)
+        weights1 = np.array([1.0]*np.shape(sample1)[0], dtype=np.float64)
     else:
         weights1 = np.asarray(weights1).astype("float64")
         if np.shape(weights1)[0] != np.shape(sample1)[0]:
@@ -345,7 +345,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
             return None
     # Process weights2 entry and check for consistency.
     if weights2 is None:
-            weights2 = np.array([1.0]*np.shape(sample2)[0], dtype=np.float64)
+        weights2 = np.array([1.0]*np.shape(sample2)[0], dtype=np.float64)
     else:
         weights2 = np.asarray(weights2).astype("float64")
         if np.shape(weights2)[0] != np.shape(sample2)[0]:
@@ -367,7 +367,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
     n = np.zeros((rp_bins.size, pi_bins.size), dtype=np.float64)
     for i in range(rp_bins.size):
         for j in range(pi_bins.size):
-                n[i, j] += np.sum(np.extract((dd[:, 0] <= rp_bins[i]) & (dd[:, 1] <= pi_bins[j]), ww))
+            n[i, j] += np.sum(np.extract((dd[:, 0] <= rp_bins[i]) & (dd[:, 1] <= pi_bins[j]), ww))
 
     return n
 
