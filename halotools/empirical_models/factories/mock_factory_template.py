@@ -238,7 +238,7 @@ class MockFactory(object):
                 " if the mock_observables sub-package has been compiled.\n"
                 "You are likely encountering this error because you are using \nyour Halotools repository "
                 "as your working directory."
-                )
+                   )
             raise HalotoolsError(msg)
 
         try:
@@ -374,7 +374,7 @@ class MockFactory(object):
                 " if the mock_observables sub-package has been compiled\n"
                 "You are likely encountering this error because you are using \nyour Halotools repository "
                 "as your working directory."
-                )
+                   )
             raise HalotoolsError(msg)
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
@@ -481,7 +481,7 @@ class MockFactory(object):
                 " if the mock_observables sub-package has been compiled\n"
                 "You are likely encountering this error because you are using \nyour Halotools repository "
                 "as your working directory."
-                )
+                   )
             raise HalotoolsError(msg)
 
         try:

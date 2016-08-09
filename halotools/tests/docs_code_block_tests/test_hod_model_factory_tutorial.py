@@ -284,7 +284,7 @@ class TestHodModelFactoryTutorial(TestCase):
         try:
             assert (disrupted_cens['halo_mvir'].max() <=
                 new_model.param_dict['max_disruption_mass_centrals']
-                )
+                    )
         except ValueError:
             # in this Monte Carlo realization, there were zero disrupted centrals
             pass

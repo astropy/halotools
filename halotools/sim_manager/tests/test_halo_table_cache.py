@@ -104,7 +104,7 @@ class TestHaloTableCache(TestCase):
                 'halo_y': [1, 2, 3],
                 'halo_z': [1, 2, 3],
                 'halo_mass': [1, 2, 3],
-                })
+                 })
             bad_table_fname = os.path.join(self.dummy_cache_baseloc,
                 'bad_table.hdf5')
             self.bad_table.write(bad_table_fname, path='data')

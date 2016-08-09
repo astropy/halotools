@@ -421,7 +421,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     "manually delete line #"+str(linenum)+"from the log file. \n"
                     "The log file is stored in the following location:\n"
                     + self.halo_table_cache.cache_log_fname+"\n"
-                    )
+                        )
                 raise HalotoolsError(msg)
         # there are no exact matches, but there may accidentally be nearby redshifts
         else:
@@ -463,7 +463,7 @@ class RockstarHlistReader(TabularAsciiReader):
                 "If you do not intend to use store the catalog in cache, \n"
                 "you should instead process the file with the "
                 "`~halotools.sim_manager.TabularAsciiReader`.\n"
-                )
+                   )
             raise HalotoolsError(msg)
 
         for name in self.dt.names:
@@ -477,7 +477,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     "If you do not intend to use store the catalog in cache, \n"
                     "you should instead process the file with the "
                     "`~halotools.sim_manager.TabularAsciiReader`.\n"
-                    )
+                        )
                 raise HalotoolsError(msg)
 
     def _get_default_output_fname(self):

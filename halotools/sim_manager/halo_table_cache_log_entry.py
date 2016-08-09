@@ -297,7 +297,7 @@ class HaloTableCacheLogEntry(object):
                     "must at a minimum have the following columns:\n"
                     "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``,\n"
                     "plus at least one additional column storing a mass-like variable.\n\n"
-                    )
+                       )
         except:
             pass
 
@@ -329,7 +329,7 @@ class HaloTableCacheLogEntry(object):
                 msg = (str(num_failures)+". All values of the "
                     "``halo_x``, ``halo_y``, ``halo_z`` columns\n"
                     "must be bounded by [0, Lbox].\n\n"
-                    )
+                       )
         except:
             pass
 
@@ -349,7 +349,7 @@ class HaloTableCacheLogEntry(object):
                 num_failures += 1
                 msg = (str(num_failures)+". The ``halo_id`` column "
                     "must contain a unique set of integers.\n\n"
-                    )
+                       )
         except:
             pass
 
@@ -394,7 +394,7 @@ class HaloTableCacheLogEntry(object):
             msg = (str(num_failures)+". All values of the "
                 "``halo_rvir`` column\n"
                 "must be less than 50, crudely ensuring you used Mpc/h units.\n\n"
-                )
+                   )
         except KeyError:
             pass
 

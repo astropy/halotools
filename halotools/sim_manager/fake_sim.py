@@ -162,7 +162,7 @@ class FakeSim(UserSuppliedHaloCatalog):
             halo_mass_accretion_rate=dmdt,
             halo_mvir_host_halo=halo_mvir_host_halo,
             user_supplied_ptclcat=ptclcat
-            )
+                                         )
 
 
 class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
@@ -280,4 +280,4 @@ class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
             halo_vmax=vmax,
             halo_vpeak=vpeak,
             user_supplied_ptclcat=ptclcat
-            )
+                                         )

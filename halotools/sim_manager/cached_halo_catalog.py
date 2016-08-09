@@ -399,7 +399,7 @@ class CachedHaloCatalog(object):
 
         msg += ("\nThere is no matching catalog in cache "
             "within dz_tol = "+str(self._dz_tol)+" of these inputs.\n"
-            )
+                )
 
         if len(matching_entries) == 0:
             suggestion_preamble = ("\nThe following entries in the cache log "
@@ -486,7 +486,7 @@ class CachedHaloCatalog(object):
 
         msg += ("\nThere is no matching catalog in cache "
             "within dz_tol = "+str(self._dz_tol)+" of these inputs.\n"
-            )
+                )
 
         if len(matching_entries) == 0:
             suggestion_preamble = ("\nThe following entries in the cache log "
@@ -582,7 +582,7 @@ class CachedHaloCatalog(object):
                             "sim_manager.supported_sims module.\n"
                             "Double-check the value of this attribute in the \n"
                             "NbodySimulation sub-class you added to the supported_sims module. \n"
-                            )
+                               )
                         raise HalotoolsError(msg)
                 else:
                     setattr(self, attr, getattr(matching_sim, attr))

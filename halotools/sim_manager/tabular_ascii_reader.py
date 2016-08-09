@@ -301,7 +301,7 @@ class TabularAsciiReader(object):
                 msg = ("\nThe value bound to every key of the input ``columns_to_keep_dict``\n"
                     "must be a two-element tuple.\n"
                     "The ``"+key+"`` is not the required type.\n"
-                    )
+                       )
                 raise TypeError(msg)
 
             column_index, dtype = value
@@ -311,7 +311,7 @@ class TabularAsciiReader(object):
                 msg = ("\nThe first element of the two-element tuple bound to every key of \n"
                     "the input ``columns_to_keep_dict`` must an integer.\n"
                     "The first element of the ``"+key+"`` is not the required type.\n"
-                    )
+                       )
                 raise TypeError(msg)
             try:
                 dt = np.dtype(dtype)
@@ -320,7 +320,7 @@ class TabularAsciiReader(object):
                     "the input ``columns_to_keep_dict`` must be a string recognized by Numpy\n"
                     "as a data type, e.g., 'f4' or 'i8'.\n"
                     "The second element of the ``"+key+"`` is not the required type.\n"
-                    )
+                       )
                 raise TypeError(msg)
         self.columns_to_keep_dict = columns_to_keep_dict
 

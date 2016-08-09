@@ -292,7 +292,7 @@ class TestRockstarHlistReader(TestCase):
             'halo_x': (3, 'f4'),
             'halo_y': (4, 'f4'),
             'halo_z': (5, 'f4'),
-            })
+             })
 
         reader = RockstarHlistReader(
             input_fname=temp_fname,

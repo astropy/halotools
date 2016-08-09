@@ -69,7 +69,7 @@ class TestPtclTableCacheLogEntry(TestCase):
             'vx': [1, 2, 3],
             'vy': [1, 2, 3],
             'vz': [1, 2, 3],
-            })
+             })
 
     def get_scenario_kwargs(self, num_scenario):
         return ({'simname': self.simnames[num_scenario],

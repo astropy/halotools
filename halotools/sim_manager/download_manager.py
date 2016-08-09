@@ -249,7 +249,7 @@ class DownloadManager(object):
                 + "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
-                )
+                    )
             raise HalotoolsError(msg)
 
         # At this point there are no conflicts with the existing log
@@ -529,7 +529,7 @@ class DownloadManager(object):
                 + "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
-                )
+                    )
             raise HalotoolsError(msg)
 
         # At this point there are no conflicts with the existing log

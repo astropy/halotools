@@ -248,7 +248,7 @@ class PtclTableCacheLogEntry(object):
                 msg += (str(num_failures)+". The particle table "
                     "must at a minimum have the following columns:\n"
                     "``x``, ``y``, ``z``.\n\n"
-                    )
+                        )
         except:
             pass
 
@@ -279,7 +279,7 @@ class PtclTableCacheLogEntry(object):
                 msg += (str(num_failures)+". All values of the "
                     "``x``, ``y``, ``z`` columns\n"
                     "must be bounded by [0, Lbox].\n\n"
-                    )
+                        )
         except:
             pass
 

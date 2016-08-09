@@ -418,7 +418,7 @@ class TestZheng07Sats(TestCase):
         midmass = 1e12
         assert (self.model3.mean_occupation(prim_haloprop=midmass) <
             self.default_model.mean_occupation(prim_haloprop=midmass)
-            )
+                )
 
     def test_logM0_scaling3_mean_occupation(self):
 

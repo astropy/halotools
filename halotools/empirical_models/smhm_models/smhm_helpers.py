@@ -18,7 +18,7 @@ inconsistent_redshift_msg = ("\nYou passed a redshift = %.2f argument to the con
     "the redshift you passed to the constructor,\n\n"
     "3. do not pass in any redshift argument at all to the ``%s`` method,\n"
     "in which case the redshift you passed to the constructor will be automatically chosen.\n\n"
-    )
+                             )
 
 
 def get_inconsistent_redshift_msg(input_redshift, constructor_redshift, class_name, method_name):
