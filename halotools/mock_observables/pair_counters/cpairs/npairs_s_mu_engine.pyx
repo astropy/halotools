@@ -63,6 +63,7 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_s_bins = len(s_bins)
     cdef int num_mu_bins = len(mu_bins)
     cdef cnp.int64_t[:,:] counts = np.zeros((num_s_bins, num_mu_bins), dtype=np.int64)
+    cdef cnp.int64_t[:,:] counts_sum = np.zeros((num_s_bins, num_mu_bins), dtype=np.int64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
@@ -104,6 +105,7 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp, s, mu
     cdef int Ni, Nj, i, j, k, l, g, max_k
+    cdef cnp.float64_t s_max = np.max(s_bins_in), mu_max = np.max(mu_bins_in)
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
     cdef cnp.float64_t[:] y_icell1, y_icell2
@@ -191,18 +193,28 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                         mu = sqrt(dz_sq)/s
                                     else:
                                         mu=0.0
+                                    
+                                    if (s <= s_max) & (mu <= mu_max):
+                                        
+                                        k = num_s_bins-2
+                                        while k!=-1:
+                                            if s > s_bins[k]: break
+                                            k=k-1
 
-                                    k = num_s_bins-1
-                                    while s<=s_bins[k]:
-                                        g = num_mu_bins-1
-                                        while mu<=mu_bins[g]:
-                                            counts[k,g] += 1
+                                        g = num_mu_bins-2
+                                        while g!=-1:
+                                            if mu > mu_bins[g]: break
                                             g=g-1
-                                            if g<0: break
-                                        k=k-1
-                                        if k<0: break
 
-    return np.array(counts)
+                                        # Only counts pairs in that bin.
+                                        counts[k+1,g+1] += 1
+
+    # Adds counts for all bins where s < s_bin and mu < mu_bin.
+    for k in range(num_s_bins):
+        for g in range(num_mu_bins):
+            counts_sum[k,g] = np.sum(counts[:k+1,:g+1])
+
+    return np.array(counts_sum)
 
 
 
