@@ -344,8 +344,8 @@ def _enclose_in_box(data1, data2, data3):
     Lbox = np.array([xyzmax, xyzmax, xyzmax])
 
     return np.vstack((x1, y1, z1)).T,\
-           np.vstack((x2, y2, z2)).T,\
-           np.vstack((x3, y3, z3)).T, Lbox
+    np.vstack((x2, y2, z2)).T,\
+    np.vstack((x3, y3, z3)).T, Lbox
 
 
 def get_subvolume_numbers(j_index, N_sub_vol):
@@ -481,4 +481,4 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
     verify_tpcf_estimator(estimator)
 
     return sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross,\
-           num_threads, _sample1_is_sample2, PBCs
+    num_threads, _sample1_is_sample2, PBCs

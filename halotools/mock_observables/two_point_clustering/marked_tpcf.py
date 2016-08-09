@@ -594,4 +594,4 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
     num_threads = get_num_threads(num_threads)
 
     return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-           num_threads, wfunc, normalize_by, _sample1_is_sample2, PBCs, randomize_marks
+    num_threads, wfunc, normalize_by, _sample1_is_sample2, PBCs, randomize_marks

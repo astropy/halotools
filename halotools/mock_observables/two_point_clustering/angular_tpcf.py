@@ -322,7 +322,7 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     # check for input parameter consistency
     if (theta_max >= 180.0):
         msg = ("\n The maximum length over which you search for pairs of points \n"
-                "cannot be larger than 180.0 deg. \n")
+               "cannot be larger than 180.0 deg. \n")
         raise HalotoolsError(msg)
 
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
@@ -334,4 +334,4 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     verify_tpcf_estimator(estimator)
 
     return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-           _sample1_is_sample2
+    _sample1_is_sample2

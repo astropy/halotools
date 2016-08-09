@@ -31,8 +31,8 @@ def test_wp_auto_nonperiodic():
         randoms = np.random.random((Npts, 3))
 
     result = wp(sample1, rp_bins, pi_max, sample2=None,
-                  randoms=randoms, period=None,
-                  max_sample_size=int(1e4), estimator='Natural')
+                randoms=randoms, period=None,
+                max_sample_size=int(1e4), estimator='Natural')
 
     print(result)
     assert result.ndim == 1, "More than one correlation function returned erroneously."

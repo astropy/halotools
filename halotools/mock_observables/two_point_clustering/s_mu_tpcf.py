@@ -439,4 +439,4 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     verify_tpcf_estimator(estimator)
 
     return sample1, s_bins, mu_bins, sample2, randoms, period,\
-           do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+    do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
