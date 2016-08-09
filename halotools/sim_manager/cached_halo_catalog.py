@@ -407,12 +407,14 @@ class CachedHaloCatalog(object):
             alt_list1 = list(gen1)  # discard the redshift requirement
             if len(alt_list1) > 0:
                 msg += suggestion_preamble
-                for entry in alt_list1: msg += str(entry) + "\n\n"
+                for entry in alt_list1:
+                    msg += str(entry) + "\n\n"
             else:
                 alt_list2 = list(gen2)  # discard the version_name requirement
                 if len(alt_list2) > 0:
                     msg += suggestion_preamble
-                    for entry in alt_list2: msg += str(entry) + "\n\n"
+                    for entry in alt_list2:
+                        msg += str(entry) + "\n\n"
                 else:
                     msg += "There are no simulations matching your input simname.\n"
             raise InvalidCacheLogEntry(msg)
@@ -494,17 +496,20 @@ class CachedHaloCatalog(object):
             alt_list1 = list(gen1)  # discard the redshift requirement
             if len(alt_list1) > 0:
                 msg += suggestion_preamble
-                for entry in alt_list1: msg += str(entry) + "\n\n"
+                for entry in alt_list1:
+                    msg += str(entry) + "\n\n"
             else:
                 alt_list2 = list(gen2)  # discard the version_name requirement
                 if len(alt_list2) > 0:
                     msg += suggestion_preamble
-                    for entry in alt_list2: msg += str(entry) + "\n\n"
+                    for entry in alt_list2:
+                        msg += str(entry) + "\n\n"
                 else:
                     alt_list3 = list(gen3)  # discard the halo_finder requirement
                     if len(alt_list3) > 0:
                         msg += suggestion_preamble
-                        for entry in alt_list3: msg += str(entry) + "\n\n"
+                        for entry in alt_list3:
+                            msg += str(entry) + "\n\n"
                     else:
                         msg += "There are no simulations matching your input simname.\n"
             raise InvalidCacheLogEntry(msg)

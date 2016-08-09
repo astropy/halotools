@@ -270,7 +270,8 @@ class FoFGroups(object):
         if igraph_available is True:
             self.edges = np.asarray(self.g.get_edgelist())
             return self.edges
-        else: raise HalotoolsError(no_igraph_msg)
+        else:
+            raise HalotoolsError(no_igraph_msg)
 
     def get_edge_lengths(self):
         """
@@ -297,7 +298,8 @@ class FoFGroups(object):
             lens = edges.get_attribute_values('weight')
             self.edge_lengths = np.array(lens)
             return self.edge_lengths
-        else: raise HalotoolsError(no_igraph_msg)
+        else:
+            raise HalotoolsError(no_igraph_msg)
 
 
 def _scipy_to_igraph(matrix, coords, directed=False):

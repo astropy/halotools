@@ -57,8 +57,10 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     else:
         raise ValueError("unsupported estimator!")
 
-    if np.shape(xi)[0] == 1: return xi[0]
-    else: return xi  # for jackknife
+    if np.shape(xi)[0] == 1:
+        return xi[0]
+    else:
+        return xi  # for jackknife
 
 
 def _list_estimators():

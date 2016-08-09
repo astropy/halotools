@@ -177,12 +177,14 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
                 RR = npairs_3d(randoms, randoms, chord_bins,
                             num_threads=num_threads)
                 RR = np.diff(RR)
-            else: RR = None
+            else:
+                RR = None
             if do_DR is True:
                 D1R = npairs_3d(sample1, randoms, chord_bins,
                              num_threads=num_threads)
                 D1R = np.diff(D1R)
-            else: D1R = None
+            else:
+                D1R = None
             if _sample1_is_sample2:
                 D2R = None
             else:
@@ -190,7 +192,8 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
                     D2R = npairs_3d(sample2, randoms, chord_bins,
                                  num_threads=num_threads)
                     D2R = np.diff(D2R)
-                else: D2R = None
+                else:
+                    D2R = None
             return D1R, D2R, RR
         elif randoms is None:
 
@@ -237,11 +240,13 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             if do_cross is True:
                 D1D2 = npairs_3d(sample1, sample2, chord_bins, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
-            else: D1D2 = None
+            else:
+                D1D2 = None
             if do_auto is True:
                 D2D2 = npairs_3d(sample2, sample2, chord_bins, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
-            else: D2D2 = None
+            else:
+                D2D2 = None
 
         return D1D1, D1D2, D2D2
 

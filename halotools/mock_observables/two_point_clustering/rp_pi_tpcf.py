@@ -255,14 +255,16 @@ def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
             D1D2 = np.diff(np.diff(D1D2, axis=0), axis=1)
-        else: D1D2 = None
+        else:
+            D1D2 = None
         if do_auto is True:
             D2D2 = npairs_xy_z(sample2, sample2, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
             D2D2 = np.diff(np.diff(D2D2, axis=0), axis=1)
-        else: D2D2 = None
+        else:
+            D2D2 = None
 
     return D1D1, D1D2, D2D2
 
@@ -296,14 +298,16 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
                 approx_cell1_size=approx_cellran_size,
                 approx_cell2_size=approx_cellran_size)
             RR = np.diff(np.diff(RR, axis=0), axis=1)
-        else: RR = None
+        else:
+            RR = None
         if do_DR is True:
             D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cellran_size)
             D1R = np.diff(np.diff(D1R, axis=0), axis=1)
-        else: D1R = None
+        else:
+            D1R = None
         if _sample1_is_sample2:  # calculating the cross-correlation
             D2R = None
         else:
@@ -313,7 +317,8 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cellran_size)
                 D2R = np.diff(np.diff(D2R, axis=0), axis=1)
-            else: D2R = None
+            else:
+                D2R = None
 
         return D1R, D2R, RR
     # PBCs and no randoms--calculate randoms analytically.

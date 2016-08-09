@@ -91,4 +91,5 @@ def test_igraph_functionality():
         assert len(lens) == len(edges)
         assert np.all(np.sort(lens) == np.sort(fof_group.m.data))
 
-    else: pass
+    else:
+        pass

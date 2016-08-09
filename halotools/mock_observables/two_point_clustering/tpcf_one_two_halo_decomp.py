@@ -293,7 +293,8 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
                         approx_cell1_size=approx_cellran_size,
                         approx_cell2_size=approx_cellran_size)
             RR = np.diff(RR)
-        else: RR = None
+        else:
+            RR = None
         if do_DR is True:
             D1R = npairs_3d(sample1, randoms, rbins, period=period,
                          num_threads=num_threads,
@@ -301,7 +302,8 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
                          approx_cell2_size=approx_cellran_size
                             )
             D1R = np.diff(D1R)
-        else: D1R = None
+        else:
+            D1R = None
         if _sample1_is_sample2:
             D2R = None
         else:
@@ -311,7 +313,8 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
                              approx_cell1_size=approx_cell2_size,
                              approx_cell2_size=approx_cellran_size)
                 D2R = np.diff(D2R)
-            else: D2R = None
+            else:
+                D2R = None
 
         return D1R, D2R, RR
     # PBCs and no randoms--calculate randoms analytically.
@@ -369,13 +372,15 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
                 weights1=marks1, weights2=marks2,
                 weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             D1D2 = np.diff(D1D2)
-        else: D1D2 = None
+        else:
+            D1D2 = None
         if do_auto is True:
             D2D2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=marks2,
                 weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             D2D2 = np.diff(D2D2)
-        else: D2D2 = None
+        else:
+            D2D2 = None
 
     return D1D1, D1D2, D2D2
 

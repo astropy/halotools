@@ -392,13 +392,15 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
                 weights1=marks1, weights2=marks2, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads)
             D1D2 = np.diff(D1D2)
-        else: D1D2 = None
+        else:
+            D1D2 = None
         if do_auto is True:
             D2D2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=marks2, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads)
             D2D2 = np.diff(D2D2)
-        else: D2D2 = None
+        else:
+            D2D2 = None
 
     return D1D1, D1D2, D2D2
 
@@ -438,13 +440,15 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
                 weights2=permuted_marks2,
                 weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             R1R2 = np.diff(R1R2)
-        else: R1R2 = None
+        else:
+            R1R2 = None
         if do_auto is True:
             R2R2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=permuted_marks2,
                 weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             R2R2 = np.diff(R2R2)
-        else: R2R2 = None
+        else:
+            R2R2 = None
 
     return R1R1, R1R2, R2R2
 
@@ -473,14 +477,16 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
                           approx_cell1_size=approx_cell1_size,
                           approx_cell2_size=approx_cell2_size)
             D1D2 = np.diff(D1D2)
-        else: D1D2 = None
+        else:
+            D1D2 = None
         if do_auto is True:
             D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
                           num_threads=num_threads,
                           approx_cell1_size=approx_cell2_size,
                           approx_cell2_size=approx_cell2_size)
             D2D2 = np.diff(D2D2)
-        else: D2D2 = None
+        else:
+            D2D2 = None
 
     return D1D1, D1D2, D2D2
 
