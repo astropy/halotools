@@ -155,7 +155,7 @@ class MonteCarloGalProf(object):
                 if ii == 9:
                     current_lookup_time = time() - start
                     runtime = (
-                        current_lookup_time*
+                        current_lookup_time *
                         len(list(product(*profile_params_list)))/(2.*float(ii)+1.)
                         )
                     if runtime > 5:
@@ -220,7 +220,7 @@ class MonteCarloGalProf(object):
             input_profile_params = np.atleast_1d(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_profile_params, param_bins, right=True)
-            digitized_params[digitized_params==len(param_bins)] -= 1
+            digitized_params[digitized_params == len(param_bins)] -= 1
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array.
         # The i^th element of each array contains the bin index of
@@ -549,7 +549,7 @@ class MonteCarloGalProf(object):
             input_profile_params = np.atleast_1d(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_profile_params, param_bins, right=True)
-            digitized_params[digitized_params==len(param_bins)] -= 1
+            digitized_params[digitized_params == len(param_bins)] -= 1
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array.
         # The i^th element of each array contains the bin index of

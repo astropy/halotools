@@ -158,7 +158,7 @@ def underdensity_prob_func(sample1, rbins, n_ran=None,
     # function of r that corresponds to the
     # specified under-density
     mean_rho = len(sample1)/sample_volume
-    vol = (4.0/3.0)* np.pi * rbins**3
+    vol = (4.0/3.0) * np.pi * rbins**3
     N_max = mean_rho*vol*u
 
     num_underdense_spheres = np.array(

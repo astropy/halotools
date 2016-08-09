@@ -222,9 +222,9 @@ def custom_spline(table_abscissa, table_ordinates, **kwargs):
     else:
         k = 1
 
-    if k<0:
+    if k < 0:
         raise HalotoolsError("Spline degree must be non-negative")
-    elif k==0:
+    elif k == 0:
         if custom_len(table_ordinates) != 1:
             raise HalotoolsError("In spline_degree=0 edge case, "
                 "table_abscissa and table_abscissa must be 1-element arrays")
@@ -417,9 +417,9 @@ def custom_incomplete_gamma(a, x):
     >>> g = custom_incomplete_gamma(a, x)
     """
 
-    if a<0:
+    if a < 0:
         return (custom_incomplete_gamma(a+1, x) - x**a * np.exp(-x))/a
-    elif a==0:
+    elif a == 0:
         return -expi(-x)
     else:
         return gammaincc(a, x) * gamma(a)

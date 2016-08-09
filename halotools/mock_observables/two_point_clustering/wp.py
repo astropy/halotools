@@ -209,7 +209,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
 
     if _sample1_is_sample2:
-        sample2=None
+        sample2 = None
 
     #pass the arguments into the redshift space TPCF function
     result = rp_pi_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,

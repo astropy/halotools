@@ -97,7 +97,7 @@ class TestHodModelFactory(TestCase):
         model.model_dictionary['dummy_key'] = DummySatComponent()
         with pytest.raises(HalotoolsError) as err:
             model._test_censat_occupation_consistency(model.model_dictionary)
-        substr ="has a ``central_occupation_model`` attribute with an inconsistent "
+        substr = "has a ``central_occupation_model`` attribute with an inconsistent "
         assert substr in err.value.args[0]
 
     def tearDown(self):

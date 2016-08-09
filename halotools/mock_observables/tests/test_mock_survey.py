@@ -14,7 +14,7 @@ __all__ = ('test_ra_dec_z', )
 fixed_seed = 43
 
 #create some toy data to test functions
-N=100
+N = 100
 with NumpyRNGContext(fixed_seed):
     x = np.random.random((N, 3))
     v = np.random.random((N, 3))*0.1
@@ -31,8 +31,8 @@ def test_ra_dec_z():
 
     ra, dec, z = ra_dec_z(x, v, cosmo=cosmo)
 
-    assert len(ra)==N
-    assert len(dec)==N
-    assert len(z)==N
-    assert np.all(ra<2.0*np.pi) & np.all(ra>0.0), "ra range is incorrect"
-    assert np.all(dec>-1.0*np.pi/2.0) & np.all(dec<np.pi/2.0), "ra range is incorrect"
+    assert len(ra) == N
+    assert len(dec) == N
+    assert len(z) == N
+    assert np.all(ra < 2.0*np.pi) & np.all(ra > 0.0), "ra range is incorrect"
+    assert np.all(dec > -1.0*np.pi/2.0) & np.all(dec < np.pi/2.0), "ra range is incorrect"

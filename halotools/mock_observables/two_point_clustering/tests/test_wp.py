@@ -66,7 +66,7 @@ def test_wp_cross_periodic():
                 randoms=None, period=period,
                 max_sample_size=int(1e4), estimator='Natural')
 
-    assert len(result)==3, "wrong number of correlations returned"
+    assert len(result) == 3, "wrong number of correlations returned"
     assert result[0].ndim == 1, "dimension of auto incorrect"
     assert result[1].ndim == 1, "dimension of cross incorrect"
     assert result[2].ndim == 1, "dimension auto incorrect"
@@ -86,7 +86,7 @@ def test_wp_cross_nonperiodic():
                 randoms=randoms, period=None,
                 max_sample_size=int(1e4), estimator='Natural')
 
-    assert len(result)==3, "wrong number of correlations returned"
+    assert len(result) == 3, "wrong number of correlations returned"
     assert result[0].ndim == 1, "dimension of auto incorrect"
     assert result[1].ndim == 1, "dimension of cross incorrect"
     assert result[2].ndim == 1, "dimension auto incorrect"

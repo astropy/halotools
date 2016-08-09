@@ -165,7 +165,7 @@ def _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
     """
     """
     if num_threads is not 1:
-        if num_threads=='max':
+        if num_threads == 'max':
             num_threads = multiprocessing.cpu_count()
         if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"

@@ -11,7 +11,7 @@ from ..tpcf import tpcf
 
 slow = pytest.mark.slow
 
-__all__=['test_tpcf_jackknife_corr_func', 'test_tpcf_jackknife_cov_matrix']
+__all__ = ['test_tpcf_jackknife_corr_func', 'test_tpcf_jackknife_cov_matrix']
 
 #create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
@@ -26,7 +26,7 @@ def test_tpcf_jackknife_corr_func():
     """
     test the correlation function
     """
-    Npts=100
+    Npts = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*10, 3))
@@ -45,7 +45,7 @@ def test_tpcf_jackknife_no_pbc():
     """
     test the correlation function
     """
-    Npts=100
+    Npts = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*10, 3))
@@ -59,7 +59,7 @@ def test_tpcf_jackknife_cross_corr():
     """
     test the correlation function
     """
-    Npts1, Npts2, Nran =100, 90, 500
+    Npts1, Npts2, Nran = 100, 90, 500
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))
         sample2 = np.random.random((Npts2, 3))
@@ -74,7 +74,7 @@ def test_tpcf_jackknife_no_randoms():
     """
     test the correlation function
     """
-    Npts1, Npts2, Nran =100, 90, 500
+    Npts1, Npts2, Nran = 100, 90, 500
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))
         sample2 = np.random.random((Npts2, 3))
@@ -89,7 +89,7 @@ def test_tpcf_jackknife_alt_estimator():
     """
     test the correlation function
     """
-    Npts1, Npts2, Nran =100, 90, 500
+    Npts1, Npts2, Nran = 100, 90, 500
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))
         sample2 = np.random.random((Npts2, 3))
@@ -104,7 +104,7 @@ def test_tpcf_jackknife_cov_matrix():
     """
     test the covariance matrix
     """
-    Npts=100
+    Npts = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*10, 3))
@@ -113,4 +113,4 @@ def test_tpcf_jackknife_cov_matrix():
 
     result_1, err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, period=period, num_threads=1)
 
-    assert np.shape(err)==(nbins, nbins), "cov matrix not correct shape"
+    assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"

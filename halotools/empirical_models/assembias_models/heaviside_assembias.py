@@ -512,7 +512,7 @@ class HeavisideAssembias(object):
 
             frac_type1 = 1 - no_edge_split
             frac_type2 = 1 - frac_type1
-            perturbation[~type1_mask] *= (-frac_type1[~type1_mask]/
+            perturbation[~type1_mask] *= (-frac_type1[~type1_mask] /
                 (frac_type2[~type1_mask]))
 
             no_edge_result += perturbation

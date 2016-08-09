@@ -13,7 +13,7 @@ from ..mock_observables_helpers import enforce_sample_has_correct_shape
 __all__ = ('verify_tpcf_estimator', 'process_optional_input_sample2',
     'downsample_inputs_exceeding_max_sample_size')
 
-__author__=['Duncan Campbell', 'Andrew Hearin']
+__author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 # Define a dictionary containing the available tpcf estimator names
 # and their corresponding values of (do_DD, do_DR, do_RR)
@@ -84,7 +84,7 @@ def process_optional_input_sample2(sample1, sample2, do_cross, ndim=3):
         if sample1.shape != sample2.shape:
             _sample1_is_sample2 = False
         else:
-            if np.all(sample1==sample2):
+            if np.all(sample1 == sample2):
                 _sample1_is_sample2 = True
                 msg = ("\n `sample1` and `sample2` are exactly the same, \n"
                        "only the auto-correlation will be returned.\n")

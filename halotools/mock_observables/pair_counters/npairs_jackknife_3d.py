@@ -246,9 +246,9 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
 
     if type(N_samples) is not int:
         raise HalotoolsError("There must be an integer number of jackknife samples")
-    if np.max(jtags1)>N_samples:
+    if np.max(jtags1) > N_samples:
         raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
-    if np.max(jtags2)>N_samples:
+    if np.max(jtags2) > N_samples:
         raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
 
     return weights1, weights2, jtags1, jtags2

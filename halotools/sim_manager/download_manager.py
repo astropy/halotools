@@ -246,7 +246,7 @@ class DownloadManager(object):
             msg += str(entry.fname) + "\n\n"
             msg += ("This log entry has exactly matching metadata "
                 "and a redshift within the input ``dz_tol`` = " + str(dz_tol)
-                +"\n of the redshift of the most closely matching catalog on the web.\n"
+                + "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
                 )
@@ -300,7 +300,7 @@ class DownloadManager(object):
         if new_log_entry.safe_for_cache is False:
             msg = ("\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
-                "and contact the Halotools developers.\n"+ output_fname)
+                "and contact the Halotools developers.\n" + output_fname)
             raise HalotoolsError(msg)
 
         self.halo_table_cache.add_entry_to_cache_log(new_log_entry)
@@ -526,7 +526,7 @@ class DownloadManager(object):
             msg += str(entry.fname) + "\n\n"
             msg += ("This log entry has exactly matching metadata "
                 "and a redshift within the input ``dz_tol`` = " + str(dz_tol)
-                +"\n of the redshift of the most closely matching catalog on the web.\n"
+                + "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
                 )
@@ -574,7 +574,7 @@ class DownloadManager(object):
         if new_log_entry.safe_for_cache is False:
             msg = ("\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
-                "and contact the Halotools developers.\n"+ output_fname)
+                "and contact the Halotools developers.\n" + output_fname)
             raise HalotoolsError(msg)
 
         self.ptcl_table_cache.add_entry_to_cache_log(new_log_entry)

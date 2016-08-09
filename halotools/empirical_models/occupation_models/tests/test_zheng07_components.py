@@ -150,7 +150,7 @@ class TestZheng07Cens(TestCase):
         mean_occ = model.mean_occupation(prim_haloprop=mvir_array)
 
         # Check that the range is in [0,1]
-        assert np.all(mean_occ<= 1)
+        assert np.all(mean_occ <= 1)
         assert np.all(mean_occ >= 0)
 
         # The mean occupation should be monotonically increasing

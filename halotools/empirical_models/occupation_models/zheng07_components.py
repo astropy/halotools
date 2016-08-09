@@ -136,7 +136,7 @@ class Zheng07Cens(OccupationComponent):
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
             (logM - self.param_dict['logMmin'])
-            /self.param_dict['sigma_logM']))
+            / self.param_dict['sigma_logM']))
 
         return mean_ncen
 
@@ -179,8 +179,8 @@ class Zheng07Cens(OccupationComponent):
             threshold_array = np.arange(-22, -17.5, 0.5)
             threshold_array = threshold_array[::-1]
 
-            threshold_index = np.where(threshold_array==threshold)[0]
-            if len(threshold_index)==0:
+            threshold_index = np.where(threshold_array == threshold)[0]
+            if len(threshold_index) == 0:
                 msg = ("\nInput luminosity threshold "
                     "does not match any of the Table 1 values \nof "
                     "Zheng et al. 2007 (arXiv:0703457).\n"
@@ -190,7 +190,7 @@ class Zheng07Cens(OccupationComponent):
                     "You can always manually change the values in ``param_dict``.\n")
                 warnings.warn(msg)
                 threshold = model_defaults.default_luminosity_threshold
-                threshold_index = np.where(threshold_array==threshold)[0]
+                threshold_index = np.where(threshold_array == threshold)[0]
 
             param_dict = (
                 {'logMmin': logMmin_array[threshold_index[0]],
@@ -466,9 +466,9 @@ class Zheng07Sats(OccupationComponent):
             threshold_array = np.arange(-22, -17.5, 0.5)
             threshold_array = threshold_array[::-1]
 
-            threshold_index = np.where(threshold_array==threshold)[0]
+            threshold_index = np.where(threshold_array == threshold)[0]
 
-            if len(threshold_index)==0:
+            if len(threshold_index) == 0:
                 msg = ("\nInput luminosity threshold "
                     "does not match any of the Table 1 values \nof "
                     "Zheng et al. 2007 (arXiv:0703457).\n"
@@ -478,7 +478,7 @@ class Zheng07Sats(OccupationComponent):
                     "You can always manually change the values in ``param_dict``.\n")
                 warnings.warn(msg)
                 threshold = model_defaults.default_luminosity_threshold
-                threshold_index = np.where(threshold_array==threshold)[0]
+                threshold_index = np.where(threshold_array == threshold)[0]
                 warnings.warn(msg)
 
             param_dict = (

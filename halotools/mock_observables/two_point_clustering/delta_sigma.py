@@ -234,7 +234,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     #Check to see if xi ever is equal to -1
     #if so, there are radial bins with 0 matter particles.
     #This could mean that the user has under-sampled the particles.
-    if np.any(xi==-1.0):
+    if np.any(xi == -1.0):
         msg = ("\n"
                "Some radial bins contain 0 particles in the \n"
                "galaxy-matter cross cross correlation calculation. \n"

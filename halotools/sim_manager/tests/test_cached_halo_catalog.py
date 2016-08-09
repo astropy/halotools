@@ -115,7 +115,7 @@ class TestCachedHaloCatalog(TestCase):
                     assert type(hf.attrs['redshift']) == type(pf.attrs['redshift'])
                 except AssertionError:
                     msg = ("Type error for the redshift attribute of the ``"+hf.attrs['simname']
-                        +"`` simulation.\n")
+                        + "`` simulation.\n")
                     msg += type_mismatch_msg
                     raise HalotoolsError(msg)
 

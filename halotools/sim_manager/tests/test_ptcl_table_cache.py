@@ -159,7 +159,7 @@ class TestPtclTableCache(TestCase):
 
         with pytest.raises(TypeError) as err:
             cache.add_entry_to_cache_log('abc', update_ascii=False)
-        substr="You can only add instances of PtclTableCacheLogEntry to the cache log"
+        substr = "You can only add instances of PtclTableCacheLogEntry to the cache log"
         assert substr in err.value.args[0]
 
     @pytest.mark.skipif('not HAS_H5PY')

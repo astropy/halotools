@@ -124,7 +124,7 @@ def reshape_input_marks(marks, npts_sample, correct_num_marks, cond_func):
         msg = ("You must pass in an array of marks whose length \n"
             "matches the number of points in your sample.\n"
             "Your input sample has %i points, but your marks array has length = %i.\n")
-        raise ValueError(msg %(npts_sample, npts_in_marks))
+        raise ValueError(msg % (npts_sample, npts_in_marks))
 
     try:
         num_input_marks_per_point = marks.shape[1]

@@ -118,11 +118,11 @@ def test_tpcf_estimators():
                     approx_cell1_size=[rmax, rmax, rmax],
                     approx_cellran_size=[rmax, rmax, rmax])
 
-    assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_3)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_4)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_5)==3, "wrong number of correlation functions returned erroneously."
+    assert len(result_1) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_2) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_3) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_4) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_5) == 3, "wrong number of correlation functions returned erroneously."
 
 
 @slow
@@ -142,7 +142,7 @@ def test_tpcf_sample_size_limit():
                     max_sample_size=int(1e2), estimator='Natural',
                     approx_cell1_size=[rmax, rmax, rmax])
 
-    assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
+    assert len(result_1) == 3, "wrong number of correlation functions returned erroneously."
 
 
 @slow
@@ -187,9 +187,9 @@ def test_tpcf_randoms():
     substr = "If no PBCs are specified, randoms must be provided."
     assert substr in err.value.args[0]
 
-    assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_3)==3, "wrong number of correlation functions returned erroneously."
+    assert len(result_1) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_2) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_3) == 3, "wrong number of correlation functions returned erroneously."
 
 
 @slow
@@ -226,8 +226,8 @@ def test_tpcf_period_API():
     substr = "All values must bounded positive numbers."
     assert substr in err.value.args[0]
 
-    assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
-    assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
+    assert len(result_1) == 3, "wrong number of correlation functions returned erroneously."
+    assert len(result_2) == 3, "wrong number of correlation functions returned erroneously."
 
 
 @slow

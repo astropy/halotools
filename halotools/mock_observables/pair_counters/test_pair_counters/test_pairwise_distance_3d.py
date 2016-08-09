@@ -28,15 +28,15 @@ def test_pairwise_distance_3d_periodic_mesh_grid_1():
     period = 1.0
 
     #test on a uniform grid
-    rmax=0.10001
+    rmax = 0.10001
     m = pairwise_distance_3d(mesh_sample, mesh_sample, rmax, period=period)
 
     #each point has 7 connections including 1 self connection
     #N = (10^3)*7
-    assert m.getnnz()==7000
+    assert m.getnnz() == 7000
 
     #diagonal self matches should have distance 0
-    assert np.all(m.diagonal()==0.0)
+    assert np.all(m.diagonal() == 0.0)
 
     #off diagonal should all be 0.1
     i, j = m.nonzero()
@@ -53,17 +53,17 @@ def test_pairwise_distance_3d_nonperiodic_mesh_grid_1():
     period = 1.0
 
     #test on a uniform grid
-    rmax=0.10001
+    rmax = 0.10001
     m = pairwise_distance_3d(mesh_sample, mesh_sample, rmax, period=None)
 
     #each point has 7 connections including 1 self connection
     #N = (10^3)*7
     #points on the 6 faces have fewer connections N - (10*10*6) = 6400
     #overlapping accounts for edges (2 less) and corners (3 less)
-    assert m.getnnz()==6400
+    assert m.getnnz() == 6400
 
     #diagonal self matches should have distance 0
-    assert np.all(m.diagonal()==0.0)
+    assert np.all(m.diagonal() == 0.0)
 
     #off diagonal should all be 0.1
     i, j = m.nonzero()
@@ -80,11 +80,11 @@ def test_pairwise_distance_3d_nonperiodic_random_1():
         random_sample = np.random.random((Npts, 3))
     period = 1.0
 
-    rmax=10.0
+    rmax = 10.0
     m = pairwise_distance_3d(random_sample, random_sample, rmax, period=None)
 
     #each point is paired with every other point
-    assert m.getnnz()==Npts**2
+    assert m.getnnz() == Npts**2
 
 
 def test_pairwise_distance_3d_periodic_tight_locus1():
@@ -100,18 +100,18 @@ def test_pairwise_distance_3d_periodic_tight_locus1():
     period = 1.0
 
     #should be no connections
-    rmax=0.01
+    rmax = 0.01
     m = pairwise_distance_3d(data1, data2, rmax, period=period)
 
     #each point has 0 connections including 1 self connection
-    assert m.getnnz()==0
+    assert m.getnnz() == 0
 
     #should be 10*10 connections
-    rmax=0.3
+    rmax = 0.3
     m = pairwise_distance_3d(data1, data2, rmax, period=period)
 
     #each point has 10 connections
-    assert m.getnnz()== Npts1*Npts2
+    assert m.getnnz() == Npts1*Npts2
 
 
 def test_pairwise_distance_3d_nonperiodic_tight_locus1():
@@ -126,18 +126,18 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus1():
     period = 1.0
 
     #should be no connections
-    rmax=0.01
+    rmax = 0.01
     m = pairwise_distance_3d(data1, data2, rmax, period=None)
 
     #each point has 0 connections including 1 self connection
-    assert m.getnnz()==0
+    assert m.getnnz() == 0
 
     #should be 0 connections
-    rmax=0.3
+    rmax = 0.3
     m = pairwise_distance_3d(data1, data2, rmax, period=None)
 
     #each point has 0 connections
-    assert m.getnnz()== 0
+    assert m.getnnz() == 0
 
 
 def test_pairwise_distance_3d_nonperiodic_tight_locus2():
@@ -152,18 +152,18 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
     period = 1.0
 
     #should be no connections
-    rmax=0.01
+    rmax = 0.01
     m = pairwise_distance_3d(data1, data2, rmax, period=None)
 
     #each point has 0 connections including 1 self connection
-    assert m.getnnz()==0
+    assert m.getnnz() == 0
 
     #should 10
-    rmax=0.2
+    rmax = 0.2
     m = pairwise_distance_3d(data1, data2, rmax, period=None)
 
     #each point has 0 connections including 1 self connection
-    assert m.getnnz()==Npts1*Npts2
+    assert m.getnnz() == Npts1*Npts2
 
 
 @pytest.mark.slow

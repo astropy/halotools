@@ -317,11 +317,11 @@ def marked_tpcf(sample1, rbins, sample2=None,
     W1W1, W1W2, W2W2 = marked_pair_counts(sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2)
 
-    if normalize_by=='number_counts':
+    if normalize_by == 'number_counts':
         R1R1, R1R2, R2R2 = pair_counts(sample1, sample2, rbins, period,
             num_threads, do_auto, do_cross, _sample1_is_sample2, None, None)
     #calculate randomized marked pairs
-    elif normalize_by=='random_marks':
+    elif normalize_by == 'random_marks':
         if iterations > 1:
             #create storage arrays of the right shape
             R1R1 = np.zeros((iterations, len(rbins)-1))
@@ -380,8 +380,8 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
             weight_func_id=weight_func_id, period=period, num_threads=num_threads)
         D1D1 = np.diff(D1D1)
     else:
-        D1D1=None
-        D2D2=None
+        D1D1 = None
+        D2D2 = None
 
     if _sample1_is_sample2:
         D1D2 = D1D1
@@ -392,13 +392,13 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
                 weights1=marks1, weights2=marks2, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads)
             D1D2 = np.diff(D1D2)
-        else: D1D2=None
+        else: D1D2 = None
         if do_auto is True:
             D2D2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=marks2, weight_func_id=weight_func_id,
                 period=period, num_threads=num_threads)
             D2D2 = np.diff(D2D2)
-        else: D2D2=None
+        else: D2D2 = None
 
     return D1D1, D1D2, D2D2
 
@@ -425,8 +425,8 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
             weight_func_id=weight_func_id, period=period, num_threads=num_threads)
         R1R1 = np.diff(R1R1)
     else:
-        R1R1=None
-        R2R2=None
+        R1R1 = None
+        R2R2 = None
 
     if _sample1_is_sample2:
         R1R2 = R1R1
@@ -438,13 +438,13 @@ def random_counts(sample1, sample2, rbins, period, num_threads,
                 weights2=permuted_marks2,
                 weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             R1R2 = np.diff(R1R2)
-        else: R1R2=None
+        else: R1R2 = None
         if do_auto is True:
             R2R2 = marked_npairs_3d(sample2, sample2, rbins,
                 weights1=marks2, weights2=permuted_marks2,
                 weight_func_id=weight_func_id, period=period, num_threads=num_threads)
             R2R2 = np.diff(R2R2)
-        else: R2R2=None
+        else: R2R2 = None
 
     return R1R1, R1R2, R2R2
 
@@ -460,8 +460,8 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
                       approx_cell2_size=approx_cell1_size)
         D1D1 = np.diff(D1D1)
     else:
-        D1D1=None
-        D2D2=None
+        D1D1 = None
+        D2D2 = None
 
     if _sample1_is_sample2:
         D1D2 = D1D1
@@ -473,14 +473,14 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
                           approx_cell1_size=approx_cell1_size,
                           approx_cell2_size=approx_cell2_size)
             D1D2 = np.diff(D1D2)
-        else: D1D2=None
+        else: D1D2 = None
         if do_auto is True:
             D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
                           num_threads=num_threads,
                           approx_cell1_size=approx_cell2_size,
                           approx_cell2_size=approx_cell2_size)
             D2D2 = np.diff(D2D2)
-        else: D2D2=None
+        else: D2D2 = None
 
     return D1D1, D1D2, D2D2
 
@@ -560,7 +560,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
         randomize_marks = np.array([True]*marks1.shape[1])
 
     if randomize_marks.ndim == 1:
-        if len(randomize_marks)!=marks1.shape[1]:
+        if len(randomize_marks) != marks1.shape[1]:
             msg = ("\n `randomize_marks` must have same length \n"
                    " as the number of weights per point.")
             raise HalotoolsError(msg)

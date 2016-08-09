@@ -260,10 +260,10 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         rbins, period, num_threads, do_DR, do_RR)
 
     if _sample1_is_sample2:
-        D2R=D1R
+        D2R = D1R
     else:
         if do_DR is True:
-            D2R, RR_dummy= jrandom_counts(sample2, randoms, j_index_2, j_index_random,
+            D2R, RR_dummy = jrandom_counts(sample2, randoms, j_index_2, j_index_random,
                 N_sub_vol, rbins, period, num_threads, do_DR, do_RR=False)
         else: D2R = None
 
@@ -375,8 +375,8 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
             num_threads=num_threads)
         D1D1 = np.diff(D1D1, axis=1)
     else:
-        D1D1=None
-        D2D2=None
+        D1D1 = None
+        D2D2 = None
 
     if _sample1_is_sample2:
         D1D2 = D1D1
@@ -387,7 +387,7 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,
                 jtags1=j_index_1, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
             D1D2 = np.diff(D1D2, axis=1)
-        else: D1D2=None
+        else: D1D2 = None
         if do_auto is True:
             D2D2 = npairs_jackknife_3d(sample2, sample2, rbins, period=period,
                 jtags1=j_index_2, jtags2=j_index_2,
@@ -408,13 +408,13 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
             jtags1=j_index, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
         DR = np.diff(DR, axis=1)
-    else: DR=None
+    else: DR = None
     if do_RR is True:
         RR = npairs_jackknife_3d(randoms, randoms, rbins, period=period,
             jtags1=j_index_randoms, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
         RR = np.diff(RR, axis=1)
-    else: RR=None
+    else: RR = None
 
     return DR, RR
 

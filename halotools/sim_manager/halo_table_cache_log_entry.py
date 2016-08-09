@@ -239,9 +239,9 @@ class HaloTableCacheLogEntry(object):
                     num_failures += 1
                     msg = (
                         str(num_failures)+". The hdf5 file has metadata "
-                        "``"+key+"`` = "+str(metadata)+
+                        "``"+key+"`` = "+str(metadata) +
                         ".\nThis does not match the "
-                        +str(getattr(self, key))+" value in the log entry.\n\n"
+                        + str(getattr(self, key))+" value in the log entry.\n\n"
                         )
                 except KeyError:
 
@@ -373,7 +373,7 @@ class HaloTableCacheLogEntry(object):
         """
         msg = ''
 
-        if self.fname[-5:]=='.hdf5':
+        if self.fname[-5:] == '.hdf5':
             pass
         else:
             num_failures += 1

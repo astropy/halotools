@@ -15,7 +15,7 @@ def get_extensions():
     sources = [os.path.join(PATH_TO_PKG, srcfn) for srcfn in SOURCES]
     include_dirs = ['numpy']
     libraries = []
-    language ='c++'
+    language = 'c++'
     extra_compile_args = ['-Ofast']
 
     extensions = []

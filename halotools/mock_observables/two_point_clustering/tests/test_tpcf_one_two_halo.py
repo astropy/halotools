@@ -35,7 +35,7 @@ def test_tpcf_one_two_halo_auto_periodic():
       randoms=None, period=period,
       max_sample_size=int(1e4), estimator='Natural')
 
-    assert len(result)==2, "wrong number of correlation functions returned."
+    assert len(result) == 2, "wrong number of correlation functions returned."
 
 
 @pytest.mark.slow
@@ -57,7 +57,7 @@ def test_tpcf_one_two_halo_cross_periodic():
       approx_cell2_size=[rmax, rmax, rmax],
       approx_cellran_size=[rmax, rmax, rmax])
 
-    assert len(result)==6, "wrong number of correlation functions returned."
+    assert len(result) == 6, "wrong number of correlation functions returned."
 
 
 @pytest.mark.slow
@@ -75,7 +75,7 @@ def test_tpcf_one_two_halo_auto_nonperiodic():
         randoms=randoms, period=period,
         max_sample_size=int(1e4), estimator='Natural')
 
-    assert len(result)==2, "wrong number of correlation functions returned."
+    assert len(result) == 2, "wrong number of correlation functions returned."
 
 
 @pytest.mark.slow
@@ -98,7 +98,7 @@ def test_tpcf_one_two_halo_cross_nonperiodic():
       approx_cell2_size=[rmax, rmax, rmax],
       approx_cellran_size=[rmax, rmax, rmax])
 
-    assert len(result)==6, "wrong number of correlation functions returned."
+    assert len(result) == 6, "wrong number of correlation functions returned."
 
 
 def test_tpcf_decomposition_process_args1():

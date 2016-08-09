@@ -8,7 +8,7 @@ from astropy.tests.helper import pytest
 
 from ..s_mu_tpcf import s_mu_tpcf
 
-__all__=['test_s_mu_tpcf_auto_periodic', 'test_s_mu_tpcf_auto_nonperiodic']
+__all__ = ['test_s_mu_tpcf_auto_periodic', 'test_s_mu_tpcf_auto_nonperiodic']
 
 fixed_seed = 43
 

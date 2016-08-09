@@ -475,7 +475,7 @@ def indices_of_selected_subhalos(subhalo_hostids, subhalo_occupations, subhalo_m
                 "entries of ``subhalo_hostids`` = {1}.")
             raise ValueError(msg.format(total_subhalo_multiplicity, Nsubs))
 
-    clipped_subhalo_occupations = subhalo_occupations[subhalo_multiplicity>0]
+    clipped_subhalo_occupations = subhalo_occupations[subhalo_multiplicity > 0]
     csum = clipped_subhalo_occupations.cumsum()
     num_subhalos_to_draw = csum[-1]
 

@@ -51,7 +51,7 @@ def test_subhalo_indexing_array2():
     """ Create a sequence of randomly selected inputs and verify that
     the subhalo_indexing_array function returns sensible results
     """
-    nhosts= 1000
+    nhosts = 1000
     for seed in seed_array:
         with NumpyRNGContext(seed):
             host_halo_ids = np.sort(np.random.permutation(np.arange(0, int(1e5)))[0:nhosts])

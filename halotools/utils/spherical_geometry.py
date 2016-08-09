@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-__all__=['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
+__all__ = ['spherical_to_cartesian', 'chord_to_cartesian', 'sample_spherical_surface']
 __author__ = ('Duncan Campbell', )
 
 

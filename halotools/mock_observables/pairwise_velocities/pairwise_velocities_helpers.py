@@ -36,7 +36,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
             raise ValueError(msg)
         else:
             velocities2 = np.atleast_1d(velocities2)
-        if np.all(sample1==sample2):
+        if np.all(sample1 == sample2):
             _sample1_is_sample2 = True
             msg = ("\n Warning: `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-function will be returned.\n")

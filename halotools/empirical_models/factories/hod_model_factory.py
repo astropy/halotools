@@ -755,7 +755,7 @@ class HodModelFactory(ModelFactory):
                 if hasattr(model, 'redshift'):
                     zs = str(model.redshift)
                     msg += ("For gal_type = ``" + gal_type + "``, the "
-                        +clname+" instance has redshift = " + zs + "\n")
+                        + clname+" instance has redshift = " + zs + "\n")
             raise HalotoolsError(msg)
 
     def build_prim_sec_haloprop_list(self):

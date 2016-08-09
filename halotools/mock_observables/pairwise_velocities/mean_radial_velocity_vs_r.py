@@ -177,10 +177,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
             D1D1 = np.diff(D1D1)
             N1N1 = np.diff(N1N1)
         else:
-            D1D1=None
-            D2D2=None
-            N1N1=None
-            N2N2=None
+            D1D1 = None
+            D2D2 = None
+            N1N1 = None
+            N2N2 = None
 
         if _sample1_is_sample2:
             D1D2 = D1D1
@@ -199,8 +199,8 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
                 D1D2 = np.diff(D1D2)
                 N1N2 = np.diff(N1N2)
             else:
-                D1D2=None
-                N1N2=None
+                D1D2 = None
+                N1N2 = None
             if do_auto is True:
                 D2D2, dummy, N2N2 = velocity_marked_npairs_3d(
                     sample2, sample2, rbins,
@@ -212,8 +212,8 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
                 D2D2 = np.diff(D2D2)
                 N2N2 = np.diff(N2N2)
             else:
-                D2D2=None
-                N2N2=None
+                D2D2 = None
+                N2N2 = None
 
         return D1D1, D1D2, D2D2, N1N1, N1N2, N2N2
 

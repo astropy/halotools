@@ -170,7 +170,7 @@ def _pairwise_distance_3d_process_args(data1, data2, r_max, period,
     helper function to process arguments for `~halotools.mock_observables.pairwise_distance_3d function.
     """
     if num_threads is not 1:
-        if num_threads=='max':
+        if num_threads == 'max':
             num_threads = multiprocessing.cpu_count()
         if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"

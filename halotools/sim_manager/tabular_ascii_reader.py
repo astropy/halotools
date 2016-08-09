@@ -235,7 +235,7 @@ class TabularAsciiReader(object):
                 if row_cut_max <= row_cut_min:
                     msg = ("\nFor the ``"+row_cut_min_key+"`` column, \n"
                         "you set the value of the input ``row_cut_min_dict`` to "
-                        +str(row_cut_min)+"\nand the value of the input "
+                        + str(row_cut_min)+"\nand the value of the input "
                         "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -248,7 +248,7 @@ class TabularAsciiReader(object):
                 if row_cut_min >= row_cut_max:
                     msg = ("\nFor the ``"+row_cut_max_key+"`` column, \n"
                         "you set the value of the input ``row_cut_max_dict`` to "
-                        +str(row_cut_max)+"\nand the value of the input "
+                        + str(row_cut_max)+"\nand the value of the input "
                         "``row_cut_min_dict`` to "+str(row_cut_min)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -267,7 +267,7 @@ class TabularAsciiReader(object):
                 if row_cut_neq == row_cut_eq:
                     msg = ("\nFor the ``"+row_cut_eq_key+"`` column, \n"
                         "you set the value of the input ``row_cut_eq_dict`` to "
-                        +str(row_cut_eq)+"\nand the value of the input "
+                        + str(row_cut_eq)+"\nand the value of the input "
                         "``row_cut_neq_dict`` to "+str(row_cut_neq)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -280,7 +280,7 @@ class TabularAsciiReader(object):
                 if row_cut_eq == row_cut_neq:
                     msg = ("\nFor the ``"+row_cut_neq_key+"`` column, \n"
                         "you set the value of the input ``row_cut_neq_dict`` to "
-                        +str(row_cut_neq)+"\nand the value of the input "
+                        + str(row_cut_neq)+"\nand the value of the input "
                         "``row_cut_eq_dict`` to "+str(row_cut_eq)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -359,7 +359,7 @@ class TabularAsciiReader(object):
 
     def _enforce_no_repeated_columns(self):
         duplicates = list(
-            k for k, v in list(collections.Counter(self.column_indices_to_keep).items()) if v>1
+            k for k, v in list(collections.Counter(self.column_indices_to_keep).items()) if v > 1
             )
         if len(duplicates) > 0:
             example_repeated_column_index = str(duplicates[0])
@@ -415,7 +415,7 @@ class TabularAsciiReader(object):
         Nheader = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
-                if ((l[0:len(self.header_char)]==self.header_char) or (l=="\n")):
+                if ((l[0:len(self.header_char)] == self.header_char) or (l == "\n")):
                     Nheader += 1
                 else:
                     break
@@ -448,7 +448,7 @@ class TabularAsciiReader(object):
         Nrows_data = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
-                if ((l[0:len(self.header_char)]!=self.header_char) and (l!="\n")):
+                if ((l[0:len(self.header_char)] != self.header_char) and (l != "\n")):
                     Nrows_data += 1
         return Nrows_data
 

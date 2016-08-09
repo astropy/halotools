@@ -11,11 +11,11 @@ from ..pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
 
 from ...custom_exceptions import HalotoolsError
 
-igraph_available=True
+igraph_available = True
 try:
     import igraph
 except ImportError:
-    igraph_available=False
+    igraph_available = False
 if igraph_available is True:  # there is another package called igraph--need to distinguish.
     if not hasattr(igraph, 'Graph'):
         igraph_available is False
@@ -133,7 +133,7 @@ class FoFGroups(object):
 
         self.b_perp = float(b_perp)  # perpendicular linking length
         self.b_para = float(b_para)  # parallel linking length
-        self.positions=np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
+        self.positions = np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
 
         #process Lbox parameter
         if (Lbox is None) & (period is None):
@@ -152,7 +152,7 @@ class FoFGroups(object):
         if np.shape(Lbox) != (3,):
             raise ValueError("Lbox must be an array of length 3, or number indicating the "
                 "length of one side of a cube")
-        if (period is not None) and (not np.all(Lbox==period)):
+        if (period is not None) and (not np.all(Lbox == period)):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
 
         self.period = period  # simulation box periodic boundary conditions

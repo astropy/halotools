@@ -313,7 +313,7 @@ class Leauthaud11Sats(OccupationComponent):
         self._update_satellite_params()
 
         mean_nsat = (
-            np.exp(-self._mcut/(mass*self.littleh))*
+            np.exp(-self._mcut/(mass*self.littleh)) *
             (mass*self.littleh/self._msat)**self.param_dict['alphasat']
             )
 
@@ -355,11 +355,11 @@ class Leauthaud11Sats(OccupationComponent):
         knee_mass = 1.e12
 
         self._msat = (
-            knee_mass*self.param_dict['bsat']*
+            knee_mass*self.param_dict['bsat'] *
             (knee_threshold / knee_mass)**self.param_dict['betasat'])
 
         self._mcut = (
-            knee_mass*self.param_dict['bcut']*
+            knee_mass*self.param_dict['bcut'] *
             (knee_threshold / knee_mass)**self.param_dict['betacut'])
 
 

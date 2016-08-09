@@ -59,8 +59,8 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
 
     if min_size is not None:
         min_size = np.atleast_1d(min_size)
-        if np.any(Lbox<min_size):
-            Lbox[(Lbox<min_size)] = min_size[(Lbox<min_size)]
+        if np.any(Lbox < min_size):
+            Lbox[(Lbox < min_size)] = min_size[(Lbox < min_size)]
 
     return x1, y1, z1, x2, y2, z2, Lbox
 

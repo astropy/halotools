@@ -237,7 +237,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         except KeyError:
             pass
 
-        if self._interpol_method=='spline':
+        if self._interpol_method == 'spline':
             if 'input_spline_degree' in list(kwargs.keys()):
                 self._input_spine_degree = kwargs['input_spline_degree']
             else:
@@ -317,10 +317,10 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._abscissa = getattr(self, self.galprop_name+'_abscissa')
 
         model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
-        if self._interpol_method=='polynomial':
+        if self._interpol_method == 'polynomial':
             mean_galprop_fraction = model_helpers.polynomial_from_table(
                 self._abscissa, model_ordinates, prim_haloprop)
-        elif self._interpol_method=='spline':
+        elif self._interpol_method == 'spline':
             spline_function = model_helpers.custom_spline(
                 self._abscissa, model_ordinates,
                     k=self._spline_degree)
@@ -329,7 +329,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             raise HalotoolsError("Input interpol_method must be 'polynomial' or 'spline'.")
 
         # Enforce boundary conditions
-        mean_galprop_fraction[mean_galprop_fraction<0]=0
-        mean_galprop_fraction[mean_galprop_fraction>1]=1
+        mean_galprop_fraction[mean_galprop_fraction < 0] = 0
+        mean_galprop_fraction[mean_galprop_fraction > 1] = 1
 
         return mean_galprop_fraction

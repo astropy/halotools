@@ -8,8 +8,8 @@ from math import floor
 __all__ = ('RectangularDoubleMesh', )
 __author__ = ('Andrew Hearin', )
 
-default_max_cells_per_dimension_cell1=50
-default_max_cells_per_dimension_cell2=50
+default_max_cells_per_dimension_cell1 = 50
+default_max_cells_per_dimension_cell2 = 50
 
 
 def digitized_position(p, cell_size, num_divs):

@@ -241,7 +241,7 @@ def test_npairs_xy_z_brute_force_periodic():
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
     test_result = pure_python_brute_force_npairs_xy_z(data1, data2, rp_bins, pi_bins, period=1)
 
-    assert np.shape(result)==(len(rp_bins), len(pi_bins))
+    assert np.shape(result) == (len(rp_bins), len(pi_bins))
     assert np.all(result == test_result)
 
 
@@ -260,7 +260,7 @@ def test_npairs_xy_z_brute_force_non_periodic():
     result = npairs_xy_z(data1, data2, rp_bins, pi_bins)
     test_result = pure_python_brute_force_npairs_xy_z(data1, data2, rp_bins, pi_bins)
 
-    assert np.shape(result)==(len(rp_bins), len(pi_bins))
+    assert np.shape(result) == (len(rp_bins), len(pi_bins))
     assert np.all(result == test_result)
 
 

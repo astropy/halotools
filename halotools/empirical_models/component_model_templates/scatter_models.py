@@ -163,7 +163,7 @@ class LogNormalScatterModel(object):
     def _initialize_param_dict(self):
         """ Private method used to initialize ``self.param_dict``.
         """
-        self.param_dict={}
+        self.param_dict = {}
         for ipar, val in enumerate(self.ordinates):
             key = self._get_param_key(ipar)
             self.param_dict[key] = val

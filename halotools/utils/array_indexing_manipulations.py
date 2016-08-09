@@ -230,7 +230,7 @@ def random_indices_within_bin(binned_multiplicity, desired_binned_occupations,
         return np.array([], dtype=int)
 
     try:
-        assert np.all(binned_multiplicity[desired_binned_occupations>0] >= min_required_entries_per_bin)
+        assert np.all(binned_multiplicity[desired_binned_occupations > 0] >= min_required_entries_per_bin)
     except AssertionError:
         msg = ("Input ``binned_multiplicity`` array must contain at least \n"
         "min_required_entries_per_bin = {0} entries. \nThis indicates that "

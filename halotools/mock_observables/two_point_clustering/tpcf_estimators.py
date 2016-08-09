@@ -22,7 +22,7 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     NR2 = np.atleast_1d(NR2)
     Ns = np.array([len(ND1), len(ND2), len(NR1), len(NR2)])
 
-    if np.any(Ns>1):
+    if np.any(Ns > 1):
         #used for the jackknife calculations
         #the outer dimension is the number of samples.
         #the N arrays are the number of points in each dimension.
@@ -57,7 +57,7 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     else:
         raise ValueError("unsupported estimator!")
 
-    if np.shape(xi)[0]==1: return xi[0]
+    if np.shape(xi)[0] == 1: return xi[0]
     else: return xi  # for jackknife
 
 
