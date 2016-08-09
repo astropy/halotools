@@ -94,6 +94,3 @@ def test_s_mu_auto_consistency():
 
     assert np.allclose(result_11a, result_11b)
     assert np.allclose(result_22a, result_22b)
-
-
-

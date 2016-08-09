@@ -58,5 +58,3 @@ def test_TP_estimator_requirements_bad_estimator():
         __ = _TP_estimator_requirements('Ron Perlman')
     substr = "Input `estimator` must be one of the following"
     assert substr in err.value.args[0]
-
-

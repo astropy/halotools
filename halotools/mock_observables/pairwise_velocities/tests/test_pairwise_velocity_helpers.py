@@ -213,6 +213,3 @@ def test_process_rp_bins4():
         rp_bins, pi_max = _process_rp_bins(input_rpbins, pi_max, period, PBCs)
     substr = "The input ``pi_max`` = "
     assert substr in err.value.args[0]
-
-
-

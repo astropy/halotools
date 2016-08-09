@@ -150,4 +150,3 @@ def test_wp_auto_consistency():
 
     assert np.allclose(wp_11a, wp_11b)
     assert np.allclose(wp_22a, wp_22b)
-

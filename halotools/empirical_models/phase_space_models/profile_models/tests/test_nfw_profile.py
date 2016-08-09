@@ -272,4 +272,3 @@ class TestNFWProfile(TestCase):
             halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=44)
         assert np.allclose(r1, r2, rtol=0.001)
         assert not np.allclose(r1, r3, rtol=0.001)
-

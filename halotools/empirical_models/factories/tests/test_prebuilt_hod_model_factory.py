@@ -37,7 +37,3 @@ class TestPrebuiltHodModelFactory(TestCase):
             num_iterations=1, simname='fake', summary_statistic='mean',
             gal_type='centrals', include_crosscorr=True, rbins=np.array((0.1, 0.2, 0.3)),
             redshift=0, halo_finder='rockstar')
-
-
-
-

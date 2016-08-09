@@ -200,5 +200,3 @@ def test_underdensity_prob_func_process_args6():
         upf = underdensity_prob_func(sample1, rbins, period=period)
     substr = "You must pass either ``n_ran`` or ``random_sphere_centers``"
     assert substr in err.value.args[0]
-
-

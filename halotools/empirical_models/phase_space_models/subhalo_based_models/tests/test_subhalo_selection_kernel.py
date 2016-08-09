@@ -207,5 +207,3 @@ def test_indices_of_selected_subhalos5():
     assert substr in err.value.args[0]
     substr = "which is inconsistent with the total number of entries of ``subhalo_hostids``"
     assert substr in err.value.args[0]
-
-

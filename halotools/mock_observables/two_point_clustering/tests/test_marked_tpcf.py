@@ -307,5 +307,3 @@ def test_exception_handling8():
             period=period, num_threads=1, weight_func_id=weight_func_id, do_auto='yes')
     substr = "`do_auto` and `do_cross` keywords must be boolean-valued."
     assert substr in err.value.args[0]
-
-

@@ -611,4 +611,3 @@ def test_tpcf_vs_corrfunc():
 
     halotools_result2 = tpcf(sample2, rbins, period=250.0)
     assert np.allclose(halotools_result2, sinha_sample2_xi, rtol=1e-5), msg
-

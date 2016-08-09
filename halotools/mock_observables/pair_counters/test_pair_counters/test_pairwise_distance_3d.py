@@ -237,6 +237,3 @@ def test_get_rmax2():
         __ = _get_r_max(sample1, np.inf)
     substr = "Input ``r_max`` must be an array of bounded positive numbers."
     assert substr in err.value.args[0]
-
-
-

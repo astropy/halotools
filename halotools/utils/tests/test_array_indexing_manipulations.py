@@ -355,15 +355,3 @@ def test_calculate_entry_multiplicity4():
             sorted_repeated_hostids, unique_possible_hostids, testing_mode=True)
     substr = "must appear in unique_possible_hostids."
     assert substr in err.value.args[0]
-
-
-
-
-
-
-
-
-
-
-
-

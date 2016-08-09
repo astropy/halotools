@@ -73,4 +73,3 @@ class TestTrivialProfile(TestCase):
         assert self.default_model.mdef == model_defaults.halo_mass_definition
         assert self.m200_model.mdef == '200m'
         assert self.wmap9_model.mdef == model_defaults.halo_mass_definition
-

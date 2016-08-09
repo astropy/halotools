@@ -83,7 +83,3 @@ def test_forbidden_sims():
         __ = CachedHaloCatalog(simname='bolplanck', version_name='halotools_alpha_version2')
     substr = "See https://github.com/astropy/halotools/issues/598"
     assert substr in err.value.args[0]
-
-
-
-

@@ -121,5 +121,3 @@ def test_rp_pi_cross_consistency():
         do_auto=False, do_cross=True)
 
     assert np.allclose(result_12a, result_12b)
-
-
