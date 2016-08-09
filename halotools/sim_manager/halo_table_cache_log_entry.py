@@ -240,8 +240,8 @@ class HaloTableCacheLogEntry(object):
                     msg = (
                         str(num_failures)+". The hdf5 file has metadata "
                         "``"+key+"`` = "+str(metadata) +
-                        ".\nThis does not match the "
-                        + str(getattr(self, key))+" value in the log entry.\n\n"
+                        ".\nThis does not match the " +
+                        str(getattr(self, key))+" value in the log entry.\n\n"
                         )
                 except KeyError:
 

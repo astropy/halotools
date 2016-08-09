@@ -158,15 +158,15 @@ class TestHodMockFactory(TestCase):
         sats = model.mock.galaxy_table[~cenmask]
 
         sats_outside_boundary_mask = (
-            (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
-            | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
-            | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
+            (sats['x'] < 0) | (sats['x'] > halocat.Lbox) |
+            (sats['y'] < 0) | (sats['y'] > halocat.Lbox) |
+            (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
         assert np.any(sats_outside_boundary_mask == True)
 
         cens_outside_boundary_mask = (
-            (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
-            | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
-            | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
+            (cens['x'] < 0) | (cens['x'] > halocat.Lbox) |
+            (cens['y'] < 0) | (cens['y'] > halocat.Lbox) |
+            (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
         assert np.all(cens_outside_boundary_mask == False)
 
     @pytest.mark.slow
@@ -183,15 +183,15 @@ class TestHodMockFactory(TestCase):
         sats = model.mock.galaxy_table[~cenmask]
 
         sats_outside_boundary_mask = (
-            (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
-            | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
-            | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
+            (sats['x'] < 0) | (sats['x'] > halocat.Lbox) |
+            (sats['y'] < 0) | (sats['y'] > halocat.Lbox) |
+            (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
         assert np.all(sats_outside_boundary_mask == False)
 
         cens_outside_boundary_mask = (
-            (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
-            | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
-            | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
+            (cens['x'] < 0) | (cens['x'] > halocat.Lbox) |
+            (cens['y'] < 0) | (cens['y'] > halocat.Lbox) |
+            (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
         assert np.all(cens_outside_boundary_mask == False)
 
     def test_zero_satellite_edge_case(self):

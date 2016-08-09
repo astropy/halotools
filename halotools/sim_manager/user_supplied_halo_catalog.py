@@ -183,10 +183,8 @@ class UserSuppliedHaloCatalog(object):
 
         halo_table_dict = (
             {key: np.array(kwargs[key]) for key in kwargs
-            if ((type(kwargs[key]) is np.ndarray) | (type(kwargs[key]) is Column))
-            and (custom_len(kwargs[key]) == Nhalos)
-            and (key[:5] == 'halo_')}
-            )
+            if ((type(kwargs[key]) is np.ndarray) | (type(kwargs[key]) is Column)) and
+            (custom_len(kwargs[key]) == Nhalos) and (key[:5] == 'halo_')})
         self._test_halo_table_dict(halo_table_dict)
 
         metadata_dict = (

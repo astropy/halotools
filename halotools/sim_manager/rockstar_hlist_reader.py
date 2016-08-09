@@ -419,8 +419,8 @@ class RockstarHlistReader(TabularAsciiReader):
                     "you can either use the `remove_entry_from_cache_log` method \n"
                     "of the HaloTableCache class, or equivalently, you can \n"
                     "manually delete line #"+str(linenum)+"from the log file. \n"
-                    "The log file is stored in the following location:\n"
-                    + self.halo_table_cache.cache_log_fname+"\n"
+                    "The log file is stored in the following location:\n" +
+                    self.halo_table_cache.cache_log_fname+"\n"
                         )
                 raise HalotoolsError(msg)
         # there are no exact matches, but there may accidentally be nearby redshifts

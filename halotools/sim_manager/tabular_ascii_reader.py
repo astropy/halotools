@@ -234,8 +234,8 @@ class TabularAsciiReader(object):
                 row_cut_max = self.row_cut_max_dict[row_cut_min_key]
                 if row_cut_max <= row_cut_min:
                     msg = ("\nFor the ``"+row_cut_min_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_min_dict`` to "
-                        + str(row_cut_min)+"\nand the value of the input "
+                        "you set the value of the input ``row_cut_min_dict`` to " +
+                        str(row_cut_min)+"\nand the value of the input "
                         "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -247,8 +247,8 @@ class TabularAsciiReader(object):
                 row_cut_min = self.row_cut_min_dict[row_cut_max_key]
                 if row_cut_min >= row_cut_max:
                     msg = ("\nFor the ``"+row_cut_max_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_max_dict`` to "
-                        + str(row_cut_max)+"\nand the value of the input "
+                        "you set the value of the input ``row_cut_max_dict`` to " +
+                        str(row_cut_max)+"\nand the value of the input "
                         "``row_cut_min_dict`` to "+str(row_cut_min)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -266,8 +266,8 @@ class TabularAsciiReader(object):
                 row_cut_neq = self.row_cut_neq_dict[row_cut_eq_key]
                 if row_cut_neq == row_cut_eq:
                     msg = ("\nFor the ``"+row_cut_eq_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_eq_dict`` to "
-                        + str(row_cut_eq)+"\nand the value of the input "
+                        "you set the value of the input ``row_cut_eq_dict`` to " +
+                        str(row_cut_eq)+"\nand the value of the input "
                         "``row_cut_neq_dict`` to "+str(row_cut_neq)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)
@@ -279,8 +279,8 @@ class TabularAsciiReader(object):
                 row_cut_eq = self.row_cut_eq_dict[row_cut_neq_key]
                 if row_cut_eq == row_cut_neq:
                     msg = ("\nFor the ``"+row_cut_neq_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_neq_dict`` to "
-                        + str(row_cut_neq)+"\nand the value of the input "
+                        "you set the value of the input ``row_cut_neq_dict`` to " +
+                        str(row_cut_neq)+"\nand the value of the input "
                         "``row_cut_eq_dict`` to "+str(row_cut_eq)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
                     raise ValueError(msg)

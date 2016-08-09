@@ -379,20 +379,20 @@ class CachedHaloCatalog(object):
             "with the following characteristics:\n\n")
 
         if self._default_simname_choice is True:
-            msg += ("simname = ``" + str(self.simname)
-                + "``  (set by sim_defaults.default_simname)\n")
+            msg += ("simname = ``" + str(self.simname) +
+                "``  (set by sim_defaults.default_simname)\n")
         else:
             msg += "simname = ``" + str(self.simname) + "``\n"
 
         if self._default_ptcl_version_name_choice is True:
-            msg += ("ptcl_version_name = ``" + str(self.ptcl_version_name)
-                + "``  (set by sim_defaults.default_version_name)\n")
+            msg += ("ptcl_version_name = ``" + str(self.ptcl_version_name) +
+                "``  (set by sim_defaults.default_version_name)\n")
         else:
             msg += "ptcl_version_name = ``" + str(self.ptcl_version_name) + "``\n"
 
         if self._default_redshift_choice is True:
-            msg += ("redshift = ``" + str(self.redshift)
-                + "``  (set by sim_defaults.default_redshift)\n")
+            msg += ("redshift = ``" + str(self.redshift) +
+                "``  (set by sim_defaults.default_redshift)\n")
         else:
             msg += "redshift = ``" + str(self.redshift) + "``\n"
 
@@ -462,26 +462,26 @@ class CachedHaloCatalog(object):
             "with the following characteristics:\n\n")
 
         if self._default_simname_choice is True:
-            msg += ("simname = ``" + str(simname)
-                + "``  (set by sim_defaults.default_simname)\n")
+            msg += ("simname = ``" + str(simname) +
+                "``  (set by sim_defaults.default_simname)\n")
         else:
             msg += "simname = ``" + str(simname) + "``\n"
 
         if self._default_halo_finder_choice is True:
-            msg += ("halo_finder = ``" + str(halo_finder)
-                + "``  (set by sim_defaults.default_halo_finder)\n")
+            msg += ("halo_finder = ``" + str(halo_finder) +
+                "``  (set by sim_defaults.default_halo_finder)\n")
         else:
             msg += "halo_finder = ``" + str(halo_finder) + "``\n"
 
         if self._default_version_name_choice is True:
-            msg += ("version_name = ``" + str(version_name)
-                + "``  (set by sim_defaults.default_version_name)\n")
+            msg += ("version_name = ``" + str(version_name) +
+                "``  (set by sim_defaults.default_version_name)\n")
         else:
             msg += "version_name = ``" + str(version_name) + "``\n"
 
         if self._default_redshift_choice is True:
-            msg += ("redshift = ``" + str(redshift)
-                + "``  (set by sim_defaults.default_redshift)\n")
+            msg += ("redshift = ``" + str(redshift) +
+                "``  (set by sim_defaults.default_redshift)\n")
         else:
             msg += "redshift = ``" + str(redshift) + "``\n"
 
@@ -581,8 +581,8 @@ class CachedHaloCatalog(object):
                         assert getattr(self, attr) == getattr(matching_sim, attr)
                     except AssertionError:
                         msg = ("The ``" + attr + "`` metadata of the hdf5 file \n"
-                            "is inconsistent with the corresponding attribute of the \n"
-                            + matching_sim.__class__.__name__ + " class in the "
+                            "is inconsistent with the corresponding attribute of the \n" +
+                            matching_sim.__class__.__name__ + " class in the "
                             "sim_manager.supported_sims module.\n"
                             "Double-check the value of this attribute in the \n"
                             "NbodySimulation sub-class you added to the supported_sims module. \n"

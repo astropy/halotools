@@ -637,8 +637,8 @@ class SubhaloModelFactory(ModelFactory):
                 clname = model.__class__.__name__
                 if hasattr(model, 'redshift'):
                     zs = str(model.redshift)
-                    msg += ("For modelname = ``" + modelname + "``, the "
-                        + clname+" instance has redshift = " + zs + "\n")
+                    msg += ("For modelname = ``" + modelname + "``, the " +
+                        clname+" instance has redshift = " + zs + "\n")
             raise HalotoolsError(msg)
 
     def build_prim_sec_haloprop_list(self):

@@ -135,8 +135,7 @@ class Zheng07Cens(OccupationComponent):
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.param_dict['logMmin'])
-            / self.param_dict['sigma_logM']))
+            (logM - self.param_dict['logMmin']) / self.param_dict['sigma_logM']))
 
         return mean_ncen
 
