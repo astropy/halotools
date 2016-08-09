@@ -36,7 +36,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
             raise ValueError(msg)
         else:
             velocities2 = np.atleast_1d(velocities2)
-        if np.all(sample1==sample2):
+        if np.all(sample1 == sample2):
             _sample1_is_sample2 = True
             msg = ("\n Warning: `sample1` and `sample2` are exactly the same, \n"
                    "only the auto-function will be returned.\n")
@@ -90,7 +90,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
     num_threads = get_num_threads(num_threads)
 
     return sample1, velocities1, sample2, velocities2, period, do_auto,\
-           do_cross, num_threads, _sample1_is_sample2, PBCs
+        do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
 def _process_radial_bins(rbins, period, PBCs):
@@ -98,7 +98,7 @@ def _process_radial_bins(rbins, period, PBCs):
     process radial bin parameter
     """
 
-    #check the radial bins parameter
+    # check the radial bins parameter
     rbins = np.atleast_1d(rbins)
     rmax = np.max(rbins)
     try:
@@ -111,7 +111,7 @@ def _process_radial_bins(rbins, period, PBCs):
                "1-D array with at least two entries.")
         raise ValueError(msg)
 
-    #check for input parameter consistency
+    # check for input parameter consistency
     if PBCs:
         if (rmax >= np.min(period)/3.0):
             msg = ("\n The maximum length over which you search for pairs \n"
@@ -128,7 +128,7 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     process projected radial bin and pi_max parameters
     """
 
-    #process projected radial bins
+    # process projected radial bins
     rp_bins = np.atleast_1d(rp_bins)
     rp_max = np.max(rp_bins)
     try:

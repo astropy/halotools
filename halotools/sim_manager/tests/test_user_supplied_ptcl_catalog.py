@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function)
+"""
+"""
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 import os
@@ -26,7 +27,7 @@ from ..ptcl_table_cache import PtclTableCache
 
 from ...custom_exceptions import HalotoolsError
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files

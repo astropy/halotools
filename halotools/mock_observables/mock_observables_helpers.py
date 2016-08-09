@@ -64,7 +64,7 @@ def get_num_threads(input_num_threads, enforce_max_cores=False):
     In this event,  ``enforce_max_cores`` is set to True,
     then ``num_threads`` is automatically set to num_cores.
     """
-    if input_num_threads=='max':
+    if input_num_threads == 'max':
         num_threads = num_available_cores
     else:
         try:

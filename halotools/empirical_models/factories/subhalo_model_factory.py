@@ -275,9 +275,9 @@ class SubhaloModelFactory(ModelFactory):
             input_model_dictionary = copy(kwargs)
             del input_model_dictionary['baseline_model_instance']
 
-            ### First parse the supplementary keyword arguments,
+            # First parse the supplementary keyword arguments,
             # such as 'model_feature_calling_sequence',
-            ### from the keywords that are bound to component model instances
+            # from the keywords that are bound to component model instances
             possible_supplementary_kwargs = ('galaxy_selection_func',
                 'halo_selection_func', 'model_feature_calling_sequence')
             supplementary_kwargs = {}
@@ -298,9 +298,9 @@ class SubhaloModelFactory(ModelFactory):
         else:
             input_model_dictionary = copy(kwargs)
 
-            ### First parse the supplementary keyword arguments,
+            # First parse the supplementary keyword arguments,
             # such as 'model_feature_calling_sequence',
-            ### from the keywords that are bound to component model instances,
+            # from the keywords that are bound to component model instances,
             # such as 'stellar_mass'
 
             possible_supplementary_kwargs = ('galaxy_selection_func',
@@ -365,8 +365,8 @@ class SubhaloModelFactory(ModelFactory):
         :ref:`model_feature_calling_sequence_mechanism`
         """
         ########################
-        ### Require that all elements of the input model_feature_calling_sequence
-        ### were also keyword arguments to the __init__ constructor
+        # Require that all elements of the input model_feature_calling_sequence
+        # were also keyword arguments to the __init__ constructor
         try:
             model_feature_calling_sequence = list(supplementary_kwargs['model_feature_calling_sequence'])
             for model_feature in model_feature_calling_sequence:
@@ -398,8 +398,8 @@ class SubhaloModelFactory(ModelFactory):
                 model_feature_calling_sequence = list(self._input_model_dictionary.keys())
 
         ########################
-        ### Now conversely require that all remaining __init__ constructor keyword arguments
-        ### appear in the model_feature_calling_sequence
+        # Now conversely require that all remaining __init__ constructor keyword arguments
+        # appear in the model_feature_calling_sequence
         for constructor_kwarg in self._input_model_dictionary:
             try:
                 assert constructor_kwarg in model_feature_calling_sequence
@@ -637,8 +637,8 @@ class SubhaloModelFactory(ModelFactory):
                 clname = model.__class__.__name__
                 if hasattr(model, 'redshift'):
                     zs = str(model.redshift)
-                    msg += ("For modelname = ``" + modelname + "``, the "
-                        +clname+" instance has redshift = " + zs + "\n")
+                    msg += ("For modelname = ``" + modelname + "``, the " +
+                        clname+" instance has redshift = " + zs + "\n")
             raise HalotoolsError(msg)
 
     def build_prim_sec_haloprop_list(self):

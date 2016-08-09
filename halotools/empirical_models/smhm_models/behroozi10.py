@@ -121,17 +121,16 @@ class Behroozi10SmHm(PrimGalpropModel):
         # the same as in Table 2, even though the mean_log_halo_mass and
         # mean_stellar_mass methods use accept and return arguments in h=1 units.
 
-        d = {
-        'smhm_m0_0': 10.72,
-        'smhm_m0_a': 0.59,
-        'smhm_m1_0': 12.35,
-        'smhm_m1_a': 0.3,
-        'smhm_beta_0': 0.43,
-        'smhm_beta_a': 0.18,
-        'smhm_delta_0': 0.56,
-        'smhm_delta_a': 0.18,
-        'smhm_gamma_0': 1.54,
-        'smhm_gamma_a': 2.52}
+        d = ({'smhm_m0_0': 10.72,
+            'smhm_m0_a': 0.59,
+            'smhm_m1_0': 12.35,
+            'smhm_m1_a': 0.3,
+            'smhm_beta_0': 0.43,
+            'smhm_beta_a': 0.18,
+            'smhm_delta_0': 0.56,
+            'smhm_delta_a': 0.18,
+            'smhm_gamma_0': 1.54,
+            'smhm_gamma_a': 2.52})
 
         return d
 

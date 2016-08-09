@@ -221,13 +221,13 @@ def test_npairs_brute_force_periodic():
     result = npairs_3d(random_sample, random_sample, rbins, period=period)
 
     msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(len(rbins),), msg
+    assert np.shape(result) == (len(rbins),), msg
 
     test_result = pure_python_brute_force_npairs_3d(
         random_sample, random_sample, rbins, period=period)
 
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
-    assert np.all(test_result==result), msg
+    assert np.all(test_result == result), msg
 
 
 def test_npairs_brute_force_nonperiodic():
@@ -243,13 +243,13 @@ def test_npairs_brute_force_nonperiodic():
     result = npairs_3d(random_sample, random_sample, rbins, period=None)
 
     msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(len(rbins),), msg
+    assert np.shape(result) == (len(rbins),), msg
 
     test_result = pure_python_brute_force_npairs_3d(
         random_sample, random_sample, rbins, period=None)
 
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
-    assert np.all(test_result==result), msg
+    assert np.all(test_result == result), msg
 
 
 def test_sensible_num_threads():

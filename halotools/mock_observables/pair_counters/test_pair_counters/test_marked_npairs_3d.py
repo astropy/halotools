@@ -25,7 +25,7 @@ fixed_seed = 43
 
 def retrieve_mock_data(Npts, Npts2, Lbox):
 
-    #set up a regular grid of points to test pair counters
+    # set up a regular grid of points to test pair counters
     epsilon = 0.001
     gridx = np.linspace(0, Lbox-epsilon, Npts2)
     gridy = np.linspace(0, Lbox-epsilon, Npts2)

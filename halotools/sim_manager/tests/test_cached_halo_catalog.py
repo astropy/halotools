@@ -27,7 +27,7 @@ from ..download_manager import DownloadManager
 
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files
@@ -114,8 +114,8 @@ class TestCachedHaloCatalog(TestCase):
                 try:
                     assert type(hf.attrs['redshift']) == type(pf.attrs['redshift'])
                 except AssertionError:
-                    msg = ("Type error for the redshift attribute of the ``"+hf.attrs['simname']
-                        +"`` simulation.\n")
+                    msg = ("Type error for the redshift attribute of the ``" +
+                        hf.attrs['simname'] + "`` simulation.\n")
                     msg += type_mismatch_msg
                     raise HalotoolsError(msg)
 
@@ -330,7 +330,7 @@ class TestCachedHaloCatalog(TestCase):
         cache = HaloTableCache()
 
         ######################################################
-        ### Make sure the file does not already exist on disk or in cache
+        # Make sure the file does not already exist on disk or in cache
         tmp_fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.07835.list.halotools_alpha_version2.hdf5'
 
         if os.path.isfile(tmp_fname):
@@ -349,7 +349,7 @@ class TestCachedHaloCatalog(TestCase):
             assert matching_log_entry not in cache.log
 
         ######################################################
-        ## Enforce it does not exist on disk or in the log
+        # Enforce it does not exist on disk or in the log
         assert not os.path.isfile(tmp_fname)
 
         with pytest.raises(InvalidCacheLogEntry) as err:
@@ -359,7 +359,7 @@ class TestCachedHaloCatalog(TestCase):
                 redshift=11.7632)
 
         #####################################################
-        ## Now download the file and store it in cache
+        # Now download the file and store it in cache
 
         dman.download_processed_halo_table(simname='bolshoi',
             halo_finder='rockstar',
@@ -367,7 +367,7 @@ class TestCachedHaloCatalog(TestCase):
             redshift=11.7632, overwrite=True)
 
         ######################################################
-        ## Enforce that the file is on disk, in cache, and loads
+        # Enforce that the file is on disk, in cache, and loads
         assert os.path.isfile(tmp_fname)
 
         entry = cache.determine_log_entry_from_fname(tmp_fname)
@@ -380,7 +380,7 @@ class TestCachedHaloCatalog(TestCase):
             version_name='halotools_alpha_version2', redshift=11.7632)
 
         #####################################################
-        ## Now move the file to a new location
+        # Now move the file to a new location
         new_fname = os.path.join(self.dummy_cache_baseloc, os.path.basename(tmp_fname))
         assert not os.path.isfile(new_fname)
         os.system('cp ' + tmp_fname + ' ' + new_fname)
@@ -389,7 +389,7 @@ class TestCachedHaloCatalog(TestCase):
         assert os.path.isfile(new_fname)
 
         ######################################################
-        ## Verify that we can no longer load the catalog from metadata
+        # Verify that we can no longer load the catalog from metadata
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname='bolshoi',
                 halo_finder='rockstar',
@@ -399,7 +399,7 @@ class TestCachedHaloCatalog(TestCase):
         assert tmp_fname in err.value.args[0]
 
         ######################################################
-        ## Update the cache location using the CachedHaloCatalog
+        # Update the cache location using the CachedHaloCatalog
 
         del halocat
         halocat = CachedHaloCatalog(fname=new_fname, update_cached_fname=True)
@@ -408,7 +408,7 @@ class TestCachedHaloCatalog(TestCase):
         ######################################################
 
         ######################################################
-        ## Verify that we can load the catalog from metadata again
+        # Verify that we can load the catalog from metadata again
         halocat = CachedHaloCatalog(simname='bolshoi',
             halo_finder='rockstar',
             version_name='halotools_alpha_version2', redshift=11.7632)

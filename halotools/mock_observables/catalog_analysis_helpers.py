@@ -268,7 +268,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     >>> labels, N_sub_vol = cuboid_subvolume_labels(sample, Nsub, Lbox)
     """
 
-    #process inputs and check for consistency
+    # process inputs and check for consistency
     sample = np.atleast_1d(sample).astype('f8')
     try:
         assert sample.ndim == 2
@@ -296,9 +296,9 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     # create an array of unique integer IDs for each subvolume
     inds = np.arange(1, N_sub_vol+1).reshape(Nsub[0], Nsub[1], Nsub[2])
 
-    #tag each particle with an integer indicating which subvolume it is in
+    # tag each particle with an integer indicating which subvolume it is in
     index = np.floor(sample/dL).astype(int)
-    #take care of the case where a point falls on the boundary
+    # take care of the case where a point falls on the boundary
     for i in range(3):
         index[:, i] = np.where(index[:, i] == Nsub[i], Nsub[i] - 1, index[:, i])
     index = inds[index[:, 0], index[:, 1], index[:, 2]].astype(int)

@@ -8,7 +8,7 @@ from astropy.utils.misc import NumpyRNGContext
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('custom_len', 'find_idx_nearest_val', 'randomly_downsample_data',
-            'array_is_monotonic', 'unsorting_indices')
+           'array_is_monotonic', 'unsorting_indices')
 
 
 def custom_len(x):

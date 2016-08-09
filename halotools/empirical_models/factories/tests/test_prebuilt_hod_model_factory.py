@@ -1,17 +1,16 @@
-#!/usr/bin/env python
+"""
+"""
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 from astropy.tests.helper import pytest
 
 import numpy as np
-from copy import copy
 
 from ...factories import PrebuiltHodModelFactory
 
 
 from ....sim_manager import FakeSim
-from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestPrebuiltHodModelFactory']
 
@@ -37,7 +36,3 @@ class TestPrebuiltHodModelFactory(TestCase):
             num_iterations=1, simname='fake', summary_statistic='mean',
             gal_type='centrals', include_crosscorr=True, rbins=np.array((0.1, 0.2, 0.3)),
             redshift=0, halo_finder='rockstar')
-
-
-
-

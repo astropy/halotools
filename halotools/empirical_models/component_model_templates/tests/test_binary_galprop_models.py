@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+"""
+"""
 import numpy as np
 
 from astropy.tests.helper import pytest

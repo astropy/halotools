@@ -9,4 +9,3 @@ from .marked_cylindrical_isolation_engine import marked_cylindrical_isolation_en
 
 __all__ = ('spherical_isolation_engine', 'cylindrical_isolation_engine',
     'marked_spherical_isolation_engine', 'marked_cylindrical_isolation_engine')
-

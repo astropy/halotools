@@ -134,10 +134,10 @@ class LogNormalScatterModel(object):
 
         scatter_scale = self.mean_scatter(**kwargs)
 
-        #initialize result with zero scatter result
+        # initialize result with zero scatter result
         result = np.zeros(len(scatter_scale))
 
-        #only draw from a normal distribution for non-zero values of scatter
+        # only draw from a normal distribution for non-zero values of scatter
         mask = (scatter_scale > 0.0)
         with NumpyRNGContext(seed):
             result[mask] = np.random.normal(loc=0, scale=scatter_scale[mask])
@@ -163,7 +163,7 @@ class LogNormalScatterModel(object):
     def _initialize_param_dict(self):
         """ Private method used to initialize ``self.param_dict``.
         """
-        self.param_dict={}
+        self.param_dict = {}
         for ipar, val in enumerate(self.ordinates):
             key = self._get_param_key(ipar)
             self.param_dict[key] = val

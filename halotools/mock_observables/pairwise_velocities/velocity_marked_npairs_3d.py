@@ -124,7 +124,7 @@ def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         _velocity_marked_npairs_3d_process_weights(sample1, sample2,
             weights1, weights2, weight_func_id))
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
@@ -170,7 +170,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     correct_shape1 = (npts_sample1, correct_num_weights)
     correct_shape2 = (npts_sample2, correct_num_weights)
 
-    ### Process the input weights1
+    # Process the input weights1
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
     if weights1 is None:
@@ -194,7 +194,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     npts_weights1 = np.shape(weights1)[0]
     num_weights1 = np.shape(weights1)[1]
     # At this point, weights1 is guaranteed to be a 2-d ndarray
-    ### now we check its shape
+    # now we check its shape
     if np.shape(weights1) != correct_shape1:
         if _converted_to_2d_from_1d is True:
             msg = ("\n You passed in a 1-D array for `weights1` that \n"
@@ -211,7 +211,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
             raise ValueError(msg %
                 (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
 
-    ### Process the input weights2
+    # Process the input weights2
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
     if weights2 is None:
@@ -235,7 +235,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     npts_weights2 = np.shape(weights2)[0]
     num_weights2 = np.shape(weights2)[1]
     # At this point, weights2 is guaranteed to be a 2-d ndarray
-    ### now we check its shape
+    # now we check its shape
     if np.shape(weights2) != correct_shape2:
         if _converted_to_2d_from_1d is True:
             msg = ("\n You passed in a 1-D array for `weights2` that \n"

@@ -134,7 +134,7 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         _velocity_marked_npairs_3d_process_weights(sample1, sample2,
             weights1, weights2, weight_func_id))
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

@@ -148,7 +148,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     rp_bins, pi_max = _process_rp_bins(rp_bins, pi_max, period, PBCs)
     pi_bins = np.array([0.0, pi_max])
 
-    #create marks for the marked pair counter.
+    # create marks for the marked pair counter.
     marks1 = np.vstack((sample1.T, velocities1.T)).T
     marks2 = np.vstack((sample2.T, velocities2.T)).T
 
@@ -172,10 +172,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
             N1N1 = np.diff(N1N1, axis=1)[:, 0]
             N1N1 = np.diff(N1N1)
         else:
-            D1D1=None
-            D2D2=None
-            N1N1=None
-            N2N2=None
+            D1D1 = None
+            D2D2 = None
+            N1N1 = None
+            N2N2 = None
 
         if _sample1_is_sample2:
             D1D2 = D1D1
@@ -196,8 +196,8 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                 N1N2 = np.diff(N1N2, axis=1)[:, 0]
                 N1N2 = np.diff(N1N2)
             else:
-                D1D2=None
-                N1N2=None
+                D1D2 = None
+                N1N2 = None
             if do_auto is True:
                 D2D2, dummy, N2N2 = velocity_marked_npairs_xy_z(
                     sample2, sample2, rp_bins, pi_bins,
@@ -210,12 +210,12 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                 N2N2 = np.diff(N2N2, axis=1)[:, 0]
                 N2N2 = np.diff(N2N2)
             else:
-                D2D2=None
-                N2N2=None
+                D2D2 = None
+                N2N2 = None
 
         return D1D1, D1D2, D2D2, N1N1, N1N2, N2N2
 
-    #count the sum of radial velocities and number of pairs
+    # count the sum of radial velocities and number of pairs
     weight_func_id = 13
     V1V1, V1V2, V2V2, N1N1, N1N2, N2N2 =\
         marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period,
@@ -223,7 +223,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
             marks1, marks2, weight_func_id, _sample1_is_sample2,
             approx_cell1_size, approx_cell2_size)
 
-    #return results: the sum of radial velocities divided by the number of pairs
+    # return results: the sum of radial velocities divided by the number of pairs
     if _sample1_is_sample2:
         M_11 = V1V1/N1N1
         return np.where(np.isfinite(M_11), M_11, 0.)

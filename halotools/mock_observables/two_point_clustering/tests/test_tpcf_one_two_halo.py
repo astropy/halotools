@@ -13,7 +13,7 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['test_tpcf_one_two_halo_auto_periodic', 'test_tpcf_one_two_halo_cross_periodic']
 
-#create toy data to test functions
+# create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rbins = np.linspace(0.001, 0.3, 5)
 rmax = rbins.max()
@@ -35,7 +35,7 @@ def test_tpcf_one_two_halo_auto_periodic():
       randoms=None, period=period,
       max_sample_size=int(1e4), estimator='Natural')
 
-    assert len(result)==2, "wrong number of correlation functions returned."
+    assert len(result) == 2, "wrong number of correlation functions returned."
 
 
 @pytest.mark.slow
@@ -57,7 +57,7 @@ def test_tpcf_one_two_halo_cross_periodic():
       approx_cell2_size=[rmax, rmax, rmax],
       approx_cellran_size=[rmax, rmax, rmax])
 
-    assert len(result)==6, "wrong number of correlation functions returned."
+    assert len(result) == 6, "wrong number of correlation functions returned."
 
 
 @pytest.mark.slow
@@ -75,7 +75,7 @@ def test_tpcf_one_two_halo_auto_nonperiodic():
         randoms=randoms, period=period,
         max_sample_size=int(1e4), estimator='Natural')
 
-    assert len(result)==2, "wrong number of correlation functions returned."
+    assert len(result) == 2, "wrong number of correlation functions returned."
 
 
 @pytest.mark.slow
@@ -98,7 +98,7 @@ def test_tpcf_one_two_halo_cross_nonperiodic():
       approx_cell2_size=[rmax, rmax, rmax],
       approx_cellran_size=[rmax, rmax, rmax])
 
-    assert len(result)==6, "wrong number of correlation functions returned."
+    assert len(result) == 6, "wrong number of correlation functions returned."
 
 
 def test_tpcf_decomposition_process_args1():
@@ -187,22 +187,22 @@ def test_tpcf_decomposition_cross_consistency():
 
     result_a = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=True, do_cross=True)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=True, do_cross=True)
     result_1h_12a, result_2h_12a = result_a[2:4]
 
     result_b = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=False, do_cross=True)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=False, do_cross=True)
     result_1h_12b, result_2h_12b = result_b[0:2]
 
     assert np.allclose(result_1h_12a, result_1h_12b)
@@ -219,23 +219,23 @@ def test_tpcf_decomposition_auto_consistency():
 
     result_a = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=True, do_cross=True)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=True, do_cross=True)
     result_1h_11a, result_2h_11a = result_a[0:2]
     result_1h_22a, result_2h_22a = result_a[4:6]
 
     result_1h_11b, result_2h_11b, result_1h_22b, result_2h_22b = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=True, do_cross=False)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=True, do_cross=False)
 
     assert np.allclose(result_1h_11a, result_1h_11b)
     assert np.allclose(result_2h_11a, result_2h_11b)

@@ -77,7 +77,3 @@ def test_func_signature_int_from_cond_func1():
         __ = _func_signature_int_from_cond_func(-1)
     substr = "must be one of the integer values"
     assert substr in err.value.args[0]
-
-
-
-

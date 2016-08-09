@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+"""
+"""
 import numpy as np
 from astropy.table import Table
 from copy import copy, deepcopy
@@ -69,7 +70,7 @@ class TestZheng07Cens(TestCase):
 
     def test_mean_ncen_scaling1(self):
 
-        ### Now make sure the value of <Ncen> scales reasonably with the parameters
+        # Now make sure the value of <Ncen> scales reasonably with the parameters
 
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
         occ2_lowmass = self.model2.mean_occupation(prim_haloprop=self.lowmass)
@@ -87,7 +88,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation1(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
 
@@ -99,7 +100,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation2(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
 
@@ -111,7 +112,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation3(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
 
@@ -123,7 +124,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation4(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
 
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
@@ -150,7 +151,7 @@ class TestZheng07Cens(TestCase):
         mean_occ = model.mean_occupation(prim_haloprop=mvir_array)
 
         # Check that the range is in [0,1]
-        assert np.all(mean_occ<= 1)
+        assert np.all(mean_occ <= 1)
         assert np.all(mean_occ >= 0)
 
         # The mean occupation should be monotonically increasing
@@ -158,7 +159,7 @@ class TestZheng07Cens(TestCase):
 
     def enforce_mc_occupation_behavior(self, model):
 
-        ### Check the Monte Carlo realization method
+        # Check the Monte Carlo realization method
         assert hasattr(model, 'mc_occupation')
 
         # First check that the mean occuation is ~0.5 when model is evaulated at Mmin
@@ -262,7 +263,7 @@ class TestZheng07Sats(TestCase):
 
     def test_default_model(self):
 
-        ### First test the model with all default settings
+        # First test the model with all default settings
 
         self.enforce_required_attributes(self.default_model)
         self.enforce_mean_occupation_behavior(self.default_model)
@@ -297,7 +298,7 @@ class TestZheng07Sats(TestCase):
 
     def enforce_mc_occupation_behavior(self, model):
 
-        ### Check the Monte Carlo realization method
+        # Check the Monte Carlo realization method
         assert hasattr(model, 'mc_occupation')
 
         model.param_dict['alpha'] = 1
@@ -418,7 +419,7 @@ class TestZheng07Sats(TestCase):
         midmass = 1e12
         assert (self.model3.mean_occupation(prim_haloprop=midmass) <
             self.default_model.mean_occupation(prim_haloprop=midmass)
-            )
+                )
 
     def test_logM0_scaling3_mean_occupation(self):
 

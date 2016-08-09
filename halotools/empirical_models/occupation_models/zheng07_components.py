@@ -135,8 +135,7 @@ class Zheng07Cens(OccupationComponent):
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.param_dict['logMmin'])
-            /self.param_dict['sigma_logM']))
+            (logM - self.param_dict['logMmin']) / self.param_dict['sigma_logM']))
 
         return mean_ncen
 
@@ -172,15 +171,15 @@ class Zheng07Cens(OccupationComponent):
         """
 
         def get_zheng07_params(threshold):
-            #Load tabulated data from Zheng et al. 2007, Table 1
+            # Load tabulated data from Zheng et al. 2007, Table 1
             logMmin_array = [11.35, 11.46, 11.6, 11.75, 12.02, 12.3, 12.79, 13.38, 14.22]
             sigma_logM_array = [0.25, 0.24, 0.26, 0.28, 0.26, 0.21, 0.39, 0.51, 0.77]
             # define the luminosity thresholds corresponding to the above data
             threshold_array = np.arange(-22, -17.5, 0.5)
             threshold_array = threshold_array[::-1]
 
-            threshold_index = np.where(threshold_array==threshold)[0]
-            if len(threshold_index)==0:
+            threshold_index = np.where(threshold_array == threshold)[0]
+            if len(threshold_index) == 0:
                 msg = ("\nInput luminosity threshold "
                     "does not match any of the Table 1 values \nof "
                     "Zheng et al. 2007 (arXiv:0703457).\n"
@@ -190,7 +189,7 @@ class Zheng07Cens(OccupationComponent):
                     "You can always manually change the values in ``param_dict``.\n")
                 warnings.warn(msg)
                 threshold = model_defaults.default_luminosity_threshold
-                threshold_index = np.where(threshold_array==threshold)[0]
+                threshold_index = np.where(threshold_array == threshold)[0]
 
             param_dict = (
                 {'logMmin': logMmin_array[threshold_index[0]],
@@ -458,7 +457,7 @@ class Zheng07Sats(OccupationComponent):
         """
 
         def get_zheng07_params(threshold):
-            #Load tabulated data from Zheng et al. 2007, Table 1
+            # Load tabulated data from Zheng et al. 2007, Table 1
             logM0_array = [11.2, 10.59, 11.49, 11.69, 11.38, 11.84, 11.92, 13.94, 14.0]
             logM1_array = [12.4, 12.68, 12.83, 13.01, 13.31, 13.58, 13.94, 13.91, 14.69]
             alpha_array = [0.83, 0.97, 1.02, 1.06, 1.06, 1.12, 1.15, 1.04, 0.87]
@@ -466,9 +465,9 @@ class Zheng07Sats(OccupationComponent):
             threshold_array = np.arange(-22, -17.5, 0.5)
             threshold_array = threshold_array[::-1]
 
-            threshold_index = np.where(threshold_array==threshold)[0]
+            threshold_index = np.where(threshold_array == threshold)[0]
 
-            if len(threshold_index)==0:
+            if len(threshold_index) == 0:
                 msg = ("\nInput luminosity threshold "
                     "does not match any of the Table 1 values \nof "
                     "Zheng et al. 2007 (arXiv:0703457).\n"
@@ -478,7 +477,7 @@ class Zheng07Sats(OccupationComponent):
                     "You can always manually change the values in ``param_dict``.\n")
                 warnings.warn(msg)
                 threshold = model_defaults.default_luminosity_threshold
-                threshold_index = np.where(threshold_array==threshold)[0]
+                threshold_index = np.where(threshold_array == threshold)[0]
                 warnings.warn(msg)
 
             param_dict = (

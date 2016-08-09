@@ -24,7 +24,7 @@ except ImportError:
     HAS_H5PY = False
 
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files
@@ -292,7 +292,7 @@ class TestRockstarHlistReader(TestCase):
             'halo_x': (3, 'f4'),
             'halo_y': (4, 'f4'),
             'halo_z': (5, 'f4'),
-            })
+             })
 
         reader = RockstarHlistReader(
             input_fname=temp_fname,

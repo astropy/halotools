@@ -7,15 +7,14 @@ from scipy.sparse import coo_matrix
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
+from ..fof_groups import FoFGroups
+
 igraph_available = True
 try:
     import igraph
 except ImportError:
     igraph_available = False
     print("igraph package not installed.  Some functions will not be available.")
-
-from ..fof_groups import FoFGroups
-
 
 __all__ = ['test_fof_groups_init', 'test_fof_group_IDs',
            'test_igraph_functionality']
@@ -53,12 +52,12 @@ def test_fof_group_IDs():
     fof_group = FoFGroups(sample, b_perp, b_para, Lbox=Lbox, period=period)
 
     group_IDs = fof_group.group_ids
-    assert len(group_IDs)==N, "number of labels returned is incorrect"
+    assert len(group_IDs) == N, "number of labels returned is incorrect"
 
     groups = np.unique(group_IDs)
     N_groups = len(groups)
 
-    assert N_groups==fof_group.n_groups, "number of groups is incorrect"
+    assert N_groups == fof_group.n_groups, "number of groups is incorrect"
 
 
 @pytest.mark.slow
@@ -84,11 +83,12 @@ def test_igraph_functionality():
         assert len(multiplicity) == N
 
         edges = fof_group.get_edges()
-        #the number of edges is half the sum of vertex degrees of the graph
-        assert len(edges)==np.sum(fof_group.degree)/2
+        # the number of edges is half the sum of vertex degrees of the graph
+        assert len(edges) == np.sum(fof_group.degree)/2
 
         lens = fof_group.get_edge_lengths()
-        assert len(lens)==len(edges)
-        assert np.all(np.sort(lens)==np.sort(fof_group.m.data))
+        assert len(lens) == len(edges)
+        assert np.all(np.sort(lens) == np.sort(fof_group.m.data))
 
-    else: pass
+    else:
+        pass

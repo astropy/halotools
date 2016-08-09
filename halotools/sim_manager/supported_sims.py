@@ -13,7 +13,7 @@ __all__ = ('NbodySimulation',
            'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo')
 
 ######################################################
-########## Simulation classes defined below ##########
+# Simulation classes defined below
 ######################################################
 
 

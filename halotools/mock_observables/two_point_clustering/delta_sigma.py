@@ -209,32 +209,32 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     """
 
-    #process the input parameters
+    # process the input parameters
     args = (galaxies, particles, rp_bins, period, estimator, num_threads)
     result = _delta_sigma_process_args(*args)
     galaxies, particles, rp_bins, period, estimator, num_threads, PBCs = result
 
-    #determine radial bins to calculate tpcf in
+    # determine radial bins to calculate tpcf in
     rp_max = np.max(rp_bins)
     rp_min = np.min(rp_bins)
-    #maximum radial distance to calculate TPCF out to:
+    # maximum radial distance to calculate TPCF out to:
     rmax = np.sqrt(rp_max**2 + pi_max**2)
 
-    #define radial bins using either log or linear spacing
+    # define radial bins using either log or linear spacing
     if log_bins is True:
         rbins = np.logspace(np.log10(rp_min), np.log10(rmax), n_bins)
     else:
         rbins = np.linspace(rp_min, rmax, n_bins)
 
-    #calculate the cross-correlation between galaxies and particles
+    # calculate the cross-correlation between galaxies and particles
     xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,
         do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads,
         approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell2_size)
 
-    #Check to see if xi ever is equal to -1
-    #if so, there are radial bins with 0 matter particles.
-    #This could mean that the user has under-sampled the particles.
-    if np.any(xi==-1.0):
+    # Check to see if xi ever is equal to -1
+    # if so, there are radial bins with 0 matter particles.
+    # This could mean that the user has under-sampled the particles.
+    if np.any(xi == -1.0):
         msg = ("\n"
                "Some radial bins contain 0 particles in the \n"
                "galaxy-matter cross cross correlation calculation. \n"

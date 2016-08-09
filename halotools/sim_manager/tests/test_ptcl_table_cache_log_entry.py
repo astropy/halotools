@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function)
+"""
+"""
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 from astropy.tests.helper import pytest
@@ -19,7 +20,7 @@ from astropy.config.paths import _find_home
 from . import helper_functions
 from ..ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files
@@ -69,7 +70,7 @@ class TestPtclTableCacheLogEntry(TestCase):
             'vx': [1, 2, 3],
             'vy': [1, 2, 3],
             'vz': [1, 2, 3],
-            })
+             })
 
     def get_scenario_kwargs(self, num_scenario):
         return ({'simname': self.simnames[num_scenario],

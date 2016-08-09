@@ -47,4 +47,3 @@ def pure_python_npairs_per_object_3d(sample1, sample2, rbins, period=None):
                     counts[i, irbin] += 1
 
     return counts
-

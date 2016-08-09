@@ -13,6 +13,7 @@ __all__ = ('test_mean_los_velocity_vs_rp_auto_consistency', )
 
 fixed_seed = 43
 
+
 @pytest.mark.slow
 def test_mean_los_velocity_vs_rp_auto_consistency():
 

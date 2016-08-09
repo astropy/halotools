@@ -12,7 +12,7 @@ from ... import model_defaults
 
 from ....sim_manager import FakeSim
 
-__all__=['test_nonzero_scatter', 'test_zero_scatter']
+__all__ = ['test_nonzero_scatter', 'test_zero_scatter']
 
 
 def test_nonzero_scatter():
@@ -24,7 +24,7 @@ def test_nonzero_scatter():
 
     scatter = scatter_model.scatter_realization(table=halo_table)
 
-    assert len(scatter)==len(halo_table)
+    assert len(scatter) == len(halo_table)
 
 
 def test_zero_scatter():
@@ -36,8 +36,8 @@ def test_zero_scatter():
 
     scatter = scatter_model.scatter_realization(table=halo_table)
 
-    assert len(scatter)==len(halo_table)
-    assert np.all(scatter==0.0)
+    assert len(scatter) == len(halo_table)
+    assert np.all(scatter == 0.0)
 
 
 def test_LogNormalScatterModel_initialization():

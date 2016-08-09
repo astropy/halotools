@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 Module containing some commonly used composite HOD models.
-
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ... import factories
 from ...occupation_models import leauthaud11_components
@@ -96,7 +92,7 @@ def hearin15_model_dictionary(central_assembias_strength=1,
 
     """
     ##############################
-    ### Build the occupation model
+    # Build the occupation model
     if central_assembias_strength == 0:
         centrals_occupation = leauthaud11_components.Leauthaud11Cens(**kwargs)
     else:
@@ -109,7 +105,7 @@ def hearin15_model_dictionary(central_assembias_strength=1,
     centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ##############################
-    ### Build the occupation model
+    # Build the occupation model
 
     if satellite_assembias_strength == 0:
         satellites_occupation = leauthaud11_components.Leauthaud11Sats(**kwargs)

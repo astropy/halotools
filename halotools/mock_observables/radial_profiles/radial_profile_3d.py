@@ -218,7 +218,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     search_ylength = max_rbins_absolute
     search_zlength = max_rbins_absolute
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

@@ -237,19 +237,19 @@ class DownloadManager(object):
             redshift=closest_redshift, dz_tol=dz_tol)
         close_matches = list(close_match_generator)
 
-        if ((len(close_matches) > 0)
-            & (len(exact_matches) == 0)
-            & (ignore_nearby_redshifts is False)):
+        if ((len(close_matches) > 0) &
+            (len(exact_matches) == 0) &
+                (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
             msg += str(entry.fname) + "\n\n"
             msg += ("This log entry has exactly matching metadata "
-                "and a redshift within the input ``dz_tol`` = " + str(dz_tol)
-                +"\n of the redshift of the most closely matching catalog on the web.\n"
+                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) +
+                "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
-                )
+                    )
             raise HalotoolsError(msg)
 
         # At this point there are no conflicts with the existing log
@@ -300,7 +300,7 @@ class DownloadManager(object):
         if new_log_entry.safe_for_cache is False:
             msg = ("\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
-                "and contact the Halotools developers.\n"+ output_fname)
+                "and contact the Halotools developers.\n" + output_fname)
             raise HalotoolsError(msg)
 
         self.halo_table_cache.add_entry_to_cache_log(new_log_entry)
@@ -319,8 +319,8 @@ class DownloadManager(object):
                 "to the following location:\n" + str(output_fname) + "\n\n"
                 "This filename and its associated metadata have also been "
                 "added to the Halotools cache log, \n"
-                "as reflected by a newly added line to the following ASCII file:\n\n"
-                + str(self.halo_table_cache.cache_log_fname) + "\n\n"
+                "as reflected by a newly added line to the following ASCII file:\n\n" +
+                str(self.halo_table_cache.cache_log_fname) + "\n\n"
                 "Since the catalog will now be recognized in cache, \n"
                 "you can load it into memory using the following syntax:\n\n"
                 ">>> from halotools.sim_manager import CachedHaloCatalog \n"
@@ -517,19 +517,19 @@ class DownloadManager(object):
             redshift=closest_redshift, dz_tol=dz_tol)
         close_matches = list(close_match_generator)
 
-        if ((len(close_matches) > 0)
-            & (len(exact_matches) == 0)
-            & (ignore_nearby_redshifts is False)):
+        if ((len(close_matches) > 0) &
+            (len(exact_matches) == 0) &
+                (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
             msg += str(entry.fname) + "\n\n"
             msg += ("This log entry has exactly matching metadata "
-                "and a redshift within the input ``dz_tol`` = " + str(dz_tol)
-                +"\n of the redshift of the most closely matching catalog on the web.\n"
+                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) +
+                "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
-                )
+                    )
             raise HalotoolsError(msg)
 
         # At this point there are no conflicts with the existing log
@@ -574,7 +574,7 @@ class DownloadManager(object):
         if new_log_entry.safe_for_cache is False:
             msg = ("\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
-                "and contact the Halotools developers.\n"+ output_fname)
+                "and contact the Halotools developers.\n" + output_fname)
             raise HalotoolsError(msg)
 
         self.ptcl_table_cache.add_entry_to_cache_log(new_log_entry)
@@ -592,8 +592,8 @@ class DownloadManager(object):
                 "to the following location:\n" + str(output_fname) + "\n\n"
                 "This filename and its associated metadata have also been "
                 "added to the Halotools cache log, \n"
-                "as reflected by a newly added line to the following ASCII file:\n\n"
-                + str(self.ptcl_table_cache.cache_log_fname) + "\n\n"
+                "as reflected by a newly added line to the following ASCII file:\n\n" +
+                str(self.ptcl_table_cache.cache_log_fname) + "\n\n"
                 "You can access the particle data with the following syntax:\n\n"
                 ">>> from halotools.sim_manager import CachedHaloCatalog \n"
                 ">>> halocat = CachedHaloCatalog("+args_msg+")\n"

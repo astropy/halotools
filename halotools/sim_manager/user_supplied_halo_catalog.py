@@ -183,10 +183,8 @@ class UserSuppliedHaloCatalog(object):
 
         halo_table_dict = (
             {key: np.array(kwargs[key]) for key in kwargs
-            if ( (type(kwargs[key]) is np.ndarray) | (type(kwargs[key]) is Column) )
-            and (custom_len(kwargs[key]) == Nhalos)
-            and (key[:5] == 'halo_')}
-            )
+            if ((type(kwargs[key]) is np.ndarray) | (type(kwargs[key]) is Column)) and
+            (custom_len(kwargs[key]) == Nhalos) and (key[:5] == 'halo_')})
         self._test_halo_table_dict(halo_table_dict)
 
         metadata_dict = (
@@ -360,7 +358,7 @@ class UserSuppliedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         ############################################################
-        ## Perform some consistency checks in the fname
+        # Perform some consistency checks in the fname
         if (os.path.isfile(fname)) & (overwrite is False):
             msg = ("\nYou attempted to store your halo catalog "
                 "in the following location: \n\n" + str(fname) +
@@ -379,7 +377,7 @@ class UserSuppliedHaloCatalog(object):
             msg = ("\nThe fname must end with an ``.hdf5`` extension.\n")
             raise HalotoolsError(msg)
         ############################################################
-        ## Perform consistency checks on the remaining log entry attributes
+        # Perform consistency checks on the remaining log entry attributes
         try:
             _ = str(simname)
             _ = str(halo_finder)

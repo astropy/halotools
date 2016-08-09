@@ -145,7 +145,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
     >>> result = npairs_jackknife_3d(sample1, sample2, rbins, period = period, jtags1=jtags1, jtags2=jtags2, N_samples = N_samples)
 
     """
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -160,7 +160,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
         _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
             weights1, weights2, jtags1, jtags2, N_samples))
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
@@ -198,14 +198,14 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
     """
     """
 
-    #Process weights1 entry and check for consistency.
+    # Process weights1 entry and check for consistency.
     if weights1 is None:
         weights1 = np.array([1.0]*np.shape(sample1)[0], dtype=np.float64)
     else:
         weights1 = np.asarray(weights1).astype("float64")
         if np.shape(weights1)[0] != np.shape(sample1)[0]:
             raise HalotoolsError("weights1 should have same len as sample1")
-    #Process weights2 entry and check for consistency.
+    # Process weights2 entry and check for consistency.
     if weights2 is None:
         weights2 = np.array([1.0]*np.shape(sample2)[0], dtype=np.float64)
     else:
@@ -213,14 +213,14 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         if np.shape(weights2)[0] != np.shape(sample2)[0]:
             raise HalotoolsError("weights2 should have same len as sample2")
 
-    #Process jtags_1 entry and check for consistency.
+    # Process jtags_1 entry and check for consistency.
     if jtags1 is None:
         jtags1 = np.array([0]*np.shape(sample1)[0], dtype=np.int)
     else:
         jtags1 = np.asarray(jtags1).astype("int")
         if np.shape(jtags1)[0] != np.shape(sample1)[0]:
             raise HalotoolsError("jtags1 should have same len as sample1")
-    #Process jtags_2 entry and check for consistency.
+    # Process jtags_2 entry and check for consistency.
     if jtags2 is None:
         jtags2 = np.array([0]*np.shape(sample2)[0], dtype=np.int)
     else:
@@ -228,7 +228,7 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         if np.shape(jtags2)[0] != np.shape(sample2)[0]:
             raise HalotoolsError("jtags2 should have same len as sample2")
 
-    #Check bounds of jackknife tags
+    # Check bounds of jackknife tags
     if np.min(jtags1) < 1:
         raise HalotoolsError("jtags1 must be >= 1")
     if np.min(jtags2) < 1:
@@ -238,7 +238,7 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
     if np.max(jtags2) > N_samples:
         raise HalotoolsError("jtags2 must be <= N_samples")
 
-    #throw warning if some tags do not exist
+    # throw warning if some tags do not exist
     if not np.array_equal(np.unique(jtags1), np.arange(1, N_samples+1)):
         warn("Warning: sample1 does not contain points in every jackknife sample.")
     if not np.array_equal(np.unique(jtags1), np.arange(1, N_samples+1)):
@@ -246,9 +246,9 @@ def _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
 
     if type(N_samples) is not int:
         raise HalotoolsError("There must be an integer number of jackknife samples")
-    if np.max(jtags1)>N_samples:
+    if np.max(jtags1) > N_samples:
         raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
-    if np.max(jtags2)>N_samples:
+    if np.max(jtags2) > N_samples:
         raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
 
     return weights1, weights2, jtags1, jtags2

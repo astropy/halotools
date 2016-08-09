@@ -21,4 +21,4 @@ def test_delta_sigma1():
     rp_bins = np.logspace(-2, -1, 5)
     pi_max = 0.1
     ds = delta_sigma(sample1, sample2, rp_bins, pi_max, period=1, log_bins=False)
-    assert ds.ndim ==1, 'wrong number of results returned'
+    assert ds.ndim == 1, 'wrong number of results returned'

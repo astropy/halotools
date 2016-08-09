@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 This module contains private helper functions used throughout the
 `~halotools.mock_observables.pair_counters` subpackage to perform
 control flow on function arguments, bounds-checking and exception-handling.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from copy import copy
@@ -59,8 +58,8 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
 
     if min_size is not None:
         min_size = np.atleast_1d(min_size)
-        if np.any(Lbox<min_size):
-            Lbox[(Lbox<min_size)] = min_size[(Lbox<min_size)]
+        if np.any(Lbox < min_size):
+            Lbox[(Lbox < min_size)] = min_size[(Lbox < min_size)]
 
     return x1, y1, z1, x2, y2, z2, Lbox
 
@@ -72,7 +71,7 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
     """
 
     #################################################
-    ### Set the approximate cell sizes of the trees
+    # Set the approximate cell sizes of the trees
     if approx_cell1_size is None:
         approx_cell1_size = period/10.0
     else:

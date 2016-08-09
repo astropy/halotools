@@ -8,4 +8,4 @@ __all__ = ('test_trivial_phase_space', )
 
 
 def test_trivial_phase_space():
-    model =TrivialPhaseSpace()
+    model = TrivialPhaseSpace()

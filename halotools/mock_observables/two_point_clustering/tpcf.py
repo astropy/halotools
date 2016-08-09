@@ -49,7 +49,7 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
         """
         return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
 
-    #randoms provided, so calculate random pair counts.
+    # randoms provided, so calculate random pair counts.
     if randoms is not None:
         if do_RR is True:
             RR = npairs_3d(randoms, randoms, rbins, period=period,
@@ -57,15 +57,17 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
                         approx_cell1_size=approx_cellran_size,
                         approx_cell2_size=approx_cellran_size)
             RR = np.diff(RR)
-        else: RR=None
+        else:
+            RR = None
         if do_DR is True:
             D1R = npairs_3d(sample1, randoms, rbins, period=period,
                          num_threads=num_threads,
                          approx_cell1_size=approx_cell1_size,
                          approx_cell2_size=approx_cellran_size
-                         )
+                            )
             D1R = np.diff(D1R)
-        else: D1R=None
+        else:
+            D1R = None
         if _sample1_is_sample2:
             D2R = None
         else:
@@ -75,32 +77,33 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
                              approx_cell1_size=approx_cell2_size,
                              approx_cell2_size=approx_cellran_size)
                 D2R = np.diff(D2R)
-            else: D2R=None
+            else:
+                D2R = None
 
         return D1R, D2R, RR
 
-    #PBCs and no randoms--calculate randoms analytically.
+    # PBCs and no randoms--calculate randoms analytically.
     elif randoms is None:
 
-        #set the number of randoms equal to the number of points in sample1
+        # set the number of randoms equal to the number of points in sample1
         NR = len(sample1)
 
-        #do volume calculations
+        # do volume calculations
         v = nball_volume(rbins)  # volume of spheres
         dv = np.diff(v)  # volume of shells
         global_volume = period.prod()  # volume of simulation
 
-        #calculate randoms for sample1
+        # calculate randoms for sample1
         N1 = np.shape(sample1)[0]  # number of points in sample1
         rho1 = N1/global_volume  # number density of points
         D1R = (NR)*(dv*rho1)  # random counts are N**2*dv*rho
 
-        #calculate randoms for sample2
+        # calculate randoms for sample2
         N2 = np.shape(sample2)[0]  # number of points in sample2
         rho2 = N2/global_volume  # number density of points
         D2R = (NR)*(dv*rho2)  # random counts are N**2*dv*rho
 
-        #calculate the random-random pairs.
+        # calculate the random-random pairs.
         rhor = (NR**2)/global_volume
         RR = (dv*rhor)
 
@@ -120,8 +123,8 @@ def _pair_counts(sample1, sample2, rbins,
             approx_cell2_size=approx_cell1_size)
         D1D1 = np.diff(D1D1)
     else:
-        D1D1=None
-        D2D2=None
+        D1D1 = None
+        D2D2 = None
 
     if _sample1_is_sample2:
         D1D2 = D1D1
@@ -133,14 +136,16 @@ def _pair_counts(sample1, sample2, rbins,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
             D1D2 = np.diff(D1D2)
-        else: D1D2=None
+        else:
+            D1D2 = None
         if do_auto is True:
             D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
             D2D2 = np.diff(D2D2)
-        else: D2D2=None
+        else:
+            D2D2 = None
 
     return D1D1, D1D2, D2D2
 
@@ -322,13 +327,13 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     :ref:`galaxy_catalog_analysis_tutorial2`
     """
 
-    #check input arguments using clustering helper functions
+    # check input arguments using clustering helper functions
     function_args = (sample1, rbins, sample2, randoms, period,
         do_auto, do_cross, estimator, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, approx_cellran_size,
         RR_precomputed, NR_precomputed, seed)
 
-    #pass arguments in, and get out processed arguments, plus some control flow variables
+    # pass arguments in, and get out processed arguments, plus some control flow variables
     (sample1, rbins, sample2, randoms, period,
         do_auto, do_cross, num_threads,
         _sample1_is_sample2, PBCs,
@@ -346,25 +351,26 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     if randoms is not None:
         NR = len(randoms)
     else:
-        #set the number of randoms equal to the number of points in sample1
-        #this is arbitrarily set, but must remain consistent!
+        # set the number of randoms equal to the number of points in sample1
+        # this is arbitrarily set, but must remain consistent!
         if NR_precomputed is not None:
             NR = NR_precomputed
         else:
             NR = N1
 
-    #count data pairs
+    # count data pairs
     D1D1, D1D2, D2D2 = _pair_counts(sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
 
-    #count random pairs
+    # count random pairs
     D1R, D2R, RR = _random_counts(sample1, sample2, randoms, rbins,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size)
-    if RR_precomputed is not None: RR = RR_precomputed
+    if RR_precomputed is not None:
+        RR = RR_precomputed
 
-    #run results through the estimator and return relavent/user specified results.
+    # run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
         return xi_11
@@ -454,4 +460,4 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
     assert np.all(rbins > 0.), "All values of input ``rbins`` must be positive"
 
     return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-           _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed
+        _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed

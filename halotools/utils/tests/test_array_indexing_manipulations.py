@@ -318,7 +318,7 @@ def test_calculate_entry_multiplicity2():
     unique_possible_hostids = np.arange(10)
 
     # The following line should not raise an exception
-    __ = aim.calculate_entry_multiplicity( sorted_repeated_hostids, unique_possible_hostids,
+    __ = aim.calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostids,
         testing_mode=False)
 
     with pytest.raises(ValueError) as err:
@@ -355,15 +355,3 @@ def test_calculate_entry_multiplicity4():
             sorted_repeated_hostids, unique_possible_hostids, testing_mode=True)
     substr = "must appear in unique_possible_hostids."
     assert substr in err.value.args[0]
-
-
-
-
-
-
-
-
-
-
-
-

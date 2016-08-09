@@ -20,7 +20,7 @@ from ...utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesi
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import array_is_monotonic
 
-__all__=['angular_tpcf']
+__all__ = ['angular_tpcf']
 __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
@@ -136,18 +136,18 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     :ref:`galaxy_catalog_analysis_tutorial9`
     """
 
-    #check input arguments using clustering helper functions
+    # check input arguments using clustering helper functions
     function_args = (sample1, theta_bins, sample2, randoms, do_auto, do_cross,
         estimator, num_threads, max_sample_size, seed)
 
-    #pass arguments in, and get out processed arguments, plus some control flow variables
+    # pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-    _sample1_is_sample2 = _angular_tpcf_process_args(*function_args)
+        _sample1_is_sample2 = _angular_tpcf_process_args(*function_args)
 
-    #convert angular bins to coord lengths on a unit sphere
+    # convert angular bins to coord lengths on a unit sphere
     chord_bins = chord_to_cartesian(theta_bins, radians=False)
 
-    #convert samples and randoms to cartesian coordinates (x,y,z) on a unit sphere
+    # convert samples and randoms to cartesian coordinates (x,y,z) on a unit sphere
     x, y, z = spherical_to_cartesian(sample1[:, 0], sample1[:, 1])
     sample1 = np.vstack((x, y, z)).T
     if _sample1_is_sample2:
@@ -171,18 +171,20 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             h = 1.0 - np.sqrt(1.0-chord**2)
             return np.pi*(chord**2+h**2)
 
-        #randoms provided, so calculate random pair counts.
+        # randoms provided, so calculate random pair counts.
         if randoms is not None:
             if do_RR is True:
                 RR = npairs_3d(randoms, randoms, chord_bins,
                             num_threads=num_threads)
                 RR = np.diff(RR)
-            else: RR=None
+            else:
+                RR = None
             if do_DR is True:
                 D1R = npairs_3d(sample1, randoms, chord_bins,
                              num_threads=num_threads)
                 D1R = np.diff(D1R)
-            else: D1R=None
+            else:
+                D1R = None
             if _sample1_is_sample2:
                 D2R = None
             else:
@@ -190,19 +192,20 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
                     D2R = npairs_3d(sample2, randoms, chord_bins,
                                  num_threads=num_threads)
                     D2R = np.diff(D2R)
-                else: D2R=None
+                else:
+                    D2R = None
             return D1R, D2R, RR
         elif randoms is None:
 
-            #set the number of randoms equal to the number of points in sample1
+            # set the number of randoms equal to the number of points in sample1
             NR = len(sample1)
 
-            #do area calculations
+            # do area calculations
             da = area_spherical_cap(chord_bins)
             da = np.diff(da)
             global_area = 4.0*np.pi  # surface area of a unit sphere
 
-            #calculate randoms for sample1
+            # calculate randoms for sample1
             N1 = np.shape(sample1)[0]  # number of points in sample1
             rho1 = N1/global_area  # number density of points
             D1R = (N1)*(da*rho1)  # random counts are N**2*dv*rho
@@ -211,7 +214,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             rho2 = N2/global_area  # number density of points
             D2R = N2*(da*rho2)
 
-            #calculate the random-random pairs.
+            # calculate the random-random pairs.
             rhor = NR**2/global_area
             RR = (da*rhor)
 
@@ -227,8 +230,8 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             D1D1 = npairs_3d(sample1, sample1, chord_bins, num_threads=num_threads)
             D1D1 = np.diff(D1D1)
         else:
-            D1D1=None
-            D2D2=None
+            D1D1 = None
+            D2D2 = None
 
         if _sample1_is_sample2:
             D1D2 = D1D1
@@ -237,11 +240,13 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             if do_cross is True:
                 D1D2 = npairs_3d(sample1, sample2, chord_bins, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
-            else: D1D2=None
+            else:
+                D1D2 = None
             if do_auto is True:
                 D2D2 = npairs_3d(sample2, sample2, chord_bins, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
-            else: D2D2=None
+            else:
+                D2D2 = None
 
         return D1D1, D1D2, D2D2
 
@@ -254,18 +259,18 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     if randoms is not None:
         NR = len(randoms)
     else:
-        #set the number of randoms equal to the number of points in sample1
-        #this is arbitrarily set, but must remain consistent!
+        # set the number of randoms equal to the number of points in sample1
+        # this is arbitrarily set, but must remain consistent!
         NR = N1
 
-    #count data pairs
+    # count data pairs
     D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, chord_bins,
         num_threads, do_auto, do_cross, _sample1_is_sample2)
-    #count random pairs
+    # count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, chord_bins,
         num_threads, do_RR, do_DR, _sample1_is_sample2)
 
-    #run results through the estimator and return relavent/user specified results.
+    # run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
         return xi_11
@@ -314,10 +319,10 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
                "array with at least two entries.")
         raise HalotoolsError(msg)
 
-    #check for input parameter consistency
+    # check for input parameter consistency
     if (theta_max >= 180.0):
         msg = ("\n The maximum length over which you search for pairs of points \n"
-                "cannot be larger than 180.0 deg. \n")
+               "cannot be larger than 180.0 deg. \n")
         raise HalotoolsError(msg)
 
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
@@ -329,4 +334,4 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     verify_tpcf_estimator(estimator)
 
     return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-           _sample1_is_sample2
+        _sample1_is_sample2

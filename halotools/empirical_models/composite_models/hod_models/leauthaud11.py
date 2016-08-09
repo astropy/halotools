@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 Module containing the HOD-style composite model based on Leauthaud et al. (2011).
-
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ... import model_defaults
 from ...occupation_models import leauthaud11_components
@@ -83,7 +79,7 @@ def leauthaud11_model_dictionary(threshold=model_defaults.default_stellar_mass_t
     >>> model_instance.populate_mock(halocat)
 
     """
-    ### Build model for centrals
+    # Build model for centrals
     # Build the occupation model
     centrals_occupation = leauthaud11_components.Leauthaud11Cens(threshold=threshold, **kwargs)
     centrals_occupation._suppress_repeated_param_warning = True
@@ -91,7 +87,7 @@ def leauthaud11_model_dictionary(threshold=model_defaults.default_stellar_mass_t
 
     centrals_profile = TrivialPhaseSpace(**kwargs)
 
-    ### Build model for satellites
+    # Build model for satellites
     # Build the occupation model
     satellites_occupation = leauthaud11_components.Leauthaud11Sats(threshold=threshold, **kwargs)
     # Build the profile model

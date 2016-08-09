@@ -22,43 +22,47 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     NR2 = np.atleast_1d(NR2)
     Ns = np.array([len(ND1), len(ND2), len(NR1), len(NR2)])
 
-    if np.any(Ns>1):
-        #used for the jackknife calculations
-        #the outer dimension is the number of samples.
-        #the N arrays are the number of points in each dimension.
-        #so, what we want to do is multiple each row of e.g. DD by the number of 1/N
-        mult = lambda x, y: (x*y.T).T  # annoying and ugly, but works.
+    if np.any(Ns > 1):
+        # used for the jackknife calculations
+        # the outer dimension is the number of samples.
+        # the N arrays are the number of points in each dimension.
+        # so, what we want to do is multiple each row of e.g. DD by the number of 1/N
+        def mult(x, y):
+            return (x*y.T).T
     else:
-        mult = lambda x, y: x*y  # used for all else
+        def mult(x, y):
+            return x*y
 
     _test_for_zero_division(DD, DR, RR, ND1, ND2, NR1, NR2, estimator)
 
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
-        #DD/RR-1
+        # DD/RR-1
         xi = mult(1.0/factor, DD/RR) - 1.0
     elif estimator == 'Davis-Peebles':
         factor = ND1*ND2/(ND1*NR2)
-        #DD/DR-1
+        # DD/DR-1
         xi = mult(1.0/factor, DD/DR) - 1.0
     elif estimator == 'Hewett':
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
-        #(DD-DR)/RR
+        # (DD-DR)/RR
         xi = mult(1.0/factor1, DD/RR) - mult(1.0/factor2, DR/RR)
     elif estimator == 'Hamilton':
-        #DDRR/DRDR-1
+        # DDRR/DRDR-1
         xi = (DD*RR)/(DR*DR) - 1.0
     elif estimator == 'Landy-Szalay':
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
-        #(DD - 2.0*DR + RR)/RR
+        # (DD - 2.0*DR + RR)/RR
         xi = mult(1.0/factor1, DD/RR) - mult(1.0/factor2, 2.0*DR/RR) + 1.0
     else:
         raise ValueError("unsupported estimator!")
 
-    if np.shape(xi)[0]==1: return xi[0]
-    else: return xi  # for jackknife
+    if np.shape(xi)[0] == 1:
+        return xi[0]
+    else:
+        return xi  # for jackknife
 
 
 def _list_estimators():

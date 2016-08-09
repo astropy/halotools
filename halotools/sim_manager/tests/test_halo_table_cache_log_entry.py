@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function)
+"""
+"""
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 from astropy.tests.helper import pytest
@@ -22,7 +23,7 @@ except ImportError:
 from . import helper_functions
 from ..halo_table_cache_log_entry import HaloTableCacheLogEntry
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files
@@ -72,7 +73,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             'halo_y': [1, 2, 3],
             'halo_z': [1, 2, 3],
             'halo_mass': [1, 2, 3],
-            })
+             })
 
         self.table4 = Table(
             {'halo_id': [1, 2, 2],
@@ -80,7 +81,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             'halo_y': [1, 2, 3],
             'halo_z': [1, 2, 3],
             'halo_mass': [1, 2, 3],
-            })
+             })
 
         self.good_table = Table(
             {'halo_id': [1, 2, 3],
@@ -88,7 +89,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             'halo_y': [1, 2, 3],
             'halo_z': [1, 2, 3],
             'halo_mass': [1, 2, 3],
-            })
+             })
 
     def get_scenario_kwargs(self, num_scenario):
         return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario],

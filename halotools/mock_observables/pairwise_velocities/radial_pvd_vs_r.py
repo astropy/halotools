@@ -125,7 +125,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     ref:`galaxy_catalog_analysis_tutorial7`
     """
 
-    #process input arguments
+    # process input arguments
     function_args = (sample1, velocities1, sample2, velocities2, period,
         do_auto, do_cross, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, seed)
@@ -136,11 +136,11 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
 
     rbins = _process_radial_bins(rbins, period, PBCs)
 
-    #calculate velocity difference scale
+    # calculate velocity difference scale
     std_v1 = np.sqrt(np.std(velocities1[0, :]))
     std_v2 = np.sqrt(np.std(velocities2[0, :]))
 
-    #build the marks.
+    # build the marks.
     shift1 = np.repeat(std_v1, len(sample1))
     shift2 = np.repeat(std_v2, len(sample2))
     marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
@@ -165,12 +165,12 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
             S1S1 = np.diff(S1S1)
             N1N1 = np.diff(N1N1)
         else:
-            D1D1=None
-            D2D2=None
-            N1N1=None
-            N2N2=None
-            S1S1=None
-            S2S2=None
+            D1D1 = None
+            D2D2 = None
+            N1N1 = None
+            N2N2 = None
+            S1S1 = None
+            S2S2 = None
 
         if _sample1_is_sample2:
             D1D2 = D1D1
@@ -180,7 +180,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
             S1S2 = S1S1
             S2S2 = S1S1
         else:
-            if do_cross==True:
+            if do_cross == True:
                 D1D2, S1S2, N1N2 = velocity_marked_npairs_3d(
                     sample1, sample2, rbins,
                     weights1=marks1, weights2=marks2,
@@ -192,9 +192,9 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
                 S1S2 = np.diff(S1S2)
                 N1N2 = np.diff(N1N2)
             else:
-                D1D2=None
-                N1N2=None
-                S1S2=None
+                D1D2 = None
+                N1N2 = None
+                S1S2 = None
             if do_auto is True:
                 D2D2, S2S2, N2N2 = velocity_marked_npairs_3d(sample2, sample2, rbins,
                     weights1=marks2, weights2=marks2,
@@ -206,8 +206,8 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
                 S2S2 = np.diff(S2S2)
                 N2N2 = np.diff(N2N2)
             else:
-                D2D2=None
-                N2N2=None
+                D2D2 = None
+                N2N2 = None
 
         return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
 
@@ -226,7 +226,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         variance = (sum_x_sqr - (sum_x * sum_x)/N)/(N - 1)
         return np.sqrt(variance)
 
-    #return results
+    # return results
     if _sample1_is_sample2:
         sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
         return np.where(np.isfinite(sigma_11), sigma_11, 0.)

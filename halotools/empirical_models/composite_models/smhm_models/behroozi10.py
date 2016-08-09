@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 """
 Module containing the subhalo-based composite model
 based on the Behroozi et al. (2010) stellar-to-halo-mass relation.
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ...smhm_models import Behroozi10SmHm
 

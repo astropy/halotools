@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ Module containing the `group_member_generator`,
 the primary engine of the group aggregation calculations.
 """

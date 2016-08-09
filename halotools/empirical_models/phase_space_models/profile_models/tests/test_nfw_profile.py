@@ -170,14 +170,14 @@ class TestNFWProfile(TestCase):
             assert array_is_monotonic(result, strict=True) == 1
 
             # Enforce self-consistency between the analytic expression for cumulative_mass_PDF
-            ### and the direct numerical integral of the analytical expression for
-            ### dimensionless_mass_density
+            # and the direct numerical integral of the analytical expression for
+            # dimensionless_mass_density
             super_class_result = super(NFWProfile, model).cumulative_mass_PDF(
                 scaled_radius, conc)
             assert np.allclose(super_class_result, result, rtol=1e-4)
 
             # Verify that we get a self-consistent result between
-            ### enclosed_mass and cumulative_mass_PDF
+            # enclosed_mass and cumulative_mass_PDF
             halo_radius = model.halo_mass_to_halo_radius(total_mass)
             radius = scaled_radius*halo_radius
             enclosed_mass = model.enclosed_mass(radius, total_mass, conc)
@@ -272,4 +272,3 @@ class TestNFWProfile(TestCase):
             halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=44)
         assert np.allclose(r1, r2, rtol=0.001)
         assert not np.allclose(r1, r3, rtol=0.001)
-

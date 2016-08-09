@@ -146,15 +146,14 @@ class Moster13SmHm(PrimGalpropModel):
         # the same as in Table 1, even though the
         # mean_stellar_mass method accepts and returns arguments in h=1 units.
 
-        d = {
-        'm10': 11.590,
-        'm11': 1.195,
-        'n10': 0.0351,
-        'n11': -0.0247,
-        'beta10': 1.376,
-        'beta11': -0.826,
-        'gamma10': 0.608,
-        'gamma11': 0.329
-        }
+        d = ({
+            'm10': 11.590,
+            'm11': 1.195,
+            'n10': 0.0351,
+            'n11': -0.0247,
+            'beta10': 1.376,
+            'beta11': -0.826,
+            'gamma10': 0.608,
+            'gamma11': 0.329})
 
         return d

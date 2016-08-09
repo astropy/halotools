@@ -99,7 +99,7 @@ class Tinker13Cens(OccupationComponent):
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_sfr_designation', 'mc_occupation']
         self._galprop_dtypes_to_allocate = np.dtype([
-            ('halo_num_'+ self.gal_type, 'i4'),
+            ('halo_num_' + self.gal_type, 'i4'),
             (self.sfr_designation_key, object),
             ('sfr_designation', object),
             ])
@@ -116,7 +116,7 @@ class Tinker13Cens(OccupationComponent):
             self.param_dict[active_key] = value
             self.param_dict[quiescent_key] = value
 
-        ### From Table 2 of Tinker+13
+        # From Table 2 of Tinker+13
         self.param_dict['smhm_m1_0_active'] = 12.56
         self.param_dict['smhm_m1_0_quiescent'] = 12.08
         self.param_dict['smhm_m0_0_active'] = 10.96
@@ -420,7 +420,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_occupation', 'mc_sfr_designation']
         self._galprop_dtypes_to_allocate = np.dtype([
-            ('halo_num_'+ self.gal_type, 'i4'),
+            ('halo_num_' + self.gal_type, 'i4'),
             (self.sfr_designation_key, object),
             ])
 
@@ -517,11 +517,11 @@ class Tinker13QuiescentSats(OccupationComponent):
         knee_mass = 1.e12
 
         self._msat = (
-            knee_mass*self.param_dict['bsat_quiescent']*
+            knee_mass*self.param_dict['bsat_quiescent'] *
             (knee_threshold / knee_mass)**self.param_dict['betasat_quiescent'])
 
         self._mcut = (
-            knee_mass*self.param_dict['bcut_quiescent']*
+            knee_mass*self.param_dict['bcut_quiescent'] *
             (knee_threshold / knee_mass)**self.param_dict['betacut_quiescent'])
 
 
@@ -586,7 +586,7 @@ class Tinker13ActiveSats(OccupationComponent):
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_occupation', 'mc_sfr_designation']
         self._galprop_dtypes_to_allocate = np.dtype([
-            ('halo_num_'+ self.gal_type, 'i4'),
+            ('halo_num_' + self.gal_type, 'i4'),
             (self.sfr_designation_key, object),
             ])
 
@@ -681,9 +681,9 @@ class Tinker13ActiveSats(OccupationComponent):
         knee_mass = 1.e12
 
         self._msat = (
-            knee_mass*self.param_dict['bsat_active']*
+            knee_mass*self.param_dict['bsat_active'] *
             (knee_threshold / knee_mass)**self.param_dict['betasat_active'])
 
         self._mcut = (
-            knee_mass*self.param_dict['bcut_active']*
+            knee_mass*self.param_dict['bcut_active'] *
             (knee_threshold / knee_mass)**self.param_dict['betacut_active'])

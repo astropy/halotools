@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function)
+"""
+"""
+from __future__ import absolute_import, division, print_function
 
 from unittest import TestCase
 from astropy.tests.helper import pytest
@@ -97,7 +98,7 @@ class TestHodModelFactory(TestCase):
         model.model_dictionary['dummy_key'] = DummySatComponent()
         with pytest.raises(HalotoolsError) as err:
             model._test_censat_occupation_consistency(model.model_dictionary)
-        substr ="has a ``central_occupation_model`` attribute with an inconsistent "
+        substr = "has a ``central_occupation_model`` attribute with an inconsistent "
         assert substr in err.value.args[0]
 
     def tearDown(self):

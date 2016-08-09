@@ -88,7 +88,3 @@ def test_npairs_per_object_3d_brute_force2():
     result = npairs_per_object_3d(sample1, sample2, rbins, period=1)
     assert brute_force_result.shape == result.shape
     assert np.all(result == brute_force_result)
-
-
-
-

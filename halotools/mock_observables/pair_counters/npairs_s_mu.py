@@ -140,7 +140,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     >>> result = npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = period)
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _npairs_3d_process_args(sample1, sample2, s_bins, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -149,7 +149,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     rmax = np.max(s_bins)
 
-    #process mu_bins parameter separately
+    # process mu_bins parameter separately
     mu_bins = np.atleast_1d(mu_bins)
     try:
         assert mu_bins.ndim == 1
@@ -163,7 +163,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

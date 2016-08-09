@@ -57,7 +57,7 @@ def test_npairs_s_mu_periodic():
     """
 
     s_bins = np.array([0.0, 0.1, 0.2, 0.3])
-    N_mu_bins=100
+    N_mu_bins = 100
     mu_bins = np.linspace(0, 1.0, N_mu_bins)
     Npts = len(random_sample)
 
@@ -65,10 +65,10 @@ def test_npairs_s_mu_periodic():
         period=period, num_threads=num_threads)
 
     msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(len(s_bins), N_mu_bins), msg
+    assert np.shape(result) == (len(s_bins), N_mu_bins), msg
 
     result = np.diff(result, axis=1)
-    result = np.sum(result, axis=1)+ Npts
+    result = np.sum(result, axis=1) + Npts
 
     test_result = npairs_3d(random_sample, random_sample, s_bins,
         period=period, num_threads=num_threads)
@@ -83,17 +83,17 @@ def test_npairs_s_mu_nonperiodic():
     """
 
     s_bins = np.array([0.0, 0.1, 0.2, 0.3])
-    N_mu_bins=100
+    N_mu_bins = 100
     mu_bins = np.linspace(0, 1.0, N_mu_bins)
 
     result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins,
         num_threads=num_threads)
 
     msg = 'The returned result is an unexpected shape.'
-    assert np.shape(result)==(len(s_bins), N_mu_bins), msg
+    assert np.shape(result) == (len(s_bins), N_mu_bins), msg
 
     result = np.diff(result, axis=1)
-    result = np.sum(result, axis=1)+ Npts
+    result = np.sum(result, axis=1) + Npts
 
     test_result = npairs_3d(random_sample, random_sample, s_bins, num_threads=num_threads)
 

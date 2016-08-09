@@ -100,7 +100,7 @@ class OccupationComponent(object):
         # The _mock_generation_calling_sequence determines which methods
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_occupation']
-        self._galprop_dtypes_to_allocate = np.dtype([('halo_num_'+ self.gal_type, 'i4')])
+        self._galprop_dtypes_to_allocate = np.dtype([('halo_num_' + self.gal_type, 'i4')])
 
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies.
@@ -182,7 +182,7 @@ class OccupationComponent(object):
         """
         # The scipy built-in Poisson number generator raises an exception
         # if its input is zero, so here we impose a simple workaround
-        first_occupation_moment = np.where(first_occupation_moment <=0,
+        first_occupation_moment = np.where(first_occupation_moment <= 0,
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
 
         with NumpyRNGContext(seed):

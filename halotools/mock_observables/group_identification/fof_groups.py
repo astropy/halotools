@@ -11,11 +11,11 @@ from ..pair_counters.pairwise_distance_xy_z import pairwise_distance_xy_z
 
 from ...custom_exceptions import HalotoolsError
 
-igraph_available=True
+igraph_available = True
 try:
     import igraph
 except ImportError:
-    igraph_available=False
+    igraph_available = False
 if igraph_available is True:  # there is another package called igraph--need to distinguish.
     if not hasattr(igraph, 'Graph'):
         igraph_available is False
@@ -133,9 +133,9 @@ class FoFGroups(object):
 
         self.b_perp = float(b_perp)  # perpendicular linking length
         self.b_para = float(b_para)  # parallel linking length
-        self.positions=np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
+        self.positions = np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
 
-        #process Lbox parameter
+        # process Lbox parameter
         if (Lbox is None) & (period is None):
             raise ValueError("Lbox and Period cannot be both be None.")
         elif (Lbox is None) & (period is not None):
@@ -152,12 +152,12 @@ class FoFGroups(object):
         if np.shape(Lbox) != (3,):
             raise ValueError("Lbox must be an array of length 3, or number indicating the "
                 "length of one side of a cube")
-        if (period is not None) and (not np.all(Lbox==period)):
+        if (period is not None) and (not np.all(Lbox == period)):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
 
         self.period = period  # simulation box periodic boundary conditions
         self.Lbox = np.asarray(Lbox, dtype='float64')  # simulation box periodic boundary conditions
-        #calculate the physical linking lengths
+        # calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)
         self.n_gal = len(positions)/self.volume
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
@@ -270,7 +270,8 @@ class FoFGroups(object):
         if igraph_available is True:
             self.edges = np.asarray(self.g.get_edgelist())
             return self.edges
-        else: raise HalotoolsError(no_igraph_msg)
+        else:
+            raise HalotoolsError(no_igraph_msg)
 
     def get_edge_lengths(self):
         """
@@ -297,7 +298,8 @@ class FoFGroups(object):
             lens = edges.get_attribute_values('weight')
             self.edge_lengths = np.array(lens)
             return self.edge_lengths
-        else: raise HalotoolsError(no_igraph_msg)
+        else:
+            raise HalotoolsError(no_igraph_msg)
 
 
 def _scipy_to_igraph(matrix, coords, directed=False):

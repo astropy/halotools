@@ -162,7 +162,8 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     """
     idx_selected_subhalos, subhalo_occupations, subhalo_multiplicity = (
         calculate_selection_of_true_subhalos(
-        subhalo_hostids, satellite_occupations, host_halo_ids, testing_mode=testing_mode))
+            subhalo_hostids, satellite_occupations, host_halo_ids,
+            testing_mode=testing_mode))
 
     remaining_occupations = satellite_occupations - subhalo_occupations
 
@@ -475,7 +476,7 @@ def indices_of_selected_subhalos(subhalo_hostids, subhalo_occupations, subhalo_m
                 "entries of ``subhalo_hostids`` = {1}.")
             raise ValueError(msg.format(total_subhalo_multiplicity, Nsubs))
 
-    clipped_subhalo_occupations = subhalo_occupations[subhalo_multiplicity>0]
+    clipped_subhalo_occupations = subhalo_occupations[subhalo_multiplicity > 0]
     csum = clipped_subhalo_occupations.cumsum()
     num_subhalos_to_draw = csum[-1]
 

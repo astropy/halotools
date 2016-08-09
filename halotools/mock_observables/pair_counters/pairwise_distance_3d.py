@@ -113,7 +113,7 @@ def pairwise_distance_3d(data1, data2, r_max, period=None,
 
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _pairwise_distance_3d_process_args(data1, data2, r_max, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -122,7 +122,7 @@ def pairwise_distance_3d(data1, data2, r_max, period=None,
 
     search_xlength, search_ylength, search_zlength = max_r_max, max_r_max, max_r_max
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
@@ -150,12 +150,12 @@ def pairwise_distance_3d(data1, data2, r_max, period=None,
     else:
         result = [engine(cell1_tuples[0])]
 
-    #unpack result
+    # unpack result
     d = np.zeros((0,), dtype='float')
     i_inds = np.zeros((0,), dtype='int')
     j_inds = np.zeros((0,), dtype='int')
 
-    #unpack the results
+    # unpack the results
     for i in range(len(result)):
         d = np.append(d, result[i][0])
         i_inds = np.append(i_inds, result[i][1])
@@ -170,7 +170,7 @@ def _pairwise_distance_3d_process_args(data1, data2, r_max, period,
     helper function to process arguments for `~halotools.mock_observables.pairwise_distance_3d function.
     """
     if num_threads is not 1:
-        if num_threads=='max':
+        if num_threads == 'max':
             num_threads = multiprocessing.cpu_count()
         if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"

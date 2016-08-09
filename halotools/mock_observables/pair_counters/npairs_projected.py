@@ -118,7 +118,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
 
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
             verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -128,7 +128,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
     rp_max = np.max(rp_bins)
     search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )
@@ -165,7 +165,7 @@ def _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
     """
     """
     if num_threads is not 1:
-        if num_threads=='max':
+        if num_threads == 'max':
             num_threads = multiprocessing.cpu_count()
         if not isinstance(num_threads, int):
             msg = "Input ``num_threads`` argument must be an integer or the string 'max'"

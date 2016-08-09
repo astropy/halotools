@@ -77,7 +77,9 @@ class TestHodMockFactory(TestCase):
         self.model.populate_mock(self.fakesim)
 
         self.galaxy_table1 = deepcopy(self.model.mock.galaxy_table)
-        f100x = lambda t: t['halo_x'] > 100
+
+        def f100x(t):
+            return t['halo_x'] > 100
         self.model.mock.populate(masking_function=f100x)
         self.galaxy_table2 = deepcopy(self.model.mock.galaxy_table)
 
@@ -86,8 +88,11 @@ class TestHodMockFactory(TestCase):
 
         model = PrebuiltHodModelFactory('zheng07')
 
-        f100x = lambda t: t['halo_x'] > 100
-        f150z = lambda t: t['halo_z'] > 150
+        def f100x(t):
+            return t['halo_x'] > 100
+
+        def f150z(t):
+            return t['halo_z'] > 150
 
         halocat = FakeSim()
         model.populate_mock(halocat, masking_function=f100x)
@@ -131,7 +136,8 @@ class TestHodMockFactory(TestCase):
         sats = model.mock.galaxy_table[~cenmask]
         assert np.any(sats['halo_x'] != sats['x'])
 
-        f100x = lambda t: t['halo_x'] > 100
+        def f100x(t):
+            return t['halo_x'] > 100
         model.populate_mock(halocat, masking_function=f100x)
         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
         cens = model.mock.galaxy_table[cenmask]
@@ -152,15 +158,15 @@ class TestHodMockFactory(TestCase):
         sats = model.mock.galaxy_table[~cenmask]
 
         sats_outside_boundary_mask = (
-            (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
-            | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
-            | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
+            (sats['x'] < 0) | (sats['x'] > halocat.Lbox) |
+            (sats['y'] < 0) | (sats['y'] > halocat.Lbox) |
+            (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
         assert np.any(sats_outside_boundary_mask == True)
 
         cens_outside_boundary_mask = (
-            (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
-            | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
-            | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
+            (cens['x'] < 0) | (cens['x'] > halocat.Lbox) |
+            (cens['y'] < 0) | (cens['y'] > halocat.Lbox) |
+            (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
         assert np.all(cens_outside_boundary_mask == False)
 
     @pytest.mark.slow
@@ -177,15 +183,15 @@ class TestHodMockFactory(TestCase):
         sats = model.mock.galaxy_table[~cenmask]
 
         sats_outside_boundary_mask = (
-            (sats['x'] < 0) | (sats['x'] > halocat.Lbox)
-            | (sats['y'] < 0) | (sats['y'] > halocat.Lbox)
-            | (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
+            (sats['x'] < 0) | (sats['x'] > halocat.Lbox) |
+            (sats['y'] < 0) | (sats['y'] > halocat.Lbox) |
+            (sats['z'] < 0) | (sats['z'] > halocat.Lbox))
         assert np.all(sats_outside_boundary_mask == False)
 
         cens_outside_boundary_mask = (
-            (cens['x'] < 0) | (cens['x'] > halocat.Lbox)
-            | (cens['y'] < 0) | (cens['y'] > halocat.Lbox)
-            | (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
+            (cens['x'] < 0) | (cens['x'] > halocat.Lbox) |
+            (cens['y'] < 0) | (cens['y'] > halocat.Lbox) |
+            (cens['z'] < 0) | (cens['z'] > halocat.Lbox))
         assert np.all(cens_outside_boundary_mask == False)
 
     def test_zero_satellite_edge_case(self):

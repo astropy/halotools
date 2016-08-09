@@ -119,7 +119,7 @@ class HodMockFactory(MockFactory):
         except AssertionError:
             raise HalotoolsError(missing_halo_upid_msg)
 
-        ################ Make cuts on halo catalog ################
+        # Make cuts on halo catalog #
         # Select host halos only, since this is an HOD-style model
         halo_table = SampleSelector.host_halo_selection(table=halocat.halo_table)
 
@@ -148,7 +148,7 @@ class HodMockFactory(MockFactory):
 
         ############################################################
 
-        ### Create new columns of the halo catalog, if applicable
+        # Create new columns of the halo catalog, if applicable
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.items():
@@ -410,33 +410,33 @@ class HodMockFactory(MockFactory):
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype=dt[key].type)
 
     def estimate_ngals(self, seed=None):
-            """ Method to estimate the number of galaxies produced by the
-            mock.populate() method. It runs one realization of all
-            mc_occupation methods and reports the total number of galaxies
-            produced. However, no extra memory is allocated for the
-            galaxy tables. Note that model.populate() will invoke a new call
-            to all mc_occupation methods and can produce a different number
-            of galaxies.
+        """ Method to estimate the number of galaxies produced by the
+        mock.populate() method. It runs one realization of all
+        mc_occupation methods and reports the total number of galaxies
+        produced. However, no extra memory is allocated for the
+        galaxy tables. Note that model.populate() will invoke a new call
+        to all mc_occupation methods and can produce a different number
+        of galaxies.
 
-            """
+        """
 
-            # Call all composite model methods that should be called prior to mc_occupation
-            # All such function calls must be applied to the table.
-            halo_table = np.copy(self.halo_table)
-            for func_name in self.model._mock_generation_calling_sequence:
-                if 'mc_occupation' in func_name:
-                    # exit when we encounter a ``mc_occupation_`` function
-                    break
-                else:
-                    func = getattr(self.model, func_name)
-                    func(table=halo_table)
+        # Call all composite model methods that should be called prior to mc_occupation
+        # All such function calls must be applied to the table.
+        halo_table = np.copy(self.halo_table)
+        for func_name in self.model._mock_generation_calling_sequence:
+            if 'mc_occupation' in func_name:
+                # exit when we encounter a ``mc_occupation_`` function
+                break
+            else:
+                func = getattr(self.model, func_name)
+                func(table=halo_table)
 
-            # Call the component model to get a Monte Carlo
-            # realization of the abundance of galaxies for all gal_type.
-            ngals = 0
-            for gal_type in self.gal_types:
-                occupation_func_name = 'mc_occupation_'+gal_type
-                occupation_func = getattr(self.model, occupation_func_name)
-                ngals = ngals + np.sum(occupation_func(table=halo_table, seed=seed))
+        # Call the component model to get a Monte Carlo
+        # realization of the abundance of galaxies for all gal_type.
+        ngals = 0
+        for gal_type in self.gal_types:
+            occupation_func_name = 'mc_occupation_'+gal_type
+            occupation_func = getattr(self.model, occupation_func_name)
+            ngals = ngals + np.sum(occupation_func(table=halo_table, seed=seed))
 
-            return ngals
+        return ngals

@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-
 Modules performing small, commonly used tasks throughout the package.
-
 """
 
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from math import ceil
 import numpy as np
@@ -140,7 +136,7 @@ def compute_conditional_percentiles(**kwargs):
         output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
 
         # Use the largest bin for any points larger than the largest bin boundary,
-        ### and raise a warning if such points are found
+        # and raise a warning if such points are found
         Nbins = len(prim_haloprop_bin_boundaries)
         if Nbins in output:
             msg = ("\n\nThe ``compute_prim_haloprop_bins`` function detected points in the \n"

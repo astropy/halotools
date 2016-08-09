@@ -204,11 +204,11 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     if randoms is not None:
         NR = len(randoms)
     else:
-        #set the number of randoms equal to the number of points in sample1
-        #this is arbitrarily set, but must remain consistent!
+        # set the number of randoms equal to the number of points in sample1
+        # this is arbitrarily set, but must remain consistent!
         NR = N1
 
-    #count pairs
+    # count pairs
     D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins,
         period, num_threads, do_auto, do_cross,
         _sample1_is_sample2, approx_cell1_size, approx_cell2_size)
@@ -255,14 +255,16 @@ def pair_counts(sample1, sample2, rp_bins, pi_bins, period,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
             D1D2 = np.diff(np.diff(D1D2, axis=0), axis=1)
-        else: D1D2=None
+        else:
+            D1D2 = None
         if do_auto is True:
             D2D2 = npairs_xy_z(sample2, sample2, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
             D2D2 = np.diff(np.diff(D2D2, axis=0), axis=1)
-        else: D2D2=None
+        else:
+            D2D2 = None
 
     return D1D1, D1D2, D2D2
 
@@ -288,7 +290,7 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
     shells, which is the correct volume to use for a continious cubic volume with PBCs
     """
 
-    #No PBCs, randoms must have been provided.
+    # No PBCs, randoms must have been provided.
     if randoms is not None:
         if do_RR is True:
             RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins,
@@ -296,14 +298,16 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
                 approx_cell1_size=approx_cellran_size,
                 approx_cell2_size=approx_cellran_size)
             RR = np.diff(np.diff(RR, axis=0), axis=1)
-        else: RR=None
+        else:
+            RR = None
         if do_DR is True:
             D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cellran_size)
             D1R = np.diff(np.diff(D1R, axis=0), axis=1)
-        else: D1R=None
+        else:
+            D1R = None
         if _sample1_is_sample2:  # calculating the cross-correlation
             D2R = None
         else:
@@ -313,31 +317,32 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
                     approx_cell1_size=approx_cell2_size,
                     approx_cell2_size=approx_cellran_size)
                 D2R = np.diff(np.diff(D2R, axis=0), axis=1)
-            else: D2R=None
+            else:
+                D2R = None
 
         return D1R, D2R, RR
-    #PBCs and no randoms--calculate randoms analytically.
+    # PBCs and no randoms--calculate randoms analytically.
     elif randoms is None:
 
-        #set the number of randoms equal to the number of points in sample1
+        # set the number of randoms equal to the number of points in sample1
         NR = len(sample1)
 
-        #do volume calculations
+        # do volume calculations
         v = cylinder_volume(rp_bins, 2.0*pi_bins)  # volume of spheres
         dv = np.diff(np.diff(v, axis=0), axis=1)  # volume of annuli
         global_volume = period.prod()
 
-        #calculate randoms for sample1
+        # calculate randoms for sample1
         N1 = np.shape(sample1)[0]
         rho1 = N1/global_volume
         D1R = (N1)*(dv*rho1)  # read note about pair counter
 
-        #calculate randoms for sample2
+        # calculate randoms for sample2
         N2 = np.shape(sample2)[0]
         rho2 = N2/global_volume
         D2R = N2*(dv*rho2)  # read note about pair counter
 
-        #calculate the random-random pairs.
+        # calculate the random-random pairs.
         rhor = NR**2/global_volume
         RR = (dv*rhor)  # RR is only the RR for the cross-correlation.
 
@@ -387,4 +392,4 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
     verify_tpcf_estimator(estimator)
 
     return sample1, rp_bins, pi_bins, sample2, randoms, period,\
-           do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs

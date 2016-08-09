@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 Module containing some commonly used composite HOD models.
-
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ... import model_defaults
 from ...occupation_models import tinker13_components
