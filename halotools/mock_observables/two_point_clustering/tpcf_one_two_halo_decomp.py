@@ -201,8 +201,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,\
-    do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =\
-    _tpcf_one_two_halo_decomp_process_args(*function_args)
+        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =\
+        _tpcf_one_two_halo_decomp_process_args(*function_args)
 
     # What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
@@ -250,7 +250,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_12,\
-            two_halo_xi_12, one_halo_xi_22, two_halo_xi_22
+                two_halo_xi_12, one_halo_xi_22, two_halo_xi_22
         elif (do_cross is True):
             one_halo_xi_12 = _TP_estimator(one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)

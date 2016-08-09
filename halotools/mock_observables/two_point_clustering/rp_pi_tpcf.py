@@ -392,4 +392,4 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
     verify_tpcf_estimator(estimator)
 
     return sample1, rp_bins, pi_bins, sample2, randoms, period,\
-    do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs

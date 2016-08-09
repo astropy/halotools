@@ -142,7 +142,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-    _sample1_is_sample2 = _angular_tpcf_process_args(*function_args)
+        _sample1_is_sample2 = _angular_tpcf_process_args(*function_args)
 
     # convert angular bins to coord lengths on a unit sphere
     chord_bins = chord_to_cartesian(theta_bins, radians=False)
@@ -334,4 +334,4 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     verify_tpcf_estimator(estimator)
 
     return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-    _sample1_is_sample2
+        _sample1_is_sample2

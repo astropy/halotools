@@ -460,4 +460,4 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
     assert np.all(rbins > 0.), "All values of input ``rbins`` must be positive"
 
     return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-    _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed
+        _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed

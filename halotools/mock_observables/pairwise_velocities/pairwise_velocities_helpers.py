@@ -90,7 +90,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
     num_threads = get_num_threads(num_threads)
 
     return sample1, velocities1, sample2, velocities2, period, do_auto,\
-    do_cross, num_threads, _sample1_is_sample2, PBCs
+        do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
 def _process_radial_bins(rbins, period, PBCs):

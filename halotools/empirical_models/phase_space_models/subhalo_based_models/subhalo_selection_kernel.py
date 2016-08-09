@@ -162,7 +162,8 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     """
     idx_selected_subhalos, subhalo_occupations, subhalo_multiplicity = (
         calculate_selection_of_true_subhalos(
-        subhalo_hostids, satellite_occupations, host_halo_ids, testing_mode=testing_mode))
+            subhalo_hostids, satellite_occupations, host_halo_ids,
+            testing_mode=testing_mode))
 
     remaining_occupations = satellite_occupations - subhalo_occupations
 
