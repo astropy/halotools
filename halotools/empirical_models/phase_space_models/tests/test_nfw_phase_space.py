@@ -95,7 +95,6 @@ class TestNFWPhaseSpace(TestCase):
         assert np.allclose(x1, x2, rtol=0.001)
         assert not np.allclose(x1, x3, rtol=0.001)
 
-
     def test_mc_dimensionless_radial_distance(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`.
 
@@ -166,7 +165,6 @@ class TestNFWPhaseSpace(TestCase):
 
         assert np.allclose(x1, x2, rtol=0.001)
         assert not np.allclose(x1, x3, rtol=0.001)
-
 
     def test_mc_halo_centric_pos(self):
         """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`.

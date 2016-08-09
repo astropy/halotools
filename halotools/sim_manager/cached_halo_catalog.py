@@ -211,7 +211,6 @@ class CachedHaloCatalog(object):
 
         self._set_publication_list(self.simname)
 
-
     def _set_publication_list(self, simname):
         try:
             simclass = supported_sims.supported_sim_dict[simname]
