@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-
 Modules performing small, commonly used tasks throughout the package.
-
 """
 
-from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from math import ceil
 import numpy as np

@@ -1,16 +1,13 @@
-#!/usr/bin/env python
+"""
+"""
 import numpy as np
-from astropy.table import Table
-from copy import copy, deepcopy
 
 from astropy.tests.helper import pytest
 from unittest import TestCase
-import warnings
 from astropy.utils.misc import NumpyRNGContext
 
 from ..occupation_model_template import OccupationComponent
 
-from ... import model_defaults
 from ...factories import PrebuiltHodModelFactory, HodModelFactory
 
 from ....sim_manager import FakeSim

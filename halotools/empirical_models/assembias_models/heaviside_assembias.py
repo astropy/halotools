@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains the `~halotools.empirical_models.HeavisideAssembias` class.
 The purpose of this class is to introduce step function-type assembly bias into

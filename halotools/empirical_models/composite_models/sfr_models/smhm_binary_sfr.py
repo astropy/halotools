@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 """
 Module containing a pre-built subhalo-based model
 that has a binary quenching feature.
 """
-from __future__ import (
-    division, print_function, absolute_import)
+from __future__ import division, print_function, absolute_import
 
 from ... import model_defaults
 from ...smhm_models import Behroozi10SmHm

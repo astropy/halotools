@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 This module contains private helper functions used throughout the
 `~halotools.mock_observables.pair_counters` subpackage to perform
 control flow on function arguments, bounds-checking and exception-handling.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from copy import copy

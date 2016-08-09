@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 Module containing the HOD-style composite model based on Leauthaud et al. (2011).
-
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ... import model_defaults
 from ...occupation_models import leauthaud11_components

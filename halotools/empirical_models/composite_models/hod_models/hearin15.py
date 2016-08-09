@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 Module containing some commonly used composite HOD models.
-
 """
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 from ... import factories
 from ...occupation_models import leauthaud11_components

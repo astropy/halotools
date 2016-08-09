@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-
+"""
+"""
 from unittest import TestCase
 from astropy.tests.helper import pytest
 

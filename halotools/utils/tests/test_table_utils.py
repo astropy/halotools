@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-
+"""
+"""
 import numpy as np
 from unittest import TestCase
 from functools import partial

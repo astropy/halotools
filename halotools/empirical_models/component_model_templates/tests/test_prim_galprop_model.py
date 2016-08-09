@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+"""
+"""
 import numpy as np
 from astropy.table import Table
 from unittest import TestCase
