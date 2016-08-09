@@ -7,15 +7,14 @@ from scipy.sparse import coo_matrix
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
+from ..fof_groups import FoFGroups
+
 igraph_available = True
 try:
     import igraph
 except ImportError:
     igraph_available = False
     print("igraph package not installed.  Some functions will not be available.")
-
-from ..fof_groups import FoFGroups
-
 
 __all__ = ['test_fof_groups_init', 'test_fof_group_IDs',
            'test_igraph_functionality']
