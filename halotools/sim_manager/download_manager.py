@@ -239,7 +239,7 @@ class DownloadManager(object):
 
         if ((len(close_matches) > 0)
             & (len(exact_matches) == 0)
-            & (ignore_nearby_redshifts is False)):
+                & (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
@@ -519,7 +519,7 @@ class DownloadManager(object):
 
         if ((len(close_matches) > 0)
             & (len(exact_matches) == 0)
-            & (ignore_nearby_redshifts is False)):
+                & (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
