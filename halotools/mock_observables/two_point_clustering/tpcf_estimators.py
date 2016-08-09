@@ -44,7 +44,7 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     elif estimator == 'Hewett':
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
-        #(DD-DR)/RR
+        # (DD-DR)/RR
         xi = mult(1.0/factor1, DD/RR) - mult(1.0/factor2, DR/RR)
     elif estimator == 'Hamilton':
         # DDRR/DRDR-1
@@ -52,7 +52,7 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     elif estimator == 'Landy-Szalay':
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
-        #(DD - 2.0*DR + RR)/RR
+        # (DD - 2.0*DR + RR)/RR
         xi = mult(1.0/factor1, DD/RR) - mult(1.0/factor2, 2.0*DR/RR) + 1.0
     else:
         raise ValueError("unsupported estimator!")

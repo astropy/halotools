@@ -32,7 +32,7 @@ def test_pairwise_distance_3d_periodic_mesh_grid_1():
     m = pairwise_distance_3d(mesh_sample, mesh_sample, rmax, period=period)
 
     # each point has 7 connections including 1 self connection
-    #N = (10^3)*7
+    # N = (10^3)*7
     assert m.getnnz() == 7000
 
     # diagonal self matches should have distance 0
@@ -57,7 +57,7 @@ def test_pairwise_distance_3d_nonperiodic_mesh_grid_1():
     m = pairwise_distance_3d(mesh_sample, mesh_sample, rmax, period=None)
 
     # each point has 7 connections including 1 self connection
-    #N = (10^3)*7
+    # N = (10^3)*7
     # points on the 6 faces have fewer connections N - (10*10*6) = 6400
     # overlapping accounts for edges (2 less) and corners (3 less)
     assert m.getnnz() == 6400

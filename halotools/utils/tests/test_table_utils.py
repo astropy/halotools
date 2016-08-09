@@ -94,9 +94,8 @@ class TestComputeConditionalPercentiles(TestCase):
                 sec_haloprop_key='halo_vmax')
         split = percentiles < 0.5
         low_vmax, high_vmax = self.fake_halo_table[split], self.fake_halo_table[np.invert(split)]
-        #assert len(low_vmax) == len(high_vmax)
 
-    def test_custom_halo_table(self):
+    def test_custom_halo_table2(self):
         prim_haloprop_bin_boundaries = [1e10, 1e13, 1e15]
 
         manual_mass_split = self.custom_halo_table['halo_mvir'] < 1e13
