@@ -177,7 +177,7 @@ class TestNFWProfile(TestCase):
             assert np.allclose(super_class_result, result, rtol=1e-4)
 
             # Verify that we get a self-consistent result between
-            ### enclosed_mass and cumulative_mass_PDF
+            # enclosed_mass and cumulative_mass_PDF
             halo_radius = model.halo_mass_to_halo_radius(total_mass)
             radius = scaled_radius*halo_radius
             enclosed_mass = model.enclosed_mass(radius, total_mass, conc)

@@ -119,7 +119,7 @@ class HodMockFactory(MockFactory):
         except AssertionError:
             raise HalotoolsError(missing_halo_upid_msg)
 
-        ################ Make cuts on halo catalog ################
+        # Make cuts on halo catalog #
         # Select host halos only, since this is an HOD-style model
         halo_table = SampleSelector.host_halo_selection(table=halocat.halo_table)
 
