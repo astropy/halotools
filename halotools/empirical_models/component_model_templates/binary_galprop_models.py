@@ -322,7 +322,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                 self._abscissa, model_ordinates, prim_haloprop)
         elif self._interpol_method == 'spline':
             spline_function = model_helpers.custom_spline(
-                self._abscissa, model_ordinates,
+                    self._abscissa, model_ordinates,
                     k=self._spline_degree)
             mean_galprop_fraction = spline_function(prim_haloprop)
         else:

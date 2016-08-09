@@ -220,14 +220,14 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     # calculate 1-halo pairs
     weight_func_id = 3
     one_halo_D1D1, one_halo_D1D2, one_halo_D2D2 = marked_pair_counts(
-        sample1, sample2, rbins, period, num_threads,
+            sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
             sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
 
     # calculate 2-halo pairs
     weight_func_id = 4
     two_halo_D1D1, two_halo_D1D2, two_halo_D2D2 = marked_pair_counts(
-        sample1, sample2, rbins, period, num_threads,
+            sample1, sample2, rbins, period, num_threads,
             do_auto, do_cross, sample1_host_halo_id,
             sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
 

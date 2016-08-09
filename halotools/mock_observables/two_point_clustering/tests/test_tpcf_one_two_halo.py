@@ -187,22 +187,22 @@ def test_tpcf_decomposition_cross_consistency():
 
     result_a = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=True, do_cross=True)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=True, do_cross=True)
     result_1h_12a, result_2h_12a = result_a[2:4]
 
     result_b = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=False, do_cross=True)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=False, do_cross=True)
     result_1h_12b, result_2h_12b = result_b[0:2]
 
     assert np.allclose(result_1h_12a, result_1h_12b)
@@ -219,23 +219,23 @@ def test_tpcf_decomposition_auto_consistency():
 
     result_a = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=True, do_cross=True)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=True, do_cross=True)
     result_1h_11a, result_2h_11a = result_a[0:2]
     result_1h_22a, result_2h_22a = result_a[4:6]
 
     result_1h_11b, result_2h_11b, result_1h_22b, result_2h_22b = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
-      sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
-      estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
-      approx_cell2_size=[rmax, rmax, rmax],
-      approx_cellran_size=[rmax, rmax, rmax],
-      do_auto=True, do_cross=False)
+        sample2_host_halo_id=IDs2, randoms=None,
+        period=period, max_sample_size=int(1e4),
+        estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
+        approx_cell2_size=[rmax, rmax, rmax],
+        approx_cellran_size=[rmax, rmax, rmax],
+        do_auto=True, do_cross=False)
 
     assert np.allclose(result_1h_11a, result_1h_11b)
     assert np.allclose(result_2h_11a, result_2h_11b)
