@@ -405,7 +405,9 @@ def test_RR_precomputed_natural_estimator_auto():
     NR = len(randoms)
 
     factor = N1*N1/(NR*NR)
-    mult = lambda x, y: x*y
+
+    def mult(x, y):
+        return x*y
     xi_11 = mult(1.0/factor, D1D1/RR) - 1.0
 
     # The following assertion implies that the RR
@@ -490,7 +492,8 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     factor1 = ND1*ND2/(NR1*NR2)
     factor2 = ND1*NR2/(NR1*NR2)
 
-    mult = lambda x, y: x*y
+    def mult(x, y):
+        return x*y
     xi_11 = mult(1.0/factor1, D1D1/RR) - mult(1.0/factor2, 2.0*D1R/RR) + 1.0
 
     # # The following assertion implies that the RR

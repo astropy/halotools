@@ -27,9 +27,11 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
         # the outer dimension is the number of samples.
         # the N arrays are the number of points in each dimension.
         # so, what we want to do is multiple each row of e.g. DD by the number of 1/N
-        mult = lambda x, y: (x*y.T).T  # annoying and ugly, but works.
+        def mult(x, y):
+            return (x*y.T).T
     else:
-        mult = lambda x, y: x*y  # used for all else
+        def mult(x, y):
+            return x*y
 
     _test_for_zero_division(DD, DR, RR, ND1, ND2, NR1, NR2, estimator)
 

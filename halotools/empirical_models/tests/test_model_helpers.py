@@ -72,7 +72,8 @@ def test_bind_default_kwarg_mixin_safe():
 def test_bounds_enforcing_decorator_factory():
     """
     """
-    f = lambda x: x
+    def f(x):
+        return x
     decorator = occuhelp.bounds_enforcing_decorator_factory(0, 1, warning=True)
     decorated_f = decorator(f)
     result = decorated_f(-1)

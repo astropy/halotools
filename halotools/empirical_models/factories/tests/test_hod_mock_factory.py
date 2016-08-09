@@ -77,7 +77,9 @@ class TestHodMockFactory(TestCase):
         self.model.populate_mock(self.fakesim)
 
         self.galaxy_table1 = deepcopy(self.model.mock.galaxy_table)
-        f100x = lambda t: t['halo_x'] > 100
+
+        def f100x(t):
+            return t['halo_x'] > 100
         self.model.mock.populate(masking_function=f100x)
         self.galaxy_table2 = deepcopy(self.model.mock.galaxy_table)
 
@@ -86,8 +88,11 @@ class TestHodMockFactory(TestCase):
 
         model = PrebuiltHodModelFactory('zheng07')
 
-        f100x = lambda t: t['halo_x'] > 100
-        f150z = lambda t: t['halo_z'] > 150
+        def f100x(t):
+            return t['halo_x'] > 100
+
+        def f150z(t):
+            return t['halo_z'] > 150
 
         halocat = FakeSim()
         model.populate_mock(halocat, masking_function=f100x)
@@ -131,7 +136,8 @@ class TestHodMockFactory(TestCase):
         sats = model.mock.galaxy_table[~cenmask]
         assert np.any(sats['halo_x'] != sats['x'])
 
-        f100x = lambda t: t['halo_x'] > 100
+        def f100x(t):
+            return t['halo_x'] > 100
         model.populate_mock(halocat, masking_function=f100x)
         cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
         cens = model.mock.galaxy_table[cenmask]
