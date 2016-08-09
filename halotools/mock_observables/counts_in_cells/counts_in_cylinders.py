@@ -133,7 +133,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius,
             cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length = result[0:8]
@@ -144,7 +144,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     pi_max = np.max(cylinder_half_length)
     search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

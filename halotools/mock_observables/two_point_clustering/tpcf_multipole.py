@@ -70,18 +70,18 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     >>> xi_2 = tpcf_multipole(xi_s_mu, mu_bins, order=2)
     """
 
-    #process inputs
+    # process inputs
     s_mu_tcpf_result = np.atleast_1d(s_mu_tcpf_result)
     mu_bins = np.atleast_1d(mu_bins)
     order = int(order)
 
-    #calculate the center of each mu bin
+    # calculate the center of each mu bin
     mu_bin_centers = (mu_bins[:-1]+mu_bins[1:])/(2.0)
 
-    #get the Legendre polynomial of the desired order.
+    # get the Legendre polynomial of the desired order.
     Ln = legendre(order)
 
-    #numerically integrate over mu
+    # numerically integrate over mu
     result = (2.0*order + 1.0)/2.0 *\
              np.sum(s_mu_tcpf_result * np.diff(mu_bins) * Ln(mu_bin_centers), axis=1)
 

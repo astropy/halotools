@@ -23,10 +23,10 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
     Ns = np.array([len(ND1), len(ND2), len(NR1), len(NR2)])
 
     if np.any(Ns > 1):
-        #used for the jackknife calculations
-        #the outer dimension is the number of samples.
-        #the N arrays are the number of points in each dimension.
-        #so, what we want to do is multiple each row of e.g. DD by the number of 1/N
+        # used for the jackknife calculations
+        # the outer dimension is the number of samples.
+        # the N arrays are the number of points in each dimension.
+        # so, what we want to do is multiple each row of e.g. DD by the number of 1/N
         mult = lambda x, y: (x*y.T).T  # annoying and ugly, but works.
     else:
         mult = lambda x, y: x*y  # used for all else
@@ -35,11 +35,11 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
 
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
-        #DD/RR-1
+        # DD/RR-1
         xi = mult(1.0/factor, DD/RR) - 1.0
     elif estimator == 'Davis-Peebles':
         factor = ND1*ND2/(ND1*NR2)
-        #DD/DR-1
+        # DD/DR-1
         xi = mult(1.0/factor, DD/DR) - 1.0
     elif estimator == 'Hewett':
         factor1 = ND1*ND2/(NR1*NR2)
@@ -47,7 +47,7 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
         #(DD-DR)/RR
         xi = mult(1.0/factor1, DD/RR) - mult(1.0/factor2, DR/RR)
     elif estimator == 'Hamilton':
-        #DDRR/DRDR-1
+        # DDRR/DRDR-1
         xi = (DD*RR)/(DR*DR) - 1.0
     elif estimator == 'Landy-Szalay':
         factor1 = ND1*ND2/(NR1*NR2)

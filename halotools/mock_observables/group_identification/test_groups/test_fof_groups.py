@@ -84,7 +84,7 @@ def test_igraph_functionality():
         assert len(multiplicity) == N
 
         edges = fof_group.get_edges()
-        #the number of edges is half the sum of vertex degrees of the graph
+        # the number of edges is half the sum of vertex degrees of the graph
         assert len(edges) == np.sum(fof_group.degree)/2
 
         lens = fof_group.get_edge_lengths()

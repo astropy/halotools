@@ -405,7 +405,7 @@ class MonteCarloGalProf(object):
         if x is None:
             return None, None, None
 
-        ### Retrieve the halo_radius
+        # Retrieve the halo_radius
         if 'table' in kwargs:
             table = kwargs['table']
             halo_radius = table[self.halo_boundary_key]

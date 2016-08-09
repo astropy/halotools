@@ -98,7 +98,7 @@ def _process_radial_bins(rbins, period, PBCs):
     process radial bin parameter
     """
 
-    #check the radial bins parameter
+    # check the radial bins parameter
     rbins = np.atleast_1d(rbins)
     rmax = np.max(rbins)
     try:
@@ -111,7 +111,7 @@ def _process_radial_bins(rbins, period, PBCs):
                "1-D array with at least two entries.")
         raise ValueError(msg)
 
-    #check for input parameter consistency
+    # check for input parameter consistency
     if PBCs:
         if (rmax >= np.min(period)/3.0):
             msg = ("\n The maximum length over which you search for pairs \n"
@@ -128,7 +128,7 @@ def _process_rp_bins(rp_bins, pi_max, period, PBCs):
     process projected radial bin and pi_max parameters
     """
 
-    #process projected radial bins
+    # process projected radial bins
     rp_bins = np.atleast_1d(rp_bins)
     rp_max = np.max(rp_bins)
     try:

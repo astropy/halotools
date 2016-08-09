@@ -7,7 +7,7 @@ from ....factories import PrebuiltHodModelFactory
 
 from .....sim_manager import FakeSim
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files

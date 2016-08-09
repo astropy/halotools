@@ -158,7 +158,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
     be considered neighbors of *p*.
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -167,7 +167,7 @@ def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None,
 
     search_xlength, search_ylength, search_zlength = max_rp_max, max_rp_max, max_pi_max
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

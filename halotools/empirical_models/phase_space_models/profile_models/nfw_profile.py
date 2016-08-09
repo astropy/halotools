@@ -634,7 +634,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         funcobj = custom_spline(log_table_ordinates, logradius_array, k=4)
 
         # Use method of Inverse Transform Sampling to generate a Monte Carlo realization
-        ### of the radial positions
+        # of the radial positions
         with NumpyRNGContext(seed):
             randoms = np.random.uniform(0, 1, num_pts)
         log_randoms = np.log10(randoms)

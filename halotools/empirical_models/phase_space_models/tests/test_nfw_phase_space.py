@@ -54,24 +54,24 @@ class TestNFWPhaseSpace(TestCase):
     def test_constructor(self):
         """ Test that composite phase space models have all the appropriate attributes.
         """
-        ### MonteCarloGalProf attributes
+        # MonteCarloGalProf attributes
         assert hasattr(self.nfw, 'logradius_array')
         assert hasattr(self.nfw, 'rad_prof_func_table')
         assert hasattr(self.nfw, 'vel_prof_func_table')
         assert hasattr(self.nfw, '_mc_dimensionless_radial_distance')
 
-        ### NFWPhaseSpace attributes
+        # NFWPhaseSpace attributes
         assert hasattr(self.nfw, 'assign_phase_space')
         assert hasattr(self.nfw, '_galprop_dtypes_to_allocate')
 
-        ### AnalyticDensityProf attributes
+        # AnalyticDensityProf attributes
         assert hasattr(self.nfw, 'circular_velocity')
 
-        ### NFWProfile attributes
+        # NFWProfile attributes
         assert hasattr(self.nfw, 'mass_density')
         assert hasattr(self.nfw, 'prof_param_keys')
 
-        ### ConcMass
+        # ConcMass
         assert hasattr(self.nfw, 'conc_NFWmodel')
         assert hasattr(self.nfw, 'conc_mass_model')
 
@@ -335,8 +335,8 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw.mc_vel(self._dummy_halo_table, seed=fixed_seed)
         assert np.any(self._dummy_halo_table['vx'] != self._dummy_halo_table['halo_vx'])
 
-    ### OLD TESTS OF THE NFW PROFILE MODEL
-    ### THESE ARE STILL RELEVANT BUT NEED TO BE REVAMPED TO THE NEW SYNTAX
+    # OLD TESTS OF THE NFW PROFILE MODEL
+    # THESE ARE STILL RELEVANT BUT NEED TO BE REVAMPED TO THE NEW SYNTAX
     # # Check that the lookup table attributes are correct
     # model_instance.build_inv_cumu_lookup_table()
 

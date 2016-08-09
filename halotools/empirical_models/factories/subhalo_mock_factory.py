@@ -87,7 +87,7 @@ class SubhaloMockFactory(MockFactory):
             ('halo_mvir_host_halo' in list(halo_table.keys()))):
             self.additional_haloprops.append('halo_mvir_host_halo')
 
-        ### Create new columns of the halo catalog, if applicable
+        # Create new columns of the halo catalog, if applicable
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.items():

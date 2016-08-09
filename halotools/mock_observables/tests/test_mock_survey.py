@@ -13,7 +13,7 @@ __all__ = ('test_ra_dec_z', )
 
 fixed_seed = 43
 
-#create some toy data to test functions
+# create some toy data to test functions
 N = 100
 with NumpyRNGContext(fixed_seed):
     x = np.random.random((N, 3))

@@ -116,7 +116,7 @@ class Tinker13Cens(OccupationComponent):
             self.param_dict[active_key] = value
             self.param_dict[quiescent_key] = value
 
-        ### From Table 2 of Tinker+13
+        # From Table 2 of Tinker+13
         self.param_dict['smhm_m1_0_active'] = 12.56
         self.param_dict['smhm_m1_0_quiescent'] = 12.08
         self.param_dict['smhm_m0_0_active'] = 10.96

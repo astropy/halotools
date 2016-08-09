@@ -135,7 +135,7 @@ class FoFGroups(object):
         self.b_para = float(b_para)  # parallel linking length
         self.positions = np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
 
-        #process Lbox parameter
+        # process Lbox parameter
         if (Lbox is None) & (period is None):
             raise ValueError("Lbox and Period cannot be both be None.")
         elif (Lbox is None) & (period is not None):
@@ -157,7 +157,7 @@ class FoFGroups(object):
 
         self.period = period  # simulation box periodic boundary conditions
         self.Lbox = np.asarray(Lbox, dtype='float64')  # simulation box periodic boundary conditions
-        #calculate the physical linking lengths
+        # calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)
         self.n_gal = len(positions)/self.volume
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))

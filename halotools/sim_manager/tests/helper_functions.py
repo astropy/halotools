@@ -9,7 +9,7 @@ from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files

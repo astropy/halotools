@@ -36,7 +36,7 @@ def test_tpcf_auto():
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
-    #with randoms
+    # with randoms
     result = tpcf(sample1, rbins, sample2=None,
                   randoms=randoms, period=None,
                   max_sample_size=int(1e4), estimator='Natural',
@@ -44,7 +44,7 @@ def test_tpcf_auto():
                   approx_cellran_size=[rmax, rmax, rmax])
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
-    #with out randoms
+    # with out randoms
     result = tpcf(sample1, rbins, sample2=None,
                   randoms=None, period=period,
                   max_sample_size=int(1e4), estimator='Natural',
@@ -65,14 +65,14 @@ def test_tpcf_cross():
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
-    #with randoms
+    # with randoms
     result = tpcf(sample1, rbins, sample2=sample2,
                   randoms=randoms, period=None,
                   max_sample_size=int(1e4), estimator='Natural', do_auto=False,
                   approx_cell1_size=[rmax, rmax, rmax])
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
-    #with out randoms
+    # with out randoms
     result = tpcf(sample1, rbins, sample2=sample2,
                   randoms=None, period=period,
                   max_sample_size=int(1e4), estimator='Natural', do_auto=False,
@@ -158,26 +158,26 @@ def test_tpcf_randoms():
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
-    #No PBCs w/ randoms
+    # No PBCs w/ randoms
     result_1 = tpcf(sample1, rbins, sample2=sample2,
                     randoms=randoms, period=None,
                     max_sample_size=int(1e4), estimator='Natural',
                     approx_cell1_size=[rmax, rmax, rmax],
                     approx_cellran_size=[rmax, rmax, rmax])
-    #PBCs w/o randoms
+    # PBCs w/o randoms
     result_2 = tpcf(sample1, rbins, sample2=sample2,
                     randoms=None, period=period,
                     max_sample_size=int(1e4), estimator='Natural',
                     approx_cell1_size=[rmax, rmax, rmax],
                     approx_cellran_size=[rmax, rmax, rmax])
-    #PBCs w/ randoms
+    # PBCs w/ randoms
     result_3 = tpcf(sample1, rbins, sample2=sample2,
                     randoms=randoms, period=period,
                     max_sample_size=int(1e4), estimator='Natural',
                     approx_cell1_size=[rmax, rmax, rmax],
                     approx_cellran_size=[rmax, rmax, rmax])
 
-    #No PBCs and no randoms should throw an error.
+    # No PBCs and no randoms should throw an error.
     with pytest.raises(ValueError) as err:
         tpcf(sample1, rbins, sample2=sample2,
              randoms=None, period=None,
@@ -216,7 +216,7 @@ def test_tpcf_period_API():
                     max_sample_size=int(1e4), estimator='Natural',
                     approx_cell1_size=[rmax, rmax, rmax])
 
-    #should throw an error.  period must be positive!
+    # should throw an error.  period must be positive!
     period = np.array([1.0, 1.0, -1.0])
     with pytest.raises(ValueError) as err:
         tpcf(sample1, rbins, sample2=sample2,
@@ -243,7 +243,7 @@ def test_tpcf_cross_consistency_w_auto():
     rbins = np.linspace(0.001, 0.3, 5)
     rmax = rbins.max()
 
-    #with out randoms
+    # with out randoms
     result1 = tpcf(sample1, rbins, sample2=None,
                    randoms=None, period=period,
                    max_sample_size=int(1e4), estimator='Natural',
@@ -263,7 +263,7 @@ def test_tpcf_cross_consistency_w_auto():
     assert np.allclose(result1, result1_p), "cross mode and auto mode are not the same"
     assert np.allclose(result2, result2_p), "cross mode and auto mode are not the same"
 
-    #with randoms
+    # with randoms
     result1 = tpcf(sample1, rbins, sample2=None,
                    randoms=randoms, period=period,
                    max_sample_size=int(1e4), estimator='Natural',
@@ -389,13 +389,13 @@ def test_RR_precomputed_natural_estimator_auto():
 
     from ..tpcf import _random_counts, _pair_counts
 
-    #count data pairs
+    # count data pairs
     D1D1, D1D2, D2D2 = _pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
 
-    #count random pairs
+    # count random pairs
     D1R, D2R, RR = _random_counts(
         sample1, sample2, randoms, rbins, period,
         PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
@@ -470,13 +470,13 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
 
     from ..tpcf import _random_counts, _pair_counts
 
-    #count data pairs
+    # count data pairs
     D1D1, D1D2, D2D2 = _pair_counts(
         sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
 
-    #count random pairs
+    # count random pairs
     D1R, D2R, RR = _random_counts(
         sample1, sample2, randoms, rbins, period,
         PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,

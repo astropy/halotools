@@ -204,11 +204,11 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     if randoms is not None:
         NR = len(randoms)
     else:
-        #set the number of randoms equal to the number of points in sample1
-        #this is arbitrarily set, but must remain consistent!
+        # set the number of randoms equal to the number of points in sample1
+        # this is arbitrarily set, but must remain consistent!
         NR = N1
 
-    #count pairs
+    # count pairs
     D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins,
         period, num_threads, do_auto, do_cross,
         _sample1_is_sample2, approx_cell1_size, approx_cell2_size)
@@ -288,7 +288,7 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
     shells, which is the correct volume to use for a continious cubic volume with PBCs
     """
 
-    #No PBCs, randoms must have been provided.
+    # No PBCs, randoms must have been provided.
     if randoms is not None:
         if do_RR is True:
             RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins,
@@ -316,28 +316,28 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
             else: D2R = None
 
         return D1R, D2R, RR
-    #PBCs and no randoms--calculate randoms analytically.
+    # PBCs and no randoms--calculate randoms analytically.
     elif randoms is None:
 
-        #set the number of randoms equal to the number of points in sample1
+        # set the number of randoms equal to the number of points in sample1
         NR = len(sample1)
 
-        #do volume calculations
+        # do volume calculations
         v = cylinder_volume(rp_bins, 2.0*pi_bins)  # volume of spheres
         dv = np.diff(np.diff(v, axis=0), axis=1)  # volume of annuli
         global_volume = period.prod()
 
-        #calculate randoms for sample1
+        # calculate randoms for sample1
         N1 = np.shape(sample1)[0]
         rho1 = N1/global_volume
         D1R = (N1)*(dv*rho1)  # read note about pair counter
 
-        #calculate randoms for sample2
+        # calculate randoms for sample2
         N2 = np.shape(sample2)[0]
         rho2 = N2/global_volume
         D2R = N2*(dv*rho2)  # read note about pair counter
 
-        #calculate the random-random pairs.
+        # calculate the random-random pairs.
         rhor = NR**2/global_volume
         RR = (dv*rhor)  # RR is only the RR for the cross-correlation.
 

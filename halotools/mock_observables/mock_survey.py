@@ -69,36 +69,36 @@ def ra_dec_z(x, v, cosmo=None):
     >>> ra, dec, redshift = ra_dec_z(coords, vels, cosmo = cosmo)
     """
 
-    #calculate the observed redshift
+    # calculate the observed redshift
     if cosmo is None:
         cosmo = cosmology.FlatLambdaCDM(H0=0.7, Om0=0.3)
     c_km_s = c.to('km/s').value
 
-    #remove h scaling from position so we can use the cosmo object
+    # remove h scaling from position so we can use the cosmo object
     x = x/cosmo.h
 
-    #compute comoving distance from observer
+    # compute comoving distance from observer
     r = np.sqrt(x[:, 0]**2+x[:, 1]**2+x[:, 2]**2)
 
-    #compute radial velocity
+    # compute radial velocity
     ct = x[:, 2]/r
     st = np.sqrt(1.0 - ct**2)
     cp = x[:, 0]/np.sqrt(x[:, 0]**2 + x[:, 1]**2)
     sp = x[:, 1]/np.sqrt(x[:, 0]**2 + x[:, 1]**2)
     vr = v[:, 0]*st*cp + v[:, 1]*st*sp + v[:, 2]*ct
 
-    #compute cosmological redshift and add contribution from perculiar velocity
+    # compute cosmological redshift and add contribution from perculiar velocity
     yy = np.arange(0, 1.0, 0.001)
     xx = cosmo.comoving_distance(yy).value
     f = interp1d(xx, yy, kind='cubic')
     z_cos = f(r)
     redshift = z_cos+(vr/c_km_s)*(1.0+z_cos)
 
-    #calculate spherical coordinates
+    # calculate spherical coordinates
     theta = np.arccos(x[:, 2]/r)
     phi = np.arctan2(x[:, 1], x[:, 0])
 
-    #convert spherical coordinates into ra,dec
+    # convert spherical coordinates into ra,dec
     ra = phi
     dec = theta - np.pi/2.0
 

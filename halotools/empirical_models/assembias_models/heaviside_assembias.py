@@ -404,9 +404,9 @@ class HeavisideAssembias(object):
         def wrapper(*args, **kwargs):
 
             #################################################################################
-            ### Retrieve the arrays storing prim_haloprop and sec_haloprop
-            ### The control flow below is what permits accepting an input
-            ### table or a directly inputting prim_haloprop and sec_haloprop arrays
+            # Retrieve the arrays storing prim_haloprop and sec_haloprop
+            # The control flow below is what permits accepting an input
+            # table or a directly inputting prim_haloprop and sec_haloprop arrays
             _HAS_table = False
             if 'table' in kwargs:
                 try:
@@ -440,14 +440,14 @@ class HeavisideAssembias(object):
 
             #################################################################################
 
-            ### Compute the fraction of type-2 halos as a function of the input prim_haloprop
+            # Compute the fraction of type-2 halos as a function of the input prim_haloprop
             split = self.percentile_splitting_function(prim_haloprop)
 
-            ### Compute the baseline, undecorated result
+            # Compute the baseline, undecorated result
             result = func(*args, **kwargs)
 
             # We will only decorate values that are not edge cases,
-            ### so first compute the mask for non-edge cases
+            # so first compute the mask for non-edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) &
                 (result > baseline_lower_bound) & (result < baseline_upper_bound)

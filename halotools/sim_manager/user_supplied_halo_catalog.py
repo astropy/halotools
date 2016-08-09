@@ -360,7 +360,7 @@ class UserSuppliedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         ############################################################
-        ## Perform some consistency checks in the fname
+        # Perform some consistency checks in the fname
         if (os.path.isfile(fname)) & (overwrite is False):
             msg = ("\nYou attempted to store your halo catalog "
                 "in the following location: \n\n" + str(fname) +
@@ -379,7 +379,7 @@ class UserSuppliedHaloCatalog(object):
             msg = ("\nThe fname must end with an ``.hdf5`` extension.\n")
             raise HalotoolsError(msg)
         ############################################################
-        ## Perform consistency checks on the remaining log entry attributes
+        # Perform consistency checks on the remaining log entry attributes
         try:
             _ = str(simname)
             _ = str(halo_finder)

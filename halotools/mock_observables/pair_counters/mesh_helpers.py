@@ -72,7 +72,7 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period):
     """
 
     #################################################
-    ### Set the approximate cell sizes of the trees
+    # Set the approximate cell sizes of the trees
     if approx_cell1_size is None:
         approx_cell1_size = period/10.0
     else:

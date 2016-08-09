@@ -197,11 +197,11 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
 
     """
 
-    #define the volume to search for pairs
+    # define the volume to search for pairs
     pi_max = float(pi_max)
     pi_bins = np.array([0.0, pi_max])
 
-    #process input parameters
+    # process input parameters
     function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
         do_cross, estimator, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
@@ -211,7 +211,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     if _sample1_is_sample2:
         sample2 = None
 
-    #pass the arguments into the redshift space TPCF function
+    # pass the arguments into the redshift space TPCF function
     result = rp_pi_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,
         sample2=sample2, randoms=randoms,
         period=period, do_auto=do_auto, do_cross=do_cross,
@@ -221,7 +221,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         approx_cell2_size=approx_cell2_size,
         approx_cellran_size=approx_cellran_size)
 
-    #return the results.
+    # return the results.
     if _sample1_is_sample2:
         D1D1 = result[:, 0]
         wp_D1D1 = 2.0*D1D1*pi_max

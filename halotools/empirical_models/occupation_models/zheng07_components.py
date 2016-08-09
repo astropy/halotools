@@ -172,7 +172,7 @@ class Zheng07Cens(OccupationComponent):
         """
 
         def get_zheng07_params(threshold):
-            #Load tabulated data from Zheng et al. 2007, Table 1
+            # Load tabulated data from Zheng et al. 2007, Table 1
             logMmin_array = [11.35, 11.46, 11.6, 11.75, 12.02, 12.3, 12.79, 13.38, 14.22]
             sigma_logM_array = [0.25, 0.24, 0.26, 0.28, 0.26, 0.21, 0.39, 0.51, 0.77]
             # define the luminosity thresholds corresponding to the above data
@@ -458,7 +458,7 @@ class Zheng07Sats(OccupationComponent):
         """
 
         def get_zheng07_params(threshold):
-            #Load tabulated data from Zheng et al. 2007, Table 1
+            # Load tabulated data from Zheng et al. 2007, Table 1
             logM0_array = [11.2, 10.59, 11.49, 11.69, 11.38, 11.84, 11.92, 13.94, 14.0]
             logM1_array = [12.4, 12.68, 12.83, 13.01, 13.31, 13.58, 13.94, 13.91, 14.69]
             alpha_array = [0.83, 0.97, 1.02, 1.06, 1.06, 1.12, 1.15, 1.04, 0.87]

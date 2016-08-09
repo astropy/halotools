@@ -69,7 +69,7 @@ class TestZheng07Cens(TestCase):
 
     def test_mean_ncen_scaling1(self):
 
-        ### Now make sure the value of <Ncen> scales reasonably with the parameters
+        # Now make sure the value of <Ncen> scales reasonably with the parameters
 
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
         occ2_lowmass = self.model2.mean_occupation(prim_haloprop=self.lowmass)
@@ -87,7 +87,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation1(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
 
@@ -99,7 +99,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation2(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
 
@@ -111,7 +111,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation3(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
         defocc_lowmass = self.default_model.mean_occupation(prim_haloprop=self.lowmass)
 
@@ -123,7 +123,7 @@ class TestZheng07Cens(TestCase):
 
     def test_param_dict_propagation4(self):
 
-        ### Verify that directly changing model parameters
+        # Verify that directly changing model parameters
         # without a new instantiation also behaves properly
 
         defocc_highmass = self.default_model.mean_occupation(prim_haloprop=self.highmass)
@@ -158,7 +158,7 @@ class TestZheng07Cens(TestCase):
 
     def enforce_mc_occupation_behavior(self, model):
 
-        ### Check the Monte Carlo realization method
+        # Check the Monte Carlo realization method
         assert hasattr(model, 'mc_occupation')
 
         # First check that the mean occuation is ~0.5 when model is evaulated at Mmin
@@ -262,7 +262,7 @@ class TestZheng07Sats(TestCase):
 
     def test_default_model(self):
 
-        ### First test the model with all default settings
+        # First test the model with all default settings
 
         self.enforce_required_attributes(self.default_model)
         self.enforce_mean_occupation_behavior(self.default_model)
@@ -297,7 +297,7 @@ class TestZheng07Sats(TestCase):
 
     def enforce_mc_occupation_behavior(self, model):
 
-        ### Check the Monte Carlo realization method
+        # Check the Monte Carlo realization method
         assert hasattr(model, 'mc_occupation')
 
         model.param_dict['alpha'] = 1

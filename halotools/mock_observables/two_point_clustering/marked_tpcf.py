@@ -305,7 +305,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     within the statistical errors.
     """
 
-    #process parameters
+    # process parameters
     function_args = (sample1, rbins, sample2, marks1, marks2,
         period, do_auto, do_cross, num_threads, max_sample_size,
         weight_func_id, normalize_by, iterations, randomize_marks, seed)
@@ -313,22 +313,22 @@ def marked_tpcf(sample1, rbins, sample2=None,
         weight_func_id, normalize_by, _sample1_is_sample2, PBCs,\
         randomize_marks = _marked_tpcf_process_args(*function_args)
 
-    #calculate marked pairs
+    # calculate marked pairs
     W1W1, W1W2, W2W2 = marked_pair_counts(sample1, sample2, rbins, period,
         num_threads, do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2)
 
     if normalize_by == 'number_counts':
         R1R1, R1R2, R2R2 = pair_counts(sample1, sample2, rbins, period,
             num_threads, do_auto, do_cross, _sample1_is_sample2, None, None)
-    #calculate randomized marked pairs
+    # calculate randomized marked pairs
     elif normalize_by == 'random_marks':
         if iterations > 1:
-            #create storage arrays of the right shape
+            # create storage arrays of the right shape
             R1R1 = np.zeros((iterations, len(rbins)-1))
             R1R2 = np.zeros((iterations, len(rbins)-1))
             R2R2 = np.zeros((iterations, len(rbins)-1))
             for i in range(iterations):
-                #get arrays to randomize marks
+                # get arrays to randomize marks
                 with NumpyRNGContext(seed):
                     permutate1 = np.random.permutation(np.arange(0, len(sample1)))
                     permutate2 = np.random.permutation(np.arange(0, len(sample2)))
@@ -341,7 +341,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
             R1R2 = np.median(R1R2, axis=0)
             R2R2 = np.median(R2R2, axis=0)
         else:
-            #get arrays to randomize marks
+            # get arrays to randomize marks
             with NumpyRNGContext(seed):
                 permutate1 = np.random.permutation(np.arange(0, len(sample1)))
                 permutate2 = np.random.permutation(np.arange(0, len(sample2)))
@@ -349,7 +349,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 num_threads, do_auto, do_cross, marks1, marks2, weight_func_id,
                 _sample1_is_sample2, permutate1, permutate2, randomize_marks)
 
-    #return results
+    # return results
     if _sample1_is_sample2:
         M_11 = W1W1/R1R1
         return M_11
@@ -498,19 +498,19 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
         sample1, sample2, do_cross)
 
-    #process wfunc parameter
+    # process wfunc parameter
     try:
         int(wfunc) == wfunc
     except:
         msg = ("\n `wfunc` parameter must be an integer ID of the desired function.")
         raise ValueError(msg)
 
-    #process normalize_by parameter
+    # process normalize_by parameter
     if normalize_by not in ['random_marks', 'number_counts']:
         msg = ("\n `normalize_by` parameter not recognized.")
         raise ValueError(msg)
 
-    #process marks
+    # process marks
     if marks1 is not None:
         marks1 = np.atleast_1d(marks1).astype(float)
     else:
@@ -546,7 +546,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
                "a `marks2` array of dimension %i")
         raise HalotoolsError(msg % ndim2)
 
-    #check for consistency between marks and samples
+    # check for consistency between marks and samples
     if len(marks1) != len(sample1):
         msg = ("\n `marks1` must have same length as `sample1`.")
         raise HalotoolsError(msg)

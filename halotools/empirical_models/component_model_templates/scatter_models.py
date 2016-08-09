@@ -134,10 +134,10 @@ class LogNormalScatterModel(object):
 
         scatter_scale = self.mean_scatter(**kwargs)
 
-        #initialize result with zero scatter result
+        # initialize result with zero scatter result
         result = np.zeros(len(scatter_scale))
 
-        #only draw from a normal distribution for non-zero values of scatter
+        # only draw from a normal distribution for non-zero values of scatter
         mask = (scatter_scale > 0.0)
         with NumpyRNGContext(seed):
             result[mask] = np.random.normal(loc=0, scale=scatter_scale[mask])

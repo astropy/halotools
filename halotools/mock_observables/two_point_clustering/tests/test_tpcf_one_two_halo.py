@@ -13,7 +13,7 @@ from ....custom_exceptions import HalotoolsError
 
 __all__ = ['test_tpcf_one_two_halo_auto_periodic', 'test_tpcf_one_two_halo_cross_periodic']
 
-#create toy data to test functions
+# create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rbins = np.linspace(0.001, 0.3, 5)
 rmax = rbins.max()

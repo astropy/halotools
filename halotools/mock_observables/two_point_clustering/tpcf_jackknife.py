@@ -210,14 +210,14 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=3, period=Lbox)
     """
 
-    #process input parameters
+    # process input parameters
     function_args = (sample1, randoms, rbins, Nsub, sample2, period, do_auto,
         do_cross, estimator, num_threads, max_sample_size, seed)
     sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _tpcf_jackknife_process_args(*function_args)
 
-    #determine box size the data occupies.
-    #This is used in determining jackknife samples.
+    # determine box size the data occupies.
+    # This is used in determining jackknife samples.
     if PBCs is False:
         sample1, sample2, randoms, Lbox = _enclose_in_box(sample1, sample2, randoms)
     else:
@@ -233,21 +233,21 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     j_index_2, N_sub_vol = cuboid_subvolume_labels(sample2, Nsub, Lbox)
     j_index_random, N_sub_vol = cuboid_subvolume_labels(randoms, Nsub, Lbox)
 
-    #number of points in each subvolume
+    # number of points in each subvolume
     NR_subs = get_subvolume_numbers(j_index_random, N_sub_vol)
     N1_subs = get_subvolume_numbers(j_index_1, N_sub_vol)
     N2_subs = get_subvolume_numbers(j_index_2, N_sub_vol)
-    #number of points in each jackknife sample
+    # number of points in each jackknife sample
     N1_subs = N1 - N1_subs
     N2_subs = N2 - N2_subs
     NR_subs = NR - NR_subs
 
-    #calculate all the pair counts
+    # calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(
         sample1, sample2, j_index_1, j_index_2, N_sub_vol,
         rbins, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
 
-    #pull out the full and sub sample results
+    # pull out the full and sub sample results
     D1D1_full = D1D1[0, :]
     D1D1_sub = D1D1[1:, :]
     D1D2_full = D1D2[0, :]
@@ -255,7 +255,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     D2D2_full = D2D2[0, :]
     D2D2_sub = D2D2[1:, :]
 
-    #do random counts
+    # do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
         rbins, period, num_threads, do_DR, do_RR)
 
@@ -284,17 +284,17 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         RR_full = None
         RR_sub = None
 
-    #calculate the correlation function for the full sample
+    # calculate the correlation function for the full sample
     xi_11_full = _TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
     xi_12_full = _TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
     xi_22_full = _TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
 
-    #calculate the correlation function for the subsamples
+    # calculate the correlation function for the subsamples
     xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
     xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
     xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
 
-    #calculate the covariance matrix
+    # calculate the covariance matrix
     xi_11_cov = np.matrix(np.cov(xi_11_sub.T))
     xi_12_cov = np.matrix(np.cov(xi_12_sub.T))
     xi_22_cov = np.matrix(np.cov(xi_22_sub.T))
@@ -352,9 +352,9 @@ def get_subvolume_numbers(j_index, N_sub_vol):
     calculate how many points are in each subvolume.
     """
 
-    #there could be subvolumes with no points, and we
-    #need every label to be in there at least once. append a vector
-    #of the possible labels, and we can subtract 1 later.
+    # there could be subvolumes with no points, and we
+    # need every label to be in there at least once. append a vector
+    # of the possible labels, and we can subtract 1 later.
     temp = np.hstack((j_index, np.arange(1, N_sub_vol+1, 1)))
 
     labels, N = np.unique(temp, return_counts=True)
@@ -434,7 +434,7 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
 
     period, PBCs = get_period(period)
 
-    #process randoms parameter
+    # process randoms parameter
     if np.shape(randoms) == (1,):
         N_randoms = randoms[0]
         if PBCs is True:
@@ -452,7 +452,7 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)
 
-    #Process Nsub entry and check for consistency.
+    # Process Nsub entry and check for consistency.
     Nsub = np.atleast_1d(Nsub)
     if len(Nsub) == 1:
         Nsub = np.array([Nsub[0]]*3)

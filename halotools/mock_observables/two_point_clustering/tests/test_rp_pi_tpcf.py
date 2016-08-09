@@ -10,7 +10,7 @@ from ..rp_pi_tpcf import rp_pi_tpcf
 __all__ = ('test_rp_pi_tpcf_auto_nonperiodic', 'test_rp_pi_tpcf_auto_periodic',
     'test_rp_pi_tpcf_cross_periodic', 'test_rp_pi_tpcf_cross_nonperiodic')
 
-#create toy data to test functions
+# create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rp_bins = np.linspace(0.001, 0.3, 5)
 pi_bins = np.linspace(0, 0.3, 5)

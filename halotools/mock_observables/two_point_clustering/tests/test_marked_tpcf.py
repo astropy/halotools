@@ -36,7 +36,7 @@ def test_marked_tpcf_auto_periodic():
     with NumpyRNGContext(fixed_seed):
         weights1 = np.random.random(Npts)
 
-    #with randoms
+    # with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
         period=period, num_threads=1, weight_func_id=weight_func_id)
 
@@ -57,7 +57,7 @@ def test_marked_tpcf_auto_nonperiodic():
     with NumpyRNGContext(fixed_seed):
         weights1 = np.random.random(Npts)
 
-    #with randoms
+    # with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,
         period=None, num_threads=1, weight_func_id=weight_func_id)
 

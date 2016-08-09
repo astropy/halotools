@@ -13,7 +13,7 @@ slow = pytest.mark.slow
 
 __all__ = ['test_tpcf_jackknife_corr_func', 'test_tpcf_jackknife_cov_matrix']
 
-#create toy data to test functions
+# create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rbins = np.linspace(0.001, 0.3, 5).astype(float)
 rmax = rbins.max()

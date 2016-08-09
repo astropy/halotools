@@ -249,7 +249,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
 
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _spherical_isolation_process_args(sample1, sample2, r_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -258,7 +258,7 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
 
     search_xlength, search_ylength, search_zlength = max_r_max, max_r_max, max_r_max
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

@@ -22,7 +22,7 @@ except ImportError:
 from . import helper_functions
 from ..halo_table_cache_log_entry import HaloTableCacheLogEntry
 
-### Determine whether the machine is mine
+# Determine whether the machine is mine
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files

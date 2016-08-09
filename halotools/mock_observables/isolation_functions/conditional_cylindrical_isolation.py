@@ -260,7 +260,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     >>> is_isolated = conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max, marks1, marks2, cond_func, period=Lbox)
     """
 
-    ### Process the inputs with the helper function
+    # Process the inputs with the helper function
     result = _cylindrical_isolation_process_args(sample1, sample2, rp_max, pi_max, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
@@ -272,7 +272,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     # Process the input marks and with the helper function
     marks1, marks2 = _conditional_isolation_process_marks(sample1, sample2, marks1, marks2, cond_func)
 
-    ### Compute the estimates for the cell sizes
+    # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
         )

@@ -138,7 +138,7 @@ class ConcMass(object):
                 "which does not correspond to a column of the input ``table``.\n")
             raise HalotoolsError(msg % key)
 
-        ### Impose the model_defaults constraints
+        # Impose the model_defaults constraints
         c = np.where(c > model_defaults.max_permitted_conc,
             model_defaults.max_permitted_conc, c)
         c = np.where(c < model_defaults.min_permitted_conc,

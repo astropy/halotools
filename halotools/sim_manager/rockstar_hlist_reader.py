@@ -726,13 +726,13 @@ class RockstarHlistReader(TabularAsciiReader):
         This implementation will eventually change in favor of something
         more flexible.
         """
-        ### Add the halo_nfw_conc column
+        # Add the halo_nfw_conc column
         if ('halo_rvir' in list(self.halo_table.keys())) & ('halo_rs' in list(self.halo_table.keys())):
             self.halo_table['halo_nfw_conc'] = (
                 self.halo_table['halo_rvir'] / self.halo_table['halo_rs']
                 )
 
-        ### Add the halo_nfw_conc column
+        # Add the halo_nfw_conc column
         self.halo_table['halo_hostid'] = self.halo_table['halo_id']
         subhalo_mask = self.halo_table['halo_upid'] != -1
         self.halo_table['halo_hostid'][subhalo_mask] = (

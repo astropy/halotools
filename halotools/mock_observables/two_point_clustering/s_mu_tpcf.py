@@ -204,7 +204,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     >>> xi = s_mu_tpcf(sample1, s_bins, mu_bins, period=Lbox)
     """
 
-    #process arguments
+    # process arguments
     function_args = (sample1, s_bins, mu_bins, sample2, randoms, period,
         do_auto, do_cross, estimator, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
@@ -212,7 +212,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     sample1, s_bins, mu_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _s_mu_tpcf_process_args(*function_args)
 
-    #what needs to be done?
+    # what needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
 
     # How many points are there (for normalization purposes)?
@@ -221,8 +221,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     if randoms is not None:
         NR = len(randoms)
     else:
-        #set the number of randoms equal to the number of points in sample1
-        #this is arbitrarily set, but must remain consistent!
+        # set the number of randoms equal to the number of points in sample1
+        # this is arbitrarily set, but must remain consistent!
         NR = N1
 
     D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,
@@ -233,8 +233,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
-    #return results.  remember to reverse the final result because we used sin(theta_los)
-    #bins instead of the user passed in mu = cos(theta_los).
+    # return results.  remember to reverse the final result because we used sin(theta_los)
+    # bins instead of the user passed in mu = cos(theta_los).
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
         return xi_11
@@ -282,7 +282,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
     with PBCs
     """
 
-    #PBCs and randoms.
+    # PBCs and randoms.
     if randoms is not None:
         if do_RR is True:
             RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
@@ -310,19 +310,19 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
             else: D2R = None
 
         return D1R, D2R, RR
-    #PBCs and no randoms--calculate randoms analytically.
+    # PBCs and no randoms--calculate randoms analytically.
     elif randoms is None:
 
-        #set the number of randoms equal to the number of points in sample1
+        # set the number of randoms equal to the number of points in sample1
         NR = len(sample1)
 
-        #do volume calculations
+        # do volume calculations
         dv = spherical_sector_volume(s_bins, mu_bins)
         dv = np.diff(dv, axis=1)  # volume of wedges
         dv = np.diff(dv, axis=0)  # volume of wedge 'pieces'
         global_volume = period.prod()
 
-        #calculate randoms for sample1
+        # calculate randoms for sample1
         N1 = np.shape(sample1)[0]
         rho1 = N1/global_volume
         D1R = (N1-1.0)*(dv*rho1)  # read note about pair counter
@@ -331,7 +331,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
         rho2 = N2/global_volume
         D2R = (N2-1.0)*(dv*rho2)  # read note about pair counter
 
-        #calculate the random-random pairs.
+        # calculate the random-random pairs.
         rhor = NR**2/global_volume
         RR = (dv*rhor)
 
@@ -397,16 +397,16 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
         sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
-    #process radial bins
+    # process radial bins
     s_bins = get_separation_bins_array(s_bins)
     s_max = np.max(s_bins)
 
-    #process angular bins
+    # process angular bins
     mu_bins = get_line_of_sight_bins_array(mu_bins)
 
-    #work with the sine of the angle between s and the LOS.  Only using cosine as the
-    #input because of convention.  sin(theta_los) increases as theta_los increases, which
-    #is required in order to get the pair counter to work.
+    # work with the sine of the angle between s and the LOS.  Only using cosine as the
+    # input because of convention.  sin(theta_los) increases as theta_los increases, which
+    # is required in order to get the pair counter to work.
     theta = np.arccos(mu_bins)
     mu_bins = np.sin(theta)[::-1]  # must be increasing, remember to reverse result.
 
