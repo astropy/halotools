@@ -37,6 +37,7 @@ class UserSuppliedPtclCatalog(object):
     See :ref:`working_with_alternative_particle_data` for a tutorial on this class.
 
     """
+
     def __init__(self, **kwargs):
         """
 
