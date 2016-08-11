@@ -69,6 +69,11 @@ def find_idx_nearest_val(array, value):
     >>> val = 45.5
     >>> idx_nearest_val = find_idx_nearest_val(x, val)
     >>> nearest_val = x[idx_nearest_val]
+
+    Notes
+    ------
+    Use of this function is deprecated. The `numpy.argmin` function provides
+    equivalent behavior.
     """
     if custom_len(array) == 0:
         msg = "find_idx_nearest_val method was passed an empty array"

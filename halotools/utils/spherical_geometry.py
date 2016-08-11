@@ -27,6 +27,11 @@ def spherical_to_cartesian(ra, dec):
     x,y,z : sequence of arrays
         Cartesian coordinates.
 
+    Examples
+    ---------
+    >>> ra, dec = 0.1, 1.5
+    >>> x, y, z = spherical_to_cartesian(ra, dec)
+
     """
 
     rar = np.radians(ra)
@@ -57,6 +62,11 @@ def chord_to_cartesian(theta, radians=True):
     --------
     C : array
         chord distance
+
+    Examples
+    --------
+    >>> theta = np.linspace(0, 1, 100)
+    >>> chord_distance = chord_to_cartesian(theta)
     """
 
     theta = np.atleast_1d(theta)
