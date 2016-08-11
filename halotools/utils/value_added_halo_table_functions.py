@@ -19,7 +19,7 @@ def broadcast_host_halo_property(table, halo_property_key,
         delete_possibly_existing_column=False):
     """ Calculate a property of the host of a group system
     and broadcast that property to all group members,
-    e.g., calculate host halo mass or group central star formation rate.
+    e.g., calculate host halo mass.
 
     Parameters
     -----------
@@ -39,11 +39,16 @@ def broadcast_host_halo_property(table, halo_property_key,
     Notes
     --------
     This function is primarily for use with Halotools-formatted halo tables.
-    For example, this function assumes that the table is sorted
-    by ['halo_upid', 'halo_hostid'],
-    and that the new column will be named ``halo_property_key_host_halo``.
-    For more general functionality,
-    use `~halotools.utils.group_member_generator` instead.
+    In particular, this function assumes that the table has
+    a ``halo_id`` and ``halo_hostid`` column.
+
+    Examples
+    ---------
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+    >>> broadcast_host_halo_property(halocat.halo_table, 'halo_spin')
+
+    The ``halo_table`` now has a column called ``halo_spin_host_halo``.
     """
 
     try:
@@ -89,6 +94,13 @@ def add_halo_hostid(table, delete_possibly_existing_column=False):
         If True, the column will be deleted if it exists,
         and no action will be taken if it does not exist.
         Default is False.
+
+    Examples
+    ---------
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+    >>> del halocat.halo_table['halo_hostid']
+    >>> add_halo_hostid(halocat.halo_table)
     """
     try:
         assert type(table) == Table
