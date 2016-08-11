@@ -7,7 +7,7 @@
 
 - Fixed little h bug in the Behroozi10SmHm class. This impacts the Leauthaud11Cens and Leauthaud11Sats classes, as well as the `leauthaud11` composite model.
 
-- Fixed bug in mock_observables.pair_counters.npairs_per_object_3d
+- Fixed bug in mock_observables.pair_counters.npairs_per_object_3d. See https://github.com/astropy/halotools/issues/606.
 
 - New counts_in_cells sub-package in mock_observables
 
@@ -16,6 +16,10 @@
 - Fixed buggy behavior for two-point functions called for logical branch `do_auto=True, do_cross=False`
 
 - Performance enhancement of isolation_functions by 50% - 300%, depending on numerical regime.
+
+- Updated all catalogs to version_name=``halotools_v0p4``, resolving the bug pointed out in https://github.com/astropy/halotools/issues/598.
+
+- Performance enhancement of npairs_s_mu function by 10-100x after cleaning cython engine of python objects.
 
 
 0.3 (2016-06-28)
