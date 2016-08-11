@@ -63,7 +63,6 @@ contribute to the Halotools code base.
    development/index
    development/bug_reports
    development/contributors
-   development/features_planned_for_next_release
 
 
 
