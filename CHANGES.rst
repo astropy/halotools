@@ -1,4 +1,4 @@
-0.4 (unreleased)
+0.4 (2016-08-11)
 ----------------
 
 - All models now support an optional ``seed`` keyword argument, allowing for deterministic Monte Carlo realizations of models. As a result of this feature, it is now mandatory that all user-defined models obey a new constraint. Any function appearing in the ``mock_generation_calling_sequence`` must now use the kwargs Python syntax to catch any additional inputs passed to these functions by the MockFactory.
