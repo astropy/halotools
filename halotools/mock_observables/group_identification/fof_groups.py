@@ -224,7 +224,11 @@ class FoFGroups(object):
 
         """
         if igraph_available is True:
-            self.degree = self.g.degree()
+            try:
+                self.degree = self.g.degree()
+            except AttributeError:
+                self.create_graph()
+                self.degree = self.g.degree()
             return self.degree
         else:
             raise HalotoolsError(no_igraph_msg)
@@ -239,7 +243,11 @@ class FoFGroups(object):
             the 'betweenness' of galaxies in groups
         """
         if igraph_available is True:
-            self.betweenness = self.g.betweenness()
+            try:
+                self.betweenness = self.g.betweenness()
+            except AttributeError:
+                self.create_graph()
+                self.betweenness = self.g.betweenness()
             return self.betweenness
         else:
             raise HalotoolsError(no_igraph_msg)
@@ -249,7 +257,11 @@ class FoFGroups(object):
         Return the multiplicity of galaxies' group (requires igraph package).
         """
         if igraph_available is True:
-            clusters = self.g.clusters()
+            try:
+                clusters = self.g.clusters()
+            except AttributeError:
+                self.create_graph()
+                clusters = self.g.clusters()
             mltp = np.array(clusters.sizes())
             self.multiplicity = mltp[self.group_ids]
             return self.multiplicity
@@ -268,7 +280,11 @@ class FoFGroups(object):
 
         """
         if igraph_available is True:
-            self.edges = np.asarray(self.g.get_edgelist())
+            try:
+                self.edges = np.asarray(self.g.get_edgelist())
+            except AttributeError:
+                self.create_graph()
+                self.edges = np.asarray(self.g.get_edgelist())
             return self.edges
         else:
             raise HalotoolsError(no_igraph_msg)
@@ -294,7 +310,11 @@ class FoFGroups(object):
 
         """
         if igraph_available is True:
-            edges = self.g.es()
+            try:
+                edges = self.g.es()
+            except AttributeError:
+                self.create_graph()
+                edges = self.g.es()
             lens = edges.get_attribute_values('weight')
             self.edge_lengths = np.array(lens)
             return self.edge_lengths
