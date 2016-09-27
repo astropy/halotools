@@ -547,7 +547,7 @@ def test_tpcf_raises_exception_for_large_search_length():
 
     with pytest.raises(ValueError) as err:
         normal_result = tpcf(sample1, rbins, period=period)
-    substr = "search length cannot exceed period/3 in any dimension."
+    substr = "Either decrease your search length or use a larger simulation"
     assert substr in err.value.args[0]
 
 

@@ -45,7 +45,7 @@ def test_enforce_maximum_search_length_case3():
     search_length, period = 1, 3
     with pytest.raises(ValueError) as err:
         _enforce_maximum_search_length(search_length, period)
-    substr = "algorithm requires that the search length cannot exceed period/3 in any dimension"
+    substr = "Either decrease your search length or use a larger simulation"
     assert substr in err.value.args[0]
 
 
@@ -54,7 +54,7 @@ def test_enforce_maximum_search_length_case4():
     search_length, period = 1, (3, 4)
     with pytest.raises(ValueError) as err:
         _enforce_maximum_search_length(search_length, period)
-    substr = "algorithm requires that the search length cannot exceed period/3 in any dimension"
+    substr = "Either decrease your search length or use a larger simulation"
     assert substr in err.value.args[0]
 
 
@@ -63,7 +63,7 @@ def test_enforce_maximum_search_length_case5():
     search_length, period = (1, 1), (3, 4)
     with pytest.raises(ValueError) as err:
         _enforce_maximum_search_length(search_length, period)
-    substr = "algorithm requires that the search length cannot exceed period/3 in any dimension"
+    substr = "Either decrease your search length or use a larger simulation"
     assert substr in err.value.args[0]
 
 
