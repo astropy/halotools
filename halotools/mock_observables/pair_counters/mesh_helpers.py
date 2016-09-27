@@ -155,12 +155,19 @@ def _enforce_maximum_search_length(search_length, period=None):
         If a sequence is passed, the input ``search_length`` will be required
         to be less 1/3 of the smallest element of the sequence.
     """
+    search_length = np.atleast_1d(search_length)
     if period is None:
-        period = np.inf
+        period = np.zeros_like(search_length) + np.inf
     period = np.atleast_1d(period)
+
     try:
         assert np.all(search_length < period/3.)
     except AssertionError:
-        msg = ("The `~halotools.mock_observables.pair_counters.RectangularDoubleMesh` "
-            "algorithm requires that the search length cannot exceed period/3 in any dimension.")
-        raise ValueError(msg)
+        max_search_fraction = np.max(period - search_length)
+        msg = ("The search algorithm used by the function you called \n"
+            "does not permit you to look for pairs separated by values \n"
+            "exceeding a fraction of Lbox/3. in any dimension.\n"
+            "Your function call would require searching for pairs separated by a distance of {0:.2f}*Lbox.\n"
+            "Either decrease your search length or use a larger simulation."
+            )
+        raise ValueError(msg.format(max_search_fraction))
