@@ -8,16 +8,16 @@ import numpy as np
 from ....utils import (calculate_first_idx_unique_array_vals, sum_in_bins,
     random_indices_within_bin, calculate_entry_multiplicity)
 
-__all__ = ('subhalo_indexing_array', )
+__all__ = ('calculate_satellite_selection_mask', )
 
 
-def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids,
+def calculate_satellite_selection_mask(subhalo_hostids, satellite_occupations, host_halo_ids,
         host_halo_bin_numbers, fill_remaining_satellites=True,
         seed=None, testing_mode=False, min_required_entries_per_bin=None):
     """ Function driving the selection of subhalos during HOD mock population.
     Given a catalog of subhalos, host halos and a desired number of satellites
-    in each host, the `subhalo_indexing_array` function can be used to return the
-    indices used to select subhalos to serve as satellites.
+    in each host, the `calculate_satellite_selection_mask` function can be used
+    to calculate the indices used to select subhalos to serve as satellites.
 
     In the situation in which a host halo does not have as many subhalos
     as the desired number of satellites, a subhalo within the same bin
@@ -29,7 +29,7 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
 
     The returned array is a length-*Nsats* array storing the indices of the
     ``subhalo_hostids`` that were selected. In case special treatment of the
-    orphan satellites is desired, the ``subhalo_indexing_array`` function
+    orphan satellites is desired, the `calculate_satellite_selection_mask` function
     also returns a boolean array that can be used as a mask to identify the
     orphans.
 
@@ -76,7 +76,7 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     Returns
     -------
     satellite_selection_indices : array
-        Integer array storing the indices of the selected subhalos.
+        Integer array of indices that can act as a mask to select subhalos.
 
         If ``fill_remaining_satellites`` is set to False,
         then some values of ``satellite_selection_indices`` may be -1.
@@ -106,14 +106,14 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     We'll demonstrate basic usage here using a halo catalog taken from a
     `~halotools.sim_manager.FakeSim` object, which means we'll have to do a fair
     amount of work to arrange the memory layout into the required form.
-    When ``subhalo_indexing_array`` is used as part of a Halotools model,
+    When `calculate_satellite_selection_mask` is used as part of a Halotools model,
     this organization is typically accomplished in an automated fashion during a
     pre-processing phase of mock population.
 
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
 
-    The `subhalo_indexing_array` algorithm requires that
+    The `calculate_satellite_selection_mask` algorithm requires that
     every entry of the input ``subhalo_hostids`` has a matching entry in
     the input ``host_halo_ids`` array. To address this, we will mask out
     those rare subhalos with no matching host halo
@@ -139,7 +139,7 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     large ``halo_vpeak`` will be preferentially selected to serve as satellites.
 
     Now we separate host halos from subhalos (preserving the above memory layout),
-    and define the arrays we'll use as inputs to the `subhalo_indexing_array` function.
+    and define the arrays we'll use as inputs to the `calculate_satellite_selection_mask` function.
 
     >>> host_halo_mask = halos['halo_upid'] == -1
     >>> hosts = halos[host_halo_mask]
@@ -150,11 +150,11 @@ def subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids
     >>> satellite_occupations = np.random.randint(0, 5, len(hosts))
     >>> host_halo_ids = hosts['halo_id'].data
 
-    With our arrays so defined, we call the ``subhalo_indexing_array`` function
+    With our arrays so defined, we call the `calculate_satellite_selection_mask` function
     and demonstrate that it does indeed return a result that can serve as an indexing
     array providing us with the correct total number of satellites.
 
-    >>> result = subhalo_indexing_array(subhalo_hostids, satellite_occupations, host_halo_ids, host_halo_bin_numbers, testing_mode=True)
+    >>> result = calculate_satellite_selection_mask(subhalo_hostids, satellite_occupations, host_halo_ids, host_halo_bin_numbers, testing_mode=True)
     >>> satellite_selection_indices, missing_subhalo_mask = result
     >>> selected_subhalos = subhalos[satellite_selection_indices]
     >>> assert len(selected_subhalos) == satellite_occupations.sum()
@@ -284,7 +284,7 @@ def calculate_selection_of_remaining_satellites(remaining_occupations,
         Integer array of length *num_remaining_satellites* that may be used
         as indices of any length *Nsubs* array to select subhalo properties.
         Here *Nsubs* is the total number of subhalos in the original catalog
-        passed to the `~halotools.empirical_models.subhalo_indexing_array` function,
+        passed to the `~halotools.empirical_models.calculate_satellite_selection_mask` function,
         and *num_remaining_satellites* is the sum of the entries of ``remaining_occupations``.
     """
 

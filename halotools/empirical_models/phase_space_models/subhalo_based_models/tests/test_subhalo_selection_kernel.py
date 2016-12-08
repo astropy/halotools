@@ -8,13 +8,13 @@ from astropy.utils.misc import NumpyRNGContext
 
 from .. import subhalo_selection_kernel as ssk
 
-__all__ = ('test_subhalo_indexing_array1', )
+__all__ = ('test_calculate_satellite_selection_mask1', )
 
 fixed_seed = 43
 seed_array = np.arange(0, 10)
 
 
-def test_subhalo_indexing_array1():
+def test_calculate_satellite_selection_mask1():
     """ Create a hard-coded specific example for which the indices can be
     determined by hand, and explicitly enforce that the returned values agree.
     """
@@ -23,15 +23,16 @@ def test_subhalo_indexing_array1():
     host_halo_bins = np.array([0, 0, 1, 1, 2, 2, 3, 3, 3])
     occupations = np.array([2, 1, 1, 0, 3, 3, 0, 2, 1])
     correct_result = np.array([-1, -1, 0, -1, 3, 4, 5, 6, 7, -1, 8, -1, -1])
-    result, mask = ssk.subhalo_indexing_array(objID, occupations, hostIDs, host_halo_bins,
+    result, mask = ssk.calculate_satellite_selection_mask(objID, occupations, hostIDs, host_halo_bins,
         testing_mode=True, fill_remaining_satellites=False)
-    msg = "subhalo_indexing_array function is incorrect with testing_mode=True"
+    msg = "calculate_satellite_selection_mask function is incorrect with testing_mode=True"
     assert np.all(result == correct_result), msg
+    assert np.all(result[mask] == -1)
 
-    result2, mask = ssk.subhalo_indexing_array(objID, occupations, hostIDs, host_halo_bins,
+    result2, mask2 = ssk.calculate_satellite_selection_mask(objID, occupations, hostIDs, host_halo_bins,
         fill_remaining_satellites=True)
-    assert np.all(result[result != -1] == result2[result != -1])
-    assert np.all(result[result == -1] != result2[result == -1])
+    assert np.all(result[~mask] == result2[~mask])
+    assert np.all(result[mask] != result2[mask])
 
     try:
         selected_objects = objID[result2]
@@ -47,9 +48,9 @@ def test_subhalo_indexing_array1():
     assert set(fake_satellite_objids[4:]) <= set((12, 15, 16))
 
 
-def test_subhalo_indexing_array2():
+def test_calculate_satellite_selection_mask2():
     """ Create a sequence of randomly selected inputs and verify that
-    the subhalo_indexing_array function returns sensible results
+    the calculate_satellite_selection_mask function returns sensible results
     """
     nhosts = 1000
     for seed in seed_array:
@@ -73,7 +74,7 @@ def test_subhalo_indexing_array2():
             __[0:nbins] = np.arange(nbins)
             host_halo_bin_numbers = np.sort(__)
 
-            satellite_selection_indices, missing_subhalo_mask = ssk.subhalo_indexing_array(
+            satellite_selection_indices, missing_subhalo_mask = ssk.calculate_satellite_selection_mask(
                 subhalo_hostids, satellite_occupations, host_halo_ids, host_halo_bin_numbers,
                 testing_mode=True, fill_remaining_satellites=False, seed=seed)
 
@@ -85,7 +86,7 @@ def test_subhalo_indexing_array2():
             assert np.all(satellite_selection_indices[missing_subhalo_mask] == -1)
             assert not np.any(satellite_selection_indices[~missing_subhalo_mask] == -1)
 
-            satellite_selection_indices2, missing_subhalo_mask2 = ssk.subhalo_indexing_array(
+            satellite_selection_indices2, missing_subhalo_mask2 = ssk.calculate_satellite_selection_mask(
                 subhalo_hostids, satellite_occupations, host_halo_ids, host_halo_bin_numbers,
                 testing_mode=True, fill_remaining_satellites=True, seed=None)
 
