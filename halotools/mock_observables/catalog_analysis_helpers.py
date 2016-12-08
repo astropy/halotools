@@ -306,7 +306,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     return index, int(N_sub_vol)
 
 
-def sign_pbc(x1, x2, period=None, equality_fill_val=0.):
+def sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=False):
     """ Return the sign of the unit vector pointing from x2 towards x1,
     that is, the sign of (x1 - x2), accounting for periodic boundary conditions.
 
@@ -327,6 +327,11 @@ def sign_pbc(x1, x2, period=None, equality_fill_val=0.):
 
     equality_fill_val : float, optional
         Value to return for cases where x1 == x2. Default is 0.
+
+    return_pbc_correction : bool, optional
+        If True, the `sign_pbc` function will additionally return a
+        length *Npts* boolean array storing whether or not the input
+        points had a PBC correction applied. Default is False.
 
     Returns
     -------
@@ -370,7 +375,10 @@ def sign_pbc(x1, x2, period=None, equality_fill_val=0.):
     if equality_fill_val != 0:
         result = np.where(result == 0, equality_fill_val, result)
 
-    return result
+    if return_pbc_correction:
+        return result, pbc_correction
+    else:
+        return result
 
 
 def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
@@ -399,6 +407,10 @@ def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
     xrel : array
         1-d array of length *Npts* storing x1 - x2.
         If *x1 > x2* and abs(*x1* - *x2*) > period/2, the sign of *d* will be negative.
+
+    vrel : array, optional
+        1-d array of length *Npts* storing v1 relative to v2.
+        Only returned if ``v1`` and ``v2`` are passed in.
 
     Examples
     --------
