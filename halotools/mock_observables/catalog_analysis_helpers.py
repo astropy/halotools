@@ -10,7 +10,7 @@ from ..empirical_models import enforce_periodicity_of_box
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('mean_y_vs_x', 'return_xyz_formatted_array', 'cuboid_subvolume_labels',
-    'relative_positions_and_velocities')
+    'relative_positions_and_velocities', 'sign_pbc')
 __author__ = ['Andrew Hearin']
 
 

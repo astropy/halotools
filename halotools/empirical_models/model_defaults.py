@@ -37,18 +37,6 @@ sec_haloprop_key = 'halo_nfw_conc'
 
 halo_mass_definition = 'vir'
 
-#
-default_inherited_subhalo_props_dict = (
-    {'halo_id': ('halo_id', 'i8'),
-    'halo_x': ('x', 'f8'),
-    'halo_y': ('y', 'f8'),
-    'halo_z': ('z', 'f8'),
-    'halo_vx': ('vx', 'f8'),
-    'halo_vy': ('vy', 'f8'),
-    'halo_vz': ('vz', 'f8'),
-    'halo_mpeak': ('halo_mpeak', 'f8')
-    })
-
 
 def get_halo_boundary_key(mdef):
     """ For the input mass definition,
