@@ -121,7 +121,8 @@ class HodMockFactory(MockFactory):
 
         # Make cuts on halo catalog #
         # Select host halos only, since this is an HOD-style model
-        halo_table = SampleSelector.host_halo_selection(table=halocat.halo_table)
+        halo_table, subhalo_table = SampleSelector.host_halo_selection(
+            table=halocat.halo_table, return_subhalos=True)
 
         # make a (possibly trivial) completeness cut
         cutoff_mvir = self.Num_ptcl_requirement*self.particle_mass
@@ -145,6 +146,14 @@ class HodMockFactory(MockFactory):
             raise HalotoolsError(msg % (
                 self.halo_mass_column_key, max_column_value, cutoff_mvir,
                 self.particle_mass, self.Num_ptcl_requirement))
+
+        # If any component model needs the subhalo_table, bind it to the mock object
+        for component_model in self.model.model_dictionary.values():
+            try:
+                f = getattr(component_model, 'preprocess_subhalo_table')
+                halo_table, self.subhalo_table = f(halo_table, subhalo_table)
+            except AttributeError:
+                pass
 
         ############################################################
 
@@ -293,8 +302,12 @@ class HodMockFactory(MockFactory):
 
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
+            try:
+                d = {key: getattr(self, key) for key in func.additional_kwargs}
+            except AttributeError:
+                d = {}
             gal_type_slice = self._gal_type_indices[func.gal_type]
-            func(table=self.galaxy_table[gal_type_slice], seed=seed)
+            func(table=self.galaxy_table[gal_type_slice], seed=seed, **d)
 
         if self.enforce_PBC is True:
             self.galaxy_table['x'], self.galaxy_table['vx'] = (
@@ -349,7 +362,11 @@ class HodMockFactory(MockFactory):
                 break
             else:
                 func = getattr(self.model, func_name)
-                func(table=self.halo_table, seed=seed)
+                try:
+                    d = {key: getattr(self, key) for key in func.additional_kwargs}
+                except AttributeError:
+                    d = {}
+                func(table=self.halo_table, seed=seed, **d)
                 galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
                 galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
                 self._remaining_methods_to_call.remove(func_name)

@@ -607,6 +607,16 @@ class HodModelFactory(ModelFactory):
                 docstring = getattr(component_model, methodname).__doc__
                 getattr(self, new_method_name).__doc__ = docstring
 
+                if hasattr(component_model, '_additional_kwargs_dict'):
+                    additional_kwargs_dict = component_model._additional_kwargs_dict
+                    self._test_additional_kwargs_dict(additional_kwargs_dict)
+                    try:
+                        additional_kwargs = additional_kwargs_dict[methodname]
+                        setattr(getattr(self, new_method_name),
+                            'additional_kwargs', additional_kwargs)
+                    except KeyError:
+                        pass
+
             attrs_to_inherit = list(set(
                 component_model._attrs_to_inherit))
             for attrname in attrs_to_inherit:
@@ -1044,6 +1054,12 @@ class HodModelFactory(ModelFactory):
                         "composite model with a self-consistent population of centrals.\n".format(
                             component_model.gal_type, component_model.__class__.__name__))
                     raise HalotoolsError(msg)
+
+    def _test_additional_kwargs_dict(self, _additional_kwargs_dict):
+        """
+        """
+        assert 'table' not in list(_additional_kwargs_dict.keys())
+        assert 'seed' not in list(_additional_kwargs_dict.keys())
 
     def populate_mock(self, halocat, **kwargs):
         """
