@@ -118,7 +118,7 @@ class BinaryGalpropModel(object):
             mc_generator = np.random.random(custom_len(mean_galprop_fraction))
         result = np.where(mc_generator < mean_galprop_fraction, True, False)
         if 'table' in kwargs:
-            kwargs['table'][self.galprop_name] = result
+            kwargs['table'][self.galprop_name][:] = result
         return result
 
 
