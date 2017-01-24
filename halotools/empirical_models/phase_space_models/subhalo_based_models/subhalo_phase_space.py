@@ -36,7 +36,8 @@ class SubhaloPhaseSpace(object):
 
     def __init__(self, gal_type, host_haloprop_bins,
             inherited_subhalo_props_dict=default_inherited_subhalo_props_dict,
-            binning_key='halo_mvir_host_halo', intra_halo_sorting_key='halo_mpeak', **kwargs):
+            binning_key='halo_mvir_host_halo', intra_halo_sorting_key='halo_mpeak',
+            reverse_intra_halo_order=True, **kwargs):
         """
         Parameters
         ----------
@@ -65,6 +66,14 @@ class SubhaloPhaseSpace(object):
             Column name defining how the subhalos will be sorted within each host halo.
             Subhalos appearing first are preferentially selected as satellites.
             Default is ``halo_mpeak``.
+            This argument should be used together with reverse_intra_halo_order.
+
+        reverse_intra_halo_order : bool, optional
+            If set to True, subhalos with larger values of the intra_halo_sorting_key
+            will be the first in each halo to be assigned galaxies.
+            If False, preferential assignment goes to subhalos with smaller values.
+            Default is True, for compatibility with the more typical properties
+            such as ``halo_mpeak`` and ``halo_vpeak``.
 
         inherited_subhalo_props_dict : dict, optional
             Python dictionary determining which properties
@@ -96,6 +105,7 @@ class SubhaloPhaseSpace(object):
         self.inherited_subhalo_props_dict = inherited_subhalo_props_dict
         self.binning_key = binning_key
         self.intra_halo_sorting_key = intra_halo_sorting_key
+        self.reverse_intra_halo_order = reverse_intra_halo_order
         self.subhalo_table_sorting_keys = list((self.binning_key,
             '_subhalo_inheritance_id', self.intra_halo_sorting_key))
 
@@ -248,8 +258,13 @@ class SubhaloPhaseSpace(object):
 
         subs_with_matching_hosts['_subhalo_inheritance_id'] = (
             host_halo_table['_subhalo_inheritance_id'][idxB])
-        self.subhalo_table_sorting_keys = ['halo_mvir_host_halo', '_subhalo_inheritance_id']
-        subs_with_matching_hosts.sort(self.subhalo_table_sorting_keys)
+
+        if self.reverse_intra_halo_order:
+            subs_with_matching_hosts[self.subhalo_table_sorting_keys[-1]][:] *= -1
+            subs_with_matching_hosts.sort(self.subhalo_table_sorting_keys)
+            subs_with_matching_hosts[self.subhalo_table_sorting_keys[-1]][:] *= -1
+        else:
+            subs_with_matching_hosts.sort(self.subhalo_table_sorting_keys)
 
         if not array_is_monotonic(subs_with_matching_hosts['_subhalo_inheritance_id'].data,
                 strict=False):
