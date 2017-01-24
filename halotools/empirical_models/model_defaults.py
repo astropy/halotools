@@ -27,7 +27,7 @@ default_binary_galprop_haloprop = default_smhm_haloprop
 host_haloprop_prefix = 'halo_'
 
 default_haloprop_list_inherited_by_mock = (
-    ['halo_id', 'halo_x', 'halo_y', 'halo_z',
+    ['halo_id', 'halo_hostid', 'halo_x', 'halo_y', 'halo_z',
     'halo_vx', 'halo_vy', 'halo_vz',
     'halo_mvir', 'halo_rvir', 'halo_upid']
     )
