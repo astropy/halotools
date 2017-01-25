@@ -105,7 +105,8 @@ def zheng07_model_dictionary(
         raise HalotoolsError(msg)
 
     satellites_occupation = zheng07_components.Zheng07Sats(
-        threshold=threshold, redshift=redshift, cenocc_model=cenocc_model, **kwargs)
+        threshold=threshold, redshift=redshift,
+        cenocc_model=cenocc_model, modulate_with_cenocc=modulate_with_cenocc, **kwargs)
     satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model

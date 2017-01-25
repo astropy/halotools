@@ -59,3 +59,24 @@ def test_zheng07_composite2():
 
     fake_sim = FakeSim()
     composite_model.populate_mock(fake_sim)
+
+
+def test_modulate_with_cenocc1():
+    """ Regression test for Issue #646. Verify that the ``modulate_with_cenocc``
+    keyword argument is actually passed to the satellite occupation component.
+    """
+    model1 = PrebuiltHodModelFactory('zheng07', modulate_with_cenocc=True)
+    assert model1.model_dictionary[u'satellites_occupation'].modulate_with_cenocc is True
+
+
+def test_modulate_with_cenocc2():
+    """ Regression test for Issue #646. Verify that the ``modulate_with_cenocc``
+    keyword argument results in behavior that is properly modified by the centrals.
+    """
+    model = PrebuiltHodModelFactory('zheng07', modulate_with_cenocc=True)
+    test_mass = 1e12
+    ncen1 = model.mean_occupation_satellites(prim_haloprop=test_mass)
+    model.param_dict['logMmin'] *= 1.5
+    ncen2 = model.mean_occupation_satellites(prim_haloprop=test_mass)
+    assert ncen1 != ncen2
+
