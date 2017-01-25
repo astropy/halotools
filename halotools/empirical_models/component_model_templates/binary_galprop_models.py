@@ -140,7 +140,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     def __init__(self, galprop_abscissa, galprop_ordinates,
             logparam=True, interpol_method='spline', **kwargs):
-        """
+        r"""
         Parameters
         ----------
         galprop_name : array, keyword argument
@@ -184,8 +184,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         -----------
         Suppose we wish to construct a model for whether a central galaxy is
         star-forming or quiescent. We want to set the quiescent fraction to 1/3
-        for Milky Way-type centrals (:math:`M_{\\mathrm{vir}}=10^{12}M_{\odot}`),
-        and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`).
+        for Milky Way-type centrals (:math:`M_{\mathrm{vir}}=10^{12}M_{\odot}`),
+        and 90% for massive cluster centrals (:math:`M_{\mathrm{vir}}=10^{15}M_{\odot}`).
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
         >>> abscissa, ordinates = [12, 15], [1/3., 0.9]
@@ -206,7 +206,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         Here is another example of how you could use `BinaryGalpropInterpolModel`
         to construct a simple model for satellite morphology, where the early- vs. late-type
-        of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
+        of the satellite depends on :math:`V_{\mathrm{peak}}` value of the host halo
 
         >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_name='late_type', galprop_abscissa=abscissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
         >>> vmax_array = np.logspace(2, 3, num=100)
