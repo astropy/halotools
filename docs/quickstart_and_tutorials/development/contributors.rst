@@ -27,6 +27,7 @@ Core package contributors
 * Nathan Goldbaum
 * Andrew Hearin
 * Elise Jennings
+* Johannes Ulf Lange
 * Alexie Leauthaud
 * Yao-Yuan Mao
 * Surhud More
