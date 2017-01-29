@@ -65,7 +65,7 @@ def test_attrs2():
 def test_positions2():
     fake_sim = FakeSimHalosNearBoundaries()
     assert not np.any((fake_sim.halo_table['halo_x'] > 1) &
-        (fake_sim.halo_table['halo_x'] < fake_sim.Lbox - 1))
+        (fake_sim.halo_table['halo_x'] < fake_sim.Lbox[0] - 1))
 
 
 def test_stochasticity2():

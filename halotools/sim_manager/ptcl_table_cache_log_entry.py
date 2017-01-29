@@ -260,7 +260,9 @@ class PtclTableCacheLogEntry(object):
         try:
             data = Table.read(self.fname, path='data')
             f = self.h5py.File(self.fname)
-            Lbox = f.attrs['Lbox']
+            Lbox = np.empty(3)
+            Lbox[:] = f.attrs['Lbox']
+
             f.close()
             try:
                 x = data['x']
@@ -268,11 +270,11 @@ class PtclTableCacheLogEntry(object):
                 z = data['z']
 
                 assert np.all(x >= 0)
-                assert np.all(x <= Lbox)
+                assert np.all(x <= Lbox[0])
                 assert np.all(y >= 0)
-                assert np.all(y <= Lbox)
+                assert np.all(y <= Lbox[1])
                 assert np.all(z >= 0)
-                assert np.all(z <= Lbox)
+                assert np.all(z <= Lbox[2])
 
             except AssertionError:
                 num_failures += 1
