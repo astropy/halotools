@@ -25,6 +25,7 @@ Core package contributors
 * Benedikt Diemer
 * Yu Feng
 * Nathan Goldbaum
+* Nick Hand
 * Andrew Hearin
 * Elise Jennings
 * Alexie Leauthaud
