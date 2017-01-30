@@ -90,5 +90,14 @@ def test_lbox_vector():
         alist = adict[simname]
         a = alist[0]
         z = 1/a - 1
-        halocat = CachedHaloCatalog(simname=simname, redshift=z)
-        assert len(halocat.Lbox) == 3
+        try:
+            halocat = CachedHaloCatalog(simname=simname, redshift=z)
+            assert len(halocat.Lbox) == 3
+        except HalotoolsError as err:
+            substr = "The Halotools cache log is empty."
+            if substr in err.value.args[0]:
+                pass
+            else:
+                msg = "Every CachedHaloCatalog must have a 3-vector for the ``Lbox`` attribute"
+                raise HalotoolsError(msg)
+
