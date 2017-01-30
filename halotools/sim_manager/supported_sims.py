@@ -8,6 +8,7 @@ halo catalogs as they are loaded into memory.
 from abc import ABCMeta
 from astropy.extern import six
 from astropy import cosmology
+import numpy as np
 
 __all__ = ('NbodySimulation',
            'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo')
@@ -54,7 +55,8 @@ class NbodySimulation(object):
 
         """
         self.simname = simname
-        self.Lbox = Lbox
+        self.Lbox = np.empty(3, dtype='f4')
+        self.Lbox[:] = Lbox
         self.particle_mass = particle_mass
         self.num_ptcl_per_dim = num_ptcl_per_dim
         self.softening_length = softening_length

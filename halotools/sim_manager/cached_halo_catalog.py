@@ -5,6 +5,7 @@ keyword inputs such as ``simname`` and ``redshift``.
 import os
 from warnings import warn
 from copy import deepcopy
+import numpy as np
 
 from astropy.table import Table
 
@@ -569,6 +570,9 @@ class CachedHaloCatalog(object):
         for attr_key in list(f.attrs.keys()):
             if attr_key == 'redshift':
                 setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))
+            elif attr_key == 'Lbox':
+                self.Lbox = np.empty(3)
+                self.Lbox[:] = f.attrs['Lbox']
             else:
                 setattr(self, attr_key, f.attrs[attr_key])
         f.close()
@@ -578,7 +582,7 @@ class CachedHaloCatalog(object):
             for attr in matching_sim._attrlist:
                 if hasattr(self, attr):
                     try:
-                        assert getattr(self, attr) == getattr(matching_sim, attr)
+                        assert np.all(getattr(self, attr) == getattr(matching_sim, attr))
                     except AssertionError:
                         msg = ("The ``" + attr + "`` metadata of the hdf5 file \n"
                             "is inconsistent with the corresponding attribute of the \n" +
