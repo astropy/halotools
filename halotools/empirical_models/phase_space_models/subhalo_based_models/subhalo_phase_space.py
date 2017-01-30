@@ -186,7 +186,7 @@ class SubhaloPhaseSpace(object):
         """
         """
         poskeys = ('x', 'y', 'z')
-        for poskey in poskeys:
+        for axis,poskey in enumerate(poskeys):
             subhalo_hostpos_key = 'halo_' + poskey + '_host_halo'
             subhalo_poskey = 'halo_' + poskey
             subhalo_hostpos = subhalo_table[subhalo_hostpos_key][satellite_selection_idx][missing_subhalo_mask]
@@ -198,9 +198,9 @@ class SubhaloPhaseSpace(object):
             subhalo_vel = subhalo_table[subhalo_velkey][satellite_selection_idx][missing_subhalo_mask]
 
             s, pbc_correction = _sign_pbc(subhalo_pos, subhalo_hostpos,
-                period=Lbox, return_pbc_correction=True)
+                period=Lbox[axis], return_pbc_correction=True)
             absd = np.abs(subhalo_pos - subhalo_hostpos)
-            relpos = s*np.where(absd > Lbox/2., Lbox - absd, absd)
+            relpos = s*np.where(absd > Lbox[axis]/2., Lbox[axis] - absd, absd)
             relvel = pbc_correction*(subhalo_vel-subhalo_hostvel)
             galaxy_table[poskey][missing_subhalo_mask] += relpos
             galaxy_table['v'+poskey][missing_subhalo_mask] += relvel

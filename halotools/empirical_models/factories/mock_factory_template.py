@@ -145,7 +145,7 @@ class MockFactory(object):
 
         """
         ngals = len(self.galaxy_table)
-        comoving_volume = self.Lbox**3
+        comoving_volume = np.prod(self.Lbox)
         return ngals/float(comoving_volume)
 
     def compute_galaxy_clustering(self, include_crosscorr=False, **kwargs):
@@ -494,7 +494,7 @@ class MockFactory(object):
         z = self.galaxy_table['z']
         if zspace is True:
             z += self.galaxy_table['vz']/100.
-            z = model_helpers.enforce_periodicity_of_box(z, self.Lbox)
+            z = model_helpers.enforce_periodicity_of_box(z, self.Lbox[2])
         pos = np.vstack((x, y, z)).T
 
         group_finder = mock_observables.FoFGroups(positions=pos,

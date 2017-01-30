@@ -3,6 +3,8 @@
 
 - Added SubhaloPhaseSpace class for modeling HOD-style satellite velocities with subhalos.
 
+- The ``Lbox`` attribute of all Halotools halo catalogs is now stored as an array of length 3 instead of a scalar.
+
 
 0.4 (2016-08-11)
 ----------------

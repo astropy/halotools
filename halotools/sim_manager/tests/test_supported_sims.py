@@ -83,3 +83,16 @@ def test_forbidden_sims():
         __ = CachedHaloCatalog(simname='bolplanck', version_name='halotools_alpha_version2')
     substr = "See https://github.com/astropy/halotools/issues/598"
     assert substr in err.value.args[0]
+
+
+def test_lbox_vector():
+    for simname in list(adict.keys()):
+        alist = adict[simname]
+        a = alist[0]
+        z = 1/a - 1
+        try:
+            halocat = CachedHaloCatalog(simname=simname, redshift=z)
+            assert len(halocat.Lbox) == 3
+        except HalotoolsError:
+            pass
+

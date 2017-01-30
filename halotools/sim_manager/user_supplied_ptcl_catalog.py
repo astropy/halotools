@@ -145,6 +145,12 @@ class UserSuppliedPtclCatalog(object):
         self.ptcl_table = Table(ptcl_table_dict)
 
         self._test_metadata_dict(**metadata_dict)
+        
+        # make Lbox a 3-vector
+        _Lbox = metadata_dict.pop('Lbox')
+        metadata_dict['Lbox'] = np.empty(3)
+        metadata_dict['Lbox'][:] = _Lbox
+        
         for key, value in metadata_dict.items():
             setattr(self, key, value)
 
@@ -181,22 +187,30 @@ class UserSuppliedPtclCatalog(object):
         return ptcl_table_dict, metadata_dict
 
     def _test_metadata_dict(self, **metadata_dict):
+        
         try:
             assert 'Lbox' in metadata_dict
-            assert custom_len(metadata_dict['Lbox']) == 1
+            assert custom_len(metadata_dict['Lbox']) in [1,3]
+        except AssertionError:
+            msg = ("\nThe UserSuppliedPtclCatalog requires keyword argument "
+                   "``Lbox``, storing either a scalar or 3-vector.\n")
+            raise HalotoolsError(msg)
+                
+        try:
             assert 'particle_mass' in metadata_dict
             assert custom_len(metadata_dict['particle_mass']) == 1
             assert 'redshift' in metadata_dict
         except AssertionError:
             msg = ("\nThe UserSuppliedPtclCatalog requires keyword arguments "
-                   "``Lbox``, ``particle_mass`` and ``redshift``\n"
+                   "``particle_mass`` and ``redshift``\n"
                    "storing scalars that will be interpreted as metadata "
                    "about the particle catalog.\n")
             raise HalotoolsError(msg)
 
-        Lbox = metadata_dict['Lbox']
-        assert Lbox > 0, "``Lbox`` must be a positive number"
-
+        Lbox = np.empty(3)
+        Lbox[:] = metadata_dict['Lbox']
+        assert (Lbox > 0).all(), "``Lbox`` must be positive"
+    
         try:
             x, y, z = (
                 self.ptcl_table['x'],
@@ -204,11 +218,11 @@ class UserSuppliedPtclCatalog(object):
                 self.ptcl_table['z'])
 
             assert np.all(x >= 0)
-            assert np.all(x <= Lbox)
+            assert np.all(x <= Lbox[0])
             assert np.all(y >= 0)
-            assert np.all(y <= Lbox)
+            assert np.all(y <= Lbox[1])
             assert np.all(z >= 0)
-            assert np.all(z <= Lbox)
+            assert np.all(z <= Lbox[2])
         except AssertionError:
             msg = ("The ``x``, ``y`` and ``z`` columns must only store "
                    "arrays\n that are bound by 0 and the input ``Lbox``. \n")

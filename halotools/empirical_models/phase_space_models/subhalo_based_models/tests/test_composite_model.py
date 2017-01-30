@@ -43,11 +43,11 @@ def test_composite_model():
     sats = model.mock.galaxy_table[satmask]
 
     assert np.all(sats['x'] >= 0.)
-    assert np.all(sats['x'] <= halocat.Lbox)
+    assert np.all(sats['x'] <= halocat.Lbox[0])
     assert np.all(sats['x'] >= 0.)
-    assert np.all(sats['y'] <= halocat.Lbox)
+    assert np.all(sats['y'] <= halocat.Lbox[1])
     assert np.all(sats['z'] >= 0.)
-    assert np.all(sats['z'] <= halocat.Lbox)
+    assert np.all(sats['z'] <= halocat.Lbox[2])
 
     hostrvir = np.zeros(len(sats))
     hostx = np.zeros(len(sats))
@@ -63,9 +63,9 @@ def test_composite_model():
     hostrvir[idxA] = model.mock.halo_table['halo_rvir'][idxB]
     x, y, z = sats['x'], sats['y'], sats['z']
 
-    dx = rel_posvel(hostx, x, period=halocat.Lbox)
-    dy = rel_posvel(hosty, y, period=halocat.Lbox)
-    dz = rel_posvel(hostz, z, period=halocat.Lbox)
+    dx = rel_posvel(hostx, x, period=halocat.Lbox[0])
+    dy = rel_posvel(hosty, y, period=halocat.Lbox[1])
+    dz = rel_posvel(hostz, z, period=halocat.Lbox[2])
 
     d = np.sqrt(dx**2 + dy**2 + dz**2)
     assert np.all(d < 2*hostrvir)
