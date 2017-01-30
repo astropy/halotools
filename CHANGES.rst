@@ -3,7 +3,7 @@
 
 - Added SubhaloPhaseSpace class for modeling HOD-style satellite velocities with subhalos.
 
-- Added support for the ``Lbox`` keyword passed as a 3-vector to UserSuppliedPtclCatalog and UserSuppliedHaloCatalog. The ``Lbox`` attribute of these classes is now stored as an array of length 3 instead of a scalar.
+- The ``Lbox`` attribute of all Halotools halo catalogs is now stored as an array of length 3 instead of a scalar.
 
 
 0.4 (2016-08-11)
