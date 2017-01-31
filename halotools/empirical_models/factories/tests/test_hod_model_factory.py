@@ -6,11 +6,11 @@ from unittest import TestCase
 from astropy.tests.helper import pytest
 
 import numpy as np
-from copy import copy
+from copy import deepcopy
 
 from ...factories import HodModelFactory, PrebuiltHodModelFactory
 
-from ....sim_manager import FakeSim
+from ....sim_manager import FakeSim, sim_defaults
 from ....empirical_models import zheng07_model_dictionary, OccupationComponent
 from ....custom_exceptions import HalotoolsError
 
@@ -100,6 +100,62 @@ class TestHodModelFactory(TestCase):
             model._test_censat_occupation_consistency(model.model_dictionary)
         substr = "has a ``central_occupation_model`` attribute with an inconsistent "
         assert substr in err.value.args[0]
+
+    def test_factory_constructor_redshift1(self):
+        """ Verify that redundantly passing in a compatible redshift causes no problems
+        """
+        model_dict1 = zheng07_model_dictionary(redshift=1)
+        model1 = HodModelFactory(**model_dict1)
+        assert model1.redshift == 1
+
+        model_dict2 = deepcopy(model_dict1)
+        model_dict2['redshift'] = 1
+        model2 = HodModelFactory(**model_dict2)
+        assert model2.redshift == 1
+
+    def test_factory_constructor_redshift2(self):
+        """ Verify that passing in an incompatible redshift raises the correct exception
+        """
+        model_dict1 = zheng07_model_dictionary(redshift=1)
+        model1 = HodModelFactory(**model_dict1)
+        assert model1.redshift == 1
+
+        model_dict2 = deepcopy(model_dict1)
+        model_dict2['redshift'] = 2
+        #
+        with pytest.raises(AssertionError) as err:
+            model2 = HodModelFactory(**model_dict2)
+        substr = "that is inconsistent with the redshift z ="
+        assert substr in err.value.args[0]
+
+    def test_factory_constructor_redshift3(self):
+        """ Verify correct redshift behavior when using the baseline_model_instance argument
+        """
+        model_dict1 = zheng07_model_dictionary(redshift=1)
+        model1 = HodModelFactory(**model_dict1)
+
+        model2 = HodModelFactory(baseline_model_instance=model1,
+                redshift=model1.redshift)
+
+        assert model2.redshift == model1.redshift
+
+        with pytest.raises(AssertionError) as err:
+            model3 = HodModelFactory(baseline_model_instance=model1,
+                    redshift=model1.redshift+1)
+        substr = "that is inconsistent with the redshift z ="
+        assert substr in err.value.args[0]
+
+    def test_factory_constructor_redshift4(self):
+        """ Verify correct redshift behavior when the model dictionary
+        has no components with redshifts defined
+        """
+        model_dict_no_redshift = zheng07_model_dictionary(redshift=1)
+        for component_model in model_dict_no_redshift.values():
+            del component_model.redshift
+
+        model_dict_no_redshift['redshift'] = 1.5
+        model2 = HodModelFactory(**model_dict_no_redshift)
+        assert model2.redshift == 1.5
 
     def tearDown(self):
         pass

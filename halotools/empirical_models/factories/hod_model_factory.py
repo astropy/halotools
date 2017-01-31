@@ -120,6 +120,12 @@ class HodModelFactory(ModelFactory):
             Another possible example would be
             gal_type_list = ['centrals', 'satellites', 'orphans'].
 
+        redshift: float, optional
+            Redshift of the model galaxies. Must be compatible with the
+            redshift of all component models, and with the redshift
+            of the snapshot of the simulation used to populate mocks.
+            Default is None.
+
         halo_selection_func : function object, optional
             Function object used to place a cut on the input ``table``.
             If the ``halo_selection_func`` keyword argument is passed,
@@ -204,7 +210,6 @@ class HodModelFactory(ModelFactory):
         :ref:`hod_mock_factory_source_notes`
 
         """
-
         input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(
             **kwargs)
 
@@ -274,6 +279,11 @@ class HodModelFactory(ModelFactory):
         if len(kwargs) == 0:
             msg = ("You did not pass any model features to the factory")
             raise HalotoolsError(msg)
+
+        try:
+            self._factory_constructor_redshift = kwargs.pop('redshift')
+        except KeyError:
+            pass
 
         if 'baseline_model_instance' in kwargs:
             baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary
@@ -754,7 +764,10 @@ class HodModelFactory(ModelFactory):
             if hasattr(model, 'redshift'))
 
         if len(set(zlist)) == 0:
-            self.redshift = sim_defaults.default_redshift
+            try:
+                self.redshift = self._factory_constructor_redshift
+            except AttributeError:
+                self.redshift = sim_defaults.default_redshift
         elif len(set(zlist)) == 1:
             self.redshift = float(zlist[0])
         else:
@@ -767,6 +780,13 @@ class HodModelFactory(ModelFactory):
                     msg += ("For gal_type = ``" + gal_type + "``, the " +
                         clname+" instance has redshift = " + zs + "\n")
             raise HalotoolsError(msg)
+
+        if hasattr(self, '_factory_constructor_redshift'):
+            msg = ("You passed an input argument of ``redshift`` = {0} to the HodModelFactory\n"
+                "that is inconsistent with the redshift z = {1} defined by "
+                "the component models".format(
+                    self._factory_constructor_redshift, self.redshift))
+            assert self.redshift == self._factory_constructor_redshift, msg
 
     def build_prim_sec_haloprop_list(self):
         """ Method builds the ``_haloprop_list`` of strings.
