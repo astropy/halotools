@@ -117,11 +117,13 @@ class DownloadManager(object):
 
         Examples
         -----------
+        >>> from halotools.sim_manager import sim_defaults
+        >>>
         >>> dman = DownloadManager()
         >>> simname = 'bolplanck'
         >>> z = 2
         >>> version_name = sim_defaults.default_version_name
-        >>> halo_finder = sim_defaults.default_version_name
+        >>> halo_finder = sim_defaults.default_halo_finder
         >>> dman.download_processed_halo_table(simname = 'bolplanck', halo_finder = halo_finder, version_name = version_name, redshift = z) # doctest: +SKIP
 
         Now that you have downloaded the catalog, it is stored in the default cache location:
