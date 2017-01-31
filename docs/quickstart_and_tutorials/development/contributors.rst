@@ -28,6 +28,7 @@ Core package contributors
 * Nick Hand
 * Andrew Hearin
 * Elise Jennings
+* Johannes Ulf Lange
 * Alexie Leauthaud
 * Yao-Yuan Mao
 * Surhud More

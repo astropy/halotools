@@ -190,7 +190,7 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     #transform to s and mu
                                     s = sqrt(dz_sq + dxy_sq)
                                     if s!=0:
-                                        mu = sqrt(dz_sq)/s
+                                        mu = sqrt(dxy_sq)/s
                                     else:
                                         mu=0.0
                                     
