@@ -27,6 +27,14 @@ HOD models
    ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/tinker13_composite_model
    ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/hearin15_composite_model
 
+CLF models
+~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 1
+
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/cacciato09_composite_model
+
 Subhalo-based models
 ~~~~~~~~~~~~~~~~~~~~~
 

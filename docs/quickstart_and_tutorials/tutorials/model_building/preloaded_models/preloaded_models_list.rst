@@ -6,10 +6,10 @@
 List of All Preloaded Models Grouped by Type
 *********************************************
 
-This page is just a quick reference for every prebuilt model provided by Halotools. 
-See :ref:`preloaded_models_overview` for more information. 
+This page is just a quick reference for every prebuilt model provided by Halotools.
+See :ref:`preloaded_models_overview` for more information.
 
-HOD Models 
+HOD Models
 ===========
 
 .. toctree::
@@ -20,7 +20,16 @@ HOD Models
    hearin15_composite_model
    tinker13_composite_model
 
-Subhalo-based Models 
+CLF Models
+==========
+
+.. toctree::
+   :maxdepth: 1
+
+   cacciato09_composite_model
+
+
+Subhalo-based Models
 ====================
 
 .. toctree::

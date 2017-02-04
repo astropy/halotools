@@ -17,7 +17,7 @@ __all__ = ('solve_for_polynomial_coefficients', 'polynomial_from_table',
      'bind_default_kwarg_mixin_safe',
      'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory')
 
-__author__ = ['Andrew Hearin', 'Surhud More']
+__author__ = ['Andrew Hearin', 'Surhud More', 'Johannes Ulf Lange']
 
 
 def solve_for_polynomial_coefficients(abscissa, ordinates):
@@ -393,13 +393,11 @@ def custom_incomplete_gamma(a, x):
     """ Incomplete gamma function.
 
     For the case covered by scipy, a > 0, scipy is called. Otherwise the gamma function
-    recurrence relations are called, extending the scipy behavior. The only other difference from the
-    scipy function is that in `custom_incomplete_gamma` only supports
-    the case where the input ``a`` is a scalar.
+    recurrence relations are called, extending the scipy behavior.
 
     Parameters
     -----------
-    a : float
+    a : array_like
 
     x : array_like
 
@@ -417,13 +415,41 @@ def custom_incomplete_gamma(a, x):
     >>> g = custom_incomplete_gamma(a, x)
     """
 
-    if a < 0:
-        return (custom_incomplete_gamma(a+1, x) - x**a * np.exp(-x))/a
-    elif a == 0:
-        return -expi(-x)
+    if isinstance(a, np.ndarray):
+
+        if not isinstance(x, np.ndarray):
+            x = np.repeat(x, len(a))
+
+        if len(a) != len(x):
+            msg = ("The ``a`` and ``x`` arguments of the "
+                   "``custom_incomplete_gamma`` function must have the same"
+                   "length.\n")
+            raise HalotoolsError(msg)
+
+        result = np.zeros(len(a))
+
+        mask = (a < 0)
+        if np.any(mask):
+            result[mask] = ((custom_incomplete_gamma(a[mask]+1, x[mask]) -
+                x[mask]**a[mask] * np.exp(-x[mask])) / a[mask])
+        mask = (a == 0)
+        if np.any(mask):
+            result[mask] = -expi(-x[mask])
+        mask = a > 0
+        if np.any(mask):
+            result[mask] = gammaincc(a[mask], x[mask]) * gamma(a[mask])
+
+        return result
+
     else:
-        return gammaincc(a, x) * gamma(a)
-custom_incomplete_gamma.__author__ = ['Surhud More']
+
+        if a < 0:
+            return (custom_incomplete_gamma(a+1, x) - x**a * np.exp(-x))/a
+        elif a == 0:
+            return -expi(-x)
+        else:
+            return gammaincc(a, x) * gamma(a)
+custom_incomplete_gamma.__author__ = ['Surhud More', 'Johannes Ulf Lange']
 
 
 def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning=True):

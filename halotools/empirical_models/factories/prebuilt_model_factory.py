@@ -230,6 +230,8 @@ class PrebuiltHodModelFactory(HodModelFactory):
 
         if model_nickname == 'zheng07':
             dictionary_retriever = hod_models.zheng07_model_dictionary
+        elif model_nickname == 'cacciato09':
+            dictionary_retriever = hod_models.cacciato09_model_dictionary
         elif model_nickname == 'leauthaud11':
             dictionary_retriever = hod_models.leauthaud11_model_dictionary
         elif model_nickname == 'hearin15':
