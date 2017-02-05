@@ -136,7 +136,7 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.vstack(result)
+        counts = np.sum(np.array(result), axis=0)
         pool.close()
     else:
         result = engine(cell1_tuples[0])
