@@ -100,7 +100,7 @@ def test_npairs_per_object_3d_parallel():
         sample2 = np.random.random((npts2, 3))
 
     rbins = [0.05, 0.1, 0.25]
-    serial_result = npairs_per_object_3d(sample1, sample2, rbins, period=1)
+    serial_result = npairs_per_object_3d(sample1, sample2, rbins, period=1, num_threads=1)
     parallel_result = npairs_per_object_3d(sample1, sample2, rbins, period=1, num_threads=3)
     assert np.shape(serial_result) == np.shape(parallel_result)
     assert np.all(serial_result == parallel_result)
