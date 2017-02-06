@@ -88,3 +88,21 @@ def test_npairs_per_object_3d_brute_force2():
     result = npairs_per_object_3d(sample1, sample2, rbins, period=1)
     assert brute_force_result.shape == result.shape
     assert np.all(result == brute_force_result)
+
+
+def test_npairs_per_object_3d_parallel():
+    """ Regression test for GitHub Issue #634.
+    """
+    npts1 = 100
+    npts2 = 90
+    with NumpyRNGContext(fixed_seed+1):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
+
+    rbins = [0.05, 0.1, 0.25]
+    serial_result = npairs_per_object_3d(sample1, sample2, rbins, period=1, num_threads=1)
+    parallel_result = npairs_per_object_3d(sample1, sample2, rbins, period=1, num_threads=3)
+    assert np.shape(serial_result) == np.shape(parallel_result)
+    assert np.all(serial_result == parallel_result)
+
+

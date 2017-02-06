@@ -5,6 +5,8 @@
 
 - The ``Lbox`` attribute of all Halotools halo catalogs is now stored as an array of length 3 instead of a scalar.
 
+- Fixed bug in multi-threaded calculations using npairs_per_object_3d function.
+
 
 0.4 (2016-08-11)
 ----------------
