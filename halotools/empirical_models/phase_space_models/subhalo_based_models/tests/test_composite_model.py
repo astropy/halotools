@@ -69,6 +69,3 @@ def test_composite_model():
 
     d = np.sqrt(dx**2 + dy**2 + dz**2)
     assert np.all(d < 2*hostrvir)
-
-
-

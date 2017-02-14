@@ -58,4 +58,4 @@ class TrivialPhaseSpace(object):
         """
         phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
         for key in phase_space_keys:
-            table[key] = table['halo_'+key]
+            table[key][:] = table['halo_'+key][:]
