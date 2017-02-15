@@ -65,7 +65,7 @@ def find_idx_nearest_val(array, value):
 
     Examples
     --------
-    >>> x = np.linspace(0, 1000, num=1e5)
+    >>> x = np.linspace(0, 1000, num=int(1e5))
     >>> val = 45.5
     >>> idx_nearest_val = find_idx_nearest_val(x, val)
     >>> nearest_val = x[idx_nearest_val]

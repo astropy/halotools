@@ -130,7 +130,7 @@ def compute_conditional_percentiles(**kwargs):
             num_prim_haloprop_bins = (lg10_max_prim_haloprop-lg10_min_prim_haloprop)/dlog10_prim_haloprop
             prim_haloprop_bin_boundaries = np.logspace(
                 lg10_min_prim_haloprop, lg10_max_prim_haloprop,
-                num=ceil(num_prim_haloprop_bins))
+                num=int(ceil(num_prim_haloprop_bins)))
 
         # digitize the masses so that we can access them bin-wise
         output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
