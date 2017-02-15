@@ -48,7 +48,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests.
         """
-        self.Nptcls = 1e4
+        self.Nptcls = int(1e4)
         self.Lbox = 100
         self.redshift = 0.0
         self.x = np.linspace(0, self.Lbox, self.Nptcls)
@@ -106,7 +106,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         assert (ptclcat.Lbox == 200.).all()
         assert hasattr(ptclcat, 'particle_mass')
         assert ptclcat.particle_mass == 100
-        
+
     def test_successful_load_vector_Lbox(self):
 
         ptclcat = UserSuppliedPtclCatalog(Lbox=[100,200,300],
@@ -142,7 +142,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat = UserSuppliedPtclCatalog(Lbox=200,
                 particle_mass=100, redshift=self.redshift,
                 **bad_ptclcat_args)
-    
+
     def test_positions_contained_inside_anisotropic_lbox(self):
         # positions must be < Lbox
         bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
@@ -157,7 +157,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat = UserSuppliedPtclCatalog(Lbox=[100, 150, 200],
                 particle_mass=100, redshift=self.redshift,
                 **bad_ptclcat_args)
-                
+
         with pytest.raises(HalotoolsError):
             bad_ptclcat_args['z'][0] = 225
             ptclcat = UserSuppliedPtclCatalog(Lbox=[100, 150, 200],
