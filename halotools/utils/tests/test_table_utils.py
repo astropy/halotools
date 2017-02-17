@@ -66,8 +66,8 @@ class TestComputeConditionalPercentiles(TestCase):
         mass1 = np.zeros(int(Npts/2)) + 1e12
         mass2 = np.zeros(int(Npts/2)) + 1e14
         mass = np.append(mass1, mass2)
-        zform1 = np.linspace(0, 10, Npts/2)
-        zform2 = np.linspace(20, 30, Npts/2)
+        zform1 = np.linspace(0, 10, int(Npts/2))
+        zform2 = np.linspace(20, 30, int(Npts/2))
         zform = np.append(zform1, zform2)
 
         d = {'halo_mvir': mass, 'halo_zform': zform}
