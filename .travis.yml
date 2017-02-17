@@ -55,6 +55,9 @@ matrix:
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         - python: 3.4
+          env: SETUP_CMD='egg_info'
+
+        - python: 3.4
           env: NUMPY_VERSION=1.9
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
