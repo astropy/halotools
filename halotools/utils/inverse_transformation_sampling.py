@@ -2,6 +2,7 @@
 """
 import numpy as np
 from astropy.utils import NumpyRNGContext
+from warnings import warn
 
 from .array_utils import unsorting_indices
 
@@ -117,6 +118,9 @@ def build_cdf_lookup(y, npts_lookup_table=1000):
     assert len(y) > 1, "Input ``y`` has only one element"
 
     npts_y = len(y)
+    if npts_y < npts_lookup_table:
+        warn("npts_y = {0} is less than  npts_lookup_table = {1}.\n"
+            "Setting npts_lookup_table to {0}".format(npts_y, npts_lookup_table))
     npts_lookup_table = max(npts_lookup_table, npts_y)
 
     sorted_y = np.sort(y)

@@ -3,6 +3,7 @@
 import numpy as np
 from astropy.utils import NumpyRNGContext
 from astropy.tests.helper import pytest
+import warnings
 
 from ..inverse_transformation_sampling import _sorted_rank_order_array, rank_order_percentile
 from ..inverse_transformation_sampling import build_cdf_lookup, monte_carlo_from_cdf_lookup
@@ -98,3 +99,13 @@ def test_monte_carlo_from_cdf_lookup3():
             mc_input=np.array((0.1, 0.4, 0.25)), num_draws=10)
     substr = "If input ``mc_input`` is specified"
     assert substr in err.value.args[0]
+
+
+def test_build_cdf_lookup_raises_npts_warning():
+    npts_y, npts_lookup_table = 100, 200
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        y = np.random.normal(size=npts_y)
+        __ = build_cdf_lookup(y, npts_lookup_table=npts_lookup_table)
+    substr = "npts_y = {0} is less than  npts_lookup_table = {1}.".format(npts_y, npts_lookup_table)
+    assert substr in str(w[-1].message)
