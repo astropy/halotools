@@ -6,6 +6,9 @@ from astropy.utils import NumpyRNGContext
 from .array_utils import unsorting_indices
 
 
+__all__ = ('monte_carlo_from_cdf_lookup', 'build_cdf_lookup', 'rank_order_percentile')
+
+
 def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
         num_draws=None, seed=None):
     """

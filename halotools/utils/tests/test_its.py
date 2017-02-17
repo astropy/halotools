@@ -7,6 +7,8 @@ from astropy.tests.helper import pytest
 from ..inverse_transformation_sampling import _sorted_rank_order_array, rank_order_percentile
 from ..inverse_transformation_sampling import build_cdf_lookup, monte_carlo_from_cdf_lookup
 
+__all__ = ('test_sorted_rank_order_array', )
+
 
 def test_sorted_rank_order_array():
     result = _sorted_rank_order_array(4)
