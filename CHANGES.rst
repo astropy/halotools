@@ -7,6 +7,8 @@
 
 - Fixed bug in multi-threaded calculations using npairs_per_object_3d function.
 
+- Added abunmatch sub-package of empirical_models providing conditional abundance matching functionality
+
 
 0.4 (2016-08-11)
 ----------------

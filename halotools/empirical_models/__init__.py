@@ -14,3 +14,4 @@ from .sfr_models import *
 from .occupation_models import *
 from .smhm_models import *
 from .composite_models import *
+from .abunmatch import *
