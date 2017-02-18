@@ -84,10 +84,10 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     e.g., in models analogous to `age matching <https://arxiv.org/abs/1304.5557/>`_.
     """
     haloprop_table, galprop_table = its.build_cdf_lookup(galprop, npts_lookup_table)
-    x_percentiles = its.rank_order_percentile(haloprop)
-    noisy_x_percentiles = randomly_resort(x_percentiles, sigma, seed=seed)
+    haloprop_percentiles = its.rank_order_percentile(haloprop)
+    noisy_haloprop_percentiles = randomly_resort(haloprop_percentiles, sigma, seed=seed)
     return its.monte_carlo_from_cdf_lookup(haloprop_table, galprop_table,
-            mc_input=noisy_x_percentiles)
+            mc_input=noisy_haloprop_percentiles)
 
 
 def randomly_resort(x, sigma, seed=None):
