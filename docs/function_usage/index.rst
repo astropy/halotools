@@ -34,7 +34,7 @@ Subhalo-based models
    :maxdepth: 1
 
    ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/behroozi10_composite_model
-
+   abundance_matching
 
 Component models
 ------------------

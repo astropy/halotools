@@ -12,7 +12,7 @@ __all__ = ('conditional_abunmatch', 'randomly_resort')
 
 def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
     """ Function used to model a correlation between two variables ``x`` and ``y``
-    using the conditional abundance matching technique.
+    using conditional abundance matching.
 
     Parameters
     -----------
@@ -23,7 +23,7 @@ def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
         Numpy array of shape (npts_y, ) typically storing a galaxy property
 
     sigma : float, optional
-        Variable controlling the level of Gaussian noise that will be introduced
+        Level of Gaussian noise that will be introduced
         to the x--y correlation. Default is 0, for a perfect monotonic relation
         between x and y.
 
@@ -33,6 +33,7 @@ def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
 
     seed : int, optional
         Random number seed used to introduce noise in the x--y correlation.
+
         Default is None for stochastic results.
 
     Returns
@@ -53,24 +54,28 @@ def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
     their own binning as appropriate to the particular problem.
 
     >>> num_halos_in_mpeak_bin = int(1e4)
-    >>> spin_at_fixed_mpeak = 10**np.random.normal(loc=-1.5, size=num_halos_in_mpeak_bin, scale=0.3)
-
+    >>> mean, size, std = -1.5, num_halos_in_mpeak_bin, 0.3
+    >>> spin_at_fixed_mpeak = 10**np.random.normal(loc=mean, size=size, scale=std)
     >>> num_gals_in_mstar_bin = int(1e3)
-    >>> some_galprop_at_fixed_mpeak = np.random.power(2.5, size=num_gals_in_mstar_bin)
-    >>> modeled_galprop = conditional_abunmatch(spin_at_fixed_mpeak, some_galprop_at_fixed_mpeak)
+    >>> some_galprop_at_fixed_mstar = np.random.power(2.5, size=num_gals_in_mstar_bin)
+    >>> modeled_galprop = conditional_abunmatch(spin_at_fixed_mpeak, some_galprop_at_fixed_mstar)
 
     Notes
     -----
-    In principle, this function is also applicable to traditional abundance matching, e.g.,
-    between stellar mass and halo. In practice, this may not be suitable for your application
-    if extrapolation beyond the tabulated SMF is needed - the implementation here makes a simple
-    call to `numpy.interp`, which can result in undesired edge case behavior if
+    To approximate the input ``y`` distribution, the implementation of `conditional_abunmatch`
+    builds a lookup table for the CDF of the input ``y``  using a simple call to `numpy.interp`,
+    which can result in undesired edge case behavior if
     a large fraction of model galaxies lie outside the range of the data.
 
     For a code that provides careful treatment of this extrapolation
-    for Schechter-like abundance functions, see the
+    for traditional abundance matching applications involving Schechter-like abundance functions, see the
     `deconvolution abundance matching code <https://bitbucket.org/yymao/abundancematching/>`_
     written by Yao-Yuan Mao.
+
+    The intended applications of the `conditional_abunmatch` function are those for which
+    the stochasticity in ``y`` at fixed ``x`` need not be forced
+    to respect the form of a log-normal distribution,
+    e.g., in models analogous to `age matching <https://arxiv.org/abs/1304.5557/>`_.
     """
     x_percentiles = its.rank_order_percentile(x)
     noisy_x_percentile = randomly_resort(x_percentiles, sigma, seed=seed)
