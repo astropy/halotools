@@ -10,45 +10,49 @@ __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('conditional_abunmatch', 'randomly_resort')
 
 
-def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
-    """ Function used to model a correlation between two variables ``x`` and ``y``
-    using conditional abundance matching.
+def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, seed=None):
+    """ Function used to model a correlation between two variables,
+     ``haloprop`` and ``galprop``, using conditional abundance matching.
 
     Parameters
     -----------
-    x : ndarray
-        Numpy array of shape (npts_x, ) typically storing a halo property
+    haloprop : ndarray
+        Numpy array of shape (num_halos, ) typically storing a halo property
 
-    y : ndarray
-        Numpy array of shape (npts_y, ) typically storing a galaxy property
+    galprop : ndarray
+        Numpy array of shape (num_gals, ) typically storing a galaxy property
 
     sigma : float, optional
         Level of Gaussian noise that will be introduced
-        to the x--y correlation. Default is 0, for a perfect monotonic relation
-        between x and y.
+        to the haloprop--galprop correlation.
+
+        Default is 0, for a perfect monotonic relation between haloprop and galprop.
 
     npts_lookup_table : int, optional
-        Size of the lookup table used to approximate the ``y`` distribution.
+        Size of the lookup table used to approximate the ``galprop`` distribution.
+
         Default is 1000.
 
     seed : int, optional
-        Random number seed used to introduce noise in the x--y correlation.
+        Random number seed used to introduce noise in the haloprop--galprop correlation.
 
         Default is None for stochastic results.
 
     Returns
     -------
-    modeled_y : ndarray
-        Numpy array of shape (npts_x, ) storing the modeled y-values associated
-        with each value of the input ``x``.
+    model_galprop : ndarray
+        Numpy array of shape (num_halos, ) storing the modeled galprop-values associated
+        with each value of the input ``haloprop``.
 
     Examples
     --------
     Suppose we would like to do some CAM-style modeling of a correlation between some
-    halo property ``x`` and some galaxy property ``y``. The `conditional_abunmatch` function
+    halo property ``haloprop`` and some galaxy property ``galprop``.
+    The `conditional_abunmatch` function
     can be used to map values of the galaxy property onto the halos in such a way that the
-    PDF of ``y`` is preserved and a correlation (of variable strength)
-    between ``x`` and ``y`` is introduced. In the example below, the arrays ``x`` and ``y``
+    PDF of ``galprop`` is preserved and a correlation (of variable strength)
+    between ``haloprop`` and ``galprop`` is introduced. In the example below,
+    the arrays ``haloprop`` and ``galprop``
     will be assumed to store the halo and galaxy properties in a particular bin of the
     primary halo and galaxy property. To fully implement CAM, the user will need to do
     their own binning as appropriate to the particular problem.
@@ -62,26 +66,28 @@ def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
 
     Notes
     -----
-    To approximate the input ``y`` distribution, the implementation of `conditional_abunmatch`
-    builds a lookup table for the CDF of the input ``y``  using a simple call to `numpy.interp`,
+    To approximate the input ``galprop`` distribution, the implementation of `conditional_abunmatch`
+    builds a lookup table for the CDF of the input ``galprop``  using a simple call to `numpy.interp`,
     which can result in undesired edge case behavior if
     a large fraction of model galaxies lie outside the range of the data.
+    To ensure your results are not impacted by this, make sure that
+    num_gals >> npts_lookup_table.
 
-    For a code that provides careful treatment of this extrapolation
+    For code that provides careful treatment of this extrapolation
     for traditional abundance matching applications involving Schechter-like abundance functions, see the
     `deconvolution abundance matching code <https://bitbucket.org/yymao/abundancematching/>`_
     written by Yao-Yuan Mao.
 
     The intended applications of the `conditional_abunmatch` function are those for which
-    the stochasticity in ``y`` at fixed ``x`` need not be forced
+    the stochasticity in ``galprop`` at fixed ``haloprop`` need not be forced
     to respect the form of a log-normal distribution,
     e.g., in models analogous to `age matching <https://arxiv.org/abs/1304.5557/>`_.
     """
-    x_table, y_table = its.build_cdf_lookup(y, npts_lookup_table)
-
-    x_percentiles = its.rank_order_percentile(x)
+    haloprop_table, galprop_table = its.build_cdf_lookup(galprop, npts_lookup_table)
+    x_percentiles = its.rank_order_percentile(haloprop)
     noisy_x_percentiles = randomly_resort(x_percentiles, sigma, seed=seed)
-    return its.monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=noisy_x_percentiles)
+    return its.monte_carlo_from_cdf_lookup(haloprop_table, galprop_table,
+            mc_input=noisy_x_percentiles)
 
 
 def randomly_resort(x, sigma, seed=None):
