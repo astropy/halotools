@@ -77,13 +77,11 @@ def conditional_abunmatch(x, y, sigma=0., npts_lookup_table=1000, seed=None):
     to respect the form of a log-normal distribution,
     e.g., in models analogous to `age matching <https://arxiv.org/abs/1304.5557/>`_.
     """
-    x_percentiles = its.rank_order_percentile(x)
-    noisy_x_percentile = randomly_resort(x_percentiles, sigma, seed=seed)
-
     x_table, y_table = its.build_cdf_lookup(y, npts_lookup_table)
 
-    return its.monte_carlo_from_cdf_lookup(x_table, y_table,
-            mc_input=noisy_x_percentile)
+    x_percentiles = its.rank_order_percentile(x)
+    noisy_x_percentiles = randomly_resort(x_percentiles, sigma, seed=seed)
+    return its.monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=noisy_x_percentiles)
 
 
 def randomly_resort(x, sigma, seed=None):
@@ -107,11 +105,10 @@ def randomly_resort(x, sigma, seed=None):
         Array of shape (npts, )
     """
     npts = len(x)
-    noisy_indices = noisy_indexing_array(npts, sigma, seed=seed)
-
     idx_sorted = np.argsort(x)
     x_sorted = x[idx_sorted]
 
+    noisy_indices = noisy_indexing_array(npts, sigma, seed=seed)
     noisy_x_sorted = x_sorted[noisy_indices]
 
     idx_unsorted = unsorting_indices(idx_sorted)
@@ -154,7 +151,7 @@ def noisy_indexing_array(npts, sigma, seed=None):
     elif np.all(sigma) == 0:
         return np.arange(npts)
     else:
-        sigma = np.where(sigma < 1e-3, 1e-3, sigma)
+        sigma = np.maximum(sigma, 1e-3)
 
     with NumpyRNGContext(seed):
         noise = np.random.normal(loc=0, scale=sigma, size=npts)
@@ -167,15 +164,17 @@ def noisy_indexing_array(npts, sigma, seed=None):
     noisy_percentiles -= np.min(noisy_percentiles)
     noisy_percentiles /= np.max(noisy_percentiles)
 
-    # Now transform the noisy percentile into an array of (noisy) indices
+    # Now transform noisy_percentiles into an array of noisy indices
     noisy_indices = np.array(noisy_percentiles*npts).astype(int)
 
-    # Return a set of noisy percentile values
-    # that will be linearly spaced in the unit interval
-    # and sorted according to the noisy_index calculated above
+    # At this point, noisy_indices has the appropriate stochasticity but may have repeated entries
+    # Our goal is to return a length-npts array with no repeated entries
+    # that may be treated as a fancy indexing array to introduce a noisy ordering
+    # of some other length-npts array storing our galaxy property.
+    # So what we do next is address the issue of repeated entries,
+    # replacing them with their rank-order in sequence of their appearance
     placeholder_negatives = np.zeros_like(noisy_indices) - 1.
-    rescaled_noisy_percentile = np.insert(placeholder_negatives,
-        noisy_indices, sorted_ranks-1)
-    mask_out_placeholder_negatives = rescaled_noisy_percentile!=-1
+    rescaled_noisy_percentile = np.insert(placeholder_negatives, noisy_indices, sorted_ranks-1)
+    mask_out_placeholder_negatives = rescaled_noisy_percentile != -1
     indices_with_noise = rescaled_noisy_percentile[mask_out_placeholder_negatives]
     return indices_with_noise.astype(int)
