@@ -58,7 +58,7 @@ matrix:
           env: SETUP_CMD='egg_info'
 
         - python: 3.4
-          env: NUMPY_VERSION=1.9
+          env: NUMPY_VERSION=1.11
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         # Try Astropy development version
