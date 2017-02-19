@@ -186,14 +186,12 @@ def array_is_monotonic(array, strict=False):
 
 
 def unsorting_indices(sorting_indices):
-    """ For an array that has been sorting according to the
-    input ``sorting_indices``, return the indices that will return
-    the array back to its original order.
+    """ Return the indexing array that inverts `numpy.argsort`.
 
     Parameters
     ----------
     sorting_indices : array_like
-        Length-Npts array
+        Length-Npts array - the output of `numpy.argsort`
 
     Returns
     -------
