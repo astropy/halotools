@@ -26,6 +26,13 @@ NFW Profile Models
 	NFWPhaseSpace
 	ConcMass
 
+Subhalo-based Profiles
+----------------------
+
+.. autosummary::
+
+    SubhaloPhaseSpace
+
 Central Galaxy Profile Models
 -----------------------------
 
