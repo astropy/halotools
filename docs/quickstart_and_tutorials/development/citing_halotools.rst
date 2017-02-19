@@ -9,8 +9,7 @@ License and Citation Information
 Citing Halotools
 ------------------
 
-Halotools is currently preparing for its first "official" public release (v0.2).
-The v0.2 release is accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication,
+The first "official" release of Halotools (v0.2) was accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication,
 we ask that you cite this paper in your work.
 
 Depending on what you use Halotools to do, there may be additional citations that are appropriate.
