@@ -20,8 +20,8 @@ from ..mock_observables_helpers import (get_num_threads, get_separation_bins_arr
 
 from ...sim_manager.sim_defaults import default_cosmology
 
-__all__ = ['delta_sigma']
-__author__ = ['Duncan Campbell']
+__all__ = ('delta_sigma', )
+__author__ = ('Duncan Campbell', 'Andrew Hearin', 'Shun Saito')
 
 newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
@@ -254,7 +254,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
 
     rho_crit0 = cosmology.critical_density0
     rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology.h**2
-    mean_rho_comoving = cosmology.Om0*rho_crit0
+    mean_rho_comoving = (cosmology.Om0 + cosmology.Onu0)*rho_crit0
 
     # define function to integrate
     def twice_one_plus_xi_gm(pi, rp):
