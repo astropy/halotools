@@ -27,7 +27,7 @@ newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 
 def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
-        cosmology=default_cosmology,
+        cosmology=default_cosmology, max_sample_size=int(1e6),
         log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
@@ -93,6 +93,12 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         Statistical estimator for the tpcf.
         Options are 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
         Default is ``Natural``.
+
+    max_sample_size : int, optional
+        Defines maximum size of the sample that will be passed to the pair counter.
+        If sample size exeeds max_sample_size,
+        the sample will be randomly down-sampled such that the subsample
+        is equal to ``max_sample_size``. Default value is 1e6. Set to np.inf for no downsampling.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -229,7 +235,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     # calculate the cross-correlation between galaxies and particles
     xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,
         do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads,
-        approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell2_size)
+        approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell2_size,
+        max_sample_size=max_sample_size)
 
     # Check to see if xi ever is equal to -1
     # if so, there are radial bins with 0 matter particles.
