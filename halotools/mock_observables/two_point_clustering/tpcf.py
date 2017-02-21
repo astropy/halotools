@@ -226,7 +226,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         Defines maximum size of the sample that will be passed to the pair counter.
         If sample size exeeds max_sample_size,
         the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
+        is equal to ``max_sample_size``. Default value is 1e6. Set to np.inf for no downsampling.
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
