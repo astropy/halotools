@@ -613,10 +613,7 @@ class MonteCarloGalProf(object):
         virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
-        try:
-            seed = kwargs['seed']
-        except KeyError:
-            seed = None
+        seed = kwargs.get('seed', None)
         with NumpyRNGContext(seed):
             radial_velocities = np.random.normal(scale=radial_dispersions)
 
@@ -671,7 +668,11 @@ class MonteCarloGalProf(object):
         total_mass = table[self.prim_haloprop_key]
 
         vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
+        if seed is not None:
+            seed += 1
         vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
+        if seed is not None:
+            seed += 1
         vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
 
         if overwrite_table_velocities is True:
