@@ -205,10 +205,7 @@ class MonteCarloGalProf(object):
         # Draw random values for the cumulative mass PDF
         # These will be turned into random radial positions
         # by inverting the tabulated cumulative_mass_PDF
-        try:
-            seed = kwargs['seed']
-        except KeyError:
-            seed = None
+        seed = kwargs.get('seed', None)
         with NumpyRNGContext(seed):
             rho = np.random.random(len(profile_params[0]))
 
@@ -270,10 +267,8 @@ class MonteCarloGalProf(object):
         This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function.
 
         """
-        try:
-            seed = kwargs['seed']
-        except KeyError:
-            seed = None
+        seed = kwargs.get('seed', None)
+
         with NumpyRNGContext(seed):
             cos_t = np.random.uniform(-1., 1., Npts)
             phi = np.random.uniform(0, 2*np.pi, Npts)
@@ -334,13 +329,14 @@ class MonteCarloGalProf(object):
         Ngals = len(profile_params[0])
         if Ngals == 0:
             return None, None, None
-        x, y, z = self.mc_unit_sphere(Ngals, **kwargs)
+
+        seed = kwargs.get('seed', None)
+        x, y, z = self.mc_unit_sphere(Ngals, seed=seed)
 
         # Get the radial positions of the galaxies scaled by the halo radius
-        try:
-            seed = kwargs['seed']
-        except KeyError:
-            seed = None
+
+        if seed is not None:
+            seed += 1
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
             *profile_params, seed=seed)
 
@@ -617,10 +613,7 @@ class MonteCarloGalProf(object):
         virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
-        try:
-            seed = kwargs['seed']
-        except KeyError:
-            seed = None
+        seed = kwargs.get('seed', None)
         with NumpyRNGContext(seed):
             radial_velocities = np.random.normal(scale=radial_dispersions)
 
@@ -675,7 +668,11 @@ class MonteCarloGalProf(object):
         total_mass = table[self.prim_haloprop_key]
 
         vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
+        if seed is not None:
+            seed += 1
         vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
+        if seed is not None:
+            seed += 1
         vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params, seed=seed)
 
         if overwrite_table_velocities is True:

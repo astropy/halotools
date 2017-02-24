@@ -216,6 +216,8 @@ class SubhaloMockFactory(MockFactory):
 
         for method in self.model._mock_generation_calling_sequence:
             func = getattr(self.model, method)
+            if seed is not None:
+                seed += 1
             func(table=self.galaxy_table, seed=seed)
 
         if hasattr(self.model, 'galaxy_selection_func'):

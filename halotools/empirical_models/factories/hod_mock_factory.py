@@ -307,6 +307,8 @@ class HodMockFactory(MockFactory):
             except AttributeError:
                 d = {}
             gal_type_slice = self._gal_type_indices[func.gal_type]
+            if seed is not None:
+                seed += 1
             func(table=self.galaxy_table[gal_type_slice], seed=seed, **d)
 
         if self.enforce_PBC is True:
@@ -366,6 +368,8 @@ class HodMockFactory(MockFactory):
                     d = {key: getattr(self, key) for key in func.additional_kwargs}
                 except AttributeError:
                     d = {}
+                if seed is not None:
+                    seed += 1
                 func(table=self.halo_table, seed=seed, **d)
                 galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
                 galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
@@ -391,6 +395,8 @@ class HodMockFactory(MockFactory):
             occupation_func = getattr(self.model, occupation_func_name)
             # Call the component model to get a Monte Carlo
             # realization of the abundance of gal_type galaxies
+            if seed is not None:
+                seed += 1
             self._occupation[gal_type] = occupation_func(table=self.halo_table, seed=seed)
 
             # Now use the above result to set up the indexing scheme
@@ -453,6 +459,8 @@ class HodMockFactory(MockFactory):
         for gal_type in self.gal_types:
             occupation_func_name = 'mc_occupation_'+gal_type
             occupation_func = getattr(self.model, occupation_func_name)
+            if seed is not None:
+                seed += 1
             ngals = ngals + np.sum(occupation_func(table=halo_table, seed=seed))
 
         return ngals

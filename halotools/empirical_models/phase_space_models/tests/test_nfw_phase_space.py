@@ -2,6 +2,7 @@
 """
 from unittest import TestCase
 import numpy as np
+from copy import deepcopy
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 
@@ -320,68 +321,62 @@ class TestNFWPhaseSpace(TestCase):
         assert np.allclose(mc_vr_seed43a, mc_vr_seed43b, rtol=0.001)
         assert not np.allclose(mc_vr_seed43a, mc_vr_seed44, rtol=0.001)
 
-    def test_mc_vel(self):
-        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_vel`.
-
-        Method verifies that the ``vx`` column of an input ``table`` is in fact over-written.
-
-        Notes
-        -----
-        Clearly this particular function would benefit from more robust unit-testing.
+    def test_mc_pos1(self):
+        """ Verify that the seed keyword is treated properly.
+        This function serves as a regression test for https://github.com/astropy/halotools/issues/672.
         """
-        assert np.all(self._dummy_halo_table['vx'] == self._dummy_halo_table['halo_vx'])
-        self.nfw.mc_vel(self._dummy_halo_table, seed=fixed_seed)
-        assert np.any(self._dummy_halo_table['vx'] != self._dummy_halo_table['halo_vx'])
+        nfw = NFWPhaseSpace()
+        halos = Table()
+        num_halos = int(1e4)
+        halos['x'] = np.zeros(num_halos)
+        halos['y'] = np.zeros(num_halos)
+        halos['z'] = np.zeros(num_halos)
+        halos['host_centric_distance'] = 0.
+        halos['halo_rvir'] = 1.
+        halos['conc_NFWmodel'] = 5.
+        halos['halo_mvir'] = 1e12
+        nfw.mc_pos(table=halos, seed=43)
 
-    # OLD TESTS OF THE NFW PROFILE MODEL
-    # THESE ARE STILL RELEVANT BUT NEED TO BE REVAMPED TO THE NEW SYNTAX
-    # # Check that the lookup table attributes are correct
-    # model_instance.build_inv_cumu_lookup_table()
+        assert np.min(halos['x']) < -0.9
+        assert np.min(halos['y']) < -0.9
+        assert np.min(halos['z']) < -0.9
+        assert np.max(halos['x']) > 0.9
+        assert np.max(halos['y']) > 0.9
+        assert np.max(halos['z']) > 0.9
 
-    # assert np.all(model_instance.NFWmodel_conc_lookup_table_bins > 0)
-    # assert np.all(model_instance.NFWmodel_conc_lookup_table_bins < 1000)
+    def test_mc_vel1(self):
+        """
+        """
+        halo_table = deepcopy(self._dummy_halo_table)
+        assert np.all(halo_table['vx'] == halo_table['halo_vx'])
+        self.nfw.mc_vel(halo_table, seed=fixed_seed)
+        assert np.any(halo_table['vx'] != halo_table['halo_vx'])
 
-    # assert len(model_instance.NFWmodel_conc_lookup_table_bins) >= 10
-    # assert (len(model_instance.cumu_inv_func_table) ==
-    #     len(model_instance.func_table_indices) )
+    def test_mc_vel2(self):
+        """ Method verifies that seed keyword is treated properly.
+        This serves as a regression test for https://github.com/astropy/halotools/issues/672
+        """
+        nfw = NFWPhaseSpace()
+        halos = Table()
+        num_halos = int(1e4)
+        halos['vx'] = np.zeros(num_halos)
+        halos['vy'] = np.zeros(num_halos)
+        halos['vz'] = np.zeros(num_halos)
+        halos['host_centric_distance'] = np.random.uniform(0, 1, num_halos)
+        halos['halo_rvir'] = 1.
+        halos['conc_NFWmodel'] = 5.
+        halos['halo_mvir'] = 1e12
+        nfw.mc_vel(halos, seed=43)
+        assert not np.all(halos['vx'] == halos['vy'])
+        assert not np.all(halos['vx'] == halos['vz'])
 
-    # # Verify accuracy of lookup table
-    # def get_lookup_table_frac_error(model, conc, test_radius):
-    #     """ Function returns the fractional difference between the
-    #     exact value of the inverse cumulative mass PDF, and the
-    #     value inferred from the discretized lookup table.
-    #     """
-    #     exact_result = model.cumulative_mass_PDF(test_radius, conc)
-    #     conc_table = model.NFWmodel_conc_lookup_table_bins
-    #     digitized_conc_index = np.digitize(np.array([conc]), conc_table)
-    #     digitized_conc = conc_table[digitized_conc_index]
-    #     func = model.cumu_inv_func_table[digitized_conc_index[0]]
-    #     approximate_result = 10.**func(np.log10(exact_result))
-    #     fracdiff = abs((approximate_result - test_radius)/test_radius)
-    #     return fracdiff
-    # # Now we will verify that the lookup table method attains
-    # # better than 0.1% accuracy at all relevant radii and concentrations
-    # radius = np.logspace(-3, 0, 15)
-    # test_conc_array = np.linspace(1, 25, 5)
-    # for test_conc in test_conc_array:
-    #     frac_error = get_lookup_table_frac_error(
-    #         model_instance, test_conc, radius)
-    #     assert np.allclose(frac_error, 0, rtol = 1e-3, atol = 1e-3)
+    def test_seed_treatment1(self):
+        """ Regression test for https://github.com/astropy/halotools/issues/672.
+        """
+        nfw = NFWPhaseSpace()
+        satellites = nfw.mc_generate_nfw_phase_space_points(seed=43)
+        assert np.any(satellites['vx'] != satellites['vy'])
 
-    # # The lookup table should adjust properly when passed an input_dict
-    # initial_NFWmodel_conc_lookup_table_min = copy(model_instance.NFWmodel_conc_lookup_table_min)
-    # initial_NFWmodel_conc_lookup_table_max = copy(model_instance.NFWmodel_conc_lookup_table_max)
-    # initial_NFWmodel_conc_lookup_table_spacing = copy(model_instance.NFWmodel_conc_lookup_table_spacing)
-    # initial_NFWmodel_conc_lookup_table_bins = copy(model_instance.NFWmodel_conc_lookup_table_bins)
 
-    # model_instance.NFWmodel_conc_lookup_table_min -= 0.05
-    # model_instance.NFWmodel_conc_lookup_table_min += 0.05
-    # model_instance.NFWmodel_conc_lookup_table_spacing *= 0.9
-    # model_instance.build_inv_cumu_lookup_table()
-    # assert model_instance.NFWmodel_conc_lookup_table_bins != initial_NFWmodel_conc_lookup_table_bins
 
-    # model_instance.NFWmodel_conc_lookup_table_min = initial_NFWmodel_conc_lookup_table_min
-    # model_instance.NFWmodel_conc_lookup_table_max = initial_NFWmodel_conc_lookup_table_max
-    # model_instance.NFWmodel_conc_lookup_table_spacing = initial_NFWmodel_conc_lookup_table_spacing
-    # model_instance.build_inv_cumu_lookup_table()
-    # assert np.all(model_instance.NFWmodel_conc_lookup_table_bins == initial_NFWmodel_conc_lookup_table_bins)
+

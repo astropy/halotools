@@ -9,6 +9,7 @@
 
 - Added abunmatch sub-package of empirical_models providing conditional abundance matching functionality
 
+- Fixed bug in mock population when using the seed keyword, resolving Issue #672, https://github.com/astropy/halotools/issues/672.
 
 0.4 (2016-08-11)
 ----------------

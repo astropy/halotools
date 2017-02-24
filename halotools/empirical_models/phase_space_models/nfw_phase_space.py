@@ -110,6 +110,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         """
         MonteCarloGalProf.mc_pos(self, table=table, seed=seed)
+        if seed is not None:
+            seed += 1
         MonteCarloGalProf.mc_vel(self, table=table, seed=seed)
 
     def mc_generate_nfw_phase_space_points(self, Ngals=int(1e4), conc=5, mass=1e12,
@@ -183,9 +185,17 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         r = np.sqrt(x**2 + y**2 + z**2)
         scaled_radius = r/rvir
 
+        if seed is not None:
+            seed += 1
         vrad = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
+        if seed is not None:
+            seed += 1
         vx = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
+        if seed is not None:
+            seed += 1
         vy = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
+        if seed is not None:
+            seed += 1
         vz = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
 
         t = Table({'x': x, 'y': y, 'z': z,
