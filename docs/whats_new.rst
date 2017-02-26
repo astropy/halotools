@@ -8,7 +8,7 @@ What's New in Halotools v0.5?
 
 All Halotools official releases include minor bug-fixes and performance enhancements. All such changes appear in the :ref:`changelog`, and can also be reviewed reviewed in detail by filtering the `GitHub Issues page <https://github.com/astropy/halotools/issues/>`_ for issues that have been tagged with Milestone matching the release you are interested in.
 
-New Features
+New Models
 ============
 
 .. currentmodule:: halotools.empirical_models
@@ -29,6 +29,25 @@ Conditional Luminosity Function models
 ---------------------------------------
 
 The Conditional Luminosity Function (CLF) is a closely related class of empirical models to HODs. Whereas the HOD only specifies the number of galaxies in a halo brighter than some threshold, the CLF specifies the luminosity function of galaxies in a halo brighter than some threshold (e.g., `van den Bosch et al 2012 <https://arxiv.org/abs/1206.6890/>`_, and related works). The :ref:`cacciato09_composite_model` is a composite CLF model introduced in Halotools v0.5 that implements the version of the CLF introduced in `Cacciato et al 2009 <https://arxiv.org/abs/0807.4932/>`_.
+
+New Mock Observations
+======================
+
+.. currentmodule:: halotools.empirical_models
+
+Calculating the HOD
+-------------------
+
+The `hod_from_mock` function provides a convenient interface for calculating
+the mean number of galaxies per halo as a function of halo mass.
+The API permits arbitrary subsampling; supports any input independent variable,
+and is performant enough to apply to MCMC applications of, e.g., group statistics.
+Thus the `hod_from_mock` function could be used for example,
+to calculate :math:`\langle N_{\rm cen}|M_{\rm vir}\rangle`,
+:math:`\langle N_{\rm red}|V_{\rm max}\rangle`,
+or :math:`\langle N_{\rm blue-sat}|M_{\rm group}\rangle`.
+
+
 
 
 
