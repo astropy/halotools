@@ -22,10 +22,13 @@ The `conditional_abunmatch` function provides a Numpy-based kernel for mapping g
 HOD models using subhalos for satellites
 ----------------------------------------
 
-In HOD-stye models of the galaxy--halo connection, there is parametric freedom in the number of satellites assigned to a host halo. Once the satellite count in a halo is determined, the intra-halo positions and velocities must also be modeled in some way. One common parametric choice is to assume an NFW profile, as in `Zehavi et al 2005 <https://arxiv.org/abs/astro-ph/0408569/>`_, `van den Bosch et al 2012 <https://arxiv.org/abs/1206.6890/>`_, and related works. Alternatively, satellites may be assigned to randomly chosen dark matter particles in the halo, as in `Reid and White 2014 <https://arxiv.org/abs/1404.3742/>`_. Instead of dark matter particles, the `SubhaloPhaseSpace` class allows for satellites to placed onto subhalos in the host halo. As described in the documentation, `SubhaloPhaseSpace` allows users to preferentially select *which* subhalos are assigned satellites, e.g., most massive first.
+In HOD-stye models of the galaxy--halo connection, there is parametric freedom in the number of satellites assigned to a host halo. Once the satellite count in a halo is determined, the intra-halo positions and velocities must also be modeled in some way. One common parametric choice is to assume an NFW profile, as in `Zehavi et al 2005 <https://arxiv.org/abs/astro-ph/0408569/>`_, and related works. Alternatively, satellites may be assigned to randomly chosen dark matter particles in the halo, as in `Reid and White 2014 <https://arxiv.org/abs/1404.3742/>`_. Instead of dark matter particles, the `SubhaloPhaseSpace` class allows for satellites to placed onto subhalos in the host halo. As described in the documentation, `SubhaloPhaseSpace` allows users to preferentially select *which* subhalos are assigned satellites, e.g., most massive first.
 
 
-Conditonal Luminosity Function models
--------------------------------------
+Conditional Luminosity Function models
+---------------------------------------
+
+The Conditional Luminosity Function (CLF) is a closely related class of empirical models to HODs. Whereas the HOD only specifies the number of galaxies in a halo brighter than some threshold, the CLF specifies the luminosity function of galaxies in a halo brighter than some threshold (e.g., `van den Bosch et al 2012 <https://arxiv.org/abs/1206.6890/>`_, and related works). The :ref:`cacciato09_composite_model` is a composite CLF model introduced in Halotools v0.5 that implements the version of the CLF introduced in `Cacciato et al 2009 <https://arxiv.org/abs/0807.4932/>`_.
+
 
 
