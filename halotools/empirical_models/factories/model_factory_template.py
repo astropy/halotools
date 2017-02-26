@@ -90,27 +90,18 @@ class ModelFactory(object):
             Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
             **kwargs):
         """
-        Method used to populate a simulation with a Monte Carlo realization of a model.
+        Method used to populate a simulation
+        with a Monte Carlo realization of a model.
 
-        After calling this method, the model instance will have a new ``mock`` attribute.
-        You can then access the galaxy population via ``model.mock.galaxy_table``,
-        an Astropy `~astropy.table.Table`.
+        After calling this method, the model instance
+        will have a new ``mock`` attribute.
+        You can then access the galaxy population via
+        ``model.mock.galaxy_table``, an Astropy `~astropy.table.Table`.
 
-        Calling `populate_mock` triggers a halo catalog pre-processing phase that
-        only needs to be done once. After calling `populate_mock`,
-        if you want to repopulate the halo catalog, you should use the
-        `~halotools.empirical_models.MockFactory.populate` method
-        bound to ``model.mock``.
-
-        For example, if you are running an MCMC type analysis,
-        you will choose your halo catalog and completeness cuts, and call
-        `populate_mock` with the appropriate arguments. Thereafter, you can
-        explore parameter space by changing the values stored in the
-        ``param_dict`` dictionary attached to the model, and then calling the
-        `~halotools.empirical_models.MockFactory.populate` method
-        bound to ``model.mock``. Any changes to the ``param_dict`` of the
-        model will automatically propagate into the behavior of
-        the `~halotools.empirical_models.MockFactory.populate` method.
+        For documentation specific to the `populate_mock` method of subhalo-based
+        models, see `halotools.empirical_models.SubhaloModelFactory.populate_mock`;
+        for HOD-style models
+        see `halotools.empirical_models.HodModelFactory.populate_mock`.
 
         See the :ref:`mock_making_tutorials` section of the documentation for
         an in-depth description of the Halotools source-code implementation
@@ -159,6 +150,37 @@ class ModelFactory(object):
         seed : int, optional
             Random number seed used in the Monte Carlo realization.
             Default is None, which will produce stochastic results.
+
+        Notes
+        -----
+        Note the difference between the
+        `halotools.empirical_models.MockFactory.populate` method and the
+        closely related method
+        `halotools.empirical_models.ModelFactory.populate_mock`.
+        The `~halotools.empirical_models.ModelFactory.populate_mock` method
+        is bound to a composite model instance and is called the *first* time
+        a composite model is used to generate a mock. Calling the
+        `~halotools.empirical_models.ModelFactory.populate_mock` method creates
+        the `~halotools.empirical_models.MockFactory` instance and binds it to
+        composite model. From then on, if you want to *repopulate* a new Universe
+        with the same composite model, you should instead call the
+        `~halotools.empirical_models.MockFactory.populate` method
+        bound to ``model.mock``. The reason for this distinction is that
+        calling `~halotools.empirical_models.ModelFactory.populate_mock`
+        triggers a large number of relatively expensive pre-processing steps
+        and self-consistency checks that need only be carried out once.
+        See the Examples section below for an explicit demonstration.
+
+        In particular, if you are running an MCMC type analysis,
+        you will choose your halo catalog and completeness cuts, and call
+        `~halotools.empirical_models.ModelFactory.populate_mock`
+        with the appropriate arguments. Thereafter, you can
+        explore parameter space by changing the values stored in the
+        ``param_dict`` dictionary attached to the model, and then calling the
+        `~halotools.empirical_models.MockFactory.populate` method
+        bound to ``model.mock``. Any changes to the ``param_dict`` of the
+        model will automatically propagate into the behavior of
+        the `~halotools.empirical_models.MockFactory.populate` method.
 
         Examples
         ----------
