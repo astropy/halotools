@@ -178,17 +178,11 @@ class HodMockFactory(MockFactory):
     def populate(self, seed=None, **kwargs):
         """
         Method populating host halos with mock galaxies.
+
         By calling the `populate` method of your mock, you will repopulate
         the halo catalog with a new realization of the model based on
         whatever values of the model parameters are currently stored in the
-        model ``param_dict``.
-
-        Normally, repeated calls to this method should not increase the RAM
-        usage of halotools because a new mock catalog is created and the old one
-        deleted. However, on certain machines the memory usage was found to
-        increase over time. If this is the case and memory usage is critical you
-        can try calling gc.collect() immediately following the call to
-        ``mock.populate`` to manually invoke python's garbage collection.
+        ``param_dict`` of the model.
 
         For an in-depth discussion of how this method is implemented,
         see the :ref:`hod_mock_factory_source_notes` section of the documentation.
@@ -215,6 +209,46 @@ class HodMockFactory(MockFactory):
         seed : int, optional
             Random number seed used in the Monte Carlo realization.
             Default is None, which will produce stochastic results.
+
+        Notes
+        -----
+        Note the difference between the
+        `halotools.empirical_models.HodMockFactory.populate` method and the
+        closely related method
+        `halotools.empirical_models.HodModelFactory.populate_mock`.
+        The `~halotools.empirical_models.HodModelFactory.populate_mock` method
+        is bound to a composite model instance and is called the *first* time
+        a composite model is used to generate a mock. Calling the
+        `~halotools.empirical_models.HodModelFactory.populate_mock` method creates
+        the `~halotools.empirical_models.HodMockFactory` instance and binds it to
+        composite model. From then on, if you want to *repopulate* a new Universe
+        with the same composite model, you should instead call the
+        `~halotools.empirical_models.HodMockFactory.populate` method
+        bound to ``model.mock``. The reason for this distinction is that
+        calling `~halotools.empirical_models.HodModelFactory.populate_mock`
+        triggers a large number of relatively expensive pre-processing steps
+        and self-consistency checks that need only be carried out once.
+        See the Examples section below for an explicit demonstration.
+
+        In particular, if you are running an MCMC type analysis,
+        you will choose your halo catalog and completeness cuts, and call
+        `halotools.empirical_models.ModelFactory.populate_mock`
+        with the appropriate arguments. Thereafter, you can
+        explore parameter space by changing the values stored in the
+        ``param_dict`` dictionary attached to the model, and then calling the
+        `~halotools.empirical_models.MockFactory.populate` method
+        bound to ``model.mock``. Any changes to the ``param_dict`` of the
+        model will automatically propagate into the behavior of
+        the `~halotools.empirical_models.MockFactory.populate` method.
+
+        Normally, repeated calls to the
+        `~halotools.empirical_models.HodMockFactory.populate` method
+        should not increase the RAM usage of halotools because a new mock
+        catalog is created and the old one
+        deleted. However, on certain machines the memory usage was found to
+        increase over time. If this is the case and memory usage is critical you
+        can try calling gc.collect() immediately following the call to
+        ``mock.populate`` to manually invoke python's garbage collection.
 
         Examples
         ----------
