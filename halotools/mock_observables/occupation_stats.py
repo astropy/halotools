@@ -6,12 +6,12 @@ from scipy.stats import binned_statistic
 from ..utils import crossmatch
 
 
-__all__ = ('hod_from_mock',)
+__all__ = ('hod_from_mock', 'get_haloprop_of_galaxies')
 __author__ = ('Andrew Hearin', )
 
 
 def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
-    """
+    r"""
     Calculate the HOD of a mock galaxy sample.
 
     Parameters
@@ -43,11 +43,17 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
 
     Examples
     --------
+    In the following calculation, we'll populate a mock catalog and then manually
+    compute the central galaxy HOD from the ``galaxy_table``.
+
     >>> from halotools.empirical_models import PrebuiltHodModelFactory
     >>> from halotools.sim_manager import FakeSim
     >>> model = PrebuiltHodModelFactory('leauthaud11', threshold=10.75)
     >>> halocat = FakeSim()
     >>> model.populate_mock(halocat)
+
+    Now compute :math:`\langle N_{\rm cen} \rangle(M_{\rm vir})`:
+
     >>> cenmask = model.mock.galaxy_table['gal_type'] == 'centrals'
     >>> central_host_mass = model.mock.galaxy_table['halo_mvir'][cenmask]
     >>> halo_mass = model.mock.halo_table['halo_mvir']
@@ -76,7 +82,7 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
 
 def get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos):
     """ Calculate the host halo property of every galaxy with a ``halo_id`` that
-    matches one of input halos. This function can be used, for example,
+    matches one of the input halos. This function can be used, for example,
     to calculate the host halo mass of a galaxy.
 
     Parameters
@@ -87,26 +93,43 @@ def get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos):
 
     halo_id_halos : ndarray
         Integer array of shape (num_halos, ) storing the ``halo_id``
-        of each viable host halo. Repeated entries are not permissible,
+        of every host halo in the entire halo catalog used to populate the mock.
+        Repeated entries are not permissible,
         but halos with zero or multiple galaxies are accepted.
 
     haloprop_halos : ndarray
-        Array of shape (num_halos, ) storing the halo property of interest.
+        Array of shape (num_halos, ) storing the halo property of interest,
+        e.g., ``halo_mvir``.
 
     Returns
     -------
     haloprop_galaxies : ndarray
         Array of shape (num_galaxies, ) storing the property of the halo
         that each galaxy belongs to. Galaxies with no matching halo will
-        receive value of np.nan
+        receive value of `~numpy.nan`
 
     Examples
     --------
-    >>> num_galaxies, num_halos = 10, 100
-    >>> halo_id_halos = np.arange(num_halos).astype(int)
-    >>> haloprop_halos = np.random.rand(num_halos)
-    >>> halo_id_galaxies = np.random.randint(0, num_halos, num_galaxies)
-    >>> haloprop_galaxies = get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos)
+    When you populate a mock catalog, the host halo mass of every galaxy is automatically
+    included in the ``galaxy_table``. However, you may wish to know other halo properties
+    for each mock galaxy, such as the spin of the halo the galaxy lives in. The code below
+    demonstrates how to use the `get_haloprop_of_galaxies` function to do this.
+
+    >>> from halotools.empirical_models import PrebuiltHodModelFactory
+    >>> from halotools.sim_manager import FakeSim
+    >>> model = PrebuiltHodModelFactory('leauthaud11')
+    >>> halocat = FakeSim()
+    >>> model.populate_mock(halocat)
+    >>> halo_id_halos = halocat.halo_table['halo_id']
+    >>> halo_id_galaxies = model.mock.galaxy_table['halo_id']
+    >>> haloprop_halos = halocat.halo_table['halo_spin']
+    >>> halo_spin_galaxies = get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos)
+    >>> model.mock.galaxy_table['halo_spin'] = halo_spin_galaxies
+
+    Note that we needed to use the original halo catalog
+    to retrieve the ``halo_spin`` of the halos; in order to save memory,
+    the version of the ``halo_table`` that is bound to ``model.mock`` has a
+    restricted subset of columns.
     """
     halo_id_galaxies = np.atleast_1d(halo_id_galaxies)
     halo_id_halos = np.atleast_1d(halo_id_halos)

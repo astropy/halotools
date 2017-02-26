@@ -21,12 +21,12 @@ All of these can be imported from `halotools.mock_observables`.
 	delta_sigma
 	marked_tpcf
 
-Galaxy Group Statistics 
+Galaxy Group Statistics
 ==========================
 
 .. autosummary::
 
-	FoFGroups 
+	FoFGroups
 
 Isolation Criteria
 ==========================
@@ -36,7 +36,7 @@ Isolation Criteria
 	spherical_isolation
 	cylindrical_isolation
 	conditional_spherical_isolation
-	conditional_cylindrical_isolation 
+	conditional_cylindrical_isolation
 
 Pairwise Velocities
 ==========================
@@ -55,7 +55,7 @@ Radial Profiles
 
 	radial_profile_3d
 
-Void Statistics 
+Void Statistics
 ==========================
 
 .. autosummary::
@@ -70,4 +70,12 @@ Large Scale Density
 
 	large_scale_density_spherical_volume
 	large_scale_density_spherical_annulus
+
+Calculating the HOD
+====================
+
+.. autosummary::
+
+	hod_from_mock
+
 
