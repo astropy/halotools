@@ -52,7 +52,11 @@ luminosity threshold of the galaxy sample in units of Lsun with h=1 units:
 
 It is not permissible to dynamically change the ``threshold``
 of the model instance. If you want to explore the effects of different
-thresholds, you should instantiate multiple models.
+thresholds, you should instantiate multiple models. Alternatively, you can
+always impose a higher threshold on an already existing galaxy catalog produced
+with a given model instance. The resulting reduced catalog will have the same
+statistical properties as if you ran the model with the higher threshold and
+same parameters.
 
 As described in :ref:`altering_param_dict`, you can always change the model parameters
 after instantiation by changing the values in the ``param_dict`` dictionary. For example,
@@ -112,11 +116,17 @@ just play with the code: change parameter values, make plots of how the
 underying analytical relations vary, and also of how the
 mock observables vary. Here we just give a simple description of the meaning
 of each parameter. You can also refer to the original
-Cacciato et al. (2009) publication, arXiv:0807.4932, as well as the follow-up paper
-Cacciato et al. (2012), arXiv:1203.2616.
+Cacciato et al. (2009) publication, arXiv:0807.4932. The fiducial values of the
+``cacciato09`` model instance implemented in Halotools are drawn from the WMAP3
+analysis of that publication.
 
-Note that the fiducial values of the ``cacciato09`` model instance implemented in Halotools
-are actually drawn from the 2012 publication.
+The model also generalizes the CLF model of Cacciato et al. (2009) by allowing
+modifications of the high-luminosity cut-off of the satellite population.
+Briefly, changing the delta parameters should only affect the abundance of
+satellites that have luminosities similar to the central luminosity. On the other
+hand, faint satellites should be unaffected. The details of the 2 delta parameters
+are described in Lange et al. (in prep.). Setting both to 0, as done by default, is
+equivalent to the model of Cacciato et al. (2009). 
 
 * param_dict['log_L_0'] -  Normalization of central mass-to-light ratio.
 
@@ -140,9 +150,9 @@ are actually drawn from the 2012 publication.
 
 * param_dict['log_M_2'] - Modifies normalization and faint-end slope of the satellite luminosity function.
 
-* param_dict['delta_1'] - Modifies faint-end slope of the satellite luminosity function.
+* param_dict['delta_1'] - Modifies the high-luminosity exponential cut-off of the satellite luminosity function.
 
-* param_dict['delta_2'] - Modifies faint-end slope of the satellite luminosity function.
+* param_dict['delta_2'] - Modifies the high-luminosity exponential cut-off of the satellite luminosity function.
 
 
 
