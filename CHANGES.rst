@@ -7,11 +7,15 @@
 
 - Fixed bug in multi-threaded calculations using npairs_per_object_3d function.
 
-- Added abunmatch sub-package of empirical_models providing conditional abundance matching functionality
+- Added `empirical_models.abunmatch` sub-package providing conditional abundance matching functionality
 
 - Fixed bug in mock population when using the seed keyword, resolving Issue #672, https://github.com/astropy/halotools/issues/672.
 
-- Added convenience function to calculate the HOD from a mock galaxy sample
+- Added `mock_observables.hod_from_mock` convenience function to calculate the HOD from a mock galaxy sample
+
+- Performance enhancements to marked correlation functions
+
+- Fixed bug in `mock_observables.pair_counters.npairs_s_mu` that impacted `mock_observables.s_mu_tpcf`
 
 0.4 (2016-08-11)
 ----------------
