@@ -104,5 +104,3 @@ def test_npairs_per_object_3d_parallel():
     parallel_result = npairs_per_object_3d(sample1, sample2, rbins, period=1, num_threads=3)
     assert np.shape(serial_result) == np.shape(parallel_result)
     assert np.all(serial_result == parallel_result)
-
-

@@ -376,7 +376,3 @@ class TestNFWPhaseSpace(TestCase):
         nfw = NFWPhaseSpace()
         satellites = nfw.mc_generate_nfw_phase_space_points(seed=43)
         assert np.any(satellites['vx'] != satellites['vy'])
-
-
-
-

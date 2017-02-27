@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 import sys
 import fnmatch
 
-from subprocess import PIPE,Popen
-import fileinput
+from subprocess import PIPE, Popen
 
 tutorials_root = os.path.abspath('./docs/tutorials')
+
 
 def get_tutlist(tut):
 
@@ -30,11 +29,12 @@ def get_tutlist(tut):
     tutlist = fnmatch.filter(candidate_tutorials, file_pattern)
     return tutlist
 
+
 def get_list_of_tutorials(relative_dirname):
     tutorial_tag = '.ipynb'
     tutorial_list = (
-        [f for f in os.listdir(relative_dirname) if 
-        os.path.isfile(os.path.join(relative_dirname,f)) & 
+        [f for f in os.listdir(relative_dirname) if
+        os.path.isfile(os.path.join(relative_dirname, f)) &
         (f[-len(tutorial_tag):] == tutorial_tag)]
         )
     return tutorial_list
@@ -46,12 +46,12 @@ def rewrite_first_line(fname):
     f.close()
     line = lines[1]
     line = lines[1]
-    line = line.replace('-','_')
+    line = line.replace('-', '_')
     line = line.replace('\n', ':')
     line = '.. _'+line
     lines[1] = line
     lines.insert(2, '\n')
-    f = open(fname,'w')
+    f = open(fname, 'w')
     for line in lines:
         f.write(line)
     f.close()
@@ -60,9 +60,9 @@ def rewrite_first_line(fname):
 def add_asterisk_header(fname):
 
     def get_asterisks_line(header):
-        asterisks=''
+        asterisks = ''
         for ii in range(len(header)):
-            asterisks+='*'
+            asterisks += '*'
         return asterisks+'\n'
 
     f = open(fname, 'r')
@@ -75,10 +75,11 @@ def add_asterisk_header(fname):
     asterisks = get_asterisks_line(title)
     lines.insert(4, asterisks)
     lines.insert(3, asterisks)
-    f = open(fname,'w')
+    f = open(fname, 'w')
     for line in lines:
         f.write(line)
     f.close()
+
 
 def correct_docs_hyperlinks(fname):
 
@@ -124,56 +125,57 @@ def correct_docs_hyperlinks(fname):
         for line in lines:
             f.write(line)
 
+
 def test_ipynb(fname):
-    """Function to use in a test suite to 
-    verify that an IPython Notebook 
+    """Function to use in a test suite to
+    verify that an IPython Notebook
     executes without raising an exception.
-    
-    The method is to convert the Notebook to a python script, 
-    and then assert that the script does not raise an exception 
-    when run as an executable. Useful for 
-    incorporating IPython Notebooks into documentation. 
 
-    Parameters 
+    The method is to convert the Notebook to a python script,
+    and then assert that the script does not raise an exception
+    when run as an executable. Useful for
+    incorporating IPython Notebooks into documentation.
+
+    Parameters
     ----------
-    fname : string 
-        Name of IPython Notebook being tested. 
+    fname : string
+        Name of IPython Notebook being tested.
 
-    Notes 
+    Notes
     -----
-    Requires pandoc to be installed so that 
-    the Notebook can be converted to an executable python script. 
+    Requires pandoc to be installed so that
+    the Notebook can be converted to an executable python script.
 
-    Do not include the file extension in fname. 
-    If '.ipynb' is accidentally included, the function will strip 
-    the extension and otherwise behave properly. 
+    Do not include the file extension in fname.
+    If '.ipynb' is accidentally included, the function will strip
+    the extension and otherwise behave properly.
 
-    Credit to Padriac Cunningham for the idea to spawn a subprocess 
-    to handle the exception handling in an external script. 
+    Credit to Padriac Cunningham for the idea to spawn a subprocess
+    to handle the exception handling in an external script.
 
-    """ 
+    """
 
     fname = os.path.basename(fname)
-    if fname[-6:]=='.ipynb':
+    if fname[-6:] == '.ipynb':
         fname = fname[0:-6]
 
 
 #   convert the notebook to a python script
 #   conversion_string = "ipython nbconvert --to python "+fname+".ipynb"
     conversion_string = "ipython nbconvert --to python "+fname
-    c=os.system(conversion_string)
+    c = os.system(conversion_string)
 
-#   Use subprocess.Popen to spawn a subprocess 
+#   Use subprocess.Popen to spawn a subprocess
 #   that executes the tutorial script
-    s = Popen(["python" ,fname+".py"],stderr=PIPE)
-#   After the following line, 
-#   err will be an empty string if the program runs without 
+    s = Popen(["python", fname + ".py"], stderr=PIPE)
+#   After the following line,
+#   err will be an empty string if the program runs without
 #   raising any exceptions
-    _, err = s.communicate()  
+    _, err = s.communicate()
 
-    # The script version of the .ipynb file 
+    # The script version of the .ipynb file
     # is no longer necessary, so delete it
-    os.system("rm -rf "+fname+".py")
+    os.system("rm -rf " + fname + ".py")
 
     return err
 
@@ -193,12 +195,12 @@ def prepare_system_for_tutorial(fname):
         pass
 
 
-
 ########################################################
-########### MAIN ###########
+# MAIN
+
 
 def main(args):
-    if len(args)==1:
+    if len(args) == 1:
         arg = tutorials_root
     else:
         arg = args[1]
@@ -211,30 +213,30 @@ def main(args):
         base_fname = os.path.basename(fname)
         tutorial_loc = os.path.dirname(fname)
 
-        command = "cp "+fname+" ./"
+        command = "cp " + fname + " ./"
         os.system(command)
         prepare_system_for_tutorial(base_fname)
 
         # Check to see whether this notebook raises an exception
         fname_test = test_ipynb(base_fname)
 
-        if (fname_test=='') or ('FutureWarning' in fname_test):
+        if (fname_test == '') or ('FutureWarning' in fname_test):
             # convert the notebook to rst for inclusion in the docs
-            conversion_string = "ipython nbconvert --to rst "+base_fname
-            c=os.system(conversion_string)
+            conversion_string = "ipython nbconvert --to rst " + base_fname
+            c = os.system(conversion_string)
 
-            rst_fname = base_fname[:-len('.ipynb')]+'.rst'
+            rst_fname = base_fname[:-len('.ipynb')] + '.rst'
             add_asterisk_header(rst_fname)
             rewrite_first_line(rst_fname)
             correct_docs_hyperlinks(rst_fname)
-            os.system("rm "+base_fname)
-            os.system("mv "+rst_fname+" "+tutorial_loc)
+            os.system("rm " + base_fname)
+            os.system("mv " + rst_fname + " " + tutorial_loc)
 
         else:
-            print("error msg = %s " % fname_test )
+            print("error msg = %s " % fname_test)
             failure_list.append(fname)
 
-    if failure_list==[]:
+    if failure_list == []:
         print("\n")
         print("Each notebook executes without raising an exception")
         print("\n")
@@ -243,17 +245,15 @@ def main(args):
         print("The following notebooks were not converted to rst "
             "because they raise an exception:")
         for failure in failure_list:
-            print(failure+"\n")
+            print(failure + "\n")
         print("\n")
 
-            
+
 ########################################################
 
 
-
-
 ############################
-### Trigger
+# Trigger
 ############################
 if __name__ == '__main__':
     main(sys.argv)

@@ -74,7 +74,3 @@ def test_occupation_stats4():
     mean_nsat = np.where(mean_nsat < 1e-2, 0, mean_nsat)
     expected_mean_nsat = np.where(expected_mean_nsat < 1e-2, 0, mean_nsat)
     assert np.allclose(expected_mean_nsat, mean_nsat, rtol=0.02)
-
-
-
-

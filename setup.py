@@ -13,8 +13,8 @@ try:
     import cython
     if parse_version(cython.__version__) < parse_version('0.23'):
             raise ImportError("Halotools requires Cython>=0.23, but your installed "
-                                                "Cython is older.  Please upgrade before trying to "
-                                                "build Halotools.")
+                            "Cython is older.  Please upgrade before trying to "
+                            "build Halotools.")
 except ImportError:
     pass  # Cython not installed, which is fine for release versions
 
@@ -99,18 +99,17 @@ for root, dirs, files in os.walk(PACKAGENAME):
 package_info['package_data'][PACKAGENAME].extend(c_files)
 
 setup(name=PACKAGENAME,
-            version=VERSION,
-            description=DESCRIPTION,
-            scripts=scripts,
-            install_requires=['astropy>=1', 'scipy', 'beautifulsoup4', 'requests'],
-            provides=[PACKAGENAME],
-            author=AUTHOR,
-            author_email=AUTHOR_EMAIL,
-            license=LICENSE,
-            url=URL,
-            long_description=LONG_DESCRIPTION,
-            cmdclass=cmdclassd,
-            zip_safe=False,
-            use_2to3=True,
-            **package_info
-)
+    version=VERSION,
+    description=DESCRIPTION,
+    scripts=scripts,
+    install_requires=['astropy>=1', 'scipy', 'beautifulsoup4', 'requests'],
+    provides=[PACKAGENAME],
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    license=LICENSE,
+    url=URL,
+    long_description=LONG_DESCRIPTION,
+    cmdclass=cmdclassd,
+    zip_safe=False,
+    use_2to3=True,
+    **package_info)
