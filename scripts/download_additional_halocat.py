@@ -107,12 +107,12 @@ else:
 
 #  Raise a special message if high-redshift bolshoi or multidark particles are requested.
 hiz_no_ptcls_error_msg = (
-    "\nHigh-redshift particles are not available for the "+simname+" simulation.\n"
-    "To download the high-z "+simname+" halos you have requested, "
+    "\nHigh-redshift particles are not available for the " + simname + " simulation.\n"
+    "To download the high-z " + simname + " halos you have requested, "
     "throw the -halos_only flag.\n")
 
 if download_ptcls is True:
-    if (redshift > 0.1) & ((simname == 'bolshoi') or (simname=='multidark')):
+    if (redshift > 0.1) & ((simname == 'bolshoi') or (simname == 'multidark')):
         raise ValueError(hiz_no_ptcls_error_msg)
 
 # Done parsing inputs
@@ -151,7 +151,7 @@ if args.overwrite is False:
 ##################################################################
 
 ##################################################################
-### Call the download methods
+# Call the download methods
 if download_ptcls is True:
     new_ptcl_log_entry = downman.download_ptcl_table(simname=simname,
         redshift=redshift, dz_tol=0.05, overwrite=args.overwrite, download_dirname=args.dirname,
@@ -167,7 +167,7 @@ if download_halos is True:
 
 
 ##################################################################
-### Issue the success message
+# Issue the success message
 
 cache_dirname = str(os.path.dirname(downman.halo_table_cache.cache_log_fname)).strip()
 halo_table_cache_basename = str(os.path.basename(downman.halo_table_cache.cache_log_fname))
@@ -182,19 +182,19 @@ msg = (
     "you use with Halotools.\n")
 
 if download_halos is True:
-    msg += ("The "+halo_table_cache_basename+" cache log now has an entry \n"
+    msg += ("The " + halo_table_cache_basename + " cache log now has an entry \n"
         "corresponding to the newly downloaded halo catalog,\n"
-        "which is stored in the following location:\n\n"
-        + new_halo_log_entry.fname + "\n\n")
+        "which is stored in the following location:\n\n" +
+        new_halo_log_entry.fname + "\n\n")
 
 if download_ptcls is True:
-    msg += ("The "+ptcl_table_cache_basename+" cache log now has an entry \n"
+    msg += ("The " + ptcl_table_cache_basename + " cache log now has an entry \n"
         "corresponding to a random downsampling of \n"
         "~1e6 dark matter particles from the requested snapshot; "
-        "\nthe particle catalog is stored in the following location:\n\n"
-        + new_ptcl_log_entry.fname + "\n\n")
+        "\nthe particle catalog is stored in the following location:\n\n" +
+        new_ptcl_log_entry.fname + "\n\n")
 
-msg +=("This data is in the form of an hdf5 files store an Astropy Table data structure. \n"
+msg += ("This data is in the form of an hdf5 files store an Astropy Table data structure. \n"
     "\nThe Halotools cache system allows you to \n"
     "load these catalogs into memory with the following syntax:\n\n"
     ">>> from halotools.sim_manager import CachedHaloCatalog\n"

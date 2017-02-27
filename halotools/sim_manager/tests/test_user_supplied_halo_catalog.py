@@ -114,7 +114,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert (halocat.Lbox == 200).all()
         assert hasattr(halocat, 'particle_mass')
         assert halocat.particle_mass == 100
-        
+
     def test_successful_load_vector_Lbox(self):
 
         halocat = UserSuppliedHaloCatalog(Lbox=[100,200,300],
@@ -150,7 +150,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox=200,
                 particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
-                
+
     def test_positions_contained_inside_anisotropic_lbox(self):
         # positions must be < Lbox
         bad_halocat_args = deepcopy(self.good_halocat_args)
@@ -165,13 +165,12 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox=[100, 150, 200],
                 particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
-                
+
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_z'][0] = 225
             halocat = UserSuppliedHaloCatalog(Lbox=[100, 150, 200],
                 particle_mass=100, redshift=self.redshift,
                 **bad_halocat_args)
-        
 
     def test_has_halo_x_column(self):
         # must have halo_x column

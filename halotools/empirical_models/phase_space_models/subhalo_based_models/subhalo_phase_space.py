@@ -26,8 +26,7 @@ default_inherited_subhalo_props_dict = (
     'halo_vx': ('vx', 'f8'),
     'halo_vy': ('vy', 'f8'),
     'halo_vz': ('vz', 'f8'),
-    'halo_mpeak': ('halo_mpeak', 'f8')
-    })
+    'halo_mpeak': ('halo_mpeak', 'f8')})
 
 
 class SubhaloPhaseSpace(object):

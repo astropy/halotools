@@ -95,4 +95,3 @@ def test_lbox_vector():
             assert len(halocat.Lbox) == 3
         except HalotoolsError:
             pass
-

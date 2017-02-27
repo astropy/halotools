@@ -592,8 +592,8 @@ class Cacciato09Sats(OccupationComponent):
         prim_haloprop = np.atleast_1d(prim_haloprop)
 
         try:
-            assert ((len(prim_haloprop) == 1) or (len(prim_galprop) == 1)
-                    or (len(prim_haloprop) == (len(prim_galprop))))
+            assert ((len(prim_haloprop) == 1) or (len(prim_galprop) == 1) or
+                    (len(prim_haloprop) == (len(prim_galprop))))
         except AssertionError:
             msg = ("If both ``prim_galprop`` and ``prim_haloprop`` are arrays"
                    " with multiple elements, they must have the same length.\n")

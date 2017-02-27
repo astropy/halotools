@@ -67,7 +67,7 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
 
     bins_with_galaxies_but_no_halos = (galaxy_counts > 0) & (halo_counts == 0)
     if np.any(bins_with_galaxies_but_no_halos):
-        bad_bin_index = np.where(bins_with_galaxies_but_no_halos==True)[0][0]
+        bad_bin_index = np.where(bins_with_galaxies_but_no_halos == True)[0][0]
         bad_bin_edge_low, bad_bin_edge_high = bin_edges[bad_bin_index], bin_edges[bad_bin_index+1]
         msg = ("The bin with edges ({0:.3f}, {1:.3f}) has galaxies but no halos.\n"
             "This must mean that the input ``haloprop_galaxies`` and ``haloprop_halos`` arrays \n"

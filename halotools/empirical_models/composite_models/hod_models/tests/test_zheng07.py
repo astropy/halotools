@@ -79,4 +79,3 @@ def test_modulate_with_cenocc2():
     model.param_dict['logMmin'] *= 1.5
     ncen2 = model.mean_occupation_satellites(prim_haloprop=test_mass)
     assert ncen1 != ncen2
-

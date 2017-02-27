@@ -168,6 +168,5 @@ def _enforce_maximum_search_length(search_length, period=None):
             "does not permit you to look for pairs separated by values \n"
             "exceeding a fraction of Lbox/3. in any dimension.\n"
             "Your function call would require searching for pairs separated by a distance of {0:.2f}*Lbox.\n"
-            "Either decrease your search length or use a larger simulation."
-            )
+            "Either decrease your search length or use a larger simulation.")
         raise ValueError(msg.format(max_search_fraction))

@@ -17,9 +17,9 @@ def file_prepend_line(filename, line_to_prepend):
 
 
 def get_asterisks_line(header):
-    asterisks=''
+    asterisks = ''
     for ii in range(len(header)):
-        asterisks+='*'
+        asterisks += '*'
     return asterisks
 
 
@@ -52,32 +52,32 @@ def test_ipynb(fname, enforce_pass=True):
 
     """
 
-    if fname[-6:]=='.ipynb':
+    if fname[-6:] == '.ipynb':
         fname = fname[0:-6]
 
 #   convert the notebook to a python script
 #   conversion_string = "ipython nbconvert --to python "+fname+".ipynb"
-    conversion_string = "ipython nbconvert --to python "+fname
-    c=system(conversion_string)
+    conversion_string = "ipython nbconvert --to python " + fname
+    c = system(conversion_string)
 
 #   Use subprocess.Popen to spawn a subprocess
 #   that executes the tutorial script
-    s = Popen(["python" ,fname+".py"],stderr=PIPE)
+    s = Popen(["python", fname+".py"], stderr=PIPE)
 #   After the following line,
 #   err will be an empty string if the program runs without
 #   raising any exceptions
     _, err = s.communicate()
     if enforce_pass is True:
-        assert err==''
+        assert err == ''
 
     # The script version of the .ipynb file
     # is no longer necessary, so delete it
-    system("rm -rf "+fname+".py")
+    system("rm -rf " + fname + ".py")
 
     if err == '':
         return 'pass'
     else:
-        print("error msg = \n"+err)
+        print("error msg = \n" + err)
         return 'fail'
 
 
@@ -93,18 +93,18 @@ def main():
         # Check to see whether this notebook raises an exception
         fname_test = test_ipynb(fname, enforce_pass=False)
 
-        if fname_test=='pass':
+        if fname_test == 'pass':
             # convert the notebook to rst for inclusion in the docs
             conversion_string = "ipython nbconvert --to rst "+fname
-            c=system(conversion_string)
-            header_line=get_asterisks_line(tutorial_dict[fname])
+            c = system(conversion_string)
+            header_line = get_asterisks_line(tutorial_dict[fname])
             file_prepend_line(fname+'.rst', header_line)
             file_prepend_line(fname+'.rst', tutorial_dict[fname])
             file_prepend_line(fname+'.rst', header_line)
         else:
             failure_list.append(fname)
 
-    if failure_list==[]:
+    if failure_list == []:
         print("\n")
         print("Each notebook executes without raising an exception")
         print("\n")
@@ -118,9 +118,6 @@ def main():
 
 
 ########################################################
-
-
-
 
 ############################
 ### Trigger
