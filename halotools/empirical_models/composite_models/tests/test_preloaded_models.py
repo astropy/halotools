@@ -1,7 +1,5 @@
 """
 """
-
-from unittest import TestCase
 from astropy.tests.helper import pytest
 
 from ...factories import PrebuiltHodModelFactory
@@ -9,57 +7,65 @@ from ...factories import PrebuiltHodModelFactory
 from ....sim_manager import CachedHaloCatalog, FakeSim
 from ....custom_exceptions import HalotoolsError
 
-# Determine whether the machine is mine
-# This will be used to select tests whose
-# returned values depend on the configuration
-# of my personal cache directory files
-from astropy.config.paths import _find_home
-aph_home = '/Users/aphearin'
-detected_home = _find_home()
-if aph_home == detected_home:
-    APH_MACHINE = True
-else:
-    APH_MACHINE = False
+
+__all__ = ('test_hearin15', 'test_Leauthaud11', 'test_Leauthaud11b',
+    'test_Leauthaud11c', 'test_zu_mandelbaum15', 'test_zu_mandelbaum15b')
 
 
-__all__ = ('TestHearin15', )
-
-
-class TestHearin15(TestCase):
-
-    def setup_class(self):
-        pass
-
-    def test_Hearin15(self):
-
-        model = PrebuiltHodModelFactory('hearin15')
+def test_hearin15():
+    """
+    """
+    model = PrebuiltHodModelFactory('hearin15')
+    try:
+        halocat = CachedHaloCatalog()
+    except:
         halocat = FakeSim()
+    model.populate_mock(halocat)
+
+
+def test_Leauthaud11():
+    """
+    """
+    model = PrebuiltHodModelFactory('leauthaud11')
+    halocat = FakeSim()
+    model.populate_mock(halocat)
+
+
+def test_Leauthaud11b():
+    """
+    """
+    model = PrebuiltHodModelFactory('leauthaud11')
+    halocat = FakeSim(redshift=2.)
+    # Test that an attempt to repopulate with a different halocat raises an exception
+    with pytest.raises(HalotoolsError) as err:
+        model.populate_mock(halocat)  # default redshift != 2
+    substr = ""
+    assert substr in err.value.args[0]
+
+
+def test_Leauthaud11c():
+    """
+    """
+    model_highz = PrebuiltHodModelFactory('leauthaud11', redshift=2.)
+    halocat = FakeSim(redshift=2.)
+    model_highz.populate_mock(halocat)
+
+
+def test_zu_mandelbaum15():
+    """ This test raises an exception because the Halotools-provided catalogs
+    do not currently have the ``halo_200m`` column
+    """
+    halocat = FakeSim()
+    model = PrebuiltHodModelFactory('zu_mandelbaum15')
+    with pytest.raises(HalotoolsError) as err:
         model.populate_mock(halocat)
+    substr = "Your model requires that the ``halo_200m`` key appear in the halo catalog"
+    assert substr in err.value.args[0]
 
-    def test_Leauthaud11(self):
 
-        model = PrebuiltHodModelFactory('leauthaud11')
-        halocat = FakeSim()
-        model.populate_mock(halocat)
-
-    def test_Leauthaud11b(self):
-
-        model = PrebuiltHodModelFactory('leauthaud11')
-        halocat = FakeSim(redshift=2.)
-        # Test that an attempt to repopulate with a different halocat raises an exception
-        with pytest.raises(HalotoolsError) as exc:
-            model.populate_mock(halocat)  # default redshift != 2
-
-    def test_Leauthaud11c(self):
-
-        model_highz = PrebuiltHodModelFactory('leauthaud11', redshift=2.)
-        halocat = FakeSim(redshift=2.)
-        model_highz.populate_mock(halocat)
-
-    @pytest.mark.skipif('not APH_MACHINE')
-    @pytest.mark.slow
-    def test_hearin15_fullpop(self):
-        halocat = CachedHaloCatalog(simname='bolshoi', redshift=0)
-        model = PrebuiltHodModelFactory('hearin15', threshold=11)
-        model.populate_mock(halocat)
-        del model
+def test_zu_mandelbaum15b():
+    """
+    """
+    halocat = FakeSim()
+    model = PrebuiltHodModelFactory('zu_mandelbaum15', prim_haloprop_key='halo_mvir')
+    model.populate_mock(halocat)

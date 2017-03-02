@@ -38,6 +38,7 @@ The first is based on luminosity threshold samples, the second stellar mass thre
 
    zheng07_composite_model
    leauthaud11_composite_model
+   zu_mandelbaum15_composite_model
 
 Traditional CLF models
 -----------------------
