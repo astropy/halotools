@@ -30,6 +30,14 @@ Conditional Luminosity Function models
 
 The Conditional Luminosity Function (CLF) is a closely related class of empirical models to HODs. Whereas the HOD only specifies the number of galaxies in a halo brighter than some threshold, the CLF specifies the luminosity function of galaxies in a halo brighter than some threshold (e.g., `van den Bosch et al 2012 <https://arxiv.org/abs/1206.6890/>`_, and related works). The :ref:`cacciato09_composite_model` is a composite CLF model introduced in Halotools v0.5 that implements the version of the CLF introduced in `Cacciato et al 2009 <https://arxiv.org/abs/0807.4932/>`_.
 
+
+Zu & Mandelbaum (2015)
+----------------------
+There is a new HOD model based on `Zu and Mandelbaum 2015 <https://arxiv.org/abs/1509.06758/>`_.
+This model describes an HOD fit to z=0 SDSS clustering and lensing of stellar mass threshold galaxy
+samples. See :ref:`zu_mandelbaum15_composite_model` for a tutorial.
+
+
 New Mock Observations
 ======================
 
