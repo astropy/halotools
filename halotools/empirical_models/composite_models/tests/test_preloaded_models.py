@@ -51,18 +51,6 @@ def test_Leauthaud11c():
     model_highz.populate_mock(halocat)
 
 
-def test_zu_mandelbaum15():
-    """ This test raises an exception because the Halotools-provided catalogs
-    do not currently have the ``halo_200m`` column
-    """
-    halocat = FakeSim()
-    model = PrebuiltHodModelFactory('zu_mandelbaum15')
-    with pytest.raises(HalotoolsError) as err:
-        model.populate_mock(halocat)
-    substr = "Your model requires that the ``halo_200m`` key appear in the halo catalog"
-    assert substr in err.value.args[0]
-
-
 def test_zu_mandelbaum15b():
     """
     """
