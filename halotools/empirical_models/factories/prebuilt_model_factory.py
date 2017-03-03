@@ -141,7 +141,8 @@ class PrebuiltHodModelFactory(HodModelFactory):
     For a tutorial on all prebuilt models, see :ref:`preloaded_models_overview`.
     """
 
-    prebuilt_model_nickname_list = ['zheng07', 'leauthaud11', 'tinker13', 'hearin15']
+    prebuilt_model_nickname_list = ('zheng07', 'leauthaud11', 'tinker13',
+            'hearin15', 'zu_mandelbaum15', 'cacciato09')
 
     def __init__(self, model_nickname, **kwargs):
         """
@@ -159,6 +160,10 @@ class PrebuiltHodModelFactory(HodModelFactory):
             * 'tinker13' (see :ref:`tinker13_composite_model`)
 
             * 'hearin15' (see :ref:`hearin15_composite_model`)
+
+            * 'cacciato09' (see :ref:`cacciato09_composite_model`)
+
+            * 'zu_mandelbaum15' (see :ref:`zu_mandelbaum15_composite_model`)
 
         halo_selection_func : function object, optional
             Function object used to place a cut on the input ``table``.
@@ -238,6 +243,8 @@ class PrebuiltHodModelFactory(HodModelFactory):
             dictionary_retriever = hod_models.hearin15_model_dictionary
         elif model_nickname == 'tinker13':
             dictionary_retriever = hod_models.tinker13_model_dictionary
+        elif model_nickname == 'zu_mandelbaum15':
+            dictionary_retriever = hod_models.zu_mandelbaum15_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
             raise HalotoolsError(msg % model_nickname)

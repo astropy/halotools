@@ -16,8 +16,8 @@ __all__ = ['Behroozi10SmHm']
 
 
 class Behroozi10SmHm(PrimGalpropModel):
-    """ Stellar-to-halo-mass relation based on Behroozi et al. (2010),
-    `arXiv:1205.5807 <http://arxiv.org/abs/astro-ph/1205.5807/>`_..
+    """ Stellar-to-halo-mass relation based on
+    `Behroozi et al 2010 <http://arxiv.org/abs/astro-ph/1001.0015/>`_.
 
     .. note::
 
@@ -215,8 +215,8 @@ class Behroozi10SmHm(PrimGalpropModel):
         elif 'prim_haloprop' in list(kwargs.keys()):
             halo_mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``table`` or ``prim_haloprop``")
+            raise KeyError("Must pass one of the following keyword arguments "
+                "to mean_occupation:\n``table`` or ``prim_haloprop``")
 
         log_stellar_mass_table = np.linspace(8.5, 12.5, 100)
         log_halo_mass_table = self.mean_log_halo_mass(log_stellar_mass_table, redshift=redshift)

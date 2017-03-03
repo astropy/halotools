@@ -26,6 +26,7 @@ HOD models
    ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/leauthaud11_composite_model
    ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/tinker13_composite_model
    ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/hearin15_composite_model
+   ../quickstart_and_tutorials/tutorials/model_building/preloaded_models/zu_mandelbaum15_composite_model
 
 CLF models
 ~~~~~~~~~~

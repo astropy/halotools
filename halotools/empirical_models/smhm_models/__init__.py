@@ -3,3 +3,4 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from .behroozi10 import *
 from .moster13 import *
+from .zu_mandelbaum15 import *

@@ -307,8 +307,8 @@ class Leauthaud11Sats(OccupationComponent):
         elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
-            function_name = "Leauthaud11Sats.mean_occupation"
-            raise HalotoolsError(function_name)
+            raise KeyError("Must pass one of the following keyword arguments "
+                "to mean_occupation:\n``table`` or ``prim_haloprop``")
 
         self._update_satellite_params()
 
