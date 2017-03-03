@@ -24,13 +24,13 @@ def zheng07_model_dictionary(
     There are two populations, centrals and satellites.
     Central occupation statistics are given by a nearest integer distribution
     with first moment given by an ``erf`` function; the class governing this
-    behavior is `~halotools.empirical_models.occupation_components.Zheng07Cens`.
+    behavior is `~halotools.empirical_models.Zheng07Cens`.
     Central galaxies are assumed to reside at the exact center of the host halo;
     the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`.
 
     Satellite occupation statistics are given by a Poisson distribution
     with first moment given by a power law that has been truncated at the low-mass end;
-    the class governing this behavior is `~halotools.empirical_models.occupation_components.Zheng07Sats`;
+    the class governing this behavior is `~halotools.empirical_models.Zheng07Sats`;
     satellites in this model follow an (unbiased) NFW profile, as governed by the
     `~halotools.empirical_models.NFWPhaseSpace` class.
 

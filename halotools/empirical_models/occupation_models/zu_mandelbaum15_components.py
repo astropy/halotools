@@ -48,6 +48,17 @@ class ZuMandelbaum15Cens(OccupationComponent):
         >>> cen_model = ZuMandelbaum15Cens(threshold=11.25)
         >>> cen_model = ZuMandelbaum15Cens(prim_haloprop_key='halo_m200b')
 
+        Notes
+        -----
+        Note also that the best-fit parameters of this model are based on the
+        ``halo_m200m`` halo mass definition.
+        Using alternative choices of mass definition will require altering the
+        model parameters in order to mock up the same model published in Zu & Mandelbaum 2015.
+        The `Colossus python package <https://bitbucket.org/bdiemer/colossus/>`_
+        written by Benedikt Diemer can be used to
+        convert between different halo mass definitions. This may be useful if you wish to use an
+        existing halo catalog for which the halo mass definition you need is unavailable.
+
         """
         upper_occupation_bound = 1.0
 
@@ -208,6 +219,17 @@ class ZuMandelbaum15Sats(OccupationComponent):
         >>> sat_model = ZuMandelbaum15Sats()
         >>> sat_model = ZuMandelbaum15Sats(threshold=11)
         >>> sat_model = ZuMandelbaum15Sats(prim_haloprop_key='halo_mvir')
+
+        Notes
+        -----
+        Note also that the best-fit parameters of this model are based on the
+        ``halo_m200m`` halo mass definition.
+        Using alternative choices of mass definition will require altering the
+        model parameters in order to mock up the same model published in Zu & Mandelbaum 2015.
+        The `Colossus python package <https://bitbucket.org/bdiemer/colossus/>`_
+        written by Benedikt Diemer can be used to
+        convert between different halo mass definitions. This may be useful if you wish to use an
+        existing halo catalog for which the halo mass definition you need is unavailable.
         """
         self.central_occupation_model = ZuMandelbaum15Cens(
             prim_haloprop_key=prim_haloprop_key, threshold=threshold)

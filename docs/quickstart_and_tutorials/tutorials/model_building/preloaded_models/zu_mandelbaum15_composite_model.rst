@@ -14,17 +14,16 @@ see `~halotools.empirical_models.zu_mandelbaum15_model_dictionary`.
 Overview of the Zu & Mandelbaum et al. (2015) Model Features
 =============================================================
 This HOD-style model is based on `Zu & Mandelbaum et al (2015) <https://arxiv.org/abs/1505.02781/>`_.
-The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation.
-The authors use nearly the same relation as in
-`Behroozi et al. (2010) <https://arxiv.org/abs/1001.0015/>`_,
-except they refit the parameters and only fit to z=0 data, and allow for the
-stochasticity to vary with halo mass. Otherwise, the model has the same functional
+The behavior of this model is governed by the
+`Behroozi et al. (2010) <https://arxiv.org/abs/1001.0015/>`_, but with parameters
+that have been refit to z=0 data, and with scatter that is allowed to
+vary with halo mass. The occupation statistics have the same functional
 form as the :ref:`leauthaud11_composite_model` introduced in
 `Leauthaud et al (2011) <https://arxiv.org/abs/1103.2077/>`_.
 
 In this model, there are two populations, centrals and satellites.
 Central occupation statistics are given by a nearest integer distribution
-with first moment given by an ``erf`` function; the class governing this
+with first moment given by an `~scipy.special.erf` function; the class governing this
 behavior is `~halotools.empirical_models.ZuMandelbaum15Cens`.
 Central galaxies are assumed to reside at the exact center of the host halo;
 the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`.
@@ -53,7 +52,7 @@ the instance returned by the factory:
 First, the ``threshold`` keyword argument pertains to the minimum
 stellar mass of the galaxy sample, in solar mass units with h=1:
 
->>> model = PrebuiltHodModelFactory('zu_mandelbaum15', threshold = 10.75)
+>>> model = PrebuiltHodModelFactory('zu_mandelbaum15', threshold=10.75)
 
 Second, the ``prim_haloprop_key`` keyword argument determines which
 halo mass definition will be used to populate a mock with this model.
@@ -62,6 +61,11 @@ be aware that the best-fit parameters of the Zu & Mandelbaum model are
 based on ``halo_m200m``:
 
 >>> model = PrebuiltHodModelFactory('zu_mandelbaum15', threshold=11, haloprop_key='halo_mvir')
+
+The `Colossus python package <https://bitbucket.org/bdiemer/colossus/>`_
+written by Benedikt Diemer can be used to
+convert between different halo mass definitions. This may be useful if you wish to use an
+existing halo catalog for which the halo mass definition you need is unavailable.
 
 As described in :ref:`altering_param_dict`, you can always change the model parameters
 after instantiation by changing the values in the ``param_dict`` dictionary. For example,
@@ -102,8 +106,8 @@ its underlying analytical relations. Here are a few examples:
 
 To compute the mean number of each galaxy type as a function of halo mass:
 
->>> mean_ncen = model.mean_occupation_centrals(prim_haloprop = halo_mass)
->>> mean_nsat = model.mean_occupation_satellites(prim_haloprop = halo_mass)
+>>> mean_ncen = model.mean_occupation_centrals(prim_haloprop=halo_mass)
+>>> mean_nsat = model.mean_occupation_satellites(prim_haloprop=halo_mass)
 
 To compute the mean stellar mass of central galaxies as a function of halo mass:
 
@@ -129,25 +133,21 @@ of each parameter. You can also refer to the original publications
 and `Zu & Mandelbaum et al (2015) <https://arxiv.org/abs/1505.02781/>`_
 for more detailed descriptions of the meaning of each parameter.
 
-Leauthaud et al. (2011) publication, arXiv:1103.2077, and also the original
-Behroozi et al. (2010) publication, arXiv:1001.0015,
-for further details. A succinct summary also appears in Section 2.1 of arXiv:1103.2077.
-
 To see how the following parameters are implemented, see `ZuMandelbaum15Cens.mean_occupation` and `Behroozi10SmHm.mean_stellar_mass`.
 
-* param_dict['smhm_m0'] - Characteristic stellar mass at redshift-zero in the :math:`\langle M_{\ast} \rangle(M_{\rm halo})` map.
+* param_dict['smhm_m0'] - Characteristic stellar mass at redshift-zero in :math:`\langle M_{\ast} \rangle(M_{\rm halo})`.
 
-* param_dict['smhm_m1'] - Characteristic halo mass at redshift-zero in the :math:`\langle M_{\ast} \rangle(M_{\rm halo})` map.
+* param_dict['smhm_m1'] - Characteristic halo mass at redshift-zero in :math:`\langle M_{\ast} \rangle(M_{\rm halo})`.
 
-* param_dict['smhm_beta'] - Low-mass slope at redshift-zero of the :math:`\langle M_{\ast} \rangle(M_{\rm halo})` map.
+* param_dict['smhm_beta'] - Low-mass slope at redshift-zero of :math:`\langle M_{\ast} \rangle(M_{\rm halo})`.
 
-* param_dict['smhm_delta'] - High-mass slope at redshift-zero of the :math:`\langle M_{\ast} \rangle(M_{\rm halo})` map.
+* param_dict['smhm_delta'] - High-mass slope at redshift-zero of :math:`\langle M_{\ast} \rangle(M_{\rm halo})`.
 
-* param_dict['smhm_gamma'] - Transition between low- and high-mass behavior at redshift-zero of the :math:`\langle M_{\ast} \rangle(M_{\rm halo})` map.
+* param_dict['smhm_gamma'] - Transition between low- and high-mass behavior at redshift-zero of :math:`\langle M_{\ast} \rangle(M_{\rm halo})`.
 
-* param_dict['u'smhm_sigma'] - Normalization of the log-normal scatter in the stellar-to-halo mass relation.
+* param_dict['u'smhm_sigma'] - Normalization of the log-normal scatter about the mean relation :math:`\langle M_{\ast} \rangle(M_{\rm halo})`.
 
-* param_dict['u'smhm_sigma_slope'] - Parameter controlling halo mass-dependence of the log-normal scatter in the stellar-to-halo mass relation.
+* param_dict['u'smhm_sigma_slope'] - Parameter controlling halo mass-dependence of the log-normal scatter.
 
 To see how the following parameters are implemented, see `ZuMandelbaum15Sats.mean_occupation` and `Behroozi10SmHm.mean_stellar_mass`.
 

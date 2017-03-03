@@ -30,8 +30,9 @@ All the models in this section are built by the
 
 Traditional HOD models
 --------------------------------------
-The following models are two of the most widely used HODs in the literature.
-The first is based on luminosity threshold samples, the second stellar mass thresholds.
+The following models are some the most widely used HODs in the literature.
+These are all designed to model either luminosity-threshold or stellar mass-threshold
+galaxy samples.
 
 .. toctree::
    :maxdepth: 1

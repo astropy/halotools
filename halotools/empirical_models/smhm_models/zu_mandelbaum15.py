@@ -41,6 +41,17 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         prim_haloprop_key : string, optional
             String giving the column name of the primary halo property
             governing stellar mass.
+
+        Notes
+        -----
+        Note also that the best-fit parameters of this model are based on the
+        ``halo_m200m`` halo mass definition.
+        Using alternative choices of mass definition will require altering the
+        model parameters in order to mock up the same model published in Zu & Mandelbaum 2015.
+        The `Colossus python package <https://bitbucket.org/bdiemer/colossus/>`_
+        written by Benedikt Diemer can be used to
+        convert between different halo mass definitions. This may be useful if you wish to use an
+        existing halo catalog for which the halo mass definition you need is unavailable.
         """
 
         super(ZuMandelbaum15SmHm, self).__init__(
