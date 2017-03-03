@@ -17,6 +17,8 @@
 
 - Fixed bug in `mock_observables.pair_counters.npairs_s_mu` that impacted `mock_observables.s_mu_tpcf`
 
+- Added Zu & Mandelbaum 2015 HOD model
+
 0.4 (2016-08-11)
 ----------------
 
