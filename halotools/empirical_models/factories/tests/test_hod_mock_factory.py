@@ -54,16 +54,16 @@ def test_estimate_ngals2():
     assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
 
 
-# def test_convenience_functions():
-#     model = PrebuiltHodModelFactory('zheng07')
-#     halocat = FakeSim(seed=fixed_seed)
-#     model.populate_mock(halocat, seed=fixed_seed)
+def test_convenience_functions():
+    model = PrebuiltHodModelFactory('zheng07', threshold=-21.5)
+    halocat = FakeSim(seed=fixed_seed, num_halos_per_massbin=25)
+    model.populate_mock(halocat, seed=fixed_seed)
 
-#     nd = model.mock.number_density
-#     fsat = model.mock.satellite_fraction
-#     xi = model.mock.compute_galaxy_matter_cross_clustering(
-#         gal_type='centrals', include_complement=True)
-#     gn = model.mock.compute_fof_group_ids()
+    nd = model.mock.number_density
+    fsat = model.mock.satellite_fraction
+    xi = model.mock.compute_galaxy_matter_cross_clustering(
+        gal_type='centrals', include_complement=True, num_iterations=1)
+    gn = model.mock.compute_fof_group_ids()
 
 
 # @pytest.mark.slow
@@ -72,7 +72,7 @@ def test_estimate_ngals2():
 #     halos in the expected way
 #     """
 
-#     model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+#     model = PrebuiltHodModelFactory('zheng07', threshold=-22)
 #     halocat = FakeSim()
 
 #     def f150z(t):
