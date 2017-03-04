@@ -14,6 +14,10 @@ from ....sim_manager.fake_sim import FakeSimHalosNearBoundaries
 from ..prebuilt_model_factory import PrebuiltHodModelFactory
 from ....custom_exceptions import HalotoolsError
 
+# Determine whether the machine is mine
+# This will be used to select tests whose
+# returned values depend on the configuration
+# of my personal cache directory files
 aph_home = '/Users/aphearin'
 detected_home = _find_home()
 if aph_home == detected_home:
@@ -112,7 +116,6 @@ def test_nonPBC_positions():
     """ When we do not enforce PBCs, verify that some satellites are
     getting spilled beyond the boundaries, but never centrals.
     """
-
     model = PrebuiltHodModelFactory('zheng07', threshold=-18)
 
     halocat = FakeSimHalosNearBoundaries()
@@ -142,7 +145,6 @@ def test_PBC_positions():
     """
 
     model = PrebuiltHodModelFactory('zheng07', threshold=-18)
-
     halocat = FakeSimHalosNearBoundaries()
     model.populate_mock(halocat=halocat, enforce_PBC=True,
         _testing_mode=True)
@@ -253,7 +255,6 @@ def test_one_two_halo_decomposition_on_mock():
                 "this machine should have the requested catalog")
         else:
             return
-
     model.populate_mock(bolshoi_halocat)
     gals = model.mock.galaxy_table
     pos = return_xyz_formatted_array(gals['x'], gals['y'], gals['z'])
