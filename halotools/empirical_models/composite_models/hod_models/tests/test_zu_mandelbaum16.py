@@ -40,8 +40,8 @@ def test_zu_mandelbaum16_correct_fred():
     expected_red_frac_cens = model.mean_quiescent_fraction_centrals(prim_haloprop=example_mass)
     expected_red_frac_sats = model.mean_quiescent_fraction_satellites(prim_haloprop=example_mass)
 
-    assert np.allclose(cens['quiescent'].mean(), expected_red_frac_cens, rtol=0.05)
-    assert np.allclose(sats['quiescent'].mean(), expected_red_frac_sats, rtol=0.05)
+    assert np.allclose(cens['quiescent'].mean(), expected_red_frac_cens, rtol=0.1)
+    assert np.allclose(sats['quiescent'].mean(), expected_red_frac_sats, rtol=0.1)
 
 
 def test_zu_mandelbaum16_seed():
