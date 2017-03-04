@@ -54,16 +54,37 @@ def test_estimate_ngals2():
     assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
 
 
-# def test_convenience_functions():
-#     model = PrebuiltHodModelFactory('zheng07')
-#     halocat = FakeSim(seed=fixed_seed)
-#     model.populate_mock(halocat, seed=fixed_seed)
+def test_convenience_functions():
+    model = PrebuiltHodModelFactory('zheng07')
+    halocat = FakeSim(seed=fixed_seed)
+    model.populate_mock(halocat, seed=fixed_seed)
 
-#     nd = model.mock.number_density
-#     fsat = model.mock.satellite_fraction
-#     xi = model.mock.compute_galaxy_matter_cross_clustering(
-#         gal_type='centrals', include_complement=True)
-#     gn = model.mock.compute_fof_group_ids()
+    nd = model.mock.number_density
+    fsat = model.mock.satellite_fraction
+    xi = model.mock.compute_galaxy_matter_cross_clustering(
+        gal_type='centrals', include_complement=True)
+    gn = model.mock.compute_fof_group_ids()
+
+
+@pytest.mark.slow
+def test_mock_population_mask():
+    """ Verify that using the masking_function feature properly excludes
+    halos in the expected way
+    """
+
+    model = PrebuiltHodModelFactory('zheng07', threshold=-21)
+    halocat = FakeSim()
+
+    def f150z(t):
+        return t['halo_z'] > 150
+
+    # First show that the test is non-trivial
+    model.populate_mock(halocat)
+    assert np.any(model.mock.galaxy_table['halo_z'] < 150)
+
+    model.populate_mock(halocat, masking_function=f150z)
+    assert np.all(model.mock.galaxy_table['halo_z'] > 150)
+    assert np.any(model.mock.galaxy_table['halo_x'] < 100)
 
 
 # class TestHodMockFactory(TestCase):
@@ -83,30 +104,6 @@ def test_estimate_ngals2():
 #         self.model.mock.populate(masking_function=f100x)
 #         self.galaxy_table2 = deepcopy(self.model.mock.galaxy_table)
 
-#     @pytest.mark.slow
-#     def test_mock_population_mask(self):
-
-#         model = PrebuiltHodModelFactory('zheng07')
-
-#         def f100x(t):
-#             return t['halo_x'] > 100
-
-#         def f150z(t):
-#             return t['halo_z'] > 150
-
-#         halocat = FakeSim()
-#         model.populate_mock(halocat, masking_function=f100x)
-#         assert np.all(model.mock.galaxy_table['halo_x'] > 100)
-#         model.populate_mock(halocat)
-#         assert np.any(model.mock.galaxy_table['halo_x'] < 100)
-#         model.populate_mock(halocat, masking_function=f100x)
-#         assert np.all(model.mock.galaxy_table['halo_x'] > 100)
-
-#         model.populate_mock(halocat, masking_function=f150z)
-#         assert np.all(model.mock.galaxy_table['halo_z'] > 150)
-#         assert np.any(model.mock.galaxy_table['halo_x'] < 100)
-#         model.populate_mock(halocat)
-#         assert np.any(model.mock.galaxy_table['halo_z'] < 150)
 
 #     def test_mock_population_pbcs(self):
 
