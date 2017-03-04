@@ -29,6 +29,14 @@ def test_init():
     assert model._mock_generation_calling_sequence == ['inherit_subhalo_properties']
 
 
+def test_default_inherited_subhalo_props_dict():
+    from .....empirical_models import default_inherited_subhalo_props_dict
+    msg = ("The ``default_inherited_subhalo_props_dict`` should be importable from empirical_models\n"
+        "and it should have the ``{0}`` key")
+    for key in ('halo_x', 'halo_y', 'halo_z', 'halo_vx', 'halo_vy', 'halo_vz'):
+        assert key in list(default_inherited_subhalo_props_dict.keys()), msg.format(key)
+
+
 def test_preprocess_subhalo_table1():
     halocat = FakeSim(seed=fixed_seed)
 
