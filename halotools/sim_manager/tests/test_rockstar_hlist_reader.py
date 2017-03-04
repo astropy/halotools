@@ -182,6 +182,12 @@ class TestRockstarHlistReader(TestCase):
         """
         """
         fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        if not os.path.isfile(fname):
+            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
+                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
+                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
+                "$gunzip hlist_0.07812.list.gz\n\n")
+            raise IOError(msg)
 
         columns_to_keep_dict = ({
             'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'),
@@ -210,6 +216,12 @@ class TestRockstarHlistReader(TestCase):
         """
         """
         fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        if not os.path.isfile(fname):
+            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
+                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
+                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
+                "$gunzip hlist_0.07812.list.gz\n\n")
+            raise IOError(msg)
 
         columns_to_keep_dict = ({
             'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'),
@@ -236,6 +248,12 @@ class TestRockstarHlistReader(TestCase):
         """
         """
         fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        if not os.path.isfile(fname):
+            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
+                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
+                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
+                "$gunzip hlist_0.07812.list.gz\n\n")
+            raise IOError(msg)
 
         columns_to_keep_dict = ({
             'spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'),
@@ -260,6 +278,12 @@ class TestRockstarHlistReader(TestCase):
         """
         """
         fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        if not os.path.isfile(fname):
+            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
+                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
+                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
+                "$gunzip hlist_0.07812.list.gz\n\n")
+            raise IOError(msg)
 
         columns_to_keep_dict = ({
             'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'),
