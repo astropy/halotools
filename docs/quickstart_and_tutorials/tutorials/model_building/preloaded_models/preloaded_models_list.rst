@@ -20,6 +20,7 @@ HOD Models
    hearin15_composite_model
    tinker13_composite_model
    zu_mandelbaum15_composite_model
+   zu_mandelbaum16_composite_model
 
 CLF Models
 ==========

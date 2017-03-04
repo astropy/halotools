@@ -1,4 +1,4 @@
-"""
+r"""
 Module storing the `~halotools.empirical_models.ModelFactory` class,
 an abstract container class used to build
 any composite model of the galaxy-halo connection.
@@ -39,7 +39,7 @@ inconsistent_version_name_error_msg = ("Inconsistency between the version_name "
 
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):
-    """ Abstract container class used to build
+    r""" Abstract container class used to build
     any composite model of the galaxy-halo connection.
 
     See `~halotools.empirical_models.SubhaloModelFactory` for
@@ -48,7 +48,7 @@ class ModelFactory(object):
     """
 
     def __init__(self, input_model_dictionary, **kwargs):
-        """
+        r"""
         Parameters
         ----------
         input_model_dictionary : dict
@@ -89,7 +89,7 @@ class ModelFactory(object):
     def populate_mock(self, halocat,
             Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
             **kwargs):
-        """
+        r"""
         Method used to populate a simulation
         with a Monte Carlo realization of a model.
 
@@ -236,7 +236,7 @@ class ModelFactory(object):
         self.mock.populate(**mockpop_kwargs)
 
     def update_param_dict_decorator(self, component_model, func_name):
-        """
+        r"""
         Decorator used to propagate any possible changes in the composite model param_dict
         down to the appropriate component model param_dict.
 
@@ -289,7 +289,7 @@ class ModelFactory(object):
         return decorated_func
 
     def compute_average_galaxy_clustering(self, num_iterations=5, summary_statistic='median', **kwargs):
-        """
+        r"""
         Method repeatedly populates a simulation with a mock galaxy catalog, computes the clustering
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering
         such as the median computed from the collection of clustering measurements.
@@ -497,7 +497,7 @@ class ModelFactory(object):
 
     def compute_average_galaxy_matter_cross_clustering(self, num_iterations=5,
             summary_statistic='median', **kwargs):
-        """
+        r"""
         Method repeatedly populates a simulation with a mock galaxy catalog,
         computes the galaxy-matter cross-correlation
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering
