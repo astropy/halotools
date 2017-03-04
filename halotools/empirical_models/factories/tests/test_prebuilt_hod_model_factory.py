@@ -14,7 +14,7 @@ __all__ = ('test_fake_mock_population', 'test_fake_mock_observations1')
 
 
 @pytest.mark.slow
-def test_fake_mock_population(self):
+def test_fake_mock_population():
     halocat = FakeSim(num_halos_per_massbin=25)
     for modelname in PrebuiltHodModelFactory.prebuilt_model_nickname_list:
         model = PrebuiltHodModelFactory(modelname)
@@ -23,7 +23,7 @@ def test_fake_mock_population(self):
 
 
 @pytest.mark.slow
-def test_fake_mock_observations1(self):
+def test_fake_mock_observations1():
     model = PrebuiltHodModelFactory('zu_mandelbaum16')
     result = model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
 
