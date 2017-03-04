@@ -58,7 +58,7 @@ class TestRockstarHlistReader(TestCase):
 
     def setUp(self):
 
-        self.tmpdir = os.path.join(_find_home(), 'tmp_testingdir')
+        self.tmpdir = os.path.join(_find_home(), '.tmp_testingdir')
         try:
             os.makedirs(self.tmpdir)
         except OSError:

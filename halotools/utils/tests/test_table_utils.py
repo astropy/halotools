@@ -2,7 +2,7 @@
 """
 import numpy as np
 from unittest import TestCase
-from functools import partial
+from astropy.tests.helper import pytest
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 
@@ -10,58 +10,81 @@ from ..table_utils import SampleSelector, compute_conditional_percentiles
 
 from ...sim_manager import FakeSim
 
-__all__ = ('TestSampleSelector', 'TestComputeConditionalPercentiles')
+__all__ = ('test_split_sample1', 'TestComputeConditionalPercentiles')
 
 fixed_seed = 43
 
 
-class TestSampleSelector(TestCase):
+def test_split_sample1():
+    """ Verify that the split_sample function successfully divides a sample in half
     """
+    t = Table({'x': np.arange(10)})
+
+    percentiles = 0.5
+    result = SampleSelector.split_sample(table=t, key='x', percentiles=percentiles)
+
+    assert len(result) == 2
+    assert set(result[0]['x']) == set((0, 1, 2, 3, 4))
+    assert set(result[1]['x']) == set((5, 6, 7, 8, 9))
+    assert len(result[0]) == 5
+    assert len(result[1]) == 5
+
+
+def test_split_sample2():
+    """ Verify that split_sample raises the appropriate exception when
+    attempting to split the sample too finely
     """
+    t = Table({'x': np.arange(10)})
 
-    def test_split_sample(self):
-        Npts = 10
-        x = np.linspace(0, 9, Npts)
+    with pytest.raises(ValueError) as err:
+        SampleSelector.split_sample(table=t[0:4], key='x',
+            percentiles=[0.1, 0.2, 0.3, 0.4, 0.5])
+    substr = "Input length of percentiles must be less than input table length"
+    assert substr in err.value.args[0]
 
-        d = {'x': x}
-        t = Table(d)
-        ax = np.array(x, dtype=[('x', 'f4')])
 
-        percentiles = 0.5
-        result = SampleSelector.split_sample(table=t, key='x', percentiles=percentiles)
+def test_split_sample3():
+    """ Verify that split_sample raises the appropriate exception when
+    attempting to split the sample too finely
+    """
+    t = Table({'x': np.arange(10)})
 
-        assert len(result) == 2
-        assert len(result[0]) == 5
-        assert len(result[1]) == 5
+    with pytest.raises(ValueError) as err:
+        SampleSelector.split_sample(table=t[0:4], key='x',
+            percentiles=[0.1, 0.1, 0.95])
+    substr = "The input percentiles spacing is too fine."
+    assert substr in err.value.args[0]
 
-        result0_sum = result[0]['x'].sum()
-        correct_sum = np.sum([0, 1, 2, 3, 4])
-        assert result0_sum == correct_sum
 
-        result1_sum = result[1]['x'].sum()
-        correct_sum = np.sum([5, 6, 7, 8, 9])
-        assert result1_sum == correct_sum
+def test_split_sample4():
+    """ Verify that split_sample raises the appropriate exception when
+    trying to split the sample on a non-existent key
+    """
+    t = Table({'x': np.arange(10)})
 
-        f = partial(SampleSelector.split_sample, table=t[0:4], key='x',
-                percentiles=[0.1, 0.2, 0.3, 0.4, 0.5])
-        self.assertRaises(ValueError, f)
+    with pytest.raises(KeyError) as err:
+        SampleSelector.split_sample(table=t, key='y',
+            percentiles=0.5)
+    substr = "The ``y`` key does not appear in the table you are trying"
+    assert substr in err.value.args[0]
 
-        f = partial(SampleSelector.split_sample, table=t, key='x',
-                percentiles=[0.1, 0.1, 0.95])
-        self.assertRaises(ValueError, f)
 
-        f = partial(SampleSelector.split_sample, table=t, key='y',
-                percentiles=0.5)
-        self.assertRaises(KeyError, f)
+def test_split_sample5():
+    """ Verify that split_sample raises the appropriate exception when
+    passing in a structured Numpy array
+    """
+    t = Table({'x': np.arange(10)})
 
-        f = partial(SampleSelector.split_sample, table=ax, key='x',
-                percentiles=0.5)
-        self.assertRaises(TypeError, f)
+    with pytest.raises(TypeError) as err:
+        SampleSelector.split_sample(table=np.array(t), key='x',
+            percentiles=0.5)
+    substr = "Input table must be an Astropy Table instance"
+    assert substr in err.value.args[0]
 
 
 class TestComputeConditionalPercentiles(TestCase):
 
-    def setup_class(self):
+    def setUp(self):
         Npts = int(1e4)
         mass1 = np.zeros(int(Npts/2)) + 1e12
         mass2 = np.zeros(int(Npts/2)) + 1e14
@@ -147,3 +170,7 @@ class TestComputeConditionalPercentiles(TestCase):
         split = percentiles <= 0.5
         low_zform, high_zform = self.custom_halo_table[split], self.custom_halo_table[np.invert(split)]
         assert len(low_zform) == len(high_zform)
+
+    def tearDown(self):
+        del self.fake_halo_table
+        del self.custom_halo_table
