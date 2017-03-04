@@ -9,7 +9,7 @@ from ..factories import SubhaloModelFactory, HodModelFactory
 
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
+__all__ = ('PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory')
 __author__ = ['Andrew Hearin']
 
 
@@ -142,7 +142,7 @@ class PrebuiltHodModelFactory(HodModelFactory):
     """
 
     prebuilt_model_nickname_list = ('zheng07', 'leauthaud11', 'tinker13',
-            'hearin15', 'zu_mandelbaum15', 'cacciato09')
+            'hearin15', 'zu_mandelbaum15', 'zu_mandelbaum16', 'cacciato09')
 
     def __init__(self, model_nickname, **kwargs):
         """
@@ -164,6 +164,8 @@ class PrebuiltHodModelFactory(HodModelFactory):
             * 'cacciato09' (see :ref:`cacciato09_composite_model`)
 
             * 'zu_mandelbaum15' (see :ref:`zu_mandelbaum15_composite_model`)
+
+            * 'zu_mandelbaum16' (see :ref:`zu_mandelbaum16_composite_model`)
 
         halo_selection_func : function object, optional
             Function object used to place a cut on the input ``table``.
@@ -245,6 +247,8 @@ class PrebuiltHodModelFactory(HodModelFactory):
             dictionary_retriever = hod_models.tinker13_model_dictionary
         elif model_nickname == 'zu_mandelbaum15':
             dictionary_retriever = hod_models.zu_mandelbaum15_model_dictionary
+        elif model_nickname == 'zu_mandelbaum16':
+            dictionary_retriever = hod_models.zu_mandelbaum16_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
             raise HalotoolsError(msg % model_nickname)

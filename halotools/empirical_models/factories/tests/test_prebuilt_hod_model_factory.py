@@ -24,7 +24,7 @@ def test_fake_mock_population():
 
 @pytest.mark.slow
 def test_fake_mock_observations1():
-    model = PrebuiltHodModelFactory('hearin15')
+    model = PrebuiltHodModelFactory('zu_mandelbaum16')
     result = model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
 
     result = model.compute_average_galaxy_clustering(

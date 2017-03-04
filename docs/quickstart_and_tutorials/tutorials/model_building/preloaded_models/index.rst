@@ -77,6 +77,7 @@ constrain the physics of star formation and quenching.
    :maxdepth: 1
 
    tinker13_composite_model
+   zu_mandelbaum16_composite_model
 
 Subhalo-based Models
 ====================================
