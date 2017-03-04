@@ -19,7 +19,7 @@ class TestNFWPhaseSpace(TestCase):
     """ Class used to test `~halotools.empirical_models.NFWPhaseSpace`.
     """
 
-    def setup_class(self):
+    def setUp(self):
         """ Load the NFW model and build a coarse lookup table.
         """
         self.nfw = NFWPhaseSpace()
@@ -35,15 +35,23 @@ class TestNFWPhaseSpace(TestCase):
         npts = int(1e3)
         Lbox = 250
         zeros = np.zeros(npts)
+
         with NumpyRNGContext(fixed_seed):
             x = np.random.uniform(0, Lbox, npts)
+        with NumpyRNGContext(fixed_seed+1):
             y = np.random.uniform(0, Lbox, npts)
+        with NumpyRNGContext(fixed_seed+2):
             z = np.random.uniform(0, Lbox, npts)
+        with NumpyRNGContext(fixed_seed+3):
             halo_vx = np.random.uniform(-250, 250, npts)
+        with NumpyRNGContext(fixed_seed+4):
             halo_vy = np.random.uniform(-250, 250, npts)
+        with NumpyRNGContext(fixed_seed+5):
             halo_vz = np.random.uniform(-250, 250, npts)
+        with NumpyRNGContext(fixed_seed+6):
             d = np.random.uniform(0, 0.25, npts)
             rvir = np.zeros(npts) + 0.2
+        with NumpyRNGContext(fixed_seed+7):
             conc_nfw = np.random.uniform(1.5, 15, npts)
         mass = np.zeros(npts) + 1e12
 
@@ -376,3 +384,6 @@ class TestNFWPhaseSpace(TestCase):
         nfw = NFWPhaseSpace()
         satellites = nfw.mc_generate_nfw_phase_space_points(seed=43)
         assert np.any(satellites['vx'] != satellites['vy'])
+
+    def tearDown(self):
+        del self._dummy_halo_table

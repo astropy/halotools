@@ -1,20 +1,10 @@
 """
 """
-from unittest import TestCase
 
-__all__ = ['TestNFWJeansVelocity']
+__all__ = ('test_velocity_dispersion', )
 
 
-class TestNFWJeansVelocity(TestCase):
-    """ Class used to test `~halotools.empirical_models.NFWPhaseSpace`.
+def test_velocity_dispersion():
     """
-
-    def setup_class(self):
-        """ Load the NFW model and build a coarse lookup table.
-        """
-        pass
-
-    def test_velocity_dispersion(self):
-        """
-        """
-        pass
+    """
+    pass

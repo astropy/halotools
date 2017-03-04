@@ -321,12 +321,13 @@ class SampleSelector(object):
 
         """
         table = kwargs['table']
-        if type(table) is not Table:
+        if not isinstance(table, Table):
             raise TypeError("Input table must be an Astropy Table instance")
 
         key = kwargs['key']
         if key not in list(table.keys()):
-            raise KeyError("Input key must be a column name of the input table")
+            raise KeyError("The ``{0}`` key does not appear in the table you are trying \n"
+                "to split into subsamples".format(key))
         table.sort(key)
 
         percentiles = kwargs['percentiles']

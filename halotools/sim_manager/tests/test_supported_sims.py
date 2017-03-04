@@ -2,7 +2,6 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from unittest import TestCase
 import numpy as np
 
 from astropy.config.paths import _find_home
@@ -70,6 +69,10 @@ def test_halo_rvir_in_correct_units():
 
 
 def test_bolplanck_particle_mass():
+    """ This is a regression test for https://github.com/astropy/halotools/issues/576
+
+    This test should never be deleted or refactored.
+    """
     from ..supported_sims import BolPlanck
     bp = BolPlanck()
     assert np.allclose(bp.particle_mass, 1.55e8, rtol=0.01)
@@ -77,7 +80,10 @@ def test_bolplanck_particle_mass():
 
 @pytest.mark.skipif('not HAS_H5PY')
 def test_forbidden_sims():
-    """
+    """ This is a regression test that ensures no one will use the
+    z = 0 halotools_alpha_version2 halo catalog.
+
+    This test should never be deleted or refactored.
     """
     with pytest.raises(HalotoolsError) as err:
         __ = CachedHaloCatalog(simname='bolplanck', version_name='halotools_alpha_version2')
@@ -86,6 +92,9 @@ def test_forbidden_sims():
 
 
 def test_lbox_vector():
+    """ Ensure that the Lbox attribute of CachedHaloCatalog instances
+    is always a 3-element vector.
+    """
     for simname in list(adict.keys()):
         alist = adict[simname]
         a = alist[0]

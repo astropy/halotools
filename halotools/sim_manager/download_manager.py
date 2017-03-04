@@ -240,7 +240,7 @@ class DownloadManager(object):
         close_matches = list(close_match_generator)
 
         if ((len(close_matches) > 0) &
-            (len(exact_matches) == 0) &
+            (len(exact_matches) == 1) &
                 (ignore_nearby_redshifts is False)):
 
             entry = close_matches[0]

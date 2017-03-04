@@ -37,7 +37,7 @@ class TestHaloCatNFWConsistency(TestCase):
     """
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
-    def setup_class(self):
+    def setUp(self):
         """ Pre-load various arrays into memory for use by all tests.
         """
         halocat = CachedHaloCatalog(simname='bolshoi', redshift=0.)
@@ -91,3 +91,6 @@ class TestHaloCatNFWConsistency(TestCase):
                 median_mass, median_conc)
 
             assert np.allclose(median_vmax, predicted_vmax, rtol=0.05)
+
+    def tearDown(self):
+        pass
