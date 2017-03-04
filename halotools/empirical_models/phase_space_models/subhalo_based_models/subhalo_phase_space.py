@@ -31,6 +31,8 @@ default_inherited_subhalo_props_dict = (
 
 class SubhaloPhaseSpace(object):
     """ Class using subhalo information to model the phase space of satellite galaxies.
+
+    For a demonstration of typical usage, see the :ref:`subhalo_phase_space_model_tutorial`.
     """
 
     def __init__(self, gal_type, host_haloprop_bins,
