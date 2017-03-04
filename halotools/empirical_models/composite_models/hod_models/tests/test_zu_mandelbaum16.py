@@ -1,7 +1,6 @@
 """
 """
 import numpy as np
-from unittest import TestCase
 from astropy.tests.helper import pytest
 
 from ....factories import PrebuiltHodModelFactory
