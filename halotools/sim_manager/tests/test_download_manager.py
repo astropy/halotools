@@ -47,7 +47,7 @@ class TestDownloadManager(TestCase):
 
         # First create an empty directory where we will
         # temporarily store a collection of empty files
-        self.base_dummydir = os.path.join(homedir, 'temp_directory_for_halotools_testing')
+        self.base_dummydir = os.path.join(homedir, '.temp_directory_for_halotools_testing')
         defensively_create_empty_dir(self.base_dummydir)
         self.dummyloc = os.path.join(self.base_dummydir, 'halotools')
         defensively_create_empty_dir(self.dummyloc)
@@ -370,7 +370,7 @@ class TestDownloadManager(TestCase):
             self.downman.download_processed_halo_table(
                 simname='bolshoi',
                 halo_finder='rockstar',
-                version_name='halotools_alpha_version2',
+                version_name='halotools_v0p4',
                 redshift=11.7, dz_tol=200,
                 overwrite=True, download_dirname='std_cache_loc')
         substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``"
