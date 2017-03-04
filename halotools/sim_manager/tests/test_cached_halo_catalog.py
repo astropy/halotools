@@ -69,7 +69,9 @@ class TestCachedHaloCatalog(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_all_catalogs(self):
-        """ Verify that the default halo catalog loads.
+        """ Verify that all halo catalogs in cache successfully load.
+        This test is only run on APH_MACHINE because there is no need to enforce
+        users to have a clean cache log if they do not want to bother cleaning it up.
         """
         cache = HaloTableCache()
         for entry in cache.log:
@@ -125,11 +127,17 @@ class TestCachedHaloCatalog(TestCase):
             except InvalidCacheLogEntry:
                 pass
 
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_default_catalog(self):
-        """ Verify that the default halo catalog loads.
+        """ Verify that the default halo catalog loads if it is available
         """
-        halocat = CachedHaloCatalog()
+        try:
+            halocat = CachedHaloCatalog()
+        except:
+            if APH_MACHINE:
+                raise ValueError("This test should pass on APH_MACHINE since \n"
+                    "this machine should have the requested catalog")
+            else:
+                return
         assert hasattr(halocat, 'redshift')
         assert hasattr(halocat, 'Lbox')
 

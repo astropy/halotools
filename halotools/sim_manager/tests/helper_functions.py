@@ -10,20 +10,11 @@ from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home
 
-# Determine whether the machine is mine
-# This will be used to select tests whose
-# returned values depend on the configuration
-# of my personal cache directory files
-aph_home = '/Users/aphearin'
 detected_home = _find_home()
-if aph_home == detected_home:
-    APH_MACHINE = True
-else:
-    APH_MACHINE = False
 
 __all__ = ('add_new_row_to_cache_log', )
 
-dummy_cache_baseloc = os.path.join(detected_home, 'Desktop', 'tmp_dummy_cache')
+dummy_cache_baseloc = os.path.join(detected_home, '.tmp_dummy_cache')
 cache_basename = 'halo_table_cache_log.txt'
 
 
