@@ -199,16 +199,16 @@ class TestRockstarHlistReader(TestCase):
             row_cut_neq_dict={'halo_id': -1}
             )
 
-        if HAS_H5PY:
-            write_to_disk = True
-        else:
-            write_to_disk = False
-        reader.read_halocat(columns_to_convert_from_kpc_to_mpc=[],
-            write_to_disk=write_to_disk)
+        reader.read_halocat(columns_to_convert_from_kpc_to_mpc=['halo_y'],
+            write_to_disk=False)
 
     @pytest.mark.slow
     def test_read_dummy_halo_catalog2(self):
-        """
+        """ If the test is run on a machine that has any entry in its cache log,
+        the an exception should be raised because the call to
+        the RockstarHlistReader intentionally uses the first cache log entry as input.
+        If the log is empty, as it will be in
+        CI environments, no exception should be raised.
         """
         fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
@@ -223,17 +223,39 @@ class TestRockstarHlistReader(TestCase):
             })
 
         cache = HaloTableCache()
-        entry = cache.log[0]
+        try:
+            entry = cache.log[0]
+            output_fname = entry.fname
+            halo_finder = entry.halo_finder
+            redshift = entry.redshift
+            simname = entry.simname
+            version_name = entry.version_name
+            HAS_ENTRY = True
+        except IndexError:
+            output_fname = fname + '.hdf5'
+            halo_finder = 'rockstar'
+            redshift = '-0.0023'
+            simname = 'bolshoi'
+            version_name = 'dummy'
+            HAS_ENTRY = False
 
-        with pytest.raises(HalotoolsError) as err:
+        if HAS_ENTRY:
+            with pytest.raises(HalotoolsError) as err:
+                reader = RockstarHlistReader(
+                    input_fname=fname,
+                    columns_to_keep_dict=columns_to_keep_dict,
+                    output_fname=output_fname,
+                    simname=simname, halo_finder=halo_finder, redshift=redshift,
+                    version_name=version_name, Lbox=250., particle_mass=1.35e8)
+            substr = "There is already an existing entry in the Halotools cache log"
+            assert substr in err.value.args[0]
+        else:
             reader = RockstarHlistReader(
                 input_fname=fname,
                 columns_to_keep_dict=columns_to_keep_dict,
-                output_fname=entry.fname,
-                simname=entry.simname, halo_finder=entry.halo_finder, redshift=entry.redshift,
-                version_name=entry.version_name, Lbox=250., particle_mass=1.35e8)
-        substr = "There is already an existing entry in the Halotools cache log"
-        assert substr in err.value.args[0]
+                output_fname=output_fname,
+                simname=simname, halo_finder=halo_finder, redshift=redshift,
+                version_name=version_name, Lbox=250., particle_mass=1.35e8)
 
     @pytest.mark.slow
     def test_read_dummy_halo_catalog3(self):
