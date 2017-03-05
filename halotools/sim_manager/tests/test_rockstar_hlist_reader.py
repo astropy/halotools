@@ -10,6 +10,7 @@ from astropy.tests.helper import pytest
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 from astropy.config.paths import _find_home
+from astropy.utils.data import get_pkg_data_filename
 from collections import OrderedDict
 
 from ..rockstar_hlist_reader import RockstarHlistReader, _infer_redshift_from_input_fname
@@ -108,7 +109,6 @@ class TestRockstarHlistReader(TestCase):
             'halo_mvir': (5, 'f4')
             })
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_good_args(self):
 
         reader = RockstarHlistReader(
@@ -119,7 +119,6 @@ class TestRockstarHlistReader(TestCase):
             redshift=4, version_name='dummy', Lbox=100, particle_mass=1e8
             )
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict1(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -133,7 +132,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.args[0]
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict2(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -147,7 +145,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.args[0]
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict3(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -161,7 +158,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.args[0]
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict4(self):
 
         with pytest.raises(ValueError) as err:
@@ -176,17 +172,14 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.args[0]
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog1(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -206,21 +199,22 @@ class TestRockstarHlistReader(TestCase):
             row_cut_neq_dict={'halo_id': -1}
             )
 
-        reader.read_halocat(columns_to_convert_from_kpc_to_mpc=[],
-            write_to_disk=True)
+        reader.read_halocat(columns_to_convert_from_kpc_to_mpc=['halo_y'],
+            write_to_disk=False)
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog2(self):
+        """ If the test is run on a machine that has any entry in its cache log,
+        the an exception should be raised because the call to
+        the RockstarHlistReader intentionally uses the first cache log entry as input.
+        If the log is empty, as it will be in
+        CI environments, no exception should be raised.
         """
-        """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -229,30 +223,49 @@ class TestRockstarHlistReader(TestCase):
             })
 
         cache = HaloTableCache()
-        entry = cache.log[0]
+        try:
+            entry = cache.log[0]
+            output_fname = entry.fname
+            halo_finder = entry.halo_finder
+            redshift = entry.redshift
+            simname = entry.simname
+            version_name = entry.version_name
+            HAS_ENTRY = True
+        except IndexError:
+            output_fname = fname + '.hdf5'
+            halo_finder = 'rockstar'
+            redshift = '-0.0023'
+            simname = 'bolshoi'
+            version_name = 'dummy'
+            HAS_ENTRY = False
 
-        with pytest.raises(HalotoolsError) as err:
+        if HAS_ENTRY:
+            with pytest.raises(HalotoolsError) as err:
+                reader = RockstarHlistReader(
+                    input_fname=fname,
+                    columns_to_keep_dict=columns_to_keep_dict,
+                    output_fname=output_fname,
+                    simname=simname, halo_finder=halo_finder, redshift=redshift,
+                    version_name=version_name, Lbox=250., particle_mass=1.35e8)
+            substr = "There is already an existing entry in the Halotools cache log"
+            assert substr in err.value.args[0]
+        else:
             reader = RockstarHlistReader(
                 input_fname=fname,
                 columns_to_keep_dict=columns_to_keep_dict,
-                output_fname=entry.fname,
-                simname=entry.simname, halo_finder=entry.halo_finder, redshift=entry.redshift,
-                version_name=entry.version_name, Lbox=250., particle_mass=1.35e8)
-        substr = "There is already an existing entry in the Halotools cache log"
-        assert substr in err.value.args[0]
+                output_fname=output_fname,
+                simname=simname, halo_finder=halo_finder, redshift=redshift,
+                version_name=version_name, Lbox=250., particle_mass=1.35e8)
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog3(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -272,17 +285,14 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.args[0]
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog4(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -303,7 +313,6 @@ class TestRockstarHlistReader(TestCase):
         result = _infer_redshift_from_input_fname(fname)
         assert result == 11.8008
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_reader_configurations(self):
         """
         """
@@ -325,17 +334,17 @@ class TestRockstarHlistReader(TestCase):
             simname='bolplanck', halo_finder='rockstar', redshift=11.8008,
             version_name='dummy', Lbox=250., particle_mass=1.35e8,
             )
-        reader.read_halocat([], add_supplementary_halocat_columns=False)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=10)
+            chunk_memory_size=10, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=11)
+            chunk_memory_size=11, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=99)
+            chunk_memory_size=99, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=100)
+            chunk_memory_size=100, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=101)
+            chunk_memory_size=101, write_to_disk=False)
 
     def tearDown(self):
         try:

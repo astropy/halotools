@@ -21,6 +21,10 @@ from ..custom_exceptions import HalotoolsError
 
 __all__ = ('RockstarHlistReader', )
 
+uninstalled_h5py_msg = ("\nYou must have h5py installed if you want to \n"
+    "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
+    "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
+
 
 def _infer_redshift_from_input_fname(fname):
     """ Method extracts the portion of the Rockstar hlist fname
@@ -337,12 +341,10 @@ class RockstarHlistReader(TabularAsciiReader):
         """
         try:
             import h5py
+            self._has_h5py = True
             self.h5py = h5py
         except ImportError:
-            msg = ("\nYou must have h5py installed if you want to \n"
-                "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
-                "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
-            raise HalotoolsError(msg)
+            self._has_h5py = False
 
         TabularAsciiReader.__init__(self,
             input_fname, columns_to_keep_dict,
@@ -669,6 +671,9 @@ class RockstarHlistReader(TabularAsciiReader):
         and also calls the ``self._write_metadata`` method to place the
         hdf5 file into standard form.
         """
+        if not self._has_h5py:
+            raise HalotoolsError(uninstalled_h5py_msg)
+
         self.halo_table.write(
             self.output_fname, path='data', overwrite=self.overwrite)
         self._write_metadata()
@@ -676,6 +681,9 @@ class RockstarHlistReader(TabularAsciiReader):
     def _write_metadata(self):
         """ Private method to add metadata to the hdf5 file.
         """
+        if not self._has_h5py:
+            raise HalotoolsError(uninstalled_h5py_msg)
+
         # Now add the metadata
         f = self.h5py.File(self.output_fname)
         f.attrs.create('simname', str(self.simname))

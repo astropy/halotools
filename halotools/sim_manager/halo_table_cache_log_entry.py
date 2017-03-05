@@ -56,11 +56,10 @@ class HaloTableCacheLogEntry(object):
         """
         try:
             import h5py
+            self._has_h5py = True
             self.h5py = h5py
         except ImportError:
-            msg = ("Must have h5py installed \n"
-                "to to instantiate the HaloTableCacheLogEntry class.\n")
-            raise HalotoolsError(msg)
+            self._has_h5py = False
 
         self.simname = simname
         self.halo_finder = halo_finder
@@ -149,9 +148,7 @@ class HaloTableCacheLogEntry(object):
         the responsibility of the `~halotools.sim_manager.HaloTableCache` class.
 
         """
-        try:
-            import h5py
-        except ImportError:
+        if not self._has_h5py:
             msg = ("\nCannot determine whether an hdf5 file "
                 "is safe_for_cache without h5py installed.\n")
             raise HalotoolsError(msg)
