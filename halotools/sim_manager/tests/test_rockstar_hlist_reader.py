@@ -109,7 +109,6 @@ class TestRockstarHlistReader(TestCase):
             'halo_mvir': (5, 'f4')
             })
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_good_args(self):
 
         reader = RockstarHlistReader(
@@ -120,7 +119,6 @@ class TestRockstarHlistReader(TestCase):
             redshift=4, version_name='dummy', Lbox=100, particle_mass=1e8
             )
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict1(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -134,7 +132,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.args[0]
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict2(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -148,7 +145,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.args[0]
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict3(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -162,7 +158,6 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.args[0]
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict4(self):
 
         with pytest.raises(ValueError) as err:
@@ -177,8 +172,6 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.args[0]
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog1(self):
         """
         """
@@ -206,7 +199,7 @@ class TestRockstarHlistReader(TestCase):
             row_cut_neq_dict={'halo_id': -1}
             )
 
-        if APH_MACHINE:
+        if HAS_H5PY:
             write_to_disk = True
         else:
             write_to_disk = False
@@ -214,8 +207,6 @@ class TestRockstarHlistReader(TestCase):
             write_to_disk=write_to_disk)
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog2(self):
         """
         """
@@ -245,8 +236,6 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.args[0]
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog3(self):
         """
         """
@@ -274,7 +263,6 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.args[0]
 
     @pytest.mark.slow
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_read_dummy_halo_catalog4(self):
         """
         """
@@ -303,7 +291,6 @@ class TestRockstarHlistReader(TestCase):
         result = _infer_redshift_from_input_fname(fname)
         assert result == 11.8008
 
-    @pytest.mark.skipif('not HAS_H5PY')
     def test_reader_configurations(self):
         """
         """
@@ -325,17 +312,17 @@ class TestRockstarHlistReader(TestCase):
             simname='bolplanck', halo_finder='rockstar', redshift=11.8008,
             version_name='dummy', Lbox=250., particle_mass=1.35e8,
             )
-        reader.read_halocat([], add_supplementary_halocat_columns=False)
+        reader.read_halocat([], add_supplementary_halocat_columns=False, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=10)
+            chunk_memory_size=10, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=11)
+            chunk_memory_size=11, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=99)
+            chunk_memory_size=99, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=100)
+            chunk_memory_size=100, write_to_disk=False)
         reader.read_halocat([], add_supplementary_halocat_columns=False,
-            chunk_memory_size=101)
+            chunk_memory_size=101, write_to_disk=False)
 
     def tearDown(self):
         try:
