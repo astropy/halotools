@@ -35,7 +35,7 @@ Once you have installed the code and downloaded the default halo catalog (see th
 from halotools.empirical_models import PrebuiltHodModelFactory
 model = PrebuiltHodModelFactory('zheng07')
 
-# Select a halo catlaog
+# Select a halo catalog
 from halotools.sim_manager import CachedHaloCatalog
 halocat = CachedHaloCatalog(simname='bolshoi', redshift=0, halo_finder='rockstar')
 
