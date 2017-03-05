@@ -55,9 +55,67 @@ Because :math:`N_{\rm sat}` and :math:`N_{\rm sub}` are disconnected, it is poss
 In a little more detail, during the pre-processing phase of mock population, host halos are initially binned according to the ``binning_key`` column of the halo catalog; by default, this binning is done on the ``halo_mvir_host_halo`` property. The bins themselves are defined by the ``host_haloprop_bins`` argument. Care must be taken by the user to ensure that no bins are empty, and also that the bins are sufficiently narrow so that the true mass-dependence of the radial profiles is captured. Halotools will raise an exception if an unacceptable choice is made.
 
 
+Inheriting additional subhalo properties besides position and velocity
+========================================================================
 
+For each satellite galaxy, once its parent subhalo is selected, the position and velocity of that subhalo are assigned to the satellite. As an additional modeling feature, you may choose to inherit additional subhalo properties besides just the phase space coordinates. For example, you may wish to also inherit the subhalo formation time to implement an age matching-like model, or the subhalo spin for morphology modeling.
 
+The additional properties you choose to inherit is specified by the ``inherited_subhalo_props_dict``argument. Each key of the ``inherited_subhalo_props_dict`` dictionary gives the name of a column in the ``subhalo_table`` that you wish to inherit. The value bound to each key is a tuple of two strings. The first string specifies the name you would like to give the inherited property in the ``galaxy_table``. The second string specifies the data type of the column, e.g., 'f4' or 'i8'.
 
+For example, the default dictionary is as follows:
+
+default_inherited_subhalo_props_dict = (
+    {'halo_id': ('halo_id', 'i8'),
+    'halo_x': ('x', 'f8'),
+    'halo_y': ('y', 'f8'),
+    'halo_z': ('z', 'f8'),
+    'halo_vx': ('vx', 'f8'),
+    'halo_vy': ('vy', 'f8'),
+    'halo_vz': ('vz', 'f8'),
+    'halo_mpeak': ('halo_mpeak', 'f8')})
+
+You can import this dictionary directly from the `~halotools.empirical_models` sub-package:
+
+>>> from halotools.empirical_models import default_inherited_subhalo_props_dict
+
+This way, you can supplement default_inherited_subhalo_props_dict with whatever additional properties you are interested in, and pass the result to ``inherited_subhalo_props_dict``.
+
+A worked example
+=================
+
+Let's suppose we'd like to start with the ``leauthaud11`` HOD model as our baseline; this model assumes satellites are distributed according to an NFW profile. What we'll do next is show how to build alternative models that are identical in every respect to ``leauthaud11``, except that satellites are placed on subhalos instead of tracing an NFW profile.
+
+.. code:: python
+
+    from halotools.empirical_models import PrebuiltHodModelFactory
+    orig_model = PrebuiltHodModelFactory('leauthaud11')
+
+    from halotools.empirical_models import SubhaloPhaseSpace
+    alt_profile_model = SubhaloPhaseSpace('satellites', np.logspace(10.5, 15.2, 15))
+
+    from halotools.empirical_models import HodModelFactory
+
+    new_model_dictionary = orig_model.model_dictionary
+    new_model_dictionary['satellites_profile'] = alt_profile_model
+    new_model = HodModelFactory(**new_model_dictionary)
+
+The ``new_model`` can be used to populate mock catalogs just like any Halotools composite model:
+
+.. code:: python
+
+    from halotools.sim_manager import CachedHaloCatalog
+    halocat = CachedHaloCatalog(simname='bolplanck')
+    new_model.populate_mock(halocat, seed=43)
+    orig_model.populate_mock(halocat, seed=43)
+
+Since we called `~halotools.empirical_models.HodModelFactory.populate_mock` by passing the ``seed`` keyword, all Monte Carlo functions have deterministic behavior and so the occupation statistics of these two realizations are identical:
+
+.. code:: python
+
+    print(len(new_model.mock.galaxy_table), len(orig_model.mock.galaxy_table))
+    (49098, 49098)
+
+In addition to the usual ``halo_table`` column names, when using `~halotools.empirical_models.SubhaloPhaseSpace` there is an an additional column called ``real_subhalo``. For satellites that sit on a subhalo that is within their actual host halo, this column is ``True``. Otherwise, this column is ``False`` (n.b., a peculiarity of the  implementation is that the ``real_subhalo`` column is also ``False`` for centrals). For reference, in this particular realization, only ~1.3% of satellites have this column equal to ``True``.
 
 
 
