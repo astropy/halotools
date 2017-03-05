@@ -10,6 +10,7 @@ from astropy.tests.helper import pytest
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 from astropy.config.paths import _find_home
+from astropy.utils.data import get_pkg_data_filename
 from collections import OrderedDict
 
 from ..rockstar_hlist_reader import RockstarHlistReader, _infer_redshift_from_input_fname
@@ -181,12 +182,11 @@ class TestRockstarHlistReader(TestCase):
     def test_read_dummy_halo_catalog1(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -206,8 +206,12 @@ class TestRockstarHlistReader(TestCase):
             row_cut_neq_dict={'halo_id': -1}
             )
 
+        if APH_MACHINE:
+            write_to_disk = True
+        else:
+            write_to_disk = False
         reader.read_halocat(columns_to_convert_from_kpc_to_mpc=[],
-            write_to_disk=True)
+            write_to_disk=write_to_disk)
 
     @pytest.mark.slow
     @pytest.mark.skipif('not HAS_H5PY')
@@ -215,12 +219,11 @@ class TestRockstarHlistReader(TestCase):
     def test_read_dummy_halo_catalog2(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -247,12 +250,11 @@ class TestRockstarHlistReader(TestCase):
     def test_read_dummy_halo_catalog3(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
@@ -273,16 +275,14 @@ class TestRockstarHlistReader(TestCase):
 
     @pytest.mark.slow
     @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog4(self):
         """
         """
-        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        fname = get_pkg_data_filename('data/dummy_halocat_0.07812.list')
         if not os.path.isfile(fname):
-            msg = ("The APH_MACHINE needs to download a trivial Rockstar file that is missing\n\n"
-                "$/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar\n"
-                "$wget http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/hlist_0.07812.list.gz\n"
-                "$gunzip hlist_0.07812.list.gz\n\n")
+            msg = ("The following file is, in fact, located in the directory of this testing module:\n"
+                "{0}\nBut for mysterious reasons having to do with the py.test framework, \n"
+                "the file does not appear to exist".format(fname))
             raise IOError(msg)
 
         columns_to_keep_dict = ({
