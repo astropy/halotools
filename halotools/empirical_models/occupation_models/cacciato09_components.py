@@ -331,7 +331,9 @@ class Cacciato09Sats(OccupationComponent):
         self._galprop_dtypes_to_allocate = np.dtype([(prim_galprop_key, 'f8')])
         self.prim_galprop_key = prim_galprop_key
         self.param_dict = self.get_default_parameters()
-        self.central_occupation_model = Cacciato09Cens()
+        self.central_occupation_model = Cacciato09Cens(
+            threshold=threshold, prim_haloprop_key=prim_haloprop_key,
+            prim_galprop_key=prim_galprop_key, **kwargs)
         self._methods_to_inherit = (
             ['mc_occupation', 'mean_occupation', 'mc_prim_galprop', 'clf',
              'phi_sat', 'alpha_sat', 'prim_galprop_cut']
