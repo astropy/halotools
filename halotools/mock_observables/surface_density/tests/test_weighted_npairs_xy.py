@@ -35,6 +35,10 @@ def test_weighted_npairs_xy_brute_force_pbc():
     cython_weighted_counts = weighted_npairs_xy(data1, data2, w2, rp_bins, period=1)
     assert np.allclose(cython_weighted_counts, python_weighted_counts)
 
+    # Verify the PBC enforcement is non-trivial
+    cython_weighted_counts = weighted_npairs_xy(data1, data2, w2, rp_bins)
+    assert not np.allclose(cython_weighted_counts, python_weighted_counts)
+
 
 def test_weighted_npairs_xy_brute_force_no_pbc():
     """
@@ -54,6 +58,10 @@ def test_weighted_npairs_xy_brute_force_no_pbc():
 
     cython_weighted_counts = weighted_npairs_xy(data1, data2, w2, rp_bins, period=None)
     assert np.allclose(cython_weighted_counts, python_weighted_counts)
+
+    # Verify the PBC enforcement is non-trivial
+    cython_weighted_counts = weighted_npairs_xy(data1, data2, w2, rp_bins, period=1)
+    assert not np.allclose(cython_weighted_counts, python_weighted_counts)
 
 
 def test_weighted_npairs_xy_tight_locus1():

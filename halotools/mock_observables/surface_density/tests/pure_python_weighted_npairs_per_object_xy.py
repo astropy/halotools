@@ -7,10 +7,10 @@ import numpy as np
 
 from .pure_python_weighted_npairs_xy import periodic_xy_distance
 
-__all__ = ('weighted_pure_python_npairs_per_object_xy', )
+__all__ = ('pure_python_weighted_npairs_per_object_xy', )
 
 
-def weighted_pure_python_npairs_per_object_xy(xarr1, yarr1, xarr2, yarr2, warr2,
+def pure_python_weighted_npairs_per_object_xy(xarr1, yarr1, xarr2, yarr2, warr2,
         rp_bins, xperiod, yperiod):
     """ Count the number of pairs as a function of xy-distance,
     weighted by the second pair of points.
@@ -18,8 +18,8 @@ def weighted_pure_python_npairs_per_object_xy(xarr1, yarr1, xarr2, yarr2, warr2,
     num_rp_bins = len(rp_bins)
     num_pts1 = len(xarr1)
 
-    counts = np.zeros(num_pts1, num_rp_bins)
-    weighted_counts = np.zeros(num_pts1, num_rp_bins)
+    counts = np.zeros((num_pts1, num_rp_bins))
+    weighted_counts = np.zeros((num_pts1, num_rp_bins))
 
     for i, x1, y1 in zip(range(num_pts1), xarr1, yarr1):
         for x2, y2, w2 in zip(xarr2, yarr2, warr2):
