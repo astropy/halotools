@@ -4,24 +4,26 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 from .pure_python_weighted_npairs_xy import pure_python_weighted_npairs_xy
 from ..weighted_npairs_xy import weighted_npairs_xy
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
-__all__ = ('test_weighted_npairs_xy_brute_force1', )
+__all__ = ('test_weighted_npairs_xy_brute_force_pbc', )
 
 fixed_seed = 43
 
 
-def test_weighted_npairs_xy_brute_force1():
+def test_weighted_npairs_xy_brute_force_pbc():
     """
     """
-    npts1, npts2 = 100, 111
-    data1 = np.random.random((npts1, 2))
-    data2 = np.random.random((npts2, 2))
-    w2 = np.random.rand(npts2)
+    npts1, npts2 = 500, 111
+    with NumpyRNGContext(fixed_seed):
+        data1 = np.random.random((npts1, 2))
+        data2 = np.random.random((npts2, 2))
+        w2 = np.random.rand(npts2)
     rp_bins = np.array((0.01, 0.1, 0.2, 0.3))
     xperiod, yperiod = 1, 1
 
@@ -31,6 +33,26 @@ def test_weighted_npairs_xy_brute_force1():
         xarr1, yarr1, xarr2, yarr2, w2, rp_bins, xperiod, yperiod)
 
     cython_weighted_counts = weighted_npairs_xy(data1, data2, w2, rp_bins, period=1)
+    assert np.allclose(cython_weighted_counts, python_weighted_counts)
+
+
+def test_weighted_npairs_xy_brute_force_no_pbc():
+    """
+    """
+    npts1, npts2 = 500, 111
+    with NumpyRNGContext(fixed_seed):
+        data1 = np.random.random((npts1, 2))
+        data2 = np.random.random((npts2, 2))
+        w2 = np.random.rand(npts2)
+    rp_bins = np.array((0.01, 0.1, 0.2, 0.3))
+    xperiod, yperiod = np.inf, np.inf
+
+    xarr1, yarr1 = data1[:, 0], data1[:, 1]
+    xarr2, yarr2 = data2[:, 0], data2[:, 1]
+    counts, python_weighted_counts = pure_python_weighted_npairs_xy(
+        xarr1, yarr1, xarr2, yarr2, w2, rp_bins, xperiod, yperiod)
+
+    cython_weighted_counts = weighted_npairs_xy(data1, data2, w2, rp_bins, period=None)
     assert np.allclose(cython_weighted_counts, python_weighted_counts)
 
 
@@ -81,7 +103,8 @@ def test_weighted_npairs_xy_tight_locus3():
     npts1, npts2 = 100, 300
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.05, zc=0.1, seed=fixed_seed)
     data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.95, zc=0.1, seed=fixed_seed)
-    weights2 = np.random.rand(npts2)
+    with NumpyRNGContext(fixed_seed):
+        weights2 = np.random.rand(npts2)
 
     rp_bins = np.array((0.05, 0.15, 0.3))
 
@@ -96,9 +119,10 @@ def test_parallel():
     """
     Lbox = 15
     npts1, npts2 = 1500, 700
-    data1 = np.random.random((npts1, 3))*Lbox
-    data2 = np.random.random((npts2, 3))*Lbox
-    weights2 = np.random.rand(data2.shape[0])
+    with NumpyRNGContext(fixed_seed):
+        data1 = np.random.random((npts1, 3))*Lbox
+        data2 = np.random.random((npts2, 3))*Lbox
+        weights2 = np.random.rand(data2.shape[0])
 
     rp_bins = np.linspace(0.05, 0.25, 15)
 
@@ -116,7 +140,8 @@ def test_sensible_num_threads():
     npts1, npts2 = 100, 100
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
     data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
-    weights2 = np.random.rand(data2.shape[0])
+    with NumpyRNGContext(fixed_seed):
+        weights2 = np.random.rand(data2.shape[0])
 
     rp_bins = np.array((0.05, 0.15, 0.3))
 
@@ -131,7 +156,8 @@ def test_sensible_rp_bins():
     npts1, npts2 = 100, 100
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
     data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
-    weights2 = np.random.rand(data2.shape[0])
+    with NumpyRNGContext(fixed_seed):
+        weights2 = np.random.rand(data2.shape[0])
 
     rp_bins = 0.1
 
@@ -145,7 +171,8 @@ def test_sensible_period():
     npts1, npts2 = 100, 100
     data1 = generate_locus_of_3d_points(npts1, xc=0.1, yc=0.1, zc=0.1, seed=fixed_seed)
     data2 = generate_locus_of_3d_points(npts2, xc=0.1, yc=0.1, zc=0.2, seed=fixed_seed)
-    weights2 = np.random.rand(data2.shape[0])
+    with NumpyRNGContext(fixed_seed):
+        weights2 = np.random.rand(data2.shape[0])
 
     rp_bins = np.array((0.05, 0.15, 0.3))
 
