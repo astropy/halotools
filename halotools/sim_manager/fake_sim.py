@@ -33,7 +33,7 @@ class FakeSim(UserSuppliedHaloCatalog):
     """
 
     def __init__(self, num_massbins=10, num_halos_per_massbin=int(100),
-            num_ptcl=int(1e4), seed=43, redshift=0., cosmology=default_cosmology,
+            num_ptcl=int(2e4), seed=43, redshift=0., cosmology=default_cosmology,
             **kwargs):
         """
         Parameters
@@ -81,7 +81,11 @@ class FakeSim(UserSuppliedHaloCatalog):
         self.num_massbins = num_massbins
         self.num_halos_per_massbin = num_halos_per_massbin
         self.num_halos = self.num_massbins*self.num_halos_per_massbin
-        self.num_ptcl = num_ptcl
+
+        approx_num_ptcl = num_ptcl
+        self.num_ptcl_per_dim = int(approx_num_ptcl**(1/3.))
+        self.num_ptcl = self.num_ptcl_per_dim**3
+
         self.cosmology = cosmology
 
         halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype='i8')

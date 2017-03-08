@@ -1,8 +1,7 @@
-# Licensed under a 3-clause BSD style license - see LICENSE.rst
-
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from .rectangular_mesh import RectangularDoubleMesh
+from .rectangular_mesh_2d import RectangularDoubleMesh2D
 from .npairs_3d import npairs_3d
 from .npairs_projected import npairs_projected
 from .npairs_xy_z import npairs_xy_z
