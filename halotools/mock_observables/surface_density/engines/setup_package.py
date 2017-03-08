@@ -2,7 +2,7 @@ from distutils.extension import Extension
 import os
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ("weighted_npairs_xy_engine.pyx", )
+SOURCES = ("weighted_npairs_xy_engine.pyx", "weighted_npairs_per_object_xy_engine.pyx")
 
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 

@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-__all__ = ('pure_python_weighted_npairs_xy', )
+__all__ = ('pure_python_weighted_npairs_xy', 'periodic_xy_distance')
 
 
 def periodic_xy_distance(x1, y1, x2, y2, xperiod, yperiod):

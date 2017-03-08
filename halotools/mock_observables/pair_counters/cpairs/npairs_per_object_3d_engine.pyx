@@ -70,7 +70,7 @@ def npairs_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
     cdef cnp.int64_t[:] inner_counts = np.zeros((num_rbins,), dtype=np.int64)
-    cdef cnp.int64_t[:,:] outer_counts = np.zeros(
+    cdef cnp.int64_t[:, :] outer_counts = np.zeros(
         (len(x1_sorted), num_rbins), dtype=np.int64)
 
     cdef cnp.int64_t icell1, icell2
