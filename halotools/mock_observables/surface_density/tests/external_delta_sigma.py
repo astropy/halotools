@@ -3,14 +3,19 @@ used in the unit-testing of `~halotools.mock_observables.surface_density` sub-pa
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import numpy as np
+from ....sim_manager.sim_defaults import default_cosmology
+
 
 __all__ = ('external_delta_sigma', )
 __author__ = ('Surhud More', )
 
 
-def external_delta_sigma(galaxies, particles, rp_bins, period, projection_period
+def external_delta_sigma(galaxies, particles, rp_bins, period, projection_period,
         cosmology=default_cosmology):
-    """
+    r"""
+    Parameters
+    ----------
     galaxies : array_like
         Ngal x 2 numpy array containing 2-d positions of galaxies.
         Length units are comoving and assumed to be in Mpc/h,
@@ -47,27 +52,27 @@ def external_delta_sigma(galaxies, particles, rp_bins, period, projection_period
     Returns
     -------
     rmids : np.array
-        The bins at which :math:`\\Delta \\Sigma` is calculated.
+        The bins at which :math:`\Delta\Sigma` is calculated.
         The units of `rmids` is :math:`hinv Mpc`, where distances are in comoving units.
         You can convert to physical units using the input cosmology and redshift.
         Note that little h = 1 here and throughout Halotools.
 
     Delta_Sigma : np.array
-        :math:`\\Delta\\Sigma(r_p)` calculated at projected comoving radial distances ``rp_bins``.
+        :math:`\Delta\Sigma(r_p)` calculated at projected comoving radial distances ``rp_bins``.
         The units of `ds` are :math:`h * M_{\odot} / Mpc^2`, where distances are in comoving units.
         You can convert to physical units using the input cosmology and redshift.
         Note that little h = 1 here and throughout Halotools.
 
     Notes
     -----
-    :math:`\\Delta\\Sigma` is calculated by first calculating the projected
-    surface density `\\Sigma` using the particles passed to the code
+    :math:`\Delta\Sigma` is calculated by first calculating the projected
+    surface density :math:`\Sigma` using the particles passed to the code
 
     and then,
 
     .. math::
-        \\Delta\\Sigma(r_p) = \\bar{\\Sigma}(<r_p) - \\Sigma(r_p)
 
+        \Delta\Sigma(r_p) = \bar{\Sigma}(<r_p) - \Sigma(r_p)
     """
 
     from scipy.spatial import cKDTree
@@ -97,7 +102,7 @@ def external_delta_sigma(galaxies, particles, rp_bins, period, projection_period
     sigma = sigmabar*xi2d
 
     # Now initialize sigmainside(rp_bins)
-    xi2dinside = pairs_inside_rad/(px.size*x.size/Area*(np.pi*rp_bins**2)) - 1.0
+    xi2dinside = pairs_inside_rad/(particles.size*galaxies.size/Area*(np.pi*rp_bins**2)) - 1.0
     sigmainside = sigmabar*xi2dinside
 
     from scipy.interpolate import interp1d
