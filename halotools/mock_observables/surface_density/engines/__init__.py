@@ -1,3 +1,4 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .weighted_npairs_xy_engine import weighted_npairs_xy_engine
+from .weighted_npairs_per_object_xy_engine import weighted_npairs_per_object_xy_engine
