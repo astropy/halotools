@@ -14,7 +14,7 @@ from ..mock_observables_helpers import (get_num_threads, get_separation_bins_arr
     get_period, enforce_sample_respects_pbcs, enforce_sample_has_correct_shape)
 
 
-__all__ = ('total_mass_enclosed_in_stack_of_cylinders', )
+__all__ = ('total_mass_enclosed_in_stack_of_cylinders', 'total_mass_enclosed_per_cylinder')
 __author__ = ('Andrew Hearin', )
 
 

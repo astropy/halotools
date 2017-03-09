@@ -27,6 +27,16 @@ Getting Started
    function_usage/index
    source_notes/index
 
+***********
+What's New?
+***********
+
+.. toctree::
+   :maxdepth: 1
+
+   whats_new
+   changelog
+
 *********
 Reference
 *********
