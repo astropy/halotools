@@ -12,6 +12,7 @@ from ...component_model_templates import BinaryGalpropInterpolModel
 
 from ...factories import SubhaloModelFactory, PrebuiltSubhaloModelFactory
 from ...composite_models.smhm_models.behroozi10 import behroozi10_model_dictionary
+from ...composite_models.sfr_models.smhm_binary_sfr import smhm_binary_sfr_model_dictionary
 
 
 from ....sim_manager import FakeSim
@@ -205,3 +206,48 @@ def test_deterministic_mock_making():
             assert np.allclose(h1[key], h2[key], rtol=0.001)
         except TypeError:
             pass
+
+
+def test_raises_appropriate_exception1():
+    """
+    """
+    model_dict_no_redshift = smhm_binary_sfr_model_dictionary()
+    model = SubhaloModelFactory(**model_dict_no_redshift)
+
+    for i, component_model in enumerate(model.model_dictionary.values()):
+        component_model.redshift = i
+
+    with pytest.raises(HalotoolsError) as err:
+        model.set_model_redshift()
+    substr = "Inconsistency between the redshifts of the component models"
+    assert substr in err.value.args[0]
+
+
+def test_restore_init_param_dict():
+    """
+    """
+    model_dict_no_redshift = smhm_binary_sfr_model_dictionary()
+    model = SubhaloModelFactory(**model_dict_no_redshift)
+    orig_param_dict = deepcopy(model.param_dict)
+
+    for key in model.param_dict.keys():
+        model.param_dict[key] += 1
+
+    assert orig_param_dict != model.param_dict
+
+    model.restore_init_param_dict()
+    assert orig_param_dict == model.param_dict
+
+
+def test_test_dictionary_consistency():
+    """
+    """
+    model_dict_no_redshift = behroozi10_model_dictionary()
+    model = SubhaloModelFactory(**model_dict_no_redshift)
+    for component_model in model.model_dictionary.values():
+        del component_model._methods_to_inherit
+
+    with pytest.raises(HalotoolsError) as err:
+        model._test_dictionary_consistency()
+    substr = "At a minimum, all component models must have this attribute"
+    assert substr in err.value.args[0]
