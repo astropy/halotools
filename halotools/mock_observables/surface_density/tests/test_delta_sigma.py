@@ -95,3 +95,41 @@ def test_delta_sigma_consistency():
     sigma_inside_cylinder_interp = log_interp(sigma_inside_cylinder, rp_bins, rp_mids)
     implied_delta_sigma = sigma_inside_cylinder_interp - sigma_annulus
     assert np.allclose(implied_delta_sigma, ds, rtol=0.001)
+
+
+def test_delta_sigma_raises_exceptions1():
+    num_centers, num_ptcl = 100, 500
+    with NumpyRNGContext(fixed_seed):
+        centers = np.random.random((num_centers, 3))
+        particles = np.random.random((num_ptcl, 3))
+
+    particle_masses = np.ones(num_ptcl-1)
+    downsampling_factor = 1
+
+    rp_bins = np.linspace(0.1, 0.3, 5)
+    Lbox = 1.
+
+    with pytest.raises(AssertionError) as err:
+        rp_mids, ds = new_delta_sigma(centers, particles, particle_masses,
+            downsampling_factor, rp_bins, Lbox)
+    substr = "Must have same number of ``particle_masses`` as particles"
+    assert substr in err.value.args[0]
+
+
+def test_delta_sigma_raises_exceptions2():
+    num_centers, num_ptcl = 100, 500
+    with NumpyRNGContext(fixed_seed):
+        centers = np.random.random((num_centers, 3))
+        particles = np.random.random((num_ptcl, 3))
+
+    particle_masses = np.ones(num_ptcl)
+    downsampling_factor = 0.5
+
+    rp_bins = np.linspace(0.1, 0.3, 5)
+    Lbox = 1.
+
+    with pytest.raises(AssertionError) as err:
+        rp_mids, ds = new_delta_sigma(centers, particles, particle_masses,
+            downsampling_factor, rp_bins, Lbox)
+    substr = "downsampling_factor = 0.5 < 1, which is impossible".format(downsampling_factor)
+    assert substr in err.value.args[0]
