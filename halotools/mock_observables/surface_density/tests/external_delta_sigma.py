@@ -78,8 +78,8 @@ def external_delta_sigma(galaxies, particles, rp_bins, period, projection_period
     from scipy.spatial import cKDTree
     from astropy.constants import G
 
-    Ngal = galaxies.shape[0]
-    Npart = particles.shape[0]
+    Ngal = float(galaxies.shape[0])
+    Npart = float(particles.shape[0])
     if np.isscalar(period):
         Area = period**2
     else:
@@ -102,7 +102,7 @@ def external_delta_sigma(galaxies, particles, rp_bins, period, projection_period
     sigma = sigmabar*xi2d
 
     # Now initialize sigmainside(rp_bins)
-    xi2dinside = pairs_inside_rad/(particles.size*galaxies.size/Area*(np.pi*rp_bins**2)) - 1.0
+    xi2dinside = pairs_inside_rad/(Npart*Ngal/Area*(np.pi*rp_bins**2)) - 1.0
     sigmainside = sigmabar*xi2dinside
 
     from scipy.interpolate import interp1d
