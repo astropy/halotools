@@ -18,3 +18,4 @@ from .two_point_clustering import *
 from .large_scale_density import *
 from .counts_in_cells import *
 from .occupation_stats import hod_from_mock, get_haloprop_of_galaxies
+from .surface_density import *
