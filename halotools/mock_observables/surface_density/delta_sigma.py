@@ -1,5 +1,5 @@
 """
-Module containing the `~halotools.mock_observables.new_delta_sigma` function used to
+Module containing the `~halotools.mock_observables.delta_sigma` function used to
 calculate galaxy-galaxy lensing.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -16,11 +16,11 @@ from ..mock_observables_helpers import (get_num_threads, get_separation_bins_arr
 
 from ...sim_manager.sim_defaults import default_cosmology
 
-__all__ = ('new_delta_sigma', )
+__all__ = ('delta_sigma', )
 __author__ = ('Andrew Hearin', )
 
 
-def new_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
+def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
         rp_bins, period, cosmology=default_cosmology, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     r"""
@@ -137,7 +137,7 @@ def new_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     The default Halotools catalogs come with ~1e6 particles.
     Using this many particles may be overkill: in many typical use-cases,
-    the `new_delta_sigma` function converges at the percent-level using
+    the `delta_sigma` function converges at the percent-level using
     an order of magnitude fewer particles.
     The code below shows how to (optionally) downsample these particles
     using a Halotools convenience function.
@@ -156,10 +156,10 @@ def new_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     >>> rp_bins = np.logspace(-1, 1, 10)
     >>> period = model.mock.Lbox
-    >>> rp, ds = new_delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
+    >>> rp, ds = delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
 
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
-    the `new_delta_sigma` functions are in *comoving* units of
+    the `delta_sigma` functions are in *comoving* units of
     :math:`M_{\odot} / {\rm Mpc}^2` assuming h=1,
     whereas the typical units used to plot :math:`\Delta\Sigma` are in
     *physical* units of :math:`M_{\odot} / {\rm pc}^2` using the value of

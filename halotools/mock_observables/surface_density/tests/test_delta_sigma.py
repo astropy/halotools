@@ -8,7 +8,7 @@ from astropy.tests.helper import pytest
 
 from .external_delta_sigma import external_delta_sigma
 
-from ..new_delta_sigma import new_delta_sigma
+from ..delta_sigma import delta_sigma
 from ..surface_density import surface_density_in_annulus, surface_density_in_cylinder
 from ..surface_density_helpers import log_interpolation_with_inner_zero_masking as log_interp
 
@@ -22,7 +22,7 @@ fixed_seed = 43
 
 
 @pytest.mark.slow
-def test_new_delta_sigma1():
+def test_delta_sigma1():
     """
     """
     model = PrebuiltSubhaloModelFactory('behroozi10')
@@ -59,7 +59,7 @@ def test_new_delta_sigma1():
         return  #  skip test if testing environment has scipy version incompatibilities
 
     downsampling_factor = halocat.num_ptcl_per_dim**3/float(particles.shape[0])
-    rp_mids, dsigma = new_delta_sigma(galaxies, particles, halocat.particle_mass,
+    rp_mids, dsigma = delta_sigma(galaxies, particles, halocat.particle_mass,
         downsampling_factor, rp_bins, halocat.Lbox)
 
     dsigma_interpol = np.exp(np.interp(np.log(rp_mids_external),
@@ -69,9 +69,9 @@ def test_new_delta_sigma1():
 
 
 def test_delta_sigma_consistency():
-    """This testing function guarantees consistency between the new_delta_sigma
+    """This testing function guarantees consistency between the delta_sigma
     function and the surface_density_in_annulus and surface_density_in_cylinder functions,
-    effectively freezing the internal calculation of new_delta_sigma.
+    effectively freezing the internal calculation of delta_sigma.
     """
     num_centers, num_ptcl = 100, 500
     with NumpyRNGContext(fixed_seed):
@@ -84,7 +84,7 @@ def test_delta_sigma_consistency():
     rp_bins = np.linspace(0.1, 0.3, 5)
     Lbox = 1.
 
-    rp_mids, ds = new_delta_sigma(centers, particles, particle_masses,
+    rp_mids, ds = delta_sigma(centers, particles, particle_masses,
         downsampling_factor, rp_bins, Lbox)
 
     sigma_annulus = surface_density_in_annulus(centers, particles, particle_masses,
@@ -110,7 +110,7 @@ def test_delta_sigma_raises_exceptions1():
     Lbox = 1.
 
     with pytest.raises(AssertionError) as err:
-        rp_mids, ds = new_delta_sigma(centers, particles, particle_masses,
+        rp_mids, ds = delta_sigma(centers, particles, particle_masses,
             downsampling_factor, rp_bins, Lbox)
     substr = "Must have same number of ``particle_masses`` as particles"
     assert substr in err.value.args[0]
@@ -129,7 +129,7 @@ def test_delta_sigma_raises_exceptions2():
     Lbox = 1.
 
     with pytest.raises(AssertionError) as err:
-        rp_mids, ds = new_delta_sigma(centers, particles, particle_masses,
+        rp_mids, ds = delta_sigma(centers, particles, particle_masses,
             downsampling_factor, rp_bins, Lbox)
     substr = "downsampling_factor = 0.5 < 1, which is impossible".format(downsampling_factor)
     assert substr in err.value.args[0]
