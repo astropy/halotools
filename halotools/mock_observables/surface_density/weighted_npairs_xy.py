@@ -43,12 +43,11 @@ def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
     sample2_mass : array_like
         Array of shape (Npts2, ) containing the masses of the ``sample2`` points.
 
-        Note that you may get more numericall stable results
+        Note that you may get more numerically stable results
         if you are able to normalize your masses to order-unity values.
 
     rp_bins : array_like
-        array of boundaries defining the radial bins perpendicular to the LOS in which
-        pairs are counted.
+        array of xy-distances defining the radial bins in which pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
@@ -57,9 +56,6 @@ def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
         period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed

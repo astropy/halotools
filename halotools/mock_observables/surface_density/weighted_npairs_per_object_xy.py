@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.weighted_npairs_xy` function
+""" Module containing the `~halotools.mock_observables.weighted_npairs_per_object_xy` function
 used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -22,7 +22,93 @@ __all__ = ('weighted_npairs_per_object_xy', )
 def weighted_npairs_per_object_xy(sample1, sample2, sample2_mass, rp_bins,
         period=None, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
-    """
+    r"""
+    Function counts the total mass of ``sample2`` enclosed within
+    each z-axis-aligned cylinder centered at ``sample1`` points.
+
+    Parameters
+    ----------
+    sample1 : array_like
+        Array of shape (Npts1, 2) containing 3-D positions of points.
+
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
+    sample2 : array_like
+        Array of shape (Npts2, 2) containing 3-D positions of particles.
+
+    sample2_mass : array_like
+        Array of shape (Npts2, ) containing the masses of the ``sample2`` particles.
+
+        Note that you may get more numerically stable results
+        if you are able to normalize your masses to order-unity values.
+
+    rp_bins : array_like
+        Array of shape (num_rp_bins, ) storing xy-distances defining
+        the radial bins in which pairs are counted.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
+    period : array_like, optional
+        Length-2 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
+        If set to None (the default option), PBCs are set to infinity.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
+    num_threads : int, optional
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
+        the pair counters should use all available cores on the machine.
+
+    approx_cell1_size : array_like, optional
+        Length-2 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
+
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
+
+    Returns
+    -------
+    enclosed_mass : array_like
+        Numpy array of shape (Npts1, num_rp_bins) storing the total mass enclosed
+        within each input cylinder.
+
+    Examples
+    --------
+    For demonstration purposes we create randomly distributed sets of points within a
+    periodic unit cube.
+
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 450.
+    >>> period = [Lbox, Lbox]
+    >>> rp_bins = np.logspace(-1, 1.5, 15)
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> sample2_mass = np.random.uniform(0, 1, Npts2)
+
+    We transform our *x, y* points into the array shape used by the pair-counter by
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> sample1 = np.vstack([x1, y1]).T
+    >>> sample2 = np.vstack([x2, y2]).T
+
+    >>> result = weighted_npairs_per_object_xy(sample1, sample2, sample2_mass, rp_bins, period=period)
+
     """
     # Process the inputs with the helper function
     result = _weighted_npairs_xy_process_args(sample1, sample2, sample2_mass,
