@@ -4,19 +4,68 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
+from astropy.tests.helper import pytest
 
-from .pure_python_weighted_npairs_xy import pure_python_weighted_npairs_xy
 from .external_delta_sigma import external_delta_sigma
 
 from ..new_delta_sigma import new_delta_sigma
 from ..surface_density import surface_density_in_annulus, surface_density_in_cylinder
 from ..surface_density_helpers import log_interpolation_with_inner_zero_masking as log_interp
 
-from ...tests.cf_helpers import generate_locus_of_3d_points, generate_thin_cylindrical_shell_of_points
+from ....empirical_models import PrebuiltSubhaloModelFactory
+from ....sim_manager import CachedHaloCatalog
+from ....mock_observables import return_xyz_formatted_array
 
 __all__ = ('test_delta_sigma_consistency', )
 
 fixed_seed = 43
+
+
+@pytest.mark.slow
+def test_new_delta_sigma1():
+    """
+    """
+    model = PrebuiltSubhaloModelFactory('behroozi10')
+    try:
+        halocat = CachedHaloCatalog()
+    except:
+        return  #  Skip test if the environment does not have the default halo catalog
+    model.populate_mock(halocat, seed=fixed_seed)
+
+    px = model.mock.ptcl_table['x']
+    py = model.mock.ptcl_table['y']
+    pz = model.mock.ptcl_table['z']
+    Nptcls_to_keep = int(1e5)
+    randomizer = np.random.random(len(model.mock.ptcl_table))
+    sorted_randoms = np.sort(randomizer)
+    ptcl_mask = np.where(sorted_randoms < sorted_randoms[Nptcls_to_keep])[0]
+    particles = return_xyz_formatted_array(px, py, pz, mask=ptcl_mask)
+
+    x = model.mock.galaxy_table['x']
+    y = model.mock.galaxy_table['y']
+    z = model.mock.galaxy_table['z']
+    mstar105_mask = (model.mock.galaxy_table['stellar_mass'] > 10**10.25)
+    mstar105_mask *= (model.mock.galaxy_table['stellar_mass'] < 10**10.75)
+    galaxies = return_xyz_formatted_array(x, y, z, mask=mstar105_mask)
+
+    period = halocat.Lbox[0]
+    projection_period = period
+    rp_bins = np.logspace(np.log10(0.25), np.log10(15), 10)
+
+    try:
+        rp_mids_external, dsigma_external = external_delta_sigma(galaxies[:, :2], particles[:, :2],
+            rp_bins, period, projection_period, cosmology=halocat.cosmology)
+    except:
+        return  #  skip test if testing environment has scipy version incompatibilities
+
+    downsampling_factor = halocat.num_ptcl_per_dim**3/float(particles.shape[0])
+    rp_mids, dsigma = new_delta_sigma(galaxies, particles, halocat.particle_mass,
+        downsampling_factor, rp_bins, halocat.Lbox)
+
+    dsigma_interpol = np.exp(np.interp(np.log(rp_mids_external),
+            np.log(rp_mids), np.log(dsigma)))
+
+    assert np.allclose(dsigma_interpol, dsigma_external, rtol=0.1)
 
 
 def test_delta_sigma_consistency():
