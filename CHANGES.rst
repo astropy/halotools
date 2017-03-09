@@ -21,6 +21,8 @@
 
 - Modified internals of `mock_observables.delta_sigma` function, and included new `mock_observables.delta_sigma_from_precomputed` function to compute the results from a set of pre-computed pairs
 
+- Fixed factor of 2 error in tpcf_multipole, resolving https://github.com/astropy/halotools/issues/651
+
 0.4 (2016-08-11)
 ----------------
 
