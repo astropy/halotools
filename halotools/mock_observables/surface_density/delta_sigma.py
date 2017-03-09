@@ -27,6 +27,10 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     Calculate :math:`\Delta\Sigma(r_p)`, the galaxy-galaxy lensing signal
     as a function of projected distance.
 
+    By using the ``particle_masses`` argument, the function works equally well
+    with DM-only simulations as with hydro simulations that include
+    particles of variable mass.
+
     Example calls to this function appear in the documentation below.
 
     See also :ref:`galaxy_catalog_analysis_tutorial3`.
@@ -96,7 +100,7 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     -------
     Delta_Sigma : array_like
         Numpy array of shape (num_rbins-1, ) storing :math:`\Delta\Sigma(r_p)`
-        in comoving units of :math:`M_{\odot} / {\rm Mpc}^2` assuming h=1.
+        in comoving units of :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1.
 
     Examples
     --------
@@ -160,7 +164,7 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
     the `delta_sigma` functions are in *comoving* units of
-    :math:`M_{\odot} / {\rm Mpc}^2` assuming h=1,
+    :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1,
     whereas the typical units used to plot :math:`\Delta\Sigma` are in
     *physical* units of :math:`M_{\odot} / {\rm pc}^2` using the value of
     little h appropriate for your assumed cosmology.
