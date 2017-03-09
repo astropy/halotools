@@ -8,9 +8,10 @@ from astropy.tests.helper import pytest
 
 from .external_delta_sigma import external_delta_sigma
 
-from ..delta_sigma import delta_sigma
+from ..delta_sigma import delta_sigma, delta_sigma_from_precomputed_pairs
 from ..surface_density import surface_density_in_annulus, surface_density_in_cylinder
 from ..surface_density_helpers import log_interpolation_with_inner_zero_masking as log_interp
+from ..mass_in_cylinders import total_mass_enclosed_per_cylinder
 
 from ....empirical_models import PrebuiltSubhaloModelFactory
 from ....sim_manager import CachedHaloCatalog
@@ -133,3 +134,25 @@ def test_delta_sigma_raises_exceptions2():
             downsampling_factor, rp_bins, Lbox)
     substr = "downsampling_factor = 0.5 < 1, which is impossible".format(downsampling_factor)
     assert substr in err.value.args[0]
+
+
+def test_delta_sigma_from_precomputed_pairs():
+    num_centers, num_ptcl = 1000, 5000
+    with NumpyRNGContext(fixed_seed):
+        galaxies = np.random.random((num_centers, 3))
+        particles = np.random.random((num_ptcl, 3))
+
+    particle_masses = np.ones(num_ptcl)
+    downsampling_factor = 1
+
+    rp_bins = np.linspace(0.1, 0.3, 5)
+    period = 1.
+
+    rp_mids, ds1 = delta_sigma(galaxies, particles, particle_masses,
+        downsampling_factor, rp_bins, period)
+
+    mass_encl = total_mass_enclosed_per_cylinder(galaxies, particles, particle_masses,
+        downsampling_factor, rp_bins, period)
+    rp_mids2, ds2 = delta_sigma_from_precomputed_pairs(galaxies, mass_encl, rp_bins, period)
+
+    assert np.allclose(ds1, ds2)
