@@ -6,6 +6,9 @@
 What's New in Halotools v0.5?
 *****************************
 
+Halotools ``v0.5`` will soon be available for pip installation. The main changes to the code are summarized in the sections below.
+
+
 New Models
 ============
 
