@@ -41,18 +41,11 @@ def npairs(sample1, sample2, rbins, period=None):
 
     """
 
-    # work with arrays!
-    sample1 = np.asarray(sample1)
-    if sample1.ndim == 1:
-        sample1 = np.array([sample1])
-    sample2 = np.asarray(sample2)
-    if sample2.ndim == 1:
-        sample2 = np.array([sample2])
-    rbins = np.asarray(rbins)
-    if rbins.size == 1:
-        rbins = np.array([rbins])
+    sample1 = np.atleast_2d(sample1)
+    sample2 = np.atleast_2d(sample2)
+    rbins = np.atleast_1d(rbins)
 
-    # Check to make sure both data sets have the same dimension. Otherwise, throw an error!
+    # Check to make sure both data sets have the same dimension. Otherwise, throw an error
     if np.shape(sample1)[-1] != np.shape(sample2)[-1]:
         raise ValueError("sample1 and sample2 inputs do not have the same dimension.")
         return None
@@ -78,6 +71,7 @@ def npairs(sample1, sample2, rbins, period=None):
 
     # sort results
     dd.sort()
+
     # count number less than r
     n = np.zeros((rbins.size,), dtype=np.int)
     for i in range(rbins.size):
@@ -125,19 +119,10 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
 
     """
 
-    # work with arrays!
-    sample1 = np.asarray(sample1)
-    if sample1.ndim == 1:
-        sample1 = np.array([sample1])
-    sample2 = np.asarray(sample2)
-    if sample2.ndim == 1:
-        sample2 = np.array([sample2])
-    rp_bins = np.asarray(rp_bins)
-    if rp_bins.size == 1:
-        rp_bins = np.array([rp_bins])
-    pi_bins = np.asarray(pi_bins)
-    if pi_bins.size == 1:
-        pi_bins = np.array([pi_bins])
+    sample1 = np.atleast_2d(sample1)
+    sample2 = np.atleast_2d(sample2)
+    rp_bins = np.atleast_1d(rp_bins)
+    pi_bins = np.atleast_1d(pi_bins)
 
     # Check to make sure both data sets have the same dimension. Otherwise, throw an error!
     if np.shape(sample1)[-1] != np.shape(sample2)[-1]:
@@ -209,16 +194,9 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 
     """
 
-    # work with arrays!
-    sample1 = np.asarray(sample1)
-    if sample1.ndim == 1:
-        sample1 = np.array([sample1])
-    sample2 = np.asarray(sample2)
-    if sample2.ndim == 1:
-        sample2 = np.array([sample2])
-    r = np.asarray(r)
-    if r.size == 1:
-        r = np.array([r])
+    sample1 = np.atleast_2d(sample1)
+    sample2 = np.atleast_2d(sample2)
+    r = np.atleast_1d(r)
 
     # Check to make sure both data sets have the same dimension. Otherwise, throw an error!
     if np.shape(sample1)[-1] != np.shape(sample2)[-1]:
@@ -316,19 +294,10 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 
     """
 
-    # work with arrays!
-    sample1 = np.asarray(sample1)
-    if sample1.ndim == 1:
-        sample1 = np.array([sample1])
-    sample2 = np.asarray(sample2)
-    if sample2.ndim == 1:
-        sample2 = np.array([sample2])
-    rp_bins = np.asarray(rp_bins)
-    if rp_bins.size == 1:
-        rp_bins = np.array([rp_bins])
-    pi_bins = np.asarray(pi_bins)
-    if pi_bins.size == 1:
-        pi_bins = np.array([pi_bins])
+    sample1 = np.atleast_2d(sample1)
+    sample2 = np.atleast_2d(sample2)
+    rp_bins = np.atleast_1d(rp_bins)
+    pi_bins = np.atleast_1d(pi_bins)
 
     # Check to make sure both data sets have the same dimension. Otherwise, throw an error!
     if np.shape(sample1)[-1] != np.shape(sample2)[-1]:
@@ -405,13 +374,8 @@ def distance(x1, x2, period=None):
 
     """
 
-    # process inputs
-    x1 = np.asarray(x1)
-    if x1.ndim == 1:
-        x1 = np.array([x1])
-    x2 = np.asarray(x2)
-    if x2.ndim == 1:
-        x2 = np.array([x2])
+    x1 = np.atleast_2d(x1)
+    x2 = np.atleast_2d(x2)
     if period is None:
         period = np.array([np.inf]*np.shape(x1)[-1])
 
@@ -453,13 +417,8 @@ def parallel_distance(x1, x2, period=None):
 
     """
 
-    # process inputs
-    x1 = np.asarray(x1)
-    if x1.ndim == 1:
-        x1 = np.array([x1])
-    x2 = np.asarray(x2)
-    if x2.ndim == 1:
-        x2 = np.array([x2])
+    x1 = np.atleast_2d(x1)
+    x2 = np.atleast_2d(x2)
     if period is None:
         period = np.array([np.inf]*np.shape(x1)[-1])
 
@@ -501,13 +460,8 @@ def perpendicular_distance(x1, x2, period=None):
 
     """
 
-    # process inputs
-    x1 = np.asarray(x1)
-    if x1.ndim == 1:
-        x1 = np.array([x1])
-    x2 = np.asarray(x2)
-    if x2.ndim == 1:
-        x2 = np.array([x2])
+    x1 = np.atleast_2d(x1)
+    x2 = np.atleast_2d(x2)
     if period is None:
         period = np.array([np.inf]*np.shape(x1)[-1])
 
