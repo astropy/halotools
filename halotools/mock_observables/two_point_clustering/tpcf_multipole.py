@@ -82,7 +82,7 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     Ln = legendre(order)
 
     # numerically integrate over mu
-    result = (2.0*order + 1.0)/2.0 *\
-        np.sum(s_mu_tcpf_result * np.diff(mu_bins) * Ln(mu_bin_centers), axis=1)
+    result = (2.0*order + 1.0)/2.0 * np.sum(s_mu_tcpf_result * np.diff(mu_bins) *\
+        (Ln(mu_bin_centers) + Ln(-1.0*mu_bin_centers)), axis=1)
 
     return result
