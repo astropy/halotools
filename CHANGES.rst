@@ -19,6 +19,8 @@
 
 - Added Zu & Mandelbaum 2015 and Zu & Mandelbaum 2016 HOD models
 
+- Modified internals of `mock_observables.delta_sigma` function, and included new `mock_observables.delta_sigma_from_precomputed` function to compute the results from a set of pre-computed pairs
+
 0.4 (2016-08-11)
 ----------------
 

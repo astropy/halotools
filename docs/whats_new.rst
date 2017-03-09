@@ -52,16 +52,18 @@ New Mock Observations
 
 .. _galaxy_lensing_v05:
 
-Calculating galaxy-galaxy lensing
----------------------------------
+Calculating galaxy-galaxy lensing in a hydro simulation
+--------------------------------------------------------
 
 The `delta_sigma` function has had a complete overhaul, including a change to the function signature. The new implementation is faster and more accurate than the previous version, and now supports calculating the lensing signal for cases where the simulation particles have variable mass, such as hydro simulations or boxes with massive neutrinos.
 
+Calculating galaxy-galaxy lensing from pre-computed pairs
+-----------------------------------------------------------
 There is also a new `delta_sigma_from_precomputed` that allows users to pre-compute the mass surrounding each model galaxy and then compute :math:`\Delta\Sigma` directly from an input mask; for cases where the *candidate* positions of galaxies are known in advance, the `delta_sigma_from_precomputed` will generally improve runtimes for calculating :math:`\Delta\Sigma` by orders of magnitude.
 
 
-Calculating the HOD
--------------------
+Calculating the HOD directly from a mock
+-----------------------------------------
 
 The `hod_from_mock` function provides a convenient interface for calculating
 the mean number of galaxies per halo as a function of, for example, halo mass.
