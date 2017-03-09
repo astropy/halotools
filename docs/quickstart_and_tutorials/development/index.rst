@@ -4,9 +4,9 @@
 Developer documentation
 =======================
 
-The developer documentation contains guidlines for how to 
-stay up-to-date on Halotools development, submit bug reports and 
-contribute to the Halotools code base. 
+The developer documentation contains guidlines for how to
+stay up-to-date on Halotools development, submit bug reports and
+contribute to the Halotools code base.
 
 
 .. toctree::
@@ -15,3 +15,4 @@ contribute to the Halotools code base.
    staying_up_to_date
    bug_reports
    contributors
+   ../../changelog
