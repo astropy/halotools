@@ -62,7 +62,7 @@ The `delta_sigma` function has had a complete overhaul, including a change to th
 
 Calculating galaxy-galaxy lensing from pre-computed pairs
 -----------------------------------------------------------
-There is also a new `delta_sigma_from_precomputed` that allows users to pre-compute the mass surrounding each model galaxy and then compute :math:`\Delta\Sigma` directly from an input mask; for cases where the *candidate* positions of galaxies are known in advance, the `delta_sigma_from_precomputed` will generally improve runtimes for calculating :math:`\Delta\Sigma` by orders of magnitude.
+There is also a new `delta_sigma_from_precomputed_pairs` that allows users to pre-compute the mass surrounding each model galaxy and then compute :math:`\Delta\Sigma` directly from an input mask; for cases where the *candidate* positions of galaxies are known in advance, the `delta_sigma_from_precomputed_pairs` will generally improve runtimes for calculating :math:`\Delta\Sigma` by orders of magnitude.
 
 
 Calculating the HOD directly from a mock
