@@ -941,7 +941,7 @@ class SubhaloModelFactory(ModelFactory):
                 for methodname in component_model._methods_to_inherit:
                     assert hasattr(component_model, methodname)
             except AssertionError:
-                clname = component_model.__name__
+                clname = component_model.__class__.__name__
                 msg = ("You bound an instance of the ``"+clname+"`` to this keyword,\n"
                     "but the instance does not have "
                     "a properly defined ``_methods_to_inherit`` attribute.\n"

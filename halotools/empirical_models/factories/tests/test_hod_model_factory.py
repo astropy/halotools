@@ -148,3 +148,120 @@ def test_factory_constructor_redshift4():
     model_dict_no_redshift['redshift'] = 1.5
     model2 = HodModelFactory(**model_dict_no_redshift)
     assert model2.redshift == 1.5
+
+
+def test_raises_appropriate_exception1():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+    with pytest.raises(HalotoolsError) as err:
+        model.build_model_feature_calling_sequence({'model_feature_calling_sequence': (4, 5)})
+    substr = "does not appear in the keyword arguments you passed to the HodModelFactory"
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception2():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+    with pytest.raises(HalotoolsError) as err:
+        model._test_model_feature_calling_sequence_consistency(
+            ['abc'], model.gal_types)
+    substr = "input ``model_feature_calling_sequence`` has a ``abc`` element"
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception3():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+
+    model_dictionary_key = 'Air Bud 4: Seventh Inning Fetch'
+    gal_type_list = model.gal_types
+    known_gal_type = 'Josh'
+    with pytest.raises(HalotoolsError) as err:
+        model._infer_gal_type_and_feature_name(
+            model_dictionary_key, gal_type_list, known_gal_type=known_gal_type)
+    substr = "The first substring of each key of the ``model_dictionary``"
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception4():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+
+    model_dictionary_key = 'Air Bud 4: Seventh Inning Fetch'.lower()
+    gal_type_list = model.gal_types
+    known_gal_type = 'Air Bud 4'.lower()
+    with pytest.raises(HalotoolsError) as err:
+        model._infer_gal_type_and_feature_name(
+            model_dictionary_key, gal_type_list, known_gal_type=known_gal_type)
+    substr = "The model_dictionary key ``air bud 4: seventh inning fetch`` must be comprised of"
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception5():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+
+    model_dictionary_key = 'Air Bud_: The Dog is in the House'.lower()
+    gal_type_list = model.gal_types
+    with pytest.raises(HalotoolsError) as err:
+        model._infer_gal_type_and_feature_name(
+            model_dictionary_key, gal_type_list,
+            known_feature_name="He Sits, He Stays, He Shoots, He Scores")
+    substr = "The second substring of each key of the ``model_dictionary`` "
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception6():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+
+    model_dictionary_key = 'Air Bud_: The Dog is in the House'.lower()
+    gal_type_list = model.gal_types
+    with pytest.raises(HalotoolsError) as err:
+        model._infer_gal_type_and_feature_name(
+            model_dictionary_key, gal_type_list,
+            known_feature_name="The Dog is in the House".lower())
+    substr = "the ``gal_type`` and ``feature_name`` substrings, separated by a '_', in that order"
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception7():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+
+    model_dictionary_key = 'Air Bud_: The Dog is in the House'.lower()
+    gal_type_list = ['Air', 'Bud']
+    with pytest.raises(HalotoolsError) as err:
+        model._infer_gal_type_and_feature_name(
+            model_dictionary_key, gal_type_list)
+    substr = "The ``_infer_gal_type_and_feature_name`` method was unable to identify"
+    assert substr in err.value.args[0]
+
+
+def test_raises_appropriate_exception8():
+    """
+    """
+    model_dict_no_redshift = zheng07_model_dictionary()
+    model = HodModelFactory(**model_dict_no_redshift)
+
+    for i, component_model in enumerate(model.model_dictionary.values()):
+        component_model.redshift = i
+
+    with pytest.raises(HalotoolsError) as err:
+        model.set_model_redshift()
+    substr = "Inconsistency between the redshifts of the component models"
+    assert substr in err.value.args[0]
