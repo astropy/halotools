@@ -219,3 +219,13 @@ class TestHaloTableCache(TestCase):
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
+
+
+def test_matching_log_entry_generator():
+    cache = HaloTableCache()
+    with pytest.raises(KeyError) as err:
+        __ = list(cache.matching_log_entry_generator(Air='Bud'))
+    substr = "The only acceptable keyword arguments to matching_log_entry_generator "
+    assert substr in err.value.args[0]
+
+
