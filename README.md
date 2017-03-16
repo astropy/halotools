@@ -42,7 +42,7 @@ halocat = CachedHaloCatalog(simname='bolshoi', redshift=0, halo_finder='rockstar
 # populate the catalog with the model
 model.populate_mock(halocat)
 ```
-After calling *populate_mock*, your model will have a *mock* attribute storing your synthetic galaxy population. All Halotools models have a populate_mock method that works in this way, regardless of the features of the model. There are no restrictions on the simulation or halo-finder with which you can use the populate_mock method.
+After calling *populate_mock*, your model will have a *mock* attribute storing your synthetic galaxy population. All Halotools models have a *populate_mock* method that works in this way, regardless of the features of the model. There are no restrictions on the simulation or halo-finder with which you can use the populate_mock method.
 
 ### Creating alternate mocks
 
@@ -79,7 +79,7 @@ Halotools provides end-to-end support for downloading simulation data, reducing 
 from halotools import sim_manager
 ```
 
-The *sim_manager* package comes with a memory-efficient *TabularAsciiReader* designed to handle the very large file sizes that are typical of contemporary cosmological simulations. There are 20 halo catalogs available for download from the Halotools website using the *halotools/scripts/download_additional_halocat.py* script, including simulations run with different volumes, resolutions and cosmologies, and also catalogs identified using different halo-finders and at different redshift. Any simulation you store in cache can be loaded into memory in the same way, and all such catalogs have a *halo_table* attribute storing the actual data.
+The *sim_manager* package comes with a memory-efficient *TabularAsciiReader* designed to handle the very large file sizes that are typical of contemporary cosmological simulations. There are 20 halo catalogs available for download from the Halotools website using the `download_additional_halocat script`, including simulations run with different volumes, resolutions and cosmologies, and also catalogs identified using different halo-finders and at different redshift. Any simulation you store in cache can be loaded into memory in the same way, and all such catalogs have a *halo_table* attribute storing the actual data.
 
 ```
 from halotools.sim_manager import CachedHaloCatalog
