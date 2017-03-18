@@ -66,11 +66,14 @@ def test_convenience_functions():
     assert nd > 0
     fsat = model.mock.satellite_fraction
     assert fsat < 1
-    xi = model.mock.compute_galaxy_matter_cross_clustering(
-        gal_type='centrals', include_complement=True, num_iterations=1)
-    assert np.shape(xi)[0] == 3
-    gn = model.mock.compute_fof_group_ids()
-    assert len(gn) == len(model.mock.galaxy_table)
+
+    # Avoid running this test during CI due to memory intensiveness
+    if APH_MACHINE:
+        xi = model.mock.compute_galaxy_matter_cross_clustering(
+            gal_type='centrals', include_complement=True, num_iterations=1)
+        assert np.shape(xi)[0] == 3
+        gn = model.mock.compute_fof_group_ids()
+        assert len(gn) == len(model.mock.galaxy_table)
 
 
 @pytest.mark.slow

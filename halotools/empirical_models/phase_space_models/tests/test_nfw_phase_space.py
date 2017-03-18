@@ -382,7 +382,7 @@ class TestNFWPhaseSpace(TestCase):
         """ Regression test for https://github.com/astropy/halotools/issues/672.
         """
         nfw = NFWPhaseSpace()
-        satellites = nfw.mc_generate_nfw_phase_space_points(seed=43)
+        satellites = nfw.mc_generate_nfw_phase_space_points(seed=43, Ngals=100)
         assert np.any(satellites['vx'] != satellites['vy'])
 
     def tearDown(self):
