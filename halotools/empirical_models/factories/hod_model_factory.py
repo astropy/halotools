@@ -811,13 +811,17 @@ class HodModelFactory(ModelFactory):
     def build_prof_param_keys(self):
         """
         """
-        prof_param_keys = []
+        halo_prof_param_keys = []
+        gal_prof_param_keys = []
 
         for component_model in list(self.model_dictionary.values()):
-            if hasattr(component_model, 'prof_param_keys'):
-                prof_param_keys.extend(component_model.prof_param_keys)
+            if hasattr(component_model, 'halo_prof_param_keys'):
+                halo_prof_param_keys.extend(component_model.halo_prof_param_keys)
+            if hasattr(component_model, 'gal_prof_param_keys'):
+                gal_prof_param_keys.extend(component_model.gal_prof_param_keys)
 
-        self.prof_param_keys = list(set(prof_param_keys))
+        self.halo_prof_param_keys = list(set(halo_prof_param_keys))
+        self.gal_prof_param_keys = list(set(gal_prof_param_keys))
 
     def build_publication_list(self):
         """
