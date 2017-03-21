@@ -1,0 +1,2 @@
+from .test_nfw_profile import analytic_nfw_density_outer_shell_normalization
+from .test_nfw_profile import monte_carlo_density_outer_shell_normalization
