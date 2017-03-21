@@ -57,11 +57,6 @@ class UserSuppliedPtclCatalog(object):
             At a minimum, there must be columns ``x``, ``y`` and ``z``.
             See Examples section for further notes.
 
-        Notes
-        -------
-        This class is tested by
-        `~halotools.sim_manager.tests.test_user_supplied_halo_catalog.TestUserSuppliedPtclCatalog`.
-
         Examples
         ----------
         Here is an example using dummy data to show how to create a new `UserSuppliedPtclCatalog`
@@ -145,12 +140,12 @@ class UserSuppliedPtclCatalog(object):
         self.ptcl_table = Table(ptcl_table_dict)
 
         self._test_metadata_dict(**metadata_dict)
-        
+
         # make Lbox a 3-vector
         _Lbox = metadata_dict.pop('Lbox')
         metadata_dict['Lbox'] = np.empty(3)
         metadata_dict['Lbox'][:] = _Lbox
-        
+
         for key, value in metadata_dict.items():
             setattr(self, key, value)
 
@@ -187,7 +182,7 @@ class UserSuppliedPtclCatalog(object):
         return ptcl_table_dict, metadata_dict
 
     def _test_metadata_dict(self, **metadata_dict):
-        
+
         try:
             assert 'Lbox' in metadata_dict
             assert custom_len(metadata_dict['Lbox']) in [1,3]
@@ -195,7 +190,7 @@ class UserSuppliedPtclCatalog(object):
             msg = ("\nThe UserSuppliedPtclCatalog requires keyword argument "
                    "``Lbox``, storing either a scalar or 3-vector.\n")
             raise HalotoolsError(msg)
-                
+
         try:
             assert 'particle_mass' in metadata_dict
             assert custom_len(metadata_dict['particle_mass']) == 1
@@ -210,7 +205,7 @@ class UserSuppliedPtclCatalog(object):
         Lbox = np.empty(3)
         Lbox[:] = metadata_dict['Lbox']
         assert (Lbox > 0).all(), "``Lbox`` must be positive"
-    
+
         try:
             x, y, z = (
                 self.ptcl_table['x'],
