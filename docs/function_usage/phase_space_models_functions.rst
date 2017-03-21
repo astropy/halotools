@@ -24,7 +24,6 @@ NFW Profile Models
 
 	NFWProfile
 	NFWPhaseSpace
-	ConcMass
 
 Subhalo-based Profiles
 ----------------------

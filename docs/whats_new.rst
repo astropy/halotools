@@ -48,6 +48,14 @@ The first model describes an HOD fit to z=0 SDSS clustering and lensing of stell
 samples, the second model additionally predicts whether each model galaxy is quiescent or star-forming. See :ref:`zu_mandelbaum15_composite_model` and :ref:`zu_mandelbaum16_composite_model` tutorials on these models.
 
 
+.. _biased_nfw_phase_space_v05:
+
+Satellite profiles with biased values
+-------------------------------------
+
+The `BiasedNFWPhaseSpace` class provides modeling for the distribution of satellite galaxies orbiting in their host halos, where the NFW concentration governing the satellites is allowed to differ from host halo concentration. Galaxy concentration bias is permitted to vary as a function of mass with `BiasedNFWPhaseSpace`, while the `SFRBiasedNFWPhaseSpace` class permits dependence of galaxy concentration on both host mass and whether or not the model galaxy is quiescent.
+
+
 New Mock Observations
 ======================
 
