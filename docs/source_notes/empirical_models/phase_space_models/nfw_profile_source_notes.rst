@@ -33,25 +33,23 @@ Class structure of the `~halotools.empirical_models.NFWPhaseSpace` model
 ==========================================================================================================
 
 The `~halotools.empirical_models.NFWPhaseSpace` model is a container class
-for three independently-defined sets of behaviors:
+for two independently-defined sets of behaviors:
 
-	1. Analytical descriptions of the distribution of points within the halo (`~halotools.empirical_models.NFWProfile`)
-	2. Analytical descriptions of velocity dispersion of tracer particles orbiting within the halo (`~halotools.empirical_models.NFWJeansVelocity`)
-	3. Monte Carlo methods for generating random realizations of points in phase space (`~halotools.empirical_models.MonteCarloGalProf`)
+	1. Analytical descriptions of the spatial and velocity distribution of points within the halo
+	2. Monte Carlo methods for generating random realizations of points in phase space
 
-The `~halotools.empirical_models.NFWPhaseSpace` class does not itself model any of the above functionality; each of the above three sets of behaviors are actually modeled in the indicated class, and `~halotools.empirical_models.NFWPhaseSpace` uses multiple inheritance to compose these behaviors together into a composite model for the phase space distribution of points orbiting in virial equilibrium inside an NFW potential. In the three subsections below, we describe each of these three model components in turn.
+For the first set of behaviors, the spatial distributions are modeled by
+`~halotools.empirical_models.NFWProfile`, while the `~halotools.empirical_models.NFWPhaseSpace` sub-class
+controls the velocities. The second set of behaviors is controlled entirely by
+`~halotools.empirical_models.MonteCarloGalProf`, regardless of the details of the profile model.
+
 
 .. _nfw_spatial_profile_derivations:
 
 Modeling the NFW Spatial Profile
 ======================================
 
-The spatial profile of an NFW halo is modeled with the `~halotools.empirical_models.NFWProfile` class, which is itself a sub-class of:
-
-	1. `~halotools.empirical_models.AnalyticDensityProf`
-	2. `~halotools.empirical_models.ConcMass`
-
-The `~halotools.empirical_models.AnalyticDensityProf` class governs most of the analytical expressions related to the NFW spatial profile; the `~halotools.empirical_models.ConcMass` class controls the mapping between dark matter halos and the NFW concentration associated to them.
+The spatial profile of an NFW halo is modeled with the `~halotools.empirical_models.NFWProfile` class, which is itself a sub-class of `~halotools.empirical_models.AnalyticDensityProf`
 
 Most of the functionality of the `~halotools.empirical_models.NFWProfile`
 class derives from the behavior defined in the
@@ -202,8 +200,8 @@ Finally, we change integration variables :math:`\tilde{r}\rightarrow c\tilde{r}=
 
 	\Rightarrow \sigma^{2}_{r}(\tilde{r}) = V_{\rm vir}^{2}\frac{c^{2}\tilde{r}(1 + c\tilde{r})^{2}}{g(c)}\int_{c\tilde{r}}^{\infty}{\rm d}y\frac{g(y)}{y^{3}(1 + y)^{2}}
 
-Defining the *dimensionless radial velocity dispersion* :math:`\tilde{\sigma}_{r}\equiv\sigma_{r}/V_{\rm vir}`, the above equation is the exact expression used in the `~halotools.empirical_models.NFWJeansVelocity.dimensionless_radial_velocity_dispersion` method of the
-`~halotools.empirical_models.NFWJeansVelocity` class, which is where the velocity profile behavior of the `~halotools.empirical_models.NFWPhaseSpace` class is defined. The above expression is also the same expression appearing in Eq. 24 of More et al. (2008), `arXiv:0807.4529 <http://arxiv.org/abs/0807.4529/>`_, with the only differences being of notation: :math:`g(c) \leftrightarrow \mu(c)` and :math:`c\tilde{r} \leftrightarrow r/r_{\rm s}`.
+Defining the *dimensionless radial velocity dispersion* :math:`\tilde{\sigma}_{r}\equiv\sigma_{r}/V_{\rm vir}`, the above equation is the exact expression used in the `~halotools.empirical_models.NFWPhaseSpace.dimensionless_radial_velocity_dispersion` method of the
+`~halotools.empirical_models.NFWPhaseSpace` class. The above expression is also the same expression appearing in Eq. 24 of More et al. (2008), `arXiv:0807.4529 <http://arxiv.org/abs/0807.4529/>`_, with the only differences being of notation: :math:`g(c) \leftrightarrow \mu(c)` and :math:`c\tilde{r} \leftrightarrow r/r_{\rm s}`.
 
 
 .. _nfw_monte_carlo_derivations:
@@ -242,7 +240,7 @@ Making mocks with NFWPhaseSpace satellites
 
 There are a small number of boilerplate lines of code that must go into the constructor of any class in order for the class instance to be integrated into the factory design pattern of Halotools composite models. In this final section of the tutorial, we will look closely at the `~NFWPhaseSpace` constructor to see how the analytical functions and Monte Carlo methods described above get incorporated into the Halotools framework.
 
-As `~NFWPhaseSpace` is primarily a container class for externally-defined behavior, the primary task of its constructor is to call the constructors of its super-classes. There are three super-classes whose behavior is being composed, `~NFWProfile`, `~NFWJeansVelocity` and `~MonteCarloGalProf`, whose roles we will now describe in turn.
+As `~NFWPhaseSpace` is primarily a container class for externally-defined behavior, the primary task of its constructor is to call the constructors of its super-classes. There are two super-classes whose behavior is being composed, `~NFWProfile` and `~MonteCarloGalProf`, whose roles we will now describe in turn.
 
 .. _nfw_profile_class_constructor:
 
@@ -251,19 +249,23 @@ Constructor of the `~NFWProfile` class
 
 The `~NFWProfile` class is a sub-class of `~AnalyticDensityProf`. Calling the constructor of this super-class is the first thing the `~NFWProfile` constructor does. See the :ref:`analytic_density_prof_constructor` section for what this accomplishes.
 
-The `~NFWProfile` class is also a sub-class of `~ConcMass`. Calling the constructor of `~ConcMass` is the next thing done by the `~NFWProfile` constructor. Any NFW profile is specified entirely by the mass and concentration of the halo, and there exist many different calibrated models for the mapping between halo mass and halo concentration. The `~ConcMass` class is responsible for providing access to such models.
+Any NFW profile is specified entirely by mass and concentration, and there exist many different calibrated models for the mapping between halo mass and halo concentration. The ``conc_mass_model`` keyword argument allows you to control the behavior of this relation. This keyword allows you to select between different nicknames for conc-mass relations in Halotools, or alternatively you can pass in any callable function that accepts a ``table`` keyword argument and returns an array of floats the same length as the `~astropy.table.Table` object bound to the keyword.
 
-When using the `~NFWProfile` class in stand-alone fashion, all the analytical functions bound to the instance require that the halo concentration be supplied as an independent argument, and so the behavior inherited by the `~ConcMass` class is irrelevant in such cases. However, when the `~NFWProfile` class is used as a component model in the mock-making framework, the mapping between a halo catalog and the halo concentration must be provided. For such a use-case, the `~ConcMass` class provides the user with the ``direct_from_halo_catalog`` model option to simply use the concentration in the halo_table itself; the user also has the option to instead choose an analytical model connecting halo concentration to the halos in the halo_table. See the docstring of `~ConcMass` for further details about the available options.
+Below we show a simple example of how to use a custom concentration-mass relation with `~NFWPhaseSpace`:
 
-As described in the :ref:`prof_param_keys_mechanism`, one of the boilerplate standardizations of halo profile models is that all sub-classes of the `~profile_models.AnalyticalDensityProf` class must have a bound method with the same name as every element in the ``prof_param_keys`` list of strings bound to the instance. In the case of the `~NFWProfile`, there is only a single profile parameter: ``conc_NFWmodel``. Accordingly, there is a `NFWProfile.conc_NFWmodel` method; the behavior of this method derives entirely from the `ConcMass.compute_concentration` method.
+.. code:: python
+
+	def custom_conc_mass(table):
+		mass = table['halo_mvir']
+		return np.zeros_like(mass) + 5.
+
+	nfw_model = NFWPhaseSpace(conc_mass_model=custom_conc_mass)
 
 
-.. _nfw_jeans_velocity_class_constructor:
+When using the `~NFWProfile` class in stand-alone fashion, all the analytical functions bound to the instance require that the halo concentration be supplied as an independent argument, and so the behavior inherited by the ``conc_mass_model`` keyword argument is irrelevant in such cases. However, when the `~NFWProfile` class is used as a component model in the mock-making framework, the mapping between a halo catalog and the halo concentration must be provided. For such a use-case, the ``conc_mass_model`` keyword argument provides the user with the ``direct_from_halo_catalog`` model option to simply use the concentration in the halo_table itself.
 
-Constructor of the `~NFWJeansVelocity` class
-------------------------------------------------
+As described in the :ref:`prof_param_keys_mechanism`, one of the boilerplate standardizations of halo profile models is that all sub-classes of the `~profile_models.AnalyticalDensityProf` class must have a bound method with the same name as every element in the ``prof_param_keys`` list of strings bound to the instance. In the case of the `~NFWProfile`, there is only a single profile parameter: ``conc_NFWmodel``. Accordingly, there is a `NFWProfile.conc_NFWmodel` method; the behavior of this method derives entirely from the model provided by the ``conc_mass_model`` keyword argument.
 
-This constructor currently has no functionality whatsoever. It is currently only acting as a placeholder for potential future options.
 
 .. _monte_carlo_galprof_class_constructor:
 

@@ -2,7 +2,6 @@
 Module expressing various default settings of the empirical modeling sub-package.
 
 """
-
 import numpy as np
 
 __all__ = ['get_halo_boundary_key', 'get_halo_mass_key']
@@ -81,11 +80,16 @@ def get_halo_mass_key(mdef):
     """
     return 'halo_m'+mdef
 
+
 # Number of bins to use in the lookup table attached to the NFWProfile.
 # Used primarily by HODMockFactory.
-min_permitted_conc = 1
-max_permitted_conc = 30.0
-default_high_prec_dconc = 0.025
+
+min_permitted_conc = 2.0
+max_permitted_conc = 20.0
+
+default_conc_gal_bias_bins = np.linspace(0.1, 10, 10)
+default_conc_gal_bias_bins = np.insert(default_conc_gal_bias_bins,
+    np.searchsorted(default_conc_gal_bias_bins, 1), 1)
 
 Npts_radius_table = 101
 default_lograd_min = -3

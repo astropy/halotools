@@ -19,9 +19,13 @@
 
 - Added Zu & Mandelbaum 2015 and Zu & Mandelbaum 2016 HOD models
 
-- Modified internals of `mock_observables.delta_sigma` function, and included new `mock_observables.delta_sigma_from_precomputed` function to compute the results from a set of pre-computed pairs
+- Modified internals of `mock_observables.delta_sigma` function, including an API change by removing the ``pi_max`` argument. Additionally included new `mock_observables.delta_sigma_from_precomputed` function to compute the results from a set of pre-computed pairs. See https://github.com/astropy/halotools/pull/696.
 
 - Fixed factor of 2 error in tpcf_multipole, resolving https://github.com/astropy/halotools/issues/651
+
+- Complete refactoring of the halotools/empirical_models/phase_space_models. No changes to either the API or behavior of any associated classes or functions.
+
+- Addition of two new classes `halotools.empirical_models.BiasedNFWPhaseSpace` and `halotools.empirical_models.SFRBiasedNFWPhaseSpace` for NFW satellites with biased concentrations and Jeans solutions.
 
 0.4 (2016-08-11)
 ----------------

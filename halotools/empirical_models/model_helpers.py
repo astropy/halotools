@@ -259,6 +259,8 @@ def call_func_table(func_table, abscissa, func_indices):
 
     """
     func_table = np.atleast_1d(func_table)
+    shape_error_msg = "Input ``func_table must be one-dimensional, but has shape = {0}"
+    assert len(np.shape(func_table)) == 1, shape_error_msg.format(func_table.shape)
     abscissa = np.atleast_1d(abscissa)
     func_indices = np.atleast_1d(func_indices)
 
@@ -266,7 +268,7 @@ def call_func_table(func_table, abscissa, func_indices):
     func_ranges = list(np.searchsorted(func_indices[func_argsort], list(range(len(func_table)))))
     func_ranges.append(None)
     out = np.zeros_like(abscissa)
-    for f, start, end in zip(func_table, func_ranges, func_ranges[1:]):
+    for f, start, end in zip(func_table, func_ranges[:-1], func_ranges[1:]):
         ix = func_argsort[start:end]
         out[ix] = f(abscissa[ix])
     return out
@@ -369,9 +371,6 @@ def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, def
         Whatever the default value for the attribute should be if ``keyword_argument`` does not
         appear in kwargs nor is it already bound to the ``obj``.
 
-    Notes
-    ------
-    See the constructor of `~halotools.empirical_models.conc_mass_models.ConcMass` for a usage example.
     """
     if hasattr(obj, keyword_argument):
         if keyword_argument in constructor_kwargs:

@@ -456,7 +456,9 @@ class HodMockFactory(MockFactory):
                 dtype=self.halo_table[halocatkey].dtype)
 
         # Separately allocate memory for the galaxy profile parameters
-        for galcatkey in self.model.prof_param_keys:
+        for galcatkey in self.model.halo_prof_param_keys:
+            self.galaxy_table[galcatkey] = 0.
+        for galcatkey in self.model.gal_prof_param_keys:
             self.galaxy_table[galcatkey] = 0.
 
         self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)

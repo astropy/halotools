@@ -79,3 +79,13 @@ def test_modulate_with_cenocc2():
     model.param_dict['logMmin'] *= 1.5
     ncen2 = model.mean_occupation_satellites(prim_haloprop=test_mass)
     assert ncen1 != ncen2
+
+
+def test_host_centric_distance():
+        model = PrebuiltHodModelFactory('zheng07')
+        halocat = FakeSim(seed=43)
+        model.populate_mock(halocat, seed=43)
+
+        msg = "host_centric_distance key was never mapped during mock population"
+        assert np.any(model.mock.galaxy_table['host_centric_distance'] > 0), msg
+

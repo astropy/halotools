@@ -57,11 +57,6 @@ class UserSuppliedHaloCatalog(object):
             randomly selected from the snapshot. At a minimum, the table must have
             columns ``x``, ``y`` and ``z``. Default is None.
 
-        Notes
-        -------
-        This class is tested by
-        `~halotools.sim_manager.tests.test_user_supplied_halo_catalog.TestUserSuppliedHaloCatalog`.
-
         Examples
         ----------
         Here is an example using dummy data to show how to create a new `UserSuppliedHaloCatalog`
@@ -148,12 +143,12 @@ class UserSuppliedHaloCatalog(object):
         self.halo_table = Table(halo_table_dict)
 
         self._test_metadata_dict(**metadata_dict)
-        
+
         # make Lbox a 3-vector
         _Lbox = metadata_dict.pop('Lbox')
         metadata_dict['Lbox'] = np.empty(3)
         metadata_dict['Lbox'][:] = _Lbox
-        
+
         for key, value in metadata_dict.items():
             setattr(self, key, value)
 
@@ -225,7 +220,7 @@ class UserSuppliedHaloCatalog(object):
             msg = ("\nThe UserSuppliedPtclCatalog requires keyword argument "
                    "``Lbox``, storing either a scalar or 3-vector.\n")
             raise HalotoolsError(msg)
-            
+
         try:
             assert 'particle_mass' in metadata_dict
             assert custom_len(metadata_dict['particle_mass']) == 1
