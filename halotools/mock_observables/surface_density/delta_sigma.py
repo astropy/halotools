@@ -27,6 +27,11 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     Calculate :math:`\Delta\Sigma(r_p)`, the galaxy-galaxy lensing signal
     as a function of projected distance.
 
+    The `delta_sigma` function calculates :math:`\Delta\Sigma(r_p)` by calculating
+    the excess surface density of particles in cylinders surrounding the input galaxies.
+    The input particles should be a random downsampling of particles in the
+    same simulation snapshot as the model galaxies.
+
     By using the ``particle_masses`` argument, the function works equally well
     with DM-only simulations as with hydro simulations that include
     particles of variable mass.
@@ -39,7 +44,7 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     ----------
     galaxies : array_like
 
-        Numpy array of shape (Ngal, 3) containing 3-d positions of galaxies.
+        Numpy array of shape (num_gal, 3) containing 3-d positions of galaxies.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
         See the :ref:`mock_obs_pos_formatting` documentation page for
@@ -47,14 +52,18 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
         format accepted by the ``galaxies`` and ``particles`` arguments.
 
     particles : array_like
-        Numpy array of shape (Npart, 3) containing 3-d positions of particles.
+        Numpy array of shape (num_ptcl, 3) containing 3-d positions of particles.
 
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    particle_masses : array_like
-        Float or array of shape (Npart, ) storing the mass of each particle
-        in units of Msun with h=1 units. If every particle has the same mass
-        (i.e., if your simulation is DM-only), you can pass in a single float.
+    particle_masses : float or ndarray
+        Float or array storing the mass of each particle in units of Msun with h=1 units.
+
+        If passing in an ndarray, must be of shape (num_ptcl, ),
+        one array element for every particle.
+
+        If passing in a single float, it will be assumed that every particle
+        has the same mass (as is the case in a typical DM-only simulation).
 
     downsampling_factor : float
         Factor by which the particles have been randomly downsampled.
@@ -64,7 +73,7 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
         from Halotools-provided catalogs.
 
     rp_bins : array_like
-        Numpy array of shape (num_rbins+1, ) of projected radial boundaries
+        Numpy array of shape (num_rbins, ) of projected radial boundaries
         defining the bins in which the result is calculated.
 
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
@@ -73,7 +82,8 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-        Length units are assumed to be in Mpc/h, here and throughout Halotools.
+
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -98,6 +108,10 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     Returns
     -------
+    rp_mids : array_like
+        Numpy array of shape (num_rbins-1, ) storing the projected radii at which
+        `Delta_Sigma` has been evaluated.
+
     Delta_Sigma : array_like
         Numpy array of shape (num_rbins-1, ) storing :math:`\Delta\Sigma(r_p)`
         in comoving units of :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1.
@@ -160,7 +174,7 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     >>> rp_bins = np.logspace(-1, 1, 10)
     >>> period = model.mock.Lbox
-    >>> rp, ds = delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
+    >>> rp_mids, ds = delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
 
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
     the `delta_sigma` functions are in *comoving* units of
@@ -232,7 +246,7 @@ def delta_sigma_from_precomputed_pairs(galaxies, mass_enclosed_per_galaxy,
     ----------
     galaxies : array_like
 
-        Numpy array of shape (Ngal, 3) containing 3-d positions of galaxies.
+        Numpy array of shape (num_gal, 3) containing 3-d positions of galaxies.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
         See the :ref:`mock_obs_pos_formatting` documentation page for
@@ -240,7 +254,7 @@ def delta_sigma_from_precomputed_pairs(galaxies, mass_enclosed_per_galaxy,
         format accepted by the ``galaxies`` and ``particles`` arguments.
 
     mass_enclosed_per_galaxy : array_like
-        Numpy array of shape (Ngal, num_rp_bins+1) storing the mass enclosed inside
+        Numpy array of shape (num_gal, num_rp_bins+1) storing the mass enclosed inside
         each of the cylinders defined by the input ``rp_bins``.
 
         The ``mass_enclosed_per_galaxy`` argument can be calculated using the
