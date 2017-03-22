@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from multiprocessing import cpu_count
 import warnings
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
@@ -48,7 +47,7 @@ def test_tpcf_auto():
     result = tpcf(sample1, rbins, sample2=None,
                   randoms=None, period=period,
                   max_sample_size=int(1e4), estimator='Natural',
-                  approx_cell1_size=[rmax, rmax, rmax], num_threads='max')
+                  approx_cell1_size=[rmax, rmax, rmax], num_threads=1)
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 
@@ -383,7 +382,7 @@ def test_RR_precomputed_natural_estimator_auto():
     # functions called by tpcf
     _sample1_is_sample2 = True
     PBCs = True
-    num_threads = cpu_count()
+    num_threads = 1
     do_DD, do_DR, do_RR = True, True, True
     do_auto, do_cross = True, False
 
@@ -466,7 +465,7 @@ def test_RR_precomputed_Landy_Szalay_estimator_auto():
     # functions called by tpcf
     _sample1_is_sample2 = True
     PBCs = True
-    num_threads = cpu_count()
+    num_threads = 1
     do_DD, do_DR, do_RR = True, True, True
     do_auto, do_cross = True, False
 

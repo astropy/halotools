@@ -82,7 +82,7 @@ def test_marked_tpcf_cross1():
 
     result = marked_tpcf(sample1, rbins, sample2=sample2,
         marks1=weights1, marks2=weights2,
-        period=period, num_threads='max', weight_func_id=weight_func_id)
+        period=period, num_threads=1, weight_func_id=weight_func_id)
 
 
 def test_marked_tpcf_cross_consistency():
