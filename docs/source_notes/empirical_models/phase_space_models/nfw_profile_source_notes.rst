@@ -221,7 +221,7 @@ method can be used to create an Astropy `~astropy.table.Table` storing a collect
 
 >>> from halotools.empirical_models import NFWPhaseSpace
 >>> nfw = NFWPhaseSpace()
->>> data = nfw.mc_generate_nfw_phase_space_points(Ngals = 100, mass = 1e13, conc = 10)
+>>> data = nfw.mc_generate_nfw_phase_space_points(Ngals = 100, mass = 1e13, conc = 10)  # doctest: +SKIP
 
 In the source code, the generation of these points happens in two steps. First, *x, y, z* points are drawn using the `~NFWPhaseSpace.mc_halo_centric_pos` method defined in the `~MonteCarloGalProf` orthogonal mix-in class. Following the same methodology described in :ref:`monte_carlo_nfw_spatial_profile`, the `~NFWPhaseSpace.mc_halo_centric_pos` method uses inverse transform sampling together with the `~NFWPhaseSpace.cumulative_mass_PDF` function to draw random realizations of dimensionless NFW profile radii; these dimensionless radii are then scaled according to the halo mass and radius definition selected by the keyword arguments passed to the `~NFWPhaseSpace` constructor. See the :ref:`monte_carlo_galprof_spatial_positions` section of the :ref:`monte_carlo_galprof_mixin_tutorial` for a detailed explanation of how this method works.
 
