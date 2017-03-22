@@ -11,7 +11,6 @@ from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_ke
 from ...monte_carlo_helpers import MonteCarloGalProf
 
 from ..... import model_defaults
-from ......mock_observables import relative_positions_and_velocities
 
 
 __author__ = ['Andrew Hearin']
@@ -918,9 +917,9 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             seed += 1
         vz = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c, seed=seed)
 
-        xrel, vxrel = relative_positions_and_velocities(x, 0, v1=vx, v2=0)
-        yrel, vyrel = relative_positions_and_velocities(y, 0, v1=vy, v2=0)
-        zrel, vzrel = relative_positions_and_velocities(z, 0, v1=vz, v2=0)
+        xrel, vxrel = _relative_positions_and_velocities(x, 0, v1=vx, v2=0)
+        yrel, vyrel = _relative_positions_and_velocities(y, 0, v1=vy, v2=0)
+        zrel, vzrel = _relative_positions_and_velocities(z, 0, v1=vz, v2=0)
 
         vrad = (xrel*vxrel + yrel*vyrel + zrel*vzrel)/r
 
@@ -929,3 +928,48 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             'radial_position': r, 'radial_velocity': vrad})
 
         return t
+
+
+def _sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=False):
+    x1 = np.atleast_1d(x1)
+    x2 = np.atleast_1d(x2)
+    result = np.sign(x1 - x2)
+
+    if period is not None:
+        try:
+            assert np.all(x1 >= 0)
+            assert np.all(x2 >= 0)
+            assert np.all(x1 < period)
+            assert np.all(x2 < period)
+        except AssertionError:
+            msg = "If period is not None, all values of x and y must be between [0, period)"
+            raise ValueError(msg)
+
+        d = np.abs(x1-x2)
+        pbc_correction = np.sign(period/2. - d)
+        result = pbc_correction*result
+
+    if equality_fill_val != 0:
+        result = np.where(result == 0, equality_fill_val, result)
+
+    if return_pbc_correction:
+        return result, pbc_correction
+    else:
+        return result
+
+
+def _relative_positions_and_velocities(x1, x2, period=None, **kwargs):
+    s = _sign_pbc(x1, x2, period=period, equality_fill_val=1.)
+    absd = np.abs(x1 - x2)
+    if period is None:
+        xrel = s*absd
+    else:
+        xrel = s*np.where(absd > period/2., period - absd, absd)
+
+    try:
+        v1 = kwargs['v1']
+        v2 = kwargs['v2']
+        return xrel, s*(v1-v2)
+    except KeyError:
+        return xrel
+
