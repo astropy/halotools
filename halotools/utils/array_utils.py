@@ -119,6 +119,7 @@ def randomly_downsample_data(array, num_downsample, seed=None):
     >>> downsampled_x = randomly_downsample_data(x, desired_sample_size)
 
     """
+    num_downsample = int(num_downsample)
 
     input_array_length = custom_len(array)
     if num_downsample > input_array_length:
