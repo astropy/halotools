@@ -113,7 +113,8 @@ class TestPtclTableCache(TestCase):
                                            'bad_table.hdf5')
             self.bad_table.write(bad_table_fname, path='data')
 
-            self.bad_log_entry = PtclTableCacheLogEntry('1', '2', '3', '4')
+            tmp_dummy_fname = os.path.join(self.dummy_cache_baseloc, 'tmp_dummy_fname')
+            self.bad_log_entry = PtclTableCacheLogEntry('1', '2', '3', tmp_dummy_fname)
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_determine_log_entry_from_fname1(self):
