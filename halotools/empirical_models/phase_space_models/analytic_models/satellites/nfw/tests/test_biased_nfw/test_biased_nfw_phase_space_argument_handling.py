@@ -34,7 +34,7 @@ def test_mc_radial_velocity_float_vs_array_args1():
 
     mc_vr_from_arr = nfw.mc_radial_velocity(scaled_radius_array, mass, concarr, galbiasarr, seed=43)
     mc_vr_from_float = nfw.mc_radial_velocity(scaled_radius, mass, conc, galbias, seed=43)
-    assert mc_vr_from_arr.shape == mc_vr_from_float.shape
+    assert np.shape(mc_vr_from_arr) == np.shape(mc_vr_from_float)
     assert np.allclose(mc_vr_from_arr, mc_vr_from_float)
 
 
