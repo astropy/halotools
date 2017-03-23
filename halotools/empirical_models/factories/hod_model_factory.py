@@ -734,7 +734,7 @@ class HodModelFactory(ModelFactory):
 
             if not hasattr(component_model, 'param_dict'):
                 component_model.param_dict = {}
-            intersection = set(self.param_dict) & set(component_model.param_dict)
+            intersection = set(self.param_dict.keys()) & set(component_model.param_dict.keys())
             if intersection != set():
                 for key in intersection:
                     if suppress_warning is False:
