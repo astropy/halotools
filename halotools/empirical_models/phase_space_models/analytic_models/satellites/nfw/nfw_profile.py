@@ -298,6 +298,7 @@ class NFWProfile(AnalyticDensityProf):
 
         See :ref:`nfw_cumulative_mass_pdf_derivation` for a derivation of this expression.
 
+
         Parameters
         -------------
         scaled_radius : array_like

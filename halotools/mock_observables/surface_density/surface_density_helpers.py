@@ -64,7 +64,7 @@ def log_interpolation_with_inner_zero_masking(onep_sig_in, rp_bins, rp_mids):
 
 
 def rho_matter_comoving_in_halotools_units(cosmology):
-    """ Calculate the comoving matter density in units of
+    r""" Calculate the comoving matter density in units of
     :math:`M_{\odot}/{\rm Mpc}^3` assuming :math:`h = 1`.
 
     Parameters

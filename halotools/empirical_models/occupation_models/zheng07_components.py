@@ -74,7 +74,7 @@ class Zheng07Cens(OccupationComponent):
         self.publications = ['arXiv:0408564', 'arXiv:0703457']
 
     def mean_occupation(self, **kwargs):
-        """ Expected number of central galaxies in a halo of mass halo_mass.
+        r""" Expected number of central galaxies in a halo of mass halo_mass.
         See Equation 2 of arXiv:0703457.
 
         Parameters
@@ -117,10 +117,10 @@ class Zheng07Cens(OccupationComponent):
         -----
         The `mean_occupation` method computes the following function:
 
-        :math:`\\langle N_{\\mathrm{cen}} \\rangle_{M} =
-        \\frac{1}{2}\\left( 1 +
-        \\mathrm{erf}\\left( \\frac{\\log_{10}M -
-        \\log_{10}M_{min}}{\\sigma_{\\log_{10}M}} \\right) \\right)`
+        :math:`\langle N_{\mathrm{cen}} \rangle_{M} =
+        \frac{1}{2}\left( 1 +
+        \mathrm{erf}\left( \frac{\log_{10}M -
+        \log_{10}M_{min}}{\sigma_{\log_{10}M}} \right) \right)`
 
         """
         # Retrieve the array storing the mass-like variable
@@ -206,11 +206,11 @@ class Zheng07Cens(OccupationComponent):
 
 
 class Zheng07Sats(OccupationComponent):
-    """ Power law model for the occupation statistics of satellite galaxies,
+    r""" Power law model for the occupation statistics of satellite galaxies,
     introduced in Kravtsov et al. 2004, arXiv:0308519. This implementation uses
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values.
 
-    :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`.
+    :math:`\langle N_{sat} \rangle_{M} = \left( \frac{M - M_{0}}{M_{1}} \right)^{\alpha}`.
 
     .. note::
 
@@ -224,7 +224,7 @@ class Zheng07Sats(OccupationComponent):
             threshold=model_defaults.default_luminosity_threshold,
             prim_haloprop_key=model_defaults.prim_haloprop_key,
             modulate_with_cenocc=False, cenocc_model=None, **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional
@@ -242,15 +242,15 @@ class Zheng07Sats(OccupationComponent):
             If set to True, the `Zheng07Sats.mean_occupation` method will
             be multiplied by the the first moment of the centrals:
 
-            :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\mathrm{cen}}\\rangle_{M}`
+            :math:`\langle N_{\mathrm{sat}}\rangle_{M}\Rightarrow\langle N_{\mathrm{sat}}\rangle_{M}\times\langle N_{\mathrm{cen}}\rangle_{M}`
 
             The ``cenocc_model`` keyword argument works together with
             the ``modulate_with_cenocc`` keyword argument to determine how
-            the :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` prefactor is calculated.
+            the :math:`\langle N_{\mathrm{cen}}\rangle_{M}` prefactor is calculated.
 
         cenocc_model : `OccupationComponent`, optional
             If the ``cenocc_model`` keyword argument is set to its default value
-            of None, then the :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` prefactor will be
+            of None, then the :math:`\langle N_{\mathrm{cen}}\rangle_{M}` prefactor will be
             calculated according to `Zheng07Cens.mean_occupation`.
             However, if an instance of the `OccupationComponent` class is instead
             passed in via the ``cenocc_model`` keyword,
@@ -289,7 +289,7 @@ class Zheng07Sats(OccupationComponent):
         Now ``sat_model1`` and ``sat_model2`` are identical in every respect,
         excepting only the following difference:
 
-        :math:`\\langle N_{\mathrm{sat}}\\rangle^{\mathrm{model 2}} = \\langle N_{\mathrm{cen}}\\rangle\\times\\langle N_{\mathrm{sat}}\\rangle^{\mathrm{model 1}}`
+        :math:`\langle N_{\mathrm{sat}}\rangle^{\mathrm{model 2}} = \langle N_{\mathrm{cen}}\rangle\times\langle N_{\mathrm{sat}}\rangle^{\mathrm{model 1}}`
 
         See also
         ----------
@@ -338,7 +338,7 @@ class Zheng07Sats(OccupationComponent):
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
     def mean_occupation(self, **kwargs):
-        """Expected number of satellite galaxies in a halo of mass logM.
+        r"""Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
         Parameters
@@ -358,11 +358,11 @@ class Zheng07Sats(OccupationComponent):
         mean_nsat : float or array
             Mean number of satellite galaxies in a host halo of the specified mass.
 
-        :math:`\\langle N_{\\mathrm{sat}} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha} \\langle N_{\\mathrm{cen}} \\rangle_{M}`
+        :math:`\langle N_{\mathrm{sat}} \rangle_{M} = \left( \frac{M - M_{0}}{M_{1}} \right)^{\alpha} \langle N_{\mathrm{cen}} \rangle_{M}`
 
         or
 
-        :math:`\\langle N_{\\mathrm{sat}} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`,
+        :math:`\langle N_{\mathrm{sat}} \rangle_{M} = \left( \frac{M - M_{0}}{M_{1}} \right)^{\alpha}`,
 
         depending on whether a central model was passed to the constructor.
 

@@ -197,7 +197,7 @@ class Leauthaud11Sats(OccupationComponent):
             redshift=sim_manager.sim_defaults.default_redshift,
             modulate_with_cenocc=True, cenocc_model=None,
             **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional
@@ -219,7 +219,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         cenocc_model : `OccupationComponent`, optional
             If the ``cenocc_model`` keyword argument is set to its default value
-            of None, then the :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` prefactor will be
+            of None, then the :math:`\langle N_{\mathrm{cen}}\rangle_{M}` prefactor will be
             calculated according to `leauthaud11Cens.mean_occupation`.
             However, if an instance of the `OccupationComponent` class is instead
             passed in via the ``cenocc_model`` keyword,

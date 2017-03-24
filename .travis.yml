@@ -2,6 +2,7 @@ language: python
 
 python:
     - 3.5
+    - 3.6
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
@@ -32,59 +33,12 @@ env:
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
-        # Try all python versions with the latest numpy
-        - SETUP_CMD='test'
 
 matrix:
     include:
-        - python: 2.7
-          env: SETUP_CMD='egg_info'
-
-        # Do a coverage test in Python 2.
-        - python: 2.7
-          env: SETUP_CMD='test --coverage'
-
-        # Check for sphinx doc build warnings - we do this first because it
-        # may run for a long time
-        - python: 2.7
-          env: SETUP_CMD='build_sphinx -w'
-
-        # Python3.3 is a bit old, thus conda doesn't have all version dependencies including newer numpies
-        - python: 3.3
-          env: NUMPY_VERSION=1.9
-               CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
-
-        - python: 3.4
-          env: SETUP_CMD='egg_info'
-
-        - python: 3.4
-          env: NUMPY_VERSION=1.11
-               CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
-
-        # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development
-        - python: 3.5
+        - python: 3.6
           env: ASTROPY_VERSION=development
 
-        # Try older numpy version, 1.9 is tested above with py3.3
-        - python: 2.7
-          env: NUMPY_VERSION=1.10
-
-        # Try numpy pre-release version, this runs only when a pre-release
-        # is available on pypi.
-        - python: 3.5
-          env: NUMPY_VERSION=prerelease SETUP_CMD='test'
-
-        # try a version *without* h5py - we need this for readthedocs
-        - python: 2.7
-          env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
-
-    allow_failures:
-        # The build with numpy v1.11.1rc1 halts in the middle without
-        # showing any obvious reason, thus allowing it to fail for now.
-        - python: 3.5
-          env: NUMPY_VERSION=prerelease SETUP_CMD='test'
 
 before_install:
 
