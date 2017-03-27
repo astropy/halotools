@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the HOD-style composite model
 published in Zheng et al. (2007), arXiv:0703457.
 """
@@ -17,7 +17,7 @@ __all__ = ['zheng07_model_dictionary']
 def zheng07_model_dictionary(
         threshold=model_defaults.default_luminosity_threshold,
         redshift=sim_defaults.default_redshift, modulate_with_cenocc=False, **kwargs):
-    """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457.
+    r""" Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457.
 
     See :ref:`zheng07_composite_model` for a tutorial on this model.
 
@@ -52,9 +52,9 @@ def zheng07_model_dictionary(
         If set to True, the `Zheng07Sats.mean_occupation` method will
         be multiplied by the the first moment of the centrals:
 
-        :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\\mathrm{cen}}\\rangle_{M}`
+        :math:`\langle N_{\mathrm{sat}}\rangle_{M}\Rightarrow\langle N_{\mathrm{sat}}\rangle_{M}\times\langle N_{\mathrm{cen}}\rangle_{M}`
 
-        The :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` function is calculated
+        The :math:`\langle N_{\mathrm{cen}}\rangle_{M}` function is calculated
         according to `Zheng07Cens.mean_occupation`.
 
     Returns

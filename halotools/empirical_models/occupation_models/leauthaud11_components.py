@@ -1,4 +1,4 @@
-"""
+r"""
 This module contains occupation components used by the Leauthaud11 composite model.
 """
 
@@ -21,7 +21,7 @@ __all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
 
 
 class Leauthaud11Cens(OccupationComponent):
-    """ HOD-style model for any central galaxy occupation that derives from
+    r""" HOD-style model for any central galaxy occupation that derives from
     a stellar-to-halo-mass relation.
 
     .. note::
@@ -35,7 +35,7 @@ class Leauthaud11Cens(OccupationComponent):
     def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
             prim_haloprop_key=model_defaults.prim_haloprop_key,
             redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional
@@ -85,7 +85,7 @@ class Leauthaud11Cens(OccupationComponent):
         self.publications = list(set(self.publications))
 
     def get_published_parameters(self):
-        """ Return the values of ``self.param_dict`` according to
+        r""" Return the values of ``self.param_dict`` according to
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the
         lowest redshift bin.
 
@@ -100,7 +100,7 @@ class Leauthaud11Cens(OccupationComponent):
         return d
 
     def mean_occupation(self, **kwargs):
-        """ Expected number of central galaxies in a halo.
+        r""" Expected number of central galaxies in a halo.
         See Equation 8 of arXiv:1103.2077.
 
         Parameters
@@ -136,7 +136,7 @@ class Leauthaud11Cens(OccupationComponent):
         return mean_ncen
 
     def mean_stellar_mass(self, **kwargs):
-        """ Return the stellar mass of a central galaxy as a function
+        r""" Return the stellar mass of a central galaxy as a function
         of the input table.
 
         Parameters
@@ -161,7 +161,7 @@ class Leauthaud11Cens(OccupationComponent):
         return self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
 
     def mean_log_halo_mass(self, log_stellar_mass):
-        """ Return the base-10 logarithm of the halo mass of a central galaxy as a function
+        r""" Return the base-10 logarithm of the halo mass of a central galaxy as a function
         of the base-10 logarithm of the input stellar mass.
 
         Parameters
@@ -182,7 +182,7 @@ class Leauthaud11Cens(OccupationComponent):
 
 
 class Leauthaud11Sats(OccupationComponent):
-    """ HOD-style model for any satellite galaxy occupation that derives from
+    r""" HOD-style model for any satellite galaxy occupation that derives from
     a stellar-to-halo-mass relation.
 
     .. note::
@@ -197,7 +197,7 @@ class Leauthaud11Sats(OccupationComponent):
             redshift=sim_manager.sim_defaults.default_redshift,
             modulate_with_cenocc=True, cenocc_model=None,
             **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional
@@ -219,7 +219,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         cenocc_model : `OccupationComponent`, optional
             If the ``cenocc_model`` keyword argument is set to its default value
-            of None, then the :math:`\\langle N_{\mathrm{cen}}\\rangle_{M}` prefactor will be
+            of None, then the :math:`\langle N_{\mathrm{cen}}\rangle_{M}` prefactor will be
             calculated according to `leauthaud11Cens.mean_occupation`.
             However, if an instance of the `OccupationComponent` class is instead
             passed in via the ``cenocc_model`` keyword,
@@ -276,7 +276,7 @@ class Leauthaud11Sats(OccupationComponent):
         self.publications = self.central_occupation_model.publications
 
     def mean_occupation(self, **kwargs):
-        """ Expected number of satellite galaxies in a halo of mass halo_mass.
+        r""" Expected number of satellite galaxies in a halo of mass halo_mass.
         See Equation 12-14 of arXiv:1103.2077.
 
         Parameters
@@ -368,7 +368,7 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
     """
 
     def __init__(self, **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional
@@ -426,7 +426,7 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
     """
 
     def __init__(self, **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional

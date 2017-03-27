@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.empirical_models.BinaryGalpropModel` class
 used to map a binary-valued galaxy property to a halo catalog.
 """
@@ -21,7 +21,7 @@ __author__ = ('Andrew Hearin', )
 
 @six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(object):
-    """
+    r"""
     Container class for any component model of a binary-valued galaxy property.
 
     """
@@ -29,7 +29,7 @@ class BinaryGalpropModel(object):
     def __init__(self,
             prim_haloprop_key=model_defaults.default_binary_galprop_haloprop,
             **kwargs):
-        """
+        r"""
         Parameters
         ----------
         galprop_name : string, keyword argument
@@ -81,7 +81,7 @@ class BinaryGalpropModel(object):
         self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
     def _mc_galprop(self, seed=None, **kwargs):
-        """ Return a Monte Carlo realization of the galaxy property
+        r""" Return a Monte Carlo realization of the galaxy property
         based on draws from a nearest-integer distribution.
 
         Parameters
@@ -123,7 +123,7 @@ class BinaryGalpropModel(object):
 
 
 class BinaryGalpropInterpolModel(BinaryGalpropModel):
-    """
+    r"""
     Component model for any binary-valued galaxy property
     whose assignment is determined by interpolating between points on a grid.
 
@@ -140,7 +140,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     def __init__(self, galprop_abscissa, galprop_ordinates,
             logparam=True, interpol_method='spline', **kwargs):
-        """
+        r"""
         Parameters
         ----------
         galprop_name : array, keyword argument
@@ -184,8 +184,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         -----------
         Suppose we wish to construct a model for whether a central galaxy is
         star-forming or quiescent. We want to set the quiescent fraction to 1/3
-        for Milky Way-type centrals (:math:`M_{\\mathrm{vir}}=10^{12}M_{\odot}`),
-        and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`).
+        for Milky Way-type centrals (:math:`M_{\mathrm{vir}}=10^{12}M_{\odot}`),
+        and 90% for massive cluster centrals (:math:`M_{\mathrm{vir}}=10^{15}M_{\odot}`).
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
         >>> abscissa, ordinates = [12, 15], [1/3., 0.9]
@@ -206,7 +206,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         Here is another example of how you could use `BinaryGalpropInterpolModel`
         to construct a simple model for satellite morphology, where the early- vs. late-type
-        of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
+        of the satellite depends on :math:`V_{\mathrm{peak}}` value of the host halo
 
         >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_name='late_type', galprop_abscissa=abscissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
         >>> vmax_array = np.logspace(2, 3, num=100)
@@ -282,7 +282,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self.param_dict = {key: value for key, value in zip(self._ordinates_keys, self._ordinates)}
 
     def _mean_galprop_fraction(self, **kwargs):
-        """
+        r"""
         Expectation value of the galprop for galaxies living in the input halos.
 
         Parameters
