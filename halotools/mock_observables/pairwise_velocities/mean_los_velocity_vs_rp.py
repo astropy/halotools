@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.mean_los_velocity_vs_rp` function
 used to calculate the pairwise mean line-of-sight velocity
 as a function of projected distance between the pairs.
@@ -23,9 +23,9 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6),
         approx_cell1_size=None, approx_cell2_size=None, seed=None):
-    """
+    r"""
     Calculate the mean pairwise line-of-sight (LOS) velocity
-    as a function of projected separation, :math:`\\bar{v}_{z,12}(r_p)`.
+    as a function of projected separation, :math:`\bar{v}_{z,12}(r_p)`.
 
     Example calls to this function appear in the documentation below.
 
@@ -91,19 +91,19 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     -------
     vz_12 : numpy.array
         *len(rbins)-1* length array containing the mean pairwise LOS velocity,
-        :math:`\\bar{v}_{z12}(r)`, computed in each of the bins defined by ``rp_bins``.
+        :math:`\bar{v}_{z12}(r)`, computed in each of the bins defined by ``rp_bins``.
 
     Notes
     -----
     The pairwise LOS velocity, :math:`v_{z12}(r)`, is defined as:
 
     .. math::
-        v_{z12} = |\\vec{v}_{\\rm 1, pec} \\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
+        v_{z12} = |\vec{v}_{\rm 1, pec} \cdot \hat{z}-\vec{v}_{\rm 2, pec}\cdot\hat{z}|
 
-    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and
-    :math:`\\hat{z}` is the unit-z vector.
+    where :math:`\vec{v}_{\rm 1, pec}` is the peculiar velocity of object 1, and
+    :math:`\hat{z}` is the unit-z vector.
 
-    :math:`\\bar{v}_{z12}(r_p)` is the mean of this quantity in projected radial bins.
+    :math:`\bar{v}_{z12}(r_p)` is the mean of this quantity in projected radial bins.
 
     Pairs and radial velocities are calculated using
     `~halotools.mock_observables.pair_counters.velocity_marked_npairs_xy_z`.

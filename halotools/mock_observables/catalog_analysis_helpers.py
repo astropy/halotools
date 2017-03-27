@@ -1,4 +1,4 @@
-""" Common functions used when analyzing catalogs of galaxies/halos.
+r""" Common functions used when analyzing catalogs of galaxies/halos.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -15,7 +15,7 @@ __author__ = ['Andrew Hearin']
 
 
 def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
-    """
+    r"""
     Estimate the mean value of the property *y* as a function of *x*
     for an input sample of galaxies/halos,
     optionally returning an error estimate.
@@ -39,12 +39,12 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
 
     error_estimator : string, optional
         If set to ``error_on_mean``, function will also return an array storing
-        :math:`\\sigma_{y}/\\sqrt{N}`, where :math:`\\sigma_{y}` is the
+        :math:`\sigma_{y}/\sqrt{N}`, where :math:`\sigma_{y}` is the
         standard deviation of *y* in the bin
-        and :math:`\\sqrt{N}` is the counts in each bin.
+        and :math:`\sqrt{N}` is the counts in each bin.
 
         If set to ``variance``, function will also return an array storing
-        :math:`\\sigma_{y}`.
+        :math:`\sigma_{y}`.
 
         Default is ``error_on_mean``
 
@@ -98,7 +98,7 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
 
 
 def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
-    """ Returns a Numpy array of shape *(Npts, 3)* storing the
+    r""" Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
     the `~halotools.mock_observables` package.
 
@@ -112,7 +112,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     velocity : array, optional
         Length-Npts array of velocities in units of km/s
         used to apply peculiar velocity distortions, e.g.,
-        :math:`z_{\\rm dist} = z + v/H_{0}`.
+        :math:`z_{\rm dist} = z + v/H_{0}`.
         Since Halotools workes exclusively in h=1 units,
         in the above formula :math:`H_{0} = 100 km/s/Mpc`.
 
@@ -214,7 +214,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
 
 
 def cuboid_subvolume_labels(sample, Nsub, Lbox):
-    """
+    r"""
     Return integer labels indicating which cubical subvolume of a larger cubical volume a
     set of points occupy.
 
@@ -307,7 +307,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
 
 
 def sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=False):
-    """ Return the sign of the unit vector pointing from x2 towards x1,
+    r""" Return the sign of the unit vector pointing from x2 towards x1,
     that is, the sign of (x1 - x2), accounting for periodic boundary conditions.
 
     If x1 > x2, returns 1. If x1 < x2, returns -1. If x1 == x2, returns equality_fill_val.
@@ -382,7 +382,7 @@ def sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=Fa
 
 
 def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
-    """ Return the vector pointing from x2 towards x1,
+    r""" Return the vector pointing from x2 towards x1,
     that is, x1 - x2, accounting for periodic boundary conditions.
 
     If keyword arguments ``v1`` and ``v2`` are passed in,

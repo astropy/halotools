@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.FoFGroups` class used to
 identify friends-of-friends groups of points.
 """
@@ -27,12 +27,12 @@ __author__ = ['Duncan Campbell']
 
 
 class FoFGroups(object):
-    """
+    r"""
     Friends-of-friends (FoF) groups class.
     """
 
     def __init__(self, positions, b_perp, b_para, period=None, Lbox=None, num_threads=1):
-        """
+        r"""
         Build FoF groups in redshift space assuming the distant observer approximation.
 
         The first two dimensions (x, y) define the plane for perpendicular distances.
@@ -171,7 +171,7 @@ class FoFGroups(object):
 
     @property
     def group_ids(self):
-        """
+        r"""
         Determine integer IDs for groups.
 
         Each member of a group is assigned a unique integer ID that it shares with all
@@ -190,7 +190,7 @@ class FoFGroups(object):
 
     @property
     def n_groups(self):
-        """
+        r"""
         Calculate the total number of groups, including 1-member groups
 
         Returns
@@ -269,7 +269,7 @@ class FoFGroups(object):
             raise HalotoolsError(no_igraph_msg)
 
     def get_edges(self):
-        """
+        r"""
         Return all edges of the graph (requires igraph package).
 
         Returns
@@ -290,7 +290,7 @@ class FoFGroups(object):
             raise HalotoolsError(no_igraph_msg)
 
     def get_edge_lengths(self):
-        """
+        r"""
         Return the length of all edges (requires igraph package).
 
         Returns
@@ -303,9 +303,9 @@ class FoFGroups(object):
         The length is caclulated as:
 
         .. math::
-            L_{\\rm edge} = \\sqrt{r_{\\perp}^2 + r_{\\parallel}^2},
+            L_{\rm edge} = \sqrt{r_{\perp}^2 + r_{\parallel}^2},
 
-        where :math:`r_{\\perp}` and :math:`r_{\\parallel}` are the perendicular and
+        where :math:`r_{\perp}` and :math:`r_{\parallel}` are the perendicular and
         parallel distance between galaixes.
 
         """
@@ -323,7 +323,7 @@ class FoFGroups(object):
 
 
 def _scipy_to_igraph(matrix, coords, directed=False):
-    """
+    r"""
     Convert a scipy sparse matrix to an igraph graph object (requires igraph package).
 
     Paramaters

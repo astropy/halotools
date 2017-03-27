@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.tpcf_jackknife` function used to
 calculate the two point correlation function and covariance matrix.
 """
@@ -29,8 +29,8 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         sample2=None, period=None, do_auto=True, do_cross=True,
         estimator='Natural', num_threads=1, max_sample_size=int(1e6), seed=None):
-    """
-    Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance
+    r"""
+    Calculate the two-point correlation function, :math:`\xi(r)` and the covariance
     matrix, :math:`{C}_{ij}`, between ith and jth radial bin.
 
     The covariance matrix is calculated using spatial jackknife sampling of the data
@@ -130,14 +130,14 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     Returns
     -------
     correlation_function(s) : numpy.array
-        *len(rbins)-1* length array containing correlation function :math:`\\xi(r)`
+        *len(rbins)-1* length array containing correlation function :math:`\xi(r)`
         computed in each of the radial bins defined by input ``rbins``.
 
         If ``sample2`` is passed as input, three arrays of length *len(rbins)-1* are
         returned:
 
         .. math::
-            \\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r)
+            \xi_{11}(r), \xi_{12}(r), \xi_{22}(r)
 
         The autocorrelation of ``sample1``, the cross-correlation between
         ``sample1`` and ``sample2``, and the autocorrelation of ``sample2``. If
@@ -156,7 +156,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
             C^{11}_{ij}, C^{12}_{ij}, C^{22}_{ij},
 
         the associated covariance matrices of
-        :math:`\\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r)`. If ``do_auto`` or ``do_cross``
+        :math:`\xi_{11}(r), \xi_{12}(r), \xi_{22}(r)`. If ``do_auto`` or ``do_cross``
         is set to False, the appropriate result(s) is not returned.
 
     Notes
@@ -168,14 +168,14 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     pair in subvolumes :math:`i` and :math:`j`:
 
     .. math::
-        D_i D_j += \\left \\{
-            \\begin{array}{ll}
-                1.0  & : i \\neq k, j \\neq k \\\\
-                0.5  & : i \\neq k, j=k \\\\
-                0.5  & : i = k, j \\neq k \\\\
-                0.0  & : i=j=k \\\\
-            \\end{array}
-                   \\right.
+        D_i D_j += \left \{
+            \begin{array}{ll}
+                1.0  & : i \neq k, j \neq k \\
+                0.5  & : i \neq k, j=k \\
+                0.5  & : i = k, j \neq k \\
+                0.0  & : i=j=k \\
+            \end{array}
+                   \right.
 
     Examples
     --------

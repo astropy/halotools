@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.tpcf` function used to
 calculate the two-point correlation function in 3d (aka galaxy clustering).
 """
@@ -31,7 +31,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
         do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
         approx_cell2_size, approx_cellran_size):
-    """
+    r"""
     Internal function used to random pairs during the calculation of the tpcf.
     There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
@@ -113,7 +113,7 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
 def _pair_counts(sample1, sample2, rbins,
         period, num_threads, do_auto, do_cross,
         _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
-    """
+    r"""
     Internal function used calculate DD-pairs during the calculation of the tpcf.
     """
     if do_auto is True:
@@ -155,8 +155,8 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         max_sample_size=int(1e6), approx_cell1_size=None,
         approx_cell2_size=None, approx_cellran_size=None,
         RR_precomputed=None, NR_precomputed=None, seed=None):
-    """
-    Calculate the real space two-point correlation function, :math:`\\xi(r)`.
+    r"""
+    Calculate the real space two-point correlation function, :math:`\xi(r)`.
 
     Example calls to this function appear in the documentation below.
     See the :ref:`mock_obs_pos_formatting` documentation page for
@@ -266,15 +266,15 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     Returns
     -------
     correlation_function(s) : numpy.array
-        *len(rbins)-1* length array containing the correlation function :math:`\\xi(r)`
+        *len(rbins)-1* length array containing the correlation function :math:`\xi(r)`
         computed in each of the bins defined by input ``rbins``.
 
         .. math::
-            1 + \\xi(r) \\equiv \\mathrm{DD}(r) / \\mathrm{RR}(r),
+            1 + \xi(r) \equiv \mathrm{DD}(r) / \mathrm{RR}(r),
 
-        If ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(r)` is the number
+        If ``estimator`` is set to 'Natural'.  :math:`\mathrm{DD}(r)` is the number
         of sample pairs with separations equal to :math:`r`, calculated by the pair
-        counter.  :math:`\\mathrm{RR}(r)` is the number of random pairs with separations
+        counter.  :math:`\mathrm{RR}(r)` is the number of random pairs with separations
         equal to :math:`r`, and is counted internally using "analytic randoms" if
         ``randoms`` is set to None (see notes for an explanation), otherwise it is
         calculated using the pair counter.
@@ -284,7 +284,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         then three arrays of length *len(rbins)-1* are returned:
 
         .. math::
-            \\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r),
+            \xi_{11}(r), \xi_{12}(r), \xi_{22}(r),
 
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and
         ``sample2``, and the autocorrelation of ``sample2``, respectively.

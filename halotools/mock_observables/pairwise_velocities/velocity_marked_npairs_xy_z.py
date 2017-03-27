@@ -10,8 +10,6 @@ from .velocity_marked_npairs_3d import (
     _func_signature_int_from_vel_weight_func_id, _velocity_marked_npairs_3d_process_weights)
 from .engines import velocity_marked_npairs_xy_z_engine
 
-from ...custom_exceptions import HalotoolsError
-
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
@@ -22,12 +20,12 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         weights1=None, weights2=None,
         weight_func_id=0, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
-    """
+    r"""
     Calculate the number of velocity weighted pairs
     with separations greater than or equal to
-    :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.
+    :math:`r_{\perp}` and :math:`r_{\parallel}`, :math:`W(>r_{\perp},>r_{\parallel})`.
 
-    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    :math:`r_{\perp}` and :math:`r_{\parallel}` are defined wrt the z-direction.
 
     The weight given to each pair is determined by the weights for a pair,
     :math:`w_1`, :math:`w_2`, and a user-specified "velocity weighting function", indicated

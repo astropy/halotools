@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.tpcf` function used to
 calculate the 1-halo, 2-halo decomposition of the
 two-point correlation function in 3d.
@@ -37,9 +37,9 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         num_threads=1, max_sample_size=int(1e6),
         approx_cell1_size=None, approx_cell2_size=None,
         approx_cellran_size=None, seed=None):
-    """
+    r"""
     Calculate the real space one-halo and two-halo decomposed two-point correlation
-    functions, :math:`\\xi^{1h}(r)` and :math:`\\xi^{2h}(r)`.
+    functions, :math:`\xi^{1h}(r)` and :math:`\xi^{2h}(r)`.
 
     This returns the correlation function for galaxies which reside in the same halo, and
     those that reside in separate halos, as indicated by a host halo ID.
@@ -144,14 +144,14 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     -------
     correlation_function(s) : numpy.array
         Two *len(rbins)-1* length arrays containing the one and two halo correlation
-        functions, :math:`\\xi^{1h}(r)` and :math:`\\xi^{2h}(r)`, computed in each of the
+        functions, :math:`\xi^{1h}(r)` and :math:`\xi^{2h}(r)`, computed in each of the
         radial bins defined by input ``rbins``.
 
         .. math::
-            1 + \\xi(r) \\equiv \\mathrm{DD} / \\mathrm{RR},
+            1 + \xi(r) \equiv \mathrm{DD} / \mathrm{RR},
 
-        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated
-        by the pair counter, and :math:`\\mathrm{RR}` is counted internally using
+        if ``estimator`` is set to 'Natural', where  :math:`\mathrm{DD}` is calculated
+        by the pair counter, and :math:`\mathrm{RR}` is counted internally using
         "analytic randoms" if no ``randoms`` are passed as an argument
         (see notes for an explanation).  If a different ``estimator`` is specified, the
         appropiate formula is used.
@@ -161,11 +161,11 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         returned:
 
         .. math::
-            \\xi^{1h}_{11}(r), \\ \\xi^{2h}_{11}(r),
+            \xi^{1h}_{11}(r), \ \xi^{2h}_{11}(r),
         .. math::
-            \\xi^{1h}_{12}(r), \\ \\xi^{2h}_{12}(r),
+            \xi^{1h}_{12}(r), \ \xi^{2h}_{12}(r),
         .. math::
-            \\xi^{1h}_{22}(r), \\ \\xi^{2h}_{22}(r),
+            \xi^{1h}_{22}(r), \ \xi^{2h}_{22}(r),
 
         the autocorrelation of one and two halo autocorrelation of ``sample1``,
         the one and two halo cross-correlation between ``sample1`` and ``sample2``,
@@ -274,7 +274,7 @@ def nball_volume(R, k=3):
 def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
         do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
         approx_cell2_size, approx_cellran_size):
-    """
+    r"""
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
         2. PBCs and analytical randoms

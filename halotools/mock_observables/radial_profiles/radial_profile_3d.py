@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.radial_profile_3d` function
+r""" Module containing the `~halotools.mock_observables.radial_profile_3d` function
 used to calculate radial profiles as a function of 3d separation.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -26,7 +26,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
         rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
         return_counts=False, period=None, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
-    """ Function used to calculate the mean value of some quantity in ``sample2``
+    r""" Function used to calculate the mean value of some quantity in ``sample2``
     as a function of 3d distance from the points in ``sample1``.
 
     As illustrated in the Examples section below,
@@ -35,7 +35,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     optionally normalize the 3d distances according to
     some scaling factor defined by the points in ``sample1``. The documentation below
     shows how to calculate the mean mass accretion rate of ``sample2`` as a function
-    of :math:`r / R_{\\rm vir}`, the Rvir-normalized halo-centric distance from points in ``sample1``.
+    of :math:`r / R_{\rm vir}`, the Rvir-normalized halo-centric distance from points in ``sample1``.
 
     Note that this function can also be used to calculate number density profiles
     of ``sample2`` points as a function of halo-centric distance
@@ -68,10 +68,10 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
 
     rbins_normalized : array_like, optional
         Array of length *Nrbins+1* defining the bin boundaries *x*, where
-        :math:`x = r / R_{\\rm vir}`, in which mean quantities and number counts are computed.
-        The quantity :math:`R_{\\rm vir}` can vary from point to point in ``sample1``
+        :math:`x = r / R_{\rm vir}`, in which mean quantities and number counts are computed.
+        The quantity :math:`R_{\rm vir}` can vary from point to point in ``sample1``
         and is passed in via the ``normalize_rbins_by`` argument.
-        While scaling by :math:`R_{\\rm vir}` is common, you are not limited to this
+        While scaling by :math:`R_{\rm vir}` is common, you are not limited to this
         normalization choice; in principle you can use the ``rbins_normalized`` and
         ``normalize_rbins_by`` arguments to scale your distances by any length-scale
         associated with points in ``sample1``.
@@ -82,7 +82,7 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
         will be normalized. For example, if ``normalize_rbins_by`` is defined to be the
         virial radius of each point in ``sample1``, then the input numerical values *x*
         stored in ``rbins_normalized`` will be interpreted as referring to
-        bins of :math:`x = r / R_{\\rm vir}`. Default is None, in which case
+        bins of :math:`x = r / R_{\rm vir}`. Default is None, in which case
         the input ``rbins_absolute`` argument must be passed instead of
         ``rbins_normalized``.
 
@@ -169,10 +169,10 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     >>> result1, counts = radial_profile_3d(sample1, sample2, dmdt_sample2, rbins_absolute=rbins_absolute, period=halocat.Lbox, return_counts=True)
 
     Now suppose that you wish to calculate the same quantity,
-    but instead as a function of :math:`x = r / R_{\\rm vir}`.
+    but instead as a function of :math:`x = r / R_{\rm vir}`.
     In this case, we use the ``rbins_normalized`` and ``normalize_rbins_by`` arguments.
     The following choices for these arguments will give us 15 separation bins linearly spaced in *x*
-    between :math:`\\frac{1}{2}R_{\\rm vir}` and :math:`10R_{\\rm vir}`.
+    between :math:`\frac{1}{2}R_{\rm vir}` and :math:`10R_{\rm vir}`.
 
     >>> rvir = halo_sample1['halo_rvir']
     >>> rbins_normalized = np.linspace(0.5, 10, 15)

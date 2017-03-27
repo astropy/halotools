@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.angular_tpcf` function used to
 calculate galaxy clustering as a function of angular separation.
 """
@@ -29,8 +29,8 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
         max_sample_size=int(1e6), seed=None):
-    """
-    Calculate the angular two-point correlation function, :math:`w(\\theta)`.
+    r"""
+    Calculate the angular two-point correlation function, :math:`w(\theta)`.
 
     Example calls to this function appear in the documentation below.
     See the :ref:`mock_obs_pos_formatting` documentation page for
@@ -91,15 +91,15 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     -------
     correlation_function(s) : numpy.array
         *len(theta_bins)-1* length array containing the correlation function
-        :math:`w(\\theta)` computed in each of the bins defined by input ``theta_bins``.
+        :math:`w(\theta)` computed in each of the bins defined by input ``theta_bins``.
 
         .. math::
-            1 + w(\\theta) \\equiv \\mathrm{DD}(\\theta) / \\mathrm{RR}(\\theta),
+            1 + w(\theta) \equiv \mathrm{DD}(\theta) / \mathrm{RR}(\theta),
 
-        If ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(\\theta)` is the number
-        of sample pairs with separations equal to :math:`\\theta`, calculated by the pair
-        counter.  :math:`\\mathrm{RR}(\\theta)` is the number of random pairs with
-        separations equal to :math:`\\theta`, and is counted internally using
+        If ``estimator`` is set to 'Natural'.  :math:`\mathrm{DD}(\theta)` is the number
+        of sample pairs with separations equal to :math:`\theta`, calculated by the pair
+        counter.  :math:`\mathrm{RR}(\theta)` is the number of random pairs with
+        separations equal to :math:`\theta`, and is counted internally using
         "analytic randoms" if ``randoms`` is set to None (see notes for an explanation),
         otherwise it is calculated using the pair counter.
 
@@ -108,7 +108,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         then three arrays of length *len(rbins)-1* are returned:
 
         .. math::
-            w_{11}(\\theta), w_{12}(\\theta), w_{22}(\\theta),
+            w_{11}(\theta), w_{12}(\theta), w_{22}(\theta),
 
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and
         ``sample2``, and the autocorrelation of ``sample2``, respectively.

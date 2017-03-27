@@ -4,8 +4,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
-from libc.math cimport ceil 
+cimport cython
+from libc.math cimport ceil
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('npairs_projected_engine', )
@@ -13,40 +13,40 @@ __all__ = ('npairs_projected_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs_projected_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+def npairs_projected_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     rp_bins, pi_max, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of projected separation. 
+    r""" Cython engine for counting pairs of points as a function of projected separation.
 
-    Parameters 
+    Parameters
     ------------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
 
-    x1in, y1in, z1in : arrays 
+    x1in, y1in, z1in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 1
 
-    x2in, y2in, z2in : arrays 
+    x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
     rp_bins : array_like
-        numpy array of boundaries defining the bins of separation in the xy-plane 
-        :math:`r_{\\rm p}` in which pairs are counted.
+        numpy array of boundaries defining the bins of separation in the xy-plane
+        :math:`r_{\rm p}` in which pairs are counted.
 
-    pi_max : float 
-        Maximum value in the z-dimension over which pairs will be counted. 
+    pi_max : float
+        Maximum value in the z-dimension over which pairs will be counted.
 
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
 
-    Returns 
+    Returns
     --------
-    counts : array 
-        Integer array of length len(rp_bins) giving the number of pairs 
-        separated by a distance less than the corresponding entry of ``rp_bins``. 
+    counts : array
+        Integer array of length len(rp_bins) giving the number of pairs
+        separated by a distance less than the corresponding entry of ``rp_bins``.
 
-    """    
+    """
     cdef cnp.float64_t[:] rp_bins_squared = rp_bins*rp_bins
     cdef cnp.float64_t pi_max_squared = pi_max*pi_max
     cdef cnp.float64_t xperiod = double_mesh.xperiod
@@ -98,7 +98,7 @@ def npairs_projected_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp
     cdef int Ni, Nj, i, j, k, l
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -123,9 +123,9 @@ def npairs_projected_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -187,7 +187,7 @@ def npairs_projected_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                             counts[k] += 1
                                         k=k-1
                                         if k<0: break
-                                        
+
     return np.array(counts)
 
 
