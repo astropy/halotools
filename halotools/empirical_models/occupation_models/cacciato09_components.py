@@ -1,4 +1,4 @@
-"""
+r"""
 This module contains occupation components used by the cacciato09 composite
 model.
 """
@@ -12,14 +12,13 @@ from .engines import cacciato09_sats_mc_prim_galprop_engine
 
 from .. import custom_incomplete_gamma
 
-from ... import sim_manager
 from ...custom_exceptions import HalotoolsError
 
 __all__ = ('Cacciato09Cens', 'Cacciato09Sats')
 
 
 class Cacciato09Cens(OccupationComponent):
-    """ CLF-style model for the central galaxy occupation. Since it is a CLF
+    r""" CLF-style model for the central galaxy occupation. Since it is a CLF
     model, it also assigns a primary galaxy property to galaxies in addition to
     effectively being an HOD model. The primary galaxy property can for example
     be luminosity or stellar mass.
@@ -30,7 +29,7 @@ class Cacciato09Cens(OccupationComponent):
 
     def __init__(self, threshold=10.0, prim_haloprop_key='halo_m200b',
                  prim_galprop_key='luminosity', **kwargs):
-        """
+        r"""
         Parameters
         ----------
         threshold : float, optional
@@ -71,7 +70,7 @@ class Cacciato09Cens(OccupationComponent):
         self.publications = ['arXiv:0807.4932']
 
     def get_published_parameters(self):
-        """ Return the values of ``self.param_dict`` according to
+        r""" Return the values of ``self.param_dict`` according to
         the best-fit values of the WMAP3 model in Table 3 of arXiv:0807.4932.
         """
         param_dict = (
@@ -85,7 +84,7 @@ class Cacciato09Cens(OccupationComponent):
         return param_dict
 
     def median_prim_galprop(self, **kwargs):
-        """ Return the median primary galaxy property of a central galaxy as a
+        r""" Return the median primary galaxy property of a central galaxy as a
         function of the input table.
 
         Parameters
@@ -128,7 +127,7 @@ class Cacciato09Cens(OccupationComponent):
         return prim_galprop_c * (r / (1 + r))**gamma_1 * (1 + r)**gamma_2
 
     def clf(self, prim_galprop=1e10, prim_haloprop=1e12):
-        """ Return the CLF in units of dn/dlogL for the primary halo property
+        r""" Return the CLF in units of dn/dlogL for the primary halo property
         and galaxy property L.
 
         Parameters
@@ -165,7 +164,7 @@ class Cacciato09Cens(OccupationComponent):
                        self.param_dict['sigma']**2)))
 
     def mean_occupation(self, prim_galprop_min=None, **kwargs):
-        """ Expected number of central galaxies in a halo. Derived from
+        r""" Expected number of central galaxies in a halo. Derived from
         integrating the CLF from the primary galaxy property threshold to
         infinity.
 
@@ -204,7 +203,7 @@ class Cacciato09Cens(OccupationComponent):
                            (np.sqrt(2.0) * self.param_dict['sigma'])))
 
     def mc_prim_galprop(self, **kwargs):
-        """ Method to generate Monte Carlo realizations of the primary galaxy
+        r""" Method to generate Monte Carlo realizations of the primary galaxy
         property of galaxies under the constraint that the primary galaxy
         property is above the primary galaxy property threshold.
 
@@ -288,7 +287,7 @@ class Cacciato09Cens(OccupationComponent):
 
 
 class Cacciato09Sats(OccupationComponent):
-    """ CLF-style model for the satellite galaxy occupation. Since it is a CLF
+    r""" CLF-style model for the satellite galaxy occupation. Since it is a CLF
     model, it also assigns a primary galaxy property to galaxies in addition to
     effectively being an HOD model. The primary galaxy property can for example
     be luminosity or stellar mass.
@@ -298,7 +297,7 @@ class Cacciato09Sats(OccupationComponent):
 
     def __init__(self, threshold=10.0, prim_haloprop_key='halo_m200b',
                  prim_galprop_key='luminosity', **kwargs):
-        """
+        r"""
         Parameters
         ----------
             Logarithm of the primary galaxy property threshold. If the primary
@@ -341,7 +340,7 @@ class Cacciato09Sats(OccupationComponent):
         self.publications = ['arXiv:0807.4932']
 
     def get_default_parameters(self):
-        """ Return the values of ``self.param_dict`` according to
+        r""" Return the values of ``self.param_dict`` according to
         the best-fit values of the WMAP3 model in Table 3 of arXiv:0807.4932.
         """
 
@@ -363,7 +362,7 @@ class Cacciato09Sats(OccupationComponent):
         return param_dict
 
     def _update_central_params(self):
-        """
+        r"""
         Private method to update the model parameters.
         """
 
@@ -372,7 +371,7 @@ class Cacciato09Sats(OccupationComponent):
                 self.central_occupation_model.param_dict[key] = value
 
     def phi_sat(self, **kwargs):
-        """ Return the normalization for the CLF as a function of the input
+        r""" Return the normalization for the CLF as a function of the input
         table. See equation (36) in Cacciato et al. (2009) for details.
         The normalization refers to $\phi_s^\star$.
 
@@ -415,7 +414,7 @@ class Cacciato09Sats(OccupationComponent):
                     (log_prim_haloprop - 12.0)**2)
 
     def alpha_sat(self, **kwargs):
-        """ Return the power-law slope of the CLF as a function of the input
+        r""" Return the power-law slope of the CLF as a function of the input
         table.
 
         Parameters
@@ -455,7 +454,7 @@ class Cacciato09Sats(OccupationComponent):
             mass) - log_m_2)))
 
     def prim_galprop_cut(self, **kwargs):
-        """ Return the cut-off primary galaxy properties of the CLF as a
+        r""" Return the cut-off primary galaxy properties of the CLF as a
         function of the input table. See equation (38) in Cacciato et al. (2009)
         for details. The cut-off primary galaxy property refers to $\L_s^\star$.
 
@@ -494,7 +493,7 @@ class Cacciato09Sats(OccupationComponent):
 
     def mean_occupation(self, prim_galprop_min=None, prim_galprop_max=None,
                         **kwargs):
-        """ Expected number of satellite galaxies in a halo. Derived from
+        r""" Expected number of satellite galaxies in a halo. Derived from
         integrating the CLF from the luminosity threshold to infinity.
 
         Parameters
@@ -568,7 +567,7 @@ class Cacciato09Sats(OccupationComponent):
         return result
 
     def clf(self, prim_galprop=1e10, prim_haloprop=1e12):
-        """ Return the CLF in units of dn/dlogL for the primary halo property
+        r""" Return the CLF in units of dn/dlogL for the primary halo property
         and galaxy property L.
 
         Parameters
@@ -612,7 +611,7 @@ class Cacciato09Sats(OccupationComponent):
                 np.log(10))
 
     def mc_prim_galprop(self, **kwargs):
-        """ Method to generate Monte Carlo realizations of the primary galaxy
+        r""" Method to generate Monte Carlo realizations of the primary galaxy
         property of galaxies under the constraint that the primary galaxy
         property is above the primary galaxy property threshold.
 
