@@ -1,4 +1,4 @@
-"""
+r"""
 Module storing the `~halotools.sim_manager.RockstarHlistReader` class,
 the primary class used by Halotools to process
 publicly available Rockstar hlist files and store them in cache.
@@ -27,7 +27,7 @@ uninstalled_h5py_msg = ("\nYou must have h5py installed if you want to \n"
 
 
 def _infer_redshift_from_input_fname(fname):
-    """ Method extracts the portion of the Rockstar hlist fname
+    r""" Method extracts the portion of the Rockstar hlist fname
     that contains the scale factor of the snapshot, and returns a
     float for the redshift inferred from this substring.
 
@@ -60,7 +60,7 @@ def _infer_redshift_from_input_fname(fname):
 
 
 class RockstarHlistReader(TabularAsciiReader):
-    """
+    r"""
     The `RockstarHlistReader` reads Rockstar hlist ASCII files,
     stores them as hdf5 files in the Halotools cache, and updates the cache log.
 
@@ -85,7 +85,7 @@ class RockstarHlistReader(TabularAsciiReader):
             row_cut_eq_dict={}, row_cut_neq_dict={},
             overwrite=False, ignore_nearby_redshifts=False, dz_tol=0.05,
             processing_notes=' ', **kwargs):
-        """
+        r"""
         Parameters
         -----------
         input_fname : string
@@ -290,7 +290,7 @@ class RockstarHlistReader(TabularAsciiReader):
         >>> print(halocat.version_name) # doctest: +SKIP
 
         Now suppose that for your science target of interest,
-        subhalos in your simulation with :math:`M_{\\rm vir} < 10^{10} M_{\\odot}/h`
+        subhalos in your simulation with :math:`M_{\rm vir} < 10^{10} M_{\odot}/h`
         are not properly resolved. In this case you can use the ``row_cut_min_dict`` keyword
         argument to discard such halos as the file is read.
 
@@ -302,7 +302,7 @@ class RockstarHlistReader(TabularAsciiReader):
         >>> reader.read_halocat(['halo_rvir'], write_to_disk = True, update_cache_log = True) # doctest: +SKIP
 
         Note the list we passed to the `read_halocat` method via the columns_to_convert_from_kpc_to_mpc
-        argument. In common rockstar catalogs, :math:`R_{\\rm vir}` is stored in kpc/h units,
+        argument. In common rockstar catalogs, :math:`R_{\rm vir}` is stored in kpc/h units,
         while halo centers are stored in Mpc/h units, a potential source of buggy behavior.
         Take note of all units in your raw halo catalog before caching reductions of it.
 
@@ -323,7 +323,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
         Any cut you placed on the catalog during its initial
         reduction is automatically bound to the cached halo catalog as additional metadata.
-        In this case, since we placed a lower bound on :math:`M_{\\rm vir}`:
+        In this case, since we placed a lower bound on :math:`M_{\rm vir}`:
 
         >>> print(halocat.halo_mvir_row_cut_min) # doctest: +SKIP
         >>> 100 # doctest: +SKIP
@@ -524,7 +524,7 @@ class RockstarHlistReader(TabularAsciiReader):
     def read_halocat(self, columns_to_convert_from_kpc_to_mpc,
             write_to_disk=False, update_cache_log=False,
             add_supplementary_halocat_columns=True, **kwargs):
-        """ Method reads the ascii data and
+        r""" Method reads the ascii data and
         binds the resulting catalog to ``self.halo_table``.
 
         By default, the optional ``write_to_disk`` and ``update_cache_log``
@@ -635,7 +635,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     raise HalotoolsError(msg)
 
     def _read_ascii(self, **kwargs):
-        """ Method reads the input ascii and returns
+        r""" Method reads the input ascii and returns
         a structured Numpy array of the data
         that passes the row- and column-cuts.
 
