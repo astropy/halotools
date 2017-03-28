@@ -127,7 +127,7 @@ class Zheng07Cens(OccupationComponent):
         if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = kwargs['prim_haloprop']
+            mass = np.atleast_1d(kwargs['prim_haloprop'])
         else:
             msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
                 "to the ``mean_occupation`` function of the ``Zheng07Cens`` class.\n")
@@ -397,14 +397,11 @@ class Zheng07Sats(OccupationComponent):
         if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = kwargs['prim_haloprop']
+            mass = np.atleast_1d(kwargs['prim_haloprop'])
         else:
             msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
                 "to the ``mean_occupation`` function of the ``Zheng07Sats`` class.\n")
             raise HalotoolsError(msg)
-        mass = np.array(mass)
-        if np.shape(mass) == ():
-            mass = np.array([mass])
 
         M0 = 10.**self.param_dict['logM0']
         M1 = 10.**self.param_dict['logM1']

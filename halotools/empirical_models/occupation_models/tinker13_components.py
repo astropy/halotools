@@ -148,7 +148,7 @@ class Tinker13Cens(OccupationComponent):
             np.log10(self._quiescent_fraction_abscissa), model_ordinates)
 
         if 'prim_haloprop' in kwargs:
-            prim_haloprop = kwargs['prim_haloprop']
+            prim_haloprop = np.atleast_1d(kwargs['prim_haloprop'])
         elif 'table' in kwargs:
             table = kwargs['table']
             try:
@@ -196,8 +196,8 @@ class Tinker13Cens(OccupationComponent):
                 raise HalotoolsError(msg % self.sfr_designation_key)
         else:
             try:
-                prim_haloprop = kwargs['prim_haloprop']
-                sfr_designation = kwargs['sfr_designation']
+                prim_haloprop = np.atleast_1d(kwargs['prim_haloprop'])
+                sfr_designation = np.atleast_1d(kwargs['sfr_designation'])
             except KeyError:
                 msg = ("If not passing a ``table`` keyword argument to the ``mean_occupation`` method,\n"
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments")
@@ -454,7 +454,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = kwargs['prim_haloprop']
+            mass = np.atleast_1d(kwargs['prim_haloprop'])
         else:
             function_name = "Tinker13QuiescentSats.mean_occupation"
             raise HalotoolsError(function_name)
@@ -620,7 +620,7 @@ class Tinker13ActiveSats(OccupationComponent):
         if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = kwargs['prim_haloprop']
+            mass = np.atleast_1d(kwargs['prim_haloprop'])
         else:
             function_name = "Tinker13ActiveSats.mean_occupation"
             raise HalotoolsError(function_name)

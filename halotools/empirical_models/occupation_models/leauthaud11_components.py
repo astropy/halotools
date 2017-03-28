@@ -305,7 +305,7 @@ class Leauthaud11Sats(OccupationComponent):
         if 'table' in list(kwargs.keys()):
             mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = kwargs['prim_haloprop']
+            mass = np.atleast_1d(kwargs['prim_haloprop'])
         else:
             raise KeyError("Must pass one of the following keyword arguments "
                 "to mean_occupation:\n``table`` or ``prim_haloprop``")
