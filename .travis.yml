@@ -84,6 +84,9 @@ matrix:
         - python: 2.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
+        - python: 3.6
+          env: SETUP_CMD='test'
+
     allow_failures:
         # Python 3.6 currently has a DeprecationWarning related to pytest
         # that we don't understand at the moment.
