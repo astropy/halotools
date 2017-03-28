@@ -272,7 +272,7 @@ class ZuMandelbaum15Sats(OccupationComponent):
         if 'table' in list(kwargs.keys()):
             halo_mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in list(kwargs.keys()):
-            halo_mass = kwargs['prim_haloprop']
+            halo_mass = np.atleast_1d(kwargs['prim_haloprop'])
         else:
             raise KeyError("Must pass one of the following keyword arguments "
                 "to mean_occupation:\n``table`` or ``prim_haloprop``")

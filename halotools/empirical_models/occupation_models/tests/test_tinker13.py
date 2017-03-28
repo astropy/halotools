@@ -59,7 +59,7 @@ def test_Tinker13Cens5():
 
 def test_Tinker13Cens6():
     prim_haloprop = np.zeros(2) + 1e12
-    sfr_designation = str('Cuba Gooding Jr.')
+    sfr_designation = 'Cuba Gooding Jr.'
     model = Tinker13Cens()
     with pytest.raises(HalotoolsError) as err:
         __ = model.mean_occupation(prim_haloprop=prim_haloprop, sfr_designation=sfr_designation)
