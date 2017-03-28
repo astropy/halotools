@@ -202,8 +202,7 @@ class Tinker13Cens(OccupationComponent):
                 msg = ("If not passing a ``table`` keyword argument to the ``mean_occupation`` method,\n"
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments")
                 raise HalotoolsError(msg)
-            if type(sfr_designation) == str:
-                sfr_designation = np.repeat(sfr_designation, custom_len(prim_haloprop))
+            if type(sfr_designation[0]) in (str, unicode, np.string_, np.unicode_):
                 if sfr_designation[0] not in ['active', 'quiescent']:
                     msg = ("The only acceptable values of "
                         "``sfr_designation`` are ``active`` or ``quiescent``")
