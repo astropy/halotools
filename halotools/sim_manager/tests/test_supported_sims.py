@@ -7,7 +7,7 @@ import numpy as np
 from astropy.config.paths import _find_home
 from astropy.tests.helper import pytest
 
-from ..cached_halo_catalog import CachedHaloCatalog
+from ..cached_halo_catalog import CachedHaloCatalog, InvalidCacheLogEntry
 
 from ...custom_exceptions import HalotoolsError
 
@@ -102,5 +102,9 @@ def test_lbox_vector():
         try:
             halocat = CachedHaloCatalog(simname=simname, redshift=z)
             assert len(halocat.Lbox) == 3
-        except HalotoolsError:
-            pass
+        except (InvalidCacheLogEntry, HalotoolsError):
+            if APH_MACHINE:
+                raise HalotoolsError("APH_MACHINE should never fail Lbox_vector test\n"
+                    "simname = {0}\nscale factor = {1}".format(simname, a))
+            else:
+                pass

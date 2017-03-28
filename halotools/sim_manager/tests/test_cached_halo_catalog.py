@@ -124,8 +124,20 @@ class TestCachedHaloCatalog(TestCase):
                 hf.close()
                 pf.close()
 
-            except InvalidCacheLogEntry:
-                pass
+            except (HalotoolsError, InvalidCacheLogEntry):
+                fname = halo_log_entry.fname
+                simname = halo_log_entry.simname
+                redshift = halo_log_entry.redshift
+                if APH_MACHINE:
+                    allowed_failure = (redshift > 0) & (simname == 'bolshoi' or simname == 'multidark')
+                    if allowed_failure:
+                        pass
+                    else:
+                        msg = ("APH_MACHINE should never have inconsistent halo/ptcl tables\n"
+                            "fname = {0}\nsimname = {1}\nredshift = {2}")
+                        raise HalotoolsError(msg.format(fname, simname, redshift))
+                else:
+                    pass
 
     def test_default_catalog(self):
         """ Verify that the default halo catalog loads if it is available
