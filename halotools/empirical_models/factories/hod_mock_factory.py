@@ -423,6 +423,9 @@ class HodMockFactory(MockFactory):
         self._total_abundance = {}
         self._gal_type_indices = {}
 
+        for gal_type in self.gal_types:
+            self.halo_table['halo_num_'+gal_type] = 0
+
         first_galaxy_index = 0
         for gal_type in self.gal_types:
             occupation_func_name = 'mc_occupation_'+gal_type
@@ -431,7 +434,9 @@ class HodMockFactory(MockFactory):
             # realization of the abundance of gal_type galaxies
             if seed is not None:
                 seed += 1
+
             self._occupation[gal_type] = occupation_func(table=self.halo_table, seed=seed)
+            self.halo_table['halo_num_'+gal_type][:] = self._occupation[gal_type]
 
             # Now use the above result to set up the indexing scheme
             self._total_abundance[gal_type] = (
