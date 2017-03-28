@@ -49,6 +49,7 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='build_sphinx -w'
 
+        # Significant docstring formatting changes in 3.6, so we check both
         - python: 3.6
           env: SETUP_CMD='build_sphinx -w'
 
@@ -83,14 +84,11 @@ matrix:
         - python: 2.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
-        - python: 3.5
-          env: NUMPY_VERSION=prerelease SETUP_CMD='test'
-
     allow_failures:
         # Python 3.6 currently has a DeprecationWarning related to pytest
         # that we don't understand at the moment.
         - python: 3.6
-          env: NUMPY_VERSION=1.12 SETUP_CMD='test'
+          env: SETUP_CMD='test'
 
 before_install:
 
