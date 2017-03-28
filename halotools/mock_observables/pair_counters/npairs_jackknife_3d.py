@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.npairs_jackknife_3d` function
+r""" Module containing the `~halotools.mock_observables.npairs_jackknife_3d` function
 used to estimate errors in the `~halotools.mock_observables.tpcf` function.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -23,7 +23,7 @@ __all__ = ('npairs_jackknife_3d', )
 def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, weights2=None,
         jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
-    """
+    r"""
     Pair counter used to make jackknife error estimates of real-space pair counter
     `~halotools.mock_observables.pair_counters.npairs`.
 
@@ -101,7 +101,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
         The sub-array N_pairs[0, :] stores numbers of pairs
         in the input bins for the entire sample.
         The sub-array N_pairs[i, :] stores numbers of pairs
-        in the input bins for the :math:`i^{\\rm th}` jackknife sub-sample.
+        in the input bins for the :math:`i^{\rm th}` jackknife sub-sample.
 
     Notes
     -----

@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.los_pvd_vs_rp` function
 used to calculate the pairwise line-of-sight velocity dispersion
 as a function of projected distance between the pairs.
@@ -23,8 +23,8 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         velocities2=None, period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6),
         approx_cell1_size=None, approx_cell2_size=None, seed=None):
-    """
-    Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\\sigma_{z12}(r_p)`.
+    r"""
+    Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\sigma_{z12}(r_p)`.
 
     Example calls to this function appear in the documentation below.
 
@@ -76,19 +76,19 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     -------
     sigma_12 : numpy.array
         *len(rbins)-1* length array containing the dispersion of the pairwise velocity,
-        :math:`\\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
+        :math:`\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
 
     Notes
     -----
     The pairwise LOS velocity, :math:`v_{z12}(r)`, is defined as:
 
     .. math::
-        v_{z12} = |\\vec{v}_{\\rm 1, pec}\\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
+        v_{z12} = |\vec{v}_{\rm 1, pec}\cdot \hat{z}-\vec{v}_{\rm 2, pec}\cdot\hat{z}|
 
-    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and
-    :math:`\\hat{z}` is the unit-z vector.
+    where :math:`\vec{v}_{\rm 1, pec}` is the peculiar velocity of object 1, and
+    :math:`\hat{z}` is the unit-z vector.
 
-    :math:`\\sigma_{z12}(r_p)` is the standard deviation of this quantity in
+    :math:`\sigma_{z12}(r_p)` is the standard deviation of this quantity in
     projected radial bins.
 
     Pairs and radial velocities are calculated using

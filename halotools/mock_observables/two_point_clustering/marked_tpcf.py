@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.marked_tpcf` function used to
 calculate the marked two-point correlation function.
 """
@@ -30,8 +30,8 @@ def marked_tpcf(sample1, rbins, sample2=None,
         marks1=None, marks2=None, period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6), weight_func_id=1,
         normalize_by='random_marks', iterations=1, randomize_marks=None, seed=None):
-    """
-    Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
+    r"""
+    Calculate the real space marked two-point correlation function, :math:`\mathcal{M}(r)`.
 
     Example calls to this function appear in the documentation below.
     See the :ref:`mock_obs_pos_formatting` documentation page for
@@ -126,24 +126,24 @@ def marked_tpcf(sample1, rbins, sample2=None,
     -------
     marked_correlation_function(s) : numpy.array
         *len(rbins)-1* length array containing the marked correlation function
-        :math:`\\mathcal{M}(r)` computed in each of the bins defined by ``rbins``.
+        :math:`\mathcal{M}(r)` computed in each of the bins defined by ``rbins``.
 
         .. math::
-            \\mathcal{M}(r) \\equiv \\mathrm{WW}(r) / \\mathrm{XX}(r),
+            \mathcal{M}(r) \equiv \mathrm{WW}(r) / \mathrm{XX}(r),
 
-        where :math:`\\mathrm{WW}(r)` is the weighted number of pairs with separations
-        equal to :math:`r`, and :math:`\\mathrm{XX}(r)` is dependent on the choice of the
+        where :math:`\mathrm{WW}(r)` is the weighted number of pairs with separations
+        equal to :math:`r`, and :math:`\mathrm{XX}(r)` is dependent on the choice of the
         ``normalize_by`` parameter.  If ``normalize_by`` is 'random_marks'
-        :math:`XX \\equiv \\mathcal{RR}`, the weighted pair counts where the marks have
+        :math:`XX \equiv \mathcal{RR}`, the weighted pair counts where the marks have
         been randomized marks.  If ``normalize_by`` is 'number_counts'
-        :math:`XX \\equiv DD`, the unweighted pair counts.
+        :math:`XX \equiv DD`, the unweighted pair counts.
         See Notes for more detail.
 
         If ``sample2`` is passed as input, three arrays of length *len(rbins)-1* are
         returned:
 
         .. math::
-            \\mathcal{M}_{11}(r), \\ \\mathcal{M}_{12}(r), \\ \\mathcal{M}_{22}(r),
+            \mathcal{M}_{11}(r), \ \mathcal{M}_{12}(r), \ \mathcal{M}_{22}(r),
 
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and
         ``sample2``, and the autocorrelation of ``sample2``.  If ``do_auto`` or
@@ -157,13 +157,13 @@ def marked_tpcf(sample1, rbins, sample2=None,
     If the ``period`` argument is passed in, the ith coordinate of all points
     must be between 0 and period[i].
 
-    ``normalize_by`` indicates how to calculate :math:`\\mathrm{XX}`.  If ``normalize_by``
-    is 'random_marks', then :math:`\\mathrm{XX} \\equiv \\mathcal{RR}`, and
-    :math:`\\mathcal{RR}` is calculated by randomizing the marks among points according
+    ``normalize_by`` indicates how to calculate :math:`\mathrm{XX}`.  If ``normalize_by``
+    is 'random_marks', then :math:`\mathrm{XX} \equiv \mathcal{RR}`, and
+    :math:`\mathcal{RR}` is calculated by randomizing the marks among points according
     to the ``randomize_marks`` mask.  This marked correlation function is then:
 
     .. math::
-        \\mathcal{M}(r) \\equiv \\frac{\\sum_{ij}f(m_i,m_j)}{\\sum_{kl}f(m_k,m_l)}
+        \mathcal{M}(r) \equiv \frac{\sum_{ij}f(m_i,m_j)}{\sum_{kl}f(m_k,m_l)}
 
     where the sum in the numerator is of pairs :math:`i,j` with separation :math:`r`,
     and marks :math:`m_i,m_j`.  :math:`f()` is the marking function, ``weight_func_id``.  The sum
@@ -172,13 +172,13 @@ def marked_tpcf(sample1, rbins, sample2=None,
     parameter. The mean of the sum is then taken amongst iterations and used in the
     calculation.
 
-    If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{XX} \\equiv \\mathrm{DD}`
+    If ``normalize_by`` is 'number_counts', then :math:`\mathrm{XX} \equiv \mathrm{DD}`
     is calculated by counting total number of pairs using
     `~halotools.mock_observables.pair_counters.npairs_3d`.
     This is:
 
     .. math::
-        \\mathcal{M}(r) \\equiv \\frac{\\sum_{ij}f(m_i,m_j)}{\\sum_{ij} 1},
+        \mathcal{M}(r) \equiv \frac{\sum_{ij}f(m_i,m_j)}{\sum_{ij} 1},
 
     There are multiple marking functions available.  In general, each requires a different
     number of marks per point, N_marks.  The marking function gets passed two vectors
@@ -187,7 +187,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
 
     #. multiplicaitive weights (N_marks = 1)
         .. math::
-            f(w_1,w_2) = w_1[0] \\times w_2[0]
+            f(w_1,w_2) = w_1[0] \times w_2[0]
 
     #. summed weights (N_marks = 1)
         .. math::
@@ -196,82 +196,82 @@ def marked_tpcf(sample1, rbins, sample2=None,
     #. equality weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_1[1]\\times w_2[1] & : w_1[0] = w_2[0] \\\\
-                    0.0 & : w_1[0] \\neq w_2[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_1[1]\times w_2[1] & : w_1[0] = w_2[0] \\
+                    0.0 & : w_1[0] \neq w_2[0] \\
+                \end{array}
+                \right.
 
     #. inequality weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_1[1]\\times w_2[1] & : w_1[0] \\neq w_2[0] \\\\
-                    0.0 & : w_1[0] = w_2[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_1[1]\times w_2[1] & : w_1[0] \neq w_2[0] \\
+                    0.0 & : w_1[0] = w_2[0] \\
+                \end{array}
+                \right.
 
     #. greater than weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_1[1]\\times w_2[1] & : w_2[0] > w_1[0] \\\\
-                    0.0 & : w_2[0] \\leq w_1[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_1[1]\times w_2[1] & : w_2[0] > w_1[0] \\
+                    0.0 & : w_2[0] \leq w_1[0] \\
+                \end{array}
+                \right.
 
     #. less than weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_1[1]\\times w_2[1] & : w_2[0] < w_1[0] \\\\
-                    0.0 & : w_2[0] \\geq w_1[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_1[1]\times w_2[1] & : w_2[0] < w_1[0] \\
+                    0.0 & : w_2[0] \geq w_1[0] \\
+                \end{array}
+                \right.
 
     #. greater than tolerance weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_2[1] & : w_2[0]>(w_1[0]+w_1[1]) \\\\
-                    0.0 & : w_2[0] \\leq (w_1[0]+w_1[1]) \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_2[1] & : w_2[0]>(w_1[0]+w_1[1]) \\
+                    0.0 & : w_2[0] \leq (w_1[0]+w_1[1]) \\
+                \end{array}
+                \right.
 
     #. less than tolerance weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_2[1] & : w_2[0]<(w_1[0]+w_1[1]) \\\\
-                    0.0 & : w_2[0] \\geq (w_1[0]+w_1[1]) \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_2[1] & : w_2[0]<(w_1[0]+w_1[1]) \\
+                    0.0 & : w_2[0] \geq (w_1[0]+w_1[1]) \\
+                \end{array}
+                \right.
 
     #. tolerance weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_2[1] & : |w_1[0]-w_2[0]|<w_1[1] \\\\
-                    0.0 & : |w_1[0]-w_2[0]| \\geq w_1[1] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_2[1] & : |w_1[0]-w_2[0]|<w_1[1] \\
+                    0.0 & : |w_1[0]-w_2[0]| \geq w_1[1] \\
+                \end{array}
+                \right.
 
     #. exclusion weights (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    w_2[1] & : |w_1[0]-w_2[0]|>w_1[1] \\\\
-                    0.0 & : |w_1[0]-w_2[0]| \\leq w_1[1] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    w_2[1] & : |w_1[0]-w_2[0]|>w_1[1] \\
+                    0.0 & : |w_1[0]-w_2[0]| \leq w_1[1] \\
+                \end{array}
+                \right.
 
     Examples
     --------
@@ -301,7 +301,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     >>> rbins = np.logspace(-2,-1,10)
     >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='number_counts', weight_func_id=1)
 
-    The result should be consistent with :math:`\\langle {\\rm mark}\\rangle^2` at all *r*
+    The result should be consistent with :math:`\langle {\rm mark}\rangle^2` at all *r*
     within the statistical errors.
     """
 

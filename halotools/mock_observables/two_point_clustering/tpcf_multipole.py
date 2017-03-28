@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.tpcf_multipole` function used to
 calculate the multipoles of the redshift-space two-point correlation function,
 aka the RSD multipoles.
@@ -16,7 +16,7 @@ __author__ = ['Duncan Campbell']
 
 
 def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
-    """
+    r"""
     Calculate the multipoles of the two point correlation function
     after first computing `~halotools.mock_observables.s_mu_tpcf`.
 
@@ -24,10 +24,10 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     ----------
     s_mu_tcpf_result : np.ndarray
         2-D array with the two point correlation function calculated in bins
-        of :math:`s` and :math:`\\mu`.  See `~halotools.mock_observables.s_mu_tpcf`.
+        of :math:`s` and :math:`\mu`.  See `~halotools.mock_observables.s_mu_tpcf`.
 
     mu_bins : array_like
-        array of :math:`\\mu = \\cos(\\theta_{\\rm LOS})`
+        array of :math:`\mu = \cos(\theta_{\rm LOS})`
         bins for which ``s_mu_tcpf_result`` has been calculated.
         Must be between [0,1].
 

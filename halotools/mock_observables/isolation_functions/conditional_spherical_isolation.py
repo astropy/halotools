@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.conditional_spherical_isolation` function
 used to apply a a variety of 3d isolation criteria to a set of points in a periodic box.
 """
@@ -25,7 +25,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 def conditional_spherical_isolation(sample1, sample2, r_max,
         marks1=None, marks2=None, cond_func=0, period=None,
         num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
-    """
+    r"""
     Determine whether a set of points, ``sample1``, is isolated, i.e. does not have a
     neighbor in ``sample2`` within an user specified spherical volume centered at each
     point in ``sample1``, where various additional conditions may be applied to judge
@@ -145,62 +145,62 @@ def conditional_spherical_isolation(sample1, sample2, r_max,
     1. greater than (N_marks = 1)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    True & : w_1[0] > w_2[0] \\\\
-                    False & : w_1[0] \\leq w_2[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    True & : w_1[0] > w_2[0] \\
+                    False & : w_1[0] \leq w_2[0] \\
+                \end{array}
+                \right.
 
     2. less than (N_marks = 1)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    True & : w_1[0] < w_2[0] \\\\
-                    False & : w_1[0] \\geq w_2[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    True & : w_1[0] < w_2[0] \\
+                    False & : w_1[0] \geq w_2[0] \\
+                \end{array}
+                \right.
 
     3. equality (N_marks = 1)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    True & : w_1[0] = w_2[0] \\\\
-                    False & : w_1[0] \\neq w_2[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    True & : w_1[0] = w_2[0] \\
+                    False & : w_1[0] \neq w_2[0] \\
+                \end{array}
+                \right.
 
     4. inequality (N_marks = 1)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    True & : w_1[0] \\neq w_2[0] \\\\
-                    False & : w_1[0] = w_2[0] \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    True & : w_1[0] \neq w_2[0] \\
+                    False & : w_1[0] = w_2[0] \\
+                \end{array}
+                \right.
 
     5. tolerance greater than (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    True & : w_1[0] > (w_2[0]+w_1[1]) \\\\
-                    False & : w_1[0] \\leq (w_2[0]+w_1[1]) \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    True & : w_1[0] > (w_2[0]+w_1[1]) \\
+                    False & : w_1[0] \leq (w_2[0]+w_1[1]) \\
+                \end{array}
+                \right.
 
     6. tolerance less than (N_marks = 2)
         .. math::
             f(w_1,w_2) =
-                \\left \\{
-                \\begin{array}{ll}
-                    True & : w_1[0] < (w_2[0]+w_1[1]) \\\\
-                    False & : w_1[0] \\geq (w_2[0]+w_1[1]) \\\\
-                \\end{array}
-                \\right.
+                \left \{
+                \begin{array}{ll}
+                    True & : w_1[0] < (w_2[0]+w_1[1]) \\
+                    False & : w_1[0] \geq (w_2[0]+w_1[1]) \\
+                \end{array}
+                \right.
 
     Examples
     --------

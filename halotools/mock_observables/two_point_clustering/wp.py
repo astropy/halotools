@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.wp` function used to
 calculate the projected two-point correlation function (aka projected galaxy clustering).
 """
@@ -21,7 +21,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
         max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,
         approx_cellran_size=None, seed=None):
-    """
+    r"""
     Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
     where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS).
 
@@ -143,7 +143,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         three arrays of length *len(rp_bins)-1* are returned:
 
         .. math::
-            w_{p11}(r_p), \\ w_{p12}(r_p), \\ w_{p22}(r_p),
+            w_{p11}(r_p), \ w_{p12}(r_p), \ w_{p22}(r_p),
 
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1``
         and ``sample2``, and the autocorrelation of ``sample2``.  If ``do_auto`` or ``do_cross``
@@ -156,9 +156,9 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
     `~halotools.mock_observables.rp_pi_tpcf`:
 
     .. math::
-        w_p(r_p) = \\int_0^{\\pi_{\\rm max}}2.0\\xi(r_p,\\pi)\\mathrm{d}\\pi
+        w_p(r_p) = \int_0^{\pi_{\rm max}}2.0\xi(r_p,\pi)\mathrm{d}\pi
 
-    where :math:`\\pi_{\\rm max}` is ``pi_max`` and :math:`\\xi(r_p,\\pi)`
+    where :math:`\pi_{\rm max}` is ``pi_max`` and :math:`\xi(r_p,\pi)`
     is the redshift space correlation function.
 
     For a higher-performance implementation of the wp function,

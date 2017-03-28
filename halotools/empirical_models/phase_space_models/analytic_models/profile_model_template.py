@@ -26,7 +26,7 @@ __all__ = ['AnalyticDensityProf']
 
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
-    """ Container class for any analytical radial profile model.
+    r""" Container class for any analytical radial profile model.
 
     See :ref:`profile_template_tutorial` for a review of the mathematics of
     halo profiles, and a thorough description of how the relevant equations
@@ -43,7 +43,7 @@ class AnalyticDensityProf(object):
     """
 
     def __init__(self, cosmology, redshift, mdef, **kwargs):
-        """
+        r"""
         Parameters
         -----------
         cosmology : object
@@ -411,7 +411,7 @@ class AnalyticDensityProf(object):
         return self.circular_velocity(result.x[0]*halo_radius, total_mass, *prof_params)
 
     def halo_mass_to_halo_radius(self, total_mass):
-        """
+        r"""
         Spherical overdensity radius as a function of the input mass.
 
         Note that this function is independent of the form of the density profile.
@@ -438,7 +438,7 @@ class AnalyticDensityProf(object):
             redshift=self.redshift, mdef=self.mdef)
 
     def halo_radius_to_halo_mass(self, radius):
-        """
+        r"""
         Spherical overdensity mass as a function of the input radius.
 
         Note that this function is independent of the form of the density profile.

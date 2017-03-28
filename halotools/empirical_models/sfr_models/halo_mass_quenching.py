@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.empirical_models.HaloMassInterpolQuenching` class
 responsible for providing a mapping between halo mass and galaxy quenching designation.
 """
@@ -12,7 +12,7 @@ __all__ = ['HaloMassInterpolQuenching']
 
 
 class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
-    """ Model for the quiescent fraction as a function of halo mass
+    r""" Model for the quiescent fraction as a function of halo mass
     defined by interpolating between a set of input control points.
 
     Notes
@@ -26,7 +26,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
 
     def __init__(self, halo_mass_key,
             halo_mass_abscissa, quiescent_fraction_control_values, **kwargs):
-        """
+        r"""
         Parameters
         -----------
         halo_mass_key : string
@@ -72,7 +72,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
         >>> model_instance.param_dict['quiescent_ordinates_param1'] = 0.35
 
         The above line of code changed the quiescent fraction to 0.35 at the first control value
-        of :math:`M_{\\rm vir} = 10^{12}M_{\\odot}`. You will have one parameter for every
+        of :math:`M_{\rm vir} = 10^{12}M_{\odot}`. You will have one parameter for every
         control value you used to instantiate the model. While you can always change the
         quiescent fraction of your model instance at any given control value, you cannot
         change the halo masses at which the control values are evaluated. To do that,

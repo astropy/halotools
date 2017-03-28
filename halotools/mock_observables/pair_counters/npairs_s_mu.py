@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.npairs_s_mu` function
+r""" Module containing the `~halotools.mock_observables.npairs_s_mu` function
 used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -19,11 +19,11 @@ __all__ = ('npairs_s_mu', )
 
 def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
-    """
+    r"""
     Function counts the number of pairs of points separated by less than
-    radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`,
-    where :math:`\\theta_{\\rm los}` is the line-of-sight angle
-    between points and :math:`s^2 = r_{\\rm parallel}^2 + r_{\\rm perp}^2`.
+    radial separation, *s,* and :math:`\mu\equiv\sin(\theta_{\rm los})`,
+    where :math:`\theta_{\rm los}` is the line-of-sight angle
+    between points and :math:`s^2 = r_{\rm parallel}^2 + r_{\rm perp}^2`.
 
     Note that if sample1 == sample2 that the
     `~halotools.mock_observables.npairs_s_mu` function double-counts pairs.
@@ -55,7 +55,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
 
     mu_bins : array_like
-        numpy array of :math:`\\cos(\\theta_{\\rm LOS})` boundaries defining the bins in
+        numpy array of :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
         which pairs are counted, and must be between [0,1].
 
         Note that using the sine is not common convention for
@@ -98,11 +98,11 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     Notes
     ------
-    The quantity :math:`\\mu` is defined as the :math:`\\sin(\\theta_{\\rm los})`
-    and not the conventional :math:`\\cos(\\theta_{\\rm los})`. This is
+    The quantity :math:`\mu` is defined as the :math:`\sin(\theta_{\rm los})`
+    and not the conventional :math:`\cos(\theta_{\rm los})`. This is
     because the pair counter has been optimized under the assumption that its
-    separation variable (in this case, :math:`\\mu`) *increases*
-    as :math:`\\theta_{\\rm los})` increases.
+    separation variable (in this case, :math:`\mu`) *increases*
+    as :math:`\theta_{\rm los})` increases.
 
     One final point of clarification concerning double-counting may be in order.
     Suppose sample1==sample2 and rbins[0]==0. Then the returned value for this bin

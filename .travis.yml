@@ -49,6 +49,10 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='build_sphinx -w'
 
+        # Significant docstring formatting changes in 3.6, so we check both
+        - python: 3.6
+          env: SETUP_CMD='build_sphinx -w'
+
         # Python3.3 is a bit old, thus conda doesn't have all version dependencies including newer numpies
         - python: 3.3
           env: NUMPY_VERSION=1.9
@@ -80,11 +84,14 @@ matrix:
         - python: 2.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
+        - python: 3.6
+          env: SETUP_CMD='test'
+
     allow_failures:
-        # The build with numpy v1.11.1rc1 halts in the middle without
-        # showing any obvious reason, thus allowing it to fail for now.
-        - python: 3.5
-          env: NUMPY_VERSION=prerelease SETUP_CMD='test'
+        # Python 3.6 currently has a DeprecationWarning related to pytest
+        # that we don't understand at the moment.
+        - python: 3.6
+          env: SETUP_CMD='test'
 
 before_install:
 

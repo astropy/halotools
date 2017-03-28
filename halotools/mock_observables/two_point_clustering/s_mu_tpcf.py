@@ -1,6 +1,6 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.s_mu_tpcf` function used to
-calculate the redshift-space two-point correlation function , :math:`\\xi(s, \\mu)`.
+calculate the redshift-space two-point correlation function , :math:`\xi(s, \mu)`.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -26,8 +26,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         period=None, do_auto=True, do_cross=True, estimator='Natural',
         num_threads=1, max_sample_size=int(1e6), approx_cell1_size=None,
         approx_cell2_size=None, approx_cellran_size=None, seed=None):
-    """
-    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`
+    r"""
+    Calculate the redshift space correlation function, :math:`\xi(s, \mu)`
 
     Divide redshift space into bins of radial separation and angle to to the line-of-sight
     (LOS).  This is a pre-step for calculating correlation function multipoles.
@@ -56,7 +56,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
 
     mu_bins : array_like
-        numpy array of :math:`mu = \\cos(\\theta_{\\rm LOS})` boundaries defining the bins in
+        numpy array of :math:`mu = \cos(\theta_{\rm LOS})` boundaries defining the bins in
         which pairs are counted, and must be between [0,1].
 
     sample2 : array_like, optional
@@ -132,14 +132,14 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     -------
     correlation_function(s) : np.ndarray
         *len(s_bins)-1* by *len(mu_bins)-1* ndarray containing the correlation function
-        :math:`\\xi(s, \\mu)` computed in each of the bins defined by input ``s_bins``
+        :math:`\xi(s, \mu)` computed in each of the bins defined by input ``s_bins``
         and ``mu_bins``.
 
         .. math::
-            1 + \\xi(s,\\mu) = \\mathrm{DD}(s,\\mu) / \\mathrm{RR}(s,\\mu)
+            1 + \xi(s,\mu) = \mathrm{DD}(s,\mu) / \mathrm{RR}(s,\mu)
 
-        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}(s,\\mu)` is
-        calculated by the pair counter, and :math:`\\mathrm{RR}(s,\\mu)` is counted
+        if ``estimator`` is set to 'Natural', where  :math:`\mathrm{DD}(s,\mu)` is
+        calculated by the pair counter, and :math:`\mathrm{RR}(s,\mu)` is counted
         internally using "analytic randoms" if ``randoms`` is set to None
         (see notes for further details).
 
@@ -148,7 +148,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         three arrays of shape *len(s_bins)-1* by *len(mu_bins)-1* are returned:
 
         .. math::
-            \\xi_{11}(s,\\mu), \\xi_{12}(s,\\mu), \\xi_{22}(s,\\mu),
+            \xi_{11}(s,\mu), \xi_{12}(s,\mu), \xi_{22}(s,\mu),
 
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and
         ``sample2``, and the autocorrelation of ``sample2``, respectively. If
@@ -157,19 +157,19 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
 
     Notes
     -----
-    Let :math:`\\vec{s}` be the radial vector connnecting two points.
+    Let :math:`\vec{s}` be the radial vector connnecting two points.
     The magnitude, :math:`s`, is:
 
     .. math::
-        s = \\sqrt{r_{\\parallel}^2+r_{\\perp}^2},
+        s = \sqrt{r_{\parallel}^2+r_{\perp}^2},
 
-    where :math:`r_{\\parallel}` is the separation parallel to the LOS
-    and :math:`r_{\\perp}` is the separation perpednicular to the LOS.  :math:`\\mu` is
-    the cosine of the angle, :math:`\\theta_{\\rm LOS}`, between the LOS
-    and :math:`\\vec{s}`:
+    where :math:`r_{\parallel}` is the separation parallel to the LOS
+    and :math:`r_{\perp}` is the separation perpednicular to the LOS.  :math:`\mu` is
+    the cosine of the angle, :math:`\theta_{\rm LOS}`, between the LOS
+    and :math:`\vec{s}`:
 
     .. math::
-        \\mu = \\cos(\\theta_{\\rm LOS}) \\equiv r_{\\parallel}/s.
+        \mu = \cos(\theta_{\rm LOS}) \equiv r_{\parallel}/s.
 
     Pairs are counted using
     `~halotools.mock_observables.pair_counters.npairs_s_mu`.
@@ -233,7 +233,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
-    # return results.  remember to reverse the final result because we used 
+    # return results.  remember to reverse the final result because we used
     # mu_prime = sin(theta_los) bins instead of the user passed in mu = cos(theta_los).
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
@@ -270,7 +270,7 @@ def spherical_sector_volume(s, mu_prime):
 def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size):
-    """
+    r"""
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
         2. PBCs and analytical randoms

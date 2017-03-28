@@ -1,6 +1,6 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.rp_pi_tpcf` function used to
-calculate the redshift-space two-point correlation function in 3d, :math:`\\xi(r_{p}, \\pi)`
+calculate the redshift-space two-point correlation function in 3d, :math:`\xi(r_{p}, \pi)`
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -29,8 +29,8 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         period=None, do_auto=True, do_cross=True, estimator='Natural',
         num_threads=1, max_sample_size=int(1e6), approx_cell1_size=None,
         approx_cell2_size=None, approx_cellran_size=None, seed=None):
-    """
-    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`
+    r"""
+    Calculate the redshift space correlation function, :math:`\xi(r_{p}, \pi)`
 
     Calculate the correlation function as a function of pair separation perpendicular to
     the line-of-sight (LOS) and parallel to the LOS.
@@ -139,14 +139,14 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     -------
     correlation_function(s) : numpy.ndarray
         *len(rp_bins)-1* by *len(pi_bins)-1* ndarray containing the correlation function
-        :math:`\\xi(r_p, \\pi)` computed in each of the bins defined by input ``rp_bins``
+        :math:`\xi(r_p, \pi)` computed in each of the bins defined by input ``rp_bins``
         and ``pi_bins``.
 
         .. math::
-            1 + \\xi(r_{p},\\pi) = \\mathrm{DD}r_{p},\\pi) / \\mathrm{RR}r_{p},\\pi)
+            1 + \xi(r_{p},\pi) = \mathrm{DD}r_{p},\pi) / \mathrm{RR}r_{p},\pi)
 
-        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}(r_{p},\\pi)`
-        is calculated by the pair counter, and :math:`\\mathrm{RR}(r_{p},\\pi)` is counted
+        if ``estimator`` is set to 'Natural', where  :math:`\mathrm{DD}(r_{p},\pi)`
+        is calculated by the pair counter, and :math:`\mathrm{RR}(r_{p},\pi)` is counted
         internally using "analytic randoms" if ``randoms`` is set to None
         (see notes for further details).
 
@@ -154,7 +154,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         three arrays of shape *len(rp_bins)-1* by *len(pi_bins)-1* are returned:
 
         .. math::
-            \\xi_{11}(r_{p},\\pi), \\xi_{12}(r_{p},\\pi), \\xi_{22}(r_{p},\\pi),
+            \xi_{11}(r_{p},\pi), \xi_{12}(r_{p},\pi), \xi_{22}(r_{p},\pi),
 
         the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and
         ``sample2``, and the autocorrelation of ``sample2``, respectively. If
@@ -279,7 +279,7 @@ def cylinder_volume(R, h):
 def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
         PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size):
-    """
+    r"""
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
         2. PBCs and analytical randoms

@@ -1,4 +1,4 @@
-"""
+r"""
 Module containing the `~halotools.mock_observables.radial_pvd_vs_r` function
 used to calculate the pairwise radial velocity dispersion
 as a function of 3d distance between the pairs.
@@ -22,8 +22,8 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
         velocities2=None, period=None, do_auto=True, do_cross=True,
         num_threads=1, max_sample_size=int(1e6),
         approx_cell1_size=None, approx_cell2_size=None, seed=None):
-    """
-    Calculate the pairwise velocity dispersion (PVD), :math:`\\sigma_{12}(r)`.
+    r"""
+    Calculate the pairwise velocity dispersion (PVD), :math:`\sigma_{12}(r)`.
 
     Example calls to this function appear in the documentation below.
 
@@ -74,19 +74,19 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     -------
     sigma_12 : numpy.array
         *len(rbins)-1* length array containing the dispersion of the pairwise velocity,
-        :math:`\\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
+        :math:`\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
 
     Notes
     -----
     The pairwise velocity, :math:`v_{12}(r)`, is defined as:
 
     .. math::
-        v_{12}(r) = \\vec{v}_{\\rm 1, pec} \\cdot \\vec{r}_{12}-\\vec{v}_{\\rm 2, pec} \\cdot \\vec{r}_{12}
+        v_{12}(r) = \vec{v}_{\rm 1, pec} \cdot \vec{r}_{12}-\vec{v}_{\rm 2, pec} \cdot \vec{r}_{12}
 
-    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and
-    :math:`\\vec{r}_{12}` is the radial vector connecting object 1 and 2.
+    where :math:`\vec{v}_{\rm 1, pec}` is the peculiar velocity of object 1, and
+    :math:`\vec{r}_{12}` is the radial vector connecting object 1 and 2.
 
-    :math:`\\sigma_{12}(r)` is the standard deviation of this quantity in radial bins.
+    :math:`\sigma_{12}(r)` is the standard deviation of this quantity in radial bins.
 
     Pairs and radial velocities are calculated using
     `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.

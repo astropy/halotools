@@ -16,7 +16,7 @@ __all__ = ('npairs_s_mu_engine', )
 @cython.nonecheck(False)
 def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     s_bins_in, mu_bins_in, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of projected separation.
+    r""" Cython engine for counting pairs of points as a function of projected separation.
 
     Parameters
     ------------
@@ -33,7 +33,7 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         numpy array of boundaries defining the radial bins in which pairs are counted.
 
     mu_bins_in : array_like
-        numpy array of boundaries defining bins in :math:`\\sin(\\theta_{\\rm los})`
+        numpy array of boundaries defining bins in :math:`\sin(\theta_{\rm los})`
         in which the pairs are counted in.
         Note that using the sine is not common convention for
         calculating the two point correlation function (see notes).
@@ -193,9 +193,9 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                         mu = sqrt(dxy_sq)/s
                                     else:
                                         mu=0.0
-                                    
+
                                     if (s <= s_max) & (mu <= mu_max):
-                                        
+
                                         k = num_s_bins-2
                                         while k!=-1:
                                             if s > s_bins[k]: break

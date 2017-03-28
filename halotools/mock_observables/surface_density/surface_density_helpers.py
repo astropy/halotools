@@ -12,7 +12,7 @@ __author__ = ('Andrew Hearin', 'Shun Saito')
 
 
 def annular_area_weighted_midpoints(rp_bins):
-    """ Calculate the radius that bisects the areas a set of circles.
+    r""" Calculate the radius that bisects the areas a set of circles.
 
     Parameters
     ----------
@@ -33,7 +33,7 @@ def annular_area_weighted_midpoints(rp_bins):
 
 
 def log_interpolation_with_inner_zero_masking(onep_sig_in, rp_bins, rp_mids):
-    """ Given an array ``onep_sig_in`` whose values are tabulated at
+    r""" Given an array ``onep_sig_in`` whose values are tabulated at
     ``rp_bins``, interolate in log-space to evaluate the array values at
     ``rp_mids``, taking care to mask over any zeros in ``onep_sig_in``.
 
@@ -64,7 +64,7 @@ def log_interpolation_with_inner_zero_masking(onep_sig_in, rp_bins, rp_mids):
 
 
 def rho_matter_comoving_in_halotools_units(cosmology):
-    """ Calculate the comoving matter density in units of
+    r""" Calculate the comoving matter density in units of
     :math:`M_{\odot}/{\rm Mpc}^3` assuming :math:`h = 1`.
 
     Parameters

@@ -1,4 +1,4 @@
-"""
+r"""
 Modules performing small, commonly used tasks throughout the package.
 """
 
@@ -15,7 +15,7 @@ __all__ = ['SampleSelector']
 
 
 def compute_conditional_percentiles(**kwargs):
-    """
+    r"""
     In bins of the ``prim_haloprop``, compute the rank-order percentile
     of the input ``table`` based on the value of ``sec_haloprop``.
 
@@ -92,7 +92,7 @@ def compute_conditional_percentiles(**kwargs):
             raise HalotoolsError(msg)
 
     def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
-        """
+        r"""
         Parameters
         ----------
         prim_haloprop : array
@@ -183,12 +183,12 @@ def compute_conditional_percentiles(**kwargs):
 
 
 class SampleSelector(object):
-    """ Container class for commonly used sample selections.
+    r""" Container class for commonly used sample selections.
     """
 
     @staticmethod
     def host_halo_selection(return_subhalos=False, **kwargs):
-        """ Method divides sample in to host halos and subhalos, and returns
+        r""" Method divides sample in to host halos and subhalos, and returns
         either the hosts or the hosts and the subs depending
         on the value of the input ``return_subhalos``.
         """
@@ -202,7 +202,7 @@ class SampleSelector(object):
     @staticmethod
     def property_range(lower_bound=-float("inf"), upper_bound=float("inf"),
             return_complement=False, host_halos_only=False, subhalos_only=False, **kwargs):
-        """ Method makes a cut on an input table column based on an input upper and lower bound, and
+        r""" Method makes a cut on an input table column based on an input upper and lower bound, and
         returns the cut table.
 
         Parameters
@@ -213,10 +213,10 @@ class SampleSelector(object):
             Column name that will be used to apply the cut
 
         lower_bound : float, optional keyword argument
-            Minimum value for the input column of the returned table. Default is :math:`-\\infty`.
+            Minimum value for the input column of the returned table. Default is :math:`-\infty`.
 
         upper_bound : float, optional keyword argument
-            Maximum value for the input column of the returned table. Default is :math:`+\\infty`.
+            Maximum value for the input column of the returned table. Default is :math:`+\infty`.
 
         return_complement : bool, optional keyword argument
             If True, `property_range` gives the table elements that do not pass the cut
@@ -279,7 +279,7 @@ class SampleSelector(object):
 
     @staticmethod
     def split_sample(**kwargs):
-        """ Method divides a sample into subsamples based on the percentile ranking of a given property.
+        r""" Method divides a sample into subsamples based on the percentile ranking of a given property.
 
         Parameters
         ----------

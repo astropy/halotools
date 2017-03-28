@@ -1,4 +1,4 @@
-"""
+r"""
 This module contains general purpose helper functions
 used by many of the Halotools models.
 """
@@ -21,7 +21,7 @@ __author__ = ['Andrew Hearin', 'Surhud More', 'Johannes Ulf Lange']
 
 
 def solve_for_polynomial_coefficients(abscissa, ordinates):
-    """ Solves for coefficients of the unique,
+    r""" Solves for coefficients of the unique,
     minimum-degree polynomial that passes through
     the input abscissa and attains values equal the input ordinates.
 
@@ -52,7 +52,7 @@ def solve_for_polynomial_coefficients(abscissa, ordinates):
     The coefficients of that unique polynomial are the output of the function.
 
     As an example, suppose that a model in which the quenched fraction is
-    :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`.
+    :math:`F_{q}(logM_{\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\mathrm{halo}} = 15) = 0.9`.
     Then this function takes [12, 15] as the input abscissa,
     [0.25, 0.9] as the input ordinates,
     and returns the array :math:`[c_{0}, c_{1}]`.
@@ -83,7 +83,7 @@ def solve_for_polynomial_coefficients(abscissa, ordinates):
 
 
 def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
-    """ Method to evaluate an input polynomial at the input_abscissa.
+    r""" Method to evaluate an input polynomial at the input_abscissa.
     The input polynomial is determined by `solve_for_polynomial_coefficients`
     from table_abscissa and table_ordinates.
 
@@ -126,7 +126,7 @@ def polynomial_from_table(table_abscissa, table_ordinates, input_abscissa):
 
 def enforce_periodicity_of_box(coords, box_length,
         check_multiple_box_lengths=False, **kwargs):
-    """ Function used to apply periodic boundary conditions
+    r""" Function used to apply periodic boundary conditions
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
     Parameters
@@ -176,7 +176,7 @@ def enforce_periodicity_of_box(coords, box_length,
 
 
 def custom_spline(table_abscissa, table_ordinates, **kwargs):
-    """ Convenience wrapper around `~scipy.interpolate.InterpolatedUnivariateSpline`,
+    r""" Convenience wrapper around `~scipy.interpolate.InterpolatedUnivariateSpline`,
     written specifically to handle the edge case of a spline table being
     built from a single point.
 
@@ -235,7 +235,7 @@ def custom_spline(table_abscissa, table_ordinates, **kwargs):
 
 
 def call_func_table(func_table, abscissa, func_indices):
-    """ Returns the output of an array of functions evaluated at a set of input points
+    r""" Returns the output of an array of functions evaluated at a set of input points
     if the indices of required functions is known.
 
     Parameters
@@ -275,7 +275,7 @@ def call_func_table(func_table, abscissa, func_indices):
 
 
 def bind_required_kwargs(required_kwargs, obj, **kwargs):
-    """ Method binds each element of ``required_kwargs`` to
+    r""" Method binds each element of ``required_kwargs`` to
     the input object ``obj``, or raises and exception for cases
     where a mandatory keyword argument was not passed to the
     ``obj`` constructor.
@@ -311,7 +311,7 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
 
 
 def create_composite_dtype(dtype_list):
-    """ Find the union of the dtypes in the input list, and return a composite
+    r""" Find the union of the dtypes in the input list, and return a composite
     dtype after verifying consistency of typing of possibly repeated fields.
 
     Parameters
@@ -351,7 +351,7 @@ def create_composite_dtype(dtype_list):
 
 
 def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, default_value):
-    """ Function used to ensure that a keyword argument passed to the constructor
+    r""" Function used to ensure that a keyword argument passed to the constructor
     of an orthogonal mix-in class is not already an attribute bound to self.
     If it is safe to bind the keyword_argument to the object,
     `bind_default_kwarg_mixin_safe` will do so.
@@ -389,7 +389,7 @@ def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, def
 
 
 def custom_incomplete_gamma(a, x):
-    """ Incomplete gamma function.
+    r""" Incomplete gamma function.
 
     For the case covered by scipy, a > 0, scipy is called. Otherwise the gamma function
     recurrence relations are called, extending the scipy behavior.
@@ -452,7 +452,7 @@ custom_incomplete_gamma.__author__ = ['Surhud More', 'Johannes Ulf Lange']
 
 
 def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning=True):
-    """
+    r"""
     Function returns a decorator that can be used to clip the values
     of an original function to produce a modified function whose
     values are replaced by the input ``lower_bound`` and ``upper_bound`` whenever
