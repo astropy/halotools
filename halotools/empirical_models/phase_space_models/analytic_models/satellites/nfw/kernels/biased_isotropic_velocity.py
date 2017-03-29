@@ -56,7 +56,7 @@ def dimensionless_radial_velocity_dispersion(scaled_radius, halo_conc, gal_conc,
     result = np.zeros_like(x)
 
     prefactor = gal_conc*gal_conc*x*(1. + gal_conc*x)**2/_g_integral(halo_conc)
-    extra_args = halo_conc/gal_conc
+    extra_args = halo_conc/np.atleast_1d(gal_conc).astype('f4')
 
     lower_limit = gal_conc*x
     upper_limit = float("inf")

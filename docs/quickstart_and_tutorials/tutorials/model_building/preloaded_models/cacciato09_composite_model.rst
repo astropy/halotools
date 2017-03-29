@@ -77,7 +77,7 @@ with fake simulation data via the ``halocat`` argument.
 >>> from halotools.sim_manager import FakeSim
 >>> halocat = FakeSim()
 >>> model = PrebuiltHodModelFactory('cacciato09')
->>> model.populate_mock(halocat = halocat)
+>>> model.populate_mock(halocat)  # doctest: +SKIP
 
 See `ModelFactory.populate_mock` for information about how to
 populate your model into different simulations.
@@ -100,7 +100,7 @@ To compute the median luminosity of central galaxies as a function of halo mass:
 
 To compute the average number of satellites per halo as a function of halo mass:
 
->>> mean_nsat = model.mean_occupation_satellites(prim_haloprop = halo_mass)
+>>> mean_nsat = model.mean_occupation_satellites(prim_haloprop=halo_mass)
 
 By modifying the parameters stored in the ``param_dict``, the underlying analytical
 relations such as those above allow you to study how the model behaves without the
@@ -126,7 +126,7 @@ Briefly, changing the delta parameters should only affect the abundance of
 satellites that have luminosities similar to the central luminosity. On the other
 hand, faint satellites should be unaffected. The details of the 2 delta parameters
 are described in Lange et al. (in prep.). Setting both to 0, as done by default, is
-equivalent to the model of Cacciato et al. (2009). 
+equivalent to the model of Cacciato et al. (2009).
 
 * param_dict['log_L_0'] -  Normalization of central mass-to-light ratio.
 
