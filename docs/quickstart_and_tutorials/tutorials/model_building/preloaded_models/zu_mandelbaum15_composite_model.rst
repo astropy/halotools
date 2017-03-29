@@ -87,7 +87,7 @@ with fake simulation data via the ``halocat`` argument.
 >>> from halotools.sim_manager import FakeSim
 >>> halocat = FakeSim()
 >>> model = PrebuiltHodModelFactory('zu_mandelbaum15')
->>> model.populate_mock(halocat)
+>>> model.populate_mock(halocat)  # doctest: +SKIP
 
 See `ModelFactory.populate_mock` for information about how to
 populate your model into different simulations.
