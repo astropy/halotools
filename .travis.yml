@@ -1,6 +1,9 @@
 language: python
 
 python:
+    - 2.7
+    - 3.3
+    - 3.4
     - 3.5
     - 3.6
 
@@ -36,9 +39,6 @@ env:
 
 matrix:
     include:
-        - python: 2.7
-          env: SETUP_CMD='egg_info'
-
         # Do a coverage test in Python 2.
         - python: 2.7
           env: SETUP_CMD='test --coverage'
@@ -58,9 +58,6 @@ matrix:
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         - python: 3.4
-          env: SETUP_CMD='egg_info'
-
-        - python: 3.4
           env: NUMPY_VERSION=1.11
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
@@ -68,19 +65,16 @@ matrix:
         - python: 2.7
           env: ASTROPY_VERSION=development
         - python: 3.6
-          env: ASTROPY_VERSION=development
+          env: ASTROPY_VERSION=development ASTROPY_USE_SYSTEM_PYTEST=1
 
-        # Try older numpy version, 1.9 is tested above with py3.3
-        - python: 3.4
-          env: NUMPY_VERSION=1.10
-        # Try older numpy version, 1.9 is tested above with py3.3
+        # Try older numpy version, 1.9 is tested above with py3.3 and 1.11 with py3.4
         - python: 3.5
-          env: NUMPY_VERSION=1.11
+          env: NUMPY_VERSION=1.10
 
         # Try numpy pre-release version, this runs only when a pre-release
         # is available on pypi.
         - python: 3.6
-          env: NUMPY_VERSION=prerelease SETUP_CMD='test'
+          env: NUMPY_VERSION=prerelease SETUP_CMD='test' ASTROPY_USE_SYSTEM_PYTEST=1
 
         # try a version *without* h5py - we need this for readthedocs
         - python: 2.7
