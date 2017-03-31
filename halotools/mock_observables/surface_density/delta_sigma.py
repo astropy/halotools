@@ -183,6 +183,20 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     *physical* units of :math:`M_{\odot} / {\rm pc}^2` using the value of
     little h appropriate for your assumed cosmology.
 
+    The code shown above demonstrates how to calculate :math:`\Delta\Sigma` via the excess
+    surface density of mass using the z-axis as the axis of projection. However, it may be useful
+    to project along the other Cartesian axes, for example to help beat down sample variance.
+    While the `delta_sigma` function is written to always use the "third" dimension as the
+    projection axis, you can easily hack the code to project along, say, the y-axis by simply
+    transposing your y- and z-coordinates when you pack them into a 2-d array:
+
+    >>> particles = np.vstack((px, pz, py)).T
+    >>> galaxies = np.vstack((x, z, y)).T
+
+    Using the above ``particles`` and ``galaxies`` and otherwise calling the `delta_sigma`
+    function as normal will instead calculate the surface mass density by projecting
+    along the y-axis.
+
     See also
     --------
     :ref:`galaxy_catalog_analysis_tutorial3`

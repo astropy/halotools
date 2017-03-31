@@ -68,6 +68,11 @@ Calculating galaxy-galaxy lensing in a hydro simulation
 
 The `delta_sigma` function has had a complete overhaul, including a change to the function signature. The new implementation is faster and more accurate than the previous version, and now supports calculating the lensing signal for cases where the simulation particles have variable mass, such as hydro simulations or boxes with massive neutrinos.
 
+.. note::
+
+    The function signature of `delta_sigma` no longer has a ``pi_max`` argument, as the calculation is now performed by computing the mass distribution projecting along the entire length of the z-axis of the simulation. Users of the `delta_sigma` function in previous Halotools releases will need to update their code. See the function docstring for further details.
+
+
 Calculating galaxy-galaxy lensing from pre-computed pairs
 -----------------------------------------------------------
 There is also a new `delta_sigma_from_precomputed_pairs` that allows users to pre-compute the mass surrounding each model galaxy and then compute :math:`\Delta\Sigma` directly from an input mask; for cases where the *candidate* positions of galaxies are known in advance, the `delta_sigma_from_precomputed_pairs` will generally improve runtimes for calculating :math:`\Delta\Sigma` by orders of magnitude.
