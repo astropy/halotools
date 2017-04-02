@@ -21,6 +21,11 @@ Abundance Matching and Age Matching functions
 
 The `conditional_abunmatch` function provides a Numpy-based kernel for mapping galaxy properties onto halo properties in such a way that the observed (one-point) distribution is exactly correct, and a correlation of variable strength is introduced between the galaxy and halo properties. This function is the core of the age matching technique used in `Hearin and Watson 2013 <https://arxiv.org/abs/1304.5557/>`_ to correlate galaxy color and halo age. The `conditional_abunmatch` function generalizes this technique to construct mappings between any two variables and any level of stochasticity in the mapping.
 
+Generalized modeling of galaxy--halo correlations
+--------------------------------------------------
+
+Along similar lines, the `noisy_percentile` function provides an alternative Numpy-based kernel that gives users lower-level control over how to model correlations between galaxies and halo properties. See the docstring of `noisy_percentile` for a tutorial on how to use this function to model a correlation between halo concentration and scatter in the stellar-to-halo-mass relation. `noisy_percentile` complements `conditional_abunmatch` by
+providing a higher-performance algorithm with a lower-level API, giving users more fine-grained control over a wider range of applications.
 
 .. _subhalo_phase_space_v05:
 
