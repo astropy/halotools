@@ -58,7 +58,7 @@ samples, the second model additionally predicts whether each model galaxy is qui
 Satellite profiles with biased values
 -------------------------------------
 
-The `BiasedNFWPhaseSpace` class provides modeling for the distribution of satellite galaxies orbiting in their host halos, where the NFW concentration governing the satellites is allowed to differ from host halo concentration. Galaxy concentration bias is permitted to vary as a function of mass with `BiasedNFWPhaseSpace`, while the `SFRBiasedNFWPhaseSpace` class permits dependence of galaxy concentration on both host mass and whether or not the model galaxy is quiescent.
+The `BiasedNFWPhaseSpace` class provides modeling for the distribution of satellite galaxies orbiting in Jeans equilibrium within their host halos, where the NFW concentration governing the satellites is allowed to differ from host halo concentration. Galaxy concentration bias is permitted to vary as a function of mass with `BiasedNFWPhaseSpace`, while the `SFRBiasedNFWPhaseSpace` class permits dependence of galaxy concentration on both host mass and whether or not the model galaxy is quiescent. In both of these new classes, as well as the (unbiased) `NFWPhaseSpace`, satellite velocities are determined by solving the Jeans equation for the radial velocity dispersion profile, assuming isotropy for the velocity distribution.
 
 
 New Mock Observations
