@@ -4,6 +4,8 @@ import numpy as np
 from scipy.special import erf, erfinv
 from astropy.utils.misc import NumpyRNGContext
 
+__all__ = ('noisy_percentile', )
+
 
 def noisy_percentile(percentile, correlation_coeff, seed=None, random_percentile=None):
     r"""
