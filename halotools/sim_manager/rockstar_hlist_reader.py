@@ -165,7 +165,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
         row_cut_min_dict : dict, optional
             Dictionary used to place a lower-bound cut on the rows
-            of the tabular ASCII data.
+            of the tabular ASCII data, e.g., to ignore halos below some mass cut.
 
             Each key of the dictionary must also
             be a key of the input ``columns_to_keep_dict``;
@@ -180,7 +180,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
         row_cut_max_dict : dict, optional
             Dictionary used to place an upper-bound cut on the rows
-            of the tabular ASCII data.
+            of the tabular ASCII data, e.g., to ignore halos not satisfying some relaxation criterion.
 
             Each key of the dictionary must also
             be a key of the input ``columns_to_keep_dict``;
@@ -195,7 +195,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
         row_cut_eq_dict : dict, optional
             Dictionary used to place an equality cut on the rows
-            of the tabular ASCII data.
+            of the tabular ASCII data, e.g., to ignore subhalos.
 
             Each key of the dictionary must also
             be a key of the input ``columns_to_keep_dict``;
@@ -530,9 +530,21 @@ class RockstarHlistReader(TabularAsciiReader):
         By default, the optional ``write_to_disk`` and ``update_cache_log``
         arguments are set to False because Halotools will not
         write large amounts of data to disk without your explicit instructions
-        to do so. However, it the majority of use-cases,
-        you should set both of these arguments to True, in which case
-        your reduced catalog will be saved on disk and stored in cache.
+        to do so.
+
+        If you want an untouched replica of the downloaded halo catalog on disk,
+        then you should set both of these arguments to True, in which case
+        your reduced catalog will be saved on disk and stored in cache immediately.
+
+        However, you may wish to supplement your halo catalog with additional
+        halo properties before storing on disk. This can easily be accomplished by
+        simply manually adding columns to the ``halo_table`` attribute of the
+        `RockstarHlistReader` instance after reading in the data. In this case,
+        set ``write_to_disk`` to False, add your new data, and then call the
+        ``write_to_disk`` method and ``update_cache_log`` methods in succession.
+        In such a case, it is good practice to make an explicit note of what you have done
+        in the ``processing_notes`` attribute of the reader instance so that you will
+        have a permanent record of how you processed the catalog.
 
         Parameters
         -----------
@@ -553,7 +565,9 @@ class RockstarHlistReader(TabularAsciiReader):
         write_to_disk : bool, optional
             If True, the `write_to_disk` method will be called automatically.
             Default is False, in which case you must call the `write_to_disk`
-            method yourself to store the processed catalog.
+            method yourself to store the processed catalog. In that case,
+            you will also need to manually call the ``update_cache_log`` method
+            after writing to disk.
 
         update_cache_log : bool, optional
             If True, the `update_cache_log` method will be called automatically.
@@ -670,6 +684,10 @@ class RockstarHlistReader(TabularAsciiReader):
         """ Method writes ``self.halo_table`` to ``self.output_fname``
         and also calls the ``self._write_metadata`` method to place the
         hdf5 file into standard form.
+
+        It is likely that you will want to call the ``update_cache_log`` method
+        after calling ``write_to_disk`` so that you can take advantage of the convenient
+        syntax provided by the `~halotools.sim_manager.CachedHaloCatalog` class.
         """
         if not self._has_h5py:
             raise HalotoolsError(uninstalled_h5py_msg)
