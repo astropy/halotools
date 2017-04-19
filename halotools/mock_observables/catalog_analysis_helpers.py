@@ -102,7 +102,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
         cosmology=default_cosmology, redshift=default_redshift, **kwargs):
     r""" Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
-    the `~halotools.mock_observables` package.
+    the `~halotools.mock_observables` package, optionally applying redshift-space
+    distortions according to the input ``velocity``, ``redshift`` and ``cosmology``.
 
     See :ref:`mock_obs_pos_formatting` for a tutorial.
 
@@ -131,11 +132,13 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
         Default is no distortions.
 
     cosmology : object, optional
-        Cosmology to assume when applying redshift-space distortions.
+        Cosmology to assume when applying redshift-space distortions,
+        e.g., the cosmology of the simulation.
         Default is set in `sim_manager.sim_defaults`.
 
     redshift : float, optional
-        Redshift to assume when applying redshift-space distortions.
+        Redshift of the mock galaxy sample,
+        e.g., the redshift of the simulation snapshot.
         Default is set in `sim_manager.sim_defaults`.
 
     mask : array_like, optional
