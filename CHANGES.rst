@@ -29,6 +29,8 @@
 
 - The ``gal_types`` attribute of HODModelFactory-produced models is now sorted so that ``centrals`` always appears before ``satellites``. This new default behavior is more common for interdependent occupation models, where satellite abundance depends upon central galaxy characteristics, rather than the other way around. See https://github.com/astropy/halotools/pull/729
 
+- Added new keyword arguments to `return_xyz_formatted_array` function enabling application of redshift-space distortions for galaxy samples at higher redshift. Previously, the user needed to do this manually). Default behavior of this function is unchanged, provided users had not locally modified the `sim_defaults` module to have set `default_redshift` greater than zero.
+
 
 0.4 (2016-08-11)
 ----------------
