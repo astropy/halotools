@@ -110,14 +110,14 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
     Parameters
     -----------
     x, y, z : sequence of length-Npts arrays
-        Units of Mpc assuming h=1, as throughout Halotools.
+        Comoving units of Mpc assuming h=1, as throughout Halotools.
 
     velocity : array, optional
-        Length-Npts array of velocities in units of km/s
+        Length-Npts array of velocities in *physical* units of km/s
         used to apply peculiar velocity distortions, e.g.,
-        :math:`z_{\rm dist} = z + v/H_{0}`.
-        Since Halotools workes exclusively in h=1 units,
-        in the above formula :math:`H_{0} = 100 km/s/Mpc`.
+        :math:`z_{\rm dist} = z_{\rm true} + v_{\rm z}/aH`,
+        where *a* and *H* are the scale factor and Hubble expansion rate
+        evaluated at the input ``redshift``.
 
         If ``velocity`` argument is passed,
         ``velocity_distortion_dimension`` must also be passed.
@@ -156,7 +156,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
     Returns
     --------
     pos : array_like
-        Numpy array with shape *(Npts, 3)*.
+        Numpy array with shape *(Npts, 3)* with units of comoving Mpc/h.
 
     Examples
     ---------
@@ -165,15 +165,21 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
     >>> x = np.random.uniform(0, Lbox, npts)
     >>> y = np.random.uniform(0, Lbox, npts)
     >>> z = np.random.uniform(0, Lbox, npts)
-    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox)
+    >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox)
 
     Now we will define an array of random velocities that we will use
-    to apply z-space distortions to the z-dimension. For our random velocities
+    to apply z-space distortions to the z-dimension, assuming the mock galaxy
+    sample is at the default redshift. For our random velocities
     we'll assume the values are drawn from a Gaussian centered at zero
     using `numpy.random.normal`.
 
     >>> velocity = np.random.normal(loc=0, scale=100, size=npts)
-    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
+    >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox, velocity=velocity, velocity_distortion_dimension='z')
+
+    If we wanted to introduce redshift-space distortions at some higher redshift:
+
+    >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox, velocity=velocity, velocity_distortion_dimension='z', redshift=1.5)
+
 
     """
     period = np.atleast_1d(period)
