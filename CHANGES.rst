@@ -27,6 +27,9 @@
 
 - Addition of two new classes `halotools.empirical_models.BiasedNFWPhaseSpace` and `halotools.empirical_models.SFRBiasedNFWPhaseSpace` for NFW satellites with biased concentrations and Jeans solutions.
 
+- The ``gal_types`` attribute of HODModelFactory-produced models is now sorted so that ``centrals`` always
+appears before ``satellites``. This new default behavior is more common for interdependent occupation models, where satellite abundance depends upon central galaxy characteristics, rather than the other way around. See https://github.com/astropy/halotools/pull/729
+
 0.4 (2016-08-11)
 ----------------
 
