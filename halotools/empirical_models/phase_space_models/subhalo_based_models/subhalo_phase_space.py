@@ -46,12 +46,15 @@ class SubhaloPhaseSpace(object):
             Name of the modeled galaxy population, e.g, 'satellites'.
 
         host_haloprop_bins : array_like
-            Array used to bin subhalos into groups of a similar property.
-            The first element of ``subhalo_table_sorting_keys`` determines
-            which property will be binned, and so ``host_haloprop_bins`` must
-            be consistent with that property. For example, if the first element
-            of ``host_haloprop_bins`` is ``halo_mvir_host_halo``,
-            then ``host_haloprop_bins`` could be np.logspace(10, 15, 15).
+            Array used to bin subhalos into groups of a similar property,
+            e.g., host halo mass. The ``host_haloprop_bins`` argument defines the bin edges.
+            The user must also provide the column name storing the property
+            that should be binned. This column name should be provided with the
+            ``binning_key`` argument.
+
+            For example, if you were binning subhalos by host halo mass,
+            the ``binning_key`` argument would be ``halo_mvir_host_halo``,
+            and ``host_haloprop_bins`` could be np.logspace(10, 15, 15).
 
             The purpose of ``host_haloprop_bins`` is to address the
             possibility that the desired number of satellites in a halo may
