@@ -6,6 +6,7 @@ import numpy as np
 from scipy.stats import binned_statistic
 
 from ..empirical_models import enforce_periodicity_of_box
+from ..sim_manager.sim_defaults import default_cosmology, default_redshift
 
 from ..custom_exceptions import HalotoolsError
 
@@ -97,7 +98,8 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
     return bin_midpoints, mean, err
 
 
-def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
+def return_xyz_formatted_array(x, y, z, period=np.inf,
+        cosmology=default_cosmology, redshift=default_redshift, **kwargs):
     r""" Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
     the `~halotools.mock_observables` package.
@@ -127,6 +129,14 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
         then ``pos`` can be treated as physically observed
         galaxy positions under the distant-observer approximation.
         Default is no distortions.
+
+    cosmology : object, optional
+        Cosmology to assume when applying redshift-space distortions.
+        Default is set in `sim_manager.sim_defaults`.
+
+    redshift : float, optional
+        Redshift to assume when applying redshift-space distortions.
+        Default is set in `sim_manager.sim_defaults`.
 
     mask : array_like, optional
         Boolean mask that can be used to select the positions
@@ -192,7 +202,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     if apply_distortion is True:
         try:
             assert vel_dist_dim in ('x', 'y', 'z')
-            posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + np.copy(velocity/100.)
+            spatial_distortion = (1. + redshift)*np.copy(velocity)/100./cosmology.efunc(redshift)
+            posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + spatial_distortion
             Lbox = period_dict[vel_dist_dim]
             if Lbox != np.inf:
                 posdict[vel_dist_dim] = enforce_periodicity_of_box(
