@@ -6,6 +6,7 @@ import numpy as np
 from scipy.stats import binned_statistic
 
 from ..empirical_models import enforce_periodicity_of_box
+from ..sim_manager.sim_defaults import default_cosmology, default_redshift
 
 from ..custom_exceptions import HalotoolsError
 
@@ -97,24 +98,26 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
     return bin_midpoints, mean, err
 
 
-def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
+def return_xyz_formatted_array(x, y, z, period=np.inf,
+        cosmology=default_cosmology, redshift=default_redshift, **kwargs):
     r""" Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
-    the `~halotools.mock_observables` package.
+    the `~halotools.mock_observables` package, optionally applying redshift-space
+    distortions according to the input ``velocity``, ``redshift`` and ``cosmology``.
 
     See :ref:`mock_obs_pos_formatting` for a tutorial.
 
     Parameters
     -----------
     x, y, z : sequence of length-Npts arrays
-        Units of Mpc assuming h=1, as throughout Halotools.
+        Comoving units of Mpc assuming h=1, as throughout Halotools.
 
     velocity : array, optional
-        Length-Npts array of velocities in units of km/s
+        Length-Npts array of velocities in *physical* units of km/s
         used to apply peculiar velocity distortions, e.g.,
-        :math:`z_{\rm dist} = z + v/H_{0}`.
-        Since Halotools workes exclusively in h=1 units,
-        in the above formula :math:`H_{0} = 100 km/s/Mpc`.
+        :math:`z_{\rm dist} = z_{\rm true} + v_{\rm z}/aH`,
+        where *a* and *H* are the scale factor and Hubble expansion rate
+        evaluated at the input ``redshift``.
 
         If ``velocity`` argument is passed,
         ``velocity_distortion_dimension`` must also be passed.
@@ -127,6 +130,16 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
         then ``pos`` can be treated as physically observed
         galaxy positions under the distant-observer approximation.
         Default is no distortions.
+
+    cosmology : object, optional
+        Cosmology to assume when applying redshift-space distortions,
+        e.g., the cosmology of the simulation.
+        Default is set in `sim_manager.sim_defaults`.
+
+    redshift : float, optional
+        Redshift of the mock galaxy sample,
+        e.g., the redshift of the simulation snapshot.
+        Default is set in `sim_manager.sim_defaults`.
 
     mask : array_like, optional
         Boolean mask that can be used to select the positions
@@ -143,7 +156,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     Returns
     --------
     pos : array_like
-        Numpy array with shape *(Npts, 3)*.
+        Numpy array with shape *(Npts, 3)* with units of comoving Mpc/h.
 
     Examples
     ---------
@@ -152,15 +165,21 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     >>> x = np.random.uniform(0, Lbox, npts)
     >>> y = np.random.uniform(0, Lbox, npts)
     >>> z = np.random.uniform(0, Lbox, npts)
-    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox)
+    >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox)
 
     Now we will define an array of random velocities that we will use
-    to apply z-space distortions to the z-dimension. For our random velocities
+    to apply z-space distortions to the z-dimension, assuming the mock galaxy
+    sample is at the default redshift. For our random velocities
     we'll assume the values are drawn from a Gaussian centered at zero
     using `numpy.random.normal`.
 
     >>> velocity = np.random.normal(loc=0, scale=100, size=npts)
-    >>> pos = return_xyz_formatted_array(x, y, z, period = Lbox, velocity = velocity, velocity_distortion_dimension='z')
+    >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox, velocity=velocity, velocity_distortion_dimension='z')
+
+    If we wanted to introduce redshift-space distortions at some higher redshift:
+
+    >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox, velocity=velocity, velocity_distortion_dimension='z', redshift=1.5)
+
 
     """
     period = np.atleast_1d(period)
@@ -192,7 +211,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     if apply_distortion is True:
         try:
             assert vel_dist_dim in ('x', 'y', 'z')
-            posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + np.copy(velocity/100.)
+            spatial_distortion = (1. + redshift)*np.copy(velocity)/100./cosmology.efunc(redshift)
+            posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + spatial_distortion
             Lbox = period_dict[vel_dist_dim]
             if Lbox != np.inf:
                 posdict[vel_dist_dim] = enforce_periodicity_of_box(

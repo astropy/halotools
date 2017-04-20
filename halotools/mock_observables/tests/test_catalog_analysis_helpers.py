@@ -233,7 +233,7 @@ def test_relative_velocities4():
     assert np.all(vrel == -correct_result)
 
 
-def test_return_xyz_formatted_array():
+def test_return_xyz_formatted_array1():
     npts = 10
     period = [1, 2, 3]
     x = np.linspace(0.001, period[0]-0.001, npts)
@@ -248,11 +248,44 @@ def test_return_xyz_formatted_array():
         velocity_distortion_dimension='x', period=period)
     result6 = cat_helpers.return_xyz_formatted_array(x, y, z, velocity=v,
         velocity_distortion_dimension='y', period=period)
+
     assert np.all(result1 == result2)
     assert np.all(result1 == result3)
     assert np.all(result1 == result4)
     assert np.all(result1 == result5)
     assert np.all(result1 == result6)
+
+
+def test_return_xyz_formatted_array2():
+    """ verify that redshift keyword is operative
+    """
+    npts = int(1e4)
+    x = np.linspace(0.001, 0.999, npts)
+    y = np.linspace(0.001, 0.999, npts)
+    z = np.linspace(0.001, 0.999, npts)
+    v = np.random.normal(loc=0, scale=150, size=npts)
+    result_z0 = cat_helpers.return_xyz_formatted_array(x, y, z,
+        velocity=v, velocity_distortion_dimension='x', redshift=0)
+    result_z1 = cat_helpers.return_xyz_formatted_array(x, y, z,
+        velocity=v, velocity_distortion_dimension='x', redshift=1)
+    assert not np.all(result_z0 == result_z1)
+
+
+def test_return_xyz_formatted_array3():
+    """ verify that cosmology keyword is operative
+    """
+    npts = int(1e4)
+    x = np.linspace(0.001, 0.999, npts)
+    y = np.linspace(0.001, 0.999, npts)
+    z = np.linspace(0.001, 0.999, npts)
+    v = np.random.normal(loc=0, scale=150, size=npts)
+
+    from astropy.cosmology import WMAP5, Planck15
+    result_z0a = cat_helpers.return_xyz_formatted_array(x, y, z,
+        velocity=v, velocity_distortion_dimension='x', redshift=0.5, cosmology=WMAP5)
+    result_z0b = cat_helpers.return_xyz_formatted_array(x, y, z,
+        velocity=v, velocity_distortion_dimension='x', redshift=0.5, cosmology=Planck15)
+    assert not np.all(result_z0a == result_z0b)
 
 
 class TestCatalogAnalysisHelpers(TestCase):
