@@ -20,6 +20,8 @@ The latest build of the documentation can be found at http://halotools.readthedo
 
 ## Installation
 
+[![PyPI version](https://badge.fury.io/py/halotools.svg)](https://badge.fury.io/py/halotools)
+
 You can find detailed installation instructions
 in the *Package Installation* section of http://halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations.
 
