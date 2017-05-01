@@ -7,7 +7,7 @@ import numpy as np
 
 def crossmatch(x, y, skip_bounds_checking=False):
     """
-    Finds where the elements of ``x`` appear in the array ``y``, including repeats.
+    Finds where the elements of ``x`` appear in the sorted array ``y``, including repeats.
 
     The elements in x may be repeated, but the elements in y must be unique.
     The arrays x and y may be only partially overlapping.
