@@ -55,6 +55,12 @@ def crossmatch(x, y, skip_bounds_checking=False):
         Integer array used to apply a mask to y
         such that x[idx_x] == y[idx_y]
 
+    Notes
+    -----
+    The matching between ``x`` and ``y`` is done on the sorted arrays.  A consequence of 
+    this is that x[idx_x] and y[idx_y] will generally be a subset of ``x`` and ``y`` in 
+    sorted order.
+
     Examples
     --------
     Let's create some fake data to demonstrate basic usage of the function.
