@@ -5,6 +5,7 @@ stellar mass and halo mass based on Zu & Mandelbaum et al. (2015).
 from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
 from warnings import warn
+from astropy.utils.misc import NumpyRNGContext
 
 from ..component_model_templates import PrimGalpropModel
 
@@ -185,3 +186,27 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         eta = self.param_dict['smhm_sigma_slope']
 
         return np.where(halo_mass < m1, sigma, sigma + eta*np.log10(halo_mass/m1))
+
+    def mean_scatter(self, **kwargs):
+        if 'table' in kwargs.keys():
+            halo_mass = kwargs['table'][self.prim_haloprop_key]
+        else:
+            halo_mass = np.atleast_1d(kwargs['prim_haloprop'])
+        return np.log10(np.e)*self.scatter_ln_mstar(halo_mass)
+
+    def scatter_realization(self, **kwargs):
+        """ Monte Carlo realization of stellar mass stochasticity
+        """
+        seed = kwargs.get('seed', None)
+
+        scatter_scale = np.atleast_1d(self.mean_scatter(**kwargs))
+
+        # initialize result with zero scatter result
+        result = np.zeros(len(scatter_scale))
+
+        # only draw from a normal distribution for non-zero values of scatter
+        mask = (scatter_scale > 0.0)
+        with NumpyRNGContext(seed):
+            result[mask] = np.random.normal(loc=0, scale=scatter_scale[mask])
+
+        return result
