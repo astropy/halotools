@@ -101,7 +101,7 @@ class LogNormalScatterModel(object):
         elif 'prim_haloprop' in list(kwargs.keys()):
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+            raise KeyError("Must pass one of the following keyword arguments to mean_scatter:\n"
                 "``table`` or ``prim_haloprop``")
 
         self._update_interpol()
