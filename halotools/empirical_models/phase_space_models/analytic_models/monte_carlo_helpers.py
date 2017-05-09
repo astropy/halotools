@@ -567,6 +567,7 @@ class MonteCarloGalProf(object):
 
         virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
+        radial_dispersions = np.where(radial_dispersions < 0, 0, radial_dispersions)
 
         seed = kwargs.get('seed', None)
         with NumpyRNGContext(seed):
