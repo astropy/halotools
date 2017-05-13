@@ -89,7 +89,7 @@ def test_mockpop1():
     min_host_mass_to_search_for = 10**16.001
     mask16_0p1 = _nearest_lower_value_mask(sats_0p1['halo_mvir'],
                         min_host_mass_to_search_for)
-    galaxy_sample_m16_0p1 = model.mock.galaxy_table[mask16_0p1]
+    galaxy_sample_m16_0p1 = sats_0p1[mask16_0p1]
     std_vr_0p1 = np.std(_radial_velocities(galaxy_sample_m16_0p1, halocat.Lbox))
 
     model.param_dict['conc_gal_bias'] = gal_bias_bins.max()
@@ -104,7 +104,7 @@ def test_mockpop1():
     min_host_mass_to_search_for = 10**16.001
     mask16_10 = _nearest_lower_value_mask(sats_10['halo_mvir'],
                         min_host_mass_to_search_for)
-    galaxy_sample_m16_10 = model.mock.galaxy_table[mask16_10]
+    galaxy_sample_m16_10 = sats_10[mask16_10]
     std_vr_10 = np.std(_radial_velocities(galaxy_sample_m16_10, halocat.Lbox))
 
     msg = ("Radial velocity dispersions should be smaller for larger values of ``conc_gal_bias`` ")
@@ -138,17 +138,19 @@ def test_mockpop2():
     enforce_host_centric_distance_exists(model.mock.galaxy_table)
 
     # Select a galaxy sample with the same host halo mass ~ 10**14, and another with 10**16
+    satmask = model.mock.galaxy_table['gal_type'] == 'satellites'
+    sats = model.mock.galaxy_table[satmask]
     min_host_mass_to_search_for = 10**14.001
-    mask14 = _nearest_lower_value_mask(model.mock.galaxy_table['halo_mvir'],
+    mask14 = _nearest_lower_value_mask(sats['halo_mvir'],
                         min_host_mass_to_search_for)
-    galaxy_sample_m14 = model.mock.galaxy_table[mask14]
+    galaxy_sample_m14 = sats[mask14]
     assert np.all(galaxy_sample_m14['halo_mvir'] == 10**14)
     enforce_correct_conc_gal_bias(galaxy_sample_m14, gal_bias_bins.min())
 
     min_host_mass_to_search_for = 10**16.001
-    mask16 = _nearest_lower_value_mask(model.mock.galaxy_table['halo_mvir'],
+    mask16 = _nearest_lower_value_mask(sats['halo_mvir'],
                         min_host_mass_to_search_for)
-    galaxy_sample_m16 = model.mock.galaxy_table[mask16]
+    galaxy_sample_m16 = sats[mask16]
     assert np.all(galaxy_sample_m16['halo_mvir'] == 10**16)
     enforce_correct_conc_gal_bias(galaxy_sample_m16, gal_bias_bins.max())
 
