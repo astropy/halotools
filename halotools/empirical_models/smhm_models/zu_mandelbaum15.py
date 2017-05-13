@@ -11,17 +11,6 @@ from ..component_model_templates import PrimGalpropModel
 
 __all__ = ('ZuMandelbaum15SmHm', )
 
-mdef_warning_msg = ("The best-fit parameters of the Zu & Mandelbaum 2015 model \n"
-    "were fit to SDSS data using ``halo_m200m`` as the mass definition.\n"
-    "You have selected {0} instead, so if you wish to use their exact model, \n"
-    "you will need to adjust the parameters accordingly.\n"
-    "If the ``halo_m200m`` column does not appear in the halo catalog you are using, \n"
-    "this is a commonly available column in all publicly available Rockstar catalogs,\n"
-    "so for those catalogs you can create your own CachedHaloCatalog that includes this column.\n"
-    "Alternatively, you can use your current catalog together with the \n"
-    "Colossus python package (https://bdiemer.bitbucket.io) to add a new column\n"
-    "to your existing catalog.")
-
 
 class ZuMandelbaum15SmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on
@@ -45,7 +34,7 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
 
         Notes
         -----
-        Note also that the best-fit parameters of this model are based on the
+        Note that the best-fit parameters of this model are based on the
         ``halo_m200m`` halo mass definition.
         Using alternative choices of mass definition will require altering the
         model parameters in order to mock up the same model published in Zu & Mandelbaum 2015.
@@ -57,9 +46,6 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
 
         super(ZuMandelbaum15SmHm, self).__init__(
             galprop_name='stellar_mass', prim_haloprop_key=prim_haloprop_key, **kwargs)
-
-        if self.prim_haloprop_key is not 'halo_m200m':
-            warn(mdef_warning_msg.format(self.prim_haloprop_key))
 
         self.param_dict = self.retrieve_default_param_dict()
 
