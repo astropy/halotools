@@ -4,6 +4,7 @@ Module storing `~halotools.empirical_models.PrebuiltSubhaloModelFactory` and
 the factories used to generate Halotools-provided composite models
 of the galaxy-halo connection.
 """
+from warnings import warn
 
 from ..factories import SubhaloModelFactory, HodModelFactory
 
@@ -11,6 +12,13 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ('PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory')
 __author__ = ['Andrew Hearin']
+
+
+under_development_warning = ("This particular model is "
+    "still being tested in collaboration with {0}.\n"
+    "If you need to use this prebuilt model for science, \n"
+    "you will either need to test it yourself \n"
+    "or wait for the Halotools developers to finish science verification.\n")
 
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
@@ -244,10 +252,13 @@ class PrebuiltHodModelFactory(HodModelFactory):
         elif model_nickname == 'hearin15':
             dictionary_retriever = hod_models.hearin15_model_dictionary
         elif model_nickname == 'tinker13':
+            warn(under_development_warning.format("Jeremy Tinker"))
             dictionary_retriever = hod_models.tinker13_model_dictionary
         elif model_nickname == 'zu_mandelbaum15':
+            warn(under_development_warning.format("Ying Zu"))
             dictionary_retriever = hod_models.zu_mandelbaum15_model_dictionary
         elif model_nickname == 'zu_mandelbaum16':
+            warn(under_development_warning.format("Ying Zu"))
             dictionary_retriever = hod_models.zu_mandelbaum16_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
