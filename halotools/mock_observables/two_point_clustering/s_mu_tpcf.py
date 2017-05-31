@@ -53,11 +53,16 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     s_bins : array_like
-        numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
+        numpy array of shape (num_s_bin_edges, ) storing the :math:`s`
+        boundaries defining the bins in which pairs are counted.
 
     mu_bins : array_like
-        numpy array of :math:`mu = \cos(\theta_{\rm LOS})` boundaries defining the bins in
-        which pairs are counted, and must be between [0,1].
+        numpy array of shape (num_mu_bin_edges, ) storing the
+        :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
+        which pairs are counted. All values must be between [0,1].
+
+        Note that using the sine function is not common convention for
+        calculating the two point correlation function (see notes).
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
@@ -131,9 +136,9 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     Returns
     -------
     correlation_function(s) : np.ndarray
-        *len(s_bins)-1* by *len(mu_bins)-1* ndarray containing the correlation function
-        :math:`\xi(s, \mu)` computed in each of the bins defined by input ``s_bins``
-        and ``mu_bins``.
+        Numpy array of shape (num_s_bin_edges-1, num_mu_bin_edges-1) containing
+        the correlation function :math:`\xi(s, \mu)` computed in each of the bins
+        defined by input ``s_bins`` and ``mu_bins``.
 
         .. math::
             1 + \xi(s,\mu) = \mathrm{DD}(s,\mu) / \mathrm{RR}(s,\mu)
