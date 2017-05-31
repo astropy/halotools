@@ -52,13 +52,15 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     s_bins : array_like
-        numpy array of :math:`s` boundaries defining the bins in which pairs are counted.
+        numpy array of shape (num_s_bin_edges, ) storing the :math:`s`
+        boundaries defining the bins in which pairs are counted.
 
     mu_bins : array_like
-        numpy array of :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
-        which pairs are counted, and must be between [0,1].
+        numpy array of shape (num_mu_bin_edges, ) storing the
+        :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
+        which pairs are counted. All values must be between [0,1].
 
-        Note that using the sine is not common convention for
+        Note that using the sine function is not common convention for
         calculating the two point correlation function (see notes).
 
     period : array_like, optional
@@ -93,8 +95,8 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     Returns
     -------
-    num_pairs : array of length len(rbins)
-        number of pairs
+    num_pairs : array of shape (num_s_bin_edges, num_mu_bin_edges) storing the
+        number of pairs separated by less than (s, mu)
 
     Notes
     ------
@@ -108,11 +110,6 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     Suppose sample1==sample2 and rbins[0]==0. Then the returned value for this bin
     will be len(sample1), since each sample1 point has distance 0 from itself.
 
-    Returns
-    -------
-    N_pairs : array_like
-        2-d array of length *Num_rp_bins x Num_pi_bins* storing the pair counts in each bin.
-
     Examples
     --------
     For demonstration purposes we create randomly distributed sets of points within a
@@ -121,7 +118,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     >>> Npts1, Npts2, Lbox = 1000, 1000, 200.
     >>> period = [Lbox, Lbox, Lbox]
     >>> s_bins = np.logspace(-1, 1.25, 15)
-    >>> mu_bins = np.linspace(-0.5, 0.5)
+    >>> mu_bins = np.linspace(0, 1)
 
     >>> x1 = np.random.uniform(0, Lbox, Npts1)
     >>> y1 = np.random.uniform(0, Lbox, Npts1)
@@ -137,7 +134,8 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     >>> sample1 = np.vstack([x1, y1, z1]).T
     >>> sample2 = np.vstack([x2, y2, z2]).T
 
-    >>> result = npairs_s_mu(sample1, sample2, s_bins, mu_bins, period = period)
+    >>> from halotools.mock_observables.pair_counters import npairs_s_mu
+    >>> result = npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=period)
     """
 
     # Process the inputs with the helper function
