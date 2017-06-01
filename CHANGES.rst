@@ -1,4 +1,4 @@
-0.5 (unreleased)
+0.5 (2017-05-31)
 ----------------
 
 - Added SubhaloPhaseSpace class for modeling HOD-style satellite velocities with subhalos.
