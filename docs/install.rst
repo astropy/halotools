@@ -51,13 +51,13 @@ The first step is to clone the halotools repository::
 Installing one of the official releases
 ------------------------------------------
 
-All official releases of the code are tagged with their version name, e.g., v0.2.
+All official releases of the code are tagged with their version name, e.g., v0.5.
 To install a particular release::
 
-	git checkout v0.2
+	git checkout v0.5
 	python setup.py install
 
-This will install the v0.2 release of the code. Other official release versions (e.g., v0.1) can be installed similarly.
+This will install the v0.5 release of the code. Other official release versions (e.g., v0.1) can be installed similarly.
 
 Installing the most recent master branch
 ------------------------------------------
