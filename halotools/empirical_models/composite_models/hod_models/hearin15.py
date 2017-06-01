@@ -114,10 +114,6 @@ def hearin15_model_dictionary(central_assembias_strength=1,
             assembias_strength=satellite_assembias_strength,
             assembias_strength_abscissa=satellite_assembias_strength_abscissa,
             cenocc_model=centrals_occupation, **kwargs)
-        # There is no need for a redundant new_haloprop_func_dict
-        # if this is already possessed by the central model
-        if hasattr(centrals_occupation, 'new_haloprop_func_dict'):
-            del satellites_occupation.new_haloprop_func_dict
 
     # Build the profile model
     satellites_profile = NFWPhaseSpace(**kwargs)

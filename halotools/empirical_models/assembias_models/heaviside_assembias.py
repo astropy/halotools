@@ -100,7 +100,7 @@ class HeavisideAssembias(object):
 
         self._decorate_baseline_method()
 
-        self._bind_new_haloprop_func_dict()
+        self._methods_to_inherit.extend(['assembias_strength'])
 
         try:
             self.publications.append('arXiv:1512.03050')
@@ -225,26 +225,6 @@ class HeavisideAssembias(object):
                 "calling the HeavisideAssembias constructor, \n"
                 "and the baseline model must have a method named ``%s``")
             raise HalotoolsError(msg % self._method_name_to_decorate)
-
-    def _bind_new_haloprop_func_dict(self):
-        """
-        """
-
-        def assembias_percentile_calculator(table):
-            return compute_conditional_percentiles(
-                table=table,
-                prim_haloprop_key=self.prim_haloprop_key,
-                sec_haloprop_key=self.sec_haloprop_key
-                )
-
-        key = self.sec_haloprop_key + '_percentile'
-        try:
-            self.new_haloprop_func_dict[key] = assembias_percentile_calculator
-        except AttributeError:
-            self.new_haloprop_func_dict = {}
-            self.new_haloprop_func_dict[key] = assembias_percentile_calculator
-
-        self._methods_to_inherit.extend(['assembias_strength'])
 
     @model_helpers.bounds_enforcing_decorator_factory(0, 1)
     def percentile_splitting_function(self, prim_haloprop):
@@ -473,15 +453,7 @@ class HeavisideAssembias(object):
                     no_edge_percentiles = table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
                     type1_mask = no_edge_percentiles > no_edge_split
                 else:
-                    msg = ("\nThe HeavisideAssembias class implements assembly bias \n"
-                        "by altering the behavior of the model according to the value of "
-                        "``%s``.\n This quantity can be pre-computed using the "
-                        "new_haloprop_func_dict mechanism, making your mock population run faster.\n"
-                        "See the MockFactory documentation for detailed instructions.\n "
-                        "Now computing %s from scratch.\n")
-                    key = self.sec_haloprop_key + '_percentile'
-                    warn(msg % (key, key))
-
+                    # the value of sec_haloprop_percentile will be computed from scratch
                     percentiles = compute_conditional_percentiles(
                         prim_haloprop=prim_haloprop,
                         sec_haloprop=sec_haloprop

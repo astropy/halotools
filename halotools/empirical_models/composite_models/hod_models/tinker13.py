@@ -97,7 +97,6 @@ def tinker13_model_dictionary(threshold=model_defaults.default_stellar_mass_thre
     active_satellites_occupation = tinker13_components.Tinker13ActiveSats(threshold=threshold, **kwargs)
     # Build the profile model
     active_satellites_profile = NFWPhaseSpace(concentration_binning=(1, 35, 1), **kwargs)
-    del active_satellites_profile.new_haloprop_func_dict
 
     model_dictionary = (
         {'centrals_occupation': centrals_occupation,
