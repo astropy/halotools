@@ -104,7 +104,7 @@ Although the *sim_manager* provides an object-oriented framework for creating a 
 
 [![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.4, is now available on pip. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
+Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.5, is now available on pip. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
 
 ---
 
