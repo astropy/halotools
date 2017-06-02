@@ -14,7 +14,7 @@ see `~halotools.empirical_models.cacciato09_model_dictionary`.
 For brevity, we describe this model as a "Conditional Luminosity Function" model. However,
 the associated classes work equally well as a model for the "Conditional Stellar Mass Function".
 The only difference will be a change in the ``prim_galprop_key`` from ``luminosity`` to ``stellar_mass``,
-and accompanying change to the parameter values in the model dictionary.
+and an accompanying change to the parameter values in the model dictionary.
 
 Overview of the Cacciato et al. (2009) Model Features
 ========================================================
@@ -125,8 +125,8 @@ modifications of the high-luminosity cut-off of the satellite population.
 Briefly, changing the delta parameters should only affect the abundance of
 satellites that have luminosities similar to the central luminosity. On the other
 hand, faint satellites should be unaffected. The details of the 2 delta parameters
-are described in Lange et al. (in prep.). Setting both to 0, as done by default, is
-equivalent to the model of Cacciato et al. (2009).
+are described in Lange et al. (2017), arXiv:1705.05043. Setting both to 0, as
+done by default, is equivalent to the model of Cacciato et al. (2009).
 
 * param_dict['log_L_0'] -  Normalization of central mass-to-light ratio.
 
@@ -138,17 +138,17 @@ equivalent to the model of Cacciato et al. (2009).
 
 * param_dict['sigma'] - Scatter in the log-normal mass-to-light distribution of centrals.
 
-* param_dict['a_1'] - Modifies faint-end slope of the satellite luminosity function.
+* param_dict['a_1'] - Sets the faint-end slope of the satellite luminosity function.
 
-* param_dict['a_2'] - Modifies faint-end slope of the satellite luminosity function.
+* param_dict['a_2'] - Determines the mass-dependence of the faint-end slope of the satellite luminosity function.
+
+* param_dict['log_M_2'] - Determines the mass-dependence of the faint-end slope of the satellite luminosity function.
 
 * param_dict['b_0'] - Modifies normalization of the satellite luminosity function.
 
 * param_dict['b_1'] - Modifies normalization of the satellite luminosity function.
 
 * param_dict['b_2'] - Modifies normalization of the satellite luminosity function.
-
-* param_dict['log_M_2'] - Modifies normalization and faint-end slope of the satellite luminosity function.
 
 * param_dict['delta_1'] - Modifies the high-luminosity exponential cut-off of the satellite luminosity function.
 
