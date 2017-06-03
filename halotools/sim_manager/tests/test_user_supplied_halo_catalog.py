@@ -8,7 +8,7 @@ import os
 import shutil
 
 from astropy.config.paths import _find_home
-from astropy.tests.helper import pytest
+import pytest
 
 try:
     import h5py

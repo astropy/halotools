@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from astropy.config.paths import _find_home
-from astropy.tests.helper import pytest
+import pytest
 
 from ..cached_halo_catalog import CachedHaloCatalog, InvalidCacheLogEntry
 

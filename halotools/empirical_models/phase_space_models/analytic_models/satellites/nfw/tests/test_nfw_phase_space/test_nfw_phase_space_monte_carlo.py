@@ -3,7 +3,7 @@
 import numpy as np
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
-from astropy.tests.helper import pytest
+import pytest
 
 from ...nfw_phase_space import NFWPhaseSpace
 

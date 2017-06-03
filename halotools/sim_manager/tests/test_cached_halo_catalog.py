@@ -5,9 +5,10 @@ from __future__ import absolute_import, division, print_function
 from unittest import TestCase
 import os
 import shutil
+import pytest
 
 from astropy.config.paths import _find_home
-from astropy.tests.helper import remote_data, pytest
+from astropy.tests.helper import remote_data
 from astropy.table import Table
 
 try:

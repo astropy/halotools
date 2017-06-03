@@ -4,7 +4,7 @@ from __future__ import division, print_function, absolute_import, unicode_litera
 
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
-from astropy.tests.helper import pytest
+import pytest
 
 from .. import array_indexing_manipulations as aim
 

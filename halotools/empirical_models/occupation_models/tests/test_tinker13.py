@@ -5,7 +5,7 @@ from __future__ import division, print_function, absolute_import, unicode_litera
 
 import numpy as np
 from astropy.table import Table
-from astropy.tests.helper import pytest
+import pytest
 
 from ..tinker13_components import Tinker13Cens
 from ....custom_exceptions import HalotoolsError
