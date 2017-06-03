@@ -69,14 +69,6 @@ class SubhaloMockFactory(MockFactory):
 
     def preprocess_halo_catalog(self, halocat):
         """ Method to pre-process a halo catalog upon instantiation of the mock object.
-
-        New columns are added to the ``halo_table`` according to any entries in the
-        ``new_haloprop_func_dict``.
-
-        See also
-        ---------
-        :ref:`new_haloprop_func_dict_mechanism`
-
         """
         halo_table = halocat.halo_table
 
@@ -86,15 +78,6 @@ class SubhaloMockFactory(MockFactory):
         if (('halo_mvir_host_halo' not in self.additional_haloprops) &
                 ('halo_mvir_host_halo' in list(halo_table.keys()))):
             self.additional_haloprops.append('halo_mvir_host_halo')
-
-        # Create new columns of the halo catalog, if applicable
-        try:
-            d = self.model.new_haloprop_func_dict
-            for new_haloprop_key, new_haloprop_func in d.items():
-                halo_table[new_haloprop_key] = new_haloprop_func(table=halo_table)
-                self.additional_haloprops.append(new_haloprop_key)
-        except AttributeError:
-            pass
 
         self.halo_table = Table()
         for key in self.additional_haloprops:

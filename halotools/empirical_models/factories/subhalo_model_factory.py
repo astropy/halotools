@@ -225,7 +225,6 @@ class SubhaloModelFactory(ModelFactory):
         self.build_prim_sec_haloprop_list()
         self.build_publication_list()
         self.build_dtype_list()
-        self.build_new_haloprop_func_dict()
         self.set_warning_suppressions()
         self.set_inherited_methods()
         self.set_model_redshift()
@@ -684,38 +683,6 @@ class SubhaloModelFactory(ModelFactory):
                 pass
 
         self.publications = list(set(pub_list))
-
-    def build_new_haloprop_func_dict(self):
-        """ Method used to build a dictionary of functions, ``new_haloprop_func_dict``,
-        that create new halo catalog columns
-        during a pre-processing phase of mock population.
-
-        See also
-        ---------
-        :ref:`new_haloprop_func_dict_mechanism`
-        """
-        new_haloprop_func_dict = {}
-        # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.items():
-
-            # Haloprop function dictionaries
-            if hasattr(component_model, 'new_haloprop_func_dict'):
-                dict_intersection = set(new_haloprop_func_dict).intersection(
-                    set(component_model.new_haloprop_func_dict))
-                if dict_intersection == set():
-                    new_haloprop_func_dict = dict(
-                        list(new_haloprop_func_dict.items()) +
-                        list(component_model.new_haloprop_func_dict.items())
-                        )
-                else:
-                    example_repeated_element = list(dict_intersection)[0]
-                    clname = component_model.__class__.__name__
-                    msg = ("The composite model received multiple "
-                        "component models \nwith a new_haloprop_func_dict that use "
-                        "the %s key. \nIgnoring the one that appears in the %s feature")
-                    warn(msg % (example_repeated_element, clname))
-
-        self.new_haloprop_func_dict = new_haloprop_func_dict
 
     def set_warning_suppressions(self):
         """ Method used to determine whether a warning should be issued if the
