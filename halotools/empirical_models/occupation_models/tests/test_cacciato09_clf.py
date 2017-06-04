@@ -333,7 +333,7 @@ def test_Cacciato09_gap():
     gap = np.zeros(len(lum_cen))
     for i in range(len(gap)):
         lum_cen_i = lum_cen[i]
-        lum_sat_i = lum_sat[i*30:(i+1)*(40)]
+        lum_sat_i = lum_sat[i*30:(i+1)*(30)]
         lum_sat_i = lum_sat_i[lum_sat_i < lum_cen_i] # remove bright satellites
         gap[i] = 2.5 * np.log10(lum_cen_i / np.amax(lum_sat_i[:20]))
     
