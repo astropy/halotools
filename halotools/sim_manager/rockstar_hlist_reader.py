@@ -12,6 +12,16 @@ from astropy.table import Table
 
 import datetime
 
+try:
+    import h5py
+    _HAS_H5PY = True
+except ImportError:
+    _HAS_H5PY = False
+    warn("Most of the functionality of the "
+        "sim_manager sub-package requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda. ")
+
+
 from .tabular_ascii_reader import TabularAsciiReader
 from .halo_table_cache import HaloTableCache
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
@@ -339,12 +349,6 @@ class RockstarHlistReader(TabularAsciiReader):
         :ref:`reducing_and_caching_a_new_rockstar_catalog`
 
         """
-        try:
-            import h5py
-            self._has_h5py = True
-            self.h5py = h5py
-        except ImportError:
-            self._has_h5py = False
 
         TabularAsciiReader.__init__(self,
             input_fname, columns_to_keep_dict,
@@ -689,7 +693,7 @@ class RockstarHlistReader(TabularAsciiReader):
         after calling ``write_to_disk`` so that you can take advantage of the convenient
         syntax provided by the `~halotools.sim_manager.CachedHaloCatalog` class.
         """
-        if not self._has_h5py:
+        if not _HAS_H5PY:
             raise HalotoolsError(uninstalled_h5py_msg)
 
         self.halo_table.write(
@@ -699,11 +703,11 @@ class RockstarHlistReader(TabularAsciiReader):
     def _write_metadata(self):
         """ Private method to add metadata to the hdf5 file.
         """
-        if not self._has_h5py:
+        if not _HAS_H5PY:
             raise HalotoolsError(uninstalled_h5py_msg)
 
         # Now add the metadata
-        f = self.h5py.File(self.output_fname)
+        f = h5py.File(self.output_fname)
         f.attrs.create('simname', str(self.simname))
         f.attrs.create('halo_finder', str(self.halo_finder))
         redshift_string = str(get_redshift_string(self.redshift))
