@@ -78,12 +78,14 @@ def group_member_generator(data, grouping_key, requested_columns):
     the data table.
 
     First we build the generator:
+
     >>> halos.sort(['halo_hostid', 'halo_upid'])
     >>> grouping_key = 'halo_hostid'
     >>> requested_columns = ['halo_mvir']
     >>> group_gen = group_member_generator(halos, grouping_key, requested_columns)
 
     Then we loop over it:
+
     >>> result = np.zeros(len(halos))
     >>> for first, last, member_props in group_gen:
     ...     masses = member_props[0]
