@@ -3,8 +3,17 @@
 import os
 from astropy.table import Table
 import numpy as np
+from warnings import warn
 
-from ..custom_exceptions import HalotoolsError
+try:
+    import h5py
+    _HAS_H5PY = True
+except ImportError:
+    _HAS_H5PY = False
+    warn("Most of the functionality of the "
+        "sim_manager sub-package requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda. ")
+
 
 __all__ = ('HaloTableCacheLogEntry', )
 
@@ -54,13 +63,6 @@ class HaloTableCacheLogEntry(object):
         ----------
         `~halotools.sim_manager.tests.TestHaloTableCacheLogEntry`.
         """
-        try:
-            import h5py
-            self._has_h5py = True
-            self.h5py = h5py
-        except ImportError:
-            self._has_h5py = False
-
         self.simname = simname
         self.halo_finder = halo_finder
         self.version_name = version_name
@@ -148,10 +150,9 @@ class HaloTableCacheLogEntry(object):
         the responsibility of the `~halotools.sim_manager.HaloTableCache` class.
 
         """
-        if not self._has_h5py:
-            msg = ("\nCannot determine whether an hdf5 file "
-                "is safe_for_cache without h5py installed.\n")
-            raise HalotoolsError(msg)
+        msg = ("\nCannot determine whether an hdf5 file "
+            "is safe_for_cache without h5py installed.\n")
+        assert _HAS_H5PY, msg
 
         self._cache_safety_message = "The halo catalog is safe to add to the cache log."
 
@@ -215,7 +216,8 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            f = self.h5py.File(self.fname)
+            import h5py
+            f = h5py.File(self.fname)
 
             for key in HaloTableCacheLogEntry.log_attributes:
                 try:
@@ -306,7 +308,7 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            f = self.h5py.File(self.fname)
+            f = h5py.File(self.fname)
             Lbox = f.attrs['Lbox']
             f.close()
             try:
@@ -403,7 +405,7 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            f = self.h5py.File(self.fname)
+            f = h5py.File(self.fname)
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
 

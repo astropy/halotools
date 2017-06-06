@@ -3,9 +3,18 @@
 import os
 from astropy.table import Table
 import numpy as np
+from warnings import warn
 
-from ..custom_exceptions import HalotoolsError
 from .halo_table_cache_log_entry import get_redshift_string
+
+try:
+    import h5py
+    _HAS_H5PY = True
+except ImportError:
+    _HAS_H5PY = False
+    warn("Most of the functionality of the "
+        "sim_manager sub-package requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda. ")
 
 __all__ = ('PtclTableCacheLogEntry', )
 
@@ -48,13 +57,9 @@ class PtclTableCacheLogEntry(object):
         ----------
         `~halotools.sim_manager.tests.TestPtclTableCacheLogEntry`.
         """
-        try:
-            import h5py
-            self.h5py = h5py
-        except ImportError:
-            msg = ("\nMust have the h5py package installed \n"
-                   "to instantiate the PtclTableCacheLogEntry class.\n")
-            raise HalotoolsError(msg)
+        msg = ("\nMust have the h5py package installed \n"
+               "to instantiate the PtclTableCacheLogEntry class.\n")
+        assert _HAS_H5PY, msg
 
         self.simname = simname
         self.version_name = version_name
@@ -191,7 +196,7 @@ class PtclTableCacheLogEntry(object):
         """
 
         try:
-            f = self.h5py.File(self.fname)
+            f = h5py.File(self.fname)
 
             for key in PtclTableCacheLogEntry.log_attributes:
                 try:
@@ -259,7 +264,7 @@ class PtclTableCacheLogEntry(object):
         """
         try:
             data = Table.read(self.fname, path='data')
-            f = self.h5py.File(self.fname)
+            f = h5py.File(self.fname)
             Lbox = np.empty(3)
             Lbox[:] = f.attrs['Lbox']
 
@@ -314,7 +319,7 @@ class PtclTableCacheLogEntry(object):
         """
 
         try:
-            f = self.h5py.File(self.fname)
+            f = h5py.File(self.fname)
             required_set = set(PtclTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
 

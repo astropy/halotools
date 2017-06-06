@@ -11,7 +11,9 @@ from astropy.table import Table
 
 try:
     import h5py
+    _HAS_H5PY = True
 except ImportError:
+    _HAS_H5PY = False
     warn("Most of the functionality of the "
         "sim_manager sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda. ")
@@ -170,12 +172,7 @@ class CachedHaloCatalog(object):
         """
         self._verify_acceptable_constructor_call(*args, **kwargs)
 
-        try:
-            import h5py
-            self.h5py = h5py
-        except ImportError:
-            raise HalotoolsError("Must have h5py package installed "
-                "to use CachedHaloCatalog objects")
+        assert _HAS_H5PY, "Must have h5py package installed to use CachedHaloCatalog objects"
 
         try:
             dz_tol = kwargs['dz_tol']
@@ -566,7 +563,7 @@ class CachedHaloCatalog(object):
                 self.log_entry.fname + "\n\n")
             raise InvalidCacheLogEntry(msg)
 
-        f = self.h5py.File(self.log_entry.fname)
+        f = h5py.File(self.log_entry.fname)
         for attr_key in list(f.attrs.keys()):
             if attr_key == 'redshift':
                 setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))
