@@ -8,7 +8,7 @@ cimport cython
 from libc.math cimport ceil
 from libc.math cimport sqrt
 
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
+__author__ = ('Andrew Hearin', 'Duncan Campbell', 'Manodeep Sinha')
 __all__ = ('npairs_s_mu_engine', )
 
 @cython.boundscheck(False)
@@ -50,8 +50,9 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
         separated by a distance less than the corresponding entry of ``s_bins``.
 
     """
-    cdef cnp.float64_t[:] s_bins = s_bins_in
-    cdef cnp.float64_t[:] mu_bins = mu_bins_in
+    cdef cnp.float64_t[:] sqr_s_bins = s_bins_in * s_bins_in
+    cdef cnp.float64_t[:] sqr_mu_bins = mu_bins_in * mu_bins_in
+
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -60,8 +61,8 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
-    cdef int num_s_bins = len(s_bins)
-    cdef int num_mu_bins = len(mu_bins)
+    cdef int num_s_bins = len(sqr_s_bins)
+    cdef int num_mu_bins = len(sqr_mu_bins)
     cdef cnp.int64_t[:,:] counts = np.zeros((num_s_bins, num_mu_bins), dtype=np.int64)
     cdef cnp.int64_t[:,:] counts_sum = np.zeros((num_s_bins, num_mu_bins), dtype=np.int64)
 
@@ -105,7 +106,8 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp, s, mu
     cdef int Ni, Nj, i, j, k, l, g, max_k
-    cdef cnp.float64_t s_max = np.max(s_bins_in), mu_max = np.max(mu_bins_in)
+    # cdef cnp.float64_t s_max = np.max(s_bins_in), mu_max = np.max(mu_bins_in)
+    cdef cnp.float64_t sqr_s_max = np.max(sqr_s_bins), sqr_mu_max = np.max(sqr_mu_bins)
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
     cdef cnp.float64_t[:] y_icell1, y_icell2
@@ -188,26 +190,32 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     dz_sq = dz*dz
 
                                     #transform to s and mu
-                                    s = sqrt(dz_sq + dxy_sq)
-                                    if s!=0:
-                                        mu = sqrt(dxy_sq)/s
-                                    else:
-                                        mu=0.0
+                                    sqr_s = dz_sq + dxy_sq
 
-                                    if (s <= s_max) & (mu <= mu_max):
+                                    if sqr_s > sqr_s_max:
+                                        continue
 
-                                        k = num_s_bins-2
-                                        while k!=-1:
-                                            if s > s_bins[k]: break
-                                            k=k-1
+                                    sqr_mu = sqr_s > 0 ? dxy_sq/sqr_s : 0.0
+                                    if sqr_mu > sqr_mu_max:
+                                        continue
 
-                                        g = num_mu_bins-2
-                                        while g!=-1:
-                                            if mu > mu_bins[g]: break
-                                            g=g-1
+                                    # MS: I have intentionally split
+                                    # up the loop. Since division
+                                    # is slow, computing mu is a bottle-neck.
+                                    # Computing the 's' bin however can proceed
+                                    # in the meantime.
+                                    k = num_s_bins-2
+                                    while k!=-1:
+                                        if sqr_s > sqr_s_bins[k]: break
+                                        k=k-1
 
-                                        # Only counts pairs in that bin.
-                                        counts[k+1,g+1] += 1
+                                    g = num_mu_bins-2
+                                    while g!=-1:
+                                        if sqr_mu > sqr_mu_bins[g]: break
+                                        g=g-1
+
+                                    # Only counts pairs in that bin.
+                                    counts[k+1,g+1] += 1
 
     # Adds counts for all bins where s < s_bin and mu < mu_bin.
     for k in range(num_s_bins):
