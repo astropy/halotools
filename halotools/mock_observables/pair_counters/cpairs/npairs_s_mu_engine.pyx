@@ -106,7 +106,6 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp, s, mu
     cdef int Ni, Nj, i, j, k, l, g, max_k
-    # cdef cnp.float64_t s_max = np.max(s_bins_in), mu_max = np.max(mu_bins_in)
     cdef cnp.float64_t sqr_s_max = np.max(sqr_s_bins), sqr_mu_max = np.max(sqr_mu_bins)
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
