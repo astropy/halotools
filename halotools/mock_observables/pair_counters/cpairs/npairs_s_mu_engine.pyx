@@ -194,7 +194,7 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     if sqr_s > sqr_s_max:
                                         continue
 
-                                    sqr_mu = sqr_s > 0 ? dxy_sq/sqr_s : 0.0
+                                    sqr_mu = (dxy_sq/sqr_s if sqr_s > 0.0 else 0.0)
                                     if sqr_mu > sqr_mu_max:
                                         continue
 
