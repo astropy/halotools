@@ -8,6 +8,7 @@ import numpy as np
 from ..npairs_s_mu import npairs_s_mu
 from ....mock_observables import npairs_3d
 # load comparison simple pair counters
+from ..pairs import s_mu_npairs as pure_python_brute_force_npairs_s_mu
 
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
@@ -15,7 +16,8 @@ from astropy.utils.misc import NumpyRNGContext
 slow = pytest.mark.slow
 fixed_seed = 43
 
-__all__ = ('test_npairs_s_mu_periodic', 'test_npairs_s_mu_nonperiodic')
+__all__ = ('test_npairs_s_mu_periodic', 'test_npairs_s_mu_nonperiodic',
+           'test_npairs_s_mu_point_surrounded_by_sphere')
 
 # set up random points to test pair counters
 Npts = 1000
@@ -55,26 +57,40 @@ def test_npairs_s_mu_periodic():
     """
     test npairs_s_mu with periodic boundary conditions.
     """
-
+    
+    # define bins
     s_bins = np.array([0.0, 0.1, 0.2, 0.3])
     N_mu_bins = 100
     mu_bins = np.linspace(0, 1.0, N_mu_bins)
     Npts = len(random_sample)
-
+    
+    # count pairs using optimized double tree pair counter
     result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins,
         period=period, num_threads=num_threads)
-
+    
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result) == (len(s_bins), N_mu_bins), msg
-
-    result = np.diff(result, axis=1)
-    result = np.sum(result, axis=1) + Npts
-
+    
+    # count pairs using 3D pair counter
     test_result = npairs_3d(random_sample, random_sample, s_bins,
         period=period, num_threads=num_threads)
-
+    
+    # summing pairs counts along mu axis should match the 3D radial pair result
+    result = np.diff(result, axis=1)
+    result = np.sum(result, axis=1) + Npts
+    
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(result == test_result), msg
+    
+    # compare to brute force s and mu pair counter on a set of random points
+    result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins,
+        period=period, num_threads=num_threads)
+    
+    test_result = pure_python_brute_force_npairs_s_mu(random_sample, random_sample,
+        s_bins, mu_bins, period=period)
+    
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(test_result == result), msg
 
 
 def test_npairs_s_mu_nonperiodic():
@@ -82,20 +98,72 @@ def test_npairs_s_mu_nonperiodic():
     test npairs_s_mu without periodic boundary conditions.
     """
 
+    # define bins
     s_bins = np.array([0.0, 0.1, 0.2, 0.3])
     N_mu_bins = 100
     mu_bins = np.linspace(0, 1.0, N_mu_bins)
-
+    Npts = len(random_sample)
+    
+    # count pairs using optimized double tree pair counter
     result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins,
         num_threads=num_threads)
-
+    
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result) == (len(s_bins), N_mu_bins), msg
-
+    
+    # count pairs using 3D pair counter
+    test_result = npairs_3d(random_sample, random_sample, s_bins,
+        num_threads=num_threads)
+    
+    # summing pairs counts along mu axis should match the 3D radial pair result
     result = np.diff(result, axis=1)
     result = np.sum(result, axis=1) + Npts
-
-    test_result = npairs_3d(random_sample, random_sample, s_bins, num_threads=num_threads)
-
+    
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(result == test_result), msg
+    
+    # compare to brute force s and mu pair counter on a set of random points
+    result = npairs_s_mu(random_sample, random_sample, s_bins, mu_bins,
+        num_threads=num_threads)
+    
+    test_result = pure_python_brute_force_npairs_s_mu(random_sample, random_sample,
+        s_bins, mu_bins)
+    
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(test_result == result), msg
+
+
+def test_npairs_s_mu_point_surrounded_by_sphere():
+    """
+    test npairs_s_mu without periodic boundary conditions on a point surrounded by an
+    evenly distribued circle of points perpdindicular to the LOS.
+    """
+    
+    # put one point per degree in the circle
+    theta = np.linspace(0,2*np.pi-2*np.pi/360,360)+(2.0*np.pi)/(360*2)
+    r = 1.5
+    x = r*np.cos(theta)
+    y = r*np.zeros(360)
+    z = r*np.sin(theta)
+    sample2 = np.vstack((x,y,z)).T
+    
+    # find pairs between the circle and the origin
+    sample1 = np.array([[0,0,0]])
+    
+    # define bins
+    theta_bins = np.linspace(0.0,np.pi/2.0,91) # make 1 degree mu bins
+    mu_bins = np.sort(np.cos(theta_bins))
+    s_bins = np.array([0,1,2])
+    
+    # count pairs using optimized double tree pair counter
+    result = npairs_s_mu(sample1, sample2, s_bins, mu_bins, num_threads=num_threads)
+    pairs = np.diff(np.diff(result, axis=0),axis=1)
+    
+    # note that there should be 4 pairs per mu bin
+    # since each quadrant of te circle counts once for each mu bin
+    # and there is one point per degree
+    
+    msg = "The number of pairs between the origin and a circle with one point per degree is incorrect."
+    assert np.all(pairs[1,:] == 4), msg
+
+
