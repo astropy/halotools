@@ -21,7 +21,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function counts the number of pairs of points separated by less than
-    radial separation, *s,* and :math:`\mu\equiv\sin(\theta_{\rm los})`,
+    radial separation, *s,* and :math:`\mu\equiv\cos(\theta_{\rm los})`,
     where :math:`\theta_{\rm los}` is the line-of-sight angle
     between points and :math:`s^2 = r_{\rm parallel}^2 + r_{\rm perp}^2`.
 
@@ -99,15 +99,13 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         number of pairs separated by less than (s, mu)
 
     Notes
-    ------
-    The quantity :math:`\mu` is defined as the :math:`\sin(\theta_{\rm los})`
-    and not the conventional :math:`\cos(\theta_{\rm los})`. This is
-    because the pair counter has been optimized under the assumption that its
-    separation variable (in this case, :math:`\mu`) *increases*
-    as :math:`\theta_{\rm los})` increases.
-
+    -----
+    Along the first dimension of ``num_pairs``, :math:`s` (the radial seperation) increases.
+    Along the second dimension,  :math:`\mu` (the cosine of :math:`\theta_{\rm LOS}`) 
+    decreases, i.e. :math:`\theta_{\rm LOS}` increases.
+    
     One final point of clarification concerning double-counting may be in order.
-    Suppose sample1==sample2 and rbins[0]==0. Then the returned value for this bin
+    Suppose sample1==sample2 and s_bins[0]==0. Then the returned value for this bin
     will be len(sample1), since each sample1 point has distance 0 from itself.
 
     Examples
@@ -158,6 +156,10 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         msg = ("\n Input `mu_bins` must be a monotonically increasing \n"
                "1D array with at least two entries")
         raise ValueError(msg)
+    # convert to mu=sin(theta_los) binning used by the cython engine.
+    mu_bins_prime = np.sin(np.arccos(mu_bins))
+    mu_bins_prime = np.sort(mu_bins_prime)
+    # increasing mu_prime now corresponds to increasing theta_LOS
 
     search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
@@ -176,7 +178,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     # # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_s_mu_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins_prime)
 
     # # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
