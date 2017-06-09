@@ -17,7 +17,7 @@ slow = pytest.mark.slow
 fixed_seed = 43
 
 __all__ = ('test_npairs_s_mu_periodic', 'test_npairs_s_mu_nonperiodic',
-           'test_npairs_s_mu_point_surrounded_by_sphere')
+           'test_npairs_s_mu_point_surrounded_by_circle')
 
 # set up random points to test pair counters
 Npts = 1000
@@ -133,7 +133,7 @@ def test_npairs_s_mu_nonperiodic():
     assert np.all(test_result == result), msg
 
 
-def test_npairs_s_mu_point_surrounded_by_sphere():
+def test_npairs_s_mu_point_surrounded_by_circle():
     """
     test npairs_s_mu without periodic boundary conditions on a point surrounded by an
     evenly distribued circle of points perpdindicular to the LOS.
