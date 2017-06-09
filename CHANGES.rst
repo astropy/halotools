@@ -1,7 +1,7 @@
 0.6 (unreleased)
 ----------------
 
-- No changes yet
+- Changed the API for mock_observables.pair_counters.n_pairs_s_mu which now requires ``mu_bins`` to be in the conventional mu=cos(theta_LOS) format instead of mu=sin(theta_LOS).
 
 
 0.5 (2017-05-31)
