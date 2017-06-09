@@ -61,9 +61,6 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
         which pairs are counted. All values must be between [0,1].
 
-        Note that using the sine function is not common convention for
-        calculating the two point correlation function (see notes).
-
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
         Passing ``sample2`` as an input permits the calculation of
@@ -214,7 +211,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         do_auto, do_cross, estimator, num_threads, max_sample_size,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
 
-    sample1, s_bins, mu_prime_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
+    sample1, s_bins, mu_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _s_mu_tpcf_process_args(*function_args)
 
     # what needs to be done?
@@ -230,11 +227,11 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         # this is arbitrarily set, but must remain consistent!
         NR = N1
 
-    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, s_bins, mu_prime_bins, period,
+    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size)
 
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
+    D1R, D2R, RR = random_counts(sample1, sample2, randoms, s_bins, mu_bins,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
@@ -258,7 +255,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             return xi_11, xi_22
 
 
-def spherical_sector_volume(s, mu_prime):
+def spherical_sector_volume(s, mu):
     """
     This function is used to calculate analytical randoms.
 
@@ -267,12 +264,12 @@ def spherical_sector_volume(s, mu_prime):
 
     Note that the extra factor of 2 is to get the reflection.
     """
-    theta = np.arcsin(mu_prime)
+    theta = np.arccos(mu)
     vol = (2.0*np.pi/3.0) * np.outer((s**3.0), (1.0-np.cos(theta)))*2.0
     return vol
 
 
-def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
+def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size):
     r"""
@@ -290,7 +287,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
     # PBCs and randoms.
     if randoms is not None:
         if do_RR is True:
-            RR = npairs_s_mu(randoms, randoms, s_bins, mu_prime_bins, period=period,
+            RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
                              num_threads=num_threads,
                              approx_cell1_size=approx_cellran_size,
                              approx_cell2_size=approx_cellran_size)
@@ -298,7 +295,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
         else:
             RR = None
         if do_DR is True:
-            D1R = npairs_s_mu(sample1, randoms, s_bins, mu_prime_bins, period=period,
+            D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
                               num_threads=num_threads,
                               approx_cell1_size=approx_cell1_size,
                               approx_cell2_size=approx_cellran_size)
@@ -309,7 +306,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
             D2R = None
         else:
             if do_DR is True:
-                D2R = npairs_s_mu(sample2, randoms, s_bins, mu_prime_bins, period=period,
+                D2R = npairs_s_mu(sample2, randoms, s_bins, mu_bins, period=period,
                                   num_threads=num_threads,
                                   approx_cell1_size=approx_cell2_size,
                                   approx_cell2_size=approx_cellran_size)
@@ -325,7 +322,7 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
         NR = len(sample1)
 
         # do volume calculations
-        dv = spherical_sector_volume(s_bins, mu_prime_bins)
+        dv = spherical_sector_volume(s_bins, mu_bins)
         dv = np.diff(dv, axis=1)  # volume of wedges
         dv = np.diff(dv, axis=0)  # volume of wedge 'pieces'
         global_volume = period.prod()
@@ -348,14 +345,14 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_prime_bins,
         raise ValueError('Un-supported combination of PBCs and randoms provided.')
 
 
-def pair_counts(sample1, sample2, s_bins, mu_prime_bins, period,
+def pair_counts(sample1, sample2, s_bins, mu_bins, period,
         num_threads, do_auto, do_cross, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size):
     """
     Count data pairs.
     """
     if do_auto is True:
-        D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_prime_bins, period=period,
+        D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_bins, period=period,
             num_threads=num_threads,
             approx_cell1_size=approx_cell1_size,
             approx_cell2_size=approx_cell1_size)
@@ -369,7 +366,7 @@ def pair_counts(sample1, sample2, s_bins, mu_prime_bins, period,
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_prime_bins,
+            D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_bins,
                 period=period, num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
@@ -377,7 +374,7 @@ def pair_counts(sample1, sample2, s_bins, mu_prime_bins, period,
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_prime_bins, period=period,
+            D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
                 approx_cell2_size=approx_cell2_size)
@@ -414,12 +411,6 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     # process angular bins
     mu_bins = get_line_of_sight_bins_array(mu_bins)
 
-    # work with the sine of the angle between s and the LOS.  Only using cosine as the
-    # input because of convention.  sin(theta_los) increases as theta_los increases, which
-    # is required in order to get the pair counter to work.
-    theta = np.arccos(mu_bins)
-    mu_prime_bins = np.sin(theta)[::-1]  # must be increasing, remember to reverse result.
-
     if (np.min(mu_bins) < 0.0) | (np.max(mu_bins) > 1.0):
         msg = "`mu_bins` must be in the range [0,1]."
         raise ValueError(msg)
@@ -443,5 +434,5 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
 
     verify_tpcf_estimator(estimator)
 
-    return sample1, s_bins, mu_prime_bins, sample2, randoms, period,\
+    return sample1, s_bins, mu_bins, sample2, randoms, period,\
         do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
