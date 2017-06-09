@@ -352,6 +352,96 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
     return n
 
 
+def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
+    """
+    Calculate the number of pairs with 3D radial separations less than or equal to
+    :math:`s`, and angular seperations along the LOS, :math:`\mu=\cos(\theta_{\rm LOS})`.
+
+    Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS), and
+    the final dimension is parallel to the LOS.
+
+    Parameters
+    ----------
+    sample1 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and
+        period
+
+    sample2 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and
+        period
+
+    s_bins : array_like
+        numpy array of shape (num_s_bin_edges, ) storing the :math:`s`
+        boundaries defining the bins in which pairs are counted.
+
+    mu_bins : array_like
+        numpy array of shape (num_mu_bin_edges, ) storing the
+        :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
+        which pairs are counted. All values must be between [0,1].
+
+    period : array_like, optional
+        length k array defining  periodic boundary conditions. If only
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+
+    Returns
+    -------
+    N_pairs : ndarray of shape (num_s_bin_edges, num_mu_bin_edges) storing the 
+        number counts of pairs with seperations less than ``s_bins`` and ``mu_bins``
+    
+    Notes
+    -----
+    Along the first dimension of ``N_pairs``, :math:`s` (the radial seperation) increases.
+    Along the second dimension,  :math:`\mu` (the cosine of :math:`\theta_{\rm LOS}`) 
+    decreases, i.e. :math:`\theta_{\rm LOS}` increases.
+    """
+
+    sample1 = np.atleast_2d(sample1)
+    sample2 = np.atleast_2d(sample2)
+    s_bins = np.atleast_1d(s_bins)
+    mu_bins = np.atleast_1d(mu_bins)
+
+    # Check to make sure both data sets have the same dimension. Otherwise, throw an error!
+    if np.shape(sample1)[-1] != np.shape(sample2)[-1]:
+        raise ValueError("sample1 and sample2 inputs do not have the same dimension.")
+        return None
+
+    # Process period entry and check for consistency.
+    if period is None:
+        period = np.array([np.inf]*np.shape(sample1)[-1])
+    else:
+        period = np.asarray(period).astype("float64")
+        if np.shape(period) == ():
+            period = np.array([period]*np.shape(sample1)[-1])
+        elif np.shape(period)[0] != np.shape(sample1)[-1]:
+            raise ValueError("period should have len == dimension of points")
+            return None
+    
+    # create N1 x N2 x 2 array to store **all** pair separation distances
+    # note that this array can be very large for large N1 and N2
+    N1 = len(sample1)
+    N2 = len(sample2)
+    dd = np.zeros((N1*N2, 2))
+    
+    # calculate distance between every point and every other point
+    for i in range(0, N1):
+        x1 = sample1[i, :]
+        x2 = sample2
+        dd[i*N2:i*N2+N2, 0] = distance(x1, x2, period)
+        dd[i*N2:i*N2+N2, 1] = np.cos(theta_LOS(x1, x2, period))
+    
+    # put mu bins in increasing theta_LOS order
+    mu_bins = np.sort(mu_bins)[::-1]
+    
+    # bin distances in s and mu bins
+    n = np.zeros((s_bins.size, mu_bins.size), dtype=np.int)
+    for i in range(s_bins.size):
+        for j in range(mu_bins.size):
+            n[i, j] = np.sum((dd[:, 0] <= s_bins[i]) & (dd[:, 1] >= mu_bins[j]))
+    
+    return n
+
+
 def distance(x1, x2, period=None):
     """
     Find the Euclidean distance between x1 & x2, accounting for box periodicity.
@@ -371,7 +461,6 @@ def distance(x1, x2, period=None):
     Returns
     -------
     distance : array
-
     """
 
     x1 = np.atleast_2d(x1)
@@ -477,3 +566,57 @@ def perpendicular_distance(x1, x2, period=None):
     distance = np.sqrt(np.sum(m*m, axis=len(np.shape(m))-1))
 
     return distance
+
+
+def theta_LOS(x1, x2, period=None):
+    """
+    Find the seperation angle from the LOS between x1 & x2, accounting for box periodicity.
+
+    Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS).
+
+    Parameters
+    ----------
+    x1 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period
+
+    x2 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period.
+
+    period : array_like
+        Size of the simulation box along each dimension. Defines periodic boundary
+        conditioning.  Must be axis aligned.
+
+    Returns
+    -------
+    theta_LOS : array
+        angle from LOS in radians
+        
+    Notes
+    -----
+    theta_LOS is set to 0.0 if the distance between points is 0.0
+    """
+
+    x1 = np.atleast_2d(x1)
+    x2 = np.atleast_2d(x2)
+    if period is None:
+        period = np.array([np.inf]*np.shape(x1)[-1])
+
+    # check for consistency
+    if np.shape(x1)[-1] != np.shape(x2)[-1]:
+        raise ValueError("x1 and x2 list of points must have same dimension k.")
+    else:
+        k = np.shape(x1)[-1]
+    if np.shape(period)[0] != np.shape(x1)[-1]:
+        raise ValueError("period must have length equal to the dimension of x1 and x2.")
+    
+    r_perp = perpendicular_distance(x1, x2, period=period)
+    r_parallel = parallel_distance(x1, x2, period=period)
+    
+    # deal with zero seperation
+    r = np.sqrt(r_perp**2 + r_parallel**2)
+    mask = (r>0.0)
+    
+    theta = np.zeros(len(r)) # set to zero if r==0
+    theta[mask] = np.pi/2.0 - np.arctan2(r_parallel[mask],r_perp[mask])
+
+    return theta
