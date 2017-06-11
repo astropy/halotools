@@ -3,7 +3,9 @@
 """
 import numpy as np
 from scipy.stats import kstest
+from scipy.interpolate import interp1d
 from astropy.tests.helper import pytest
+from scipy.integrate import cumtrapz
 
 from .. import Cacciato09Cens, Cacciato09Sats
 from ....custom_exceptions import HalotoolsError
@@ -305,3 +307,65 @@ def test_Cacciato09Sats_mc_prim_galprop_raises_exception1():
         __ = model.mc_prim_galprop(mass=8)
     substr = "You must pass either a ``table`` or ``prim_haloprop``"
     assert substr in err.value.args[0]
+
+def test_Cacciato09_gap():
+    cens = Cacciato09Cens(threshold=(0.4 * (19 + 4.76)))
+    sats = Cacciato09Sats(threshold=(0.4 * (19 + 4.76)))
+
+    for model in [cens, sats]:
+        model.param_dict['log_L_0'] = 9.95
+        model.param_dict['log_M_1'] = 11.27
+        model.param_dict['sigma'] = 0.156
+        model.param_dict['gamma_1'] = 2.94
+        model.param_dict['gamma_2'] = 0.244
+        model.param_dict['a_1'] = 2.0 - 1.17
+        model.param_dict['a_2'] = 0
+        model.param_dict['b_0'] = -1.42
+        model.param_dict['b_1'] = 1.82
+        model.param_dict['b_2'] = -0.30
+        model.param_dict['log_M_2'] = 14.28
+
+    lum_cen = cens.mc_prim_galprop(
+        prim_haloprop=np.repeat(10**14.5, 30000), seed=1)
+    lum_sat = sats.mc_prim_galprop(
+        prim_haloprop=np.repeat(10**14.5, len(lum_cen) * 30), seed=1)
+    
+    gap = np.zeros(len(lum_cen))
+    for i in range(len(gap)):
+        lum_cen_i = lum_cen[i]
+        lum_sat_i = lum_sat[i*30:(i+1)*(30)]
+        lum_sat_i = lum_sat_i[lum_sat_i < lum_cen_i] # remove bright satellites
+        gap[i] = 2.5 * np.log10(lum_cen_i / np.amax(lum_sat_i[:20]))
+    
+    gap_more = np.linspace(0, 1.98, 100)
+    pdf_more = np.array([0.749018, 0.761080, 0.772940, 0.784557, 0.795891,
+                         0.806902, 0.817547, 0.827784, 0.837571, 0.846866,
+                         0.855625, 0.863806, 0.871370, 0.878274, 0.884480,
+                         0.889951, 0.894650, 0.898544, 0.901600, 0.903791,
+                         0.905089, 0.905471, 0.904918, 0.903413, 0.900942,
+                         0.897497, 0.893073, 0.887667, 0.881284, 0.873930,
+                         0.865615, 0.856356, 0.846172, 0.835086, 0.823125,
+                         0.810321, 0.796708, 0.782324, 0.767210, 0.751410,
+                         0.734971, 0.717942, 0.700375, 0.682321, 0.663836,
+                         0.644974, 0.625791, 0.606345, 0.586690, 0.566884,
+                         0.546981, 0.527037, 0.507105, 0.487235, 0.467480,
+                         0.447885, 0.428498, 0.409362, 0.390517, 0.372001,
+                         0.353850, 0.336096, 0.318767, 0.301891, 0.285491,
+                         0.269585, 0.254192, 0.239325, 0.224996, 0.211213,
+                         0.197980, 0.185302, 0.173179, 0.161609, 0.150587,
+                         0.140109, 0.130165, 0.120747, 0.111843, 0.103441,
+                         0.095527, 0.088087, 0.081104, 0.074563, 0.068447,
+                         0.062738, 0.057419, 0.052471, 0.047878, 0.043622,
+                         0.039683, 0.036046, 0.032693, 0.029607, 0.026772,
+                         0.024172, 0.021791, 0.019615, 0.017630, 0.015821])
+    cdf_more = np.concatenate([[0], cumtrapz(pdf_more, x=gap_more)])
+    cdf_more = cdf_more / cdf_more[-1]
+    cdf_more = interp1d(gap_more, cdf_more)
+    
+    gap = gap[gap < gap_more[-1]]
+    
+    p_value = kstest(gap, cdf_more)[1]
+    
+    assert p_value > 0.001
+    
+
