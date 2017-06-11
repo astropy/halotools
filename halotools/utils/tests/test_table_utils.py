@@ -2,7 +2,7 @@
 """
 import numpy as np
 from unittest import TestCase
-from astropy.tests.helper import pytest
+import pytest
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 

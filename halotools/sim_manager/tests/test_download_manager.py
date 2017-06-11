@@ -3,9 +3,10 @@
 
 import os
 import shutil
+import pytest
 import numpy as np
 from astropy.config.paths import _find_home
-from astropy.tests.helper import remote_data, pytest
+from astropy.tests.helper import remote_data
 from astropy.table import Table
 from unittest import TestCase
 

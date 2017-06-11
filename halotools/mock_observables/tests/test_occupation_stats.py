@@ -1,7 +1,7 @@
 """
 """
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 from ...empirical_models import PrebuiltHodModelFactory
 from ...sim_manager import FakeSim
 from ..occupation_stats import hod_from_mock

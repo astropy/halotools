@@ -3,7 +3,7 @@
 import numpy as np
 from copy import deepcopy
 
-from astropy.tests.helper import pytest
+import pytest
 import warnings
 
 from ....empirical_models import OccupationComponent, Zheng07Sats, Zheng07Cens

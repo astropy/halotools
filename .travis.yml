@@ -33,6 +33,8 @@ env:
         - PIP_DEPENDENCIES=''
         # Here we list the dependencies to be installed that are in conda
         - CONDA_DEPENDENCIES='cython scipy beautifulsoup4 requests matplotlib h5py'
+        - ASTROPY_USE_SYSTEM_PYTEST=1
+
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'

@@ -4,7 +4,7 @@ the `~halotools.empirical_models.PrebuiltSubhaloModelFactory` class
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 
 from ...factories import PrebuiltSubhaloModelFactory, SubhaloModelFactory
 

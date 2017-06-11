@@ -3,7 +3,7 @@
 """
 import numpy as np
 from scipy.stats import kstest
-from astropy.tests.helper import pytest
+import pytest
 
 from .. import Cacciato09Cens, Cacciato09Sats
 from ....custom_exceptions import HalotoolsError

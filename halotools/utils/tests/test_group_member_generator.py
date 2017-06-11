@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 from unittest import TestCase
 from collections import Counter
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 
 from ..group_member_generator import group_member_generator
 

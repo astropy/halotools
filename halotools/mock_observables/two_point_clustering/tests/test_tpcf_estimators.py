@@ -2,7 +2,7 @@
 """
 from __future__ import absolute_import, division, print_function
 
-from astropy.tests.helper import pytest
+import pytest
 import numpy as np
 
 from ..tpcf_estimators import _test_for_zero_division, _list_estimators, _TP_estimator_requirements

@@ -1,7 +1,7 @@
 """ Module providing unit-testing of `~halotools.utils.crossmatch` function.
 """
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..crossmatch import crossmatch

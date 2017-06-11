@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
-from astropy.tests.helper import pytest
+import pytest
 
 from ..dutton_maccio14 import dutton_maccio14
 from ..direct_from_halo_catalog import direct_from_halo_catalog

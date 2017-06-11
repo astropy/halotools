@@ -1,6 +1,6 @@
 """
 """
-from astropy.tests.helper import pytest
+import pytest
 
 from ...factories import PrebuiltHodModelFactory
 
