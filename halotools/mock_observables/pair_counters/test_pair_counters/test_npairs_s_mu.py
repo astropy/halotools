@@ -1,4 +1,5 @@
-"""
+r"""
+test module for pair counts in s and mu bins
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -54,7 +55,7 @@ grid_indices += 1
 
 
 def test_npairs_s_mu_periodic():
-    """
+    r"""
     test npairs_s_mu with periodic boundary conditions on a random set of points.
     """
     
@@ -94,7 +95,7 @@ def test_npairs_s_mu_periodic():
 
 
 def test_npairs_s_mu_nonperiodic():
-    """
+    r"""
     test npairs_s_mu without periodic boundary conditions on a random set of points.
     """
 
@@ -134,7 +135,7 @@ def test_npairs_s_mu_nonperiodic():
 
 
 def test_npairs_s_mu_point_surrounded_by_circle():
-    """
+    r"""
     test npairs_s_mu without periodic boundary conditions on a point surrounded by an
     evenly distributed circle of points aligned with the LOS.
     """

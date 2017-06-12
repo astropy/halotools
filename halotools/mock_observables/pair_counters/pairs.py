@@ -1,4 +1,4 @@
-"""
+r"""
 simple python brute force pair counting functions.  The primary purpose of these functions
 is as a sanity check on more complex pair counting techniques.  These functions should not
 be used on large data sets, as memory usage is very large, and runtimes can be very slow.
@@ -12,7 +12,7 @@ __author__ = ['Duncan Campbell']
 
 
 def npairs(sample1, sample2, rbins, period=None):
-    """
+    r"""
     Calculate the number of pairs with separations less than or equal to rbins[i].
 
     Parameters
@@ -38,7 +38,6 @@ def npairs(sample1, sample2, rbins, period=None):
     -------
     N_pairs : array of length len(rbins)
         number counts of pairs
-
     """
 
     sample1 = np.atleast_2d(sample1)
@@ -83,7 +82,7 @@ def npairs(sample1, sample2, rbins, period=None):
 
 
 def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
-    """
+    r"""
     Calculate the number of pairs with parellal separations less than or equal to
     pi_bins[i], and perpendicular separations less than or equal to rp_bins[i].
 
@@ -116,7 +115,6 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
     -------
     N_pairs : ndarray of shape (len(rp_bins),len(pi_bins))
         number counts of pairs
-
     """
 
     sample1 = np.atleast_2d(sample1)
@@ -159,7 +157,7 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
 
 
 def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
-    """
+    r"""
     Calculate the weighted number of pairs with separations less than or equal to rbins[i].
 
     Parameters
@@ -191,7 +189,6 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
     -------
     wN_pairs : array of length len(rbins)
         weighted number counts of pairs
-
     """
 
     sample1 = np.atleast_2d(sample1)
@@ -251,7 +248,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
 
 
 def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None, weights2=None):
-    """
+    r"""
     Calculate the number of weighted pairs with parellal separations less than or equal to
     pi_bins[i], and perpendicular separations less than or equal to rp_bins[i].
 
@@ -291,7 +288,6 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
     -------
     wN_pairs : ndarray of shape (len(rp_bins),len(pi_bins))
         weighted number counts of pairs
-
     """
 
     sample1 = np.atleast_2d(sample1)
@@ -353,7 +349,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 
 
 def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
-    """
+    r"""
     Calculate the number of pairs with 3D radial separations less than or equal to
     :math:`s`, and angular separations along the LOS, :math:`\mu=\cos(\theta_{\rm LOS})`.
 
@@ -443,7 +439,7 @@ def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
 
 
 def distance(x1, x2, period=None):
-    """
+    r"""
     Find the Euclidean distance between x1 & x2, accounting for box periodicity.
 
     Parameters
@@ -483,7 +479,7 @@ def distance(x1, x2, period=None):
 
 
 def parallel_distance(x1, x2, period=None):
-    """
+    r"""
     Find the parallel distance between x1 & x2, accounting for box periodicity.
 
     Assumes the last dimension is the line-of-sight.
@@ -503,7 +499,6 @@ def parallel_distance(x1, x2, period=None):
     Returns
     -------
     distance : array
-
     """
 
     x1 = np.atleast_2d(x1)
@@ -526,7 +521,7 @@ def parallel_distance(x1, x2, period=None):
 
 
 def perpendicular_distance(x1, x2, period=None):
-    """
+    r"""
     Find the perpendicular distance between x1 & x2, accounting for box periodicity.
 
     Assumes the first N-1 dimensions are perpendicular to the line-of-sight.
@@ -546,7 +541,6 @@ def perpendicular_distance(x1, x2, period=None):
     Returns
     -------
     distance : array
-
     """
 
     x1 = np.atleast_2d(x1)
@@ -569,7 +563,7 @@ def perpendicular_distance(x1, x2, period=None):
 
 
 def theta_LOS(x1, x2, period=None):
-    """
+    r"""
     Find the separation angle from the LOS between x1 & x2, accounting for box periodicity.
 
     Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS).
