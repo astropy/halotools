@@ -7,7 +7,7 @@ weighting fuctions that return pairwise velocity calculations.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sqrt as c_sqrt
+# from libc.math cimport sqrt as c_sqrt
 
 __all__= ("relative_radial_velocity_weights",
     "radial_velocity_variance_counter_weights",
@@ -59,7 +59,7 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
     cdef cnp.float64_t rx = w1[0] - (w2[0] + shift[0])
     cdef cnp.float64_t ry = w1[1] - (w2[1] + shift[1])
     cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
-    cdef cnp.float64_t norm = c_sqrt(rx*rx + ry*ry + rz*rz)
+    cdef cnp.float64_t norm = np.sqrt(rx*rx + ry*ry + rz*rz)
 
     cdef cnp.float64_t dvx, dvy, dvz, result
 
@@ -129,7 +129,7 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
     cdef cnp.float64_t rx = w1[0] - (w2[0] + shift[0])
     cdef cnp.float64_t ry = w1[1] - (w2[1] + shift[1])
     cdef cnp.float64_t rz = w1[2] - (w2[2] + shift[2])
-    cdef cnp.float64_t norm = c_sqrt(rx*rx + ry*ry + rz*rz)
+    cdef cnp.float64_t norm = np.sqrt(rx*rx + ry*ry + rz*rz)
 
     cdef cnp.float64_t dvx, dvy, dvz, result
 
