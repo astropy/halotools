@@ -32,7 +32,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     observer' approximation.
 
     A common variation of pair-counting calculations is to count pairs with
-    separations *between* two different distances, e.g. [*s1*,*s2*] and [*mu1*,*mu2*]. 
+    separations *between* two different distances, e.g. [s1 ,s2] and [mu1, mu2]. 
     You can retrieve this information from `~halotools.mock_observables.npairs_s_mu`
     by taking `numpy.diff` of the returned array along each axis.
 
