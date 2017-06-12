@@ -6,7 +6,7 @@ import numpy as np
 cimport numpy as cnp
 cimport cython
 from libc.math cimport ceil
-from libc.math cimport sqrt
+# from libc.math cimport sqrt
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('npairs_s_mu_engine', )
@@ -188,9 +188,9 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     dz_sq = dz*dz
 
                                     #transform to s and mu
-                                    s = sqrt(dz_sq + dxy_sq)
+                                    s = np.sqrt(dz_sq + dxy_sq)
                                     if s!=0:
-                                        mu = sqrt(dxy_sq)/s
+                                        mu = np.sqrt(dxy_sq)/s
                                     else:
                                         mu=0.0
 
