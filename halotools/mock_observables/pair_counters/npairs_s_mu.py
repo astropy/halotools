@@ -21,19 +21,20 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function counts the number of pairs of points separated by less than
-    radial separation, *s,* and :math:`\mu\equiv\cos(\theta_{\rm los})`,
-    where :math:`\theta_{\rm los}` is the line-of-sight angle
-    between points and :math:`s^2 = r_{\rm parallel}^2 + r_{\rm perp}^2`.
-
-    Note that if sample1 == sample2 that the
-    `~halotools.mock_observables.npairs_s_mu` function double-counts pairs.
-    If your science application requires sample1==sample2 inputs and also pairs
-    to not be double-counted, simply divide the final counts by 2.
+    radial separation, :math:`s`, given by ``s_bins`` and 
+    angular distance, :math:`\mu\equiv\cos(\theta_{\rm los})`, given by ``mu_bins``,
+    where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and 
+    the line-of-sight (LOS).
+    
+    The first two dimensions (x, y) define the plane for perpendicular distances.
+    The third dimension (z) defines the LOS.  i.e. x,y positions are on
+    the plane of the sky, and z is the radial distance coordinate.  This is the 'distant
+    observer' approximation.
 
     A common variation of pair-counting calculations is to count pairs with
-    separations *between* two different distances *r1* and *r2*. You can retrieve
-    this information from the `~halotools.mock_observables.npairs_s_mu`
-    by taking `numpy.diff` of the returned array.
+    separations *between* two different distances, e.g. [*s1*,*s2*] and [*mu1*,*mu2*]. 
+    You can retrieve this information from `~halotools.mock_observables.npairs_s_mu`
+    by taking `numpy.diff` of the returned array along each axis.
 
     See Notes section for further clarification.
 
@@ -59,9 +60,6 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         numpy array of shape (num_mu_bin_edges, ) storing the
         :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
         which pairs are counted. All values must be between [0,1].
-
-        Note that using the sine function is not common convention for
-        calculating the two point correlation function (see notes).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -100,9 +98,27 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     Notes
     -----
-    Along the first dimension of ``num_pairs``, :math:`s` (the radial seperation) increases.
-    Along the second dimension,  :math:`\mu` (the cosine of :math:`\theta_{\rm LOS}`) 
-    decreases, i.e. :math:`\theta_{\rm LOS}` increases.
+    Let :math:`\vec{s}` be the radial vector connnecting two points.
+    The magnitude, :math:`s`, is:
+
+    .. math::
+        s = \sqrt{r_{\parallel}^2+r_{\perp}^2},
+
+    where :math:`r_{\parallel}` is the separation parallel to the LOS
+    and :math:`r_{\perp}` is the separation perpednicular to the LOS.  :math:`\mu` is
+    the cosine of the angle, :math:`\theta_{\rm LOS}`, between the LOS
+    and :math:`\vec{s}`:
+
+    .. math::
+        \mu = \cos(\theta_{\rm LOS}) \equiv r_{\parallel}/s.
+    
+    Along the first dimension of ``num_pairs``, :math:`s` increases.
+    Along the second dimension,  :math:`\mu` decreases, 
+    i.e. :math:`\theta_{\rm LOS}` increases.
+    
+    If sample1 == sample2 that the `~halotools.mock_observables.npairs_s_mu` function 
+    double-counts pairs. If your science application requires sample1==sample2 inputs 
+    and also pairs to not be double-counted, simply divide the final counts by 2.
     
     One final point of clarification concerning double-counting may be in order.
     Suppose sample1==sample2 and s_bins[0]==0. Then the returned value for this bin
