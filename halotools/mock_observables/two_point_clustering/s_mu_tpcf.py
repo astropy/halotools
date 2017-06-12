@@ -235,8 +235,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
         approx_cell1_size, approx_cell2_size, approx_cellran_size)
 
-    # return results.  remember to reverse the final result because we used
-    # mu_prime = sin(theta_los) bins instead of the user passed in mu = cos(theta_los).
+    # return results.  remember to reverse the final result since
+    # the pair counts are done in order of increasing theta_LOS (i.e. decreasing mu)
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
         return xi_11

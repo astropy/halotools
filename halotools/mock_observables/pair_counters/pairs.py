@@ -7,7 +7,7 @@ be used on large data sets, as memory usage is very large, and runtimes can be v
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 
-__all__ = ['npairs', 'wnpairs', 'xy_z_npairs', 'xy_z_wnpairs']
+__all__ = ['npairs', 'wnpairs', 'xy_z_npairs', 'xy_z_wnpairs', 's_mu_npairs']
 __author__ = ['Duncan Campbell']
 
 
@@ -355,7 +355,7 @@ def xy_z_wnpairs(sample1, sample2, rp_bins, pi_bins, period=None, weights1=None,
 def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
     """
     Calculate the number of pairs with 3D radial separations less than or equal to
-    :math:`s`, and angular seperations along the LOS, :math:`\mu=\cos(\theta_{\rm LOS})`.
+    :math:`s`, and angular separations along the LOS, :math:`\mu=\cos(\theta_{\rm LOS})`.
 
     Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS), and
     the final dimension is parallel to the LOS.
@@ -387,11 +387,11 @@ def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
     Returns
     -------
     N_pairs : ndarray of shape (num_s_bin_edges, num_mu_bin_edges) storing the 
-        number counts of pairs with seperations less than ``s_bins`` and ``mu_bins``
+        number counts of pairs with separations less than ``s_bins`` and ``mu_bins``
     
     Notes
     -----
-    Along the first dimension of ``N_pairs``, :math:`s` (the radial seperation) increases.
+    Along the first dimension of ``N_pairs``, :math:`s` (the radial separation) increases.
     Along the second dimension,  :math:`\mu` (the cosine of :math:`\theta_{\rm LOS}`) 
     decreases, i.e. :math:`\theta_{\rm LOS}` increases.
     """
@@ -570,7 +570,7 @@ def perpendicular_distance(x1, x2, period=None):
 
 def theta_LOS(x1, x2, period=None):
     """
-    Find the seperation angle from the LOS between x1 & x2, accounting for box periodicity.
+    Find the separation angle from the LOS between x1 & x2, accounting for box periodicity.
 
     Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS).
 
@@ -612,7 +612,7 @@ def theta_LOS(x1, x2, period=None):
     r_perp = perpendicular_distance(x1, x2, period=period)
     r_parallel = parallel_distance(x1, x2, period=period)
     
-    # deal with zero seperation
+    # deal with zero separation
     r = np.sqrt(r_perp**2 + r_parallel**2)
     mask = (r>0.0)
     

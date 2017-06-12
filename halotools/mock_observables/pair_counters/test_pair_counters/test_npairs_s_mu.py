@@ -55,7 +55,7 @@ grid_indices += 1
 
 def test_npairs_s_mu_periodic():
     """
-    test npairs_s_mu with periodic boundary conditions.
+    test npairs_s_mu with periodic boundary conditions on a random set of points.
     """
     
     # define bins
@@ -95,7 +95,7 @@ def test_npairs_s_mu_periodic():
 
 def test_npairs_s_mu_nonperiodic():
     """
-    test npairs_s_mu without periodic boundary conditions.
+    test npairs_s_mu without periodic boundary conditions on a random set of points.
     """
 
     # define bins
@@ -136,7 +136,7 @@ def test_npairs_s_mu_nonperiodic():
 def test_npairs_s_mu_point_surrounded_by_circle():
     """
     test npairs_s_mu without periodic boundary conditions on a point surrounded by an
-    evenly distribued circle of points perpdindicular to the LOS.
+    evenly distributed circle of points aligned with the LOS.
     """
     
     # put one point per degree in the circle
@@ -160,7 +160,7 @@ def test_npairs_s_mu_point_surrounded_by_circle():
     pairs = np.diff(np.diff(result, axis=0),axis=1)
     
     # note that there should be 4 pairs per mu bin
-    # since each quadrant of te circle counts once for each mu bin
+    # since each quadrant of the circle counts once for each mu bin
     # and there is one point per degree
     
     msg = "The number of pairs between the origin and a circle with one point per degree is incorrect."

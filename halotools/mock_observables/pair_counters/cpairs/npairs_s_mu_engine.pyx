@@ -16,7 +16,8 @@ __all__ = ('npairs_s_mu_engine', )
 @cython.nonecheck(False)
 def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     s_bins_in, mu_bins_in, cell1_tuple):
-    r""" Cython engine for counting pairs of points as a function of projected separation.
+    r""" Cython engine for counting pairs of points as a function of radial separation, s,
+    and the angle between the line-of-sight (LOS) and s.
 
     Parameters
     ------------
@@ -48,7 +49,11 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     counts : array
         Integer array of length len(s_bins) giving the number of pairs
         separated by a distance less than the corresponding entry of ``s_bins``.
-
+    
+    Notes
+    -----
+    mu is defined as the sin(theta_LOS) so that as theta_LOS increases, mu increases.
+    
     """
     cdef cnp.float64_t[:] sqr_s_bins = s_bins_in * s_bins_in
     cdef cnp.float64_t[:] sqr_mu_bins = mu_bins_in * mu_bins_in
@@ -175,22 +180,22 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                         z_icell2 = z2[ifirst2:ilast2]
 
                         Nj = ilast2 - ifirst2
-                        #loop over points in cell1 points
+                        # loop over points in cell1 points
                         if Nj > 0:
                             for i in range(0,Ni):
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
-                                #loop over points in cell2 points
+                                # loop over points in cell2 points
                                 for j in range(0,Nj):
-                                    #calculate the square distance
+                                    # calculate the square distance
                                     dx = x1tmp - x_icell2[j]
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
                                     dxy_sq = dx*dx + dy*dy
                                     dz_sq = dz*dz
 
-                                    #transform to s and mu
+                                    # transform to s and mu
                                     sqr_s = dz_sq + dxy_sq
 
                                     if sqr_s > sqr_s_max:
@@ -204,9 +209,9 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                     if sqr_mu > sqr_mu_max:
                                         continue
 
-                                    # MS: I have intentionally split
-                                    # up the loop. Since division
-                                    # is slow, computing mu is a bottle-neck.
+                                    # The loop has been intentionally split up
+                                    # Since division is slow,
+                                    # computing mu is a bottle-neck.
                                     # Computing the 's' bin however can proceed
                                     # in the meantime.
                                     k = num_s_bins-2

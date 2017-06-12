@@ -192,11 +192,11 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
-    # # Create a function object that has a single argument, for parallelization purposes
+    # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_s_mu_engine,
         double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins_prime)
 
-    # # Calculate the cell1 indices that will be looped over by the engine
+    # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
