@@ -265,6 +265,7 @@ def spherical_sector_volume(s, mu):
     Note that the extra factor of 2 is to get the reflection.
     """
     theta = np.arccos(mu)
+    
     vol = (2.0*np.pi/3.0) * np.outer((s**3.0), (1.0-np.cos(theta)))*2.0
     return vol
 
@@ -322,7 +323,8 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
         NR = len(sample1)
 
         # do volume calculations
-        dv = spherical_sector_volume(s_bins, mu_bins)
+        mu_bins_reverse_sorted = np.sort(mu_bins)[::-1]
+        dv = spherical_sector_volume(s_bins, mu_bins_reverse_sorted)
         dv = np.diff(dv, axis=1)  # volume of wedges
         dv = np.diff(dv, axis=0)  # volume of wedge 'pieces'
         global_volume = period.prod()
