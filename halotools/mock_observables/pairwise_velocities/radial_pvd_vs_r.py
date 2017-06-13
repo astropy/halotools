@@ -6,24 +6,29 @@ as a function of 3d distance between the pairs.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from functools import partial
 
-from .pairwise_velocities_helpers import (_pairwise_velocity_stats_process_args,
-    _process_radial_bins)
+import multiprocessing
 
-from .velocity_marked_npairs_3d import velocity_marked_npairs_3d
+from .engines import radial_pvd_vs_r_engine
+
+from .mean_radial_velocity_vs_r import _process_args
+
+from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
+from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
+
 
 __all__ = ('radial_pvd_vs_r', )
-__author__ = ['Duncan Campbell']
-
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
 
 
-def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
-        velocities2=None, period=None, do_auto=True, do_cross=True,
-        num_threads=1, max_sample_size=int(1e6),
-        approx_cell1_size=None, approx_cell2_size=None, seed=None):
+def radial_pvd_vs_r(sample1, velocities1,
+        rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
+        sample2=None, velocities2=None, period=None,
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None, seed=None):
     r"""
-    Calculate the pairwise velocity dispersion (PVD), :math:`\sigma_{12}(r)`.
+    Calculate the pairwise radial velocity dispersion as a function of absolute distance,
+    or as a function of :math:`s = r / R_{\rm vir}`.
 
     Example calls to this function appear in the documentation below.
 
@@ -32,55 +37,91 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        Numpy array of shape (npts1, 3) containing the 3-D positions of points.
 
     velocities1 : array_like
-        len(sample1) array of velocities.
+        Numpy array of shape (npts1, 3) containing the 3-D velocities.
 
-    rbins : array_like
-        array of boundaries defining the real space radial bins in which pairs are
-        counted.
+    rbins_absolute : array_like, optional
+        Array of shape (num_rbins+1, ) defining the boundaries of bins in which
+        dispersion profile is computed.
+
+        Either ``rbins_absolute`` must be passed,
+        or ``rbins_normalized`` and ``normalize_rbins_by`` must be passed.
+
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
+    rbins_normalized : array_like, optional
+        Array of shape (num_rbins+1, ) defining the bin boundaries *x*, where
+        :math:`x = r / R_{\rm vir}`, in which dispersion profile is computed.
+        The quantity :math:`R_{\rm vir}` can vary from point to point in ``sample1``
+        and is passed in via the ``normalize_rbins_by`` argument.
+        While scaling by :math:`R_{\rm vir}` is common, you are not limited to this
+        normalization choice; in principle you can use the ``rbins_normalized`` and
+        ``normalize_rbins_by`` arguments to scale your distances by any length-scale
+        associated with points in ``sample1``.
+
+        Default is None, in which case the ``rbins_absolute`` argument must be passed.
+
+    normalize_rbins_by : array_like, optional
+        Numpy array of shape (npts1, ) defining how the distance between each pair of points
+        will be normalized. For example, if ``normalize_rbins_by`` is defined to be the
+        virial radius of each point in ``sample1``, then the input numerical values *x*
+        stored in ``rbins_normalized`` will be interpreted as referring to
+        bins of :math:`x = r / R_{\rm vir}`.
+
+        Default is None, in which case
+        the input ``rbins_absolute`` argument must be passed instead of
+        ``rbins_normalized``.
+
+        Pay special attention to length-units in whatever halo catalog you are using:
+        while Halotools-provided catalogs will always have length units
+        pre-processed to be Mpc/h, commonly used default settings for ASCII catalogs
+        produced by Rockstar return the ``Rvir`` column in kpc/h units,
+        but halo centers in Mpc/h units.
 
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points.
+        Numpy array of shape (npts2, 3) containing the 3-D positions of points.
 
     velocities2 : array_like, optional
-        len(sample12) array of velocities.
+        Numpy array of shape (npts2, 3) containing the 3-D velocities.
 
     period : array_like, optional
-        length 3 array defining  periodic boundary conditions. If only
+        Length-3 array defining periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
-
-    do_auto : boolean, optional
-        caclulate the auto-pairwise velocities?
-
-    do_cross : boolean, optional
-        caclulate the cross-pairwise velocities?
+        Default is None, for no PBCs.
 
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
 
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is equal to max_sample_size.
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use *max(rbins)* in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
 
-    seed : int, optional
-        Random number seed used to randomly downsample data, if applicable.
-        Default is None, in which case downsampling will be stochastic.
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for `sample2`.  See comments for
+        ``approx_cell1_size`` for details.
 
     Returns
     -------
     sigma_12 : numpy.array
-        *len(rbins)-1* length array containing the dispersion of the pairwise velocity,
-        :math:`\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
+        Numpy array of shape (num_rbins, ) containing the dispersion
+        of the pairwise radial velocity, :math:`\sigma_{12}(r)`,
+        computed in each of the bins defined by ``rbins``.
 
     Notes
     -----
     The pairwise velocity, :math:`v_{12}(r)`, is defined as:
 
     .. math::
+
         v_{12}(r) = \vec{v}_{\rm 1, pec} \cdot \vec{r}_{12}-\vec{v}_{\rm 2, pec} \cdot \vec{r}_{12}
 
     where :math:`\vec{v}_{\rm 1, pec}` is the peculiar velocity of object 1, and
@@ -88,161 +129,102 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
 
     :math:`\sigma_{12}(r)` is the standard deviation of this quantity in radial bins.
 
-    Pairs and radial velocities are calculated using
-    `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.
+    For radial separation bins in which there are zero pairs, function returns zero.
 
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a
-    periodic unit cube.
+    For demonstration purposes we will work with
+    halos in the `~halotools.sim_manager.FakeSim`. Here we'll just demonstrate
+    basic usage, referring to :ref:`galaxy_catalog_analysis_tutorial6` for a
+    more detailed demo.
 
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
 
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
 
     We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
 
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
 
-    We will do the same to get a random set of peculiar velocities.
+    We will do the same to get a random set of velocities.
 
-    >>> vx = np.random.random(Npts)-0.5
-    >>> vy = np.random.random(Npts)-0.5
-    >>> vz = np.random.random(Npts)-0.5
-    >>> velocities = np.vstack((vx,vy,vz)).T
+    >>> vx = halocat.halo_table['halo_vx']
+    >>> vy = halocat.halo_table['halo_vy']
+    >>> vz = halocat.halo_table['halo_vz']
+    >>> velocities1 = np.vstack((vx,vy,vz)).T
 
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> sigma_12 = radial_pvd_vs_r(coords, velocities, rbins, period=period)
+    >>> rbins = np.logspace(-1, 1, 10)
+    >>> sigma_12 = radial_pvd_vs_r(sample1, velocities1, rbins_absolute=rbins, period=halocat.Lbox)
 
     See also
     ---------
     ref:`galaxy_catalog_analysis_tutorial7`
     """
+    result = _process_args(sample1, velocities1, sample2, velocities2,
+        rbins_absolute, rbins_normalized, normalize_rbins_by,
+        period, num_threads, approx_cell1_size, approx_cell2_size, seed)
 
-    # process input arguments
-    function_args = (sample1, velocities1, sample2, velocities2, period,
-        do_auto, do_cross, num_threads, max_sample_size,
-        approx_cell1_size, approx_cell2_size, seed)
-    sample1, velocities1, sample2, velocities2,\
-        period, do_auto, do_cross,\
-        num_threads, _sample1_is_sample2, PBCs =\
-        _pairwise_velocity_stats_process_args(*function_args)
+    sample1, velocities1, sample2, velocities2, max_rbins_absolute, period,\
+        num_threads, _sample1_is_sample2, PBCs, \
+        approx_cell1_size, approx_cell2_size, rbins_normalized, normalize_rbins_by = result
+    x1in, y1in, z1in = sample1[:, 0], sample1[:, 1], sample1[:, 2]
+    x2in, y2in, z2in = sample2[:, 0], sample2[:, 1], sample2[:, 2]
+    xperiod, yperiod, zperiod = period
+    squared_normalize_rbins_by = normalize_rbins_by*normalize_rbins_by
+    search_xlength = max_rbins_absolute
+    search_ylength = max_rbins_absolute
+    search_zlength = max_rbins_absolute
 
-    rbins = _process_radial_bins(rbins, period, PBCs)
+    #  Compute the estimates for the cell sizes
+    approx_cell1_size, approx_cell2_size = (
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
+        )
+    approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+    approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
 
-    # calculate velocity difference scale
-    std_v1 = np.sqrt(np.std(velocities1[0, :]))
-    std_v2 = np.sqrt(np.std(velocities2[0, :]))
+    x1in, y1in, z1in = sample1[:, 0], sample1[:, 1], sample1[:, 2]
+    x2in, y2in, z2in = sample2[:, 0], sample2[:, 1], sample2[:, 2]
+    vx1in, vy1in, vz1in = velocities1[:, 0], velocities1[:, 1], velocities1[:, 2]
+    vx2in, vy2in, vz2in = velocities2[:, 0], velocities2[:, 1], velocities2[:, 2]
 
-    # build the marks.
-    shift1 = np.repeat(std_v1, len(sample1))
-    shift2 = np.repeat(std_v2, len(sample2))
-    marks1 = np.vstack((sample1.T, velocities1.T, shift1)).T
-    marks2 = np.vstack((sample2.T, velocities2.T, shift2)).T
+    # Build the rectangular mesh
+    double_mesh = RectangularDoubleMesh(x1in, y1in, z1in, x2in, y2in, z2in,
+        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
+        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
+        search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
-    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-            do_auto, do_cross, marks1, marks2,
-            weight_func_id, _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
-        """
-        Count velocity weighted data pairs.
-        """
+    # Create a function object that has a single argument, for parallelization purposes
+    engine = partial(radial_pvd_vs_r_engine, double_mesh,
+        x1in, y1in, z1in, x2in, y2in, z2in,
+        vx1in, vy1in, vz1in, vx2in, vy2in, vz2in,
+        squared_normalize_rbins_by, rbins_normalized)
 
-        if do_auto is True:
-            D1D1, S1S1, N1N1 = velocity_marked_npairs_3d(
-                sample1, sample1, rbins,
-                weights1=marks1, weights2=marks1,
-                weight_func_id=weight_func_id,
-                period=period, num_threads=num_threads,
-                approx_cell1_size=approx_cell1_size,
-                approx_cell2_size=approx_cell1_size)
-            D1D1 = np.diff(D1D1)
-            S1S1 = np.diff(S1S1)
-            N1N1 = np.diff(N1N1)
-        else:
-            D1D1 = None
-            D2D2 = None
-            N1N1 = None
-            N2N2 = None
-            S1S1 = None
-            S2S2 = None
+    # Calculate the cell1 indices that will be looped over by the engine
+    num_threads, cell1_tuples = _cell1_parallelization_indices(
+        double_mesh.mesh1.ncells, num_threads)
 
-        if _sample1_is_sample2:
-            D1D2 = D1D1
-            D2D2 = D1D1
-            N1N2 = N1N1
-            N2N2 = N1N1
-            S1S2 = S1S1
-            S2S2 = S1S1
-        else:
-            if do_cross == True:
-                D1D2, S1S2, N1N2 = velocity_marked_npairs_3d(
-                    sample1, sample2, rbins,
-                    weights1=marks1, weights2=marks2,
-                    weight_func_id=weight_func_id,
-                    period=period, num_threads=num_threads,
-                    approx_cell1_size=approx_cell1_size,
-                    approx_cell2_size=approx_cell2_size)
-                D1D2 = np.diff(D1D2)
-                S1S2 = np.diff(S1S2)
-                N1N2 = np.diff(N1N2)
-            else:
-                D1D2 = None
-                N1N2 = None
-                S1S2 = None
-            if do_auto is True:
-                D2D2, S2S2, N2N2 = velocity_marked_npairs_3d(sample2, sample2, rbins,
-                    weights1=marks2, weights2=marks2,
-                    weight_func_id=weight_func_id,
-                    period=period, num_threads=num_threads,
-                    approx_cell1_size=approx_cell2_size,
-                    approx_cell2_size=approx_cell2_size)
-                D2D2 = np.diff(D2D2)
-                S2S2 = np.diff(S2S2)
-                N2N2 = np.diff(N2N2)
-            else:
-                D2D2 = None
-                N2N2 = None
-
-        return D1D1, D1D2, D2D2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2
-
-    weight_func_id = 12
-    V1V1, V1V2, V2V2, S1S1, S1S2, S2S2, N1N1, N1N2, N2N2 = marked_pair_counts(
-        sample1, sample2, rbins, period,
-        num_threads, do_auto, do_cross,
-        marks1, marks2, weight_func_id,
-        _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size)
-
-    def _shifted_std(N, sum_x, sum_x_sqr):
-        """
-        calculate the variance
-        """
-        variance = (sum_x_sqr - (sum_x * sum_x)/N)/(N - 1)
-        return np.sqrt(variance)
-
-    # return results
-    if _sample1_is_sample2:
-        sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
-        return np.where(np.isfinite(sigma_11), sigma_11, 0.)
+    if num_threads > 1:
+        pool = multiprocessing.Pool(num_threads)
+        result = np.array(pool.map(engine, cell1_tuples))
+        counts, vrad_sum, vradsq_sum = result[:, 0], result[:, 1], result[:, 2]
+        counts = np.sum(counts, axis=0)
+        vrad_sum = np.sum(vrad_sum, axis=0)
+        vradsq_sum = np.sum(vradsq_sum, axis=0)
+        pool.close()
     else:
-        if (do_auto is True) & (do_cross is True):
-            sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
-            sigma_12 = _shifted_std(N1N2, V1V2, S1S2)
-            sigma_22 = _shifted_std(N2N2, V2V2, S2S2)
-            return (np.where(np.isfinite(sigma_11), sigma_11, 0.),
-            np.where(np.isfinite(sigma_12), sigma_12, 0.),
-            np.where(np.isfinite(sigma_22), sigma_22, 0.))
-        elif (do_cross is True):
-            sigma_12 = _shifted_std(N1N2, V1V2, S1S2)
-            return np.where(np.isfinite(sigma_12), sigma_12, 0.)
-        elif (do_auto is True):
-            sigma_11 = _shifted_std(N1N1, V1V1, S1S1)
-            sigma_22 = _shifted_std(N2N2, V2V2, S2S2)
-            return (np.where(np.isfinite(sigma_11), sigma_11, 0.),
-                np.where(np.isfinite(sigma_22), sigma_22, 0.))
+        counts, vrad_sum, vradsq_sum = np.array(engine(cell1_tuples[0]))
+
+    counts = np.diff(counts).astype('f4')
+    vrad = np.diff(vrad_sum)
+    vradsq = np.diff(vradsq_sum)
+
+    vrad_dispersion_squared = np.zeros(len(vrad))
+    term1 = vradsq[counts > 0]/counts[counts > 0]
+    term2 = (vrad[counts > 0]/counts[counts > 0])**2
+    vrad_dispersion_squared[counts > 0] = term1 - term2
+    return np.sqrt(vrad_dispersion_squared)
