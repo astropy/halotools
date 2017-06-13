@@ -220,9 +220,10 @@ def radial_pvd_vs_r(sample1, velocities1,
 
     counts = np.diff(counts).astype('f4')
     vrad = np.diff(vrad_sum)
-    vradsq = np.diff(vrad_sum)
+    vradsq = np.diff(vradsq_sum)
 
     vrad_dispersion_squared = np.zeros(len(vrad))
-    vrad_dispersion_squared[counts > 0] = (vradsq[counts > 0]/counts[counts > 0] -
-        ((vrad[counts > 0]/counts[counts > 0]**2)))
+    term1 = vradsq[counts > 0]/counts[counts > 0]
+    term2 = (vrad[counts > 0]/counts[counts > 0])**2
+    vrad_dispersion_squared[counts > 0] = term1 - term2
     return np.sqrt(vrad_dispersion_squared)
