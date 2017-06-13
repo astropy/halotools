@@ -469,13 +469,13 @@ def test_mean_radial_velocity_vs_r_correctness3():
     rbins = np.array([0, 0.05, 0.3])
 
     s1s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2=sample2, velocities2=velocities2, period=1)
+        sample2=sample2, velocities2=velocities2, period=1, approx_cell1_size=0.1)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s1s2[1], correct_relative_velocity, rtol=0.01)
 
     # repeat the test but with PBCs set to infinity
     s1s2 = mean_radial_velocity_vs_r(sample1, velocities1, rbins,
-        sample2=sample2, velocities2=velocities2)
+        sample2=sample2, velocities2=velocities2, approx_cell2_size=0.1)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s1s2[1], 0, rtol=0.01)
 

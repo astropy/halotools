@@ -298,11 +298,11 @@ def _process_args(sample1, velocities1, sample2, velocities2,
 
     if approx_cell1_size is None:
         approx_cell1_size = [max_rbins_absolute, max_rbins_absolute, max_rbins_absolute]
-    elif len(np.atleast1d(approx_cell1_size)) == 1:
+    elif len(np.atleast_1d(approx_cell1_size)) == 1:
         approx_cell1_size = [approx_cell1_size, approx_cell1_size, approx_cell1_size]
     if approx_cell2_size is None:
         approx_cell2_size = [max_rbins_absolute, max_rbins_absolute, max_rbins_absolute]
-    elif len(np.atleast1d(approx_cell2_size)) == 1:
+    elif len(np.atleast_1d(approx_cell2_size)) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
 
     return sample1, velocities1, sample2, velocities2, max_rbins_absolute, period,\
