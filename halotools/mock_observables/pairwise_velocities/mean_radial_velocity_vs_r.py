@@ -49,7 +49,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
 
     rbins_absolute : array_like, optional
         Array of shape (num_rbins+1, ) defining the boundaries of bins in which
-        mean quantities and number counts are computed.
+        mean radial velocities are computed.
 
         Either ``rbins_absolute`` must be passed,
         or ``rbins_normalized`` and ``normalize_rbins_by`` must be passed.
@@ -58,13 +58,14 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
 
     rbins_normalized : array_like, optional
         Array of shape (num_rbins+1, ) defining the bin boundaries *x*, where
-        :math:`x = r / R_{\rm vir}`, in which mean quantities and number counts are computed.
+        :math:`x = r / R_{\rm vir}`, in which mean radial velocity profile is computed.
         The quantity :math:`R_{\rm vir}` can vary from point to point in ``sample1``
         and is passed in via the ``normalize_rbins_by`` argument.
         While scaling by :math:`R_{\rm vir}` is common, you are not limited to this
         normalization choice; in principle you can use the ``rbins_normalized`` and
         ``normalize_rbins_by`` arguments to scale your distances by any length-scale
         associated with points in ``sample1``.
+
         Default is None, in which case the ``rbins_absolute`` argument must be passed.
 
     normalize_rbins_by : array_like, optional
@@ -91,6 +92,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
     period : array_like, optional
         Length-3 array defining periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
+        Default is None, for no PBCs.
 
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -110,10 +112,6 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
         Analogous to ``approx_cell1_size``, but for `sample2`.  See comments for
         ``approx_cell1_size`` for details.
 
-    seed : int, optional
-        Random number seed used to randomly downsample data, if applicable.
-        Default is None, in which case downsampling will be stochastic.
-
     Returns
     -------
     v_12 : numpy.array
@@ -124,6 +122,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
     The pairwise velocity, :math:`v_{12}(r)`, is defined as:
 
     .. math::
+
         v_{12}(r) = \vec{v}_{\rm 1, pec} \cdot \vec{r}_{12}-\vec{v}_{\rm 2, pec} \cdot \vec{r}_{12}
 
     where :math:`\vec{v}_{\rm 1, pec}` is the peculiar velocity of object 1, and

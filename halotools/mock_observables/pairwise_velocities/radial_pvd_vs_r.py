@@ -27,7 +27,8 @@ def radial_pvd_vs_r(sample1, velocities1,
         sample2=None, velocities2=None, period=None,
         num_threads=1, approx_cell1_size=None, approx_cell2_size=None, seed=None):
     r"""
-    Calculate the pairwise velocity dispersion (PVD), :math:`\sigma_{12}(r)`.
+    Calculate the pairwise radial velocity dispersion as a function of absolute distance,
+    or as a function of :math:`s = r / R_{\rm vir}`.
 
     Example calls to this function appear in the documentation below.
 
@@ -43,7 +44,7 @@ def radial_pvd_vs_r(sample1, velocities1,
 
     rbins_absolute : array_like, optional
         Array of shape (num_rbins+1, ) defining the boundaries of bins in which
-        mean quantities and number counts are computed.
+        dispersion profile is computed.
 
         Either ``rbins_absolute`` must be passed,
         or ``rbins_normalized`` and ``normalize_rbins_by`` must be passed.
@@ -52,13 +53,14 @@ def radial_pvd_vs_r(sample1, velocities1,
 
     rbins_normalized : array_like, optional
         Array of shape (num_rbins+1, ) defining the bin boundaries *x*, where
-        :math:`x = r / R_{\rm vir}`, in which mean quantities and number counts are computed.
+        :math:`x = r / R_{\rm vir}`, in which dispersion profile is computed.
         The quantity :math:`R_{\rm vir}` can vary from point to point in ``sample1``
         and is passed in via the ``normalize_rbins_by`` argument.
         While scaling by :math:`R_{\rm vir}` is common, you are not limited to this
         normalization choice; in principle you can use the ``rbins_normalized`` and
         ``normalize_rbins_by`` arguments to scale your distances by any length-scale
         associated with points in ``sample1``.
+
         Default is None, in which case the ``rbins_absolute`` argument must be passed.
 
     normalize_rbins_by : array_like, optional
@@ -66,7 +68,9 @@ def radial_pvd_vs_r(sample1, velocities1,
         will be normalized. For example, if ``normalize_rbins_by`` is defined to be the
         virial radius of each point in ``sample1``, then the input numerical values *x*
         stored in ``rbins_normalized`` will be interpreted as referring to
-        bins of :math:`x = r / R_{\rm vir}`. Default is None, in which case
+        bins of :math:`x = r / R_{\rm vir}`.
+
+        Default is None, in which case
         the input ``rbins_absolute`` argument must be passed instead of
         ``rbins_normalized``.
 
@@ -85,6 +89,7 @@ def radial_pvd_vs_r(sample1, velocities1,
     period : array_like, optional
         Length-3 array defining periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
+        Default is None, for no PBCs.
 
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -103,10 +108,6 @@ def radial_pvd_vs_r(sample1, velocities1,
     approx_cell2_size : array_like, optional
         Analogous to ``approx_cell1_size``, but for `sample2`.  See comments for
         ``approx_cell1_size`` for details.
-
-    seed : int, optional
-        Random number seed used to randomly downsample data, if applicable.
-        Default is None, in which case downsampling will be stochastic.
 
     Returns
     -------
@@ -128,37 +129,37 @@ def radial_pvd_vs_r(sample1, velocities1,
 
     :math:`\sigma_{12}(r)` is the standard deviation of this quantity in radial bins.
 
-    Pairs and radial velocities are calculated using
-    `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.
+    For radial separation bins in which there are zero pairs, function returns zero.
 
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a
-    periodic unit cube.
+    For demonstration purposes we will work with
+    halos in the `~halotools.sim_manager.FakeSim`. Here we'll just demonstrate
+    basic usage, referring to :ref:`galaxy_catalog_analysis_tutorial6` for a
+    more detailed demo.
 
-    >>> Npts = 1000
-    >>> Lbox = 1.0
-    >>> period = np.array([Lbox,Lbox,Lbox])
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
 
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
 
     We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
 
-    >>> coords = np.vstack((x,y,z)).T
+    >>> sample1 = np.vstack((x,y,z)).T
 
-    We will do the same to get a random set of peculiar velocities.
+    We will do the same to get a random set of velocities.
 
-    >>> vx = np.random.random(Npts)-0.5
-    >>> vy = np.random.random(Npts)-0.5
-    >>> vz = np.random.random(Npts)-0.5
-    >>> velocities = np.vstack((vx,vy,vz)).T
+    >>> vx = halocat.halo_table['halo_vx']
+    >>> vy = halocat.halo_table['halo_vy']
+    >>> vz = halocat.halo_table['halo_vz']
+    >>> velocities1 = np.vstack((vx,vy,vz)).T
 
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> sigma_12 = radial_pvd_vs_r(coords, velocities, rbins_absolute=rbins, period=period)
+    >>> rbins = np.logspace(-1, 1, 10)
+    >>> sigma_12 = radial_pvd_vs_r(sample1, velocities1, rbins_absolute=rbins, period=halocat.Lbox)
 
     See also
     ---------
