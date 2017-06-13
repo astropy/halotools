@@ -204,8 +204,8 @@ def _spherical_isolation_process_args(sample1, sample2, r_max, period,
     if period is None:
         x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(
-                sample1[:, 0], sample1[:, 2], sample1[:, 2],
-                sample2[:, 0], sample2[:, 2], sample2[:, 2],
+                sample1[:, 0], sample1[:, 1], sample1[:, 2],
+                sample2[:, 0], sample2[:, 1], sample2[:, 2],
                 min_size=[max_r_max*3.0, max_r_max*3.0, max_r_max*3.0]))
     else:
         x1 = sample1[:, 0]
