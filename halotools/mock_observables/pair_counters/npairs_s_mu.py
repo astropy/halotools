@@ -21,19 +21,20 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function counts the number of pairs of points separated by less than
-    radial separation, *s,* and :math:`\mu\equiv\sin(\theta_{\rm los})`,
-    where :math:`\theta_{\rm los}` is the line-of-sight angle
-    between points and :math:`s^2 = r_{\rm parallel}^2 + r_{\rm perp}^2`.
-
-    Note that if sample1 == sample2 that the
-    `~halotools.mock_observables.npairs_s_mu` function double-counts pairs.
-    If your science application requires sample1==sample2 inputs and also pairs
-    to not be double-counted, simply divide the final counts by 2.
+    radial separation, :math:`s`, given by ``s_bins`` and 
+    angular distance, :math:`\mu\equiv\cos(\theta_{\rm los})`, given by ``mu_bins``,
+    where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and 
+    the line-of-sight (LOS).
+    
+    The first two dimensions (x, y) define the plane for perpendicular distances.
+    The third dimension (z) defines the LOS.  i.e. x,y positions are on
+    the plane of the sky, and z is the radial distance coordinate.  This is the 'distant
+    observer' approximation.
 
     A common variation of pair-counting calculations is to count pairs with
-    separations *between* two different distances *r1* and *r2*. You can retrieve
-    this information from the `~halotools.mock_observables.npairs_s_mu`
-    by taking `numpy.diff` of the returned array.
+    separations *between* two different distances, e.g. [s1 ,s2] and [mu1, mu2]. 
+    You can retrieve this information from `~halotools.mock_observables.npairs_s_mu`
+    by taking `numpy.diff` of the returned array along each axis.
 
     See Notes section for further clarification.
 
@@ -59,9 +60,6 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         numpy array of shape (num_mu_bin_edges, ) storing the
         :math:`\cos(\theta_{\rm LOS})` boundaries defining the bins in
         which pairs are counted. All values must be between [0,1].
-
-        Note that using the sine function is not common convention for
-        calculating the two point correlation function (see notes).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -99,15 +97,31 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         number of pairs separated by less than (s, mu)
 
     Notes
-    ------
-    The quantity :math:`\mu` is defined as the :math:`\sin(\theta_{\rm los})`
-    and not the conventional :math:`\cos(\theta_{\rm los})`. This is
-    because the pair counter has been optimized under the assumption that its
-    separation variable (in this case, :math:`\mu`) *increases*
-    as :math:`\theta_{\rm los})` increases.
+    -----
+    Let :math:`\vec{s}` be the radial vector connnecting two points.
+    The magnitude, :math:`s`, is:
 
+    .. math::
+        s = \sqrt{r_{\parallel}^2+r_{\perp}^2},
+
+    where :math:`r_{\parallel}` is the separation parallel to the LOS
+    and :math:`r_{\perp}` is the separation perpednicular to the LOS.  :math:`\mu` is
+    the cosine of the angle, :math:`\theta_{\rm LOS}`, between the LOS
+    and :math:`\vec{s}`:
+
+    .. math::
+        \mu = \cos(\theta_{\rm LOS}) \equiv r_{\parallel}/s.
+    
+    Along the first dimension of ``num_pairs``, :math:`s` increases.
+    Along the second dimension,  :math:`\mu` decreases, 
+    i.e. :math:`\theta_{\rm LOS}` increases.
+    
+    If sample1 == sample2 that the `~halotools.mock_observables.npairs_s_mu` function 
+    double-counts pairs. If your science application requires sample1==sample2 inputs 
+    and also pairs to not be double-counted, simply divide the final counts by 2.
+    
     One final point of clarification concerning double-counting may be in order.
-    Suppose sample1==sample2 and rbins[0]==0. Then the returned value for this bin
+    Suppose sample1==sample2 and s_bins[0]==0. Then the returned value for this bin
     will be len(sample1), since each sample1 point has distance 0 from itself.
 
     Examples
@@ -158,6 +172,10 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         msg = ("\n Input `mu_bins` must be a monotonically increasing \n"
                "1D array with at least two entries")
         raise ValueError(msg)
+    # convert to mu=sin(theta_los) binning used by the cython engine.
+    mu_bins_prime = np.sin(np.arccos(mu_bins))
+    mu_bins_prime = np.sort(mu_bins_prime)
+    # increasing mu_prime now corresponds to increasing theta_LOS
 
     search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
 
@@ -174,11 +192,11 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
-    # # Create a function object that has a single argument, for parallelization purposes
+    # Create a function object that has a single argument, for parallelization purposes
     engine = partial(npairs_s_mu_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins_prime)
 
-    # # Calculate the cell1 indices that will be looped over by the engine
+    # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
