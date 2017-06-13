@@ -64,6 +64,10 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     rbins_absolute : array_like, optional
         Array of length *Nrbins+1* defining the boundaries of bins in which
         mean quantities and number counts are computed.
+
+        Either ``rbins_absolute`` must be passed,
+        or ``rbins_normalized`` and ``normalize_rbins_by`` must be passed.
+
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     rbins_normalized : array_like, optional
