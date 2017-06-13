@@ -11,18 +11,18 @@ may wish to have an isolation criterion that depends on the stellar mass
 of the galaxy in question. This tutorial gives several examples of how
 to apply such a condition to a mock galaxy sample.
 
-This is a companion tutorial to :ref:`galaxy_catalog_analysis_tutorial10`. 
-Be sure you have read and understand that tutorial before proceeding. 
+This is a companion tutorial to :ref:`galaxy_catalog_analysis_tutorial10`.
+Be sure you have read and understand that tutorial before proceeding.
 
-There is also an IPython Notebook in the following location that can be 
+There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
     **halotools/docs/notebooks/galcat_analysis/intermediate_examples/galaxy_catalog_intermediate_analysis_tutorial1.ipynb**
 
-By following this tutorial together with this notebook, 
-you can play around with your own variations of the calculation 
-as you learn the basic syntax. 
+By following this tutorial together with this notebook,
+you can play around with your own variations of the calculation
+as you learn the basic syntax.
 
 Generate a mock galaxy catalog
 ------------------------------
@@ -38,8 +38,8 @@ default halo catalog.
     model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')
 
     from halotools.sim_manager import CachedHaloCatalog
-    halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
-    
+    halocat = CachedHaloCatalog(simname='bolshoi', redshift=0, halo_finder = 'rockstar')
+
     model.populate_mock(halocat)
 
 
@@ -49,11 +49,11 @@ Example 1: Variable isolation criteria in 3d
 For the first example we'll find "isolated" galaxies using a 3d search
 criteria that depends on stellar mass in the following manner. From our
 mock, we know the stellar mass of every galaxy. The stellar mass component of the underlying model
-that generated the mock, `halotools.empirical_models.Behroozi10SmHm`, 
-has a `halotools.empirical_models.Behroozi10SmHm.mean_log_halo_mass` 
+that generated the mock, `halotools.empirical_models.Behroozi10SmHm`,
+has a `halotools.empirical_models.Behroozi10SmHm.mean_log_halo_mass`
 method that provides a map from :math:`M_{\ast}^{\rm cen}` to
 :math:`M_{\rm vir}^{\rm host}.` There is also a
-`~halotools.empirical_models.halo_mass_to_halo_radius` function 
+`~halotools.empirical_models.halo_mass_to_halo_radius` function
 in `~halotools.empirical_models` that provides a map from :math:`M_{\rm vir}^{\rm host}` to
 :math:`R_{\rm vir}.` We will use these two functions together to draw a
 sphere of radius :math:`R_{\rm vir}` around each galaxy; a galaxy will
@@ -74,7 +74,7 @@ galaxies in a specific stellar mass range of
 
     all_gal_mask = model.mock.galaxy_table['stellar_mass'] > 1e10
     all_gals = model.mock.galaxy_table[all_gal_mask]
-    
+
     sample_mask = (all_gals['stellar_mass'] > 4e10) & (all_gals['stellar_mass'] < 5e10)
     sm_selected_gals = all_gals[sample_mask]
 
@@ -83,14 +83,14 @@ galaxies in a specific stellar mass range of
 
     from halotools.empirical_models import halo_mass_to_halo_radius
 
-    presumed_rvir = halo_mass_to_halo_radius(presumed_mvir, 
-                    cosmology = model.mock.cosmology, 
-                    redshift = model.mock.redshift, 
+    presumed_rvir = halo_mass_to_halo_radius(presumed_mvir,
+                    cosmology = model.mock.cosmology,
+                    redshift = model.mock.redshift,
                     mdef = 'vir')
 
     from halotools.mock_observables import conditional_spherical_isolation
 
-The calling signature of `~halotools.mock_observables.conditional_spherical_isolation` 
+The calling signature of `~halotools.mock_observables.conditional_spherical_isolation`
 accepts a multi-dimensional array storing the x, y, z positions of each point. You
 can place your points into the appropriate form using
 `numpy.vstack`, but below we'll demo how to use the
@@ -154,13 +154,13 @@ function formalism.
     marks1 = sm_selected_gals['stellar_mass']
     marks2 = all_gals['stellar_mass']
 
-Now we select the value of ``cond_func`` for the conditional function described above. 
-See the docstring of `~halotools.mock_observables.conditional_spherical_isolation` 
-for the function <==> function ID correspondence. 
+Now we select the value of ``cond_func`` for the conditional function described above.
+See the docstring of `~halotools.mock_observables.conditional_spherical_isolation`
+for the function <==> function ID correspondence.
 
     cond_func = 2
 
-    is_isolated = conditional_spherical_isolation(sample1_pos, sample2_pos, r_max, 
+    is_isolated = conditional_spherical_isolation(sample1_pos, sample2_pos, r_max,
                         marks1=marks1, marks2=marks2, cond_func=cond_func, period = model.mock.Lbox)
 
 Example 3: Alternative :math:`M_{\ast}` dependent isolation criteria
@@ -172,10 +172,10 @@ in ``sample1`` will be said to be isolated if there are no ``sample2``
 galaxies more massive than :math:`M_{\ast}` + *0.5dex* within 1
 Mpc/h of the galaxy in ``sample1``.
 
-For this calculation, we'll need to use ``cond_func`` = 5, which is
+For this calculation, we'll need to use ``cond_func`` = 6, which is
 defined as
 :math:`f(m^{a}_{1}, m^{b}_{1}, m^{a}_{2}, m^{b}_{2}) = {\rm True}` if
-:math:`m^{a}_{1} > m^{a}_{2} + m^{b}_{2},` and ``False`` otherwise. For
+:math:`m^{a}_{1} < m^{a}_{2} + m^{b}_{1},` and ``False`` otherwise. For
 :math:`m^{a}_{i}` we will pass in :math:`\log_{10}(M_{\ast}),` and for
 :math:`m^{b}_{i}` we pass in :math:`0.5.` We will bundle the marks into
 a multi-dimensional Numpy array using the same `numpy.vstack` method we
@@ -186,9 +186,9 @@ used to bundle our spatial positions into a *Npts x 3* array.
     marks1 = np.vstack([np.log10(sm_selected_gals['stellar_mass']), np.zeros(len(sm_selected_gals))+0.5]).T
     marks2 = np.vstack([np.log10(all_gals['stellar_mass']), np.zeros(len(all_gals))+0.5]).T
 
-    cond_func = 5
+    cond_func = 6
 
-    is_isolated = conditional_spherical_isolation(sample1_pos, sample2_pos, r_max, 
+    is_isolated = conditional_spherical_isolation(sample1_pos, sample2_pos, r_max,
                         marks1=marks1, marks2=marks2, cond_func=cond_func, period = model.mock.Lbox)
 
 Example 4: :math:`M_{\ast}` dependent isolation criteria in redshift-space
@@ -207,17 +207,17 @@ stellar-to-halo mass relation. In order for a ``sample1`` galaxy to be
 isolated, there must be no other ``sample2`` galaxies more massive than
 *0.5* dex within this cylinder.
 
-We already computed :math:`R_{\rm vir}` above; 
-we will compute :math:`V_{\rm vir}` using the 
+We already computed :math:`R_{\rm vir}` above;
+we will compute :math:`V_{\rm vir}` using the
 `~halotools.mock_observables.halo_mass_to_virial_velocity` function:
 
 .. code:: python
 
     from halotools.empirical_models import halo_mass_to_virial_velocity
 
-    presumed_vvir = halo_mass_to_virial_velocity(presumed_mvir, 
-                    cosmology = model.mock.cosmology, 
-                    redshift = model.mock.redshift, 
+    presumed_vvir = halo_mass_to_virial_velocity(presumed_mvir,
+                    cosmology = model.mock.cosmology,
+                    redshift = model.mock.redshift,
                     mdef = 'vir')
 
 The units of ``presumed_vvir`` are in km/s, so we must convert these to
@@ -236,10 +236,10 @@ Our marks and ``cond_func`` are the same as before, repeated below for convenien
 
     marks1 = np.vstack([np.log10(sm_selected_gals['stellar_mass']), np.zeros(len(sm_selected_gals))+0.5]).T
     marks2 = np.vstack([np.log10(all_gals['stellar_mass']), np.zeros(len(all_gals))+0.5]).T
-    
-    cond_func = 5
+
+    cond_func = 6
 
     from halotools.mock_observables import conditional_cylindrical_isolation
 
-    is_isolated = conditional_cylindrical_isolation(sample1_pos, sample2_pos, rp_max, pi_max, 
+    is_isolated = conditional_cylindrical_isolation(sample1_pos, sample2_pos, rp_max, pi_max,
                         marks1=marks1, marks2=marks2, cond_func=cond_func, period = model.mock.Lbox)
