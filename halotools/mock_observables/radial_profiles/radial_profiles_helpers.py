@@ -37,7 +37,6 @@ def get_normalized_rbins(rbins_absolute, rbins_normalized, normalize_rbins_by, s
     as the input ``sample1``, and if the input ``normalize_rbins_by`` argument is None,
     an array of ones is returned.
     """
-
     if (rbins_absolute is None) & (rbins_normalized is None):
         msg = ("You must either provide a ``rbins_absolute`` argument \n"
             "or a ``rbins_normalized`` argument.\n")
@@ -69,10 +68,15 @@ def get_normalized_rbins(rbins_absolute, rbins_normalized, normalize_rbins_by, s
         raise ValueError(msg)
 
     try:
-        assert np.all(rbins_normalized > 0)
         assert np.all(normalize_rbins_by > 0)
     except AssertionError:
-        msg = ("Input ``normalize_rbins_by`` and ``rbins_normalized`` must both be strictly positive.")
+        msg = ("Input ``normalize_rbins_by`` must be strictly positive.")
+        raise ValueError(msg)
+
+    try:
+        assert np.all(rbins_normalized >= 0)
+    except AssertionError:
+        msg = ("Input ``rbins_normalized`` must be strictly positive.")
         raise ValueError(msg)
 
     return rbins_normalized, normalize_rbins_by
