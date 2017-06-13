@@ -14,12 +14,8 @@ from .engines import radial_pvd_vs_r_engine
 
 from .mean_radial_velocity_vs_r import _process_args
 
-from ..radial_profiles.radial_profiles_helpers import get_normalized_rbins
 from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
-from ..pair_counters.mesh_helpers import _enclose_in_box
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
-from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
-    get_period, get_num_threads)
 
 
 __all__ = ('radial_pvd_vs_r', )
@@ -222,10 +218,11 @@ def radial_pvd_vs_r(sample1, velocities1,
     else:
         counts, vrad_sum, vradsq_sum = np.array(engine(cell1_tuples[0]))
 
-    counts = np.diff(counts)
+    counts = np.diff(counts).astype('f4')
     vrad = np.diff(vrad_sum)
     vradsq = np.diff(vrad_sum)
 
-    vrad_dispersion = np.zeros(len(vrad_sum))
-    vrad_dispersion[counts > 0] = 0.
-    return vrad_dispersion
+    vrad_dispersion_squared = np.zeros(len(vrad))
+    vrad_dispersion_squared[counts > 0] = (vradsq[counts > 0]/counts[counts > 0] -
+        ((vrad[counts > 0]/counts[counts > 0]**2)))
+    return np.sqrt(vrad_dispersion_squared)
