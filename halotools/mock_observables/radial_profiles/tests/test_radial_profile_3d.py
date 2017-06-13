@@ -278,9 +278,7 @@ def test_args_processing1e():
     with pytest.raises(ValueError) as err:
         result = radial_profile_3d(sample1, sample2, quantity,
             rbins_normalized=dummy_rbins,
-            normalize_rbins_by=np.ones(len(sample1)))
-    substr = "Input ``normalize_rbins_by`` and ``rbins_normalized`` must both be strictly positive."
-    assert substr in err.value.args[0]
+            normalize_rbins_by=np.zeros(len(sample1)))
 
 
 def test_args_processing2():
