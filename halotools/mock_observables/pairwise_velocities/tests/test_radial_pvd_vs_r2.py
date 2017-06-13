@@ -5,7 +5,7 @@ import numpy as np
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..radial_pvd_vs_r2 import radial_pvd_vs_r
+from ..radial_pvd_vs_r import radial_pvd_vs_r
 
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
