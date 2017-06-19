@@ -16,11 +16,13 @@ from math import ceil
 import numpy as np
 from . import HeavisideAssembias
 from ...custom_exceptions import HalotoolsError
+from ...utils.array_utils import custom_len
 from ...utils.table_utils import compute_conditional_percentiles
 
+__all__ = ('ContinuousAssembias', )
+__author__ = ('Sean McLaughlin', )
 
-def sigmoid(sec_haloprop, slope=0.0):
-    return np.reciprocal(1 + np.exp(-(10 ** slope) * sec_haloprop))
+
 
 
 def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
@@ -285,29 +287,26 @@ def compute_conditional_percentile(p=0.5, **kwargs):
 
 
 class ContinuousAssembias(HeavisideAssembias):
-    '''
-    Class used to extend the behavior of decorated assembly bias for continuous distributions.
-    '''
+    """
+    Class used to extend the behavior of `HeavisideAssembias` for continuous distributions.
+    """
+    # TODO where to put in max value of slope?
+    def _disp_func(self,sec_haloprop, slope, sec_haloprop_split):
+        """
+        Function define the value of \delta N_max as a function of the sec_haloprop distribution and a slope param
+        :param sec_haloprop:
+            The table of secondary haloprops
+        :param slope:
+            The "slope" parameter, which controls the rate of change between negative and positive displacements.
+        :param sec_haloprop_split:
+            For each sec_haloprop, the value in its mass bin for the secondary statistic that is the percentile given
+            by that mass bin's split. As an example, if the split in all mass bins is 0.5, sec_haloprop_split is
+            simply the median value of the sec_haloprop in each mass bin.
+        :return:
+        """
+        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop-sec_haloprop_split)))
 
-    def __init__(self, disp_func=sigmoid, **kwargs):
-        '''
-        For full documentation, see the Heaviside Assembias declaration in Halotools.
-
-        This adds one additional kwarg, the disp_func. This function determines the displacement to the mean performed
-        by decoration as a function of the secondary parameter. The default is the sigmoid function, decleared above.
-        :param disp_func:
-            Function used to displace populations along the mean according to the secondary parameter. Default is the
-            sigmoid function.
-            Must accept an array of secondary statistics as first argument. The input will be shifted so the "split"
-            will be at 0.
-            All other arguments must be kwargs, and will be put in the param_dict with their default arguements.
-        :param kwargs:
-            All other arguements. For details, see the declaration of HeavisideAssembias in Halotools.
-        '''
-        self.disp_func = disp_func
-        super(ContinuousAssembias, self).__init__(**kwargs)
-
-    def _initialize_assembias_param_dict(self, assembias_strength=0.5, **kwargs):
+    def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=0.0, **kwargs):
         '''
         For full documentation, see the Heaviside Assembias Declaration in Halotools.
 
@@ -320,36 +319,30 @@ class ContinuousAssembias(HeavisideAssembias):
         :return: None
         '''
         super(ContinuousAssembias, self)._initialize_assembias_param_dict(assembias_strength=assembias_strength,
-                                                                          **kwargs)
-
-        # get the function specification from the displacement function
-        argspec = inspect.getargspec(self.disp_func)
-        # add any additional parameters to the parameter dict
-        for par_name, val in izip(argspec.args[1:], argspec.defaults):
-            self.param_dict[self._get_disp_func_param_dict_key(par_name)] = val
-
-    def _get_disp_func_param_dict_key(self, par_name):
-        '''
-        '''
-        return 'disp_func_' + str(par_name) + '_' + self.gal_type
-
-    def assembias_percentile_calculator(self, table):
-        return compute_conditional_percentiles(table=table,
-                                               prim_haloprop_key=self.prim_haloprop_key,
-                                               sec_haloprop_key=self.sec_haloprop_key)
-
-    # NOTE don't remember if this worked or not w.r.t making things pickle.
-    def _bind_new_haloprop_func_dict(self):
-        """
-        """
-        key = self.sec_haloprop_key + '_percentile'
+                                                                      **kwargs)
+        # Accept float or iterable
+        slope = assembias_slope
         try:
-            self.new_haloprop_func_dict[key] = self.assembias_percentile_calculator
-        except AttributeError:
-            self.new_haloprop_func_dict = {}
-            self.new_haloprop_func_dict[key] = self.assembias_percentile_calculator
+            iterator = iter(slope)
+            slope = list(slope)
+        except TypeError:
+            slope = [slope]
 
-        self._methods_to_inherit.extend(['assembias_strength'])
+        # assert it has the proper length
+        # TODO do we want to allow variable slopes but constant strengths,
+        # or vice/versa? Maybe later...
+        if custom_len(self._assembias_strength_abscissa) != custom_len(slope):
+            raise HalotoolsError("``assembias_strength`` and ``assembias_slope`` "
+                                 "must have the same length")
+
+        for ipar, val in enumerate(slope):
+            self.param_dict[self._get_continuous_assembias_param_dict_key(ipar)] = val
+
+    # TODO change this to say "slope"
+    def _get_continuous_assembias_param_dict_key(self,ipar):
+        '''
+        '''
+        return self._method_name_to_decorate + '_' + self.gal_type + '_continuous_assembias_param' + str(ipar + 1)
 
     def _galprop_perturbation(self, **kwargs):
         """
@@ -396,6 +389,8 @@ class ContinuousAssembias(HeavisideAssembias):
 
         # subtract the central value to make sure the right value is in the center of the function
         # t0 = time()
+        # TODO these are wasteful. I should just compute the percentiles
+        # then get the stats I want
         central_val = compute_conditional_percentile(splitting_result, prim_haloprop=prim_haloprop,
                                                      sec_haloprop=sec_haloprop)
         # the average displacement acts as a normalization we need.
@@ -510,6 +505,8 @@ class ContinuousAssembias(HeavisideAssembias):
 
             # NOTE I've removed the type 1 mask as it is not necessary
             # this has all been rolled into the galprop_perturbation function
+            # TODO for consistancy maybe I should change it back if possible.
+            # It's not cuz the notion of type1/type2 is meaniningless in CAB
 
             if prim_haloprop[no_edge_mask].shape[0] == 0:
                 perturbation = np.zeros_like(no_edge_result)
