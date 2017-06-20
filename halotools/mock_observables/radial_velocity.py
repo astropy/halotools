@@ -17,8 +17,61 @@ def signed_dx(xs, xc, xperiod):
     return np.atleast_1d(result)
 
 
-def radial_distance(xs, ys, zs, xc, yc, zc, period, return_1d_results=False):
-    """
+def radial_distance(xs, ys, zs, xc, yc, zc, period, return_signed_1d_results=False):
+    """ Calculate the radial distance between the positions of a set of satellites
+    and their centrals, accounting for periodic boundary conditions.
+
+    If the coordinates ``xc, yc, zc`` of each satellite's central are not known in advance,
+    these can be computed by knowing the ``halo_hostid`` of the satellites, as shown in the Examples.
+
+    Parameters
+    ----------
+    xs, ys, zs : ndarrays
+        Arrays of length (ngals, ) storing the xyz-coordinates of the satellites
+
+    xc, yc, zc : ndarrays
+        Arrays of length (ngals, ) storing the xyz-coordinates of the centrals
+
+    period : float or 3-element sequence
+        Length of the periodic box in each Cartesian direction.
+        If a single float is given, the box will be assumed to be a periodic cube.
+        If the points are not in a periodic box, set ``period`` to np.inf.
+
+    return_signed_1d_results : bool, optional
+        If set to True, the signed distances in each dimension will be returned
+        in addition to the radial distance. Default is False, in which case
+        only the radial distance will be returned
+
+    Returns
+    -------
+    drad : ndarray
+        Array of shape (ngals, ) storing the radial distances
+
+    Examples
+    --------
+    For demonstration purposes we will use a fake halo catalog and compute the radial distances
+    between all the satellites and their host halos.
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+    >>> satmask = halocat.halo_table['halo_upid'] != -1
+    >>> satellites = halocat.halo_table[satmask]
+
+    Since Halotools catalogs do not come with the host halo position pre-computed,
+    we will need to calculate this information from knowledge of the ``halo_hostid`` of each satellite.
+
+    >>> from halotools.utils import crossmatch
+    >>> idxA, idxB = crossmatch(satellites['halo_hostid'], halocat.halo_table['halo_id'])
+    >>> satellites['halo_x_host_halo'] = np.nan
+    >>> satellites['halo_y_host_halo'] = np.nan
+    >>> satellites['halo_z_host_halo'] = np.nan
+    >>> satellites['halo_x_host_halo'][idxA] = halocat.halo_table['halo_x'][idxB]
+    >>> satellites['halo_y_host_halo'][idxA] = halocat.halo_table['halo_y'][idxB]
+    >>> satellites['halo_z_host_halo'][idxA] = halocat.halo_table['halo_z'][idxB]
+
+    >>> xs, ys, zs = satellites['halo_x'], satellites['halo_y'], satellites['halo_z']
+    >>> xc, yc, zc = satellites['halo_x_host_halo'], satellites['halo_y_host_halo'], satellites['halo_z_host_halo']
+    >>> satellites['radial_distance'] = radial_distance(xs, ys, zs, xc, yc, zc, halocat.Lbox)
     """
     try:
         xperiod, yperiod, zperiod = period
@@ -29,7 +82,7 @@ def radial_distance(xs, ys, zs, xc, yc, zc, period, return_1d_results=False):
     dy = signed_dx(ys, yc, yperiod)
     dz = signed_dx(zs, zc, zperiod)
     drad = np.sqrt(dx**2 + dy**2 + dz**2)
-    if return_1d_results:
+    if return_signed_1d_results:
         return drad, dx, dy, dz
     else:
         return drad
