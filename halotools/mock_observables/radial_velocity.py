@@ -1,4 +1,5 @@
-"""
+""" Functions calculating the radial distance and radial velocity of satellites
+with respect to their centrals
 """
 import numpy as np
 
@@ -16,12 +17,9 @@ def signed_dx(xs, xc, xperiod):
     return np.atleast_1d(result)
 
 
-def radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs, xc, yc, zc, vxc, vyc, vzc, period):
+def radial_distance(xs, ys, zs, xc, yc, zc, period, return_1d_results=False):
     """
     """
-    npts = len(np.atleast_1d(xs))
-    vrad = np.zeros(npts)
-
     try:
         xperiod, yperiod, zperiod = period
     except TypeError:
@@ -31,14 +29,28 @@ def radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs, xc, yc, zc, vxc, vyc
     dy = signed_dx(ys, yc, yperiod)
     dz = signed_dx(zs, zc, zperiod)
     drad = np.sqrt(dx**2 + dy**2 + dz**2)
+    if return_1d_results:
+        return drad, dx, dy, dz
+    else:
+        return drad
+
+
+def radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs, xc, yc, zc, vxc, vyc, vzc, period):
+    """
+    """
+    npts = len(np.atleast_1d(xs))
 
     dvx = np.atleast_1d(vxs - vxc)
     dvy = np.atleast_1d(vys - vyc)
     dvz = np.atleast_1d(vzs - vzc)
 
+    drad, dx, dy, dz = radial_distance(xs, ys, zs, xc, yc, zc, period, return_1d_results=True)
+
     idx_nonzero_distance = drad > 0
     num_nonzero_distance = np.count_nonzero(idx_nonzero_distance)
     num_zero_distance = npts - num_nonzero_distance
+
+    vrad = np.zeros(npts)
 
     if num_zero_distance > 0:
         term1a = dvx[~idx_nonzero_distance]**2
