@@ -10,6 +10,8 @@ from ..radial_velocity import _signed_dx, radial_distance, radial_distance_and_v
 
 fixed_seed = 43
 
+__all__ = ('test_signed_dx0', )
+
 
 def test_signed_dx0():
     npts = 10
@@ -40,3 +42,27 @@ def test_signed_dx3():
     assert dx == -2
     dx = _signed_dx(1, 9, 10)
     assert dx == 2
+
+
+def test_radial_distance1():
+    xs, ys, zs = 2, 2, 2
+    xc, yc, zc = 1, 1, 1
+
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, np.inf)
+    assert drad == np.sqrt(3)
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, 10)
+    assert drad == np.sqrt(3)
+
+
+def test_radial_distance2():
+    xs, ys, zs = 9.5, 9.5, 9.5
+    xc, yc, zc = 0.5, 0.5, 0.5
+
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, np.inf)
+    assert drad == np.sqrt(3*81)
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, 10)
+    assert drad == np.sqrt(3)
+
+
+
+
