@@ -6,18 +6,17 @@ any method of any component model. It subclasses `HeavisideAssembias` and
 `McLaughlin et al 2017 (in prep)`_.
 """
 
-from time import time
 from itertools import izip
 from functools import wraps
-import inspect
 from warnings import warn
 from math import ceil
 
 import numpy as np
 from . import HeavisideAssembias
+from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentiles
+#from ...utils.table_utils import compute_conditional_percentiles
 
 __all__ = ('ContinuousAssembias', )
 __author__ = ('Sean McLaughlin', )
@@ -79,8 +78,8 @@ def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
 
     return output
 
-
-def compute_conditional_averages(disp_func=lambda x: x, disp_func_kwargs={}, **kwargs):
+# TOOD update docs
+def compute_conditional_averages(vals, **kwargs):
     """
     In bins of the ``prim_haloprop``, compute the average value of disp_func given
     the input ``table`` based on the value of ``sec_haloprop``.
@@ -136,8 +135,6 @@ def compute_conditional_averages(disp_func=lambda x: x, disp_func_kwargs={}, **k
         try:
             prim_haloprop_key = kwargs['prim_haloprop_key']
             prim_haloprop = table[prim_haloprop_key]
-            sec_haloprop_key = kwargs['sec_haloprop_key']
-            sec_haloprop = table[sec_haloprop_key]
         except KeyError:
             msg = ("\nWhen passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
                    "you must also pass ``prim_haloprop_key`` and ``sec_haloprop_key`` keyword arguments\n"
@@ -146,7 +143,6 @@ def compute_conditional_averages(disp_func=lambda x: x, disp_func_kwargs={}, **k
     else:
         try:
             prim_haloprop = kwargs['prim_haloprop']
-            sec_haloprop = kwargs['sec_haloprop']
         except KeyError:
             msg = ("\nIf not passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
                    "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
@@ -171,15 +167,12 @@ def compute_conditional_averages(disp_func=lambda x: x, disp_func_kwargs={}, **k
     bins_in_halocat = set(prim_haloprop_bins)
     for ibin in bins_in_halocat:
         indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
-
-        # place the percentiles into the catalog
-        output[indices_of_prim_haloprop_bin] = np.mean(
-            disp_func(sec_haloprop[indices_of_prim_haloprop_bin], **disp_func_kwargs))
-    # TODO i'm not sure if this should have dimensions of prim_haloprop or the binning...
+        # place the averages into the catalog
+        output[indices_of_prim_haloprop_bin] = np.mean(vals[indices_of_prim_haloprop_bin])
     return output
 
 
-def compute_conditional_percentile(p=0.5, **kwargs):
+def compute_conditional_percentile_values(p=0.5, **kwargs):
     """
     In bins of the ``prim_haloprop``, compute the percentile given by p of the input
      ``table`` based on the value of ``sec_haloprop``.
@@ -274,9 +267,6 @@ def compute_conditional_percentile(p=0.5, **kwargs):
     bins_in_halocat = set(prim_haloprop_bins)
     for ibin, pp in izip(bins_in_halocat, p):
         indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
-
-        num_in_bin = len(sec_haloprop[indices_of_prim_haloprop_bin])
-
         # Find the indices that sort by the secondary property
         perc = np.percentile(sec_haloprop[indices_of_prim_haloprop_bin], pp * 100)
 
@@ -291,20 +281,18 @@ class ContinuousAssembias(HeavisideAssembias):
     Class used to extend the behavior of `HeavisideAssembias` for continuous distributions.
     """
     # TODO where to put in max value of slope?
-    def _disp_func(self,sec_haloprop, slope, sec_haloprop_split):
+    def _disp_func(self,sec_haloprop, slope):
         """
         Function define the value of \delta N_max as a function of the sec_haloprop distribution and a slope param
         :param sec_haloprop:
-            The table of secondary haloprops
+            The table of secondary haloprops. In general, the median (or some other percentile) is subtracted
+            from this value first.
         :param slope:
             The "slope" parameter, which controls the rate of change between negative and positive displacements.
-        :param sec_haloprop_split:
-            For each sec_haloprop, the value in its mass bin for the secondary statistic that is the percentile given
-            by that mass bin's split. As an example, if the split in all mass bins is 0.5, sec_haloprop_split is
-            simply the median value of the sec_haloprop in each mass bin.
         :return:
+            The displacement as a function of the sec_halopropr
         """
-        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop-sec_haloprop_split)))
+        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop)))
 
     def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=0.0, **kwargs):
         '''
@@ -338,11 +326,39 @@ class ContinuousAssembias(HeavisideAssembias):
         for ipar, val in enumerate(slope):
             self.param_dict[self._get_continuous_assembias_param_dict_key(ipar)] = val
 
-    # TODO change this to say "slope"
+    # I'd like to add this to control the min/max
+    # However, it is complex so ... we'll see
+    #@model_helpers.bounds_enforcing_decorator_factory(-1, 1)
+    def assembias_slope(self, prim_haloprop):
+        """
+        Method returns the slope of continuous assembly bias as a function of the primary halo property.
+
+        Parameters
+        ----------
+        prim_haloprop : array_like
+            Array storing the primary halo property.
+
+        Returns
+        -------
+        slope : array_like
+            Slope of continuous assembly bias as a function of the input halo property.
+        """
+        model_ordinates = (self.param_dict[self._get_continuous_assembias_param_dict_key(ipar)]
+                           for ipar in xrange(len(self._assembias_strength_abscissa)))
+        spline_function = model_helpers.custom_spline(
+            self._assembias_strength_abscissa, list(model_ordinates), k=3)
+
+        if self._loginterp is True:
+            result = spline_function(np.log10(prim_haloprop))
+        else:
+            result = spline_function(prim_haloprop)
+
+        return result
+
     def _get_continuous_assembias_param_dict_key(self,ipar):
         '''
         '''
-        return self._method_name_to_decorate + '_' + self.gal_type + '_continuous_assembias_param' + str(ipar + 1)
+        return self._method_name_to_decorate + '_' + self.gal_type + '_assembias_slope' + str(ipar + 1)
 
     def _galprop_perturbation(self, **kwargs):
         """
@@ -357,10 +373,10 @@ class ContinuousAssembias(HeavisideAssembias):
                 baseline_result
                 prim_haloprop
                 sec_haloprop
-                splitting_result
         :return: result, np.arry with dimensions of prim_haloprop detailing the perturbation.
         """
 
+        # TODO why don't I need this?
         # lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
         # baseline_lower_bound = getattr(self, lower_bound_key)
         upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type
@@ -370,7 +386,6 @@ class ContinuousAssembias(HeavisideAssembias):
             baseline_result = kwargs['baseline_result']
             prim_haloprop = kwargs['prim_haloprop']
             sec_haloprop = kwargs['sec_haloprop']
-            splitting_result = kwargs['splitting_result']
         except KeyError:
             msg = ("Must call _galprop_perturbation method of the"
                    "HeavisideAssembias class with the following keyword arguments:\n"
@@ -379,31 +394,15 @@ class ContinuousAssembias(HeavisideAssembias):
 
         # evaluate my continuous modification
         strength = self.assembias_strength(prim_haloprop)
+        slope = self.assembias_slope(prim_haloprop)
 
-        # get the kwargs for disp_func from the param dict
-        disp_func_kwargs = {}
-        for key, val in self.param_dict.iteritems():
-            if key[:10] == 'disp_func_' and self.gal_type in key:
-                split_key = key.split('_')
-                disp_func_kwargs[split_key[-2]] = val
-
-        # subtract the central value to make sure the right value is in the center of the function
-        # t0 = time()
-        # TODO these are wasteful. I should just compute the percentiles
-        # then get the stats I want
-        central_val = compute_conditional_percentile(splitting_result, prim_haloprop=prim_haloprop,
-                                                     sec_haloprop=sec_haloprop)
         # the average displacement acts as a normalization we need.
-        # t1 = time()
-        disp_average = compute_conditional_averages(self.disp_func, disp_func_kwargs, prim_haloprop=prim_haloprop,
-                                                    sec_haloprop=sec_haloprop - central_val)
-        # t2 = time()
-        # x = compute_conditional_percentiles(prim_haloprop=prim_haloprop, sec_haloprop=sec_haloprop-central_val)
-        # t3 = time()
 
-        # print type(self)
-        # print t1-t0, t2-t1, t3-t2
+        max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
+        disp_average = compute_conditional_averages(max_displacement,prim_haloprop=prim_haloprop)
 
+        # TODO i should study the corresponding section more closely,
+        # this is quite different
         bound1 = baseline_result / disp_average
         bound2 = (baseline_upper_bound - baseline_result) / (baseline_upper_bound - disp_average)
         # stop NaN broadcasting
@@ -412,13 +411,14 @@ class ContinuousAssembias(HeavisideAssembias):
 
         bound = np.minimum(bound1, bound2)
 
-        result = strength * bound * (self.disp_func(sec_haloprop - central_val, **disp_func_kwargs) - disp_average)
+        result = strength * bound * (max_displacement- disp_average)
         # print 'Perturbations'
         # print result.mean(),result.std(), result.max(), result.min()
 
         return result
 
     def assembias_decorator(self, func):
+        # TODO update this commetn
         # keep everything the smae but get rid of the perturbation flip cuz it's not necessary.
         # also the mask is not necessary
 
@@ -452,6 +452,8 @@ class ContinuousAssembias(HeavisideAssembias):
             # The control flow below is what permits accepting an input
             # table or a directly inputting prim_haloprop and sec_haloprop arrays
             _HAS_table = False
+            # TODO use the table
+            # TODO sec_percentile is not used here, remove refs to it
             if 'table' in kwargs:
                 try:
                     table = kwargs['table']
@@ -503,6 +505,26 @@ class ContinuousAssembias(HeavisideAssembias):
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
 
+            if _HAS_table is True:
+                if self.sec_haloprop_key + '_percentile_values' in list(table.keys()):
+                    no_edge_percentile_values = table[self.sec_haloprop_key + '_percentile_value'][no_edge_mask]
+                else:
+                    # the value of sec_haloprop_percentile will be computed from scratch
+                    no_edge_percentile_values = compute_conditional_percentile_values( no_edge_split,
+                        prim_haloprop=prim_haloprop[no_edge_mask],
+                        sec_haloprop=sec_haloprop[no_edge_mask]
+                    )
+            else:
+                try:
+                    percentiles = kwargs['sec_haloprop_percentile_values']
+                    if custom_len(percentiles) == 1:
+                        percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
+                    no_edge_percentile_values = percentiles[no_edge_mask]
+                except KeyError:
+                    no_edge_percentile_values = compute_conditional_percentile_values(no_edge_split,
+                        prim_haloprop=prim_haloprop[no_edge_mask],
+                        sec_haloprop=sec_haloprop[no_edge_mask]
+                    )
             # NOTE I've removed the type 1 mask as it is not necessary
             # this has all been rolled into the galprop_perturbation function
             # TODO for consistancy maybe I should change it back if possible.
@@ -513,9 +535,8 @@ class ContinuousAssembias(HeavisideAssembias):
             else:
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
-                    sec_haloprop=sec_haloprop[no_edge_mask],
-                    baseline_result=no_edge_result,
-                    splitting_result=no_edge_split)
+                    sec_haloprop=sec_haloprop[no_edge_mask] - no_edge_percentile_values,
+                    baseline_result=no_edge_result)
 
             no_edge_result += perturbation
             # print result.mean(), result.std(), result.max(), result.min()
