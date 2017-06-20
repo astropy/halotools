@@ -8,7 +8,10 @@ __all__ = ('radial_distance', 'radial_distance_and_velocity')
 
 
 def _signed_dx(xs, xc, xperiod):
-    """
+    """ Calculate the 1-d distance between xs and xc,
+    accounting for periodic boundary conditions.
+    The returned result is positive when xs > xc, except when PBCs are applied,
+    in which case there is a sign flip.
     """
     dx_uncorrected = xs - xc
     abs_dx_uncorrected = np.abs(dx_uncorrected)
