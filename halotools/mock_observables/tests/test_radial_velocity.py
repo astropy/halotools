@@ -7,6 +7,7 @@ from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..radial_velocity import _signed_dx, radial_distance, radial_distance_and_velocity
+from ...empirical_models import enforce_periodicity_of_box
 
 fixed_seed = 43
 
@@ -63,6 +64,19 @@ def test_radial_distance2():
     drad = radial_distance(xs, ys, zs, xc, yc, zc, 10)
     assert drad == np.sqrt(3)
 
+
+def test_radial_distance3():
+    npts = int(1e4)
+    Lbox = 150
+    with NumpyRNGContext(fixed_seed):
+        xc = np.random.uniform(0, Lbox, npts)
+        yc = np.random.uniform(0, Lbox, npts)
+        zc = np.random.uniform(0, Lbox, npts)
+    xs = enforce_periodicity_of_box(xc + 1., Lbox)
+    ys = enforce_periodicity_of_box(yc + 1., Lbox)
+    zs = enforce_periodicity_of_box(zc + 1., Lbox)
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, Lbox)
+    assert np.allclose(drad, np.sqrt(3))
 
 
 
