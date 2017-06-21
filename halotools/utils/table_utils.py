@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from math import ceil
 import numpy as np
 from warnings import warn
+import functools
 from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
@@ -67,7 +68,7 @@ def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
 
     return output
 
-def compute_conditional_decorator(func):
+class compute_conditional_decorator(object):
     # TODO update these docs
     r"""
     In bins of the ``prim_haloprop``, compute func``.
@@ -122,10 +123,14 @@ def compute_conditional_decorator(func):
     receive *smaller* values of the returned percentile.
 
     """
-    last_compute_prim_haloprop_bins_dict = {}
-    last_prim_haloprop_bins = np.zeros((1,))
 
-    def wrapper(*args, **kwargs):
+    def __init__(self, func):
+
+        self.func = func
+        self.last_compute_prim_haloprop_bins_dict = {}
+        self.last_prim_haloprop_bins = np.zeros((1,))
+
+    def __call__(self, *args, **kwargs):
         if 'table' in kwargs:
             table = kwargs['table']
             try:
@@ -159,13 +164,13 @@ def compute_conditional_decorator(func):
         except KeyError:
             pass
 
-        if compute_prim_haloprop_bins_dict == last_compute_prim_haloprop_bins_dict: # same as we were last asked for, don't recompute
-            prim_haloprop_bins = last_prim_haloprop_bins
+        if compute_prim_haloprop_bins_dict == self.last_compute_prim_haloprop_bins_dict: # same as we were last asked for, don't recompute
+            prim_haloprop_bins = self.last_prim_haloprop_bins
         else:
             prim_haloprop_bins = compute_prim_haloprop_bins(**compute_prim_haloprop_bins_dict)
             #update cache
-            last_compute_prim_haloprop_bins_dict= compute_prim_haloprop_bins_dict
-            last_prim_haloprop_bins = prim_haloprop_bins
+            self.last_compute_prim_haloprop_bins_dict= compute_prim_haloprop_bins_dict
+            self.last_prim_haloprop_bins = prim_haloprop_bins
 
         output = np.zeros_like(prim_haloprop)
 
@@ -182,13 +187,20 @@ def compute_conditional_decorator(func):
             # place the percentiles into the catalog
             #output[indices_of_prim_haloprop_bin] = percentiles
 
-            output[indices_of_prim_haloprop_bin] = func(ibin = ibin,
+            output[indices_of_prim_haloprop_bin] = self.func(ibin = ibin,
                                                         indices_of_prim_haloprop_bin= indices_of_prim_haloprop_bin,
                                                         *args, **fkwargs)
 
         return output
 
-    return wrapper
+    def __repr__(self):
+        '''Return the function's docstring.'''
+        return self.func.__doc__
+
+    def __get__(self, obj, objtype):
+        '''Support instance methods.'''
+        return functools.partial(self.__call__, obj)
+
 # TODO fix these docs
 @compute_conditional_decorator
 def compute_conditional_percentiles(indices_of_prim_haloprop_bin, sec_haloprop, **kwargs):
