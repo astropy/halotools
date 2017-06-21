@@ -1,23 +1,19 @@
 :orphan:
 
-.. _whats_new:
+.. _whats_new_v0p5:
 
 *****************************
 What's New in Halotools v0.5?
 *****************************
 
-Halotools ``v0.5`` is now available for pip installation.
-The main changes to the code since the previous release on pip are summarized in the sections below.
+Halotools ``v0.5`` is now available for pip installation. The main changes to the code are summarized in the sections below.
 
-For a summary of ongoing work related to the next release of the code, see :ref:`whats_new_v0p6`.
-See :ref:`whats_new_v0x_history` for full release history information.
 
 New Models
 ============
 
 .. currentmodule:: halotools.empirical_models
 
-.. _abundance_matching_v05:
 
 Abundance Matching and Age Matching functions
 ---------------------------------------------
@@ -30,7 +26,6 @@ Generalized modeling of galaxy--halo correlations
 Along similar lines, the `noisy_percentile` function provides an alternative Numpy-based kernel that gives users lower-level control over how to model correlations between galaxies and halo properties. See the docstring of `noisy_percentile` for a tutorial on how to use this function to model a correlation between halo concentration and scatter in the stellar-to-halo-mass relation. `noisy_percentile` complements `conditional_abunmatch` by
 providing a higher-performance algorithm with a lower-level API, giving users more fine-grained control over a wider range of applications.
 
-.. _subhalo_phase_space_v05:
 
 HOD models using subhalos for satellites
 ----------------------------------------
@@ -38,7 +33,6 @@ HOD models using subhalos for satellites
 In HOD-stye models of the galaxy--halo connection, there is parametric freedom for the positions and velocities of satellite galaxies within their halos. One common parametric choice is to assume an NFW profile, as in `Zehavi et al 2005 <https://arxiv.org/abs/astro-ph/0408569/>`_, and related works. Alternatively, satellites may be assigned to randomly chosen dark matter particles in the halo, as in `Reid and White 2014 <https://arxiv.org/abs/1404.3742/>`_. Instead of dark matter particles, the `~halotools.empirical_models.SubhaloPhaseSpace` class allows for satellites to be placed onto subhalos in the host halo. See :ref:`subhalo_phase_space_model_tutorial` for further information.
 
 
-.. _clf_models_v05:
 
 Conditional Luminosity Function models
 ---------------------------------------
@@ -46,7 +40,6 @@ Conditional Luminosity Function models
 The Conditional Luminosity Function (CLF) is a closely related class of empirical models to HODs. Whereas the HOD only specifies the number of galaxies in a halo brighter than some threshold, the CLF specifies the luminosity function of galaxies in a halo brighter than some threshold (e.g., `van den Bosch et al 2012 <https://arxiv.org/abs/1206.6890/>`_, and related works). The :ref:`cacciato09_composite_model` is a composite CLF model that implements the version of the CLF introduced in `Cacciato et al 2009 <https://arxiv.org/abs/0807.4932/>`_.
 
 
-.. _zu_mandelbaum_v05:
 
 Zu & Mandelbaum (2015/2016)
 ---------------------------
@@ -56,7 +49,6 @@ The first model describes an HOD fit to z=0 SDSS clustering and lensing of stell
 samples, the second model additionally predicts whether each model galaxy is quiescent or star-forming. See :ref:`zu_mandelbaum15_composite_model` and :ref:`zu_mandelbaum16_composite_model` tutorials on these models.
 
 
-.. _biased_nfw_phase_space_v05:
 
 Satellite profiles with biased values
 -------------------------------------
@@ -69,7 +61,6 @@ New Mock Observations
 
 .. currentmodule:: halotools.mock_observables
 
-.. _galaxy_lensing_v05:
 
 Calculating galaxy-galaxy lensing in a hydro simulation
 --------------------------------------------------------
