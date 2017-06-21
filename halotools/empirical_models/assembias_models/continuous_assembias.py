@@ -144,7 +144,7 @@ class ContinuousAssembias(HeavisideAssembias):
         # the average displacement acts as a normalization we need.
 
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
-        disp_average = compute_conditional_averages(max_displacement,prim_haloprop=prim_haloprop)
+        disp_average = compute_conditional_averages(vals=max_displacement,prim_haloprop=prim_haloprop)
 
         result = np.zeros(len(prim_haloprop))
 
@@ -266,7 +266,7 @@ class ContinuousAssembias(HeavisideAssembias):
                     no_edge_percentile_values = table[self.sec_haloprop_key + '_percentile_value'][no_edge_mask]
                 else:
                     # the value of sec_haloprop_percentile will be computed from scratch
-                    no_edge_percentile_values = compute_conditional_percentile_values( no_edge_split,
+                    no_edge_percentile_values = compute_conditional_percentile_values( p=no_edge_split,
                         prim_haloprop=prim_haloprop[no_edge_mask],
                         sec_haloprop=sec_haloprop[no_edge_mask]
                     )
@@ -277,7 +277,7 @@ class ContinuousAssembias(HeavisideAssembias):
                         percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
                     no_edge_percentile_values = percentiles[no_edge_mask]
                 except KeyError:
-                    no_edge_percentile_values = compute_conditional_percentile_values(no_edge_split,
+                    no_edge_percentile_values = compute_conditional_percentile_values(p=no_edge_split,
                         prim_haloprop=prim_haloprop[no_edge_mask],
                         sec_haloprop=sec_haloprop[no_edge_mask]
                     )
