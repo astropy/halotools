@@ -38,7 +38,7 @@ class ContinuousAssembias(HeavisideAssembias):
         :return:
             The displacement as a function of the sec_halopropr
         """
-        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop)))
+        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop_percentiles)))
 
     def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=0.0, **kwargs):
         '''
