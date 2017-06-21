@@ -97,6 +97,61 @@ def test_radial_distance4():
     assert not np.allclose(drad, radius)
 
 
+def test_radial_velocity1():
+    Lbox = np.inf
+    xc, yc, zc = 5., 5., 5.
+    vxc, vyc, vzc = 0., 0., 0.
+    input_drad = 1.
+    xs, ys, zs = xc + input_drad, yc, zc
+    input_vrad = -1.
+    vxs, vys, vzs = vxc + input_vrad, vyc, vzc
+    inferred_drad, inferred_vrad = radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs,
+            xc, yc, zc, vxc, vyc, vzc, Lbox)
+    assert np.allclose(inferred_drad, input_drad)
+    assert np.allclose(inferred_vrad, input_vrad)
+
+
+def test_radial_velocity2():
+    Lbox = 5
+    xc, yc, zc = 4.9, 4.9, 4.9
+    vxc, vyc, vzc = 0., 0., 0.
+    input_drad = 1.
+    xs, ys, zs = xc + input_drad - Lbox, yc, zc
+    input_vrad = -1.
+    vxs, vys, vzs = vxc + input_vrad, vyc, vzc
+    inferred_drad, inferred_vrad = radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs,
+            xc, yc, zc, vxc, vyc, vzc, Lbox)
+    assert np.allclose(inferred_drad, input_drad)
+    assert np.allclose(inferred_vrad, input_vrad)
+
+
+def test_radial_velocity3():
+    """
+    """
+    npts = 100
+    xc, yc, zc = 9., 9., 9.
+    vxc, vyc, vzc = 0, 0, 0
+    Lbox = 10.
+    input_drad = 3.
+    xs = np.zeros(npts) + xc + input_drad
+    ys = np.zeros(npts) + yc + input_drad
+    zs = np.zeros(npts) + zc
+    input_vrad = -1.
+    vxs = np.zeros(npts) + input_vrad
+    vys = np.zeros(npts) + input_vrad
+    vzs = np.zeros(npts)
+    xs = enforce_periodicity_of_box(xs, Lbox)
+    ys = enforce_periodicity_of_box(ys, Lbox)
+    zs = enforce_periodicity_of_box(zs, Lbox)
+
+    inferred_drad, inferred_vrad = radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs,
+            xc, yc, zc, vxc, vyc, vzc, Lbox)
+    assert np.allclose(inferred_drad, input_drad*np.sqrt(2))
+    correct_vrad = input_vrad*np.sqrt(2)
+    assert np.allclose(correct_vrad, inferred_vrad)
+
+
+
 
 
 
