@@ -6,6 +6,7 @@ import numpy as np
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
+from .cf_helpers import generate_thin_shell_of_3d_points
 from ..radial_velocity import _signed_dx, radial_distance, radial_distance_and_velocity
 from ...empirical_models import enforce_periodicity_of_box
 
@@ -77,6 +78,25 @@ def test_radial_distance3():
     zs = enforce_periodicity_of_box(zc + 1., Lbox)
     drad = radial_distance(xs, ys, zs, xc, yc, zc, Lbox)
     assert np.allclose(drad, np.sqrt(3))
+
+
+def test_radial_distance4():
+    """
+    """
+    npts = 100
+    xc, yc, zc = 9, 9, 9
+    radius = 2.
+    Lbox = 10.
+    pts = generate_thin_shell_of_3d_points(npts, radius, xc, yc, zc)
+    xs = enforce_periodicity_of_box(pts[:, 0], Lbox)
+    ys = enforce_periodicity_of_box(pts[:, 1], Lbox)
+    zs = enforce_periodicity_of_box(pts[:, 2], Lbox)
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, Lbox)
+    assert np.allclose(drad, radius)
+    drad = radial_distance(xs, ys, zs, xc, yc, zc, np.inf)
+    assert not np.allclose(drad, radius)
+
+
 
 
 
