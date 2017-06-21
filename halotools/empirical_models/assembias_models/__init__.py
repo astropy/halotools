@@ -1,1 +1,2 @@
 from .heaviside_assembias import HeavisideAssembias
+from .continuous_assembias import ContinuousAssembias
