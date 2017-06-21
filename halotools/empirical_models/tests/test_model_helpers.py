@@ -137,8 +137,8 @@ def test_check_multiple_box_lengths():
 
 
 def test_velocity_flip():
-    """ Verify that enforce_periodicity_of_box function flips the sign of
-    the velocity for points where PBCs needed to be enforced
+    """ Verify that enforce_periodicity_of_box function preserves the sign of the
+    velocity for points where PBCs needed to be enforced
     """
     box_length = 250
     Npts = int(1e4)
@@ -149,9 +149,7 @@ def test_velocity_flip():
     newcoords, newvel = enforce_periodicity_of_box(
         x, box_length, velocity=vx)
 
-    inbox = ((x >= 0) & (x <= box_length))
-    assert np.all(newvel[inbox] == 1.0)
-    assert np.all(newvel[~inbox] == -1.0)
+    assert np.all(newvel == vx)
 
 
 def test_call_func_table1():

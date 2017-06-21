@@ -140,8 +140,6 @@ def enforce_periodicity_of_box(coords, box_length,
 
     velocity : array_like, optional
         velocity in the same dimension as the input coords.
-        For all coords outside the box, the corresponding velocities
-        will receive a sign flip.
 
     check_multiple_box_lengths : bool, optional
         If True, an exception will be raised if the points span a range
@@ -167,10 +165,8 @@ def enforce_periodicity_of_box(coords, box_length,
 
     try:
         velocity = kwargs['velocity']
-        outbox = ((coords > box_length) | (coords < 0))
         newcoords = coords % box_length
-        new_velocity = np.where(outbox, -velocity, velocity)
-        return newcoords, new_velocity
+        return newcoords, velocity
     except:
         return coords % box_length
 
