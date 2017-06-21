@@ -6,17 +6,14 @@ any method of any component model. It subclasses `HeavisideAssembias` and
 `McLaughlin et al 2017 (in prep)`_.
 """
 
-from itertools import izip
 from functools import wraps
-from warnings import warn
-from math import ceil
 
 import numpy as np
 from . import HeavisideAssembias
 from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentiles, compute_conditional_averages
+from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages, compute_conditional_normalizations
 
 __all__ = ('ContinuousAssembias', )
 __author__ = ('Sean McLaughlin', )
@@ -27,7 +24,7 @@ class ContinuousAssembias(HeavisideAssembias):
     Class used to extend the behavior of `HeavisideAssembias` for continuous distributions.
     """
     # TODO where to put in max value of slope?
-    def _disp_func(self,sec_haloprop_percentiles, slope):
+    def _disp_func(self,sec_haloprop, slope):
         """
         Function define the value of \delta N_max as a function of the sec_haloprop distribution and a slope param
         :param sec_haloprop:
@@ -38,7 +35,7 @@ class ContinuousAssembias(HeavisideAssembias):
         :return:
             The displacement as a function of the sec_halopropr
         """
-        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop_percentiles)))
+        return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop)))
 
     def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=0.0, **kwargs):
         '''
@@ -130,7 +127,7 @@ class ContinuousAssembias(HeavisideAssembias):
         try:
             baseline_result = kwargs['baseline_result']
             prim_haloprop = kwargs['prim_haloprop']
-            sec_haloprop_percentiles = kwargs['sec_haloprop_percentiles']
+            sec_haloprop = kwargs['sec_haloprop']
         except KeyError:
             msg = ("Must call _galprop_perturbation method of the"
                    "HeavisideAssembias class with the following keyword arguments:\n"
@@ -143,7 +140,7 @@ class ContinuousAssembias(HeavisideAssembias):
 
         # the average displacement acts as a normalization we need.
 
-        max_displacement = self._disp_func(sec_haloprop_percentiles=sec_haloprop_percentiles, slope=slope)
+        max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
         disp_average = compute_conditional_averages(vals=max_displacement,prim_haloprop=prim_haloprop)
 
         result = np.zeros(len(prim_haloprop))
@@ -244,8 +241,15 @@ class ContinuousAssembias(HeavisideAssembias):
 
             # Compute the fraction of type-2 halos as a function of the input prim_haloprop
             split = self.percentile_splitting_function(prim_haloprop)
-            result = func(*args, **kwargs)
 
+            # Compute the baseline, undecorated result
+            # t0 = time()
+            result = func(*args, **kwargs)
+            # t1 = time()
+            # print 'Baseline time:',t1 - t0
+
+            # We will only decorate values that are not edge cases,
+            # so first compute the mask for non-edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) &
                 (result > baseline_lower_bound) & (result < baseline_upper_bound)
@@ -255,28 +259,27 @@ class ContinuousAssembias(HeavisideAssembias):
             no_edge_split = split[no_edge_mask]
 
             if _HAS_table is True:
-                # we were passed halo_type_tuple:
-                if self.sec_haloprop_key + '_percentile' in list(table.keys()):
-                    no_edge_percentiles = table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
+                if self.sec_haloprop_key + '_percentile_values' in list(table.keys()):
+                    no_edge_percentile_values = table[self.sec_haloprop_key + '_percentile_value'][no_edge_mask]
                 else:
                     # the value of sec_haloprop_percentile will be computed from scratch
-                    percentiles = compute_conditional_percentiles(
-                        prim_haloprop=prim_haloprop,
-                        sec_haloprop=sec_haloprop
-                        )
-                    no_edge_percentiles = percentiles[no_edge_mask]
+                    no_edge_percentile_values = compute_conditional_percentile_values( p=no_edge_split,
+                        prim_haloprop=prim_haloprop[no_edge_mask],
+                        sec_haloprop=sec_haloprop[no_edge_mask]
+                    )
             else:
                 try:
-                    percentiles = kwargs['sec_haloprop_percentile']
+                    percentiles = kwargs['sec_haloprop_percentile_values']
                     if custom_len(percentiles) == 1:
                         percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
+                    no_edge_percentile_values = percentiles[no_edge_mask]
                 except KeyError:
-                    percentiles = compute_conditional_percentiles(
-                        prim_haloprop=prim_haloprop,
-                        sec_haloprop=sec_haloprop
-                        )
-                no_edge_percentiles = percentiles[no_edge_mask]
+                    no_edge_percentile_values = compute_conditional_percentile_values(p=no_edge_split,
+                        prim_haloprop=prim_haloprop[no_edge_mask],
+                        sec_haloprop=sec_haloprop[no_edge_mask]
+                    )
 
+            norm = compute_conditional_normalizations(prim_haloprop=prim_haloprop, sec_haloprop=sec_haloprop)
             # NOTE I've removed the type 1 mask as it is not necessary
             # this has all been rolled into the galprop_perturbation function
             # TODO for consistancy maybe I should change it back if possible.
@@ -287,7 +290,7 @@ class ContinuousAssembias(HeavisideAssembias):
             else:
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
-                    sec_haloprop_percentiles=no_edge_percentiles - no_edge_split,
+                    sec_haloprop=(sec_haloprop[no_edge_mask] - no_edge_percentile_values)/norm,
                     baseline_result=no_edge_result)
 
             no_edge_result += perturbation

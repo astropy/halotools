@@ -337,6 +337,10 @@ def compute_conditional_averages(indices_of_prim_haloprop_bin, vals, **kwargs):
     return np.mean(vals[indices_of_prim_haloprop_bin])
 
 @compute_conditional_decorator
+def compute_conditional_normalizations(indices_prim_haloprop_bins, sec_haloprop, **kwargs):
+    return np.max(np.abs(sec_haloprop[indices_prim_haloprop_bins] ))
+
+@compute_conditional_decorator
 def compute_conditional_percentile_values(ibin, indices_of_prim_haloprop_bin, sec_haloprop, p=0.5, **kwargs):
     """
     In bins of the ``prim_haloprop``, compute the percentile given by p of the input
