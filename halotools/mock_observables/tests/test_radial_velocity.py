@@ -140,9 +140,9 @@ def test_radial_velocity3():
     vxs = np.zeros(npts) + input_vrad
     vys = np.zeros(npts) + input_vrad
     vzs = np.zeros(npts)
-    xs = enforce_periodicity_of_box(xs, Lbox)
-    ys = enforce_periodicity_of_box(ys, Lbox)
-    zs = enforce_periodicity_of_box(zs, Lbox)
+    xs, vxs = enforce_periodicity_of_box(xs, Lbox, velocity=vxs)
+    ys, vys = enforce_periodicity_of_box(ys, Lbox, velocity=vys)
+    zs, vzs = enforce_periodicity_of_box(zs, Lbox, velocity=vzs)
 
     inferred_drad, inferred_vrad = radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs,
             xc, yc, zc, vxc, vyc, vzc, Lbox)
