@@ -16,7 +16,7 @@ from . import HeavisideAssembias
 from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
-#from ...utils.table_utils import compute_conditional_percentiles
+from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages
 
 __all__ = ('ContinuousAssembias', )
 __author__ = ('Sean McLaughlin', )
@@ -122,9 +122,8 @@ class ContinuousAssembias(HeavisideAssembias):
         :return: result, np.arry with dimensions of prim_haloprop detailing the perturbation.
         """
 
-        # TODO why don't I need this?
-        # lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
-        # baseline_lower_bound = getattr(self, lower_bound_key)
+        lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
+        baseline_lower_bound = getattr(self, lower_bound_key)
         upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type
         baseline_upper_bound = getattr(self, upper_bound_key)
 
@@ -147,19 +146,30 @@ class ContinuousAssembias(HeavisideAssembias):
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
         disp_average = compute_conditional_averages(max_displacement,prim_haloprop=prim_haloprop)
 
-        # TODO i should study the corresponding section more closely,
-        # this is quite different
-        bound1 = baseline_result / disp_average
-        bound2 = (baseline_upper_bound - baseline_result) / (baseline_upper_bound - disp_average)
-        # stop NaN broadcasting
-        bound1[np.isnan(bound1)] = np.inf
-        bound2[np.isnan(bound2)] = np.inf
+        result = np.zeros(len(prim_haloprop))
 
-        bound = np.minimum(bound1, bound2)
+        greater_than_half_avg_idx = disp_average > 0.5
+        less_than_half_avg_idx = disp_average <= 0.5
 
-        result = strength * bound * (max_displacement- disp_average)
-        # print 'Perturbations'
-        # print result.mean(),result.std(), result.max(), result.min()
+        if len(max_displacement[greater_than_half_avg_idx]) > 0:
+            base_pos = baseline_result[greater_than_half_avg_idx]
+            strength_pos = strength[greater_than_half_avg_idx]
+            avg_pos = disp_average[greater_than_half_avg_idx]
+
+            upper_bound1 = (base_pos - baseline_lower_bound)/avg_pos
+            upper_bound2 = (baseline_upper_bound - base_pos)/(1-avg_pos)
+            upper_bound = np.minimum(upper_bound1, upper_bound2)
+            result[greater_than_half_avg_idx] = strength_pos*upper_bound*(max_displacement[greater_than_half_avg_idx]-avg_pos)
+
+        if len(baseline_result[less_than_half_avg_idx]) > 0:
+            base_neg = baseline_result[less_than_half_avg_idx]
+            strength_neg = strength[less_than_half_avg_idx]
+            avg_neg = disp_average[less_than_half_avg_idx]
+
+            lower_bound1 = (base_neg-baseline_lower_bound)/(1- avg_neg)
+            lower_bound2 = (baseline_upper_bound - base_neg)/avg_neg
+            lower_bound = np.minimum(lower_bound1, lower_bound2)
+            result[less_than_half_avg_idx] = strength_neg*lower_bound*(max_displacement[less_than_half_avg_idx]-avg_neg)
 
         return result
 
