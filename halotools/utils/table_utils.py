@@ -136,21 +136,29 @@ class compute_conditional_decorator(object):
             try:
                 prim_haloprop_key = kwargs['prim_haloprop_key']
                 prim_haloprop = table[prim_haloprop_key]
-                sec_haloprop_key = kwargs['sec_haloprop_key']
-                sec_haloprop = table[sec_haloprop_key]
             except KeyError:
+                #TODO update
                 msg = ("\nWhen passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
                     "you must also pass ``prim_haloprop_key`` and ``sec_haloprop_key`` keyword arguments\n"
                     "whose values are column keys of the input ``table``\n")
                 raise HalotoolsError(msg)
+            try:
+                sec_haloprop_key = kwargs['sec_haloprop_key']
+                sec_haloprop = table[sec_haloprop_key]
+            except KeyError:
+                sec_haloprop = None #not needed for all methods
         else:
             try:
                 prim_haloprop = kwargs['prim_haloprop']
-                sec_haloprop = kwargs['sec_haloprop']
             except KeyError:
+                # TODO update
                 msg = ("\nIf not passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
                     "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
                 raise HalotoolsError(msg)
+            try:
+                sec_haloprop = kwargs['sec_haloprop']
+            except KeyError:
+                sec_haloprop = None
 
         compute_prim_haloprop_bins_dict = {}
         compute_prim_haloprop_bins_dict['prim_haloprop'] = prim_haloprop
@@ -258,7 +266,11 @@ def compute_conditional_percentiles(indices_of_prim_haloprop_bin, sec_haloprop, 
         receive *smaller* values of the returned percentile.
 
         """
-
+    if sec_haloprop is None:
+        # TODO update
+        msg = ("\nIf not passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
+               "you must pass a  ``sec_haloprop`` argument\n")
+        raise HalotoolsError(msg)
     num_in_bin = len(sec_haloprop[indices_of_prim_haloprop_bin])
 
     # Find the indices that sort by the secondary property
