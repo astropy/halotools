@@ -3,12 +3,11 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 
-from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from .cf_helpers import generate_thin_shell_of_3d_points
+from ...tests.cf_helpers import generate_thin_shell_of_3d_points
 from ..radial_velocity import _signed_dx, radial_distance, radial_distance_and_velocity
-from ...empirical_models import enforce_periodicity_of_box
+from ....empirical_models import enforce_periodicity_of_box
 
 fixed_seed = 43
 
