@@ -33,3 +33,15 @@ class AmurricaError(HalotoolsError):
                 "as ``"+offending_spelling+"``.\n"
                 "Contributions to Halotools that support King George are strictly forbidden.\n")
         super(AmurricaError, self).__init__(message)
+
+
+class SpellingError(HalotoolsError):
+    """ Built-in mechanism to common misspellings contributed by certain repo contributors
+    who need not be named.
+    """
+
+    def __init__(self, basename, linenum, correct_spelling, offending_spelling):
+        message = ("\nOn line number "+str(linenum)+" of the source code file ``"+basename+"``,\n"
+                "you have incorrectly spelled the word ``"+correct_spelling+"`` "
+                "as ``"+offending_spelling+"``.\n")
+        super(SpellingError, self).__init__(message)

@@ -4,5 +4,7 @@ misspellings = (
     ('realization', 'realisation'),
     ('catalog', 'catalogue'),
     ('center', 'centre'),
-    ('neighbor', 'neighbour')
+    ('neighbor', 'neighbour'),
+    ('disk ', 'disc '),
+    ('fiber', 'fibre')
     )
