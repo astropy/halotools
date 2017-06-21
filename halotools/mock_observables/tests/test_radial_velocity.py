@@ -98,20 +98,34 @@ def test_radial_distance4():
 
 
 def test_radial_velocity1():
+    """ Put a central at (5, 5, 5) in a box WITHOUT periodic boundary conditions,
+    with the central moving in the direction (3, 0, 0).
+    Place all satellites at the point (6, 5, 5), moving in the direction (2, 0, 0),
+    i.e., in the negative radial direction that is aligned with the x-dimension.
+    Verify that we recover the correct radial velocity of -1 when ignoring PBCs
+
+    """
     Lbox = np.inf
     xc, yc, zc = 5., 5., 5.
-    vxc, vyc, vzc = 0., 0., 0.
+    vxc, vyc, vzc = 3., 0., 0.
     input_drad = 1.
     xs, ys, zs = xc + input_drad, yc, zc
-    input_vrad = -1.
-    vxs, vys, vzs = vxc + input_vrad, vyc, vzc
+    vxs, vys, vzs = 2., vyc, vzc
+    input_vrad = vxs - vxc
     inferred_drad, inferred_vrad = radial_distance_and_velocity(xs, ys, zs, vxs, vys, vzs,
             xc, yc, zc, vxc, vyc, vzc, Lbox)
     assert np.allclose(inferred_drad, input_drad)
     assert np.allclose(inferred_vrad, input_vrad)
+    assert input_vrad == -1
 
 
 def test_radial_velocity2():
+    """ Put a central at (4.9, 4.9, 4.9) in a box of length 10.
+    Place all satellites at the point (0.9, 4.9, 4.9), moving in the direction (-1, 0, 0),
+    i.e., in the negative radial direction that is aligned with the x-dimension.
+    Verify that we recover the correct radial velocity after applying PBCs
+
+    """
     Lbox = 5
     xc, yc, zc = 4.9, 4.9, 4.9
     vxc, vyc, vzc = 0., 0., 0.
@@ -126,7 +140,11 @@ def test_radial_velocity2():
 
 
 def test_radial_velocity3():
-    """
+    """ Put a central at (9, 9, 9) in a box of length 10.
+    Place all satellites at the point (11, 11, 9), moving in the direction (-1, -1, 0),
+    i.e., in the negative radial direction away from the (stationary) central.
+    Verify that we recover the correct radial velocity after applying PBCs
+
     """
     npts = 100
     xc, yc, zc = 9., 9., 9.
@@ -151,7 +169,44 @@ def test_radial_velocity3():
     assert np.allclose(correct_vrad, inferred_vrad)
 
 
+def test_radial_velocity4():
+    """ Pick a point near the edge of the box for the central,
+    and surround it by a spherical shell of satellites with a radius chosen so
+    that some of the satellites are scattered outside the box, giving a random
+    velocity to the central and random radial velocity to each satellite.
+    Verify that we recover the input radial velocity.
+    """
+    Lbox = 250.
+    npts2 = 500
+    xc, yc, zc = Lbox - 1, Lbox - 1, Lbox - 1
 
+    radius = 2.
+    pts2 = generate_thin_shell_of_3d_points(npts2, radius, xc, yc, zc, seed=fixed_seed)
+    xsarr, ysarr, zsarr = pts2[:, 0], pts2[:, 1], pts2[:, 2]
+    normed_dxsarr = (xsarr - xc)/radius
+    normed_dysarr = (ysarr - yc)/radius
+    normed_dzsarr = (zsarr - zc)/radius
 
+    input_vrad = np.random.uniform(-100, 100, npts2)
+    dvxsarr = normed_dxsarr*input_vrad
+    dvysarr = normed_dysarr*input_vrad
+    dvzsarr = normed_dzsarr*input_vrad
+    with NumpyRNGContext(fixed_seed):
+        vxc = np.random.uniform(-100, 100)
+        vyc = np.random.uniform(-100, 100)
+        vzc = np.random.uniform(-100, 100)
+    vxsarr = vxc + dvxsarr
+    vysarr = vyc + dvysarr
+    vzsarr = vzc + dvzsarr
 
+    xsarr, vxsarr = enforce_periodicity_of_box(xsarr, Lbox, velocity=vxsarr)
+    ysarr, vysarr = enforce_periodicity_of_box(ysarr, Lbox, velocity=vysarr)
+    zsarr, vzsarr = enforce_periodicity_of_box(zsarr, Lbox, velocity=vzsarr)
+
+    inferred_drad, inferred_vrad = radial_distance_and_velocity(
+        xsarr, ysarr, zsarr, vxsarr, vysarr, vzsarr,
+            xc, yc, zc, vxc, vyc, vzc, Lbox)
+
+    assert np.allclose(inferred_drad, radius)
+    assert np.allclose(inferred_vrad, input_vrad)
 
