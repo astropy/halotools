@@ -178,7 +178,7 @@ class compute_conditional_decorator(object):
 
         if compute_prim_haloprop_bins_dict.keys() == self.last_compute_prim_haloprop_bins_dict.keys(): # same as we were last asked for, don't recompute
             for key, val in compute_prim_haloprop_bins_dict.iteritems():
-                if np.any(self.last_compute_prim_haloprop_bins_dict[key] != val):
+                if not np.all(np.equal(self.last_compute_prim_haloprop_bins_dict[key] , val)):
                     break
             else:
                 same_dict = True
