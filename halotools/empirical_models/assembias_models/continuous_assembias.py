@@ -14,12 +14,14 @@ from . import HeavisideAssembias
 from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages, compute_conditional_normalizations, compute_conditional_percentiles
+from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages
+from ...utils.table_utils import  compute_conditional_decorator
 
 
 __all__ = ('ContinuousAssembias', )
 __author__ = ('Sean McLaughlin', )
 
+F = 0.99 # slope tolerance
 
 class ContinuousAssembias(HeavisideAssembias):
     """
@@ -73,8 +75,8 @@ class ContinuousAssembias(HeavisideAssembias):
 
     # I'd like to add this to control the min/max
     # However, it is complex so ... we'll see
-    #@model_helpers.bounds_enforcing_decorator_factory(-1, 1)
-    def assembias_slope(self, prim_haloprop):
+    @model_helpers.bounds_enforcing_decorator_factory(np.log10(np.log(1+F)/(1-F)), 10)
+    def assembias_slope(self, prim_haloprop, sec_haloprop):
         """
         Method returns the slope of continuous assembly bias as a function of the primary halo property.
 
@@ -282,12 +284,14 @@ class ContinuousAssembias(HeavisideAssembias):
             # NOTE I've removed the type 1 mask as it is not necessary
             # this has all been rolled into the galprop_perturbation function
 
+            pv_sub_sec_haloprop = sec_haloprop[no_edge_mask] - no_edge_percentile_values
+
             if prim_haloprop[no_edge_mask].shape[0] == 0:
                 perturbation = np.zeros_like(no_edge_result)
             else:
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
-                    sec_haloprop=sec_haloprop[no_edge_mask] - no_edge_percentile_values,
+                    sec_haloprop=pv_sub_sec_haloprop/np.max(np.abs(pv_sub_sec_haloprop)),
                     baseline_result=no_edge_result)
 
 
