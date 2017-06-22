@@ -178,7 +178,14 @@ class compute_conditional_decorator(object):
 
         if compute_prim_haloprop_bins_dict.keys() == self.last_compute_prim_haloprop_bins_dict.keys(): # same as we were last asked for, don't recompute
             for key, val in compute_prim_haloprop_bins_dict.iteritems():
-                if not np.all(np.equal(self.last_compute_prim_haloprop_bins_dict[key] , val)):
+                last_val = self.last_compute_prim_haloprop_bins_dict[key]
+                if hasattr(val, 'shape'):
+                    if val.shape != last_val.shape:
+                        break
+                    # We now know they have the same shape
+                    if not np.all(np.equal(val, last_val)):
+                        break
+                elif val != last_val:
                     break
             else:
                 same_dict = True
