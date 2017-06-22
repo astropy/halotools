@@ -282,15 +282,13 @@ class ContinuousAssembias(HeavisideAssembias):
             norm = compute_conditional_normalizations(prim_haloprop=prim_haloprop, sec_haloprop=sec_haloprop)
             # NOTE I've removed the type 1 mask as it is not necessary
             # this has all been rolled into the galprop_perturbation function
-            # TODO for consistancy maybe I should change it back if possible.
-            # It's not cuz the notion of type1/type2 is meaniningless in CAB
 
             if prim_haloprop[no_edge_mask].shape[0] == 0:
                 perturbation = np.zeros_like(no_edge_result)
             else:
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
-                    sec_haloprop=(sec_haloprop[no_edge_mask] - no_edge_percentile_values)/norm,
+                    sec_haloprop=(sec_haloprop[no_edge_mask] - no_edge_percentile_values)/norm[no_edge_mask],
                     baseline_result=no_edge_result)
 
             no_edge_result += perturbation

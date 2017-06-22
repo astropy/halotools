@@ -172,9 +172,26 @@ class compute_conditional_decorator(object):
         except KeyError:
             pass
 
-        if compute_prim_haloprop_bins_dict == self.last_compute_prim_haloprop_bins_dict: # same as we were last asked for, don't recompute
+        same_dict = False
+
+        if compute_prim_haloprop_bins_dict.keys() == self.last_compute_prim_haloprop_bins_dict.keys(): # same as we were last asked for, don't recompute
+            for key, val in compute_prim_haloprop_bins_dict.iteritems():
+                if np.any(self.last_compute_prim_haloprop_bins_dict[key] != val):
+                    break
+            else:
+                same_dict = True
+
+        if same_dict: 
             prim_haloprop_bins = self.last_prim_haloprop_bins
         else:
+            print(compute_prim_haloprop_bins_dict.keys())
+            print(self.last_compute_prim_haloprop_bins_dict.keys())
+            try:
+                print(compute_prim_haloprop_bins_dict.values()[0]-self.last_compute_prim_haloprop_bins_dict.values()[0])
+            except IndexError:
+                pass
+            print(self.func.__name__)
+            print('\n')
             prim_haloprop_bins = compute_prim_haloprop_bins(**compute_prim_haloprop_bins_dict)
             #update cache
             self.last_compute_prim_haloprop_bins_dict= compute_prim_haloprop_bins_dict
@@ -337,8 +354,8 @@ def compute_conditional_averages(indices_of_prim_haloprop_bin, vals, **kwargs):
     return np.mean(vals[indices_of_prim_haloprop_bin])
 
 @compute_conditional_decorator
-def compute_conditional_normalizations(indices_prim_haloprop_bins, sec_haloprop, **kwargs):
-    return np.max(np.abs(sec_haloprop[indices_prim_haloprop_bins] ))
+def compute_conditional_normalizations(indices_of_prim_haloprop_bin,sec_haloprop, **kwargs):
+    return np.max(np.abs(sec_haloprop[indices_of_prim_haloprop_bin] ))
 
 @compute_conditional_decorator
 def compute_conditional_percentile_values(ibin, indices_of_prim_haloprop_bin, sec_haloprop, p=0.5, **kwargs):
