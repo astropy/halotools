@@ -7,13 +7,15 @@ any method of any component model. It subclasses `HeavisideAssembias` and
 """
 
 from functools import wraps
+from time import time
 
 import numpy as np
 from . import HeavisideAssembias
 from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
-from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages, compute_conditional_normalizations
+from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages, compute_conditional_normalizations, compute_conditional_percentiles
+
 
 __all__ = ('ContinuousAssembias', )
 __author__ = ('Sean McLaughlin', )
@@ -141,7 +143,8 @@ class ContinuousAssembias(HeavisideAssembias):
         # the average displacement acts as a normalization we need.
 
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
-        disp_average = compute_conditional_averages(vals=max_displacement,prim_haloprop=prim_haloprop)
+        #disp_average = compute_conditional_averages(vals=max_displacement,prim_haloprop=prim_haloprop)
+        disp_average = np.array([1-0.5 for i in xrange(len(prim_haloprop))]) 
 
         result = np.zeros(len(prim_haloprop))
 
@@ -158,7 +161,7 @@ class ContinuousAssembias(HeavisideAssembias):
             upper_bound = np.minimum(upper_bound1, upper_bound2)
             result[greater_than_half_avg_idx] = strength_pos*upper_bound*(max_displacement[greater_than_half_avg_idx]-avg_pos)
 
-        if len(baseline_result[less_than_half_avg_idx]) > 0:
+        if len(max_displacement[less_than_half_avg_idx]) > 0:
             base_neg = baseline_result[less_than_half_avg_idx]
             strength_neg = strength[less_than_half_avg_idx]
             avg_neg = disp_average[less_than_half_avg_idx]
@@ -238,6 +241,7 @@ class ContinuousAssembias(HeavisideAssembias):
                         raise HalotoolsError(msg)
 
             #################################################################################
+            t0 = time()
 
             # Compute the fraction of type-2 halos as a function of the input prim_haloprop
             split = self.percentile_splitting_function(prim_haloprop)
@@ -258,6 +262,8 @@ class ContinuousAssembias(HeavisideAssembias):
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
 
+            print('t1', time()-t0)
+            '''
             if _HAS_table is True:
                 if self.sec_haloprop_key + '_percentile_values' in list(table.keys()):
                     no_edge_percentile_values = table[self.sec_haloprop_key + '_percentile_value'][no_edge_mask]
@@ -280,16 +286,52 @@ class ContinuousAssembias(HeavisideAssembias):
                     )
 
             norm = compute_conditional_normalizations(prim_haloprop=prim_haloprop, sec_haloprop=sec_haloprop)
+            '''
+            if _HAS_table is True:
+                if self.sec_haloprop_key + '_percentiles' in list(table.keys()):
+                    no_edge_percentiles = table[self.sec_haloprop_key + '_percentiles'][no_edge_mask]
+                else:
+                    # the value of sec_haloprop_percentile will be computed from scratch
+                    print('Computing percentiles 1 ...')
+                    no_edge_percentiles = compute_conditional_percentiles(
+                        prim_haloprop=prim_haloprop[no_edge_mask],
+                        sec_haloprop=sec_haloprop[no_edge_mask]
+                    )
+            else:
+                try:
+                    percentiles = kwargs['sec_haloprop_percentiles']
+                    if custom_len(percentiles) == 1:
+                        percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
+                    no_edge_percentile_values = percentiles[no_edge_mask]
+                except KeyError:
+ 
+                    print('Computing percentiles...')
+                    percentiles = compute_conditional_percentiles(
+                        prim_haloprop=prim_haloprop,
+                        sec_haloprop=sec_haloprop
+                        )
+                    no_edge_percentiles = percentiles[no_edge_mask]
+
+            print('t2', time()-t0)
+
             # NOTE I've removed the type 1 mask as it is not necessary
             # this has all been rolled into the galprop_perturbation function
 
             if prim_haloprop[no_edge_mask].shape[0] == 0:
                 perturbation = np.zeros_like(no_edge_result)
             else:
+                '''
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
                     sec_haloprop=(sec_haloprop[no_edge_mask] - no_edge_percentile_values)/norm[no_edge_mask],
                     baseline_result=no_edge_result)
+                '''
+                perturbation = self._galprop_perturbation(
+                    prim_haloprop=prim_haloprop[no_edge_mask],
+                    sec_haloprop=no_edge_percentiles,
+                    baseline_result=no_edge_result)
+
+            print('t3', time()-t0)
 
             no_edge_result += perturbation
             # print result.mean(), result.std(), result.max(), result.min()

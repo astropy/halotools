@@ -188,10 +188,11 @@ class compute_conditional_decorator(object):
             print(self.last_compute_prim_haloprop_bins_dict.keys())
             try:
                 print(compute_prim_haloprop_bins_dict.values()[0]-self.last_compute_prim_haloprop_bins_dict.values()[0])
-            except IndexError:
+            except :
                 pass
             print(self.func.__name__)
             print('\n')
+
             prim_haloprop_bins = compute_prim_haloprop_bins(**compute_prim_haloprop_bins_dict)
             #update cache
             self.last_compute_prim_haloprop_bins_dict= compute_prim_haloprop_bins_dict
