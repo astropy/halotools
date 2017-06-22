@@ -90,6 +90,8 @@ class ContinuousAssembias(HeavisideAssembias):
         else:
             result = spline_function(prim_haloprop)
 
+        return result
+
     def _get_continuous_assembias_param_dict_key(self,ipar):
         '''
         '''
@@ -132,6 +134,8 @@ class ContinuousAssembias(HeavisideAssembias):
         # evaluate my continuous modification
         strength = self.assembias_strength(prim_haloprop)
         slope = self.assembias_slope(prim_haloprop)
+
+        print slope, self.param_dict
 
         # the average displacement acts as a normalization we need.
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
