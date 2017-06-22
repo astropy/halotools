@@ -75,8 +75,8 @@ class ContinuousAssembias(HeavisideAssembias):
 
     # I'd like to add this to control the min/max
     # However, it is complex so ... we'll see
-    @model_helpers.bounds_enforcing_decorator_factory(np.log10(np.log(1+F)/(1-F)), 10)
-    def assembias_slope(self, prim_haloprop, sec_haloprop):
+    @model_helpers.bounds_enforcing_decorator_factory(np.log10(np.log((1+F)/(1-F))), 10, warning=True)
+    def assembias_slope(self, prim_haloprop):
         """
         Method returns the slope of continuous assembly bias as a function of the primary halo property.
 
@@ -99,6 +99,8 @@ class ContinuousAssembias(HeavisideAssembias):
             result = spline_function(np.log10(prim_haloprop))
         else:
             result = spline_function(prim_haloprop)
+
+        print result
 
         return result
 

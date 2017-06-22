@@ -501,7 +501,7 @@ def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning=True):
 
             if warning is True:
                 raise_warning = np.any(unbounded_result != bounded_result)
-                if raise_warning is True:
+                if raise_warning:
                     func_name = input_func.__name__
                     msg = ("The " + func_name + " function \nreturned at least one value that was "
                         "outside the range (%.2f, %.2f)\n. The bounds_enforcing_decorator_factory "
