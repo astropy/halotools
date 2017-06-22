@@ -38,7 +38,7 @@ class ContinuousAssembias(HeavisideAssembias):
         """
         return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop)))
 
-    def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=0.0, **kwargs):
+    def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=1.0, **kwargs):
         '''
         For full documentation, see the Heaviside Assembias Declaration in Halotools.
 
@@ -134,8 +134,6 @@ class ContinuousAssembias(HeavisideAssembias):
         # evaluate my continuous modification
         strength = self.assembias_strength(prim_haloprop)
         slope = self.assembias_slope(prim_haloprop)
-
-        print slope, self.param_dict
 
         # the average displacement acts as a normalization we need.
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)

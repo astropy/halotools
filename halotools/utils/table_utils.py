@@ -379,9 +379,9 @@ def compute_conditional_percentile_values(ibin, indices_of_prim_haloprop_bin, se
     """
     pp = p if type(p) is float else p[ibin]
     try:
-        assert np.all(np.array([0 <= _p <= 1 for _p in pp]))
+        assert 0 <= pp <= 1
     except AssertionError:
-        raise HalotoolsError('The value of `p` in ``compute_conditional_percentile_values`` must be between 0 and 1')
+        raise HalotoolsError('The value of `p=%0.2f` in ``compute_conditional_percentile_values`` must be between 0 and 1'%pp)
 
     return np.percentile(sec_haloprop[indices_of_prim_haloprop_bin], pp * 100)
 
