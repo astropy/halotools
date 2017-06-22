@@ -1,0 +1,3 @@
+misspellings = (
+    ('separation', 'seperation'),
+    )
