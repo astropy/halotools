@@ -13,6 +13,7 @@ from astropy.table import Table
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ['SampleSelector']
+__author__ = ('Andrew Hearin', 'Sean McLaughlin')
 
 def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
     """

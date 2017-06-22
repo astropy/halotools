@@ -90,10 +90,6 @@ class ContinuousAssembias(HeavisideAssembias):
         else:
             result = spline_function(prim_haloprop)
 
-        print result
-
-        return result
-
     def _get_continuous_assembias_param_dict_key(self,ipar):
         '''
         '''
