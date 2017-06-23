@@ -221,11 +221,11 @@ class ContinuousAssembias(HeavisideAssembias):
                 try:
                     sec_haloprop = np.atleast_1d(kwargs['sec_haloprop'])
                 except KeyError:
-                    if 'sec_haloprop_percentile' not in kwargs:
+                    if 'sec_haloprop_percentile_values' not in kwargs:
                         msg = ("\nIf not passing an input ``table`` to the "
                                "``assembias_decorator`` method,\n"
                                "you must pass either a ``sec_haloprop`` or "
-                               "``sec_haloprop_percentile`` argument.\n")
+                               "``sec_haloprop_percentile_values`` argument.\n")
                         raise HalotoolsError(msg)
 
             #################################################################################
