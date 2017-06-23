@@ -223,8 +223,7 @@ class ContinuousAssembias(HeavisideAssembias):
                 except KeyError:
                     msg = ("\nIf not passing an input ``table`` to the "
                            "``assembias_decorator`` method,\n"
-                           "you must pass either a ``sec_haloprop`` or "
-                           "``sec_haloprop_percentile_values`` argument.\n")
+                           "you must pass ``sec_haloprop`` argument")
                     raise HalotoolsError(msg)
 
             #################################################################################
