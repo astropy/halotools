@@ -1,6 +1,6 @@
 """
 """
-from astropy.tests.helper import pytest
+import pytest
 import numpy as np
 
 from ....occupation_models import OccupationComponent, Zheng07Cens, Zheng07Sats

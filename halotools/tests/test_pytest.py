@@ -11,7 +11,7 @@ __all__ = ('test_halotools_pytest_imports', )
 msg = ("\nHalotools has the following development requirement for all modules in the repo:\n"
     "It is not permissible to directly ``import pytest``, \n"
     "as is currently done in the following file:\n\n{0}\n\n"
-    "Instead, use ``from astropy.tests.helper import pytest`` \n")
+    "Instead, use ``import pytest`` \n")
 
 
 def filtered_filename_generator(filepat, top):

@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 from astropy.table import Table
 
 from ..mock_helpers import infer_mask_from_kwargs

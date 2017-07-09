@@ -2,7 +2,7 @@
 """
 from __future__ import (absolute_import, division, print_function)
 
-from astropy.tests.helper import pytest
+import pytest
 
 import numpy as np
 from copy import deepcopy

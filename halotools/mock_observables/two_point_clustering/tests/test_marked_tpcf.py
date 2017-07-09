@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..marked_tpcf import marked_tpcf

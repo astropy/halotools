@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 import warnings
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from .locate_external_unit_testing_data import tpcf_corrfunc_comparison_files_exist

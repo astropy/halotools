@@ -2,7 +2,7 @@
 """
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
-from astropy.tests.helper import pytest
+import pytest
 
 from .pure_python_mean_radial_velocity_vs_r import pure_python_mean_radial_velocity_vs_r
 

@@ -3,7 +3,7 @@
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from .. import subhalo_selection_kernel as ssk

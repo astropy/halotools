@@ -2,7 +2,7 @@
 """
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 
 from ..large_scale_density_spherical_annulus import large_scale_density_spherical_annulus
 

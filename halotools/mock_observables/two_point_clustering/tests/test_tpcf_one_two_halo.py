@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
-from astropy.tests.helper import pytest
+import pytest
 
 from ..tpcf_one_two_halo_decomp import tpcf_one_two_halo_decomp
 

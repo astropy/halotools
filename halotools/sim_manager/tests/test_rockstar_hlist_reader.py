@@ -6,7 +6,7 @@ import numpy as np
 import os
 import shutil
 from unittest import TestCase
-from astropy.tests.helper import pytest
+import pytest
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 from astropy.config.paths import _find_home

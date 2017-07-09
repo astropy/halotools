@@ -8,7 +8,7 @@ import numpy as np
 from ..npairs_jackknife_3d import npairs_jackknife_3d
 # load comparison simple pair counters
 
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 slow = pytest.mark.slow
