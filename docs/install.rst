@@ -39,6 +39,11 @@ Building from source
 
 If you don't install the latest release using pip,
 you can instead clone the cource code and call the setup file.
+This is the most common way to install Halotools if you want versions of the
+code that have been updated since the latest official release. In this case,
+after installation it is particularly important that you follow the instructions
+in the :ref:`verifying_your_installation` section below.
+
 Before installation, be sure you have installed the package dependencies
 described in the :ref:`halotools_dependencies` section.
 If you will be :ref:`installing_halotools_with_virtualenv`,
@@ -129,7 +134,30 @@ Any of the above can be installed with either pip or conda.
 Verifying your installation
 ==============================
 
-After installing the code and its dependencies, navigate to some new working directory and execute the test suite. If you installed Halotools into a virtual environment as described in the :ref:`installing_halotools_with_virtualenv` section of the documentation, activate the environment before spawning a python session and executing the code below.
+After installing the code and its dependencies, fire up a Python interpreter and
+check that the version number matches what you expect:
+
+.. code:: python
+
+	import halotools
+	print(halotools.__version__)
+
+If the version number is not what it should be, this likely means you have a previous
+installation that is superseding the version you tried to install. This *should* be accomplished by doing `pip uninstall halotools` before your new installation, but you may need to uninstall the previous build "manually". Like all python packages, you can find the installation location as follows:
+
+.. code:: python
+
+	import halotools
+	print(halotools.__file__)
+
+This will show where your active version is located on your machine. You can manually delete this copy of Halotools prior to your new installation to avoid version conflicts. (There may be multiple copies of Halotools in this location, depending on how may times you have previously installed the code - all such copies may be deleted prior to reinstallation).
+
+Once you have installed the package, see :ref:`getting_started` for instructions on how to get up and running.
+
+Testing your installation
+=========================
+
+Although this should not be necessary, you may wish to verify that the testing suite passes on your machine. To do so, navigate to some new working directory and execute the test suite. If you installed Halotools into a virtual environment as described in the :ref:`installing_halotools_with_virtualenv` section of the documentation, activate the environment before spawning a python session and executing the code below.
 
 .. code:: python
 
@@ -140,7 +168,6 @@ The full test suite is memory intensive and takes several minutes to run. It wil
 
 Whether you installed the master branch or a release branch, the message that concludes the execution of the test suite should not indicate that there were any errors or failures. A typical acceptable test suite report will read something like "445 passed, 45 skipped in 383.2 seconds". If you installed the master branch, your message may read something like "475 passed, 4 xfailed in 374.3 seconds". The *xfail* marker is shorthand for "expected failure"; tests marked by *xfail* do not indicate a bug or installation problem; instead, this indicates that there is a new feature that has only been partially implemented. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.
 
-Once you have installed the package, see :ref:`getting_started` for instructions on how to get up and running.
 
 Troubleshooting
 ==================
