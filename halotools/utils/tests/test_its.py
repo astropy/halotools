@@ -2,7 +2,7 @@
 """
 import numpy as np
 from astropy.utils import NumpyRNGContext
-from astropy.tests.helper import pytest
+import pytest
 import warnings
 
 from ..inverse_transformation_sampling import _sorted_rank_order_array, rank_order_percentile

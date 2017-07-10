@@ -7,7 +7,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from .. import catalog_analysis_helpers as cat_helpers

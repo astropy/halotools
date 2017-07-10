@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 from astropy.config.paths import _find_home
 
 from ...factories import PrebuiltHodModelFactory

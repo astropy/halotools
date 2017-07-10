@@ -2,7 +2,7 @@
 """
 from __future__ import absolute_import, division, print_function
 
-from astropy.tests.helper import pytest
+import pytest
 
 from ..mesh_helpers import _set_approximate_cell_sizes, _enforce_maximum_search_length
 

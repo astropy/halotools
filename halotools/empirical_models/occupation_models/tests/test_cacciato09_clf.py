@@ -4,7 +4,7 @@
 import numpy as np
 from scipy.stats import kstest
 from scipy.interpolate import interp1d
-from astropy.tests.helper import pytest
+import pytest
 from scipy.integrate import cumtrapz
 
 from .. import Cacciato09Cens, Cacciato09Sats

@@ -1,7 +1,7 @@
 """
 """
 import numpy as np
-from astropy.tests.helper import pytest
+import pytest
 
 from ..zu_mandelbaum16 import ZuMandelbaum16QuenchingCens, ZuMandelbaum16QuenchingSats
 

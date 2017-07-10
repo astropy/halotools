@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.config.paths import _find_home
-from astropy.tests.helper import pytest
+import pytest
 
 from ...biased_nfw_phase_space import BiasedNFWPhaseSpace
 from .......factories import PrebuiltHodModelFactory, HodModelFactory

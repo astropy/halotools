@@ -11,7 +11,7 @@ from ....mock_observables import npairs_3d
 # load comparison simple pair counters
 from ..pairs import s_mu_npairs as pure_python_brute_force_npairs_s_mu
 
-from astropy.tests.helper import pytest
+import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 slow = pytest.mark.slow
