@@ -21,6 +21,7 @@ The latest build of the documentation can be found at http://halotools.readthedo
 ## Installation
 
 [![PyPI version](https://badge.fury.io/py/halotools.svg)](https://badge.fury.io/py/halotools)
+[![DOI](https://zenodo.org/badge/29036740.svg)](https://zenodo.org/badge/latestdoi/29036740)
 
 You can find detailed installation instructions
 in the *Package Installation* section of http://halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations.
@@ -120,7 +121,7 @@ The google group also serves as a public forum for asking questions about the co
 
 ## Citing Halotools
 
-If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper. Depending on what modules you use, other citations may also be appropriate; see the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
+If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper, as well as the DOI of the version of the code you used, e.g., 10.5281/zenodo.835894 for v0.5, the current latest release. Depending on what modules you use, other citations may also be appropriate; see the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
 
 
 ---
