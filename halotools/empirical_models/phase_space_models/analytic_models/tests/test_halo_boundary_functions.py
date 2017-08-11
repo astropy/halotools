@@ -6,7 +6,7 @@ import numpy as np
 
 import pytest
 
-from astropy.cosmology import WMAP9, Planck13
+from astropy.cosmology import WMAP9, Planck13, Planck15
 from astropy import units as u
 
 from ..halo_boundary_functions import density_threshold, delta_vir
@@ -94,3 +94,24 @@ def test_density_threshold_error_handling():
 
     with pytest.raises(HalotoolsError):
         result = density_threshold('Jose Canseco', 0.0, 'vir')
+
+
+def test_halo_mass_to_halo_radius_colossus_consistency():
+    """
+    """
+    mass_array = np.logspace(10, 15, 10)
+    halotools_radius_z0 = halo_mass_to_halo_radius(mass_array, Planck15, 0., 'vir')
+    halotools_radius_z1 = halo_mass_to_halo_radius(mass_array, Planck15, 1., 'vir')
+    try:
+        from colossus.halo.mass_so import M_to_R
+        from colossus.cosmology import cosmology
+        cosmo = cosmology.setCosmology('planck15')
+        colossus_radius_z0 = M_to_R(mass_array, 0., 'vir')/1000.
+        colossus_radius_z1 = M_to_R(mass_array, 1., 'vir')/1000.
+        assert np.allclose(colossus_radius_z0, halotools_radius_z0, rtol=0.01)
+        assert np.allclose(colossus_radius_z1, halotools_radius_z1, rtol=0.01)
+    except ImportError:
+        pass
+
+
+
