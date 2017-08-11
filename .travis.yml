@@ -55,6 +55,7 @@ matrix:
         # Python3.3 is a bit old, thus conda doesn't have all version dependencies including newer numpies
         - python: 3.3
           env: NUMPY_VERSION=1.9
+                ASTROPY_VERSION=1.3
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         - python: 3.4
