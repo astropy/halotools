@@ -11,3 +11,4 @@ from .group_member_generator import group_member_generator
 from .crossmatch import crossmatch
 from .array_indexing_manipulations import *
 from .inverse_transformation_sampling import *
+from .distribution_matching import *
