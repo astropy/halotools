@@ -19,7 +19,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-        max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,
+        approx_cell1_size=None, approx_cell2_size=None,
         approx_cellran_size=None, seed=None):
     r"""
     Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
@@ -104,12 +104,6 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
@@ -203,7 +197,7 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
 
     # process input parameters
     function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
-        do_cross, estimator, num_threads, max_sample_size,
+        do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
@@ -216,7 +210,6 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,
         sample2=sample2, randoms=randoms,
         period=period, do_auto=do_auto, do_cross=do_cross,
         estimator=estimator, num_threads=num_threads,
-        max_sample_size=max_sample_size,
         approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell2_size,
         approx_cellran_size=approx_cellran_size)

@@ -9,8 +9,7 @@ from math import gamma
 from warnings import warn
 
 from .clustering_helpers import (process_optional_input_sample2,
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator,
-    tpcf_estimator_dd_dr_rr_requirements)
+    verify_tpcf_estimator, tpcf_estimator_dd_dr_rr_requirements)
 from .tpcf_estimators import _TP_estimator
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
@@ -152,8 +151,7 @@ def _pair_counts(sample1, sample2, rbins,
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-        max_sample_size=int(1e6), approx_cell1_size=None,
-        approx_cell2_size=None, approx_cellran_size=None,
+        approx_cell1_size=None, approx_cell2_size=None, approx_cellran_size=None,
         RR_precomputed=None, NR_precomputed=None, seed=None):
     r"""
     Calculate the real space two-point correlation function, :math:`\xi(r)`.
@@ -221,12 +219,6 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6. Set to np.inf for no downsampling.
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
@@ -329,7 +321,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
 
     # check input arguments using clustering helper functions
     function_args = (sample1, rbins, sample2, randoms, period,
-        do_auto, do_cross, estimator, num_threads, max_sample_size,
+        do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size,
         RR_precomputed, NR_precomputed, seed)
 
@@ -390,7 +382,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
 
 
 def _tpcf_process_args(sample1, rbins, sample2, randoms,
-        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        period, do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size,
         RR_precomputed, NR_precomputed, seed):
     """
@@ -404,9 +396,6 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
-
-    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

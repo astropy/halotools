@@ -21,7 +21,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         sample2=None, velocities2=None,
         period=None, do_auto=True, do_cross=True,
-        num_threads=1, max_sample_size=int(1e6),
+        num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None, seed=None):
     r"""
     Calculate the mean pairwise line-of-sight (LOS) velocity
@@ -63,11 +63,6 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is equal to max_sample_size.
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
@@ -140,7 +135,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     """
 
     function_args = (sample1, velocities1, sample2, velocities2, period,
-        do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size, seed)
+        do_auto, do_cross, num_threads, approx_cell1_size, approx_cell2_size, seed)
 
     sample1, velocities1, sample2, velocities2, period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)

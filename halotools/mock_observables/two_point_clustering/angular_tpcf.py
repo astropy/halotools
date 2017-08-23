@@ -5,12 +5,9 @@ calculate galaxy clustering as a function of angular separation.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from warnings import warn
-from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .clustering_helpers import (verify_tpcf_estimator,
-    downsample_inputs_exceeding_max_sample_size, process_optional_input_sample2)
+from .clustering_helpers import (verify_tpcf_estimator, process_optional_input_sample2)
 
 
 from ..pair_counters import npairs_3d
@@ -27,8 +24,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 
 def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
-        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-        max_sample_size=int(1e6), seed=None):
+        do_auto=True, do_cross=True, estimator='Natural', num_threads=1, seed=None):
     r"""
     Calculate the angular two-point correlation function, :math:`w(\theta)`.
 
@@ -76,12 +72,6 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
 
     seed : int, optional
         Random number seed used to randomly downsample data, if applicable.
@@ -138,7 +128,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     # check input arguments using clustering helper functions
     function_args = (sample1, theta_bins, sample2, randoms, do_auto, do_cross,
-        estimator, num_threads, max_sample_size, seed)
+        estimator, num_threads, seed)
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
@@ -290,7 +280,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
 
 def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
-        do_auto, do_cross, estimator, num_threads, max_sample_size, seed):
+        do_auto, do_cross, estimator, num_threads, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.angular_tpcf`.
@@ -303,9 +293,6 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
-
-    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     theta_bins = np.atleast_1d(theta_bins)
     theta_max = np.max(theta_bins)

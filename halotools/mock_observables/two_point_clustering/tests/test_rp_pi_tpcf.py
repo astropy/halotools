@@ -28,8 +28,7 @@ def test_rp_pi_tpcf_auto_nonperiodic():
         randoms = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None,
-        randoms=randoms, period=None,
-        max_sample_size=int(1e4), estimator='Natural')
+        randoms=randoms, period=None, estimator='Natural')
 
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
@@ -43,8 +42,7 @@ def test_rp_pi_tpcf_auto_periodic():
         sample1 = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None,
-        randoms=None, period=period,
-        max_sample_size=int(1e4), estimator='Natural')
+        randoms=None, period=period, estimator='Natural')
 
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
@@ -59,8 +57,7 @@ def test_rp_pi_tpcf_cross_periodic():
         sample2 = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=sample2,
-        randoms=None, period=period,
-        max_sample_size=int(1e4), estimator='Natural')
+        randoms=None, period=period, estimator='Natural')
 
     assert len(result) == 3, "wrong number of correlations returned"
     assert result[0].ndim == 2, "dimension of auto incorrect"
@@ -79,8 +76,7 @@ def test_rp_pi_tpcf_cross_nonperiodic():
         randoms = np.random.random((Npts, 3))
 
     result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=sample2,
-        randoms=randoms, period=None,
-        max_sample_size=int(1e4), estimator='Natural')
+        randoms=randoms, period=None, estimator='Natural')
 
     assert len(result) == 3, "wrong number of correlations returned"
     assert result[0].ndim == 2, "dimension of auto incorrect"
