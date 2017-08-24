@@ -21,7 +21,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         velocities2=None, period=None, do_auto=True, do_cross=True,
-        num_threads=1, max_sample_size=int(1e6),
+        num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None, seed=None):
     r"""
     Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\sigma_{z12}(r_p)`.
@@ -62,11 +62,6 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is equal to max_sample_size.
 
     seed : int, optional
         Random number seed used to randomly downsample data, if applicable.
@@ -142,7 +137,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
 
     # process input arguments
     function_args = (sample1, velocities1, sample2, velocities2, period,
-        do_auto, do_cross, num_threads, max_sample_size,
+        do_auto, do_cross, num_threads,
         approx_cell1_size, approx_cell2_size, seed)
     sample1, velocities1, sample2, velocities2,\
         period, do_auto, do_cross,\

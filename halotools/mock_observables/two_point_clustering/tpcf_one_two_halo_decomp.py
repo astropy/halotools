@@ -8,10 +8,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from math import gamma
-from warnings import warn
 
-from .clustering_helpers import (process_optional_input_sample2,
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
+from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_period, get_num_threads)
@@ -33,8 +31,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         sample2=None, sample2_host_halo_id=None,
         randoms=None, period=None,
-        do_auto=True, do_cross=True, estimator='Natural',
-        num_threads=1, max_sample_size=int(1e6),
+        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None,
         approx_cellran_size=None, seed=None):
     r"""
@@ -111,12 +108,6 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
@@ -197,7 +188,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     # check input arguments using clustering helper functions
     function_args = (sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
         randoms, period, do_auto, do_cross, estimator, num_threads,
-        max_sample_size, approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,\
@@ -387,7 +378,7 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         sample2, sample2_host_halo_id, randoms,
-        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        period, do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
@@ -420,9 +411,6 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         msg = ("\n `sample2_host_halo_id` must be a 1-D \n"
                "array the same length as `sample2`.")
         raise HalotoolsError(msg)
-
-    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.max(rbins)

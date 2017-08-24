@@ -7,6 +7,8 @@
 
 - Added new `distribution_matching_indices` function. See https://github.com/astropy/halotools/pull/795.
 
+- Removed `max_sample_size` keyword argument from all `mock_observables` functions.
+
 
 0.5 (2017-05-31)
 ----------------

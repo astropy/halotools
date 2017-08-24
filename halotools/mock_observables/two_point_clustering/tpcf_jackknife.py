@@ -11,8 +11,7 @@ from astropy.utils.misc import NumpyRNGContext
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from ..pair_counters import npairs_jackknife_3d
 
-from .clustering_helpers import (process_optional_input_sample2,
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
+from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_period, get_num_threads)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
@@ -28,7 +27,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         sample2=None, period=None, do_auto=True, do_cross=True,
-        estimator='Natural', num_threads=1, max_sample_size=int(1e6), seed=None):
+        estimator='Natural', num_threads=1, seed=None):
     r"""
     Calculate the two-point correlation function, :math:`\xi(r)` and the covariance
     matrix, :math:`{C}_{ij}`, between ith and jth radial bin.
@@ -98,12 +97,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
 
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
@@ -212,7 +205,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
 
     # process input parameters
     function_args = (sample1, randoms, rbins, Nsub, sample2, period, do_auto,
-        do_cross, estimator, num_threads, max_sample_size, seed)
+        do_cross, estimator, num_threads, seed)
     sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _tpcf_jackknife_process_args(*function_args)
 
@@ -425,7 +418,7 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,
 
 def _tpcf_jackknife_process_args(sample1, randoms, rbins,
         Nsub, sample2, period, do_auto, do_cross,
-        estimator, num_threads, max_sample_size, seed):
+        estimator, num_threads, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.jackknife_tpcf`.
@@ -449,9 +442,6 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins,
                    "the user must provide true randoms, and \n"
                    "not just the number of randoms desired.")
             raise HalotoolsError(msg)
-
-    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)
