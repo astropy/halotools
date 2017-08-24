@@ -8,8 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-from .clustering_helpers import (process_optional_input_sample2,
-    downsample_inputs_exceeding_max_sample_size)
+from .clustering_helpers import process_optional_input_sample2
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_period, get_num_threads)
@@ -28,7 +27,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def marked_tpcf(sample1, rbins, sample2=None,
         marks1=None, marks2=None, period=None, do_auto=True, do_cross=True,
-        num_threads=1, max_sample_size=int(1e6), weight_func_id=1,
+        num_threads=1, weight_func_id=1,
         normalize_by='random_marks', iterations=1, randomize_marks=None, seed=None):
     r"""
     Calculate the real space marked two-point correlation function, :math:`\mathcal{M}(r)`.
@@ -90,12 +89,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
 
     weight_func_id : int, optional
         Integer ID indicating which marking function should be used.
@@ -307,7 +300,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
 
     # process parameters
     function_args = (sample1, rbins, sample2, marks1, marks2,
-        period, do_auto, do_cross, num_threads, max_sample_size,
+        period, do_auto, do_cross, num_threads,
         weight_func_id, normalize_by, iterations, randomize_marks, seed)
     sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross, num_threads,\
         weight_func_id, normalize_by, _sample1_is_sample2, PBCs,\
@@ -492,7 +485,7 @@ def pair_counts(sample1, sample2, rbins, period, num_threads, do_auto, do_cross,
 
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
-        period, do_auto, do_cross, num_threads, max_sample_size,
+        period, do_auto, do_cross, num_threads,
         wfunc, normalize_by, iterations, randomize_marks, seed):
     """
     Private method to do bounds-checking on the arguments passed to
@@ -573,9 +566,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,
     else:
         msg = ("\n `randomize_marks` must be one dimensional.")
         raise HalotoolsError(msg)
-
-    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

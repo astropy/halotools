@@ -5,6 +5,8 @@
 
 - Added new `mock_observables` functions `radial_distance` and `radial_distance_and_velocity` functions. See https://github.com/astropy/halotools/pull/782
 
+- Removed `max_sample_size` keyword argument from all `mock_observables` functions.
+
 
 0.5 (2017-05-31)
 ----------------

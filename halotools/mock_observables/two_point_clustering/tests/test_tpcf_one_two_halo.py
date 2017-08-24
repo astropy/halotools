@@ -32,8 +32,7 @@ def test_tpcf_one_two_halo_auto_periodic():
         sample1 = np.random.random((Npts, 3))
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=None,
-      randoms=None, period=period,
-      max_sample_size=int(1e4), estimator='Natural')
+      randoms=None, period=period, estimator='Natural')
 
     assert len(result) == 2, "wrong number of correlation functions returned."
 
@@ -52,7 +51,7 @@ def test_tpcf_one_two_halo_cross_periodic():
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
       sample2_host_halo_id=IDs2, randoms=None,
-      period=period, max_sample_size=int(1e4),
+      period=period,
       estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
       approx_cell2_size=[rmax, rmax, rmax],
       approx_cellran_size=[rmax, rmax, rmax])
@@ -72,8 +71,7 @@ def test_tpcf_one_two_halo_auto_nonperiodic():
         randoms = np.random.random((Nran, 3))
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=None,
-        randoms=randoms, period=period,
-        max_sample_size=int(1e4), estimator='Natural')
+        randoms=randoms, period=period, estimator='Natural')
 
     assert len(result) == 2, "wrong number of correlation functions returned."
 
@@ -93,7 +91,7 @@ def test_tpcf_one_two_halo_cross_nonperiodic():
 
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
       sample2_host_halo_id=IDs2, randoms=randoms,
-      period=period, max_sample_size=int(1e4),
+      period=period,
       estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
       approx_cell2_size=[rmax, rmax, rmax],
       approx_cellran_size=[rmax, rmax, rmax])
@@ -112,7 +110,7 @@ def test_tpcf_decomposition_process_args1():
     with pytest.raises(ValueError) as err:
         result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
           sample2_host_halo_id=None, randoms=None,
-          period=period, max_sample_size=int(1e4),
+          period=period,
           estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
           approx_cell2_size=[rmax, rmax, rmax],
           approx_cellran_size=[rmax, rmax, rmax])
@@ -131,7 +129,7 @@ def test_tpcf_decomposition_process_args2():
     with pytest.raises(HalotoolsError) as err:
         result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
           sample2_host_halo_id=IDs2, randoms=None,
-          period=period, max_sample_size=int(1e4),
+          period=period,
           estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
           approx_cell2_size=[rmax, rmax, rmax],
           approx_cellran_size=[rmax, rmax, rmax])
@@ -150,7 +148,7 @@ def test_tpcf_decomposition_process_args3():
     with pytest.raises(HalotoolsError) as err:
         result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
           sample2_host_halo_id=IDs2, randoms=None,
-          period=period, max_sample_size=int(1e4),
+          period=period,
           estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
           approx_cell2_size=[rmax, rmax, rmax],
           approx_cellran_size=[rmax, rmax, rmax])
@@ -169,7 +167,7 @@ def test_tpcf_decomposition_process_args4():
     with pytest.raises(ValueError) as err:
         result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2=sample2,
           sample2_host_halo_id=IDs2, randoms=None,
-          period=period, max_sample_size=int(1e4),
+          period=period,
           estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
           approx_cell2_size=[rmax, rmax, rmax],
           approx_cellran_size=[rmax, rmax, rmax], do_auto='yes')
@@ -188,7 +186,7 @@ def test_tpcf_decomposition_cross_consistency():
     result_a = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
         sample2_host_halo_id=IDs2, randoms=None,
-        period=period, max_sample_size=int(1e4),
+        period=period,
         estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
         approx_cell2_size=[rmax, rmax, rmax],
         approx_cellran_size=[rmax, rmax, rmax],
@@ -198,7 +196,7 @@ def test_tpcf_decomposition_cross_consistency():
     result_b = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
         sample2_host_halo_id=IDs2, randoms=None,
-        period=period, max_sample_size=int(1e4),
+        period=period,
         estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
         approx_cell2_size=[rmax, rmax, rmax],
         approx_cellran_size=[rmax, rmax, rmax],
@@ -220,7 +218,7 @@ def test_tpcf_decomposition_auto_consistency():
     result_a = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
         sample2_host_halo_id=IDs2, randoms=None,
-        period=period, max_sample_size=int(1e4),
+        period=period,
         estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
         approx_cell2_size=[rmax, rmax, rmax],
         approx_cellran_size=[rmax, rmax, rmax],
@@ -231,7 +229,7 @@ def test_tpcf_decomposition_auto_consistency():
     result_1h_11b, result_2h_11b, result_1h_22b, result_2h_22b = tpcf_one_two_halo_decomp(
         sample1, IDs1, rbins, sample2=sample2,
         sample2_host_halo_id=IDs2, randoms=None,
-        period=period, max_sample_size=int(1e4),
+        period=period,
         estimator='Natural', approx_cell1_size=[rmax, rmax, rmax],
         approx_cell2_size=[rmax, rmax, rmax],
         approx_cellran_size=[rmax, rmax, rmax],

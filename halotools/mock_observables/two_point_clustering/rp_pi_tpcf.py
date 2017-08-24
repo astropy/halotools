@@ -8,8 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from math import pi
 
-from .clustering_helpers import (process_optional_input_sample2,
-    downsample_inputs_exceeding_max_sample_size, verify_tpcf_estimator)
+from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
@@ -27,7 +26,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         period=None, do_auto=True, do_cross=True, estimator='Natural',
-        num_threads=1, max_sample_size=int(1e6), approx_cell1_size=None,
+        num_threads=1, approx_cell1_size=None,
         approx_cell2_size=None, approx_cellran_size=None, seed=None):
     r"""
     Calculate the redshift space correlation function, :math:`\xi(r_{p}, \pi)`
@@ -107,12 +106,6 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
 
-    max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter.
-        If sample size exeeds max_sample_size,
-        the sample will be randomly down-sampled such that the subsample
-        is equal to ``max_sample_size``. Default value is 1e6.
-
     approx_cell1_size : array_like, optional
         Length-3 array serving as a guess for the optimal manner by how points
         will be apportioned into subvolumes of the simulation box.
@@ -190,7 +183,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     """
 
     function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
-        do_cross, estimator, num_threads, max_sample_size,
+        do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
 
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
@@ -350,7 +343,7 @@ def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
 
 
 def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
-        period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+        period, do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
@@ -362,9 +355,6 @@ def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
-
-    sample1, sample2 = downsample_inputs_exceeding_max_sample_size(
-        sample1, sample2, _sample1_is_sample2, max_sample_size, seed=seed)
 
     rp_bins = get_separation_bins_array(rp_bins)
     rp_max = np.amax(rp_bins)

@@ -19,7 +19,7 @@ __author__ = ['Duncan Campbell']
 
 
 def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
-        period, do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size, seed):
+        period, do_auto, do_cross, num_threads, approx_cell1_size, approx_cell2_size, seed):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.pairwise_velocity_stats`.
@@ -48,34 +48,6 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocit
         sample2 = sample1
         velocities2 = velocities1
         _sample1_is_sample2 = True
-
-    # down sample if sample size exceeds max_sample_size.
-    if _sample1_is_sample2 is True:
-        if (len(sample1) > max_sample_size):
-            inds = np.arange(0, len(sample1))
-            with NumpyRNGContext(seed):
-                np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            velocities1 = velocities1[inds]
-            print('\n downsampling `sample1`...')
-    else:
-        if len(sample1) > max_sample_size:
-            inds = np.arange(0, len(sample1))
-            with NumpyRNGContext(seed):
-                np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample1 = sample1[inds]
-            velocities1 = velocities1[inds]
-            print('\n downsampling `sample1`...')
-        if len(sample2) > max_sample_size:
-            inds = np.arange(0, len(sample2))
-            with NumpyRNGContext(seed):
-                np.random.shuffle(inds)
-            inds = inds[0:max_sample_size]
-            sample2 = sample2[inds]
-            velocities2 = velocities2[inds]
-            print('\n downsampling `sample2`...')
 
     period, PBCs = get_period(period)
 
