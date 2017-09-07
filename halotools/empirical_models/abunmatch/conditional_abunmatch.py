@@ -12,7 +12,23 @@ __all__ = ('conditional_abunmatch', 'randomly_resort')
 
 def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, seed=None):
     """ Function used to model a correlation between two variables,
-     ``haloprop`` and ``galprop``, using conditional abundance matching.
+    ``haloprop`` and ``galprop``, using conditional abundance matching.
+
+    The input ``galprop`` defines an input PDF of the desired galaxy property being modeled.
+    We will use the `~halotools.utils.monte_carlo_from_cdf_lookup` function to generate
+    Monte Carlo realizations of this input PDF. If there are ``num_halos`` in the input
+    ``haloprop`` array, we will draw ``num_halos`` times from this input PDF,
+    and we will do so in such a way that larger values of ``galprop`` will be associated
+    with larger values of ``haloprop``. The returned array will thus be a Monte Carlo realization
+    of the input ``galprop`` array, but a correlation between the halo property and galaxy property
+    has been introduced. The strength of this correlation can be controlled with the input ``sigma``.
+
+    An example application of this technique is age matching, in which it is supposed that
+    earlier forming halos host earlier forming galaxies
+    (See `Hearin and Watson 2013 <https://arxiv.org/abs/1304.5557/>`_).
+    Alternative applications are numerous. For example, conditional abundance matching
+    could be used to model a correlation between galaxy disk size and halo spin,
+    or to model intrinsic alignments by introducing a correlation between halo and galaxy orientation.
 
     Parameters
     -----------
@@ -67,21 +83,18 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     Notes
     -----
     To approximate the input ``galprop`` distribution, the implementation of `conditional_abunmatch`
-    builds a lookup table for the CDF of the input ``galprop``  using a simple call to `numpy.interp`,
+    builds a lookup table for the CDF of the input ``galprop`` using a simple call to `numpy.interp`,
     which can result in undesired edge case behavior if
     a large fraction of model galaxies lie outside the range of the data.
     To ensure your results are not impacted by this, make sure that
     num_gals >> npts_lookup_table.
 
-    For code that provides careful treatment of this extrapolation
-    for traditional abundance matching applications involving Schechter-like abundance functions, see the
-    `deconvolution abundance matching code <https://bitbucket.org/yymao/abundancematching/>`_
+    This function is not really intended for traditional abundance matching applications
+    involving Schechter-like abundance functions such as the stellar-to-halo mass relation,
+    where extrapolation at the exponentially decaying high-mass end requires special care.
+    For code that provides careful treatment of this extrapolation in such cases,
+    see the `deconvolution abundance matching code <https://bitbucket.org/yymao/abundancematching/>`_
     written by Yao-Yuan Mao.
-
-    The intended applications of the `conditional_abunmatch` function are those for which
-    the stochasticity in ``galprop`` at fixed ``haloprop`` need not be forced
-    to respect the form of a log-normal distribution,
-    e.g., in models analogous to `age matching <https://arxiv.org/abs/1304.5557/>`_.
 
     See also
     --------
