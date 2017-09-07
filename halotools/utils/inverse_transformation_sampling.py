@@ -56,22 +56,39 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
 
     Examples
     --------
-    Below we'll generate some fake data drawn from a weighted combination of a
-    Gaussian and a power law, build the necessary lookup tables and then
-    use the `monte_carlo_from_cdf_lookup` function to
-    randomly resample the input distribution.
+    In this first example, we'll start by creating some fake data
+    drawn from a weighted combination of a Gaussian and a power law.
+    We'll think of this fake data as if it came from some
+    external dataset that we want to model, treating the fake data as our
+    input distribution. We will use the `build_cdf_lookup` function
+    to build the necessary lookup tables ``x_table`` and ``y_table``,
+    and then use the `monte_carlo_from_cdf_lookup` function
+    to randomly resample from our input distribution.
 
     >>> npts = int(1e4)
     >>> y = 0.3*np.random.normal(size=npts) + 0.7*np.random.power(2, size=npts)
     >>> x_table, y_table = build_cdf_lookup(y)
     >>> result = monte_carlo_from_cdf_lookup(x_table, y_table, num_draws=100)
 
-    Now suppose we want to draw from this tabulate distribution, associating
-    each draw with a desired input rank-ordered percentile (as is the case,
-    for example, in applications of conditional abundance matching).
+    The returned array ``result`` is a stochastic Monte Carlo realization of our input (fake) data.
 
-    >>> result = monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=np.array((0.1, 0.4, 0.25)))
+    Now let's consider a second example where, rather than specifying an integer number of
+    purely random Monte Carlo draws, instead we pass in an array of uniform random numbers.
 
+    >>> uniform_randoms = np.random.rand(npts)
+    >>> result2 = monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=uniform_randoms)
+
+    In this particular case, the second alternative function call provides completely equivalent
+    results as the first. The way inverse tranformation sampling works is that the
+    ``uniform_randoms`` array is treated as storing the values of the inverse CDF of the
+    input distribution. Since ``uniform_randoms`` just stores random values, then random values
+    from the input distribution will be returned.
+
+    However, this alternative form of input can be exploited.
+    Suppose that instead of purely random draws, you wish to draw from the input distribution
+    in such a way that you introduce a correlation between the drawn values and the values stored
+    in some other array, ``x``. This is the basis of the conditional abundance matching technique
+    implemented by the `~halotools.empirical_models.conditional_abunmatch` function.
     """
     if mc_input is 'random':
         if num_draws is None:
