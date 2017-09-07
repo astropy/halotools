@@ -18,6 +18,9 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
     which is defined by the values of the input ``y_table`` of the CDF
     evaluated at an input set of control points ``x_table``.
 
+    The function `build_cdf_lookup` can be used to generate the two input tables
+    ``x_table`` and ``y_table`` starting from any arbitrary input distribution.
+
     Parameters
     ----------
     x_table : ndarray
@@ -48,8 +51,8 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
 
     Notes
     -----
-    The function `build_cdf_lookup` can be used to generate the two input tables
-    ``x_table`` and ``y_table`` starting from an input distribution.
+    See the Transformation of Probability tutorial at https://github.com/jbailinua/probability
+    for pedagogical derivations associated with inverse transformation sampling.
 
     Examples
     --------
