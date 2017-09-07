@@ -82,6 +82,10 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     the stochasticity in ``galprop`` at fixed ``haloprop`` need not be forced
     to respect the form of a log-normal distribution,
     e.g., in models analogous to `age matching <https://arxiv.org/abs/1304.5557/>`_.
+
+    See also
+    --------
+    `~halotools.empirical_models.noisy_percentile`
     """
     haloprop_table, galprop_table = its.build_cdf_lookup(galprop, npts_lookup_table)
     haloprop_percentiles = its.rank_order_percentile(haloprop)

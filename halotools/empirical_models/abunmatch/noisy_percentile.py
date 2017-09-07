@@ -143,6 +143,9 @@ def noisy_percentile(percentile, correlation_coeff, seed=None, random_percentile
     For the case of zero correlation (the bottom curve), there is no trend at all.
     Correlation strengths between zero and unity span the intermediary cases.
 
+    See also
+    --------
+    `~halotools.empirical_models.conditional_abunmatch`
     """
     if np.all(np.abs(correlation_coeff) == 1):
         return percentile
