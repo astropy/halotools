@@ -13,13 +13,12 @@ __all__ = ('monte_carlo_from_cdf_lookup', 'build_cdf_lookup', 'rank_order_percen
 def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
         num_draws=None, seed=None):
     """
-    Randomly draw a set of ``num_draws`` points from an input distribution function.
+    Randomly draw a set of ``num_draws`` points from any arbitrary input distribution function.
     The input distribution is specified in terms of its CDF,
     which is defined by the values of the input ``y_table`` of the CDF
     evaluated at an input set of control points ``x_table``.
-
-    The function `build_cdf_lookup` can be used to generate the two input tables
-    ``x_table`` and ``y_table`` starting from any arbitrary input distribution.
+    The input ``x_table`` and ``y_table`` can be calculated from any input dataset
+    using the function `build_cdf_lookup`.
 
     Parameters
     ----------
@@ -56,21 +55,22 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
 
     Examples
     --------
-    In this first example, we'll start by creating some fake data
+    In this first example, we'll start by creating some fake data, ``y``,
     drawn from a weighted combination of a Gaussian and a power law.
-    We'll think of this fake data as if it came from some
+    We'll think of the fake data ``y`` as if it came from some
     external dataset that we want to model, treating the fake data as our
     input distribution. We will use the `build_cdf_lookup` function
     to build the necessary lookup tables ``x_table`` and ``y_table``,
     and then use the `monte_carlo_from_cdf_lookup` function
-    to randomly resample from our input distribution.
+    to generate a Monte Carlo realization of the data ``y``.
 
     >>> npts = int(1e4)
     >>> y = 0.3*np.random.normal(size=npts) + 0.7*np.random.power(2, size=npts)
     >>> x_table, y_table = build_cdf_lookup(y)
     >>> result = monte_carlo_from_cdf_lookup(x_table, y_table, num_draws=100)
 
-    The returned array ``result`` is a stochastic Monte Carlo realization of our input (fake) data.
+    The returned array ``result`` is a stochastic Monte Carlo realization of the
+    distribution specified by ``y``.
 
     Now let's consider a second example where, rather than specifying an integer number of
     purely random Monte Carlo draws, instead we pass in an array of uniform random numbers.
@@ -78,16 +78,17 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
     >>> uniform_randoms = np.random.rand(npts)
     >>> result2 = monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=uniform_randoms)
 
-    In this particular case, the second alternative function call provides completely equivalent
-    results as the first. The way inverse tranformation sampling works is that the
-    ``uniform_randoms`` array is treated as storing the values of the inverse CDF of the
-    input distribution. Since ``uniform_randoms`` just stores random values, then random values
+    This alternative call to `monte_carlo_from_cdf_lookup` provides completely
+    equivalent results as the first, because we have passed in uniform randoms.
+    Since ``uniform_randoms`` just stores random values, then random values
     from the input distribution will be returned.
 
-    However, this alternative form of input can be exploited.
-    Suppose that instead of purely random draws, you wish to draw from the input distribution
+    However, this alternative form of input can be exploited for other applications.
+    Suppose that instead of purely random draws, you wish to draw from the input distribution ``y``
     in such a way that you introduce a correlation between the drawn values and the values stored
-    in some other array, ``x``. This is the basis of the conditional abundance matching technique
+    in some other array, ``x``. You can accomplish this by passing in the rank-order
+    percentile values of ``x`` instead of uniform randoms.
+    This is the basis of the conditional abundance matching technique
     implemented by the `~halotools.empirical_models.conditional_abunmatch` function.
 
     """

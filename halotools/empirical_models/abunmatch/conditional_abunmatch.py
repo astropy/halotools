@@ -12,15 +12,15 @@ __all__ = ('conditional_abunmatch', 'randomly_resort')
 
 def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, seed=None):
     """ Function used to model a correlation between two variables,
-    ``haloprop`` and ``galprop``, using conditional abundance matching.
+    ``haloprop`` and ``galprop``, using conditional abundance matching (CAM).
 
-    The input ``galprop`` defines an input PDF of the desired galaxy property being modeled.
+    The input ``galprop`` defines a PDF of the desired galaxy property being modeled.
     We will use the `~halotools.utils.monte_carlo_from_cdf_lookup` function to generate
     Monte Carlo realizations of this input PDF. If there are ``num_halos`` in the input
     ``haloprop`` array, we will draw ``num_halos`` times from this input PDF,
     and we will do so in such a way that larger values of ``galprop`` will be associated
     with larger values of ``haloprop``. The returned array will thus be a Monte Carlo realization
-    of the input ``galprop`` array, but a correlation between the halo property and galaxy property
+    of the input ``galprop`` distribution, but a correlation between the halo property and galaxy property
     has been introduced. The strength of this correlation can be controlled with the input ``sigma``.
 
     An example application of this technique is age matching, in which it is supposed that
@@ -67,11 +67,7 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     The `conditional_abunmatch` function
     can be used to map values of the galaxy property onto the halos in such a way that the
     PDF of ``galprop`` is preserved and a correlation (of variable strength)
-    between ``haloprop`` and ``galprop`` is introduced. In the example below,
-    the arrays ``haloprop`` and ``galprop``
-    will be assumed to store the halo and galaxy properties in a particular bin of the
-    primary halo and galaxy property. To fully implement CAM, the user will need to do
-    their own binning as appropriate to the particular problem.
+    between ``haloprop`` and ``galprop`` is introduced.
 
     >>> num_halos_in_mpeak_bin = int(1e4)
     >>> mean, size, std = -1.5, num_halos_in_mpeak_bin, 0.3
@@ -87,7 +83,8 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     which can result in undesired edge case behavior if
     a large fraction of model galaxies lie outside the range of the data.
     To ensure your results are not impacted by this, make sure that
-    num_gals >> npts_lookup_table.
+    num_gals >> npts_lookup_table. It is recommended that you always visually check histograms of the
+    distribution of returned values against the desired distribution defined by ``galprop``.
 
     This function is not really intended for traditional abundance matching applications
     involving Schechter-like abundance functions such as the stellar-to-halo mass relation,
