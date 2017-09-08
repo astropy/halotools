@@ -90,9 +90,6 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
     in some other array, ``x``. This is the basis of the conditional abundance matching technique
     implemented by the `~halotools.empirical_models.conditional_abunmatch` function.
 
-    See also
-    --------
-    `~halotools.empirical_models.conditional_abunmatch`
     """
     if mc_input is 'random':
         if num_draws is None:
