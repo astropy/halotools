@@ -8,7 +8,11 @@ from . import version
 
 # Uncomment the following line to treat all DeprecationWarnings as
 # exceptions
-enable_deprecations_as_exceptions()
+# enable_deprecations_as_exceptions()
+import astropy
+if int(astropy.__version__[0]) > 1:
+    # The warnings_to_ignore_by_pyver parameter was added in astropy 2.0
+    enable_deprecations_as_exceptions(modules_to_ignore_on_import=['requests'])
 
 # Uncomment and customize the following lines to add/remove entries from
 # the list of packages for which version numbers are displayed when running
