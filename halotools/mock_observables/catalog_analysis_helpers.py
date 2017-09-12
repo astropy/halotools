@@ -11,7 +11,7 @@ from ..sim_manager.sim_defaults import default_cosmology, default_redshift
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('mean_y_vs_x', 'return_xyz_formatted_array', 'cuboid_subvolume_labels',
-    'relative_positions_and_velocities', 'sign_pbc')
+    'relative_positions_and_velocities', 'sign_pbc', 'apply_zspace_distortion')
 __author__ = ['Andrew Hearin']
 
 
