@@ -288,6 +288,24 @@ def test_return_xyz_formatted_array3():
     assert not np.all(result_z0a == result_z0b)
 
 
+def test_return_xyz_formatted_array4():
+    """ Verify that the internals of return_xyz_formatted_array agree with the
+    results returned by the standalone implementation
+    """
+    npts = int(1e4)
+    x = np.linspace(0.001, 0.999, npts)
+    y = np.linspace(0.001, 0.999, npts)
+    z = np.linspace(0.001, 0.999, npts)
+    v = np.random.normal(loc=0, scale=0.5, size=npts)
+
+    from astropy.cosmology import WMAP5
+    result1 = cat_helpers.return_xyz_formatted_array(x, y, z,
+        velocity=v, velocity_distortion_dimension='x', redshift=0.5, cosmology=WMAP5, period=1)
+
+    result2 = cat_helpers.apply_zspace_distortion(x, v, 0.5, WMAP5, Lbox=1)
+    assert np.allclose(result1[:, 0], result2)
+
+
 class TestCatalogAnalysisHelpers(TestCase):
     """ Class providing tests of the `~halotools.mock_observables.catalog_analysis_helpers`.
     """
