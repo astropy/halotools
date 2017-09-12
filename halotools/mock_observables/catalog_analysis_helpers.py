@@ -233,6 +233,58 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
         return pos
 
 
+def apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lbox=None):
+    """ Apply redshift-space distortions to the comoving simulation coordinate,
+    optionally accounting for periodic boundary conditions.
+
+    Parameters
+    ----------
+    true_pos : ndarray
+        Array of shape (npts, ) storing the line-of-sight position in comoving Mpc/h.
+        In most cases ``true_pos`` is the z-coordinate of the simulation.
+
+    peculiar_velocity : ndarray
+        Array of shape (npts, ) storing the peculiar velocity in physical km/s.
+        In most cases ``peculiar_velocity`` is the z-velocity of the simulation.
+
+    redshift : float or ndarray
+        Float or ndarray of shape (npts, ) storing the redshift of the object.
+        If using a single snapshot, this argument is a single float equal to the
+        redshift of the snapshot. If using a lightcone, this argument is the
+        redshift of each point.
+
+    cosmology : object
+        Cosmology to assume when applying redshift-space distortions,
+        e.g., the cosmology of the simulation.
+
+    Lbox : float, optional
+        Box length of the simulation so that periodic boundary conditions
+        can be applied. Default behavior is None, in which case PBCs will be ignored.
+
+    Returns
+    -------
+    zspace_pos : ndarray
+        Array of shape (npts, ) storing the z-space coordinates in comoving Mpc/h
+
+    Examples
+    --------
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+    >>> true_pos = halocat.halo_table['halo_z']
+    >>> peculiar_velocity = halocat.halo_table['halo_vz']
+    >>> redshift = halocat.redshift
+    >>> cosmology = halocat.cosmology
+    >>> Lbox = halocat.Lbox[2]
+    >>> zspace_zcoord = apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lbox)
+    """
+    scale_factor = 1./(1. + redshift)
+    pos_err = peculiar_velocity/100./cosmology.efunc(redshift)/scale_factor
+    zspace_pos = true_pos + pos_err
+    if Lbox is not None:
+        zspace_pos = enforce_periodicity_of_box(zspace_pos, Lbox)
+    return zspace_pos
+
+
 def cuboid_subvolume_labels(sample, Nsub, Lbox):
     r"""
     Return integer labels indicating which cubical subvolume of a larger cubical volume a
