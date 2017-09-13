@@ -27,7 +27,7 @@ class Cacciato09Cens(OccupationComponent):
 
     """
 
-    def __init__(self, threshold=10.0, prim_haloprop_key='halo_m200b',
+    def __init__(self, threshold=10.0, prim_haloprop_key='halo_m180b',
                  prim_galprop_key='luminosity', **kwargs):
         r"""
         Parameters
@@ -72,6 +72,8 @@ class Cacciato09Cens(OccupationComponent):
     def get_published_parameters(self):
         r""" Return the values of ``self.param_dict`` according to
         the best-fit values of the WMAP3 model in Table 3 of arXiv:0807.4932.
+        In this analysis, halo masses have been defined using an overdensity of
+        180 times the background density of the Universe.
         """
         param_dict = (
             {'log_L_0': 9.935,
@@ -295,7 +297,7 @@ class Cacciato09Sats(OccupationComponent):
     See :ref:`cacciato09_composite_model` for a tutorial on this model.
     """
 
-    def __init__(self, threshold=10.0, prim_haloprop_key='halo_m200b',
+    def __init__(self, threshold=10.0, prim_haloprop_key='halo_m180b',
                  prim_galprop_key='luminosity', **kwargs):
         r"""
         Parameters
@@ -342,6 +344,8 @@ class Cacciato09Sats(OccupationComponent):
     def get_default_parameters(self):
         r""" Return the values of ``self.param_dict`` according to
         the best-fit values of the WMAP3 model in Table 3 of arXiv:0807.4932.
+        In this analysis, halo masses have been defined using an overdensity of
+        180 times the background density of the Universe.
         """
 
         param_dict = (
