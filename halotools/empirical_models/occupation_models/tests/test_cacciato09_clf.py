@@ -287,7 +287,7 @@ def test_Cacciato09Sats_mean_occupation_raises_exception1():
 def test_Cacciato09Sats_mean_occupation_raises_exception2():
     model = Cacciato09Sats(threshold=11.0)
     with pytest.raises(HalotoolsError) as err:
-        __ = model.mean_occupation(table={'halo_m200b': np.array((1e11, 1e12))},
+        __ = model.mean_occupation(table={'halo_m180b': np.array((1e11, 1e12))},
                 prim_galprop_min=5, prim_galprop_max=4)
     substr = "keyword must be bigger than 10^threshold"
     assert substr in err.value.args[0]
