@@ -180,6 +180,9 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
 
     >>> pos = return_xyz_formatted_array(x, y, z, period=Lbox, velocity=velocity, velocity_distortion_dimension='z', redshift=1.5)
 
+    Notes
+    -----
+    See :ref:`zspace_distortion_derivation`.
 
     """
     period = np.atleast_1d(period)
@@ -234,8 +237,16 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
 
 
 def apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lbox=None):
-    """ Apply redshift-space distortions to the comoving simulation coordinate,
+    r""" Apply redshift-space distortions to the comoving simulation coordinate,
     optionally accounting for periodic boundary conditions.
+
+    This function implements the following formula:
+
+    .. math::
+
+        s_{\rm com}^{\rm z-space} = s_{\rm com}^{\rm true} + \frac{1 + z}{H(z)}v_{\rm pec}
+
+    See :ref:`zspace_distortion_derivation` to see where this formula comes from.
 
     Parameters
     ----------
