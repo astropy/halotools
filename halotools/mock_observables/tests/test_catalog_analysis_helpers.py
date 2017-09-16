@@ -289,8 +289,9 @@ def test_return_xyz_formatted_array3():
 
 
 def test_return_xyz_formatted_array4():
-    """ Verify that the internals of return_xyz_formatted_array agree with the
-    results returned by the standalone implementation
+    """ Verify consistent behavior between
+    the `~halotools.mock_observables.return_xyz_formatted_array` function and the
+    independently-written `~halotools.mock_observables.return_xyz_formatted_array` function.
     """
     npts = int(1e4)
     x = np.linspace(0.001, 0.999, npts)
