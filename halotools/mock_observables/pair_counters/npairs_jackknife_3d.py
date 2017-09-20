@@ -30,7 +30,7 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
     Parameters
     ----------
     sample1 : array_like
-        Npts1 x 3 numpy array containing 3-D positions of points.
+        Numpy array of shape (Npts1, 3) containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
@@ -38,7 +38,8 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points.
+        Numpy array of shape (Npts2, 3) containing 3-D positions of points.
+        Should be identical to sample1 for cases of auto-sample pair counts.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     rbins : array_like
@@ -51,18 +52,18 @@ def npairs_jackknife_3d(sample1, sample2, rbins, period=None, weights1=None, wei
         period is assumed to be the same in all Cartesian directions.
 
     weights1 : array_like, optional
-        length N1 array containing weights used for weighted pair counts.
+        Numpy array of shape (Npts1, ) containing weights used for weighted pair counts.
 
     weights2 : array_like, optional
-        length N2 array containing weights used for weighted pair counts.
+        Numpy array of shape (Npts2, ) containing weights used for weighted pair counts.
 
     jtags1 : array_like, optional
-        length N1 array containing integer tags used to define jackknife sample
+        Numpy array of shape (Npts1, ) containing integer tags used to define jackknife sample
         membership. Tags are in the range [1, N_samples].
         The tag '0' is a reserved tag and should not be used.
 
     jtags2 : array_like, optional
-        length N2 array containing integer tags used to define jackknife sample
+        Numpy array of shape (Npts2, ) containing integer tags used to define jackknife sample
         membership. Tags are in the range [1, N_samples].
         The tag '0' is a reserved tag and should not be used.
 

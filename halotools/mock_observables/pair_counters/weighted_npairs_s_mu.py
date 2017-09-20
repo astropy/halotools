@@ -1,4 +1,4 @@
-r""" Module containing the `~halotools.mock_observables.npairs_s_mu` function
+r""" Module containing the `~halotools.mock_observables.weighted_npairs_s_mu` function
 used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -8,19 +8,19 @@ from functools import partial
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
-from .cpairs import npairs_s_mu_engine
+from .cpairs import weighted_npairs_s_mu_engine
 from .npairs_3d import _npairs_3d_process_args
 from ...utils.array_utils import array_is_monotonic
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 
-__all__ = ('npairs_s_mu', )
+__all__ = ('weighted_npairs_s_mu', )
 
 
-def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
+def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Function counts the number of pairs of points separated by less than
+    Function performs a *weighted* count of the number of pairs of points separated by less than
     radial separation, :math:`s`, given by ``s_bins`` and
     angular distance, :math:`\mu\equiv\cos(\theta_{\rm los})`, given by ``mu_bins``,
     where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and
@@ -33,7 +33,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     A common variation of pair-counting calculations is to count pairs with
     separations *between* two different distances, e.g. [s1 ,s2] and [mu1, mu2].
-    You can retrieve this information from `~halotools.mock_observables.npairs_s_mu`
+    You can retrieve this information from `~halotools.mock_observables.weighted_npairs_s_mu`
     by taking `numpy.diff` of the returned array along each axis.
 
     See Notes section for further clarification.
@@ -52,6 +52,12 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         Numpy array of shape (Npts2, 3) containing 3-D positions of points.
         Should be identical to sample1 for cases of auto-sample pair counts.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
+    weights1 : array_like
+        Numpy array of shape (Npts1, ) containing weights used to weight the pair counts.
+
+    weights2 : array_like
+        Numpy array of shape (Npts2, ) containing weights used to weight the pair counts.
 
     s_bins : array_like
         numpy array of shape (num_s_bin_edges, ) storing the :math:`s`
@@ -97,6 +103,10 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     num_pairs : array of shape (num_s_bin_edges, num_mu_bin_edges) storing the
         number of pairs separated by less than (s, mu)
 
+    weighted_num_pairs : array of shape (num_s_bin_edges, num_mu_bin_edges) storing the
+        weighted number of pairs separated by less than (s, mu). Each pair is
+        weighted by `w1*w2`.
+
     Notes
     -----
     Let :math:`\vec{s}` be the radial vector connnecting two points.
@@ -117,7 +127,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     Along the second dimension,  :math:`\mu` decreases,
     i.e. :math:`\theta_{\rm LOS}` increases.
 
-    If sample1 == sample2 that the `~halotools.mock_observables.npairs_s_mu` function
+    If sample1 == sample2 that the `~halotools.mock_observables.weighted_npairs_s_mu` function
     double-counts pairs. If your science application requires sample1==sample2 inputs
     and also pairs to not be double-counted, simply divide the final counts by 2.
 
@@ -148,9 +158,11 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     >>> sample1 = np.vstack([x1, y1, z1]).T
     >>> sample2 = np.vstack([x2, y2, z2]).T
+    >>> weights1 = np.random.rand(Npts1)
+    >>> weights2 = np.random.rand(Npts2)
 
-    >>> from halotools.mock_observables.pair_counters import npairs_s_mu
-    >>> result = npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=period)
+    >>> from halotools.mock_observables.pair_counters import weighted_npairs_s_mu
+    >>> counts, weighted_counts = weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, period=period)
     """
 
     # Process the inputs with the helper function
@@ -159,6 +171,12 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     s_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
+
+    weights1 = np.atleast_1d(weights1)
+    weights2 = np.atleast_1d(weights2)
+
+    assert weights1.shape == x1in.shape, "``weights1`` should have shape ({0}, )".format(len(x1in))
+    assert weights2.shape == x2in.shape, "``weights2`` should have shape ({0}, )".format(len(x2in))
 
     rmax = np.max(s_bins)
 
@@ -194,8 +212,8 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_s_mu_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins_prime)
+    engine = partial(weighted_npairs_s_mu_engine,
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, weights1, weights2, s_bins, mu_bins_prime)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -204,9 +222,12 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.sum(np.array(result), axis=0)
+        counts, weighted_counts = result
+        counts = np.sum(np.array(counts), axis=0)
+        weighted_counts = np.sum(np.array(weighted_counts), axis=0)
         pool.close()
     else:
-        counts = engine(cell1_tuples[0])
+        result = engine(cell1_tuples[0])
+        counts, weighted_counts = result
 
-    return np.array(counts)
+    return np.array(counts), np.array(weighted_counts)
