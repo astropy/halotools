@@ -21,18 +21,18 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function counts the number of pairs of points separated by less than
-    radial separation, :math:`s`, given by ``s_bins`` and 
+    radial separation, :math:`s`, given by ``s_bins`` and
     angular distance, :math:`\mu\equiv\cos(\theta_{\rm los})`, given by ``mu_bins``,
-    where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and 
+    where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and
     the line-of-sight (LOS).
-    
+
     The first two dimensions (x, y) define the plane for perpendicular distances.
     The third dimension (z) defines the LOS.  i.e. x,y positions are on
     the plane of the sky, and z is the radial distance coordinate.  This is the 'distant
     observer' approximation.
 
     A common variation of pair-counting calculations is to count pairs with
-    separations *between* two different distances, e.g. [s1 ,s2] and [mu1, mu2]. 
+    separations *between* two different distances, e.g. [s1 ,s2] and [mu1, mu2].
     You can retrieve this information from `~halotools.mock_observables.npairs_s_mu`
     by taking `numpy.diff` of the returned array along each axis.
 
@@ -41,15 +41,16 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
     Parameters
     ----------
     sample1 : array_like
-        Npts1 x 3 numpy array containing 3-D positions of points.
+        Numpy array of shape (Npts1, 3) containing 3-D positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points.
+    sample2 : array_like
+        Numpy array of shape (Npts2, 3) containing 3-D positions of points.
+        Should be identical to sample1 for cases of auto-sample pair counts.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     s_bins : array_like
@@ -111,15 +112,15 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     .. math::
         \mu = \cos(\theta_{\rm LOS}) \equiv r_{\parallel}/s.
-    
+
     Along the first dimension of ``num_pairs``, :math:`s` increases.
-    Along the second dimension,  :math:`\mu` decreases, 
+    Along the second dimension,  :math:`\mu` decreases,
     i.e. :math:`\theta_{\rm LOS}` increases.
-    
-    If sample1 == sample2 that the `~halotools.mock_observables.npairs_s_mu` function 
-    double-counts pairs. If your science application requires sample1==sample2 inputs 
+
+    If sample1 == sample2 that the `~halotools.mock_observables.npairs_s_mu` function
+    double-counts pairs. If your science application requires sample1==sample2 inputs
     and also pairs to not be double-counted, simply divide the final counts by 2.
-    
+
     One final point of clarification concerning double-counting may be in order.
     Suppose sample1==sample2 and s_bins[0]==0. Then the returned value for this bin
     will be len(sample1), since each sample1 point has distance 0 from itself.
