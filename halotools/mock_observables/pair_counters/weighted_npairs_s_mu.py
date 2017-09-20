@@ -20,7 +20,7 @@ __all__ = ('weighted_npairs_s_mu', )
 def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, period=None,
         verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Function counts the number of pairs of points separated by less than
+    Function performs a *weighted* count of the number of pairs of points separated by less than
     radial separation, :math:`s`, given by ``s_bins`` and
     angular distance, :math:`\mu\equiv\cos(\theta_{\rm los})`, given by ``mu_bins``,
     where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and
@@ -102,6 +102,10 @@ def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, 
     -------
     num_pairs : array of shape (num_s_bin_edges, num_mu_bin_edges) storing the
         number of pairs separated by less than (s, mu)
+
+    weighted_num_pairs : array of shape (num_s_bin_edges, num_mu_bin_edges) storing the
+        weighted number of pairs separated by less than (s, mu). Each pair is
+        weighted by `w1*w2`.
 
     Notes
     -----

@@ -9,6 +9,8 @@
 
 - Removed `max_sample_size` keyword argument from all `mock_observables` functions.
 
+- Added new `weighted_npairs_s_mu` function to `mock_observables` sub-package.
+
 
 0.5 (2017-05-31)
 ----------------
