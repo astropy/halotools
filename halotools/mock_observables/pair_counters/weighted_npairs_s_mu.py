@@ -8,7 +8,7 @@ from functools import partial
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
-from .cpairs import npairs_s_mu_engine
+from .cpairs import weighted_npairs_s_mu_engine
 from .npairs_3d import _npairs_3d_process_args
 from ...utils.array_utils import array_is_monotonic
 
@@ -158,7 +158,7 @@ def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, 
     >>> weights2 = np.random.rand(Npts2)
 
     >>> from halotools.mock_observables.pair_counters import weighted_npairs_s_mu
-    >>> result = weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, period=period)
+    >>> counts, weighted_counts = weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, period=period)
     """
 
     # Process the inputs with the helper function
@@ -208,8 +208,8 @@ def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, 
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_s_mu_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, s_bins, mu_bins_prime)
+    engine = partial(weighted_npairs_s_mu_engine,
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, weights1, weights2, s_bins, mu_bins_prime)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -218,9 +218,12 @@ def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.sum(np.array(result), axis=0)
+        counts, weighted_counts = result
+        counts = np.sum(np.array(counts), axis=0)
+        weighted_counts = np.sum(np.array(weighted_counts), axis=0)
         pool.close()
     else:
-        counts = engine(cell1_tuples[0])
+        result = engine(cell1_tuples[0])
+        counts, weighted_counts = result
 
-    return np.array(counts)
+    return np.array(counts), np.array(weighted_counts)
