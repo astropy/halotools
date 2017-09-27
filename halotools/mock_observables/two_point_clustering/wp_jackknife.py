@@ -17,7 +17,7 @@ from ..catalog_analysis_helpers import cuboid_subvolume_labels
 
 
 __all__ = ('wp_jackknife', )
-__author__ = ('Duncan Campbell', )
+__author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
@@ -216,8 +216,6 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
-    if _sample1_is_sample2:
-        sample2 = None
 
     # determine box size the data occupies.
     # This is used in determining jackknife samples.
@@ -248,7 +246,7 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     # calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(
         sample1, sample2, j_index_1, j_index_2, N_sub_vol,
-        rp_bins, pi_max, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
+        rp_bins, pi_bins, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
 
     # pull out the full and sub sample results
     D1D1_full = D1D1[0, :]
@@ -260,14 +258,14 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
 
     # do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
-        rp_bins, pi_max, period, num_threads, do_DR, do_RR)
+        rp_bins, pi_bins, period, num_threads, do_DR, do_RR)
 
     if _sample1_is_sample2:
         D2R = D1R
     else:
         if do_DR is True:
             D2R, RR_dummy = jrandom_counts(sample2, randoms, j_index_2, j_index_random,
-                N_sub_vol, rp_bins, pi_max, period, num_threads, do_DR, do_RR=False)
+                N_sub_vol, rp_bins, pi_bins, period, num_threads, do_DR, do_RR=False)
         else:
             D2R = None
 
@@ -314,13 +312,13 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
             return xi_12_full, xi_12_cov
 
 
-def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi_max,
+def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi_bins,
         period, num_threads, do_auto, do_cross, _sample1_is_sample2):
     """
     Count jackknife data pairs: DD
     """
     if do_auto is True:
-        D1D1 = npairs_jackknife_rp_pi(sample1, sample1, rp_bins, pi_max, period=period,
+        D1D1 = npairs_jackknife_rp_pi(sample1, sample1, rp_bins, pi_bins, period=period,
             jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
             num_threads=num_threads)
         D1D1 = np.diff(D1D1, axis=1)
@@ -333,14 +331,14 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_max, period=period,
+            D1D2 = npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins, period=period,
                 jtags1=j_index_1, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
             D1D2 = np.diff(D1D2, axis=1)
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = npairs_jackknife_rp_pi(sample2, sample2, rp_bins, pi_max, period=period,
+            D2D2 = npairs_jackknife_rp_pi(sample2, sample2, rp_bins, pi_bins, period=period,
                 jtags1=j_index_2, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
             D2D2 = np.diff(D2D2, axis=1)
@@ -348,21 +346,21 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi
     return D1D1, D1D2, D2D2
 
 
-def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins, pi_max,
+def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins, pi_bins,
         period, num_threads, do_DR, do_RR):
     """
     Count jackknife random pairs: DR, RR
     """
 
     if do_DR is True:
-        DR = npairs_jackknife_rp_pi(sample, randoms, rp_bins, pi_max, period=period,
+        DR = npairs_jackknife_rp_pi(sample, randoms, rp_bins, pi_bins, period=period,
             jtags1=j_index, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
         DR = np.diff(DR, axis=1)
     else:
         DR = None
     if do_RR is True:
-        RR = npairs_jackknife_rp_pi(randoms, randoms, rp_bins, pi_max, period=period,
+        RR = npairs_jackknife_rp_pi(randoms, randoms, rp_bins, pi_bins, period=period,
             jtags1=j_index_randoms, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
         RR = np.diff(RR, axis=1)
