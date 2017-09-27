@@ -12,3 +12,4 @@ from .weighted_npairs_s_mu_engine import weighted_npairs_s_mu_engine
 from .npairs_per_object_3d_engine import npairs_per_object_3d_engine
 from .pairwise_distance_3d_engine import pairwise_distance_3d_engine
 from .pairwise_distance_xy_z_engine import pairwise_distance_xy_z_engine
+from .npairs_jackknife_rp_pi_engine import npairs_jackknife_rp_pi_engine

@@ -150,7 +150,7 @@ def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
     >>> jtags1 = np.random.randint(1, N_samples+1, Npts1)
     >>> jtags2 = np.random.randint(1, N_samples+1, Npts2)
 
-    >>> result = npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins, period=period, jtags1=jtags1, jtags2=jtags2, N_samples=N_samples)
+    >>> #  result = npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins, period=period, jtags1=jtags1, jtags2=jtags2, N_samples=N_samples)
 
     """
     # Process the inputs with the helper function
@@ -191,6 +191,8 @@ def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
+    msg = ("Engine is currently identical to npairs_jackknife_3d_engine.pyx")
+    raise NotImplementedError(msg)
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
