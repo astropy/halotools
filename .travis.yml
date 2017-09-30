@@ -63,8 +63,6 @@ matrix:
                CONDA_DEPENDENCIES='cython scipy requests matplotlib h5py beautiful-soup'
 
         # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development
         - python: 3.6
           env: ASTROPY_VERSION=development ASTROPY_USE_SYSTEM_PYTEST=1
 
