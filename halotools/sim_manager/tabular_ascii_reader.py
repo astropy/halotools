@@ -50,10 +50,9 @@ class TabularAsciiReader(object):
     of the data stream.
     """
 
-    def __init__(self, input_fname, columns_to_keep_dict,
-            header_char='#', num_lines_header=None,
+    def __init__(self, input_fname, columns_to_keep_dict, header_char='#',
             row_cut_min_dict={}, row_cut_max_dict={},
-            row_cut_eq_dict={}, row_cut_neq_dict={}):
+            row_cut_eq_dict={}, row_cut_neq_dict={}, num_lines_header=None):
         """
         Parameters
         -----------
