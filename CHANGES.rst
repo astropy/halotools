@@ -11,6 +11,7 @@
 
 - Added new `weighted_npairs_s_mu` function to `mock_observables` sub-package.
 
+- Added `num_lines_header` optional keyword argument to TabularAsciiReader
 
 0.5 (2017-05-31)
 ----------------

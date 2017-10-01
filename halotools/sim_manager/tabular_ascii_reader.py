@@ -50,9 +50,9 @@ class TabularAsciiReader(object):
     of the data stream.
     """
 
-    def __init__(self, input_fname, columns_to_keep_dict,
-            header_char='#', row_cut_min_dict={}, row_cut_max_dict={},
-            row_cut_eq_dict={}, row_cut_neq_dict={}):
+    def __init__(self, input_fname, columns_to_keep_dict, header_char='#',
+            row_cut_min_dict={}, row_cut_max_dict={},
+            row_cut_eq_dict={}, row_cut_neq_dict={}, num_lines_header=None):
         """
         Parameters
         -----------
@@ -88,6 +88,11 @@ class TabularAsciiReader(object):
             String to be interpreted as a header line
             at the beginning of the ascii file.
             Default is '#'.
+            Can alternatively use ``num_lines_header`` optional argument.
+
+        num_lines_header : int, optional
+            Number of lines in the header. Default is None, in which case
+            header length will be determined by ``header_char`` argument.
 
         row_cut_min_dict : dict, optional
             Dictionary used to place a lower-bound cut on the rows
@@ -186,6 +191,7 @@ class TabularAsciiReader(object):
         self.input_fname = self._get_fname(input_fname)
 
         self.header_char = self._get_header_char(header_char)
+        self.num_lines_header = num_lines_header
 
         self._determine_compression_safe_file_opener()
 
@@ -412,15 +418,18 @@ class TabularAsciiReader(object):
         All empty lines that appear in header will be included in the count.
 
         """
-        Nheader = 0
-        with self._compression_safe_file_opener(self.input_fname, 'r') as f:
-            for i, l in enumerate(f):
-                if ((l[0:len(self.header_char)] == self.header_char) or (l == "\n")):
-                    Nheader += 1
-                else:
-                    break
+        if self.num_lines_header is None:
+            Nheader = 0
+            with self._compression_safe_file_opener(self.input_fname, 'r') as f:
+                for i, l in enumerate(f):
+                    if ((l[0:len(self.header_char)] == self.header_char) or (l == "\n")):
+                        Nheader += 1
+                    else:
+                        break
 
-        return Nheader
+            return Nheader
+        else:
+            return self.num_lines_header
 
     def data_len(self):
         """
