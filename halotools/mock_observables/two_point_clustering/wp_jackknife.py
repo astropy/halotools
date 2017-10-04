@@ -11,7 +11,7 @@ from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .rp_pi_tpcf import _rp_pi_tpcf_process_args
 from .tpcf_jackknife import get_subvolume_numbers, _enclose_in_box
 
-from ..pair_counters import npairs_jackknife_rp_pi
+from ..pair_counters import npairs_jackknife_xy_z
 
 from ..catalog_analysis_helpers import cuboid_subvolume_labels
 
@@ -249,12 +249,12 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         rp_bins, pi_bins, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
 
     # pull out the full and sub sample results
-    D1D1_full = D1D1[0, :]
-    D1D1_sub = D1D1[1:, :]
-    D1D2_full = D1D2[0, :]
-    D1D2_sub = D1D2[1:, :]
-    D2D2_full = D2D2[0, :]
-    D2D2_sub = D2D2[1:, :]
+    D1D1_full = D1D1[0, :, 0]
+    D1D1_sub = D1D1[1:, :, 0]
+    D1D2_full = D1D2[0, :, 0]
+    D1D2_sub = D1D2[1:, :, 0]
+    D2D2_full = D2D2[0, :, 0]
+    D2D2_sub = D2D2[1:, :, 0]
 
     # do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
@@ -270,18 +270,18 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
             D2R = None
 
     if do_DR is True:
-        D1R_full = D1R[0, :]
-        D1R_sub = D1R[1:, :]
-        D2R_full = D2R[0, :]
-        D2R_sub = D2R[1:, :]
+        D1R_full = D1R[0, :, 0]
+        D1R_sub = D1R[1:, :, 0]
+        D2R_full = D2R[0, :, 0]
+        D2R_sub = D2R[1:, :, 0]
     else:
         D1R_full = None
         D1R_sub = None
         D2R_full = None
         D2R_sub = None
     if do_RR is True:
-        RR_full = RR[0, :]
-        RR_sub = RR[1:, :]
+        RR_full = RR[0, :, 0]
+        RR_sub = RR[1:, :, 0]
     else:
         RR_full = None
         RR_sub = None
@@ -318,10 +318,10 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi
     Count jackknife data pairs: DD
     """
     if do_auto is True:
-        D1D1 = npairs_jackknife_rp_pi(sample1, sample1, rp_bins, pi_bins, period=period,
+        D1D1 = npairs_jackknife_xy_z(sample1, sample1, rp_bins, pi_bins, period=period,
             jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
             num_threads=num_threads)
-        D1D1 = np.diff(D1D1, axis=1)
+        D1D1 = np.diff(np.diff(D1D1, axis=1), axis=2)
     else:
         D1D1 = None
         D2D2 = None
@@ -331,17 +331,17 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins, period=period,
+            D1D2 = npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
                 jtags1=j_index_1, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
-            D1D2 = np.diff(D1D2, axis=1)
+            D1D2 = np.diff(np.diff(D1D2, axis=1), axis=2)
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = npairs_jackknife_rp_pi(sample2, sample2, rp_bins, pi_bins, period=period,
+            D2D2 = npairs_jackknife_xy_z(sample2, sample2, rp_bins, pi_bins, period=period,
                 jtags1=j_index_2, jtags2=j_index_2,
                 N_samples=N_sub_vol, num_threads=num_threads)
-            D2D2 = np.diff(D2D2, axis=1)
+            D2D2 = np.diff(np.diff(D2D2, axis=1), axis=2)
 
     return D1D1, D1D2, D2D2
 
@@ -353,17 +353,17 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins
     """
 
     if do_DR is True:
-        DR = npairs_jackknife_rp_pi(sample, randoms, rp_bins, pi_bins, period=period,
+        DR = npairs_jackknife_xy_z(sample, randoms, rp_bins, pi_bins, period=period,
             jtags1=j_index, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
-        DR = np.diff(DR, axis=1)
+        DR = np.diff(np.diff(DR, axis=1), axis=2)
     else:
         DR = None
     if do_RR is True:
-        RR = npairs_jackknife_rp_pi(randoms, randoms, rp_bins, pi_bins, period=period,
+        RR = npairs_jackknife_xy_z(randoms, randoms, rp_bins, pi_bins, period=period,
             jtags1=j_index_randoms, jtags2=j_index_randoms,
             N_samples=N_sub_vol, num_threads=num_threads)
-        RR = np.diff(RR, axis=1)
+        RR = np.diff(np.diff(RR, axis=1), axis=2)
     else:
         RR = None
 

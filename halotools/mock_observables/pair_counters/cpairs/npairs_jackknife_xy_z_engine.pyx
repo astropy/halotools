@@ -8,13 +8,13 @@ cimport cython
 from libc.math cimport ceil
 
 __author__ = ('Duncan Campbell', )
-__all__ = ('npairs_jackknife_rp_pi_engine', )
+__all__ = ('npairs_jackknife_xy_z_engine', )
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs_jackknife_rp_pi_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
-    weights1in, weights2in, jtags1in, jtags2in, cnp.int64_t N_samples, rbins, cell1_tuple):
+def npairs_jackknife_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
+    weights1in, weights2in, jtags1in, jtags2in, cnp.int64_t N_samples, rp_bins, pi_bins, cell1_tuple):
     """ Cython engine for counting pairs of points as a function of three-dimensional separation.
 
     Parameters
@@ -43,8 +43,13 @@ def npairs_jackknife_rp_pi_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
     N_samples : int
         Total number of cells into which the simulated box has been subdivided
 
-    rbins : array
-        Boundaries defining the bins in which pairs are counted.
+    rp_bins : array_like
+        numpy array of boundaries defining the bins of separation in the xy-plane
+        :math:`r_{\rm p}` in which pairs are counted.
+
+    pi_bins : numpy.array
+        array defining parallel separation in which to sum the pair counts
+
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -58,7 +63,9 @@ def npairs_jackknife_rp_pi_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
         separated by a distance less than the corresponding entry of ``rbins``.
 
     """
-    cdef cnp.float64_t[:] rbins_squared = rbins*rbins
+    
+    cdef cnp.float64_t[:] rp_bins_squared = rp_bins*rp_bins
+    cdef cnp.float64_t[:] pi_bins_squared = pi_bins*pi_bins
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -67,8 +74,9 @@ def npairs_jackknife_rp_pi_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
-    cdef int num_rbins = len(rbins)
-    cdef cnp.float64_t[:,:] counts = np.zeros((N_samples+1, num_rbins), dtype=np.float64)
+    cdef int num_rp_bins = len(rp_bins)
+    cdef int num_pi_bins = len(pi_bins)
+    cdef cnp.float64_t[:,:,:] counts = np.zeros((N_samples+1, num_rp_bins, num_pi_bins), dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
@@ -118,7 +126,7 @@ def npairs_jackknife_rp_pi_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
     cdef cnp.int64_t j1, j2
     cdef cnp.float64_t w1, w2
 
-    cdef int Ni, Nj, i, j, k, l
+    cdef int Ni, Nj, i, j, k, l, g
     cdef cnp.int64_t s
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -218,15 +226,20 @@ def npairs_jackknife_rp_pi_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2i
                                     dx = x1tmp - x_icell2[j]
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
-                                    dsq = dx*dx + dy*dy + dz*dz
+                                    dxy_sq = dx*dx + dy*dy
+                                    dz_sq = dz*dz
 
                                     w2 = w_icell2[j]
                                     j2 = j_icell2[j]
 
                                     for s in range(N_samples+1):
-                                        k = num_rbins-1
-                                        while dsq<=rbins_squared[k]:
-                                            counts[s,k] += jweight(s, j1, j2, w1, w2)
+                                        k = num_rp_bins-1
+                                        while dxy_sq<=rp_bins_squared[k]:
+                                            g = num_pi_bins-1
+                                            while dz_sq<=pi_bins_squared[g]:
+                                                counts[s,k,g] += jweight(s, j1, j2, w1, w2)
+                                                g=g-1
+                                                if g<0: break
                                             k=k-1
                                             if k<0: break
 

@@ -1,4 +1,4 @@
-r""" Module containing the `~halotools.mock_observables.npairs_jackknife_rp_pi` function
+r""" Module containing the `~halotools.mock_observables.npairs_jackknife_xy_z` function
 used to estimate errors in the `~halotools.mock_observables.tpcf` function.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -10,17 +10,17 @@ from warnings import warn
 
 from .rectangular_mesh import RectangularDoubleMesh
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
-from .cpairs import npairs_jackknife_rp_pi_engine
+from .cpairs import npairs_jackknife_xy_z_engine
 from .npairs_xy_z import _npairs_xy_z_process_args
 
 from ...custom_exceptions import HalotoolsError
 
 __author__ = ('Duncan Campbell', )
 
-__all__ = ('npairs_jackknife_rp_pi', )
+__all__ = ('npairs_jackknife_xy_z', )
 
 
-def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
+def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
         period=None, weights1=None, weights2=None,
         jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
@@ -150,7 +150,7 @@ def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
     >>> jtags1 = np.random.randint(1, N_samples+1, Npts1)
     >>> jtags2 = np.random.randint(1, N_samples+1, Npts2)
 
-    >>> result = npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins, period=period, jtags1=jtags1, jtags2=jtags2, N_samples=N_samples)
+    >>> result = npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins, period=period, jtags1=jtags1, jtags2=jtags2, N_samples=N_samples)
 
     """
     # Process the inputs with the helper function
@@ -166,7 +166,7 @@ def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
 
     # Process the input weights and jackknife-tags with the helper function
     weights1, weights2, jtags1, jtags2 = (
-        _npairs_jackknife_rp_pi_process_weights_jtags(sample1, sample2,
+        _npairs_jackknife_xy_z_process_weights_jtags(sample1, sample2,
             weights1, weights2, jtags1, jtags2, N_samples))
 
     # Compute the estimates for the cell sizes
@@ -183,17 +183,14 @@ def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(npairs_jackknife_rp_pi_engine,
+    engine = partial(npairs_jackknife_xy_z_engine,
         double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
-        weights1, weights2, jtags1, jtags2, N_samples, rp_bins)
+        weights1, weights2, jtags1, jtags2, N_samples, rp_bins, pi_bins)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
-    msg = ("npairs_jackknife_rp_pi_engine.pyx engine is currently identical to npairs_jackknife_3d_engine.pyx\n"
-        "Need to port over 2+1 pair-counting behavior from npairs_xy_z.pyx")
-    raise NotImplementedError(msg)
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
@@ -205,7 +202,7 @@ def npairs_jackknife_rp_pi(sample1, sample2, rp_bins, pi_bins,
     return np.array(counts)
 
 
-def _npairs_jackknife_rp_pi_process_weights_jtags(sample1, sample2,
+def _npairs_jackknife_xy_z_process_weights_jtags(sample1, sample2,
         weights1, weights2, jtags1, jtags2, N_samples):
     """
     """
