@@ -295,7 +295,15 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
     xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
     xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
-
+    
+    #account for factor of 2*pi_max in integration
+    xi_11_full = 2.0*pi_max*xi_11_full
+    xi_12_full = 2.0*pi_max*xi_12_full
+    xi_22_full = 2.0*pi_max*xi_22_full
+    xi_11_sub = 2.0*pi_max*xi_11_sub
+    xi_12_sub = 2.0*pi_max*xi_12_sub
+    xi_22_sub = 2.0*pi_max*xi_22_sub
+    
     # calculate the covariance matrix
     xi_11_cov = np.matrix(np.cov(xi_11_sub.T))
     xi_12_cov = np.matrix(np.cov(xi_12_sub.T))
