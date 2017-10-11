@@ -15,7 +15,7 @@ __all__ = ('npairs_jackknife_xy_z_engine', )
 @cython.nonecheck(False)
 def npairs_jackknife_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     weights1in, weights2in, jtags1in, jtags2in, cnp.int64_t N_samples, rp_bins, pi_bins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
+    """ Cython engine for counting pairs of points as a function of projected and parallel separation.
 
     Parameters
     ------------
@@ -49,7 +49,6 @@ def npairs_jackknife_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
 
     pi_bins : numpy.array
         array defining parallel separation in which to sum the pair counts
-
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in

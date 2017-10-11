@@ -33,8 +33,8 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         estimator='Natural', num_threads=1, seed=None,
         approx_cell1_size=None, approx_cell2_size=None, approx_cellran_size=None):
     r"""
-    Calculate the two-point correlation function, :math:`\xi(r)` and the covariance
-    matrix, :math:`{C}_{ij}`, between ith and jth radial bin.
+    Calculate the projected two-point correlation function, :math:`w_p(r_p)` and the covariance
+    matrix, :math:`{C}_{ij}`, between ith and jth projected radial bin.
 
     The covariance matrix is calculated using spatial jackknife sampling of the data
     volume.  The spatial samples are defined by splitting the box along each dimension,
@@ -139,7 +139,7 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         returned:
 
         .. math::
-            \xi_{11}(r), \xi_{12}(r), \xi_{22}(r)
+            w_{p 11}(r_p), w_{p 12}(r_p), w_{p 22}(r_p)
 
         The autocorrelation of ``sample1``, the cross-correlation between
         ``sample1`` and ``sample2``, and the autocorrelation of ``sample2``. If
@@ -158,13 +158,13 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
             C^{11}_{ij}, C^{12}_{ij}, C^{22}_{ij},
 
         the associated covariance matrices of
-        :math:`\xi_{11}(r), \xi_{12}(r), \xi_{22}(r)`. If ``do_auto`` or ``do_cross``
+        :math:`w_{p 11}(r_p), w_{p 12}(r_p), w_{p 22}(r_p)`. If ``do_auto`` or ``do_cross``
         is set to False, the appropriate result(s) is not returned.
 
     Notes
     -----
     The jackknife sampling of pair counts is done internally in
-    `~halotools.mock_observables.pair_counters.npairs_jackknife_rp_pi`.
+    `~halotools.mock_observables.pair_counters.npairs_jackknife_xy_z`.
 
     Pairs are counted such that when 'removing' subvolume :math:`k`, and counting a
     pair in subvolumes :math:`i` and :math:`j`:

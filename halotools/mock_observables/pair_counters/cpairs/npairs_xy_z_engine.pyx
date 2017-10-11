@@ -15,7 +15,7 @@ __all__ = ('npairs_xy_z_engine', )
 @cython.nonecheck(False)
 def npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     rp_bins, pi_bins, cell1_tuple):
-    r""" Cython engine for counting pairs of points as a function of projected separation.
+    r""" Cython engine for counting pairs of points as a function of projected and parrallel separation.
 
     Parameters
     ------------

@@ -25,8 +25,8 @@ def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
         jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Pair counter used to make jackknife error estimates of real-space pair counter
-    `~halotools.mock_observables.pair_counters.npairs`.
+    Pair counter used to make jackknife error estimates of redshift-space pair counter
+    `~halotools.mock_observables.pair_counters.npairs_xy_z`.
 
     Parameters
     ----------
