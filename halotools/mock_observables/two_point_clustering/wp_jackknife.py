@@ -6,11 +6,16 @@ calculate the two point correlation function and covariance matrix.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
 from .rp_pi_tpcf import _rp_pi_tpcf_process_args
 from .tpcf_jackknife import get_subvolume_numbers, _enclose_in_box
 
+from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
+    get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import npairs_jackknife_xy_z
 
 from ..catalog_analysis_helpers import cuboid_subvolume_labels
@@ -215,7 +220,7 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
+        _sample1_is_sample2, PBCs = _wp_jackknife_tpcf_process_args(*function_args)
 
     # determine box size the data occupies.
     # This is used in determining jackknife samples.
@@ -414,3 +419,58 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins
         RR = None
 
     return DR, RR
+
+def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
+        period, do_auto, do_cross, estimator, num_threads,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
+    """
+    Private method to do bounds-checking on the arguments passed to
+    `~halotools.mock_observables.redshift_space_tpcf`.
+    """
+    sample1 = enforce_sample_has_correct_shape(sample1)
+    sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
+        sample1, sample2, do_cross)
+
+    if randoms is not None:
+        randoms = np.atleast_1d(randoms)
+
+    rp_bins = get_separation_bins_array(rp_bins)
+    rp_max = np.amax(rp_bins)
+
+    pi_bins = get_line_of_sight_bins_array(pi_bins)
+    pi_max = np.amax(pi_bins)
+
+    period, PBCs = get_period(period)
+    
+    # process randoms parameter
+    if np.shape(randoms) == (1,):
+        N_randoms = randoms[0]
+        if PBCs is True:
+            with NumpyRNGContext(seed):
+                randoms = np.random.random((N_randoms, 3))*period
+        else:
+            msg = ("\n When no `period` parameter is passed, \n"
+                   "the user must provide true randoms, and \n"
+                   "not just the number of randoms desired.")
+            raise HalotoolsError(msg)
+
+
+    _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
+
+    if (randoms is None) & (PBCs is False):
+        msg = "If no PBCs are specified, randoms must be provided.\n"
+        raise ValueError(msg)
+
+    try:
+        assert do_auto == bool(do_auto)
+        assert do_cross == bool(do_cross)
+    except:
+        msg = "`do_auto` and `do_cross` keywords must be boolean-valued."
+        raise ValueError(msg)
+
+    num_threads = get_num_threads(num_threads)
+
+    verify_tpcf_estimator(estimator)
+
+    return sample1, rp_bins, pi_bins, sample2, randoms, period,\
+        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
