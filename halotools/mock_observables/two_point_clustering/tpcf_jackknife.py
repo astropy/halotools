@@ -289,9 +289,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
 
     # calculate the covariance matrix
-    xi_11_cov = np.matrix(np.cov(xi_11_sub.T))
-    xi_12_cov = np.matrix(np.cov(xi_12_sub.T))
-    xi_22_cov = np.matrix(np.cov(xi_22_sub.T))
+    xi_11_cov = np.matrix(np.cov(xi_11_sub.T, bias=True))*(N_sub_vol-1.0)
+    xi_12_cov = np.matrix(np.cov(xi_12_sub.T, bias=True))*(N_sub_vol-1.0)
+    xi_22_cov = np.matrix(np.cov(xi_22_sub.T, bias=True))*(N_sub_vol-1.0)
 
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
