@@ -120,7 +120,7 @@ def npairs_jackknife_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
     cdef int num_y2_per_y1 = num_y2divs // num_y1divs
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
-    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq
+    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq
     cdef cnp.float64_t x1tmp, y1tmp, z1tmp
 
     cdef cnp.int64_t j1, j2
