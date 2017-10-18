@@ -13,6 +13,9 @@
 
 - Added `num_lines_header` optional keyword argument to TabularAsciiReader
 
+- Added `wp_jackknife` function. See https://github.com/astropy/halotools/pull/814.
+
+
 0.5 (2017-05-31)
 ----------------
 

@@ -12,10 +12,11 @@ from .tpcf_multipole import tpcf_multipole
 from .wp import wp
 from .rp_pi_tpcf import rp_pi_tpcf
 from .tpcf_jackknife import tpcf_jackknife
+from .wp_jackknife import wp_jackknife
 from .tpcf_one_two_halo_decomp import tpcf_one_two_halo_decomp
 from .tpcf import tpcf
 from .marked_tpcf import marked_tpcf
 
 __all__ = ('angular_tpcf', 's_mu_tpcf', 'tpcf_multipole', 'wp',
            'rp_pi_tpcf', 'tpcf_jackknife', 'tpcf_one_two_halo_decomp', 'tpcf',
-           'marked_tpcf')
+           'marked_tpcf', 'wp_jackknife')
