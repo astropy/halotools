@@ -15,6 +15,8 @@
 
 - Added `wp_jackknife` function. See https://github.com/astropy/halotools/pull/814.
 
+- Fixed bug in the normalization of the covariance matrices in the `tpcf_jackknife` function.  See https://github.com/astropy/halotools/issues/815.
+
 
 0.5 (2017-05-31)
 ----------------
