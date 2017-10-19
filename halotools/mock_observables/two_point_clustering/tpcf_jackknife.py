@@ -194,13 +194,13 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     >>> xran = np.random.uniform(0, Lbox, Nran)
     >>> yran = np.random.uniform(0, Lbox, Nran)
     >>> zran = np.random.uniform(0, Lbox, Nran)
-    >>> randoms = np.vstack((x,y,z)).T
+    >>> randoms = np.vstack((xran,yran,zran)).T
 
     Calculate the jackknife covariance matrix by dividing the simulation box
     into 3 samples per dimension (for a total of 3^3 total jackknife samples):
 
     >>> rbins = np.logspace(0.5, 1.5, 8)
-    >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=3, period=Lbox)
+    >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=3, period=Lbox)  #  doctest: +SKIP
     """
 
     # process input parameters
