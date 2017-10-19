@@ -200,7 +200,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5, 5, 5],
     into 3 samples per dimension (for a total of 3^3 total jackknife samples):
 
     >>> rbins = np.logspace(0.5, 1.5, 8)
-    >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=3, period=Lbox)
+    >>> xi, xi_cov = tpcf_jackknife(coords, randoms, rbins, Nsub=3, period=Lbox)  #  doctest: +SKIP
     """
 
     # process input parameters
