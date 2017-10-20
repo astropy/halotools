@@ -290,8 +290,6 @@ class ContinuousAssembias(HeavisideAssembias):
             #  normalize by max value away from percentile
             #  This ensures that the "slope" definition and boundaries are universal
             pv_sub_sec_haloprop = sec_haloprop[no_edge_mask] - no_edge_percentile_values
-                        prim_haloprop=prim_haloprop[no_edge_mask],
-                        sec_haloprop=sec_haloprop[no_edge_mask]) > 0)/pv_sub_sec_haloprop.shape[0]
 
             if prim_haloprop[no_edge_mask].shape[0] == 0:
                 perturbation = np.zeros_like(no_edge_result)
