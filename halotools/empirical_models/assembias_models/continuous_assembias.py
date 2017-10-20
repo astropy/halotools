@@ -1,4 +1,4 @@
-"""
+r"""
 This module contains the `~halotools.empirical_models.ContinuousAssembias` class.
 The purpose of this class is to introduce a sigmoid-shaped assembly bias into
 any method of any component model. It subclasses `HeavisideAssembias` and
@@ -18,42 +18,57 @@ from ...utils.table_utils import compute_conditional_percentile_values, compute_
 __all__ = ('ContinuousAssembias', )
 __author__ = ('Sean McLaughlin', )
 
-F = 0.99 # slope tolerance
+F = 0.99  # slope tolerance
+
 
 class ContinuousAssembias(HeavisideAssembias):
     """
     Class used to extend the behavior of `HeavisideAssembias` for continuous distributions.
     """
-    def _disp_func(self,sec_haloprop, slope):
+    def _disp_func(self, sec_haloprop, slope):
         """
         Function define the value of \delta N_max as a function of the sec_haloprop distribution and a slope param
-        :param sec_haloprop:
-            The table of secondary haloprops. In general, the median (or some other percentile) is subtracted
+
+        Parameters
+        ----------
+        sec_haloprop : float or ndarray
+            The table of secondary haloprops.
+            In general, the median (or some other percentile) is subtracted
             from this value first, and it is normalized by the most extreme value.
-        :param slope:
-            The "slope" parameter, which controls the rate of change between negative and positive displacements.
-            The name "slope" is a bit of a misnomer, but generally controls the rate of change of the distribution.
-        :return:
-            The displacement as a function of the sec_halopropr
+
+        slope : float
+            The "slope" parameter, which controls the rate of change between
+            negative and positive displacements.
+
+            The name "slope" is a bit of a misnomer,
+            but generally controls the rate of change of the distribution.
+
+        Returns
+        -------
+        displacement : float or ndarray
+            The displacement as a function of the sec_haloprop
         """
         return np.reciprocal(1 + np.exp(-(10 ** slope) * (sec_haloprop)))
 
     def _initialize_assembias_param_dict(self, assembias_strength=0.5, assembias_slope=1.0, **kwargs):
-        '''
+        r"""
         For full documentation, see the Heaviside Assembias Declaration in Halotools.
 
-        This function calls the superclass's version. Then, it adds the parameters from disp_func to the dict as well.
-        :param assembias_strength:
-            Strength of assembias. Passed to superclass
-        :param assembias_slope:
-            "Slope" of disp_func. Can be an iterator of float. Uses the same abcissa as assembias_strength
-        :param kwargs:
-            Other kwargs. Details in superclass.
-        :return: None
-        '''
-        super(ContinuousAssembias, self)._initialize_assembias_param_dict(assembias_strength=assembias_strength,
-                                                                      **kwargs)
-        # Accept float or iterable
+        This function calls the superclass's version.
+        Then, it adds the parameters from disp_func to the dict as well.
+
+        Parameters
+        ----------
+        assembias_strength : float, optional
+            Strength of assembias. Default is 1.0 for maximum strength
+
+        assembias_slope : float, optional
+            Effective slopes of disp_func.
+            Can be an iterator of float. Uses the same abscissa as assembias_strength
+        """
+        super(ContinuousAssembias, self)._initialize_assembias_param_dict(
+                assembias_strength=assembias_strength, **kwargs)
+        #  Accept float or iterable
         slope = assembias_slope
         try:
             iterator = iter(slope)
@@ -69,16 +84,21 @@ class ContinuousAssembias(HeavisideAssembias):
         for ipar, val in enumerate(slope):
             self.param_dict[self._get_continuous_assembias_param_dict_key(ipar)] = val
 
-    # This formula ensures that the most extreme value will experience F times the maximum displacement
-    # Otherwise, slope could arbitrarily cancel out strength.
+    #  This formula ensures that the most extreme value will experience F times the maximum displacement
+    #  Otherwise, slope could arbitrarily cancel out strength.
     @model_helpers.bounds_enforcing_decorator_factory(np.log10(np.log((1+F)/(1-F))), 10)
     def assembias_slope(self, prim_haloprop):
-        """
-        Returns the slope of disp_func as a function of prim_haloprop
-        :param prim_haloprop:
-            the pimary haloprop
-        :return:
-            slope, the slope at each prim_haloprop
+        """ Returns the slope of disp_func as a function of prim_haloprop
+
+        Parameters
+        ----------
+        prim_haloprop : float or ndarray
+            the primary haloprop, e.g., halo mass or vmax
+
+        Returns
+        -------
+        slope : float or ndarray
+            Value of the slope at each prim_haloprop
         """
         model_ordinates = (self.param_dict[self._get_continuous_assembias_param_dict_key(ipar)]
                            for ipar in xrange(len(self._assembias_strength_abscissa)))
@@ -92,28 +112,24 @@ class ContinuousAssembias(HeavisideAssembias):
 
         return result
 
-    def _get_continuous_assembias_param_dict_key(self,ipar):
-        '''
-        '''
+    def _get_continuous_assembias_param_dict_key(self, ipar):
+        """
+        """
         return self._method_name_to_decorate + '_' + self.gal_type + '_assembias_slope' + str(ipar + 1)
 
     def _galprop_perturbation(self, **kwargs):
-        """
+        r"""
         Method determines hwo much to boost the baseline function
         according to the strength of assembly bias and the min/max
         boost allowable by the requirement that the all-halo baseline
         function be preserved. The returned perturbation applies to all halos.
 
-        :param kwargs:
-            Required kwargs are:
-                baseline_result
-                prim_haloprop
-                sec_haloprop
+        Required kwargs are: ``baseline_result``, ``prim_haloprop``, ``sec_haloprop``.
 
-        Note that this is defined where sec_haloprop has had hte p-th percentile subtracted
+        Note that this is defined where sec_haloprop has had the p-th percentile subtracted
         and is normalized by the maximum value.
 
-        :return: result, np.arry with dimensions of prim_haloprop detailing the perturbation.
+        Returns ndarray with dimensions of prim_haloprop detailing the perturbation.
         """
 
         lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
@@ -131,14 +147,14 @@ class ContinuousAssembias(HeavisideAssembias):
                    "``baseline_result``, ``splitting_result`` and ``prim_haloprop``")
             raise HalotoolsError(msg)
 
-        # evaluate my continuous modification
+        #  evaluate my continuous modification
         strength = self.assembias_strength(prim_haloprop)
         slope = self.assembias_slope(prim_haloprop)
 
-        # the average displacement acts as a normalization we need.
+        #  the average displacement acts as a normalization we need.
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
         disp_average = compute_conditional_averages(vals=max_displacement,prim_haloprop=prim_haloprop)
-        #disp_average = np.ones((prim_haloprop.shape[0], ))*0.5
+        #  disp_average = np.ones((prim_haloprop.shape[0], ))*0.5
 
         result = np.zeros(len(prim_haloprop))
 
@@ -168,17 +184,19 @@ class ContinuousAssembias(HeavisideAssembias):
         return result
 
     def assembias_decorator(self, func):
-        """ Primary behavior of the `ContinuousAssembias` class.
+        r""" Primary behavior of the `ContinuousAssembias` class.
         This method is used to introduce a boost/decrement of the baseline
         function in a manner that preserves the all-halo result.
         Any function with a semi-bounded range can be decorated with
         `assembias_decorator`. The baseline behavior can be anything
         whatsoever, such as mean star formation rate or
         mean halo occupation, provided it has a semi-bounded range.
+
         Parameters
         -----------
         func : function object
             Baseline function whose behavior is being decorated with assembly bias.
+
         Returns
         -------
         wrapper : function object
@@ -193,9 +211,9 @@ class ContinuousAssembias(HeavisideAssembias):
         def wrapper(*args, **kwargs):
 
             #################################################################################
-            # Retrieve the arrays storing prim_haloprop and sec_haloprop
-            # The control flow below is what permits accepting an input
-            # table or a directly inputting prim_haloprop and sec_haloprop arrays
+            #  Retrieve the arrays storing prim_haloprop and sec_haloprop
+            #  The control flow below is what permits accepting an input
+            #  table or a directly inputting prim_haloprop and sec_haloprop arrays
 
             _HAS_table = False
             if 'table' in kwargs:
@@ -228,28 +246,28 @@ class ContinuousAssembias(HeavisideAssembias):
 
             #################################################################################
 
-            # Compute the percentile to split on as a function of the input prim_haloprop
+            #  Compute the percentile to split on as a function of the input prim_haloprop
             split = self.percentile_splitting_function(prim_haloprop)
 
-            # Compute the baseline, undecorated result
+            #  Compute the baseline, undecorated result
             result = func(*args, **kwargs)
 
-            # We will only decorate values that are not edge cases,
-            # so first compute the mask for non-edge cases
+            #  We will only decorate values that are not edge cases,
+            #  so first compute the mask for non-edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) &
                 (result > baseline_lower_bound) & (result < baseline_upper_bound)
             )
-            # Now create convenient references to the non-edge-case sub-arrays
+            #  Now create convenient references to the non-edge-case sub-arrays
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
 
-            # Retrieve percentile values (medians) if they've been precomputed. Else, compute them.
+            #  Retrieve percentile values (medians) if they've been precomputed. Else, compute them.
             if _HAS_table is True:
                 if self.sec_haloprop_key + '_percentile_values' in table.keys():
                     no_edge_percentile_values = table[self.sec_haloprop_key + '_percentile_value'][no_edge_mask]
                 else:
-                    # the value of sec_haloprop_percentile will be computed from scratch
+                    #  the value of sec_haloprop_percentile will be computed from scratch
                     no_edge_percentile_values = compute_conditional_percentile_values( p=no_edge_split,
                         prim_haloprop=prim_haloprop[no_edge_mask],
                         sec_haloprop=sec_haloprop[no_edge_mask]
@@ -266,11 +284,11 @@ class ContinuousAssembias(HeavisideAssembias):
                         sec_haloprop=sec_haloprop[no_edge_mask]
                     )
 
-            # NOTE I've removed the type 1 mask as it is not well-defined in this implementation
-            # this has all been rolled into the galprop_perturbation function
+            #  NOTE I've removed the type 1 mask as it is not well-defined in this implementation
+            #  this has all been rolled into the galprop_perturbation function
 
-            #normalize by max value away from percentile
-            # This ensures that the "slope" definition and boundaries are universal
+            #  normalize by max value away from percentile
+            #  This ensures that the "slope" definition and boundaries are universal
             pv_sub_sec_haloprop = sec_haloprop[no_edge_mask] - no_edge_percentile_values
                         prim_haloprop=prim_haloprop[no_edge_mask],
                         sec_haloprop=sec_haloprop[no_edge_mask]) > 0)/pv_sub_sec_haloprop.shape[0]
@@ -283,12 +301,8 @@ class ContinuousAssembias(HeavisideAssembias):
                     sec_haloprop=pv_sub_sec_haloprop/np.max(np.abs(pv_sub_sec_haloprop)),
                     baseline_result=no_edge_result)
 
-
             no_edge_result += perturbation
             result[no_edge_mask] = no_edge_result
-
-            # print 'End Wrapper'
-            # print result.mean(), result.std(), result.max(), result.min()
 
             return result
 
