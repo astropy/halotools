@@ -208,10 +208,12 @@ class compute_conditional_decorator(object):
             fkwargs['sec_haloprop'] = sec_haloprop
         # sort on secondary property only with each mass bin
         bins_in_halocat = set(prim_haloprop_bins)
-        for ibin in bins_in_halocat:
+
+        #idx is usully the same; however, some edge cases make this work better
+        for idx, ibin in enumerate(bins_in_halocat):
             indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
 
-            output[indices_of_prim_haloprop_bin] = self.func(ibin = ibin,
+            output[indices_of_prim_haloprop_bin] = self.func(idx=idx,ibin = ibin,
                                                         indices_of_prim_haloprop_bin= indices_of_prim_haloprop_bin,
                                                         *args, **fkwargs)
 
@@ -335,7 +337,7 @@ def compute_conditional_averages(indices_of_prim_haloprop_bin, vals, **kwargs):
     return np.mean(vals[indices_of_prim_haloprop_bin])
 
 @compute_conditional_decorator
-def compute_conditional_percentile_values(ibin, indices_of_prim_haloprop_bin, sec_haloprop, p=0.5, **kwargs):
+def compute_conditional_percentile_values(idx, indices_of_prim_haloprop_bin, sec_haloprop, p=0.5, **kwargs):
     """
     In bins of the ``prim_haloprop``, compute the percentile given by p of the input
      ``table`` based on the value of ``sec_haloprop``.
@@ -384,7 +386,7 @@ def compute_conditional_percentile_values(ibin, indices_of_prim_haloprop_bin, se
     *smaller* values of the secondary property
     receive *smaller* values of the returned percentile.
     """
-    pp = p if type(p) is float else p[ibin]
+    pp = p if type(p) is float else p[idx-1]
     try:
         assert 0 <= pp <= 1
     except AssertionError:

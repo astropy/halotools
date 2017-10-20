@@ -160,8 +160,8 @@ class ContinuousAssembias(HeavisideAssembias):
             strength_neg = strength[less_than_half_avg_idx]
             avg_neg = disp_average[less_than_half_avg_idx]
 
-            lower_bound1 = (base_neg-baseline_lower_bound)/(1- avg_neg)
-            lower_bound2 = (baseline_upper_bound - base_neg)/avg_neg
+            lower_bound1 = (base_neg-baseline_lower_bound)/avg_neg#(1- avg_neg)
+            lower_bound2 = (baseline_upper_bound - base_neg)/(1-avg_neg)#avg_neg
             lower_bound = np.minimum(lower_bound1, lower_bound2)
             result[less_than_half_avg_idx] = strength_neg*lower_bound*(max_displacement[less_than_half_avg_idx]-avg_neg)
 
@@ -272,6 +272,8 @@ class ContinuousAssembias(HeavisideAssembias):
             #normalize by max value away from percentile
             # This ensures that the "slope" definition and boundaries are universal
             pv_sub_sec_haloprop = sec_haloprop[no_edge_mask] - no_edge_percentile_values
+                        prim_haloprop=prim_haloprop[no_edge_mask],
+                        sec_haloprop=sec_haloprop[no_edge_mask]) > 0)/pv_sub_sec_haloprop.shape[0]
 
             if prim_haloprop[no_edge_mask].shape[0] == 0:
                 perturbation = np.zeros_like(no_edge_result)
