@@ -17,6 +17,8 @@
 
 - Fixed bug in the normalization of the covariance matrices in the `tpcf_jackknife` function.  See https://github.com/astropy/halotools/issues/815.
 
+- Added `rp_pi_tpcf_jackknife` function.
+
 
 0.5 (2017-05-31)
 ----------------
