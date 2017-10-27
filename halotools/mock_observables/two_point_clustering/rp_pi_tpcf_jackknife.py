@@ -34,7 +34,7 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
         approx_cell1_size=None, approx_cell2_size=None, approx_cellran_size=None):
     r"""
     redshift space correlation function, :math:`\xi(r_{p}, \pi)` and the covariance
-    matrix, :math:`{C}_{ij}`, between ith and jth projected radial and perpendicular bin.
+    matrix, :math:`{C}_{ij}`, between ith and jth bin.
 
     The covariance matrix is calculated using spatial jackknife sampling of the data
     volume.  The spatial samples are defined by splitting the box along each dimension,
@@ -188,7 +188,12 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
                 0.0  & : i=j=k \\
             \end{array}
                    \right.
-
+    
+    The returned covariance matrix is 2-D.
+    The indices of the matrix are in row-major order.  To access the covariance between 
+    the (ith rp_bin and the jth pi_bin) and the (kth rp_bin and the lth pi_bin) of the covariance matrix C, 
+    sigma2 = C[i*j,k*l]
+    
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points
@@ -221,6 +226,9 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
     >>> rp_bins = np.logspace(0.5, 1.5, 8)
     >>> pi_bins = np.logspace(0.5, 1.5, 8)
     >>> xi, xi_cov = rp_pi_tpcf_jackknife(coords, randoms, rp_bins, pi_bins, Nsub=3, period=Lbox)
+    
+    To get the standard deviation in each bin of the correlation function
+    >>> sigma = np.sqrt(np.diagonal(xi_cov)).reshape(len(rp_bins)-1,len(pi_bins)-1)
     """
 
     # process input parameters
