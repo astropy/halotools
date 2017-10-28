@@ -155,13 +155,13 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
         ``sample2``, and the autocorrelation of ``sample2``, respectively. If
         ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are
         returned.
-        
+
     cov_matrix(ices) : numpy.ndarray
 
-        *[len(rp_bins)-1] \times [len(pi_bins)-1]* by *[len(rp_bins)-1] \times [len(pi_bins)-1]* 
+        *[len(rp_bins)-1] \times [len(pi_bins)-1]* by *[len(rp_bins)-1] \times [len(pi_bins)-1]*
         ndarray containing the covariance matrix :math:`C_{ij}`
 
-        If ``sample2`` is passed as input three ndarrays of shape 
+        If ``sample2`` is passed as input three ndarrays of shape
         *[len(rp_bins)-1] \times [len(pi_bins)-1]* by *[len(rp_bins)-1] \times [len(pi_bins)-1]* are returned:
 
         .. math::
@@ -188,12 +188,12 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
                 0.0  & : i=j=k \\
             \end{array}
                    \right.
-    
+
     The returned covariance matrix is 2-D.
-    The indices of the matrix are in row-major order.  To access the covariance between 
-    the (ith rp_bin and the jth pi_bin) and the (kth rp_bin and the lth pi_bin) of the covariance matrix C, 
+    The indices of the matrix are in row-major order.  To access the covariance between
+    the (ith rp_bin and the jth pi_bin) and the (kth rp_bin and the lth pi_bin) of the covariance matrix C,
     sigma2 = C[i*j,k*l]
-    
+
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points
@@ -226,7 +226,7 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
     >>> rp_bins = np.logspace(0.5, 1.5, 8)
     >>> pi_bins = np.logspace(0.5, 1.5, 8)
     >>> xi, xi_cov = rp_pi_tpcf_jackknife(coords, randoms, rp_bins, pi_bins, Nsub=3, period=Lbox)
-    
+
     To get the standard deviation in each bin of the correlation function
     >>> sigma = np.sqrt(np.diagonal(xi_cov)).reshape(len(rp_bins)-1,len(pi_bins)-1)
     """
@@ -316,18 +316,18 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
     xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
     xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
     xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
-    
+
     # calculate the covariance matrix
     # format correlation functions into 1-D vector
-    
+
     xi_11_sub_flat = np.reshape(xi_11_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
     xi_12_sub_flat = np.reshape(xi_12_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
     xi_22_sub_flat = np.reshape(xi_22_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
-    
+
     xi_11_cov = np.matrix(np.cov(xi_11_sub_flat.T, bias=True))*(N_sub_vol-1)
     xi_12_cov = np.matrix(np.cov(xi_12_sub_flat.T, bias=True))*(N_sub_vol-1)
     xi_22_cov = np.matrix(np.cov(xi_22_sub_flat.T, bias=True))*(N_sub_vol-1)
-    
+
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
     else:
@@ -396,6 +396,7 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins
 
     return DR, RR
 
+
 def _rp_pi_tpcf_jackknife_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
         period, do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
@@ -417,7 +418,7 @@ def _rp_pi_tpcf_jackknife_process_args(sample1, rp_bins, pi_bins, sample2, rando
     pi_max = np.amax(pi_bins)
 
     period, PBCs = get_period(period)
-    
+
     # process randoms parameter
     if np.shape(randoms) == (1,):
         N_randoms = randoms[0]
@@ -428,8 +429,7 @@ def _rp_pi_tpcf_jackknife_process_args(sample1, rp_bins, pi_bins, sample2, rando
             msg = ("\n When no `period` parameter is passed, \n"
                    "the user must provide true randoms, and \n"
                    "not just the number of randoms desired.")
-            raise HalotoolsError(msg)
-
+            raise KeyError(msg)
 
     _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
 
