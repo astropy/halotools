@@ -16,7 +16,7 @@ __all__ = ('test_tpcf_jackknife_corr_func', )
 # create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rp_bins = np.linspace(0.001, 0.2, 5).astype(float)
-pi_bins = np.linspace(0.001, 0.2, 5)
+pi_bins = np.linspace(0.0001, 0.2, 5)
 
 Npts = 1000
 
@@ -123,3 +123,18 @@ def test_rp_pi_tpcf_jackknife_cov_matrix():
         Nsub=3, period=period, num_threads=1)
 
     assert np.shape(err) == (nbins_1*nbins_2, nbins_1*nbins_2), "cov matrix not correct shape"
+
+
+def test_do_auto_false():
+    """
+    """
+    Npts1, Npts2, Nran = 300, 180, 1000
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
+
+    result1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
+        period=period, Nsub=3, num_threads=1, sample2=sample2,
+        do_auto=False)
+
