@@ -9,7 +9,6 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
-from .rp_pi_tpcf import _rp_pi_tpcf_process_args
 from .tpcf_jackknife import get_subvolume_numbers, _enclose_in_box
 
 from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
@@ -300,7 +299,7 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
     xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
     xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
-    
+
     # account for factor of 2*pi_max in the integration
     xi_11_full = 2.0*pi_max*xi_11_full
     xi_12_full = 2.0*pi_max*xi_12_full
@@ -308,18 +307,12 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     xi_11_sub = 2.0*pi_max*xi_11_sub
     xi_12_sub = 2.0*pi_max*xi_12_sub
     xi_22_sub = 2.0*pi_max*xi_22_sub
-    
+
     # calculate the covariance matrix
     xi_11_cov = np.matrix(np.cov(xi_11_sub.T, bias=True))*(N_sub_vol-1)
     xi_12_cov = np.matrix(np.cov(xi_12_sub.T, bias=True))*(N_sub_vol-1)
     xi_22_cov = np.matrix(np.cov(xi_22_sub.T, bias=True))*(N_sub_vol-1)
-    
-    #calculate the covariance matrix using the explicitly defined function below
-    #but you get the same result as above
-    #xi_11_cov =jackknife_covariance(xi_11_sub)
-    #xi_12_cov = jackknife_covariance(xi_12_sub)
-    #xi_22_cov = jackknife_covariance(xi_22_sub)
-    
+
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
     else:
@@ -330,38 +323,6 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         elif do_cross is True:
             return xi_12_full, xi_12_cov
 
-def jackknife_covariance(x):
-    """
-    caclulate the jackknife covariance matrix
-    
-    Parameters
-    ----------
-    x : array_like
-        array of shape (N jacknife samples, N variables)
-    
-    Returns
-    -------
-    cov : numpy.matrix
-    
-    Notes
-    -----
-    This function returns the same result as np.cov(x.T, bias=True)*(Njk-1),
-    where Njk is the number of jackknife samples.
-    """
-    
-    Njk, Nvar = np.shape(x)
-    
-    mx = np.mean(x, axis=0)
-    
-    C = np.zeros((Nx,Nx))
-    for i in range(0,Nx):
-        for j in range(0,Nx):
-            for k in range(0,Nj):
-                C[i,j] = C[i,j]+(x[k,i]-mx[i])*(x[k,j]-mx[j])
-    
-    C = C*(Nj-1.0)/Nj
-    
-    return np.matrix(C)
 
 def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi_bins,
         period, num_threads, do_auto, do_cross, _sample1_is_sample2):
@@ -420,6 +381,7 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins
 
     return DR, RR
 
+
 def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
         period, do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
@@ -441,7 +403,7 @@ def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
     pi_max = np.amax(pi_bins)
 
     period, PBCs = get_period(period)
-    
+
     # process randoms parameter
     if np.shape(randoms) == (1,):
         N_randoms = randoms[0]
@@ -452,8 +414,7 @@ def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
             msg = ("\n When no `period` parameter is passed, \n"
                    "the user must provide true randoms, and \n"
                    "not just the number of randoms desired.")
-            raise HalotoolsError(msg)
-
+            raise ValueError(msg)
 
     _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
 
