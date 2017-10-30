@@ -270,12 +270,14 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
         rp_bins, pi_bins, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
 
     # pull out the full and sub sample results
-    D1D1_full = D1D1[0, :, :]
-    D1D1_sub = D1D1[1:, :, :]
-    D1D2_full = D1D2[0, :, :]
-    D1D2_sub = D1D2[1:, :, :]
-    D2D2_full = D2D2[0, :, :]
-    D2D2_sub = D2D2[1:, :, :]
+    if (do_auto is True):
+        D1D1_full = D1D1[0, :, :]
+        D1D1_sub = D1D1[1:, :, :]
+        D2D2_full = D2D2[0, :, :]
+        D2D2_sub = D2D2[1:, :, :]
+    if (do_cross is True):
+        D1D2_full = D1D2[0, :, :]
+        D1D2_sub = D1D2[1:, :, :]
 
     # do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
@@ -308,25 +310,32 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
         RR_sub = None
 
     # calculate the correlation function for the full sample
-    xi_11_full = _TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
-    xi_12_full = _TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
-    xi_22_full = _TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
+    if (do_auto is True):
+        xi_11_full = _TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
+        xi_22_full = _TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
+    if (do_cross is True):
+        xi_12_full = _TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
 
     # calculate the correlation function for the subsamples
-    xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
-    xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
-    xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
+    if (do_auto is True):
+        xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
+        xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
+    if (do_cross is True):
+        xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
 
     # calculate the covariance matrix
     # format correlation functions into 1-D vector
-
-    xi_11_sub_flat = np.reshape(xi_11_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
-    xi_12_sub_flat = np.reshape(xi_12_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
-    xi_22_sub_flat = np.reshape(xi_22_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
-
-    xi_11_cov = np.matrix(np.cov(xi_11_sub_flat.T, bias=True))*(N_sub_vol-1)
-    xi_12_cov = np.matrix(np.cov(xi_12_sub_flat.T, bias=True))*(N_sub_vol-1)
-    xi_22_cov = np.matrix(np.cov(xi_22_sub_flat.T, bias=True))*(N_sub_vol-1)
+    if (do_auto is True):
+        xi_11_sub_flat = np.reshape(xi_11_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
+        xi_22_sub_flat = np.reshape(xi_22_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
+    if (do_cross is True):
+        xi_12_sub_flat = np.reshape(xi_12_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
+    
+    if (do_auto is True):
+        xi_11_cov = np.matrix(np.cov(xi_11_sub_flat.T, bias=True))*(N_sub_vol-1)
+        xi_22_cov = np.matrix(np.cov(xi_22_sub_flat.T, bias=True))*(N_sub_vol-1)
+    if (do_cross is True):
+        xi_12_cov = np.matrix(np.cov(xi_12_sub_flat.T, bias=True))*(N_sub_vol-1)
 
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
