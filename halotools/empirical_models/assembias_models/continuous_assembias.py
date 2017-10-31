@@ -9,13 +9,13 @@ any method of any component model. It subclasses `HeavisideAssembias` and
 from functools import wraps
 import numpy as np
 
-from . import HeavisideAssembias
+from . import HeavisideAssembias, FreeSplitAssembias
 from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
 from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages
 
-__all__ = ('ContinuousAssembias', )
+__all__ = ('ContinuousAssembias', 'FreeSplitContinuousAssembias' )
 __author__ = ('Sean McLaughlin', )
 
 F = 0.99  # slope tolerance
@@ -305,5 +305,9 @@ class ContinuousAssembias(HeavisideAssembias):
             return result
 
         return wrapper
+
+
+class FreeSplitContinuousAssembias(ContinuousAssembias, FreeSplitAssembias):
+    pass
 
 
