@@ -305,3 +305,5 @@ class ContinuousAssembias(HeavisideAssembias):
             return result
 
         return wrapper
+
+
