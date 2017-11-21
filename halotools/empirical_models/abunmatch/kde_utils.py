@@ -6,7 +6,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 
 
-__all__ = ('kde_cdf', )
+__all__ = ('kde_cdf', 'kde_conditional_percentile', 'percentile_curves')
 
 
 def kde_cdf(data, y):
@@ -128,3 +128,65 @@ def kde_conditional_percentile(y, x, x_bins, npts_interpol=2000, npts_sample=500
                 npts_interpol=min(npts_interpol, npts_bin), npts_sample=min(npts_sample, npts_bin))
 
     return result
+
+
+def percentile_curves(p, x, y, x_bins, **kwargs):
+    """ Calculate the p-percentile curves of y as a function of x.
+
+    A common use of this function is to compute, for example,
+    the 95-percentile region enveloping :math:`\langle y \vert x \rangle`.
+
+    Parameters
+    ----------
+    p : float or sequence
+        Float or ndarray of shape (num_p, ) storing the value of the percentiles
+        that define the percentile curves.
+
+    x : ndarray
+        Numpy array of shape (num_pts, ) storing the x-value used to bin the data
+
+    y : ndarray
+        Numpy array of shape (num_pts, ) storing the y-value used to compute P( > y | x)
+
+    x_bins : ndarray
+        Numpy array of shape (num_bins, ) storing the bin edges used to bin the data
+        Care must be taken so that each bin contains a sufficient number of points
+        to robustly calculate each percentile (e.g., at least 50 points if p=0.02 is desired)
+
+    Returns
+    -------
+    x_mids : ndarray
+        Numpy array shape of (num_bins-1, ) storing the midpoint of each bin
+
+    pcurves : ndarray
+        Numpy array of shape (num_p, num_bins-1) storing the percentile curves
+
+    Examples
+    --------
+    Here we generate some fake data to show how to calculate
+    the median value of y as a function of x,
+    and also the 90-percentile region enveloping this median relation.
+
+    >>> npts = int(1e4)
+    >>> p = (0.05, 0.5, 0.95)
+    >>> x = np.linspace(5, 100, npts)
+    >>> y = np.random.rand(npts)
+    >>> x_bins = np.linspace(5, 100, 10)
+    >>> x_mids, pcurves = percentile_curves(p, x, y, x_bins)
+    """
+    p = np.atleast_1d(p)
+
+    y_percentile = kde_conditional_percentile(y, x, x_bins, **kwargs)
+
+    xmids = 0.5*(x_bins[:-1] + x_bins[1:])
+    result = np.zeros((len(p), len(xmids)))
+
+    for j, bounds in enumerate(zip(x_bins[:-1], x_bins[1:])):
+        low, high = bounds
+        mask = (x >= low) & (x < high)
+        sample_percentile = y_percentile[mask]
+        sample_y = y[mask]
+        for i, pval in enumerate(p):
+            result[i, j] = sample_y[np.argmin(np.abs(sample_percentile-pval))]
+
+    return xmids, result
