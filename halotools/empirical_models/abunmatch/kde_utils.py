@@ -85,7 +85,7 @@ def kde_cdf_interpol(data, y, npts_interpol=None, npts_sample=None):
         return kde_cdf(data, y)
 
 
-def kde_conditional_percentile(y, x, x_bins, npts_interpol=1000, npts_sample=5000):
+def kde_conditional_percentile(y, x, x_bins, npts_interpol=2000, npts_sample=5000):
     """ Estimate P(> y | x) for each input point (x, y) by using Gaussian kernel density
     estimation within each bin defined by x_bins.
 
@@ -128,7 +128,3 @@ def kde_conditional_percentile(y, x, x_bins, npts_interpol=1000, npts_sample=500
                 npts_interpol=min(npts_interpol, npts_bin), npts_sample=min(npts_sample, npts_bin))
 
     return result
-
-
-
-
