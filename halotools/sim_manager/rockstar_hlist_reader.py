@@ -6,10 +6,9 @@ publicly available Rockstar hlist files and store them in cache.
 """
 
 import os
-
+import numpy as np
 from warnings import warn
 from astropy.table import Table
-
 import datetime
 
 try:
@@ -21,13 +20,14 @@ except ImportError:
         "sim_manager sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda. ")
 
-
 from .tabular_ascii_reader import TabularAsciiReader
 from .halo_table_cache import HaloTableCache
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
 
 from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import HalotoolsError
+from ..utils.python_string_comparisons import _passively_decode_string
+
 
 __all__ = ('RockstarHlistReader', )
 
@@ -360,18 +360,18 @@ class RockstarHlistReader(TabularAsciiReader):
         self._enforce_halo_catalog_formatting_requirements()
 
         # Bind the constructor arguments to the instance
-        self.simname = simname
-        self.halo_finder = halo_finder
+        self.simname = _passively_decode_string(simname)
+        self.halo_finder = _passively_decode_string(halo_finder)
         self.redshift = float(get_redshift_string(redshift))
-        self.version_name = version_name
+        self.version_name = _passively_decode_string(version_name)
         self.dz_tol = dz_tol
         self.Lbox = Lbox
         self.particle_mass = particle_mass
         self.overwrite = overwrite
         self.ignore_nearby_redshifts = ignore_nearby_redshifts
-        self.processing_notes = processing_notes
+        self.processing_notes = _passively_decode_string(processing_notes)
 
-        self.output_fname = (
+        self.output_fname = _passively_decode_string(
             self._retrieve_output_fname(output_fname, self.overwrite, **kwargs)
             )
 
@@ -506,7 +506,7 @@ class RockstarHlistReader(TabularAsciiReader):
             '.' + self.version_name + '.hdf5'
             )
         default_fname = os.path.join(dirname, basename)
-        return default_fname
+        return _passively_decode_string(default_fname)
 
     def _retrieve_output_fname(self, output_fname, overwrite, **kwargs):
         """ Private method checks to see whether the chosen
@@ -523,7 +523,7 @@ class RockstarHlistReader(TabularAsciiReader):
                 " with file extension '.hdf5'\n")
             raise HalotoolsError(msg)
 
-        return output_fname
+        return _passively_decode_string(output_fname)
 
     def read_halocat(self, columns_to_convert_from_kpc_to_mpc,
             write_to_disk=False, update_cache_log=False,
@@ -697,7 +697,7 @@ class RockstarHlistReader(TabularAsciiReader):
             raise HalotoolsError(uninstalled_h5py_msg)
 
         self.halo_table.write(
-            self.output_fname, path='data', overwrite=self.overwrite)
+            _passively_decode_string(self.output_fname), path='data', overwrite=self.overwrite)
         self._write_metadata()
 
     def _write_metadata(self):
@@ -708,22 +708,22 @@ class RockstarHlistReader(TabularAsciiReader):
 
         # Now add the metadata
         f = h5py.File(self.output_fname)
-        f.attrs.create('simname', str(self.simname))
-        f.attrs.create('halo_finder', str(self.halo_finder))
-        redshift_string = str(get_redshift_string(self.redshift))
+        f.attrs.create('simname', np.string_(self.simname))
+        f.attrs.create('halo_finder', np.string_(self.halo_finder))
+        redshift_string = np.string_(get_redshift_string(self.redshift))
         f.attrs.create('redshift', redshift_string)
-        f.attrs.create('version_name', str(self.version_name))
-        f.attrs.create('fname', str(self.output_fname))
+        f.attrs.create('version_name', np.string_(self.version_name))
+        f.attrs.create('fname', np.string_(self.output_fname))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
-        f.attrs.create('orig_ascii_fname', str(self.input_fname))
+        f.attrs.create('orig_ascii_fname', np.string_(self.input_fname))
 
-        time_right_now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        time_right_now = np.string_(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         f.attrs.create('time_of_catalog_production', time_right_now)
 
         if self.processing_notes is not None:
-            f.attrs.create('processing_notes', str(self.processing_notes))
+            f.attrs.create('processing_notes', np.string_(self.processing_notes))
 
         # Store all the choices for row cuts as metadata
         for haloprop_key, cut_value in self.row_cut_min_dict.items():
