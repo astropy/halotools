@@ -7,6 +7,7 @@ import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..rp_pi_tpcf_jackknife import rp_pi_tpcf_jackknife
+from ..wp_jackknife import wp_jackknife
 from ..rp_pi_tpcf import rp_pi_tpcf
 
 slow = pytest.mark.slow
@@ -16,7 +17,7 @@ __all__ = ('test_tpcf_jackknife_corr_func', )
 # create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rp_bins = np.linspace(0.001, 0.2, 5).astype(float)
-pi_bins = np.linspace(0.0001, 0.2, 5)
+pi_bins = np.linspace(0.0, 0.2, 5)
 
 Npts = 1000
 
@@ -137,4 +138,39 @@ def test_do_auto_false():
     result1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
         period=period, Nsub=3, num_threads=1, sample2=sample2,
         do_auto=False)
+
+
+@pytest.mark.slow
+def test_wp_jackknife_consistency():
+    """
+    Verify the covariance matrix returned by rp_pi_tpcf_jackknife is consistent with
+    the covariance matrix returned by wp_jackknife for the case of the first pi_bin
+    """
+    period = np.array([1.0, 1.0, 1.0])
+    rp_bins = np.linspace(0.001, 0.2, 5).astype(float)
+    pi_bins = np.linspace(0.0, 0.2, 5)
+
+    Npts = 1000
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts*3, 3))
+
+    __, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
+        Nsub=3, period=period, num_threads=1)
+
+    pi_max = pi_bins[1]
+    __, cov2 = wp_jackknife(sample1, randoms, rp_bins, pi_max,
+        Nsub=3, period=period, num_threads=1)
+
+#############################
+#  Copied from the rp_pi_tpcf_jackknife docstring:
+# To access the covariance between
+#     the (ith rp_bin and the jth pi_bin) and the (kth rp_bin and the lth pi_bin) of the covariance matrix C,
+#     sigma2 = C[i*j,k*l]
+#############################
+    j, l = 0, 0
+    for i, __ in enumerate(rp_bins):
+        for k in enumerate(rp_bins):
+            assert np.allclose(cov1[i*j, k*l], cov2[i, j])
+
 
