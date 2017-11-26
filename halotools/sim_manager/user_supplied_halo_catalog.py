@@ -14,6 +14,7 @@ from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_str
 from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 from ..utils.array_utils import custom_len
+
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ('UserSuppliedHaloCatalog', )
@@ -416,24 +417,24 @@ class UserSuppliedHaloCatalog(object):
 
         redshift_string = get_redshift_string(self.redshift)
 
-        f.attrs.create('simname', simname.encode('ascii'))
-        f.attrs.create('halo_finder', halo_finder.encode('ascii'))
-        f.attrs.create('version_name', version_name.encode('ascii'))
-        f.attrs.create('redshift', redshift_string.encode('ascii'))
-        f.attrs.create('fname', fname.encode('ascii'))
+        f.attrs.create('simname', np.string_(simname))
+        f.attrs.create('halo_finder', np.string_(halo_finder))
+        f.attrs.create('version_name', np.string_(version_name))
+        f.attrs.create('redshift', np.string_(redshift_string))
+        f.attrs.create('fname', np.string_(fname))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
 
         time_right_now = datetime.datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S').encode('ascii')
+            '%Y-%m-%d %H:%M:%S')
 
-        f.attrs.create('time_catalog_was_originally_cached', time_right_now)
+        f.attrs.create('time_catalog_was_originally_cached', np.string_(time_right_now))
 
-        f.attrs.create('processing_notes', processing_notes.encode('ascii'))
+        f.attrs.create('processing_notes', np.string_(processing_notes))
 
         for key, value in additional_metadata.items():
-            f.attrs.create(key, value.encode('ascii'))
+            f.attrs.create(key, np.string_(value))
 
         f.close()
         ############################################################

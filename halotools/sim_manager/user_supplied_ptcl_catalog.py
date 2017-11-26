@@ -300,19 +300,19 @@ class UserSuppliedPtclCatalog(object):
 
         redshift_string = get_redshift_string(self.redshift)
 
-        f.attrs.create('simname', simname.encode('ascii'))
-        f.attrs.create('version_name', version_name.encode('ascii'))
-        f.attrs.create('redshift', redshift_string.encode('ascii'))
-        f.attrs.create('fname', fname.encode('ascii'))
+        f.attrs.create('simname', np.string_(simname))
+        f.attrs.create('version_name', np.string_(version_name))
+        f.attrs.create('redshift', np.string_(redshift_string))
+        f.attrs.create('fname', np.string_(fname))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
 
         time_right_now = datetime.datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S').encode('ascii')
-        f.attrs.create('time_catalog_was_originally_cached', time_right_now)
+            '%Y-%m-%d %H:%M:%S')
+        f.attrs.create('time_catalog_was_originally_cached', np.string_(time_right_now))
 
-        f.attrs.create('processing_notes', processing_notes.encode('ascii'))
+        f.attrs.create('processing_notes', np.string_(processing_notes))
 
         f.close()
 
