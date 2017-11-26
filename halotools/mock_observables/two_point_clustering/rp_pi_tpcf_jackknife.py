@@ -1,5 +1,5 @@
 r"""
-Module containing the `~halotools.mock_observables.wp_jackknife` function used to
+Module containing the `~halotools.mock_observables.rp_pi_tpcf_jackknife` function used to
 calculate the two point correlation function and covariance matrix.
 """
 
@@ -9,6 +9,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .rp_pi_tpcf import _rp_pi_tpcf_process_args
 from .tpcf_jackknife import get_subvolume_numbers, _enclose_in_box
 
 from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
@@ -20,20 +21,20 @@ from ..pair_counters import npairs_jackknife_xy_z
 from ..catalog_analysis_helpers import cuboid_subvolume_labels
 
 
-__all__ = ('wp_jackknife', )
+__all__ = ('rp_pi_tpcf_jackknife', )
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
+def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
         sample2=None, period=None, do_auto=True, do_cross=True,
         estimator='Natural', num_threads=1, seed=None,
         approx_cell1_size=None, approx_cell2_size=None, approx_cellran_size=None):
     r"""
-    Calculate the projected two-point correlation function, :math:`w_p(r_p)` and the covariance
-    matrix, :math:`{C}_{ij}`, between ith and jth projected radial bin.
+    redshift space correlation function, :math:`\xi(r_{p}, \pi)` and the covariance
+    matrix, :math:`{C}_{ij}`, between ith and jth bin.
 
     The covariance matrix is calculated using spatial jackknife sampling of the data
     volume.  The spatial samples are defined by splitting the box along each dimension,
@@ -62,8 +63,9 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    pi_max : float
-        maximum LOS distance defining the projection integral length-scale in the z-dimension.
+    pi_bins : array_like
+        array of boundaries defining the p radial bins parallel to the LOS in which
+        pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     Nsub : array_like, optional
@@ -130,34 +132,43 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
 
     Returns
     -------
-    correlation_function(s) : numpy.array
-        *len(rp_bins)-1* length array containing correlation function :math:`\xi(r)`
-        computed in each of the radial bins defined by input ``rp_bins``.
-
-        If ``sample2`` is passed as input, three arrays of length *len(rp_bins)-1* are
-        returned:
+    correlation_function(s) : numpy.ndarray
+        *len(rp_bins)-1* by *len(pi_bins)-1* ndarray containing the correlation function
+        :math:`\xi(r_p, \pi)` computed in each of the bins defined by input ``rp_bins``
+        and ``pi_bins``.
 
         .. math::
-            w_{p 11}(r_p), w_{p 12}(r_p), w_{p 22}(r_p)
+            1 + \xi(r_{p},\pi) = \mathrm{DD}r_{p},\pi) / \mathrm{RR}r_{p},\pi)
 
-        The autocorrelation of ``sample1``, the cross-correlation between
-        ``sample1`` and ``sample2``, and the autocorrelation of ``sample2``. If
-        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) is not
+        if ``estimator`` is set to 'Natural', where  :math:`\mathrm{DD}(r_{p},\pi)`
+        is calculated by the pair counter, and :math:`\mathrm{RR}(r_{p},\pi)` is counted
+        internally using "analytic randoms" if ``randoms`` is set to None
+        (see notes for further details).
+
+        If ``sample2`` is passed as input (and not exactly the same as ``sample1``),
+        three arrays of shape *len(rp_bins)-1* by *len(pi_bins)-1* are returned:
+
+        .. math::
+            \xi_{11}(r_{p},\pi), \xi_{12}(r_{p},\pi), \xi_{22}(r_{p},\pi),
+
+        the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and
+        ``sample2``, and the autocorrelation of ``sample2``, respectively. If
+        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are
         returned.
 
     cov_matrix(ices) : numpy.ndarray
 
-        *len(rp_bins)-1* by *len(rp_bins)-1* ndarray containing the covariance matrix
-        :math:`C_{ij}`
+        *[len(rp_bins)-1] \times [len(pi_bins)-1]* by *[len(rp_bins)-1] \times [len(pi_bins)-1]*
+        ndarray containing the covariance matrix :math:`C_{ij}`
 
-        If ``sample2`` is passed as input three ndarrays of shape *len(rp_bins)-1* by
-        *len(rp_bins)-1* are returned:
+        If ``sample2`` is passed as input three ndarrays of shape
+        *[len(rp_bins)-1] \times [len(pi_bins)-1]* by *[len(rp_bins)-1] \times [len(pi_bins)-1]* are returned:
 
         .. math::
             C^{11}_{ij}, C^{12}_{ij}, C^{22}_{ij},
 
         the associated covariance matrices of
-        :math:`w_{p 11}(r_p), w_{p 12}(r_p), w_{p 22}(r_p)`. If ``do_auto`` or ``do_cross``
+        :math:`\xi_{p 11}(r_p, \pi), \xi_{p 12}(r_p, \pi), \xi_{p 22}(r_p, \pi)`. If ``do_auto`` or ``do_cross``
         is set to False, the appropriate result(s) is not returned.
 
     Notes
@@ -177,6 +188,11 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
                 0.0  & : i=j=k \\
             \end{array}
                    \right.
+
+    The returned covariance matrix is 2-D.
+    The indices of the matrix are in row-major order.  To access the covariance between
+    the (ith rp_bin and the jth pi_bin) and the (kth rp_bin and the lth pi_bin) of the covariance matrix C,
+    sigma2 = C[i*j,k*l]
 
     Examples
     --------
@@ -208,18 +224,19 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     into 3 samples per dimension (for a total of 3^3 total jackknife samples):
 
     >>> rp_bins = np.logspace(0.5, 1.5, 8)
-    >>> pi_max = 20.
-    >>> wp, wp_cov = wp_jackknife(coords, randoms, rp_bins, pi_max, Nsub=3, period=Lbox)
+    >>> pi_bins = np.logspace(0.5, 1.5, 8)
+    >>> xi, xi_cov = rp_pi_tpcf_jackknife(coords, randoms, rp_bins, pi_bins, Nsub=3, period=Lbox)
+
+    To get the standard deviation in each bin of the correlation function
+    >>> sigma = np.sqrt(np.diagonal(xi_cov)).reshape(len(rp_bins)-1,len(pi_bins)-1)
     """
-    # define the volume to search for pairs
-    pi_bins = np.array([0.0, float(pi_max)])
 
     # process input parameters
     function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
         do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _wp_jackknife_tpcf_process_args(*function_args)
+        _sample1_is_sample2, PBCs = _rp_pi_tpcf_jackknife_process_args(*function_args)
 
     # determine box size the data occupies.
     # This is used in determining jackknife samples.
@@ -254,14 +271,13 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
 
     # pull out the full and sub sample results
     if (do_auto is True):
-        D1D1_full = D1D1[0, :, 0]
-        D1D1_sub = D1D1[1:, :, 0]
-        D2D2_full = D2D2[0, :, 0]
-        D2D2_sub = D2D2[1:, :, 0]
+        D1D1_full = D1D1[0, :, :]
+        D1D1_sub = D1D1[1:, :, :]
+        D2D2_full = D2D2[0, :, :]
+        D2D2_sub = D2D2[1:, :, :]
     if (do_cross is True):
-        D1D2_full = D1D2[0, :, 0]
-        D1D2_sub = D1D2[1:, :, 0]
-
+        D1D2_full = D1D2[0, :, :]
+        D1D2_sub = D1D2[1:, :, :]
 
     # do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
@@ -277,18 +293,18 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
             D2R = None
 
     if do_DR is True:
-        D1R_full = D1R[0, :, 0]
-        D1R_sub = D1R[1:, :, 0]
-        D2R_full = D2R[0, :, 0]
-        D2R_sub = D2R[1:, :, 0]
+        D1R_full = D1R[0, :, :]
+        D1R_sub = D1R[1:, :, :]
+        D2R_full = D2R[0, :, :]
+        D2R_sub = D2R[1:, :, :]
     else:
         D1R_full = None
         D1R_sub = None
         D2R_full = None
         D2R_sub = None
     if do_RR is True:
-        RR_full = RR[0, :, 0]
-        RR_sub = RR[1:, :, 0]
+        RR_full = RR[0, :, :]
+        RR_sub = RR[1:, :, :]
     else:
         RR_full = None
         RR_sub = None
@@ -307,22 +323,19 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     if (do_cross is True):
         xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
 
-    # account for factor of 2*pi_max in the integration
-    if (do_auto is True):
-        xi_11_full = 2.0*pi_max*xi_11_full
-        xi_22_full = 2.0*pi_max*xi_22_full
-        xi_11_sub = 2.0*pi_max*xi_11_sub
-        xi_22_sub = 2.0*pi_max*xi_22_sub
-    if (do_cross is True):
-        xi_12_full = 2.0*pi_max*xi_12_full
-        xi_12_sub = 2.0*pi_max*xi_12_sub
-
     # calculate the covariance matrix
+    # format correlation functions into 1-D vector
     if (do_auto is True):
-        xi_11_cov = np.matrix(np.cov(xi_11_sub.T, bias=True))*(N_sub_vol-1)
-        xi_22_cov = np.matrix(np.cov(xi_22_sub.T, bias=True))*(N_sub_vol-1)
+        xi_11_sub_flat = np.reshape(xi_11_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
+        xi_22_sub_flat = np.reshape(xi_22_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
     if (do_cross is True):
-        xi_12_cov = np.matrix(np.cov(xi_12_sub.T, bias=True))*(N_sub_vol-1)
+        xi_12_sub_flat = np.reshape(xi_12_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
+    
+    if (do_auto is True):
+        xi_11_cov = np.matrix(np.cov(xi_11_sub_flat.T, bias=True))*(N_sub_vol-1)
+        xi_22_cov = np.matrix(np.cov(xi_22_sub_flat.T, bias=True))*(N_sub_vol-1)
+    if (do_cross is True):
+        xi_12_cov = np.matrix(np.cov(xi_12_sub_flat.T, bias=True))*(N_sub_vol-1)
 
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
@@ -393,7 +406,7 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins
     return DR, RR
 
 
-def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
+def _rp_pi_tpcf_jackknife_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
         period, do_auto, do_cross, estimator, num_threads,
         approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
     """
@@ -425,7 +438,7 @@ def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
             msg = ("\n When no `period` parameter is passed, \n"
                    "the user must provide true randoms, and \n"
                    "not just the number of randoms desired.")
-            raise ValueError(msg)
+            raise KeyError(msg)
 
     _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
 

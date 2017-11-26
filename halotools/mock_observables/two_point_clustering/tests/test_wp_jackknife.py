@@ -115,3 +115,21 @@ def test_wp_jackknife_cov_matrix():
     result_1, err = wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=5, period=period, num_threads=1)
 
     assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"
+
+
+def test_do_auto_false():
+    """
+    """
+    Npts1, Npts2, Nran = 300, 180, 1000
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
+
+    # result1 = wp_jackknife(sample1, randoms, rp_bins, pi_max,
+    #     period=period, Nsub=3, num_threads=1, sample2=sample2,
+    #     do_auto=False)
+    result = wp_jackknife(sample1, randoms, rp_bins, pi_max,
+        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
+
+
