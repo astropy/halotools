@@ -16,6 +16,7 @@ from .halo_table_cache_log_entry import HaloTableCacheLogEntry
 
 from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
+from ..utils.python_string_comparisons import _passively_decode_string
 
 __all__ = ('HaloTableCache', )
 
@@ -86,7 +87,7 @@ class HaloTableCache(object):
 
         if self._cache_log_fname_exists:
             try:
-                log_table = Table.read(self.cache_log_fname, format='ascii')
+                log_table = Table.read(_passively_decode_string(self.cache_log_fname), format='ascii')
                 assert set(log_table.keys()) == set(
                     HaloTableCacheLogEntry.log_attributes)
                 self._cache_log_fname_is_kosher = True

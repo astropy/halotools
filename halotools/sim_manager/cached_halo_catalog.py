@@ -8,6 +8,7 @@ from copy import deepcopy
 import numpy as np
 
 from astropy.table import Table
+from ..utils.python_string_comparisons import _passively_decode_string, compare_strings_py23_safe
 
 try:
     import h5py
@@ -324,7 +325,7 @@ class CachedHaloCatalog(object):
         log_entry = self.halo_table_cache.determine_log_entry_from_fname(fname,
             overwrite_fname_metadata=False)
 
-        if log_entry.fname != fname:
+        if not compare_strings_py23_safe(log_entry.fname, fname):
             if self._update_cached_fname is True:
                 old_fname = deepcopy(log_entry.fname)
                 log_entry = (
@@ -542,7 +543,7 @@ class CachedHaloCatalog(object):
             return self._halo_table
         except AttributeError:
             if self.log_entry.safe_for_cache is True:
-                self._halo_table = Table.read(self.fname, path='data')
+                self._halo_table = Table.read(_passively_decode_string(self.fname), path='data')
                 self._add_new_derived_columns(self._halo_table)
                 return self._halo_table
             else:
@@ -625,7 +626,7 @@ class CachedHaloCatalog(object):
                 ptcl_log_entry = self.ptcl_log_entry
 
             if ptcl_log_entry.safe_for_cache is True:
-                self._ptcl_table = Table.read(ptcl_log_entry.fname, path='data')
+                self._ptcl_table = Table.read(_passively_decode_string(ptcl_log_entry.fname), path='data')
                 return self._ptcl_table
             else:
                 raise InvalidCacheLogEntry(ptcl_log_entry._cache_safety_message)

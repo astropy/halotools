@@ -4,6 +4,7 @@ import os
 from astropy.table import Table
 import numpy as np
 from warnings import warn
+from ..utils.python_string_comparisons import _passively_decode_string, compare_strings_py23_safe
 
 try:
     import h5py
@@ -63,11 +64,11 @@ class HaloTableCacheLogEntry(object):
         ----------
         `~halotools.sim_manager.tests.TestHaloTableCacheLogEntry`.
         """
-        self.simname = simname
-        self.halo_finder = halo_finder
-        self.version_name = version_name
-        self.redshift = get_redshift_string(redshift)
-        self.fname = fname
+        self.simname = _passively_decode_string(simname)
+        self.halo_finder = _passively_decode_string(halo_finder)
+        self.version_name = _passively_decode_string(version_name)
+        self.redshift = _passively_decode_string(get_redshift_string(redshift))
+        self.fname = _passively_decode_string(fname)
 
     def __eq__(self, other):
         if type(other) is type(self):
@@ -197,7 +198,7 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            halo_table = Table.read(self.fname, path='data')
+            halo_table = Table.read(_passively_decode_string(self.fname), path='data')
         except:
             num_failures += 1
             msg = (str(num_failures)+". The hdf5 file must be readable with "
@@ -223,12 +224,7 @@ class HaloTableCacheLogEntry(object):
                 try:
                     metadata = f.attrs[key]
                     if key != 'redshift':
-                        # In python3 some of the metadata are stored as
-                        # bytes rather than strings, check for both
-                        try:
-                            assert metadata == getattr(self, key)
-                        except AssertionError:
-                            assert metadata == getattr(self, key).encode('ascii')
+                        assert compare_strings_py23_safe(metadata, getattr(self, key))
                     else:
                         metadata = float(get_redshift_string(metadata))
                         assert metadata == float(getattr(self, key))

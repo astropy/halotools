@@ -24,7 +24,7 @@ from ..cached_halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
 from ..ptcl_table_cache import PtclTableCache
 from ..download_manager import DownloadManager
-
+from ...utils.python_string_comparisons import compare_strings_py23_safe, _passively_decode_string
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
 # Determine whether the machine is mine
@@ -89,7 +89,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         type_mismatch_msg = ("\nThe redshift attribute of your particle catalog\n"
             "is formatted as a float, not a string, \nwhich conflicts with the "
-            "formatting of the redshfit attribute \nof the corresponding halo catalog.\n"
+            "formatting of the redshift attribute \nof the corresponding halo catalog.\n"
             "This is due to a now-fixed bug in the production of the \n"
             "Halotools-provided particle catalogs. \n"
             "To resolve this, just run the scripts/download_additional_halocat.py script \n"
@@ -127,7 +127,7 @@ class TestCachedHaloCatalog(TestCase):
             except (HalotoolsError, InvalidCacheLogEntry):
                 fname = halo_log_entry.fname
                 simname = halo_log_entry.simname
-                redshift = halo_log_entry.redshift
+                redshift = float(halo_log_entry.redshift)
                 if APH_MACHINE:
                     allowed_failure = (redshift > 0) & (simname == 'bolshoi' or simname == 'multidark')
                     if allowed_failure:
@@ -240,7 +240,7 @@ class TestCachedHaloCatalog(TestCase):
     def test_fname_optional_load(self):
         fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_v0p4.hdf5'
         halocat = CachedHaloCatalog(fname=fname)
-        assert halocat.simname == 'bolplanck'
+        assert compare_strings_py23_safe(halocat.simname, 'bolplanck')
 
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
@@ -253,7 +253,7 @@ class TestCachedHaloCatalog(TestCase):
                 if attr == 'redshift':
                     assert float(getattr(entry, attr)) == float(getattr(halocat, attr))
                 else:
-                    assert str(getattr(entry, attr)) == str(getattr(halocat, attr))
+                    assert _passively_decode_string(getattr(entry, attr)) == _passively_decode_string(getattr(halocat, attr))
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments1(self):
@@ -322,25 +322,6 @@ class TestCachedHaloCatalog(TestCase):
         fname = cache.log[0].fname
         halocat = CachedHaloCatalog(fname=fname)
 
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.skipif('not APH_MACHINE')
-    def test_acceptable_arguments7(self):
-        cache = HaloTableCache()
-        correct_fname = cache.log[10].fname
-        temporary_bad_fname = 'abc.hdf5'
-
-        import h5py
-        f = h5py.File(correct_fname)
-        f.attrs['fname'] = temporary_bad_fname
-        f.close()
-
-        with pytest.raises(HalotoolsError) as err:
-            halocat = CachedHaloCatalog(fname=correct_fname)
-        print(err.value.args[0])
-
-        f = h5py.File(correct_fname)
-        f.attrs['fname'] = correct_fname
-        f.close()
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data

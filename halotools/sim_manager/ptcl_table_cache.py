@@ -10,6 +10,8 @@ from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
 from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
+from ..utils.python_string_comparisons import compare_strings_py23_safe, _passively_decode_string
+
 
 __all__ = ('PtclTableCache', )
 
@@ -19,18 +21,18 @@ class PtclTableCache(object):
     """
 
     def __init__(self, read_log_from_standard_loc=True, **kwargs):
-        self._standard_log_dirname = halotools_cache_dirname
+        self._standard_log_dirname = _passively_decode_string(halotools_cache_dirname)
         try:
             os.makedirs(os.path.dirname(self._standard_log_dirname))
         except OSError:
             pass
-        self._standard_log_fname = os.path.join(self._standard_log_dirname,
-                                                'ptcl_table_cache_log.txt')
+        self._standard_log_fname = _passively_decode_string(
+                os.path.join(self._standard_log_dirname, 'ptcl_table_cache_log.txt'))
 
         try:
-            self.cache_log_fname = kwargs['cache_log_fname']
+            self.cache_log_fname = _passively_decode_string(kwargs['cache_log_fname'])
         except KeyError:
-            self.cache_log_fname = copy(self._standard_log_fname)
+            self.cache_log_fname = _passively_decode_string(copy(self._standard_log_fname))
         self._cache_log_fname_exists = os.path.isfile(self.cache_log_fname)
 
         if read_log_from_standard_loc is True:
@@ -81,7 +83,7 @@ class PtclTableCache(object):
 
         if self._cache_log_fname_exists:
             try:
-                log_table = Table.read(self.cache_log_fname, format='ascii')
+                log_table = Table.read(_passively_decode_string(self.cache_log_fname), format='ascii')
                 assert set(log_table.keys()) == set(
                     PtclTableCacheLogEntry.log_attributes)
                 self._cache_log_fname_is_kosher = True
@@ -143,7 +145,8 @@ class PtclTableCache(object):
                     redshift_of_entry = float(getattr(entry, key))
                     yield_entry *= abs(redshift_of_entry - requested_redshift) <= dz_tol
                 else:
-                    yield_entry *= kwargs[key] == getattr(entry, key)
+                    yield_entry *= compare_strings_py23_safe(kwargs[key], getattr(entry, key))
+                    # yield_entry *= kwargs[key] == getattr(entry, key)
             if bool(yield_entry) is True:
                 yield entry
 

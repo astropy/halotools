@@ -12,6 +12,8 @@ import numpy as np
 
 from astropy.extern.six.moves import xrange as range
 
+from ..utils.python_string_comparisons import _passively_decode_string
+
 __all__ = ('TabularAsciiReader', )
 
 
@@ -188,7 +190,7 @@ class TabularAsciiReader(object):
 
 
         """
-        self.input_fname = self._get_fname(input_fname)
+        self.input_fname = _passively_decode_string(self._get_fname(input_fname))
 
         self.header_char = self._get_header_char(header_char)
         self.num_lines_header = num_lines_header
@@ -361,7 +363,7 @@ class TabularAsciiReader(object):
                     "However, ``%s`` exists, so change your input_fname accordingly.")
                 raise IOError(msg % (input_fname, input_fname[:-3]))
 
-        return os.path.abspath(input_fname)
+        return _passively_decode_string(os.path.abspath(input_fname))
 
     def _enforce_no_repeated_columns(self):
         duplicates = list(

@@ -6,6 +6,7 @@ import numpy as np
 from warnings import warn
 
 from .halo_table_cache_log_entry import get_redshift_string
+from ..utils.python_string_comparisons import _passively_decode_string, compare_strings_py23_safe
 
 try:
     import h5py
@@ -61,10 +62,10 @@ class PtclTableCacheLogEntry(object):
                "to instantiate the PtclTableCacheLogEntry class.\n")
         assert _HAS_H5PY, msg
 
-        self.simname = simname
-        self.version_name = version_name
-        self.redshift = get_redshift_string(redshift)
-        self.fname = fname
+        self.simname = _passively_decode_string(simname)
+        self.version_name = _passively_decode_string(version_name)
+        self.redshift = _passively_decode_string(get_redshift_string(redshift))
+        self.fname = _passively_decode_string(fname)
 
     def __eq__(self, other):
         if type(other) is type(self):
@@ -178,7 +179,7 @@ class PtclTableCacheLogEntry(object):
         """ Enforce that the data can be read using the usual Astropy syntax
         """
         try:
-            data = Table.read(self.fname, path='data')
+            data = Table.read(_passively_decode_string(self.fname), path='data')
         except:
             num_failures += 1
             msg += (str(num_failures)+". The hdf5 file must be readable with "
@@ -199,19 +200,15 @@ class PtclTableCacheLogEntry(object):
             f = h5py.File(self.fname)
 
             for key in PtclTableCacheLogEntry.log_attributes:
+                ptcl_log_attr = getattr(self, key)
                 try:
 
                     metadata = f.attrs[key]
                     if key != 'redshift':
-                        # In python3 some of the metadata are stored as
-                        # bytes rather than strings, check for both
-                        try:
-                            assert metadata == getattr(self, key)
-                        except AssertionError:
-                            assert metadata == getattr(self, key).encode('ascii')
+                        assert compare_strings_py23_safe(metadata, ptcl_log_attr)
                     else:
                         metadata = float(get_redshift_string(metadata))
-                        assert metadata == float(getattr(self, key))
+                        assert metadata == float(ptcl_log_attr)
 
                 except AssertionError:
 
@@ -220,7 +217,7 @@ class PtclTableCacheLogEntry(object):
                         str(num_failures)+". The hdf5 file has metadata "
                         "``"+key+"`` = "+str(metadata) +
                         ".\nThis does not match the " +
-                        str(getattr(self, key))+" value in the log entry.\n\n"
+                        str(ptcl_log_attr)+" value in the log entry.\n\n"
                         )
                 except KeyError:
 
@@ -242,7 +239,7 @@ class PtclTableCacheLogEntry(object):
         """
         """
         try:
-            data = Table.read(self.fname, path='data')
+            data = Table.read(_passively_decode_string(self.fname), path='data')
             keys = list(data.keys())
             try:
                 assert 'x' in keys
@@ -263,7 +260,7 @@ class PtclTableCacheLogEntry(object):
         """
         """
         try:
-            data = Table.read(self.fname, path='data')
+            data = Table.read(_passively_decode_string(self.fname), path='data')
             f = h5py.File(self.fname)
             Lbox = np.empty(3)
             Lbox[:] = f.attrs['Lbox']
