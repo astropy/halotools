@@ -5,7 +5,7 @@ import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..model_helpers import custom_spline, create_composite_dtype
-from ..model_helpers import bounds_enforcing_decorator_factory, enforce_periodicity_of_box
+from ..model_helpers import enforce_periodicity_of_box
 from ..model_helpers import call_func_table, bind_default_kwarg_mixin_safe
 
 from ...custom_exceptions import HalotoolsError
@@ -75,17 +75,6 @@ def test_bind_default_kwarg_mixin_safe():
             obj, keyword_argument, constructor_kwargs, default_value)
     substr = "Do not pass the  ``abc`` keyword argument "
     assert substr in err.value.args[0]
-
-
-def test_bounds_enforcing_decorator_factory():
-    """
-    """
-    def f(x):
-        return x
-    decorator = bounds_enforcing_decorator_factory(0, 1, warning=True)
-    decorated_f = decorator(f)
-    result = decorated_f(-1)
-    assert result == 0
 
 
 def test_enforce_periodicity_of_box():

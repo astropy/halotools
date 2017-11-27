@@ -19,6 +19,8 @@
 
 - Added `rp_pi_tpcf_jackknife` function.
 
+- Removed obsolete bounds_enforcing_decorator_factory function - see https://github.com/astropy/halotools/issues/756
+
 
 0.5 (2017-05-31)
 ----------------
