@@ -24,7 +24,6 @@ class HeavisideAssembias(object):
     assembly-biased behavior into any component model.
 
     """
-
     def __init__(self, **kwargs):
         """
         No positional arguments accepted; all argument are strictly keyword arguments.

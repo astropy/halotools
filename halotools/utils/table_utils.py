@@ -7,17 +7,73 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from math import ceil
 import numpy as np
 from warnings import warn
+import functools
 from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
 
 __all__ = ['SampleSelector']
+__author__ = ('Andrew Hearin', 'Sean McLaughlin')
 
+def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
+    """
+    Parameters
+    ----------
+    prim_haloprop : array
+        Array storing the value of the primary halo property column of the ``table``
+        passed to ``compute_conditional_*``.
+    prim_haloprop_bin_boundaries : array, optional
+        Array defining the boundaries by which we will bin the input ``table``.
+        Default is None, in which case the binning will be automatically determined using
+        the ``dlog10_prim_haloprop`` keyword.
+    dlog10_prim_haloprop : float, optional
+        Logarithmic spacing of bins of the mass-like variable within which
+        we will assign secondary property percentiles. Default is 0.05.
+    Returns
+    --------
+    output : array
+        Numpy array of integers storing the bin index of the prim_haloprop bin
+        to which each halo in the input table was assigned.
+    """
+    try:
+        prim_haloprop = kwargs['prim_haloprop']
+    except KeyError:
+        msg = ("The ``compute_prim_haloprop_bins`` method "
+               "requires the ``prim_haloprop`` keyword argument")
+        raise HalotoolsError(msg)
 
-def compute_conditional_percentiles(**kwargs):
+    try:
+        prim_haloprop_bin_boundaries = kwargs['prim_haloprop_bin_boundaries']
+    except KeyError:
+        lg10_min_prim_haloprop = np.log10(np.min(prim_haloprop)) - 0.001
+        lg10_max_prim_haloprop = np.log10(np.max(prim_haloprop)) + 0.001
+        num_prim_haloprop_bins = (lg10_max_prim_haloprop - lg10_min_prim_haloprop) / dlog10_prim_haloprop
+        prim_haloprop_bin_boundaries = np.logspace(
+            lg10_min_prim_haloprop, lg10_max_prim_haloprop,
+            num=int(ceil(num_prim_haloprop_bins)))
+
+    # digitize the masses so that we can access them bin-wise
+    # print "PHP",np.max(prim_haloprop), prim_haloprop_bin_boundaries[-1]
+    output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
+
+    # Use the largest bin for any points larger than the largest bin boundary,
+    # and raise a warning if such points are found
+    Nbins = len(prim_haloprop_bin_boundaries)
+    if Nbins in output:
+        msg = ("\n\nThe ``compute_prim_haloprop_bins`` function detected points in the \n"
+               "input array of primary halo property that were larger than the largest value\n"
+               "of the input ``prim_haloprop_bin_boundaries``. All such points will be assigned\n"
+               "to the largest bin.\nBe sure that this is the behavior you expect for your application.\n\n")
+        warn(msg)
+        output = np.where(output == Nbins, Nbins - 1, output)
+
+    return output
+
+class compute_conditional_decorator(object):
     r"""
-    In bins of the ``prim_haloprop``, compute the rank-order percentile
-    of the input ``table`` based on the value of ``sec_haloprop``.
+    Decorator object. In bins of the ``prim_haloprop``, compute func``. In addition to all args and kwargs,
+    passes the bin index and indices of the respective prim haloprop bin. Caches last value of
+    prim_haloprop_bins, so it doesn't need to be recomputed if the same parameters are passed in.
 
     Parameters
     ----------
@@ -29,12 +85,12 @@ def compute_conditional_percentiles(**kwargs):
 
     prim_haloprop_key : string, optional
         Name of the column of the input ``table`` that will be used to access the
-        primary halo property. `compute_conditional_percentiles` bins the ``table`` by
+        primary halo property. `compute_conditional_decorator` bins the ``table`` by
         ``prim_haloprop_key`` when computing the result.
 
     sec_haloprop_key : string, optional
         Name of the column of the input ``table`` that will be used to access the
-        secondary halo property. `compute_conditional_percentiles` bins the ``table`` by
+        secondary halo property. `compute_conditional_decorator` bins the ``table`` by
         ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key``
         to compute the ``prim_haloprop``-conditioned rank-order percentile.
 
@@ -70,34 +126,141 @@ def compute_conditional_percentiles(**kwargs):
 
     """
 
-    if 'table' in kwargs:
-        table = kwargs['table']
-        try:
-            prim_haloprop_key = kwargs['prim_haloprop_key']
-            prim_haloprop = table[prim_haloprop_key]
-            sec_haloprop_key = kwargs['sec_haloprop_key']
-            sec_haloprop = table[sec_haloprop_key]
-        except KeyError:
-            msg = ("\nWhen passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
-                "you must also pass ``prim_haloprop_key`` and ``sec_haloprop_key`` keyword arguments\n"
-                "whose values are column keys of the input ``table``\n")
-            raise HalotoolsError(msg)
-    else:
-        try:
-            prim_haloprop = kwargs['prim_haloprop']
-            sec_haloprop = kwargs['sec_haloprop']
-        except KeyError:
-            msg = ("\nIf not passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
-                "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
-            raise HalotoolsError(msg)
+    def __init__(self, func):
 
-    def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
-        r"""
+        self.func = func
+        self.last_compute_prim_haloprop_bins_dict = {}
+        self.last_prim_haloprop_bins = np.zeros((1,))
+
+    def __call__(self, *args, **kwargs):
+        if 'table' in kwargs:
+            table = kwargs['table']
+            try:
+                prim_haloprop_key = kwargs['prim_haloprop_key']
+                prim_haloprop = table[prim_haloprop_key]
+            except KeyError:
+                msg = ("\nWhen passing an input ``table`` to a ``compute_conditional_*`` method,\n"
+                    "you must also pass ``prim_haloprop_key``  keyword arguments\n"
+                    "whose values are column keys of the input ``table``\n")
+                raise HalotoolsError(msg)
+            # Note sec_haloprop is not necessary for all methods.
+            try:
+                sec_haloprop_key = kwargs['sec_haloprop_key']
+                sec_haloprop = table[sec_haloprop_key]
+            except KeyError:
+                sec_haloprop = None
+        else:
+            try:
+                prim_haloprop = kwargs['prim_haloprop']
+            except KeyError:
+                msg = ("\nIf not passing an input ``table`` to a ``compute_conditional_*`` method,\n"
+                    "you must pass a ``prim_haloprop`` arguments\n")
+                raise HalotoolsError(msg)
+            try:
+                sec_haloprop = kwargs['sec_haloprop']
+            except KeyError:
+                sec_haloprop = None
+
+        compute_prim_haloprop_bins_dict = {}
+        compute_prim_haloprop_bins_dict['prim_haloprop'] = prim_haloprop
+        try:
+            compute_prim_haloprop_bins_dict['prim_haloprop_bin_boundaries'] = (
+                kwargs['prim_haloprop_bin_boundaries'])
+        except KeyError:
+            pass
+        try:
+            compute_prim_haloprop_bins_dict['dlog10_prim_haloprop'] = kwargs['dlog10_prim_haloprop']
+        except KeyError:
+            pass
+
+        # Check if we need to recompute the mass bins, or if it's been memoized
+        same_dict = False
+
+        if compute_prim_haloprop_bins_dict.keys() == self.last_compute_prim_haloprop_bins_dict.keys(): # same as we were last asked for, don't recompute
+            for key, val in compute_prim_haloprop_bins_dict.iteritems():
+                last_val = self.last_compute_prim_haloprop_bins_dict[key]
+                if hasattr(val, 'shape'):
+                    if val.shape != last_val.shape:
+                        break
+                    # We now know they have the same shape
+                    if not np.all(np.equal(val, last_val)):
+                        break
+                elif val != last_val:
+                    break
+            else:
+                same_dict = True
+
+        if same_dict:
+            prim_haloprop_bins = self.last_prim_haloprop_bins
+        else:
+            prim_haloprop_bins = compute_prim_haloprop_bins(**compute_prim_haloprop_bins_dict)
+            #update cache
+            self.last_compute_prim_haloprop_bins_dict= compute_prim_haloprop_bins_dict
+            self.last_prim_haloprop_bins = prim_haloprop_bins
+
+        output = np.zeros_like(prim_haloprop)
+
+        # toss these in here so we don't have to repeat the above!
+        fkwargs = kwargs.copy()
+        if 'prim_haloprop' not in fkwargs:
+            fkwargs['prim_haloprop'] = prim_haloprop
+        if 'sec_haloprop' not in fkwargs:
+            fkwargs['sec_haloprop'] = sec_haloprop
+        # sort on secondary property only with each mass bin
+        bins_in_halocat = set(prim_haloprop_bins)
+
+        #idx is usully the same; however, some edge cases make this work better
+        for idx, ibin in enumerate(bins_in_halocat):
+            indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
+
+            output[indices_of_prim_haloprop_bin] = self.func(idx=idx,ibin = ibin,
+                                                        indices_of_prim_haloprop_bin= indices_of_prim_haloprop_bin,
+                                                        *args, **fkwargs)
+
+        return output
+
+    def __repr__(self):
+        '''Return the function's docstring.'''
+        return self.func.__doc__
+
+    def __get__(self, obj, objtype):
+        '''Support instance methods.'''
+        return functools.partial(self.__call__, obj)
+
+@compute_conditional_decorator
+def compute_conditional_percentiles(indices_of_prim_haloprop_bin, sec_haloprop, **kwargs):
+    r"""
+        In bins of the ``prim_haloprop``, compute the rank-order percentile
+        of the input ``table`` based on the value of ``sec_haloprop``.
+
+        Note indices_of_prim_haloprop_bin is passed in from the decorator and does not need to be specified.
+
         Parameters
         ----------
-        prim_haloprop : array
-            Array storing the value of the primary halo property column of the ``table``
-            passed to ``compute_conditional_percentiles``.
+        table : astropy table, optional
+            a keyword argument that stores halo catalog being used to make mock galaxy population
+            If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys
+            must also be passed. If not passing a `table`, you must directly pass the
+            `prim_haloprop` and `sec_haloprop` keyword arguments.
+
+        prim_haloprop_key : string, optional
+            Name of the column of the input ``table`` that will be used to access the
+            primary halo property. `compute_conditional_percentiles` bins the ``table`` by
+            ``prim_haloprop_key`` when computing the result.
+
+        sec_haloprop_key : string, optional
+            Name of the column of the input ``table`` that will be used to access the
+            secondary halo property. `compute_conditional_percentiles` bins the ``table`` by
+            ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key``
+            to compute the ``prim_haloprop``-conditioned rank-order percentile.
+
+        prim_haloprop : array_like, optional
+            Array storing the primary halo property used to bin the input points.
+            If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`.
+
+        sec_haloprop : array_like, optional
+            Array storing the secondary halo property used to define the conditional percentiles
+            in each bin of `prim_haloprop`.
 
         prim_haloprop_bin_boundaries : array, optional
             Array defining the boundaries by which we will bin the input ``table``.
@@ -108,79 +271,128 @@ def compute_conditional_percentiles(**kwargs):
             Logarithmic spacing of bins of the mass-like variable within which
             we will assign secondary property percentiles. Default is 0.2.
 
-        Returns
+        Examples
         --------
-        output : array
-            Numpy array of integers storing the bin index of the prim_haloprop bin
-            to which each halo in the input table was assigned.
+        >>> from halotools.sim_manager import FakeSim
+        >>> fakesim = FakeSim()
+        >>> result = compute_conditional_percentiles(table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax')
+
+
+        Notes
+        -----
+        The sign of the result is such that in bins of the primary property,
+        *smaller* values of the secondary property
+        receive *smaller* values of the returned percentile.
 
         """
-        try:
-            prim_haloprop = kwargs['prim_haloprop']
-        except KeyError:
-            msg = ("The ``compute_prim_haloprop_bins`` method "
-                "requires the ``prim_haloprop`` keyword argument")
-            raise HalotoolsError(msg)
+    if sec_haloprop is None:
+        msg = ("\n``sec_haloprop`` must be passed into compute_conditional_percentiles, or a table"
+               "with ``sec_haloprop_key`` as a column.\n")
+        raise HalotoolsError(msg)
+    num_in_bin = len(sec_haloprop[indices_of_prim_haloprop_bin])
 
-        try:
-            prim_haloprop_bin_boundaries = kwargs['prim_haloprop_bin_boundaries']
-        except KeyError:
-            lg10_min_prim_haloprop = np.log10(np.min(prim_haloprop))-0.001
-            lg10_max_prim_haloprop = np.log10(np.max(prim_haloprop))+0.001
-            num_prim_haloprop_bins = (lg10_max_prim_haloprop-lg10_min_prim_haloprop)/dlog10_prim_haloprop
-            prim_haloprop_bin_boundaries = np.logspace(
-                lg10_min_prim_haloprop, lg10_max_prim_haloprop,
-                num=int(ceil(num_prim_haloprop_bins)))
+    # Find the indices that sort by the secondary property
+    ind_sorted = np.argsort(sec_haloprop[indices_of_prim_haloprop_bin])
 
-        # digitize the masses so that we can access them bin-wise
-        output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
+    percentiles = np.zeros(num_in_bin)
+    percentiles[ind_sorted] = (np.arange(num_in_bin) + 1.0) / float(num_in_bin)
 
-        # Use the largest bin for any points larger than the largest bin boundary,
-        # and raise a warning if such points are found
-        Nbins = len(prim_haloprop_bin_boundaries)
-        if Nbins in output:
-            msg = ("\n\nThe ``compute_prim_haloprop_bins`` function detected points in the \n"
-                "input array of primary halo property that were larger than the largest value\n"
-                "of the input ``prim_haloprop_bin_boundaries``. All such points will be assigned\n"
-                "to the largest bin.\nBe sure that this is the behavior you expect for your application.\n\n")
-            warn(msg)
-            output = np.where(output == Nbins, Nbins-1, output)
+    return percentiles
 
-        return output
 
-    compute_prim_haloprop_bins_dict = {}
-    compute_prim_haloprop_bins_dict['prim_haloprop'] = prim_haloprop
+@compute_conditional_decorator
+def compute_conditional_averages(indices_of_prim_haloprop_bin, vals, **kwargs):
+    """
+    In bins of the ``prim_haloprop``, compute the average value of ``vals``
+
+    Note indices_of_prim_haloprop_bin is passed in from the decorator and does not need to be specified.
+
+    Parameters
+    ----------
+    table : astropy table, optional
+        a keyword argument that stores halo catalog being used to make mock galaxy population
+        If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys
+        must also be passed. If not passing a `table`, you must directly pass the
+        `prim_haloprop` and `sec_haloprop` keyword arguments.
+    prim_haloprop_key : string, optional
+        Name of the column of the input ``table`` that will be used to access the
+        primary halo property. `compute_conditional_averages` bins the ``table`` by
+        ``prim_haloprop_key`` when computing the result.
+    prim_haloprop : array_like, optional
+        Array storing the primary halo property used to bin the input points.
+        If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`.
+    prim_haloprop_bin_boundaries : array, optional
+        Array defining the boundaries by which we will bin the input ``table``.
+        Default is None, in which case the binning will be automatically determined using
+        the ``dlog10_prim_haloprop`` keyword.
+    dlog10_prim_haloprop : float, optional
+        Logarithmic spacing of bins of the mass-like variable within which
+        we will assign secondary property percentiles. Default is 0.2.
+    Examples
+    --------
+    >>> from halotools.sim_manager import FakeSim
+    >>> fakesim = FakeSim()
+    >>> result = compute_conditional_averages(table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', vals = table['halo_vmax'])
+    """
+    return np.mean(vals[indices_of_prim_haloprop_bin])
+
+@compute_conditional_decorator
+def compute_conditional_percentile_values(idx, indices_of_prim_haloprop_bin, sec_haloprop, p=0.5, **kwargs):
+    """
+    In bins of the ``prim_haloprop``, compute the percentile given by p of the input
+     ``table`` based on the value of ``sec_haloprop``.
+
+    Note indices_of_prim_haloprop_bin is passed in from the decorator and does not need to be specified.
+
+    Parameters
+    ----------
+    p: float or array
+        Percentile to find. Float or array of floats between 0 and 1. Default is 0.5, the median.
+    table : astropy table, optional
+        a keyword argument that stores halo catalog being used to make mock galaxy population
+        If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys
+        must also be passed. If not passing a `table`, you must directly pass the
+        `prim_haloprop` and `sec_haloprop` keyword arguments.
+    prim_haloprop_key : string, optional
+        Name of the column of the input ``table`` that will be used to access the
+        primary halo property. `compute_conditional_percentile_values` bins the ``table`` by
+        ``prim_haloprop_key`` when computing the result.
+    sec_haloprop_key : string, optional
+        Name of the column of the input ``table`` that will be used to access the
+        secondary halo property. `compute_conditional_percentile_values` bins the ``table`` by
+        ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key``
+        to compute the ``prim_haloprop``-conditioned rank-order percentile.
+    prim_haloprop : array_like, optional
+        Array storing the primary halo property used to bin the input points.
+        If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`.
+    sec_haloprop : array_like, optional
+        Array storing the secondary halo property used to define the conditional percentiles
+        in each bin of `prim_haloprop`.
+    prim_haloprop_bin_boundaries : array, optional
+        Array defining the boundaries by which we will bin the input ``table``.
+        Default is None, in which case the binning will be automatically determined using
+        the ``dlog10_prim_haloprop`` keyword.
+    dlog10_prim_haloprop : float, optional
+        Logarithmic spacing of bins of the mass-like variable within which
+        we will assign secondary property percentiles. Default is 0.2.
+    Examples
+    --------
+    >>> from halotools.sim_manager import FakeSim
+    >>> fakesim = FakeSim()
+    >>> result = compute_conditional_percentile_values(table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax')
+    Notes
+    -----
+    The sign of the result is such that in bins of the primary property,
+    *smaller* values of the secondary property
+    receive *smaller* values of the returned percentile.
+    """
+    pp = p if type(p) is float else p[idx-1]
     try:
-        compute_prim_haloprop_bins_dict['prim_haloprop_bin_boundaries'] = (
-            kwargs['prim_haloprop_bin_boundaries'])
-    except KeyError:
-        pass
-    try:
-        compute_prim_haloprop_bins_dict['dlog10_prim_haloprop'] = kwargs['dlog10_prim_haloprop']
-    except KeyError:
-        pass
-    prim_haloprop_bins = compute_prim_haloprop_bins(**compute_prim_haloprop_bins_dict)
+        assert 0 <= pp <= 1
+    except AssertionError:
+        raise HalotoolsError('The value of `p=%0.2f` in ``compute_conditional_percentile_values`` must be between 0 and 1'%pp)
 
-    output = np.zeros_like(prim_haloprop)
-
-    # sort on secondary property only with each mass bin
-    bins_in_halocat = set(prim_haloprop_bins)
-    for ibin in bins_in_halocat:
-        indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
-
-        num_in_bin = len(sec_haloprop[indices_of_prim_haloprop_bin])
-
-        # Find the indices that sort by the secondary property
-        ind_sorted = np.argsort(sec_haloprop[indices_of_prim_haloprop_bin])
-
-        percentiles = np.zeros(num_in_bin)
-        percentiles[ind_sorted] = (np.arange(num_in_bin) + 1.0) / float(num_in_bin)
-
-        # place the percentiles into the catalog
-        output[indices_of_prim_haloprop_bin] = percentiles
-
-    return output
-
+    return np.percentile(sec_haloprop[indices_of_prim_haloprop_bin], pp * 100)
 
 class SampleSelector(object):
     r""" Container class for commonly used sample selections.
