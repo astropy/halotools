@@ -1,3 +1,5 @@
+:orphan:
+
 .. _utility_functions:
 
 Catalog Analysis Utility Functions
@@ -14,3 +16,4 @@ All of these can be imported from `halotools.utils`.
     unsorting_indices
     monte_carlo_from_cdf_lookup
     build_cdf_lookup
+    distribution_matching_indices
