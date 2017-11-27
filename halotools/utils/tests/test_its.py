@@ -107,5 +107,5 @@ def test_build_cdf_lookup_raises_npts_warning():
         warnings.simplefilter("always")
         y = np.random.normal(size=npts_y)
         __ = build_cdf_lookup(y, npts_lookup_table=npts_lookup_table)
-    substr = "npts_y = {0} is less than  npts_lookup_table = {1}.".format(npts_y, npts_lookup_table)
+    substr = "However, the number of data points in your data table npts_y "
     assert substr in str(w[-1].message)
