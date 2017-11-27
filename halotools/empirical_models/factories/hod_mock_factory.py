@@ -485,7 +485,7 @@ class HodMockFactory(MockFactory):
 
         # Call all composite model methods that should be called prior to mc_occupation
         # All such function calls must be applied to the table.
-        halo_table = np.copy(self.halo_table)
+        halo_table = Table(np.copy(self.halo_table))
         for func_name in self.model._mock_generation_calling_sequence:
             if 'mc_occupation' in func_name:
                 # exit when we encounter a ``mc_occupation_`` function
