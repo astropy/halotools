@@ -90,7 +90,7 @@ def zheng07_model_dictionary(
     ####################################
     # Build the `occupation` feature
     centrals_occupation = zheng07_components.Zheng07Cens(
-        threshold=threshold, redshift=redshift)
+        threshold=threshold, redshift=redshift, **kwargs)
 
     # Build the `profile` feature
     centrals_profile = TrivialPhaseSpace(redshift=redshift, **kwargs)
