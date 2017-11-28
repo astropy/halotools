@@ -253,11 +253,4 @@ def _npairs_jackknife_xy_z_process_weights_jtags(sample1, sample2,
     if not np.array_equal(np.unique(jtags1), np.arange(1, N_samples+1)):
         warn("Warning: sample2 does not contain points in every jackknife sample.")
 
-    if type(N_samples) is not int:
-        raise HalotoolsError("There must be an integer number of jackknife samples")
-    if np.max(jtags1) > N_samples:
-        raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
-    if np.max(jtags2) > N_samples:
-        raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
-
     return weights1, weights2, jtags1, jtags2
