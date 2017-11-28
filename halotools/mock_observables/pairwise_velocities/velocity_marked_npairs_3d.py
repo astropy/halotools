@@ -108,6 +108,35 @@ def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         array of length *Nrbins* containing the weighted number counts of pairs
         The exact values depend on ``weight_func_id``
         (which weighting function was chosen).
+
+    Examples
+    --------
+    For demonstration purposes we will work with
+    halos in the `~halotools.sim_manager.FakeSim`.
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> sample1 = np.vstack((x,y,z)).T
+
+    We will do the same to get a random set of velocities.
+
+    >>> vx = halocat.halo_table['halo_vx']
+    >>> vy = halocat.halo_table['halo_vy']
+    >>> vz = halocat.halo_table['halo_vz']
+    >>> velocities = np.vstack((vx,vy,vz)).T
+
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> pi_max = 10
+    >>> result = velocity_marked_npairs_3d(sample1, velocities, rbins, period=halocat.Lbox)
     """
 
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
