@@ -62,3 +62,27 @@ def test2():
     assert np.all(unweighted_counts1 == unweighted_counts2)
     assert np.all(unweighted_counts1 != weighted_counts)
 
+
+def test_parallel_serial_consistency():
+    """
+    """
+    Npts = 1000
+    with NumpyRNGContext(fixed_seed):
+        random_sample = np.random.random((Npts, 3))
+    period = np.array([1.0, 1.0, 1.0])
+    # define bins
+    s_bins = np.array([0.0, 0.1, 0.2, 0.3])
+    N_mu_bins = 100
+    mu_bins = np.linspace(0, 1.0, N_mu_bins)
+    Npts = len(random_sample)
+
+    weights1 = np.ones(Npts)
+    weights2 = np.ones(Npts)
+
+    unweighted_counts_serial, weighted_counts_serial = weighted_npairs_s_mu(random_sample, random_sample,
+            weights1, weights2, s_bins, mu_bins, period=period, num_threads=1)
+    unweighted_counts_parallel, weighted_counts_parallel = weighted_npairs_s_mu(random_sample, random_sample,
+            weights1, weights2, s_bins, mu_bins, period=period, num_threads=3)
+
+    assert np.all(unweighted_counts_serial == unweighted_counts_parallel)
+    assert np.all(weighted_counts_serial == weighted_counts_parallel)
