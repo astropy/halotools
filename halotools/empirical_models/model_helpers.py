@@ -6,16 +6,14 @@ used by many of the Halotools models.
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
-from warnings import warn
 
 from ..utils.array_utils import custom_len
 from ..custom_exceptions import HalotoolsError
 
 
 __all__ = ('solve_for_polynomial_coefficients', 'polynomial_from_table',
-     'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype',
-     'bind_default_kwarg_mixin_safe',
-     'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory')
+            'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype',
+            'bind_default_kwarg_mixin_safe', 'custom_incomplete_gamma')
 
 __author__ = ['Andrew Hearin', 'Surhud More', 'Johannes Ulf Lange']
 
@@ -445,67 +443,3 @@ def custom_incomplete_gamma(a, x):
         else:
             return gammaincc(a, x) * gamma(a)
 custom_incomplete_gamma.__author__ = ['Surhud More', 'Johannes Ulf Lange']
-
-
-def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning=True):
-    r"""
-    Function returns a decorator that can be used to clip the values
-    of an original function to produce a modified function whose
-    values are replaced by the input ``lower_bound`` and ``upper_bound`` whenever
-    the original function returns out of range values.
-
-    Parameters
-    -----------
-    lower_bound : float or int
-        Lower bound defining the output decorator
-
-    upper_bound : float or int
-        Upper bound defining the output decorator
-
-    warning : bool, optional
-        If True, decorator will raise a warning for cases where the values of the
-        undecorated function fall outside the boundaries. Default is True.
-
-    Returns
-    --------
-    decorator : object
-        Python decorator used to apply to any function for which you wish to
-        enforce that that the returned values of the original function are modified
-        to be bounded by ``lower_bound`` and ``upper_bound``.
-
-    Examples
-    --------
-    >>> def original_function(x): return x + 4
-    >>> lower_bound, upper_bound = 0, 5
-    >>> decorator = bounds_enforcing_decorator_factory(lower_bound, upper_bound)
-    >>> modified_function = decorator(original_function)
-    >>> assert original_function(3) == 7
-    >>> assert modified_function(3) == upper_bound
-    >>> assert original_function(-10) == -6
-    >>> assert modified_function(-10) == lower_bound
-    >>> assert original_function(0) == modified_function(0) == 4
-
-    """
-
-    def decorator(input_func):
-
-        def output_func(*args, **kwargs):
-
-            unbounded_result = np.array(input_func(*args, **kwargs))
-            lower_bounded_result = np.where(unbounded_result < lower_bound, lower_bound, unbounded_result)
-            bounded_result = np.where(lower_bounded_result > upper_bound, upper_bound, lower_bounded_result)
-
-            if warning is True:
-                raise_warning = np.any(unbounded_result != bounded_result)
-                if raise_warning is True:
-                    func_name = input_func.__name__
-                    msg = ("The " + func_name + " function \nreturned at least one value that was "
-                        "outside the range (%.2f, %.2f)\n. The bounds_enforcing_decorator_factory "
-                        "manually set all such values equal to \nthe appropriate boundary condition.\n")
-                    warn(msg)
-
-            return bounded_result
-
-        return output_func
-
-    return decorator
