@@ -75,8 +75,7 @@ def npairs(sample1, sample2, rbins, period=None):
     n = np.zeros((rbins.size,), dtype=np.int)
     for i in range(rbins.size):
         if rbins[i] > np.min(period)/2.0:
-            print("r=", rbins[i], "  min(period)/2=", np.min(period)/2.0)
-        n[i] = len(np.where(dd <= rbins[i])[0])
+            n[i] = len(np.where(dd <= rbins[i])[0])
 
     return n
 
@@ -382,13 +381,13 @@ def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
 
     Returns
     -------
-    N_pairs : ndarray of shape (num_s_bin_edges, num_mu_bin_edges) storing the 
+    N_pairs : ndarray of shape (num_s_bin_edges, num_mu_bin_edges) storing the
         number counts of pairs with separations less than ``s_bins`` and ``mu_bins``
-    
+
     Notes
     -----
     Along the first dimension of ``N_pairs``, :math:`s` (the radial separation) increases.
-    Along the second dimension,  :math:`\mu` (the cosine of :math:`\theta_{\rm LOS}`) 
+    Along the second dimension,  :math:`\mu` (the cosine of :math:`\theta_{\rm LOS}`)
     decreases, i.e. :math:`\theta_{\rm LOS}` increases.
     """
 
@@ -412,29 +411,29 @@ def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
         elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have len == dimension of points")
             return None
-    
+
     # create N1 x N2 x 2 array to store **all** pair separation distances
     # note that this array can be very large for large N1 and N2
     N1 = len(sample1)
     N2 = len(sample2)
     dd = np.zeros((N1*N2, 2))
-    
+
     # calculate distance between every point and every other point
     for i in range(0, N1):
         x1 = sample1[i, :]
         x2 = sample2
         dd[i*N2:i*N2+N2, 0] = distance(x1, x2, period)
         dd[i*N2:i*N2+N2, 1] = np.cos(theta_LOS(x1, x2, period))
-    
+
     # put mu bins in increasing theta_LOS order
     mu_bins = np.sort(mu_bins)[::-1]
-    
+
     # bin distances in s and mu bins
     n = np.zeros((s_bins.size, mu_bins.size), dtype=np.int)
     for i in range(s_bins.size):
         for j in range(mu_bins.size):
             n[i, j] = np.sum((dd[:, 0] <= s_bins[i]) & (dd[:, 1] >= mu_bins[j]))
-    
+
     return n
 
 
@@ -584,7 +583,7 @@ def theta_LOS(x1, x2, period=None):
     -------
     theta_LOS : array
         angle from LOS in radians
-        
+
     Notes
     -----
     theta_LOS is set to 0.0 if the distance between points is 0.0
@@ -602,14 +601,14 @@ def theta_LOS(x1, x2, period=None):
         k = np.shape(x1)[-1]
     if np.shape(period)[0] != np.shape(x1)[-1]:
         raise ValueError("period must have length equal to the dimension of x1 and x2.")
-    
+
     r_perp = perpendicular_distance(x1, x2, period=period)
     r_parallel = parallel_distance(x1, x2, period=period)
-    
+
     # deal with zero separation
     r = np.sqrt(r_perp**2 + r_parallel**2)
     mask = (r>0.0)
-    
+
     theta = np.zeros(len(r)) # set to zero if r==0
     theta[mask] = np.pi/2.0 - np.arctan2(r_parallel[mask],r_perp[mask])
 

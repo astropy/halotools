@@ -300,3 +300,45 @@ def test_sensible_period():
         result = npairs_3d(data1, data2, rbins, period=np.inf)
     substr = "Input ``period`` must be a bounded positive number in all dimensions"
     assert substr in err.value.args[0]
+
+
+def test_pure_python_npairs_3d_argument_handling1():
+    """
+    """
+    npts = 10
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts, 3))
+        sample2 = np.random.random((npts, 2))
+    rbins = np.linspace(0.01, 0.1, 5)
+
+    with pytest.raises(ValueError) as err:
+        __ = pure_python_brute_force_npairs_3d(sample1, sample2, rbins, period=None)
+    substr = "sample1 and sample2 inputs do not have the same dimension"
+    assert substr in err.value.args[0]
+
+
+def test_pure_python_npairs_3d_argument_handling2():
+    """
+    """
+    npts = 10
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts, 3))
+        sample2 = np.random.random((npts, 3))
+    rbins = np.linspace(0.01, 0.1, 5)
+
+    __ = pure_python_brute_force_npairs_3d(sample1, sample2, rbins, period=1)
+
+
+def test_pure_python_npairs_3d_argument_handling3():
+    """
+    """
+    npts = 10
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts, 2))
+        sample2 = np.random.random((npts, 2))
+    rbins = np.linspace(0.01, 0.1, 5)
+
+    with pytest.raises(ValueError) as err:
+        __ = pure_python_brute_force_npairs_3d(sample1, sample2, rbins, period=[1, 1, 1])
+    substr = "period should have len == dimension of points"
+    assert substr in err.value.args[0]
