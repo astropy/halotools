@@ -9,6 +9,13 @@ from copy import deepcopy
 
 from ....mock_observables import return_xyz_formatted_array, tpcf_one_two_halo_decomp
 
+
+from ....empirical_models import AssembiasZheng07Cens
+from ....empirical_models import TrivialPhaseSpace
+from ....empirical_models import AssembiasZheng07Sats
+from ....empirical_models import NFWPhaseSpace
+from ....empirical_models import HodModelFactory
+
 from ....sim_manager import FakeSim, CachedHaloCatalog
 from ....sim_manager.fake_sim import FakeSimHalosNearBoundaries
 from ..prebuilt_model_factory import PrebuiltHodModelFactory
@@ -55,6 +62,20 @@ def test_estimate_ngals2():
     estimated_ngals = model.mock.estimate_ngals(seed=fixed_seed)
     actual_ngals = len(model.mock.galaxy_table)
     assert np.allclose(estimated_ngals, actual_ngals, rtol=0.01)
+
+
+def test_estimate_ngals3():
+    """ Regression test for Issue #801 - https://github.com/astropy/halotools/issues/801
+    """
+    cen_occ_model = AssembiasZheng07Cens(prim_haloprop_key='halo_mvir', sec_haloprop_key='halo_nfw_conc')
+    cen_prof_model = TrivialPhaseSpace()
+    sat_occ_model = AssembiasZheng07Sats(prim_haloprop_key='halo_mvir', sec_haloprop_key='halo_nfw_conc')
+    sat_prof_model = NFWPhaseSpace()
+    model = HodModelFactory(centrals_occupation=cen_occ_model, centrals_profile=cen_prof_model,
+                satellites_occupation=sat_occ_model, satellites_profile=sat_prof_model)
+    halocat = FakeSim()
+    model.populate_mock(halocat)
+    model.mock.estimate_ngals()
 
 
 def test_convenience_functions():
