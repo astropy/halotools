@@ -238,8 +238,6 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
     # count number less than r
     n = np.zeros((r.size,), dtype=np.float64)
     for i in range(r.size):
-        if r[i] > np.min(period)/2:
-            print("r=", r[i], "  min(period)/2=", np.min(period)/2)
         for j in range(N1):
             n[i] += np.sum(np.extract(dd[j, :] <= r[i], weights2))*weights1[j]
 
