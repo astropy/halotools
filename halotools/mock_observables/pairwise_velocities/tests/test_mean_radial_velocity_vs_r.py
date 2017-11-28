@@ -143,6 +143,7 @@ def test_mean_radial_velocity_vs_r5():
         assert np.allclose(cython_result_no_pbc[i], python_result_no_pbc)
 
 
+@pytest.mark.installation_test
 def test_mean_radial_velocity_vs_r6():
     """ Brute force comparison of <Vr> calculation to pure python implementation,
     with PBCs turned on, and auto-correlation is tested

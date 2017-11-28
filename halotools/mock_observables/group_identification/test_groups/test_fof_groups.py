@@ -43,6 +43,7 @@ def test_fof_groups_init():
     assert isinstance(fof_group.m_para, coo_matrix)
 
 
+@pytest.mark.installation_test
 @pytest.mark.slow
 def test_fof_group_IDs():
     """

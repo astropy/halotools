@@ -14,6 +14,7 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ('test_Cacciato09Cens1', 'test_Cacciato09Sats1')
 
 
+@pytest.mark.installation_test
 def test_Cacciato09Cens1():
     """
     Verify that the mean and Monte Carlo occupations are both reasonable and
@@ -159,6 +160,7 @@ def test_Cacciato09Cens_mc_prim_galprop_raises_exception2():
     assert substr in err.value.args[0]
 
 
+@pytest.mark.installation_test
 def test_Cacciato09Sats1():
     """
     Verify that the mean and Monte Carlo occupations are both reasonable and
@@ -329,14 +331,14 @@ def test_Cacciato09_gap():
         prim_haloprop=np.repeat(10**14.5, 30000), seed=1)
     lum_sat = sats.mc_prim_galprop(
         prim_haloprop=np.repeat(10**14.5, len(lum_cen) * 30), seed=1)
-    
+
     gap = np.zeros(len(lum_cen))
     for i in range(len(gap)):
         lum_cen_i = lum_cen[i]
         lum_sat_i = lum_sat[i*30:(i+1)*(30)]
         lum_sat_i = lum_sat_i[lum_sat_i < lum_cen_i] # remove bright satellites
         gap[i] = 2.5 * np.log10(lum_cen_i / np.amax(lum_sat_i[:20]))
-    
+
     gap_more = np.linspace(0, 1.98, 100)
     pdf_more = np.array([0.749018, 0.761080, 0.772940, 0.784557, 0.795891,
                          0.806902, 0.817547, 0.827784, 0.837571, 0.846866,
@@ -361,11 +363,11 @@ def test_Cacciato09_gap():
     cdf_more = np.concatenate([[0], cumtrapz(pdf_more, x=gap_more)])
     cdf_more = cdf_more / cdf_more[-1]
     cdf_more = interp1d(gap_more, cdf_more)
-    
+
     gap = gap[gap < gap_more[-1]]
-    
+
     p_value = kstest(gap, cdf_more)[1]
-    
+
     assert p_value > 0.001
-    
+
 

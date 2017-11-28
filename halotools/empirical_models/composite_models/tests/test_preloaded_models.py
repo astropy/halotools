@@ -9,7 +9,7 @@ from ....custom_exceptions import HalotoolsError
 
 
 __all__ = ('test_hearin15', 'test_Leauthaud11', 'test_Leauthaud11b',
-    'test_Leauthaud11c', 'test_zu_mandelbaum15', 'test_zu_mandelbaum15b')
+    'test_Leauthaud11c', 'test_zu_mandelbaum15')
 
 
 def test_hearin15():
@@ -23,6 +23,7 @@ def test_hearin15():
     model.populate_mock(halocat)
 
 
+@pytest.mark.installation_test
 def test_Leauthaud11():
     """
     """
@@ -51,7 +52,7 @@ def test_Leauthaud11c():
     model_highz.populate_mock(halocat)
 
 
-def test_zu_mandelbaum15b():
+def test_zu_mandelbaum15():
     """
     """
     halocat = FakeSim()
