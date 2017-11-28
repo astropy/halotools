@@ -9,7 +9,9 @@
 
 - Removed `max_sample_size` keyword argument from all `mock_observables` functions.
 
-- Added new `weighted_npairs_s_mu` function to `mock_observables` sub-package.
+- Added new `weighted_npairs_s_mu` function to `mock_observables` sub-package. See Issue #810
+
+- Added standalone function to apply redshift-space distortions. See Issue #806.
 
 - Added `num_lines_header` optional keyword argument to TabularAsciiReader
 
@@ -22,6 +24,10 @@
 - Fixed bug in estimate_ngals method for case of assembly-biased occupation models. See https://github.com/astropy/halotools/issues/801
 
 - Removed obsolete bounds_enforcing_decorator_factory function - see https://github.com/astropy/halotools/issues/756
+
+- Fixed bug impacting ability of python 3.6 users to access downsampled particle data - See Issues #821, #826, and #831.
+
+- Fixed bug in isolation criteria for calculations without PBCs. See Issue #776.
 
 
 0.5 (2017-05-31)
