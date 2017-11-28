@@ -74,8 +74,7 @@ def npairs(sample1, sample2, rbins, period=None):
     # count number less than r
     n = np.zeros((rbins.size,), dtype=np.int)
     for i in range(rbins.size):
-        if rbins[i] > np.min(period)/2.0:
-            n[i] = len(np.where(dd <= rbins[i])[0])
+        n[i] = len(np.where(dd <= rbins[i])[0])
 
     return n
 
