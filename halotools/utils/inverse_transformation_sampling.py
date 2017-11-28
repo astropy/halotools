@@ -109,8 +109,15 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
 
 
 def build_cdf_lookup(y, npts_lookup_table=1000):
-    """ Compute a lookup table for the cumulative distribution function
+    r""" Compute a lookup table for the cumulative distribution function
     specified by the input set of ``y`` values.
+
+    The input data ``y`` will be used to define the CDF P(< y) in the usual way:
+    the array ``y`` will be sorted, and the largest value corresponds to CDF value 1/npts_data,
+    the second largest value 2/npts_data, etc. For performance reasons,
+    this correspondence will be used to build a sparse lookup table
+    of length ``npts_lookup_table``. The accuracy of the returned
+    CDF is fundamentally limited by npts_data, and optionally limited by npts_lookup_table.
 
     Parameters
     ----------
@@ -119,7 +126,7 @@ def build_cdf_lookup(y, npts_lookup_table=1000):
         of the returned lookup table.
 
     npts_lookup_table : int, optional
-        Number of control points in the returned lookup table.
+        Number of control points in the returned lookup table. Cannot exceed npts_data.
 
     Returns
     -------
@@ -141,8 +148,12 @@ def build_cdf_lookup(y, npts_lookup_table=1000):
 
     npts_y = len(y)
     if npts_y < npts_lookup_table:
-        warn("npts_y = {0} is less than  npts_lookup_table = {1}.\n"
-            "Setting npts_lookup_table to {0}".format(npts_y, npts_lookup_table))
+        warning_msg = ("The build_cdf_lookup function was called with the (optional) ``npts_lookup_table`` "
+            "argument set to {0}.\n"
+            "However, the number of data points in your data table npts_y = {1}.\n"
+            "The default behavior in this situation is to overwrite ``npts_lookup_table`` = ``npts_y``,\n"
+            "so that every point in the data set is used to build the lookup table.")
+        warn(warning_msg.format(npts_lookup_table, npts_y))
     npts_lookup_table = max(npts_lookup_table, npts_y)
 
     sorted_y = np.sort(y)

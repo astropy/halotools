@@ -226,7 +226,6 @@ class HeavisideAssembias(object):
                 "and the baseline model must have a method named ``%s``")
             raise HalotoolsError(msg % self._method_name_to_decorate)
 
-    @model_helpers.bounds_enforcing_decorator_factory(0, 1)
     def percentile_splitting_function(self, prim_haloprop):
         """
         Method returns the fraction of halos that are ``type-2``
@@ -266,15 +265,13 @@ class HeavisideAssembias(object):
                 self._split_abscissa, self._split_ordinates, k=3)
             result = spline_function(prim_haloprop)
 
+        result = np.where(result < 0, 0., result)
+        result = np.where(result > 1, 1., result)
         return result
 
-    @model_helpers.bounds_enforcing_decorator_factory(-1, 1)
     def assembias_strength(self, prim_haloprop):
         """
         Method returns the strength of assembly bias as a function of the primary halo property.
-
-        The `bounds_enforcing_decorator_factory` guarantees that the assembly bias
-        strength is enforced to be between -1 and 1.
 
         Parameters
         ----------
@@ -296,6 +293,8 @@ class HeavisideAssembias(object):
         else:
             result = spline_function(prim_haloprop)
 
+        result = np.where(result < -1, -1., result)
+        result = np.where(result > 1, 1., result)
         return result
 
     def _get_assembias_param_dict_key(self, ipar):

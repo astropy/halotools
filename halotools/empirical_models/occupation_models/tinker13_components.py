@@ -12,7 +12,6 @@ from .occupation_model_template import OccupationComponent
 from .. import model_defaults, model_helpers
 from ..smhm_models import Behroozi10SmHm
 from ..assembias_models import HeavisideAssembias
-from ..model_helpers import bounds_enforcing_decorator_factory
 
 from ...utils.array_utils import custom_len
 from ... import sim_manager
@@ -139,7 +138,6 @@ class Tinker13Cens(OccupationComponent):
         for key, value in zip(self._ordinates_keys, quiescent_fraction_ordinates):
             self.param_dict[key] = value
 
-    @bounds_enforcing_decorator_factory(0, 1, warning=False)
     def mean_quiescent_fraction(self, **kwargs):
         """
         """
@@ -159,6 +157,9 @@ class Tinker13Cens(OccupationComponent):
                 raise HalotoolsError(msg % self.prim_haloprop_key)
 
         fraction = spline_function(np.log10(prim_haloprop))
+
+        fraction = np.where(fraction < 0, 0., fraction)
+        fraction = np.where(fraction > 1, 1., fraction)
 
         return fraction
 

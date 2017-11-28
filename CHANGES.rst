@@ -21,6 +21,8 @@
 
 - Fixed bug in estimate_ngals method for case of assembly-biased occupation models. See https://github.com/astropy/halotools/issues/801
 
+- Removed obsolete bounds_enforcing_decorator_factory function - see https://github.com/astropy/halotools/issues/756
+
 
 0.5 (2017-05-31)
 ----------------
