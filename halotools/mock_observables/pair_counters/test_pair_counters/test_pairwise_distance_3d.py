@@ -237,3 +237,73 @@ def test_get_rmax2():
         __ = _get_r_max(sample1, np.inf)
     substr = "Input ``r_max`` must be an array of bounded positive numbers."
     assert substr in err.value.args[0]
+
+
+def test_parallel_serial_consistency():
+    Npts1, Npts2 = int(50), int(51)
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    r_max = 0.3
+
+    sparse_matrix_serial = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads=1)
+    sparse_matrix_parallel = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads=3)
+    sparse_matrix_parallel_max = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads='max')
+    dense_matrix_serial = sparse_matrix_serial.tocsc()
+    dense_matrix_parallel = sparse_matrix_parallel.tocsc()
+    dense_matrix_parallel_max = sparse_matrix_parallel_max.tocsc()
+
+    pure_python_dense_matrix = pure_python_distance_matrix_3d(sample1, sample2, r_max, Lbox=1)
+    for i in range(pure_python_dense_matrix.shape[0]):
+        for j in range(pure_python_dense_matrix.shape[1]):
+
+            matrix_element_serial = dense_matrix_serial[i, j]
+            matrix_element_parallel = dense_matrix_parallel[i, j]
+            matrix_element_parallel_max = dense_matrix_parallel_max[i, j]
+            assert np.allclose(matrix_element_serial, matrix_element_parallel, rtol=0.001)
+            assert np.allclose(matrix_element_serial, matrix_element_parallel_max, rtol=0.001)
+
+
+def test_args1():
+    Npts1, Npts2 = int(50), int(51)
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    r_max = 0.3
+
+    with pytest.raises(ValueError) as err:
+        __ = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads='a')
+    substr = "Input ``num_threads`` argument must be an integer or the string 'max'"
+    assert substr in err.value.args[0]
+
+
+def test_args2():
+    Npts1, Npts2 = int(50), int(51)
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    r_max = 0.3
+
+    with pytest.raises(ValueError) as err:
+        __ = pairwise_distance_3d(sample1, sample2, r_max, period=-11)
+    substr = "Input ``period`` must be a bounded positive number in all dimensions"
+    assert substr in err.value.args[0]
+
+
+def test_args3():
+    Npts1, Npts2 = int(50), int(51)
+
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+
+    r_max = 0.3
+
+    sparse_matrix = pairwise_distance_3d(sample1, sample2, r_max, approx_cell1_size=1, approx_cell2_size=1)
+

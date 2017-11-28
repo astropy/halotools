@@ -8,6 +8,10 @@ from ...biased_nfw_phase_space import BiasedNFWPhaseSpace
 from ...sfr_biased_nfw_phase_space import SFRBiasedNFWPhaseSpace
 
 from .......factories import PrebuiltHodModelFactory, HodModelFactory
+from .......sfr_models import HaloMassInterpolQuenching
+
+from ........sim_manager import FakeSim
+
 
 __all__ = ('test_conc_gal_bias1', )
 
@@ -86,3 +90,29 @@ def test_sfr_biased_nfw_phase_space_conc_gal_bias():
     mask = quiescent == True
     assert np.allclose(c[mask], model.param_dict['quiescent_conc_gal_bias_param1'])
     assert np.allclose(c[~mask], model.param_dict['star_forming_conc_gal_bias_param1'])
+
+
+def test_sfr_biased_nfw_phase_space_mockpop():
+    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+    model_dict = zheng07_model.model_dictionary
+
+    log_lowmass_value, log_highmass_value = 14, 16
+
+    conc_gal_bias_logM_abscissa = [log_lowmass_value, log_highmass_value]
+    biased_nfw = SFRBiasedNFWPhaseSpace(concentration_bins=conc_bins,
+            conc_gal_bias_bins=gal_bias_bins,
+            conc_gal_bias_logM_abscissa=conc_gal_bias_logM_abscissa,
+            conc_mass_model='dutton_maccio14')
+    model_dict['satellites_profile'] = biased_nfw
+
+    sfr_centrals = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.2, 0.9], gal_type='centrals')
+    sfr_satellites = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.2, 0.9], gal_type='satellites')
+
+    model_dict['centrals_sfr'] = sfr_centrals
+    model_dict['satellites_sfr'] = sfr_satellites
+
+    model = HodModelFactory(**model_dict)
+
+    halocat = FakeSim()
+    model.populate_mock(halocat)
+
