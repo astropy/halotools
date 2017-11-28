@@ -91,12 +91,14 @@ def mc_generate_nfw_radial_positions(num_pts=int(1e4), conc=5,
             msg = ("\nIf keyword argument ``halo_radius`` is unspecified, "
                 "argument ``halo_mass`` must be specified.\n")
             raise HalotoolsError(msg)
+        except TypeError:
+            raise HalotoolsError("Input ``halo_mass`` must be a float")
 
     halo_radius = np.atleast_1d(halo_radius).astype(np.float64)
     try:
         assert len(halo_radius) == 1
     except AssertionError:
-        msg = ("Input ``halo_radius`` or ``halo_mass`` must be a float")
+        msg = ("Input ``halo_radius`` must be a float")
         raise HalotoolsError(msg)
 
     conc = np.atleast_1d(conc).astype(np.float64)
