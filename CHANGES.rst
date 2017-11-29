@@ -19,7 +19,7 @@
 
 - Fixed bug in the normalization of the covariance matrices in the `tpcf_jackknife` function.  See https://github.com/astropy/halotools/issues/815.
 
-- Added `rp_pi_tpcf_jackknife` function.
+- Added `rp_pi_tpcf_jackknife` function - See #822
 
 - Fixed bug in estimate_ngals method for case of assembly-biased occupation models. See https://github.com/astropy/halotools/issues/801
 
