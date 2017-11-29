@@ -9,5 +9,8 @@ from . import custom_exceptions
 
 
 def test_installation(*args, **kwargs):
-    kwargs.setdefault('-m', 'installation_test')
+    kwargs.setdefault('args', '')
+    if kwargs['args']:
+        kwargs['args'] += ' '
+    kwargs['args'] += '-m installation_test'
     return test(*args, **kwargs)
