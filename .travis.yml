@@ -31,7 +31,6 @@ env:
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
-        - PYTEST_VERSION=3.1.0
         # Here we list the dependencies to be installed that are in conda
         - CONDA_DEPENDENCIES='cython scipy beautifulsoup4 requests matplotlib h5py'
     matrix:
@@ -100,7 +99,7 @@ install:
     # in how to install a package, in which case you can have additional
     # commands in the install: section below.
 
-    - git clone git://github.com/astropy/ci-helpers.git
+    - git clone -b uninstall_hypothesis git://github.com/bsipocz/ci-helpers
     - source ci-helpers/travis/setup_conda.sh
 
     # As described above, using ci-helpers, you should be able to set up an
