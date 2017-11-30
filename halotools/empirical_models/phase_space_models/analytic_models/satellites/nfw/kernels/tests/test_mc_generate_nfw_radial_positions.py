@@ -19,7 +19,7 @@ def test_mc_generate_nfw_radial_positions1():
 def test_mc_generate_nfw_radial_positions2():
 
     with pytest.raises(HalotoolsError) as err:
-        __ = mc_generate_nfw_radial_positions(num_pts=10, halo_mass=(2, 3))
+        __ = mc_generate_nfw_radial_positions(num_pts=10, halo_mass=(10**12, 10**13))
     substr = ("Input ``halo_mass`` must be a float")
     assert substr in err.value.args[0]
 
