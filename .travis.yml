@@ -64,7 +64,7 @@ matrix:
 
         # Try Astropy development version
         - python: 3.6
-          env: ASTROPY_VERSION=development ASTROPY_USE_SYSTEM_PYTEST=1
+          env: ASTROPY_VERSION=development
 
         # Try older numpy version, 1.9 is tested above with py3.3 and 1.11 with py3.4
         - python: 3.5
@@ -73,7 +73,7 @@ matrix:
         # Try numpy pre-release version, this runs only when a pre-release
         # is available on pypi.
         - python: 3.6
-          env: NUMPY_VERSION=prerelease SETUP_CMD='test' ASTROPY_USE_SYSTEM_PYTEST=1
+          env: NUMPY_VERSION=prerelease SETUP_CMD='test'
 
         # try a version *without* h5py - we need this for readthedocs
         - python: 2.7
@@ -99,7 +99,7 @@ install:
     # in how to install a package, in which case you can have additional
     # commands in the install: section below.
 
-    - git clone git://github.com/astropy/ci-helpers.git
+    - git clone -b uninstall_hypothesis git://github.com/bsipocz/ci-helpers
     - source ci-helpers/travis/setup_conda.sh
 
     # As described above, using ci-helpers, you should be able to set up an
