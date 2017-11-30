@@ -40,14 +40,32 @@ Halo catalog analysis
 Tutorials
 =====================
 
+Galaxy-Halo Modeling
+---------------------------------------------------------
+
 .. toctree::
    :maxdepth: 1
 
    tutorials/model_building/preloaded_models/index
    tutorials/model_building/index
+   ../source_notes/empirical_models/factories/index
+
+Galaxy/Halo Catalog Analysis
+---------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
    tutorials/catalog_analysis/galcat_analysis/index
    tutorials/catalog_analysis/halocat_analysis/index
-   ../source_notes/empirical_models/factories/index
+
+Subhalo Merger Tree Analysis
+---------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/merger_tree_analysis_example
 
 
 Developer Documentation
