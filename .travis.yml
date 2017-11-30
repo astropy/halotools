@@ -31,6 +31,7 @@ env:
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
+        - PYTEST_VERSION=3.1
         # Here we list the dependencies to be installed that are in conda
         - CONDA_DEPENDENCIES='cython scipy beautifulsoup4 requests matplotlib h5py'
     matrix:
