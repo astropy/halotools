@@ -67,7 +67,7 @@ matrix:
           env: ASTROPY_VERSION=development ASTROPY_USE_SYSTEM_PYTEST=1
 
         # Try older numpy version, 1.9 is tested above with py3.3 and 1.11 with py3.4
-        - python: 3.5
+        - python: 3.6
           env: NUMPY_VERSION=1.10
 
         # Try numpy pre-release version, this runs only when a pre-release
