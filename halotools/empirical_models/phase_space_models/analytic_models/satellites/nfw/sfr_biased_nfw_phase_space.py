@@ -16,7 +16,7 @@ __all__ = ('SFRBiasedNFWPhaseSpace', )
 
 
 missing_quiescent_key_msg = ("The `SFRBiasedNFWPhaseSpace` class "
-    "can only be used to make mocks \nin concert "
+    "can only be used to make mocks \nin concert"
     "with some other component model that is responsible for \nmodeling an"
     "``quiescent`` property of the ``galaxy_table``.\n")
 
