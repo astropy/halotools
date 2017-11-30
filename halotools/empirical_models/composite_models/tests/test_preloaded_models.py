@@ -77,3 +77,15 @@ def test_zheng07_alternate_haloprop1():
 
     satellites_profile = model.model_dictionary['satellites_profile']
     assert compare_strings_py23_safe(satellites_profile.mdef, '200c')
+
+
+def test_zheng07_alternate_haloprop2():
+    """ Regression test for Issue #827 - https://github.com/astropy/halotools/issues/827
+    """
+    model = PrebuiltHodModelFactory('zheng07', prim_haloprop_key='halo_custom_mass', mdef='200c')
+    halocat = FakeSim(redshift=0.)
+    halocat.halo_table['halo_custom_mass'] = np.copy(halocat.halo_table['halo_mvir'])
+    halocat.halo_table['halo_m200c'] = np.copy(halocat.halo_table['halo_mvir'])
+    halocat.halo_table['halo_r200c'] = np.copy(halocat.halo_table['halo_rvir'])
+    model.populate_mock(halocat)
+
