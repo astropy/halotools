@@ -22,7 +22,7 @@ gal_bias_bins = np.insert(gal_bias_bins, np.searchsorted(gal_bias_bins, 1), 1)
 
 
 def test_conc_gal_bias1():
-    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-21)
     model_dict = zheng07_model.model_dictionary
 
     log_lowmass_value, log_highmass_value = 14, 16
@@ -45,7 +45,7 @@ def test_conc_gal_bias1():
 
 
 def test_sfr_biased_nfw_phase_space_conc_gal_bias():
-    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-21)
     model_dict = zheng07_model.model_dictionary
 
     log_lowmass_value, log_highmass_value = 14, 16
@@ -93,7 +93,7 @@ def test_sfr_biased_nfw_phase_space_conc_gal_bias():
 
 
 def test_sfr_biased_nfw_phase_space_mockpop():
-    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-21)
     model_dict = zheng07_model.model_dictionary
 
     log_lowmass_value, log_highmass_value = 14, 16
