@@ -59,7 +59,7 @@ Galaxy/Halo Catalog Analysis
    tutorials/catalog_analysis/galcat_analysis/index
    tutorials/catalog_analysis/halocat_analysis/index
 
-Subhalo Merger Tree Analysis
+Merger Tree Analysis
 ---------------------------------------------------------
 
 .. toctree::

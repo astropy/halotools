@@ -29,7 +29,14 @@ def group_member_generator(data, grouping_key, requested_columns):
     Common applications of `group_member_generator` include
     subhalo analysis (e.g., calculating host halo mass) and
     galaxy group analysis (e.g., calculating total stellar mass
-    or group-centric position). See the Examples section for further details.
+    or group-centric position). The Examples section below shows basic usage.
+    There are also three tutorials demonstrating common applications in more detail:
+
+        1. :ref:`galaxy_catalog_analysis_tutorial1`
+
+        2. :ref:`halo_catalog_analysis_tutorial1`
+
+        3. :ref:`example_merger_tree_analysis`
 
     Parameters
     ------------
