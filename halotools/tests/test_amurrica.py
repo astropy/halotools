@@ -9,22 +9,6 @@ from ..custom_exceptions import AmurricaError, SpellingError
 from . import usa, ddc
 
 
-def test_amurrica_instantiation():
-    try:
-        basename, linenum, correct_spelling, offending_spelling = 'modulename', 20, 'president', 'queen'
-        raise AmurricaError(basename, linenum, correct_spelling, offending_spelling)
-    except AmurricaError:
-        pass
-
-
-def test_spelling_instantiation():
-    try:
-        basename, linenum, correct_spelling, offending_spelling = 'modulename', 20, 'Arnold', 'Sly'
-        raise SpellingError(basename, linenum, correct_spelling, offending_spelling)
-    except SpellingError:
-        pass
-
-
 def source_code_string_generator(fname):
     """ Yield each line of source code.
     Each line will be checked for all misspellings.
