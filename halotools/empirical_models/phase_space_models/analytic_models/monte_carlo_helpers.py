@@ -17,6 +17,7 @@ from ... import model_defaults
 
 from ....custom_exceptions import HalotoolsError
 
+_epsilon = 0.001
 
 __author__ = ['Andrew Hearin']
 __all__ = ['MonteCarloGalProf']
@@ -567,7 +568,7 @@ class MonteCarloGalProf(object):
 
         virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
-        radial_dispersions = np.where(radial_dispersions < 0, 0, radial_dispersions)
+        radial_dispersions = np.where(radial_dispersions <= 0, _epsilon, radial_dispersions)
 
         seed = kwargs.get('seed', None)
         with NumpyRNGContext(seed):
