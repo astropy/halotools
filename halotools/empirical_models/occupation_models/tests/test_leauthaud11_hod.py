@@ -2,12 +2,14 @@
 `halotools.empirical_models.occupation_components.leauthaud11_components` module"
 """
 import numpy as np
+import pytest
 
 from .. import Leauthaud11Cens, Leauthaud11Sats
 
 __all__ = ('test_Leauthaud11Cens', 'test_Leauthaud11Sats')
 
 
+@pytest.mark.installation_test
 def test_Leauthaud11Cens():
     """ Function to test
     `~halotools.empirical_models.Leauthaud11Cens`.
@@ -44,6 +46,7 @@ def test_Leauthaud11Cens():
     __ = model2.get_published_parameters()
 
 
+@pytest.mark.installation_test
 def test_Leauthaud11Sats():
     """ Function to test
     `~halotools.empirical_models.Leauthaud11Cens`.

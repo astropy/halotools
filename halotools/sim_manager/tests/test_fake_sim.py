@@ -3,6 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
+import pytest
 
 from ..fake_sim import FakeSim, FakeSimHalosNearBoundaries
 from ...custom_exceptions import HalotoolsError
@@ -10,6 +11,7 @@ from ...custom_exceptions import HalotoolsError
 __all__ = ('test_fake_sim_default_size', )
 
 
+@pytest.mark.installation_test
 def test_fake_sim_default_size():
     fake_sim = FakeSim()
     try:

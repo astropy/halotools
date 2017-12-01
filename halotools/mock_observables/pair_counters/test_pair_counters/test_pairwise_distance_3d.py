@@ -166,6 +166,7 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
     assert m.getnnz() == Npts1*Npts2
 
 
+@pytest.mark.installation_test
 @pytest.mark.slow
 def test_3d_brute_force_elementwise_comparison():
     Npts1, Npts2 = int(1e2), int(1e2)
@@ -239,6 +240,7 @@ def test_get_rmax2():
     assert substr in err.value.args[0]
 
 
+@pytest.mark.installation_test
 def test_parallel_serial_consistency():
     Npts1, Npts2 = int(50), int(51)
 

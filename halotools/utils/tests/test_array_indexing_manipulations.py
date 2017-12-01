@@ -256,6 +256,7 @@ def test_random_indices_within_bin2():
     assert substr in err.value.args[0]
 
 
+@pytest.mark.installation_test
 def test_random_indices_within_bin3():
     """ The purpose of this test is to scour the set of possible inputs for
     edge cases that may not be covered by the hand-tailored tests.

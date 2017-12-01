@@ -9,6 +9,7 @@ from ..occupation_stats import hod_from_mock
 __all__ = ('test_occupation_stats1', )
 
 
+@pytest.mark.installation_test
 def test_occupation_stats1():
     haloprop_galaxies = np.array((1.5, 2.5, 4.5))
     haloprop_halos = np.array((1.5, 2.5, 4.5))

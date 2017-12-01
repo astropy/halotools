@@ -11,6 +11,7 @@ __all__ = ('test_crossmatch1', )
 fixed_seed = 43
 
 
+@pytest.mark.installation_test
 def test_crossmatch1():
     """ x has unique entries. All y values are in x. All x values are in y.
     """

@@ -105,6 +105,7 @@ def test_marked_npairs_parallelization():
     assert np.allclose(serial_result, parallel_result7, rtol=1e-05), "pair counts are incorrect"
 
 
+@pytest.mark.installation_test
 def test_marked_npairs_nonperiodic():
     """
     Function tests marked_npairs with without periodic boundary conditions.

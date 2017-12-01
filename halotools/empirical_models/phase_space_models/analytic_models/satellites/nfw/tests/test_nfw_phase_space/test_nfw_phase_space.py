@@ -2,6 +2,7 @@
 do indeed trace an NFW profile.
 """
 import numpy as np
+import pytest
 
 from ..test_nfw_profile import analytic_nfw_density_outer_shell_normalization
 from ..test_nfw_profile import monte_carlo_density_outer_shell_normalization
@@ -13,6 +14,7 @@ __all__ = ['test_mc_dimensionless_radial_distance']
 fixed_seed = 43
 
 
+@pytest.mark.installation_test
 def test_mc_dimensionless_radial_distance():
     r""" Method used to test `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`.
 

@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
+import pytest
 
 from ..conditional_cylindrical_isolation import conditional_cylindrical_isolation
 from ..cylindrical_isolation import cylindrical_isolation
@@ -21,6 +22,7 @@ __all__ = ('test_agreement_with_unconditioned_calculation',
 fixed_seed = 43
 
 
+@pytest.mark.installation_test
 def test_agreement_with_unconditioned_calculation():
     """ Verify that the `~halotools.mock_observables.cylindrical_isolation` function
     agrees exactly with the `~halotools.mock_observables.conditional_cylindrical_isolation` function

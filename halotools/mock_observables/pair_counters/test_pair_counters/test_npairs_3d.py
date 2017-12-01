@@ -29,6 +29,7 @@ else:
     APH_MACHINE = False
 
 
+@pytest.mark.installation_test
 def test_rectangular_mesh_pairs_tight_locus1():
     """ Verify that `halotools.mock_observables.npairs_3d` returns
     the correct counts for two tight loci of points.
@@ -221,6 +222,7 @@ def test_parallel():
     assert np.all(serial_result == parallel_result7)
 
 
+@pytest.mark.installation_test
 def test_npairs_brute_force_periodic():
     """
     Function tests npairs with periodic boundary conditions.
