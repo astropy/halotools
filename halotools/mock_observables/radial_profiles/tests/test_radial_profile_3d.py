@@ -342,3 +342,23 @@ def test_enforce_search_length():
             rbins_normalized=rbins_normalized, normalize_rbins_by=normalize_rbins_by, period=1)
     substr = "This exceeds the maximum permitted search length of period/3."
     assert substr in err.value.args[0]
+
+
+def test_parallel_serial_consistency():
+    npts1, npts2 = 100, 90
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((npts1, 3))
+        sample2 = np.random.random((npts2, 3))
+        quantity2 = np.random.random(npts2)
+
+    rbins_absolute = np.linspace(0.01, 0.2, 5)
+    fixed_rvir = 0.1
+    rbins_normalized = rbins_absolute/fixed_rvir
+
+    result1, counts1 = radial_profile_3d(sample1, sample2, quantity2,
+        rbins_absolute=rbins_absolute, return_counts=True, period=1, num_threads=1)
+    result2, counts2 = radial_profile_3d(sample1, sample2, quantity2,
+        rbins_absolute=rbins_absolute, return_counts=True, period=1, num_threads=3)
+    assert np.all(counts1 == counts2)
+    assert np.allclose(result1, result2, rtol=0.001)
+
