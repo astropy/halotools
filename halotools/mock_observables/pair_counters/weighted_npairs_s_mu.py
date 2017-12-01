@@ -222,12 +222,15 @@ def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts, weighted_counts = result
+        result = np.array(result)
+        counts = result[:,0]
+        weighted_counts = result[:,1]
         counts = np.sum(np.array(counts), axis=0)
         weighted_counts = np.sum(np.array(weighted_counts), axis=0)
         pool.close()
     else:
         result = engine(cell1_tuples[0])
-        counts, weighted_counts = result
+        counts = result[0]
+        weighted_counts = result[1]
 
     return np.array(counts), np.array(weighted_counts)
