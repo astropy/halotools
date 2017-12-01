@@ -29,6 +29,10 @@
 
 - Fixed bug in isolation criteria for calculations without PBCs. See Issue #776.
 
+- Fixed bug in `weighted_npairs_s_mu` when called in parallel. See https://github.com/astropy/halotools/issues/837.
+
+- Fixed bug in `radial_profile_3d` when called in parallel. See https://github.com/astropy/halotools/issues/854.
+
 
 0.5 (2017-05-31)
 ----------------
