@@ -65,12 +65,14 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
     to generate a Monte Carlo realization of the data ``y``.
 
     >>> npts = int(1e4)
-    >>> y = 0.3*np.random.normal(size=npts) + 0.7*np.random.power(2, size=npts)
+    >>> y = 0.1*np.random.normal(size=npts) + 0.9*np.random.power(2, size=npts)
     >>> x_table, y_table = build_cdf_lookup(y)
-    >>> result = monte_carlo_from_cdf_lookup(x_table, y_table, num_draws=100)
+    >>> result = monte_carlo_from_cdf_lookup(x_table, y_table, num_draws=5000)
 
     The returned array ``result`` is a stochastic Monte Carlo realization of the
     distribution specified by ``y``.
+
+    .. image:: /_static/monte_carlo_example.png
 
     Now let's consider a second example where, rather than specifying an integer number of
     purely random Monte Carlo draws, instead we pass in an array of uniform random numbers.
@@ -90,6 +92,25 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
     percentile values of ``x`` instead of uniform randoms.
     This is the basis of the conditional abundance matching technique
     implemented by the `~halotools.empirical_models.conditional_abunmatch` function.
+
+    To see an example of how this works, let's create some fake data for some property *x*
+    that we wish to model as being correlated with Monte Carlo realizations of *y* while
+    preserving the PDF of the realization:
+
+    >>> x = np.sort(10**np.random.normal(loc=10, size=5000))
+    >>> x_percentile = (1. + np.arange(len(x)))/float(len(x)+1)
+    >>> correlated_result = monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=x_percentile)
+    >>> uniform_randoms = np.random.rand(npts)
+    >>> uncorrelated_result = monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=uniform_randoms)
+
+    We can use the `~halotools.empirical_models.noisy_percentile` to introduce variable levels
+    of noise in the correlation.
+
+    >>> from halotools.empirical_models import noisy_percentile
+    >>> noisy_x_percentile = noisy_percentile(x_percentile, correlation_coeff=0.75)
+    >>> weakly_correlated_result = monte_carlo_from_cdf_lookup(x_table, y_table, mc_input=noisy_x_percentile)
+
+    .. image:: /_static/monte_carlo_example2.png
 
     """
     if mc_input is 'random':
