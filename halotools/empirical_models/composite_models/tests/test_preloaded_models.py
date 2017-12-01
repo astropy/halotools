@@ -1,15 +1,16 @@
 """
 """
 import pytest
+import numpy as np
 
 from ...factories import PrebuiltHodModelFactory
 
 from ....sim_manager import CachedHaloCatalog, FakeSim
 from ....custom_exceptions import HalotoolsError
+from ....utils.python_string_comparisons import compare_strings_py23_safe
 
 
-__all__ = ('test_hearin15', 'test_Leauthaud11', 'test_Leauthaud11b',
-    'test_Leauthaud11c', 'test_zu_mandelbaum15')
+__all__ = ('test_hearin15', )
 
 
 def test_hearin15():
@@ -58,3 +59,33 @@ def test_zu_mandelbaum15():
     halocat = FakeSim()
     model = PrebuiltHodModelFactory('zu_mandelbaum15', prim_haloprop_key='halo_mvir')
     model.populate_mock(halocat)
+
+
+def test_zheng07_alternate_haloprop1():
+    """ Regression test for Issue #827 - https://github.com/astropy/halotools/issues/827
+    """
+    model = PrebuiltHodModelFactory('zheng07', prim_haloprop_key='halo_custom_mass', mdef='200c')
+
+    centrals_occupation = model.model_dictionary['centrals_occupation']
+    assert compare_strings_py23_safe(centrals_occupation.prim_haloprop_key, 'halo_custom_mass')
+
+    satellites_occupation = model.model_dictionary['satellites_occupation']
+    assert compare_strings_py23_safe(satellites_occupation.prim_haloprop_key, 'halo_custom_mass')
+
+    centrals_profile = model.model_dictionary['centrals_profile']
+    assert compare_strings_py23_safe(centrals_profile.mdef, '200c')
+
+    satellites_profile = model.model_dictionary['satellites_profile']
+    assert compare_strings_py23_safe(satellites_profile.mdef, '200c')
+
+
+def test_zheng07_alternate_haloprop2():
+    """ Regression test for Issue #827 - https://github.com/astropy/halotools/issues/827
+    """
+    model = PrebuiltHodModelFactory('zheng07', prim_haloprop_key='halo_custom_mass', mdef='200c')
+    halocat = FakeSim(redshift=0.)
+    halocat.halo_table['halo_custom_mass'] = np.copy(halocat.halo_table['halo_mvir'])
+    halocat.halo_table['halo_m200c'] = np.copy(halocat.halo_table['halo_mvir'])
+    halocat.halo_table['halo_r200c'] = np.copy(halocat.halo_table['halo_rvir'])
+    model.populate_mock(halocat)
+

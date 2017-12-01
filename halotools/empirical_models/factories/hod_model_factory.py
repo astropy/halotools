@@ -803,6 +803,8 @@ class HodModelFactory(ModelFactory):
                 haloprop_list.append(component_model.prim_haloprop_key)
             if hasattr(component_model, 'sec_haloprop_key'):
                 haloprop_list.append(component_model.sec_haloprop_key)
+            if hasattr(component_model, 'halo_boundary_key'):
+                haloprop_list.append(component_model.halo_boundary_key)
             if hasattr(component_model, 'list_of_haloprops_needed'):
                 haloprop_list.extend(component_model.list_of_haloprops_needed)
 
