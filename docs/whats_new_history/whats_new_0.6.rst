@@ -6,8 +6,7 @@
 What's New in Halotools v0.6?
 *****************************
 
-Halotools ``v0.6`` is currently under development. All significant additions/differences between
-the current version of the ``master`` branch and the official ``v0.5`` release on pip are summarized below.
+Halotools ``v0.6`` is now available for installation with conda and pip. New features are summarized below. See the full changelog **CHANGES.rst** for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
 
 
 New Mock Observables
@@ -16,6 +15,22 @@ New Mock Observables
 Radial distances and velocities
 -------------------------------
 There are new functions in the `~halotools.mock_observables` sub-package that calculate element-wise radial distances and velocities, `~halotools.mock_observables.radial_distance`  and `~halotools.mock_observables.radial_distance_and_velocity`.
+
+Jackknife error estimation
+---------------------------
+New functions `~halotools.mock_observables.wp_jackknife` and `~halotools.mock_observables.rp_pi_tpcf_jackknife` give jackknife error estimation for the `~halotools.mock_observables.wp` and `~halotools.mock_observables.rp_pi_tpcf` functions.
+
+Weighted pair counts as a function of (s, mu)
+---------------------------------------------
+New `halotools.mock_observables.pair_counters.weighted_npairs_s_mu` function gives weighting option for counting pairs in (s, mu) space.
+
+Utility functions
+==================
+
+Matching two distributions for statistical comparison
+------------------------------------------------------
+The `halotools.utils.distribution_matching_indices` function Monte Carlo resamples one distribution until it matches another.
+
 
 API Change
 ==========
