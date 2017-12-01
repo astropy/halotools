@@ -93,7 +93,7 @@ def test_sfr_biased_nfw_phase_space_conc_gal_bias():
 
 
 def test_sfr_biased_nfw_phase_space_mockpop():
-    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-18)
+    zheng07_model = PrebuiltHodModelFactory('zheng07', threshold=-20)
     model_dict = zheng07_model.model_dictionary
 
     log_lowmass_value, log_highmass_value = 14, 16
@@ -113,6 +113,6 @@ def test_sfr_biased_nfw_phase_space_mockpop():
 
     model = HodModelFactory(**model_dict)
 
-    halocat = FakeSim()
+    halocat = FakeSim(seed=43)
     model.populate_mock(halocat)
 
