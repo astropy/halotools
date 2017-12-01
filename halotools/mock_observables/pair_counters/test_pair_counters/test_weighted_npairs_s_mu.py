@@ -64,7 +64,7 @@ def test2():
     assert np.all(unweighted_counts1 != weighted_counts)
 
 
-def test3():
+def test_parallel_serial_consistency():
     """
     """
     Npts = 1000
@@ -80,8 +80,10 @@ def test3():
     weights1 = np.ones(Npts)
     weights2 = np.ones(Npts)
 
-    with pytest.raises(ValueError) as err:
-        unweighted_counts2, weighted_counts = weighted_npairs_s_mu(random_sample, random_sample,
-                weights1, weights2, s_bins, mu_bins[::-1], period=period)
-    substr = "Input `mu_bins` must be a monotonically increasing"
-    assert substr in err.value.args[0]
+    unweighted_counts_serial, weighted_counts_serial = weighted_npairs_s_mu(random_sample, random_sample,
+            weights1, weights2, s_bins, mu_bins, period=period, num_threads=1)
+    unweighted_counts_parallel, weighted_counts_parallel = weighted_npairs_s_mu(random_sample, random_sample,
+            weights1, weights2, s_bins, mu_bins, period=period, num_threads=3)
+
+    assert np.all(unweighted_counts_serial == unweighted_counts_parallel)
+    assert np.all(weighted_counts_serial == weighted_counts_parallel)
