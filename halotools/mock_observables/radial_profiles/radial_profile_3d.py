@@ -251,8 +251,8 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine, cell1_tuples)
-        marked_counts, counts = result
+        result = np.array(pool.map(engine, cell1_tuples))
+        marked_counts, counts = result[:, 0, :], result[:, 1, :]
         marked_counts = np.sum(np.array(marked_counts), axis=0)
         counts = np.sum(np.array(counts), axis=0)
         pool.close()
