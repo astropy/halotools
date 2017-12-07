@@ -98,7 +98,10 @@ def positional_marked_npairs_3d(sample1, sample2, rbins,
     Returns
     -------
     wN_pairs : numpy.array
-        array of length *Nrbins* containing the weighted number counts of pairs
+        Numpy array of shape (Nrbins, ) containing the weighted number counts of pairs
+
+    N_pairs : numpy.array
+        Numpy array of shape (Nrbins, ) containing the number counts of pairs
 
     Examples
     --------
@@ -125,7 +128,7 @@ def positional_marked_npairs_3d(sample1, sample2, rbins,
     >>> weights1 = np.random.random((Npts1, 3))
     >>> weights2 = np.random.random((Npts2, 3))
 
-    >>> result = positional_marked_npairs_3d(sample1, sample2, rbins, period=period, weights1=weights1, weights2=weights2, weight_func_id=1)
+    >>> weighted_counts, counts = positional_marked_npairs_3d(sample1, sample2, rbins, period=period, weights1=weights1, weights2=weights2, weight_func_id=1)
 
     """
 

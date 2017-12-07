@@ -73,7 +73,7 @@ def positional_marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
     cdef int num_rbins = len(rbins)
-    cdef cnp.float64_t[:] counts = np.zeros(num_rbins, dtype=np.int64)
+    cdef cnp.int64_t[:] counts = np.zeros(num_rbins, dtype=np.int64)
     cdef cnp.float64_t[:] weighted_counts = np.zeros(num_rbins, dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
