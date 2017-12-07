@@ -246,9 +246,6 @@ def radial_profile_3d(sample1, sample2, sample2_quantity,
     num_threads, cell1_tuples = _cell1_parallelization_indices(
         double_mesh.mesh1.ncells, num_threads)
 
-    # print(rbins_normalized)
-    # print(set(normalize_rbins_by))
-
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = np.array(pool.map(engine, cell1_tuples))
