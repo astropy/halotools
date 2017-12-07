@@ -10,13 +10,15 @@ from libc.math cimport fabs as c_fabs
 
 __author__ = ["Duncan Campbell"]
 
-cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t*, w2, x1, y1, z1, x2, y2, z2):
+cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t*, w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2):
     """
     vector dot product of w1 along s, the vector connection point 1 and point 2
     This function assumes w1 and w2 have been normalized
     """
     cdef cnp.float64_t x, y, z, rsq
-    
+
     x = (x2-x1)
     y = (y2-y1)
     z = (z2-z1)
