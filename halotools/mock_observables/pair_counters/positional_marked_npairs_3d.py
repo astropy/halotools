@@ -282,25 +282,7 @@ def _func_signature_int_from_wfunc(weight_func_id):
         raise ValueError(msg)
 
     if weight_func_id == 1:
-        return 1
-    elif weight_func_id == 2:
-        return 1
-    elif weight_func_id == 3:
-        return 2
-    elif weight_func_id == 4:
-        return 2
-    elif weight_func_id == 5:
-        return 2
-    elif weight_func_id == 6:
-        return 2
-    elif weight_func_id == 7:
-        return 2
-    elif weight_func_id == 8:
-        return 2
-    elif weight_func_id == 9:
-        return 2
-    elif weight_func_id == 10:
-        return 2
+        return 3
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")
         raise HalotoolsError(msg % weight_func_id)
