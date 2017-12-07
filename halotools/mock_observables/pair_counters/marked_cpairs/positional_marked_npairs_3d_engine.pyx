@@ -8,12 +8,13 @@ cimport cython
 from libc.math cimport ceil
 
 from .positional_marking_functions cimport *
-from .custom_marking_func cimport custom_func
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('positional_marked_npairs_3d_engine', )
 
-ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
+ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -212,7 +213,7 @@ def positional_marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
                                     dsq = dx*dx + dy*dy + dz*dz
 
                                     weight = wfunc(&w_icell1[i,0], &w_icell2[j,0],
-                                        x1tmp, y1tmp, z1tmp, x2tmp, y2tmp, z2tmp)
+                                        x1tmp, y1tmp, z1tmp, x2tmp, y2tmp, z2tmp, dsq)
                                     k = num_rbins-1
                                     while dsq <= rbins_squared[k]:
                                         counts[k] += 1
@@ -228,9 +229,7 @@ cdef f_type return_weighting_function(weight_func_id):
     returns a pointer to the user-specified weighting function.
     """
 
-    if weight_func_id==0:
-        return custom_func
-    elif weight_func_id==1:
+    if weight_func_id==1:
         return pos_shape_dot_product_func
     else:
         raise ValueError('marking function does not exist')

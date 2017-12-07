@@ -7,21 +7,21 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 cimport numpy as cnp
 from libc.math cimport fabs as c_fabs
+from libc.math cimport sqrt as c_sqrt
 
 __author__ = ["Duncan Campbell"]
 
-cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t*, w2,
+cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t* w2,
             cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
-            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2):
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
     """
     vector dot product of w1 along s, the vector connection point 1 and point 2
     This function assumes w1 and w2 have been normalized
     """
-    cdef cnp.float64_t x, y, z, rsq
+    cdef cnp.float64_t x, y, z
 
     x = (x2-x1)
     y = (y2-y1)
     z = (z2-z1)
-    rsq = x*x + y*y + z*z
 
     return (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)

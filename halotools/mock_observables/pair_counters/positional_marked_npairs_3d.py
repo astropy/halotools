@@ -122,10 +122,10 @@ def positional_marked_npairs_3d(sample1, sample2, rbins,
 
     >>> sample1 = np.vstack([x1, y1, z1]).T
     >>> sample2 = np.vstack([x2, y2, z2]).T
-    >>> weights1 = np.random.random(Npts1)
-    >>> weights2 = np.random.random(Npts2)
+    >>> weights1 = np.random.random((Npts1, 3))
+    >>> weights2 = np.random.random((Npts2, 3))
 
-    >>> result = positional_marked_npairs_3d(sample1, sample2, rbins, period = period, weights1 = weights1, weights2 = weights2, weight_func_id=1)
+    >>> result = positional_marked_npairs_3d(sample1, sample2, rbins, period=period, weights1=weights1, weights2=weights2, weight_func_id=1)
 
     """
 
