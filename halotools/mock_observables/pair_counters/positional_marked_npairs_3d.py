@@ -17,10 +17,10 @@ from ...custom_exceptions import HalotoolsError
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
-__all__ = ('marked_npairs_3d', )
+__all__ = ('positional_marked_npairs_3d', )
 
 
-def marked_npairs_3d(sample1, sample2, rbins,
+def positional_marked_npairs_3d(sample1, sample2, rbins,
                   period=None, weights1=None, weights2=None,
                   weight_func_id=0, verbose=False, num_threads=1,
                   approx_cell1_size=None, approx_cell2_size=None):
@@ -125,7 +125,7 @@ def marked_npairs_3d(sample1, sample2, rbins,
     >>> weights1 = np.random.random(Npts1)
     >>> weights2 = np.random.random(Npts2)
 
-    >>> result = marked_npairs_3d(sample1, sample2, rbins, period = period, weights1 = weights1, weights2 = weights2, weight_func_id=1)
+    >>> result = positional_marked_npairs_3d(sample1, sample2, rbins, period = period, weights1 = weights1, weights2 = weights2, weight_func_id=1)
 
     """
 
