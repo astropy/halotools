@@ -24,12 +24,11 @@ def positional_marked_npairs_3d(sample1, sample2, rbins,
                   period=None, weights1=None, weights2=None,
                   weight_func_id=0, verbose=False, num_threads=1,
                   approx_cell1_size=None, approx_cell2_size=None):
-    """
-    Calculate the number of weighted pairs with separations greater than or equal to r, :math:`W(>r)`.
+    r"""
+    Calculate the number of weighted pairs with separations greater than or equal to r, :math:`W(>r)`,
+    where the weight of each pair is given by the dot product of the normalized
+    3d array stored in each input weight and the separation vector of the pair.
 
-    The weight given to each pair is determined by the weights for a pair,
-    :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated
-    by the ``weight_func_id`` parameter, :math:`f(w_1,w_2)`.
 
     Note that if sample1 == sample2 that the `marked_npairs` function double-counts pairs.
 
@@ -272,7 +271,10 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
             raise HalotoolsError(msg %
                 (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
 
-    return weights1, weights2
+    normed_weights1 = weights1/np.sqrt(np.sum(weights1**2, axis=1)).reshape((npts_weights1, -1))
+    normed_weights2 = weights2/np.sqrt(np.sum(weights2**2, axis=1)).reshape((npts_weights2, -1))
+
+    return normed_weights1, normed_weights2
 
 
 def _func_signature_int_from_wfunc(weight_func_id):
