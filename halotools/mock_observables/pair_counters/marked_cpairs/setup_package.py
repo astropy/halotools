@@ -4,6 +4,7 @@ import os
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ("custom_weighting_func.pyx",
     "distances.pyx", "positional_marked_npairs_3d_engine.pyx", "positional_marking_functions.pyx",
+    "positional_marked_npairs_xy_z_engine.pyx", "positional_projected_marking_functions.pyx",
     "conditional_pairwise_distances.pyx", "marked_npairs_3d_engine.pyx")
 
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])

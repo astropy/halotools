@@ -5,3 +5,12 @@ cimport numpy as cnp
 cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t* w2,
       cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
       cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq)
+
+cdef cnp.float64_t gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
+      cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+      cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq)
+
+cdef cnp.float64_t gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
+      cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+      cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq)
+

@@ -8,6 +8,9 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport fabs as c_fabs
 from libc.math cimport sqrt as c_sqrt
+from libc.math cimport cos as c_cos
+from libc.math cimport acos as c_acos
+from libc.math cimport sin as c_sin
 
 __author__ = ["Duncan Campbell"]
 
@@ -20,8 +23,49 @@ cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t* 
     """
     cdef cnp.float64_t x, y, z
 
-    x = (x2-x1)
-    y = (y2-y1)
-    z = (z2-z1)
+    if rsq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        return (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)
+    else:
+        return 0.0
 
-    return (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)
+cdef cnp.float64_t gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta, gamma
+    
+    if rsq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)
+        gamma = c_cos(2.0*c_acos(costheta))
+        return gamma
+    else:
+        return 0.0
+
+cdef cnp.float64_t gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta, gamma
+    
+    if rsq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)
+        gamma = c_sin(2.0*c_acos(costheta))
+        return gamma
+    else:
+        return 0.0
+
+
+
