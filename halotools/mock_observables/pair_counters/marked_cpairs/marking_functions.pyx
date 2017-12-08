@@ -133,4 +133,15 @@ cdef cnp.float64_t exweights(cnp.float64_t* w1, cnp.float64_t* w2):
     else:
         return 0.0
 
+cdef cnp.float64_t dotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    dot product weights
+    return the cosine of the angle between two vectors if the vectors are normalized
+    id: 11
+    expects length 3 arrays
+    """
+    
+    return w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3]
+
+
 
