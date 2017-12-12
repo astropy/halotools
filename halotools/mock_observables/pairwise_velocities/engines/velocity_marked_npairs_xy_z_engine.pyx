@@ -240,13 +240,13 @@ cdef f_type return_velocity_weighting_function(weight_func_id):
     returns a pointer to the user-specified pairwise velocity weighting function.
     """
 
-    if weight_func_id==11:
+    if weight_func_id==1:
         return relative_radial_velocity_weights
-    if weight_func_id==12:
+    if weight_func_id==2:
         return radial_velocity_variance_counter_weights
-    if weight_func_id==13:
+    if weight_func_id==3:
         return relative_los_velocity_weights
-    if weight_func_id==14:
+    if weight_func_id==4:
         return los_velocity_variance_counter_weights
     else:
         raise ValueError('weighting function does not exist')

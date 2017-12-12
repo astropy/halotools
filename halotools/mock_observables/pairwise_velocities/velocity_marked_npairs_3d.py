@@ -19,7 +19,7 @@ __all__ = ('velocity_marked_npairs_3d', )
 
 def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         weights1=None, weights2=None,
-        weight_func_id=0, verbose=False, num_threads=1,
+        weight_func_id=1, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the number of velocity weighted pairs with separations greater than or equal to r, :math:`W(>r)`.
@@ -108,6 +108,35 @@ def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         array of length *Nrbins* containing the weighted number counts of pairs
         The exact values depend on ``weight_func_id``
         (which weighting function was chosen).
+
+    Examples
+    --------
+    For demonstration purposes we will work with
+    halos in the `~halotools.sim_manager.FakeSim`.
+
+    >>> from halotools.sim_manager import FakeSim
+    >>> halocat = FakeSim()
+
+    >>> x = halocat.halo_table['halo_x']
+    >>> y = halocat.halo_table['halo_y']
+    >>> z = halocat.halo_table['halo_z']
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> sample1 = np.vstack((x,y,z)).T
+
+    We will do the same to get a random set of velocities.
+
+    >>> vx = halocat.halo_table['halo_vx']
+    >>> vy = halocat.halo_table['halo_vy']
+    >>> vz = halocat.halo_table['halo_vz']
+    >>> velocities = np.vstack((x,y,z,vx,vy,vz)).T
+
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> pi_max = 10
+    >>> result = velocity_marked_npairs_3d(sample1, sample1, rbins, period=halocat.Lbox, weights1=velocities, weights2=velocities)
     """
 
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
@@ -263,13 +292,13 @@ def _func_signature_int_from_vel_weight_func_id(weight_func_id):
         msg = "\n weight_func_id parameter must be an integer ID of a weighting function."
         raise HalotoolsError(msg)
 
-    elif weight_func_id == 11:
+    elif weight_func_id == 1:
         return 6
-    elif weight_func_id == 12:
+    elif weight_func_id == 2:
         return 7
-    elif weight_func_id == 13:
+    elif weight_func_id == 3:
         return 6
-    elif weight_func_id == 14:
+    elif weight_func_id == 4:
         return 7
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")
