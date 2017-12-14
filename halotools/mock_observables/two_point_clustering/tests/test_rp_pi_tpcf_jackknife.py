@@ -151,7 +151,7 @@ def test_consistency_with_wp_jackknife():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*3, 3))
-    
+
     #use one large pi_bin
     pi_max=0.1
     pi_min=0.0
@@ -162,12 +162,12 @@ def test_consistency_with_wp_jackknife():
 
     result_2, err_2 = wp_jackknife(sample1, randoms, rp_bins, pi_max=pi_max,
         Nsub=3, period=period, num_threads=1)
-    
+
     #account for wp integration
     result_1 = result_1.flatten()*2.0*np.diff(pi_bins_this_test)
 
     assert np.all(result_1 == result_2), "tpcf is not consistent between rp_pi_tpcf and wp"
-    
+
     #account for wp integration
     factor = (2.0*np.diff(pi_bins_this_test))**2.0
     err_1 = err_1*factor[0]
@@ -185,7 +185,7 @@ def test_consistency_with_wp_jackknife_2():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*3, 3))
-    
+
     #use one large pi_bin
     pi_max=0.15
     pi_min=0.0
@@ -201,7 +201,7 @@ def test_consistency_with_wp_jackknife_2():
 
     __, cov2 = wp_jackknife(sample1, randoms, rp_bins, pi_max=pi_bins_this_test[1],
         Nsub=3, period=period, num_threads=1)
-    
+
     #account for wp integration in comparison
     factor = (2.0*np.diff(pi_bins_this_test[0:2]))**2.0
     cov1 = cov1*factor[0]
@@ -216,5 +216,17 @@ def test_consistency_with_wp_jackknife_2():
             assert np.allclose(element_1, element_2), "covariance elements do no match"
 
 
+def test_parallel_serial_consistency():
+    Npts1, Npts2, Nran = 300, 180, 1000
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
 
+    xi1, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
+        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
+    xi2, cov2 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
+        period=period, Nsub=3, num_threads=5, sample2=sample2, do_auto=False)
+    assert np.allclose(xi1, xi2)
+    assert np.allclose(cov1, cov2)
 
