@@ -7,6 +7,7 @@ import pytest
 from astropy.utils.misc import NumpyRNGContext
 
 from ..rp_pi_tpcf_jackknife import rp_pi_tpcf_jackknife
+from ..wp_jackknife import wp_jackknife
 from ..rp_pi_tpcf import rp_pi_tpcf
 
 from ..wp_jackknife import wp_jackknife
@@ -18,7 +19,7 @@ __all__ = ('test_tpcf_jackknife_corr_func', )
 # create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
 rp_bins = np.linspace(0.001, 0.2, 5).astype(float)
-pi_bins = np.linspace(0.0001, 0.2, 5)
+pi_bins = np.linspace(0.0, 0.2, 5)
 
 Npts = 1000
 
@@ -141,15 +142,15 @@ def test_do_auto_false():
         do_auto=False)
 
 @pytest.mark.slow
-def test_consitency_with_wp_jackknife():
+def test_consistency_with_wp_jackknife():
     """
     Verify the result and covariance matrix is consistent with wp_jackknife
     """
-    Npts = 300
+
+    Npts = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*3, 3))
-
     
     #use one large pi_bin
     pi_max=0.1
@@ -172,5 +173,48 @@ def test_consitency_with_wp_jackknife():
     err_1 = err_1*factor[0]
 
     assert np.allclose(err_1,err_2), "cov matrix is not consoistent with wp_jackknife"
+
+
+@pytest.mark.slow
+def test_consistency_with_wp_jackknife_2():
+    """
+    Verify the result and covariance matrix is consistent with wp_jackknife when len(pi_bins)>2
+    """
+
+    Npts = 1000
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts, 3))
+        randoms = np.random.random((Npts*3, 3))
+    
+    #use one large pi_bin
+    pi_max=0.15
+    pi_min=0.0
+    pi_bins_this_test = np.linspace(pi_min,pi_max,4)
+
+    __, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins_this_test,
+        Nsub=3, period=period, num_threads=1)
+
+    Nrp_bins = len(rp_bins)-1
+    Npi_bins = len(pi_bins_this_test)-1
+    print(Nrp_bins, Npi_bins)
+    assert np.shape(cov1) == (Nrp_bins*Npi_bins, Nrp_bins*Npi_bins), "covariance matrix is not the correct shape"
+
+    __, cov2 = wp_jackknife(sample1, randoms, rp_bins, pi_max=pi_bins_this_test[1],
+        Nsub=3, period=period, num_threads=1)
+    
+    #account for wp integration in comparison
+    factor = (2.0*np.diff(pi_bins_this_test[0:2]))**2.0
+    cov1 = cov1*factor[0]
+
+    j, l = 0, 0 #first pi_bins
+    for i in range(0, Nrp_bins):
+        for k in range(0, Nrp_bins):
+            ind_1 = Npi_bins*i+j
+            ind_2 = Npi_bins*k+l
+            element_1 = cov1[ind_1, ind_2]
+            element_2 = cov2[i, k]
+            assert np.allclose(element_1, element_2), "covariance elements do no match"
+
+
 
 

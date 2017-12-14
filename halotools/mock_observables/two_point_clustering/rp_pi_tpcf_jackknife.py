@@ -192,7 +192,8 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
     The returned covariance matrix is 2-D.
     The indices of the matrix are in row-major order.  To access the covariance between
     the (ith rp_bin and the jth pi_bin) and the (kth rp_bin and the lth pi_bin) of the covariance matrix C,
-    sigma2 = C[i*j,k*l]
+    sigma2 = C[Npi_bins*i+j,Npi_bins*k+l]
+    where Npi_bins = len(pi_bins)-1
 
     Examples
     --------
@@ -214,7 +215,7 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
 
     Create some 'randoms' in the same way:
 
-    >>> Nran = Npts*500
+    >>> Nran = Npts*3
     >>> xran = np.random.uniform(0, Lbox, Nran)
     >>> yran = np.random.uniform(0, Lbox, Nran)
     >>> zran = np.random.uniform(0, Lbox, Nran)
