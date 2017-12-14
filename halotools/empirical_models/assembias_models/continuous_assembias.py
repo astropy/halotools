@@ -14,6 +14,7 @@ from .. import model_helpers
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import custom_len
 from ...utils.table_utils import compute_conditional_percentile_values, compute_conditional_averages
+from ...utils.table_utils import compute_conditional_percentiles
 
 __all__ = ('ContinuousAssembias', 'FreeSplitContinuousAssembias' )
 __author__ = ('Sean McLaughlin', )
@@ -86,7 +87,7 @@ class ContinuousAssembias(HeavisideAssembias):
 
     #  This formula ensures that the most extreme value will experience F times the maximum displacement
     #  Otherwise, slope could arbitrarily cancel out strength.
-    @model_helpers.bounds_enforcing_decorator_factory(np.log10(np.log((1+F)/(1-F))), 10)
+    #@model_helpers.bounds_enforcing_decorator_factory(np.log10(np.log((1+F)/(1-F))), 10)
     def assembias_slope(self, prim_haloprop):
         """ Returns the slope of disp_func as a function of prim_haloprop
 
@@ -154,12 +155,15 @@ class ContinuousAssembias(HeavisideAssembias):
         #  the average displacement acts as a normalization we need.
         max_displacement = self._disp_func(sec_haloprop=sec_haloprop, slope=slope)
         disp_average = compute_conditional_averages(vals=max_displacement,prim_haloprop=prim_haloprop)
-        #  disp_average = np.ones((prim_haloprop.shape[0], ))*0.5
+        #disp_average = np.ones((prim_haloprop.shape[0], ))*0.5
 
         result = np.zeros(len(prim_haloprop))
 
         greater_than_half_avg_idx = disp_average > 0.5
         less_than_half_avg_idx = disp_average <= 0.5
+
+        #print max_displacement
+        #print strength, slope
 
         if len(max_displacement[greater_than_half_avg_idx]) > 0:
             base_pos = baseline_result[greater_than_half_avg_idx]
@@ -296,7 +300,8 @@ class ContinuousAssembias(HeavisideAssembias):
             else:
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
-                    sec_haloprop=pv_sub_sec_haloprop/np.max(np.abs(pv_sub_sec_haloprop)),
+                    #sec_haloprop=pv_sub_sec_haloprop/np.max(np.abs(pv_sub_sec_haloprop)),
+                    sec_haloprop = compute_conditional_percentiles(prim_haloprop = prim_haloprop[no_edge_mask], sec_haloprop=sec_haloprop[no_edge_mask])-no_edge_split,
                     baseline_result=no_edge_result)
 
             no_edge_result += perturbation

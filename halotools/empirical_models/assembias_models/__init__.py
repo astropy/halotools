@@ -1,3 +1,3 @@
 from .heaviside_assembias import HeavisideAssembias
-from .continuous_assembias import ContinuousAssembias
 from .free_split_assembias import FreeSplitAssembias
+from .continuous_assembias import ContinuousAssembias

@@ -61,7 +61,7 @@ class FreeSplitAssembias(HeavisideAssembias):
             self.param_dict[self._get_free_split_assembias_param_dict_key(ipar)] = val
 
     def _get_free_split_assembias_param_dict_key(self, ipar):
-        return self._method_name_to_decorate + '_' + self.gal_type + '_split' + str(ipar + 1)
+        return self._method_name_to_decorate + '_' + self.gal_type + '_assembias_split' + str(ipar + 1)
 
     @model_helpers.bounds_enforcing_decorator_factory(0, 1)
     def percentile_splitting_function(self, prim_haloprop):
@@ -81,8 +81,9 @@ class FreeSplitAssembias(HeavisideAssembias):
         """
 
         #retrieve ordinates from our dictionary
-        split_ordinates = (self.param_dict[self._get_free_split_assembias_param_dict_key(ipar)]
-                           for ipar in xrange(len(self._split_abscissa)))
+        split_ordinates = np.array([self.param_dict[self._get_free_split_assembias_param_dict_key(ipar)]
+                           for ipar in xrange(len(self._split_abscissa))])
+
         if self._loginterp:
             spline_function = model_helpers.custom_spline(
                 np.log10(self._split_abscissa), split_ordinates, k=3)
