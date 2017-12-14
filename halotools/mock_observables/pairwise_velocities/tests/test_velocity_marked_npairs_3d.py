@@ -21,7 +21,7 @@ def test_velocity_marked_npairs_3d_test1():
         sample1 = np.random.random((npts, 3))
         weights1 = np.random.random((npts, 6))
 
-    weight_func_id = 11
+    weight_func_id = 1
     __ = process_weights_3d(sample1, sample1, weights1, weights1, weight_func_id)
 
 
@@ -33,7 +33,7 @@ def test_velocity_marked_npairs_3d_test2():
         weights1 = np.random.random((npts, 6))
         weights2 = np.random.random((npts, 6))
 
-    weight_func_id = 11
+    weight_func_id = 1
     __ = process_weights_3d(sample1, sample2, weights1, weights2, weight_func_id)
 
 
@@ -45,7 +45,7 @@ def test_velocity_marked_npairs_3d_test3():
         weights1 = np.random.random((npts, 7))
         weights2 = np.random.random((npts, 7))
 
-    weight_func_id = 11
+    weight_func_id = 1
     with pytest.raises(ValueError) as err:
         __ = process_weights_3d(sample1, sample2, weights1, weights2, weight_func_id)
     substr = "For this value of `weight_func_id`, there should be"
@@ -60,7 +60,7 @@ def test_velocity_marked_npairs_3d_test4():
         weights1 = np.random.random(npts)
         weights2 = np.random.random(npts)
 
-    weight_func_id = 11
+    weight_func_id = 1
     with pytest.raises(ValueError) as err:
         __ = process_weights_3d(sample1, sample2, weights1, weights2, weight_func_id)
     substr = "does not have the correct length. "
@@ -75,7 +75,7 @@ def test_velocity_marked_npairs_3d_test5():
         weights1 = np.random.random((npts, 3))
         weights2 = np.random.random((npts, 3))
 
-    weight_func_id = 11
+    weight_func_id = 1
     with pytest.raises(ValueError) as err:
         __ = process_weights_3d(sample1, sample2, weights1, weights2, weight_func_id)
     substr = "For this value of `weight_func_id`, there should be "
@@ -90,7 +90,7 @@ def test_velocity_marked_npairs_3d_test6():
         weights1 = np.random.random((npts, 3, 4))
         weights2 = np.random.random((npts, 3, 4))
 
-    weight_func_id = 11
+    weight_func_id = 1
     with pytest.raises(ValueError) as err:
         __ = process_weights_3d(sample1, sample2, weights1, weights2, weight_func_id)
     substr = "You must either pass in a 1-D or 2-D array"
