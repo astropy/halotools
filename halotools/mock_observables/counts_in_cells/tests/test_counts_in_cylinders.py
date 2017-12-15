@@ -193,3 +193,19 @@ def test_counts_in_cylinders_error_handling():
 
     __ = counts_in_cylinders(sample1, sample2, rp_max, pi_max, period=1,
         approx_cell1_size=0.2, approx_cell2_size=0.2)
+
+
+def test_cic_pbc():
+    npts1 = 1000
+    npts2 = 9000
+
+    for seed in seed_list:
+        with NumpyRNGContext(seed):
+            sample1 = np.random.uniform(0.25, 0.75, npts1*3).reshape((npts1, 3))
+            sample2 = np.random.uniform(0.25, 0.75, npts2*3).reshape((npts2, 3))
+            rp_max = np.random.uniform(0, 0.1, npts1)
+            pi_max = np.random.uniform(0, 0.1, npts1)
+
+        result_pbc = counts_in_cylinders(sample1, sample2, rp_max, pi_max, period=1)
+        result_nopbc = counts_in_cylinders(sample1, sample2, rp_max, pi_max, period=None)
+        assert np.allclose(result_pbc, result_nopbc)
