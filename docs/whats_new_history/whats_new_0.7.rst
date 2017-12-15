@@ -21,3 +21,11 @@ There are many new functions in `halotools.utils` subpackage related to spatial 
     * `~halotools.utils.rotation_matrices_from_angles`
     * `~halotools.utils.rotation_matrices_from_vectors`
     * `~halotools.utils.rotate_vector_collection`
+
+
+New Mock Observables
+====================
+
+Inertia Tensor calculation
+-------------------------------
+The pairwise calculation `halotools.mock_observables.inertia_tensor_per_object_3d` computes the inertia tensor of a mass distribution surrounding each point in a sample of galaxies or halos.
