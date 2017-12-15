@@ -33,6 +33,8 @@
 
 - Fixed bug in `radial_profile_3d` when called in parallel. See https://github.com/astropy/halotools/issues/854.
 
+- Fixed bug in `radial_profile_3d` when called without periodic boundary conditions. See https://github.com/astropy/halotools/issues/862
+
 
 0.5 (2017-05-31)
 ----------------
