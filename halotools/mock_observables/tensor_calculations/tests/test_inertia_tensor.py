@@ -42,6 +42,11 @@ def test_principal_axes_from_matrices1():
 
 
 def test_inertia_tensor1():
+    """ Calculate the inertia for sample1 on a regular grid and sample2
+    a tight collection of point masses surrounding each sample1 point.
+    Enforce that the returned tensor collection has the correct shape,
+    and that each tensor is symmetric and positive definite.
+    """
 
     Lbox, rsmooth = 250., 5.
     pos1 = generate_3d_regular_mesh(5, 0, Lbox)
@@ -68,6 +73,11 @@ def test_inertia_tensor1():
     assert np.all(tensors[:, 1, 1] > 0)
     assert np.all(tensors[:, 2, 2] > 0)
 
-    assert np.any(tensors > 0)
+    assert np.allclose(tensors[:, 0, 1], tensors[:, 1, 0])
+    assert np.allclose(tensors[:, 0, 2], tensors[:, 2, 0])
+    assert np.allclose(tensors[:, 1, 2], tensors[:, 2, 1])
+
+    evals, evecs = np.linalg.eigh(tensors)
+    assert np.all(evals > 0)
 
 
