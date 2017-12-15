@@ -6,7 +6,7 @@ import numpy as np
 from scipy.stats import random_correlation
 from astropy.utils.misc import NumpyRNGContext
 
-from ..inertia_tensor import _principal_axes_from_matrices, inertia_tensor_per_object
+from ..inertia_tensor import _principal_axes_from_inertia_tensors, inertia_tensor_per_object
 
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
@@ -37,9 +37,9 @@ def pure_python_inertia_tensor(m, x, y, z, p0=(0, 0, 0)):
     return data/np.sum(m)
 
 
-def test_principal_axes_from_matrices1():
+def test_principal_axes_from_inertia_tensors1():
     """ Starting from 500 random positive definite symmetric matrices,
-    enforce that the axes returned by the _principal_axes_from_matrices function
+    enforce that the axes returned by the _principal_axes_from_inertia_tensors function
     are actually eigenvectors with the correct eigenvalue.
     """
     npts = int(500)
@@ -47,7 +47,7 @@ def test_principal_axes_from_matrices1():
     matrices = np.array([random_correlation.rvs(correct_evals) for __ in range(npts)])
     assert matrices.shape == (npts, 3, 3)
 
-    principal_axes, evals = _principal_axes_from_matrices(matrices)
+    principal_axes, evals = _principal_axes_from_inertia_tensors(matrices)
 
     assert np.shape(principal_axes) == (npts, 3)
     assert np.shape(evals) == (npts, )

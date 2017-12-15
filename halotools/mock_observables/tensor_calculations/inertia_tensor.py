@@ -93,21 +93,21 @@ def inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
     return tensors
 
 
-def _principal_axes_from_matrices(matrices):
-    evals, evecs = np.linalg.eigh(matrices)
+def _principal_axes_from_inertia_tensors(inertia_tensors):
+    evals, evecs = np.linalg.eigh(inertia_tensors)
     return evecs[:, :, 2], evals[:, 2]
 
 
-def _sphericity_from_matrices(matrices):
-    evals, __ = np.linalg.eigh(matrices)
+def _sphericity_from_inertia_tensors(inertia_tensors):
+    evals, __ = np.linalg.eigh(inertia_tensors)
     third_evals = evals[:, 0]
     first_evals = evals[:, 2]
     sphericity = third_evals/first_evals
     return sphericity
 
 
-def _triaxility_from_matrices(matrices):
-    evals, __ = np.linalg.eigh(matrices)
+def _triaxility_from_inertia_tensors(inertia_tensors):
+    evals, __ = np.linalg.eigh(inertia_tensors)
     third_evals = evals[:, 0]
     second_evals = evals[:, 1]
     first_evals = evals[:, 2]
@@ -118,6 +118,6 @@ def _triaxility_from_matrices(matrices):
 def inertia_tensors_principal_axes(sample1, sample2, weights, smoothing_scale):
     """
     """
-    return _principal_axes_from_matrices(
+    return _principal_axes_from_inertia_tensors(
             inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale))
 
