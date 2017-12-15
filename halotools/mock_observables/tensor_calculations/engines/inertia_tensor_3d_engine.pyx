@@ -72,7 +72,8 @@ def inertia_tensor_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
     cdef cnp.float64_t[:] w2_sorted = np.ascontiguousarray(
         weights2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
-    cdef cnp.float64_t[:, :, :] inertia_tensor = np.zeros((len(x1_sorted), 3, 3), dtype=np.float64)
+    cdef int npts1 = len(x1_sorted)
+    cdef cnp.float64_t[:, :, :] inertia_tensor = np.zeros((npts1, 3, 3), dtype=np.float64)
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices, dtype=np.int64)
@@ -114,6 +115,8 @@ def inertia_tensor_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
     cdef cnp.float64_t[:] w_icell2
 
     cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2
+    cdef cnp.float64_t[:] sum_weights = np.zeros(len(x1_sorted), dtype=np.float64)
+
 
     for icell1 in range(first_cell1_element, last_cell1_element):
         ifirst1 = cell1_indices[icell1]
@@ -222,6 +225,13 @@ def inertia_tensor_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
                                         inertia_tensor[ifirst1 + i, 1, 2] += yz
                                         inertia_tensor[ifirst1 + i, 2, 1] += yz
 
+                                        sum_weights[ifirst1 + i] += w2
+
+
+    for i in range(npts1):
+        for j in range(3):
+            for k in range(3):
+                inertia_tensor[i, j, k] /= sum_weights[i]
     # At this point, we have calculated our counts on the input arrays *after* sorting
     # Since the order of counts matters in this calculation, we need to undo the sorting
     sorted_tensor = np.array(inertia_tensor)

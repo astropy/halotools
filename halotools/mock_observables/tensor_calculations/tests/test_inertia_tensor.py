@@ -15,6 +15,28 @@ __all__ = ('test_inertia_tensor1', )
 fixed_seed = 43
 
 
+def pure_python_inertia_tensor(m, x, y, z, p0=(0, 0, 0)):
+    data = np.zeros((3, 3))
+    dx = x - p0[0]
+    dy = y - p0[1]
+    dz = z - p0[2]
+
+    data[0, 0] = np.sum(m*dx*dx)
+    data[1, 1] = np.sum(m*dy*dy)
+    data[2, 2] = np.sum(m*dz*dz)
+
+    data[0, 1] = np.sum(m*dx*dy)
+    data[1, 0] = data[0, 1]
+
+    data[0, 2] = np.sum(m*dx*dz)
+    data[2, 0] = data[0, 2]
+
+    data[1, 2] = np.sum(m*dy*dz)
+    data[2, 1] = data[1, 2]
+
+    return data/np.sum(m)
+
+
 def test_principal_axes_from_matrices1():
     """ Starting from 500 random positive definite symmetric matrices,
     enforce that the axes returned by the _principal_axes_from_matrices function
@@ -81,3 +103,39 @@ def test_inertia_tensor1():
     assert np.all(evals > 0)
 
 
+def test_inertia_tensor2():
+    """ Calculate the inertia for sample1 on a regular grid and sample2
+    a tight collection of point masses randomly placed to surround each sample1 point.
+    For each point in sample1, enforce that the returned tensor agrees
+    with the results from a pure python calculation
+    """
+
+    Lbox, rsmooth = 1., 0.05
+    pos1 = generate_3d_regular_mesh(2, 0, Lbox)
+    npts2_per_point = 5
+    small_sphere_size = rsmooth/100.
+
+    pos2 = generate_locus_of_3d_points(npts2_per_point,
+                xc=pos1[0, 0], yc=pos1[0, 1], zc=pos1[0, 2],
+                epsilon=small_sphere_size, seed=fixed_seed)
+    for i in range(1, pos1.shape[0]):
+        pos2_i = generate_locus_of_3d_points(npts2_per_point,
+                    xc=pos1[i, 0], yc=pos1[i, 1], zc=pos1[i, 2],
+                    epsilon=small_sphere_size, seed=fixed_seed)
+        pos2 = np.vstack((pos2, pos2_i))
+
+    with NumpyRNGContext(fixed_seed):
+        masses = np.random.random(pos2.shape[0])
+
+    tensors = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=None)
+    npts1 = tensors.shape[0]
+    for i in range(npts1):
+        t = tensors[i, :, :]
+        ifirst, ilast = i*npts2_per_point, (i+1)*npts2_per_point
+        x = pos2[ifirst:ilast, 0]
+        y = pos2[ifirst:ilast, 1]
+        z = pos2[ifirst:ilast, 2]
+        p0 = pos1[i, :]
+        m = masses[ifirst:ilast]
+        t_python = pure_python_inertia_tensor(m, x, y, z, p0=p0)
+        assert np.allclose(t, t_python, rtol=1e-3)
