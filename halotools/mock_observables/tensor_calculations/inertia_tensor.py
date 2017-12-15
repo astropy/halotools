@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-__all__ = ('inertia_tensor_per_object', )
+__all__ = ('inertia_tensor_per_object', 'inertia_tensor_principal_axis')
 
 
 def inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale):
@@ -18,4 +18,14 @@ def inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale):
     >>> smoothing_scale = 0.1
     >>> tensors = inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale)
     """
-    pass
+    raise NotImplementedError()
+
+
+def inertia_tensor_principal_axis(sample1, sample2, weights, smoothing_scale):
+    """
+    """
+    inertia_tensors = inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale)
+    evals, evecs = np.linalg.eigh(inertia_tensors)
+    return evecs[:, :, 2], evals[:, 2]
+
+
