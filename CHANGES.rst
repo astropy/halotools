@@ -35,6 +35,10 @@
 
 - Fixed bug in `radial_profile_3d` when called without periodic boundary conditions. See https://github.com/astropy/halotools/issues/862
 
+- Fixed bug in `velocity_marked_npairs_3d` and `velocity_marked_npairs_xy_z` when called with default arguments. See https://github.com/astropy/halotools/issues/836.
+
+- Changed the `weight_func_id` numbers associated with weighting functions for `velocity_marked_npairs_3d` and `velocity_marked_npairs_xy_z` where e.g. 11 is now 1, etc.
+
 
 0.5 (2017-05-31)
 ----------------
