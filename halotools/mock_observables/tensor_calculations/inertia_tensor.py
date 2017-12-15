@@ -84,18 +84,13 @@ def inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-
-        # result = np.array(pool.map(engine, cell1_tuples))
-        # marked_counts = np.sum(np.array(marked_counts), axis=0)
-        # counts = np.sum(np.array(counts), axis=0)
-
+        result = np.array(pool.map(engine, cell1_tuples))
+        tensors = np.sum(result, axis=0)
         pool.close()
-        raise NotImplementedError()
-
     else:
-        tensor = engine(cell1_tuples[0])
+        tensors = np.array(engine(cell1_tuples[0]))
 
-    return tensor
+    return tensors
 
 
 def _principal_axes_from_matrices(matrices):

@@ -139,3 +139,29 @@ def test_inertia_tensor2():
         m = masses[ifirst:ilast]
         t_python = pure_python_inertia_tensor(m, x, y, z, p0=p0)
         assert np.allclose(t, t_python, rtol=1e-3)
+
+
+def test_serial_parallel_agreement():
+    Lbox, rsmooth = 1., 0.05
+    pos1 = generate_3d_regular_mesh(3, 0, Lbox)
+    npts2_per_point = 5
+    small_sphere_size = rsmooth/100.
+
+    pos2 = generate_locus_of_3d_points(npts2_per_point,
+                xc=pos1[0, 0], yc=pos1[0, 1], zc=pos1[0, 2],
+                epsilon=small_sphere_size, seed=fixed_seed)
+    for i in range(1, pos1.shape[0]):
+        pos2_i = generate_locus_of_3d_points(npts2_per_point,
+                    xc=pos1[i, 0], yc=pos1[i, 1], zc=pos1[i, 2],
+                    epsilon=small_sphere_size, seed=fixed_seed)
+        pos2 = np.vstack((pos2, pos2_i))
+
+    with NumpyRNGContext(fixed_seed):
+        masses = np.random.random(pos2.shape[0])
+
+    tensors_serial = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, num_threads=1)
+    tensors_parallel = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, num_threads=2)
+    assert np.shape(tensors_serial) == np.shape(tensors_parallel)
+    assert np.allclose(tensors_serial, tensors_parallel, rtol=0.001)
+
+
