@@ -362,3 +362,22 @@ def test_parallel_serial_consistency():
     assert np.all(counts1 == counts2)
     assert np.allclose(result1, result2, rtol=0.001)
 
+
+def test_pbc():
+    """ Regression test for Issue #862
+    """
+    npts1, npts2 = 100, 90
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.uniform(0.25, 0.75, npts1*3).reshape((npts1, 3))
+        sample2 = np.random.uniform(0.25, 0.75, npts2*3).reshape((npts2, 3))
+        quantity2 = np.random.random(npts2)
+
+    rbins_absolute = np.linspace(0.01, 0.2, 5)
+
+    result1, counts1 = radial_profile_3d(sample1, sample2, quantity2,
+        rbins_absolute=rbins_absolute, return_counts=True, period=1)
+    result2, counts2 = radial_profile_3d(sample1, sample2, quantity2,
+        rbins_absolute=rbins_absolute, return_counts=True, period=None)
+    assert np.all(counts1 == counts2)
+    assert np.allclose(result1, result2, rtol=0.001)
+
