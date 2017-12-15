@@ -216,17 +216,35 @@ def test_consistency_with_wp_jackknife_2():
             assert np.allclose(element_1, element_2), "covariance elements do no match"
 
 
-def test_parallel_serial_consistency():
+def test_parallel_serial_consistency_1():
     Npts1, Npts2, Nran = 300, 180, 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))
         sample2 = np.random.random((Npts2, 3))
-        randoms = [Nran]
+        randoms = np.random.random((Nran, 3))
 
     xi1, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
-        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
+        period=period, Nsub=3, num_threads=1)
     xi2, cov2 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
-        period=period, Nsub=3, num_threads=5, sample2=sample2, do_auto=False)
-    assert np.allclose(xi1, xi2)
-    assert np.allclose(cov1, cov2)
+        period=period, Nsub=3, num_threads=1)
+    
+    assert np.allclose(xi1, xi2), "tpcf between threaded and non-threaded results do no match"
+    assert np.allclose(cov1, cov2), "cov matrix between threaded and non-threaded results do no match"
+
+
+def test_parallel_serial_consistency_2():
+    Npts1, Npts2, Nran = 300, 180, 1000
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = np.random.random((Nran, 3))
+    
+    xi1, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
+        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
+
+    xi2, cov2 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
+        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
+    
+    assert np.allclose(xi1, xi2), "tpcf between threaded and non-threaded results do no match"
+    assert np.allclose(cov1, cov2), "cov matrix between threaded and non-threaded results do no match"
 

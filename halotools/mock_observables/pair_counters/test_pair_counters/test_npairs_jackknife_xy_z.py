@@ -17,7 +17,10 @@ from astropy.utils.misc import NumpyRNGContext
 
 slow = pytest.mark.slow
 
-__all__ = ('test_npairs_jackknife_3d_periodic', )
+__all__ = ('test_npairs_jackknife_xy_z_periodic','test_npairs_jackknife_xy_z_nonperiodic',
+           'test_process_weights1','test_process_weights2','test_process_weights3',
+           'test_process_weights4','test_process_weights5','test_process_weights6',
+           'test_process_weights7','test_process_weights8','test_process_weights9')
 
 fixed_seed = 43
 
@@ -55,7 +58,7 @@ grid_indices = np.ravel_multi_index([ixx, iyy, izz],
 grid_indices += 1
 
 
-def test_npairs_jackknife_3d_periodic():
+def test_npairs_jackknife_xy_z_periodic():
     """
     test npairs_jackknife_3d with periodic boundary conditions.
     """
@@ -119,6 +122,35 @@ def test_npairs_jackknife_xy_z_nonperiodic():
 
     for icell in range(1, grid_jackknife_ncells**3-1):
         assert np.all(grid_result[icell, :, :] == grid_result[icell+1, :, :])
+
+
+def test_parallel_serial_consistency():
+    """
+    test npairs_jackknife_xy_z gives the same result with and w/o threading
+    """
+
+    rp_bins = np.array([0.0, 0.1, 0.2, 0.3])
+    pi_bins = np.array([0.0, 0.1, 0.2, 0.3])
+
+    # define the jackknife sample labels
+    Npts = len(random_sample)
+    N_jsamples = 10
+    with NumpyRNGContext(fixed_seed):
+        jtags1 = np.sort(np.random.randint(1, N_jsamples+1, size=Npts))
+
+    # define weights
+    weights1 = np.random.random(Npts)
+
+    result_1 = npairs_jackknife_xy_z(random_sample, random_sample, rp_bins, pi_bins, period=period,
+        jtags1=jtags1, jtags2=jtags1, N_samples=10,
+        weights1=weights1, weights2=weights1, num_threads=1)
+
+    result_2 = npairs_jackknife_xy_z(random_sample, random_sample, rp_bins, pi_bins, period=period,
+        jtags1=jtags1, jtags2=jtags1, N_samples=10,
+        weights1=weights1, weights2=weights1, num_threads=2)
+    
+    assert np.allclose(result_1,result_2), 'threaded and non-threaded results are not consistent'
+    
 
 
 def test_process_weights1():
