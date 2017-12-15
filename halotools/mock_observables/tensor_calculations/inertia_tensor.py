@@ -1,10 +1,11 @@
 """
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 
 
-
-__all__ = ('inertia_tensor_per_object', 'inertia_tensor_principal_axis')
+__all__ = ('inertia_tensor_per_object', 'inertia_tensors_principal_axes')
 
 
 def inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale):
@@ -21,11 +22,14 @@ def inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale):
     raise NotImplementedError()
 
 
-def inertia_tensor_principal_axis(sample1, sample2, weights, smoothing_scale):
-    """
-    """
-    inertia_tensors = inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale)
-    evals, evecs = np.linalg.eigh(inertia_tensors)
+def _principal_axes_from_matrices(matrices):
+    evals, evecs = np.linalg.eigh(matrices)
     return evecs[:, :, 2], evals[:, 2]
 
+
+def inertia_tensors_principal_axes(sample1, sample2, weights, smoothing_scale):
+    """
+    """
+    return _principal_axes_from_matrices(
+            inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale))
 
