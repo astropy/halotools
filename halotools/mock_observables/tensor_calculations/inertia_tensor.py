@@ -14,12 +14,71 @@ from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
 
-__all__ = ('inertia_tensor_per_object', 'inertia_tensors_principal_axes')
+__all__ = ('inertia_tensor_per_object_3d', )
 
 
-def inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
-            num_threads=1, period=None, approx_cell1_size=None, approx_cell2_size=None):
-    """
+def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
+            period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+    r""" For each point in `sample1`, calculate the inertia tensor using all point masses
+    in `sample2` within the input smoothing_scale.
+
+    Parameters
+    ----------
+    sample1 : array_like
+        Numpy array of shape (npts1, 3) storing 3-D positions of points.
+
+        See the :ref:`mock_obs_pos_formatting` documentation page, or the
+        Examples section below, for instructions on how to transform
+        your coordinate position arrays into the
+        format accepted by the ``sample1`` and ``sample2`` arguments.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
+    sample2 : array_like
+        Numpy array of shape (npts2, 3) storing 3-D positions of the point masses
+        used to calculate the inertia tensor of every `sample1` point.
+
+    weights2 : array_like
+        Numpy array of shape (npts2,) storing the mass of each `sample2` point
+        used to calculate the inertia tensor of every `sample1` point.
+
+    smoothing_scale : float
+        Three-dimensional distance from each `sample1` point defining
+        which points in `sample2` are used to compute the inertia tensor
+
+    period : array_like, optional
+        Length-3 sequence defining the periodic boundary conditions
+        in each dimension. If you instead provide a single scalar, Lbox,
+        period is assumed to be the same in all Cartesian directions.
+        Default is None, in which case no PBCs will be applied.
+
+    num_threads : int, optional
+        Number of threads to use in calculation, where parallelization is performed
+        using the python ``multiprocessing`` module. Default is 1 for a purely serial
+        calculation, in which case a multiprocessing Pool object will
+        never be instantiated. A string 'max' may be used to indicate that
+        the pair counters should use all available cores on the machine.
+
+    approx_cell1_size : array_like, optional
+        Length-3 array serving as a guess for the optimal manner by how points
+        will be apportioned into subvolumes of the simulation box.
+
+        The optimum choice unavoidably depends on the specs of your machine.
+        Default choice is to use Lbox/10 in each dimension,
+        which will return reasonable result performance for most use-cases.
+        Performance can vary sensitively with this parameter, so it is highly
+        recommended that you experiment with this parameter when carrying out
+        performance-critical calculations.
+
+    approx_cell2_size : array_like, optional
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for
+        ``approx_cell1_size`` for details.
+
+    Returns
+    -------
+    inertia_tensors : ndarray
+        Numpy array of shape (npts1, 3, 3) storing the inertia tensor for every
+        object in `sample1`.
+
     Examples
     --------
     >>> npts1, npts2 = 50, 75
@@ -27,7 +86,7 @@ def inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
     >>> sample2 = np.random.random((npts2, 3))
     >>> weights2 = np.random.random(npts2)
     >>> smoothing_scale = 0.1
-    >>> tensors = inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale)
+    >>> tensors = inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale)
     """
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
     period, PBCs = get_period(period)
@@ -91,33 +150,3 @@ def inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
         tensors = np.array(engine(cell1_tuples[0]))
 
     return tensors
-
-
-def _principal_axes_from_inertia_tensors(inertia_tensors):
-    evals, evecs = np.linalg.eigh(inertia_tensors)
-    return evecs[:, :, 2], evals[:, 2]
-
-
-def _sphericity_from_inertia_tensors(inertia_tensors):
-    evals, __ = np.linalg.eigh(inertia_tensors)
-    third_evals = evals[:, 0]
-    first_evals = evals[:, 2]
-    sphericity = third_evals/first_evals
-    return sphericity
-
-
-def _triaxility_from_inertia_tensors(inertia_tensors):
-    evals, __ = np.linalg.eigh(inertia_tensors)
-    third_evals = evals[:, 0]
-    second_evals = evals[:, 1]
-    first_evals = evals[:, 2]
-    triaxility = (first_evals**2 - second_evals**2)/(first_evals**2 - third_evals**2)
-    return triaxility
-
-
-def inertia_tensors_principal_axes(sample1, sample2, weights, smoothing_scale):
-    """
-    """
-    return _principal_axes_from_inertia_tensors(
-            inertia_tensor_per_object(sample1, sample2, weights, smoothing_scale))
-

@@ -6,7 +6,8 @@ import numpy as np
 from scipy.stats import random_correlation
 from astropy.utils.misc import NumpyRNGContext
 
-from ..inertia_tensor import _principal_axes_from_inertia_tensors, inertia_tensor_per_object
+from ..inertia_tensor import inertia_tensor_per_object_3d
+from ..tensor_derived_quantities import principal_axes_from_inertia_tensors
 
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
@@ -47,7 +48,7 @@ def test_principal_axes_from_inertia_tensors1():
     matrices = np.array([random_correlation.rvs(correct_evals) for __ in range(npts)])
     assert matrices.shape == (npts, 3, 3)
 
-    principal_axes, evals = _principal_axes_from_inertia_tensors(matrices)
+    principal_axes, evals = principal_axes_from_inertia_tensors(matrices)
 
     assert np.shape(principal_axes) == (npts, 3)
     assert np.shape(evals) == (npts, )
@@ -88,7 +89,7 @@ def test_inertia_tensor1():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=Lbox)
+    tensors = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=Lbox)
     assert tensors.shape == (pos1.shape[0], 3, 3)
 
     assert np.all(tensors[:, 0, 0] > 0)
@@ -127,7 +128,7 @@ def test_inertia_tensor2():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=None)
+    tensors = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=None)
     npts1 = tensors.shape[0]
     for i in range(npts1):
         t = tensors[i, :, :]
@@ -159,9 +160,7 @@ def test_serial_parallel_agreement():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors_serial = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, num_threads=1)
-    tensors_parallel = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, num_threads=2)
+    tensors_serial = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=1)
+    tensors_parallel = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=2)
     assert np.shape(tensors_serial) == np.shape(tensors_parallel)
     assert np.allclose(tensors_serial, tensors_parallel, rtol=0.001)
-
-
