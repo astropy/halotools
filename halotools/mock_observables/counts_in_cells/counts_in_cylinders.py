@@ -216,7 +216,7 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     # in which case we must remap our points inside the smallest enclosing cube
     # and set ``period`` equal to this cube size.
     if period is None:
-        __, __, __, __, __, __, period = (
+        x1, y1, z1, x2, y2, z2, period = (
             _enclose_in_box(
                 sample1[:, 0], sample1[:, 2], sample1[:, 2],
                 sample2[:, 0], sample2[:, 2], sample2[:, 2],
