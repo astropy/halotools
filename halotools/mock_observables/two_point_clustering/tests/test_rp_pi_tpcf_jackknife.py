@@ -226,8 +226,8 @@ def test_parallel_serial_consistency_1():
     xi1, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
         period=period, Nsub=3, num_threads=1)
     xi2, cov2 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
-        period=period, Nsub=3, num_threads=1)
-    
+        period=period, Nsub=3, num_threads=3)
+
     assert np.allclose(xi1, xi2), "tpcf between threaded and non-threaded results do no match"
     assert np.allclose(cov1, cov2), "cov matrix between threaded and non-threaded results do no match"
 
@@ -238,13 +238,13 @@ def test_parallel_serial_consistency_2():
         sample1 = np.random.random((Npts1, 3))
         sample2 = np.random.random((Npts2, 3))
         randoms = np.random.random((Nran, 3))
-    
+
     xi1, cov1 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
         period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
 
     xi2, cov2 = rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins,
-        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
-    
+        period=period, Nsub=3, num_threads=3, sample2=sample2, do_auto=False)
+
     assert np.allclose(xi1, xi2), "tpcf between threaded and non-threaded results do no match"
     assert np.allclose(cov1, cov2), "cov matrix between threaded and non-threaded results do no match"
 
