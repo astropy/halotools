@@ -22,6 +22,29 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
     r""" For each point in `sample1`, calculate the inertia tensor using all point masses
     in `sample2` within the input smoothing_scale.
 
+
+    For every pair of points in `sample1` and `sample2`, the contribution to the inertia tensor is:
+
+    .. math::
+
+        \mathcal{I}_{\rm ij} = m_{\rm j}\begin{bmatrix}
+                \delta x_{\rm ij}*\delta x_{\rm ij} & \delta x_{\rm ij}*\delta y_{\rm ij} & \delta x_{\rm ij}*\delta z_{\rm ij} \\
+                \delta y_{\rm ij}*\delta x_{\rm ij} & \delta y_{\rm ij}*\delta y_{\rm ij} & \delta y_{\rm ij}*\delta z_{\rm ij} \\
+                \delta z_{\rm ij}*\delta x_{\rm ij} & \delta z_{\rm ij}*\delta y_{\rm ij} & \delta z_{\rm ij}*\delta z_{\rm ij}
+            \end{bmatrix}
+
+    The :math:`\delta x_{\rm ij}`, :math:`\delta y_{\rm ij}`, and :math:`\delta z_{\rm ij}` terms
+    store the coordinate distances between the pair of points
+    (optionally accountin for periodic boundary conditions), and :math:`m_{\rm j}` stores
+    the mass of the `sample2` point. The `inertia_tensor_per_object_3d` function returns an inertia
+    tensor for each `sample1` point that is the sum of all such contributions for `sample2` points
+    that fall within the input `smoothing_scale`:
+
+    .. math::
+
+        \mathcal{I}_{\rm i} = \sum_{j}^{r_{\rm ij} < D_{\rm smooth}} \mathcal{I}_{\rm ij}
+
+
     Parameters
     ----------
     sample1 : array_like
