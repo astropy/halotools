@@ -4,8 +4,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from scipy.stats import random_correlation
+from astropy.utils.misc import NumpyRNGContext
 
-from ..inertia_tensor import _principal_axes_from_matrices
+from ..inertia_tensor import _principal_axes_from_matrices, inertia_tensor_per_object
+
+from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
+
+
+__all__ = ('test_inertia_tensor1', )
+fixed_seed = 43
 
 
 def test_principal_axes_from_matrices1():
@@ -32,3 +39,35 @@ def test_principal_axes_from_matrices1():
         p = np.array((x, y, z))
         q = np.matmul(m, p)
         assert np.allclose(q, correct_evals[2]*p)
+
+
+def test_inertia_tensor1():
+
+    Lbox, rsmooth = 250., 5.
+    pos1 = generate_3d_regular_mesh(5, 0, Lbox)
+    npts2_per_point = 5
+
+    small_sphere_size = rsmooth/100.
+
+    pos2 = generate_locus_of_3d_points(npts2_per_point,
+                xc=pos1[0, 0], yc=pos1[0, 1], zc=pos1[0, 2],
+                epsilon=small_sphere_size, seed=fixed_seed)
+    for i in range(1, pos1.shape[0]):
+        pos2_i = generate_locus_of_3d_points(npts2_per_point,
+                    xc=pos1[i, 0], yc=pos1[i, 1], zc=pos1[i, 2],
+                    epsilon=small_sphere_size, seed=fixed_seed)
+        pos2 = np.vstack((pos2, pos2_i))
+
+    with NumpyRNGContext(fixed_seed):
+        masses = np.random.random(pos2.shape[0])
+
+    tensors = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=Lbox)
+    assert tensors.shape == (pos1.shape[0], 3, 3)
+
+    assert np.all(tensors[:, 0, 0] > 0)
+    assert np.all(tensors[:, 1, 1] > 0)
+    assert np.all(tensors[:, 2, 2] > 0)
+
+    assert np.any(tensors > 0)
+
+
