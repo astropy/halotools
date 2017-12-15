@@ -102,6 +102,10 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
         Numpy array of shape (npts1, 3, 3) storing the inertia tensor for every
         object in `sample1`.
 
+    sum_of_masses : ndarray
+        Numpy array of shape (npts1, ) storing the sum of the masses of the
+        `sample2` points that fall within `smoothing_scale` of each `sample1` point
+
     Examples
     --------
     >>> npts1, npts2 = 50, 75
@@ -109,7 +113,7 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
     >>> sample2 = np.random.random((npts2, 3))
     >>> weights2 = np.random.random(npts2)
     >>> smoothing_scale = 0.1
-    >>> tensors = inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale)
+    >>> result = inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale)
     """
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
     period, PBCs = get_period(period)
@@ -166,10 +170,14 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        result = np.array(pool.map(engine, cell1_tuples))
-        tensors = np.sum(result, axis=0)
+        result = pool.map(engine, cell1_tuples)
+        tensors = np.array([r[0] for r in result])
+        sum_of_masses = np.array([r[1] for r in result])
+        tensors = np.sum(tensors, axis=0)
+        sum_of_masses = np.sum(sum_of_masses, axis=0)
         pool.close()
     else:
-        tensors = np.array(engine(cell1_tuples[0]))
+        result = engine(cell1_tuples[0])
+        tensors, sum_of_masses = result
 
-    return tensors
+    return np.array(tensors), np.array(sum_of_masses)

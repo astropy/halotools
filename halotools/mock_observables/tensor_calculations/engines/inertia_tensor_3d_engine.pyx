@@ -228,16 +228,13 @@ def inertia_tensor_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2i
                                         sum_weights[ifirst1 + i] += w2
 
 
-    for i in range(npts1):
-        if sum_weights[i] > 0:
-            for j in range(3):
-                for k in range(3):
-                    inertia_tensor[i, j, k] /= sum_weights[i]
     # At this point, we have calculated our counts on the input arrays *after* sorting
     # Since the order of counts matters in this calculation, we need to undo the sorting
     sorted_tensor = np.array(inertia_tensor)
+    sum_weights_array = np.array(sum_weights)
     idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
-    return sorted_tensor[idx_unsorted, :, :]
+    sum_weights_array = sum_weights_array[idx_unsorted]
+    return sorted_tensor[idx_unsorted, :, :], sum_weights_array
 
 
 

@@ -35,7 +35,7 @@ def pure_python_inertia_tensor(m, x, y, z, p0=(0, 0, 0)):
     data[1, 2] = np.sum(m*dy*dz)
     data[2, 1] = data[1, 2]
 
-    return data/np.sum(m)
+    return data, np.sum(m)
 
 
 def test_principal_axes_from_inertia_tensors1():
@@ -89,7 +89,7 @@ def test_inertia_tensor1():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=Lbox)
+    tensors, sum_of_masses = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=Lbox)
     assert tensors.shape == (pos1.shape[0], 3, 3)
 
     assert np.all(tensors[:, 0, 0] > 0)
@@ -128,7 +128,7 @@ def test_inertia_tensor2():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=None)
+    tensors, sum_m_cython = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=None)
     npts1 = tensors.shape[0]
     for i in range(npts1):
         t = tensors[i, :, :]
@@ -138,7 +138,7 @@ def test_inertia_tensor2():
         z = pos2[ifirst:ilast, 2]
         p0 = pos1[i, :]
         m = masses[ifirst:ilast]
-        t_python = pure_python_inertia_tensor(m, x, y, z, p0=p0)
+        t_python, sum_m_python = pure_python_inertia_tensor(m, x, y, z, p0=p0)
         assert np.allclose(t, t_python, rtol=1e-3)
 
 
@@ -160,7 +160,7 @@ def test_serial_parallel_agreement():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors_serial = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=1)
-    tensors_parallel = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=2)
+    tensors_serial, sum_m_serial = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=1)
+    tensors_parallel, sum_m_parallel = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=2)
     assert np.shape(tensors_serial) == np.shape(tensors_parallel)
     assert np.allclose(tensors_serial, tensors_parallel, rtol=0.001)
