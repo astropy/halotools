@@ -15,8 +15,8 @@ It is now much faster to verify successful installation of the latest version of
 
 .. code:: python
 
-    >>> import halotools
-    >>> halotools.test_installation()
+    import halotools
+    halotools.test_installation()
 
 
 New Mock Observables
