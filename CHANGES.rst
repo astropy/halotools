@@ -1,7 +1,7 @@
 0.7 (unreleased)
 ----------------
 
-- No changes yet
+- Added new `matrix_operations_3d` module in the `utils` subpackage that contains Numpy functions related to three-dimensional rotations.
 
 
 0.6 (2017-12-15)
