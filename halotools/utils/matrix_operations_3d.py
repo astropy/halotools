@@ -11,7 +11,7 @@ __all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
 
 
 def elementwise_dot(x, y):
-    """ Calculate the dot product between
+    r""" Calculate the dot product between
     each pair of elements in two input lists of 3d points.
 
     Parameters
@@ -41,7 +41,7 @@ def elementwise_dot(x, y):
 
 
 def elementwise_norm(x):
-    """ Calculate the normalization of each element in a list of 3d points.
+    r""" Calculate the normalization of each element in a list of 3d points.
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ def elementwise_norm(x):
 
 
 def normalized_vectors(vectors):
-    """ Return a unit-vector for each 3d vector in the input list of 3d points.
+    r""" Return a unit-vector for each 3d vector in the input list of 3d points.
 
     Parameters
     ----------
@@ -88,7 +88,7 @@ def normalized_vectors(vectors):
 
 
 def angles_between_list_of_vectors(v0, v1, tol=1e-3):
-    """ Calculate the angle between a collection of 3d vectors
+    r""" Calculate the angle between a collection of 3d vectors
 
     Examples
     --------
@@ -135,7 +135,7 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3):
 
 
 def vectors_normal_to_planes(x, y):
-    """ Given a collection of 3d vectors x and y,
+    r""" Given a collection of 3d vectors x and y,
     return a collection of 3d unit-vectors that are orthogonal to x and y.
 
     Examples
@@ -166,3 +166,89 @@ def vectors_normal_to_planes(x, y):
     """
     return normalized_vectors(np.cross(x, y))
 
+
+def rotation_matrices_from_angles(angles, directions):
+    r""" Calculate a collection of rotation matrices defined by
+    an input collection of rotation angles and rotation axes.
+
+    Parameters
+    ----------
+    angles : ndarray
+        Numpy array of shape (npts, ) storing a collection of rotation angles
+
+    directions : ndarray
+        Numpy array of shape (npts, 3) storing a collection of rotation axes in 3d
+
+    Returns
+    -------
+    matrices : ndarray
+        Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
+
+    Notes
+    -----
+    The function `rotate_vector_collection` can be used to efficiently
+    apply the returned collection of matrices to a collection of 3d vectors
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> angles = np.random.uniform(-np.pi/2., np.pi/2., npts)
+    >>> directions = np.random.random((npts, 3))
+    >>> rotation_matrices = rotation_matrices_from_angles(angles, directions)
+
+    """
+    directions = normalized_vectors(directions)
+    angles = np.atleast_1d(angles)
+    npts = directions.shape[0]
+
+    sina = np.sin(angles)
+    cosa = np.cos(angles)
+
+    R1 = np.zeros((npts, 3, 3))
+    R1[:, 0, 0] = cosa
+    R1[:, 1, 1] = cosa
+    R1[:, 2, 2] = cosa
+
+    R2 = directions[..., None] * directions[:, None, :]
+    R2 = R2*np.repeat(1.-cosa, 9).reshape((npts, 3, 3))
+
+    directions *= sina.reshape((npts, 1))
+    R3 = np.zeros((npts, 3, 3))
+    R3[:, [1, 2, 0], [2, 0, 1]] -= directions
+    R3[:, [2, 0, 1], [1, 2, 0]] += directions
+
+    return R1 + R2 + R3
+
+
+def rotation_matrices_from_vectors(v0, v1):
+    r""" Calculate a collection of rotation matrices defined by the unique
+    transformation rotating v1 into v2 about the mutually perpendicular axis.
+
+    Parameters
+    ----------
+    v0 : ndarray
+        Numpy array of shape (npts, 3) storing a collection of initial vector orientations.
+
+        Note that the normalization of `v0` will be ignored.
+
+    v1 : ndarray
+        Numpy array of shape (npts, 3) storing a collection of final vectors.
+
+        Note that the normalization of `v1` will be ignored.
+
+    Returns
+    -------
+    matrices : ndarray
+        Numpy array of shape (npts, 3, 3) rotating each v0 into the corresponding v1
+
+    Notes
+    -----
+    The function `rotate_vector_collection` can be used to efficiently
+    apply the returned collection of matrices to a collection of 3d vectors
+    """
+    v0 = normalized_vectors(v0)
+    v1 = normalized_vectors(v1)
+    directions = vectors_normal_to_planes(v0, v1)
+    angles = angles_between_list_of_vectors(v0, v1)
+
+    return rotation_matrices_from_angles(angles, directions)
