@@ -28,7 +28,7 @@ def principal_axes_from_inertia_tensors(inertia_tensors):
 
     Notes
     -----
-    The function `~halotools.mock_observables.inertia_tensor_per_object_3d`
+    The function `~halotools.mock_observables.inertia_tensor_per_object`
     calculates the inertia tensors :math:`\mathcal{I}_{\rm i}` for a collection of
     points inside a 3d mass distribution.
 
@@ -63,7 +63,7 @@ def sphericity_from_inertia_tensors(inertia_tensors):
 
     Notes
     -----
-    The function `~halotools.mock_observables.inertia_tensor_per_object_3d`
+    The function `~halotools.mock_observables.inertia_tensor_per_object`
     calculates the inertia tensors :math:`\mathcal{I}_{\rm i}` for a collection of
     points inside a 3d mass distribution.
     """
@@ -101,7 +101,7 @@ def triaxility_from_inertia_tensors(inertia_tensors):
 
     Notes
     -----
-    The function `~halotools.mock_observables.inertia_tensor_per_object_3d`
+    The function `~halotools.mock_observables.inertia_tensor_per_object`
     calculates the inertia tensors :math:`\mathcal{I}_{\rm i}` for a collection of
     points inside a 3d mass distribution.
     """

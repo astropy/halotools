@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-from ..inertia_tensor import inertia_tensor_per_object_3d
+from ..inertia_tensor import inertia_tensor_per_object
 
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
@@ -64,7 +64,7 @@ def test_inertia_tensor1():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors, sum_of_masses = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=Lbox)
+    tensors, sum_of_masses = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=Lbox)
     assert tensors.shape == (pos1.shape[0], 3, 3)
 
     assert np.all(tensors[:, 0, 0] > 0)
@@ -104,7 +104,7 @@ def test_inertia_tensor2():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors, sum_m_cython = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=None)
+    tensors, sum_m_cython = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=None)
     npts1 = tensors.shape[0]
     for i in range(npts1):
         t = tensors[i, :, :]
@@ -140,8 +140,8 @@ def test_serial_parallel_agreement():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors_serial, sum_m_serial = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=1)
-    tensors_parallel, sum_m_parallel = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=2)
+    tensors_serial, sum_m_serial = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, num_threads=1)
+    tensors_parallel, sum_m_parallel = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, num_threads=2)
     assert np.shape(tensors_serial) == np.shape(tensors_parallel)
     assert np.allclose(tensors_serial, tensors_parallel, rtol=0.001)
 
@@ -167,7 +167,7 @@ def test_pbcs():
     with NumpyRNGContext(fixed_seed):
         masses = np.random.random(pos2.shape[0])
 
-    tensors1, sum_m_cython1 = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=None)
-    tensors2, sum_m_cython2 = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=Lbox)
+    tensors1, sum_m_cython1 = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=None)
+    tensors2, sum_m_cython2 = inertia_tensor_per_object(pos1, pos2, masses, rsmooth, period=Lbox)
     assert np.allclose(tensors1, tensors2)
     assert np.allclose(sum_m_cython1, sum_m_cython2)

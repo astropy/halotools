@@ -6,7 +6,7 @@ import numpy as np
 import multiprocessing
 from functools import partial
 
-from .engines import inertia_tensor_per_object_3d_engine
+from .engines import inertia_tensor_per_object_engine
 
 from ..mock_observables_helpers import get_num_threads, get_period, enforce_sample_respects_pbcs
 from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
@@ -14,14 +14,14 @@ from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
 
-__all__ = ('inertia_tensor_per_object_3d', )
+__all__ = ('inertia_tensor_per_object', )
 
 
-def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
+def inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r""" For each point in `sample1`, identify all `sample2` points within the input
     `smoothing_scale`; using those points together with the input `weights2`,
-    the `inertia_tensor_per_object_3d` function calculates the inertia tensor
+    the `inertia_tensor_per_object` function calculates the inertia tensor
     of the mass distribution surrounding each point in `sample1`.
 
     For every pair of points, :math:`i, j` in `sample1`, `sample2`,
@@ -41,7 +41,7 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
     the mass of the `sample2` point.
 
     To calculate the inertia tensor :math:`\mathcal{I}_{\rm i}` for the
-    :math:`i^{\rm th}` point in `sample1`, the `inertia_tensor_per_object_3d` function
+    :math:`i^{\rm th}` point in `sample1`, the `inertia_tensor_per_object` function
     sums up the contributions :math:`\mathcal{I}_{\rm ij}` for all :math:`j` such that the
     distance between the two points :math:`D_{\rm ij}`
     is less than the smoothing scale :math:`D_{\rm smooth}`:
@@ -119,7 +119,7 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
     >>> sample2 = np.random.random((npts2, 3))
     >>> weights2 = np.random.random(npts2)
     >>> smoothing_scale = 0.1
-    >>> result = inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale)
+    >>> result = inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale)
 
     Notes
     -----
@@ -177,7 +177,7 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(inertia_tensor_per_object_3d_engine, double_mesh,
+    engine = partial(inertia_tensor_per_object_engine, double_mesh,
         x1in, y1in, z1in, x2in, y2in, z2in, weights2, smoothing_scale)
 
     # Calculate the cell1 indices that will be looped over by the engine

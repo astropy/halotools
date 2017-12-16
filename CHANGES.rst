@@ -3,7 +3,7 @@
 
 - Added new `matrix_operations_3d` module in the `utils` subpackage that contains Numpy functions related to three-dimensional rotations.
 
-- Added new `inertia_tensor_per_object_3d` function in `mock_observables` that calculates the inertia tensor for a set of points and masses in a periodic box.
+- Added new `inertia_tensor_per_object` function in `mock_observables` that calculates the inertia tensor for a set of points and masses in a periodic box.
 
 
 0.6 (2017-12-15)

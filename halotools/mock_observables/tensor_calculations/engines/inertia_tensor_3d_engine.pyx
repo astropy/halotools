@@ -10,12 +10,12 @@ from libc.math cimport ceil
 from ....utils import unsorting_indices
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
-__all__ = ('inertia_tensor_per_object_3d_engine', )
+__all__ = ('inertia_tensor_per_object_engine', )
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def inertia_tensor_per_object_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, weights2in,
+def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, weights2in,
             rsmooth, cell1_tuple):
     """ Cython engine for counting pairs of points as a function of three-dimensional separation.
 

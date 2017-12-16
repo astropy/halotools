@@ -28,4 +28,4 @@ New Mock Observables
 
 Inertia Tensor calculation
 -------------------------------
-The pairwise calculation `~halotools.mock_observables.inertia_tensor_per_object_3d` computes the inertia tensor of a mass distribution surrounding each point in a sample of galaxies or halos.
+The pairwise calculation `~halotools.mock_observables.inertia_tensor_per_object` computes the inertia tensor of a mass distribution surrounding each point in a sample of galaxies or halos.

@@ -86,6 +86,6 @@ Tensor Calculations
 
 .. autosummary::
 
-	inertia_tensor_per_object_3d
+	inertia_tensor_per_object
 	principal_axes_from_inertia_tensors
 
