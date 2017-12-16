@@ -3,11 +3,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from astropy.utils.misc import NumpyRNGContext
 
 
 __all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
-            'angles_between_list_of_vectors', 'vectors_normal_to_planes')
+            'angles_between_list_of_vectors', 'vectors_normal_to_planes',
+            'rotate_vector_collection', 'rotation_matrices_from_angles',
+            'rotation_matrices_from_vectors')
 
 
 def elementwise_dot(x, y):
@@ -260,3 +261,38 @@ def rotation_matrices_from_vectors(v0, v1):
     angles = angles_between_list_of_vectors(v0, v1)
 
     return rotation_matrices_from_angles(angles, directions)
+
+
+def rotate_vector_collection(rotation_matrices, vectors):
+    r""" Given a collection of rotation matrices and a collection of 3d vectors,
+    apply each matrix to rotate the corresponding vector.
+
+    Examples
+    --------
+    rotation_matrices : ndarray
+        Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
+
+    vectors : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+    Returns
+    -------
+    rotated_vectors : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+    Examples
+    --------
+    In this example, we'll randomly generate two sets of unit-vectors, `v0` and `v1`.
+    We'll use the `rotation_matrices_from_vectors` function to generate the
+    rotation matrices that rotate each `v0` into the corresponding `v1`.
+    Then we'll use the `rotate_vector_collection` function to apply each
+    rotation, and verify that we recover each of the `v1`.
+
+    >>> npts = int(1e4)
+    >>> v0 = normalized_vectors(np.random.random((npts, 3)))
+    >>> v1 = normalized_vectors(np.random.random((npts, 3)))
+    >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
+    >>> v2 = rotate_vector_collection(rotation_matrices, v0)
+    >>> assert np.allclose(v1, v2)
+    """
+    return np.einsum('ijk,ik->ij', rotation_matrices, vectors)
