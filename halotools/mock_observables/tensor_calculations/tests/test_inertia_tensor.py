@@ -15,6 +15,9 @@ fixed_seed = 43
 
 
 def pure_python_inertia_tensor(m, x, y, z, p0=(0, 0, 0)):
+    """ Numpy elementwise calculation of the inertia tensor for a single
+    collection of massive points.
+    """
     data = np.zeros((3, 3))
     dx = x - p0[0]
     dy = y - p0[1]
@@ -79,8 +82,9 @@ def test_inertia_tensor1():
 def test_inertia_tensor2():
     """ Calculate the inertia for sample1 on a regular grid and sample2
     a tight collection of point masses randomly placed to surround each sample1 point.
-    For each point in sample1, enforce that the returned tensor agrees
-    with the results from a pure python calculation
+    For each point in sample1, enforce that each of the returned tensors agrees
+    with the results of an independent implementation that uses
+    numpy instead of the cython kernels
     """
 
     Lbox, rsmooth = 1., 0.05
@@ -115,6 +119,10 @@ def test_inertia_tensor2():
 
 
 def test_serial_parallel_agreement():
+    """ Distribute massive points in tight spheres surrounding a grid of `sample1` points,
+    and verify that the returned inertia tensors are agree when the function is
+    called in serial or parallel.
+    """
     Lbox, rsmooth = 1., 0.05
     pos1 = generate_3d_regular_mesh(3, 0, Lbox)
     npts2_per_point = 5
