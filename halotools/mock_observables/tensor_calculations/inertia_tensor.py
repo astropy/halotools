@@ -19,11 +19,13 @@ __all__ = ('inertia_tensor_per_object_3d', )
 
 def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
-    r""" For each point in `sample1`, calculate the inertia tensor using all point masses
-    in `sample2` within the input smoothing_scale.
+    r""" For each point in `sample1`, identify all `sample2` points within the input
+    `smoothing_scale`; using those points together with the input `weights2`,
+    the `inertia_tensor_per_object_3d` function calculates the inertia tensor
+    of the mass distribution surrounding each point in `sample1`.
 
-
-    For every pair of points in `sample1` and `sample2`, the contribution to the inertia tensor is:
+    For every pair of points, :math:`i, j` in `sample1`, `sample2`,
+    the contribution to the inertia tensor is:
 
     .. math::
 
@@ -35,10 +37,14 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
 
     The :math:`\delta x_{\rm ij}`, :math:`\delta y_{\rm ij}`, and :math:`\delta z_{\rm ij}` terms
     store the coordinate distances between the pair of points
-    (optionally accountin for periodic boundary conditions), and :math:`m_{\rm j}` stores
-    the mass of the `sample2` point. The `inertia_tensor_per_object_3d` function returns an inertia
-    tensor for each `sample1` point that is the sum of all such contributions for `sample2` points
-    that fall within the input `smoothing_scale`:
+    (optionally accounting for periodic boundary conditions), and :math:`m_{\rm j}` stores
+    the mass of the `sample2` point.
+
+    To calculate the inertia tensor :math:`\mathcal{I}_{\rm i}` for the
+    :math:`i^{\rm th}` point in `sample1`, the `inertia_tensor_per_object_3d` function
+    sums up the contributions :math:`\mathcal{I}_{\rm ij}` for all :math:`j` such that the
+    distance between the two points :math:`D_{\rm ij}`
+    is less than the smoothing scale :math:`D_{\rm smooth}`:
 
     .. math::
 
@@ -114,6 +120,16 @@ def inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale,
     >>> weights2 = np.random.random(npts2)
     >>> smoothing_scale = 0.1
     >>> result = inertia_tensor_per_object_3d(sample1, sample2, weights2, smoothing_scale)
+
+    Notes
+    -----
+    There are several convenience functions available to derive quantities
+    from the returned inertia tensors:
+
+        * `~halotools.mock_observables.principal_axes_from_inertia_tensors`
+        * `~halotools.mock_observables.sphericity_from_inertia_tensors`
+        * `~halotools.mock_observables.triaxility_from_inertia_tensors`
+
     """
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
     period, PBCs = get_period(period)
