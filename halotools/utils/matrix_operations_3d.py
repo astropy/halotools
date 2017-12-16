@@ -7,7 +7,7 @@ from astropy.utils.misc import NumpyRNGContext
 
 
 __all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
-            'angles_between_list_of_vectors')
+            'angles_between_list_of_vectors', 'vectors_normal_to_planes')
 
 
 def elementwise_dot(x, y):
@@ -132,3 +132,37 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3):
     dot = np.where(mask2, -1., dot)
 
     return np.arccos(dot)
+
+
+def vectors_normal_to_planes(x, y):
+    """ Given a collection of 3d vectors x and y,
+    return a collection of 3d unit-vectors that are orthogonal to x and y.
+
+    Examples
+    --------
+    x : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `x` will be ignored.
+
+    y : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `y` will be ignored.
+
+    Returns
+    -------
+    z : ndarray
+        Numpy array of shape (npts, 3). Each 3d vector in z will be orthogonal
+        to the corresponding vector in x and y.
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> x = np.random.random((npts, 3))
+    >>> y = np.random.random((npts, 3))
+    >>> normed_z = angles_between_list_of_vectors(x, y)
+
+    """
+    return normalized_vectors(np.cross(x, y))
+
