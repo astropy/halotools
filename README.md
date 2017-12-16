@@ -86,7 +86,7 @@ The *sim_manager* package comes with a memory-efficient *TabularAsciiReader* des
 
 ```
 from halotools.sim_manager import CachedHaloCatalog
-halocat = CachedHaloCatalog(simname = any_simname, redshift = any_redshift, halo_finder = any_halo_finder)
+halocat = CachedHaloCatalog(simname=any_simname, redshift=any_redshift, halo_finder=any_halo_finder)
 print(halocat.halo_table[0:10])
 ```
 

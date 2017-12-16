@@ -6,7 +6,7 @@
 What's New in Halotools v0.6?
 *****************************
 
-Halotools ``v0.6`` is now available for installation with conda and pip. New features are summarized below. See the full changelog **CHANGES.rst** for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
+Halotools ``v0.6`` is now available for installation with conda and pip. New features are summarized below. See :ref:`changelog` for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
 
 Quick Installation Verification
 ===============================

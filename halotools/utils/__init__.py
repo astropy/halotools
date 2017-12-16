@@ -12,3 +12,4 @@ from .crossmatch import crossmatch
 from .array_indexing_manipulations import *
 from .inverse_transformation_sampling import *
 from .distribution_matching import *
+from .matrix_operations_3d import *
