@@ -3,10 +3,10 @@
 .. _whats_new_v0p7:
 
 *******************************************
-What Will Be New In Halotools v0.7?
+What's New in (unreleased) Halotools v0.7?
 *******************************************
 
-Halotools ``v0.7`` is currently under development. The latest release is ``v0.6``, which can now be installed with conda or pip. New features currently be developed for future release ``v0.7`` are summarized below. See the full changelog **CHANGES.rst** for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
+Halotools ``v0.7`` is currently under development. The latest release is ``v0.6``, which can now be installed with conda or pip. New features currently be developed for future release ``v0.7`` are summarized below. See :ref:`changelog` for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
 
 
 New Utility Functions
