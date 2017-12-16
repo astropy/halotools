@@ -1,4 +1,4 @@
-"""
+""" Common functions used to rotate three dimensional vectors
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -6,9 +6,9 @@ import numpy as np
 
 
 __all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
-            'angles_between_list_of_vectors', 'vectors_normal_to_planes',
-            'rotate_vector_collection', 'rotation_matrices_from_angles',
-            'rotation_matrices_from_vectors')
+        'angles_between_list_of_vectors', 'vectors_normal_to_planes',
+        'rotate_vector_collection', 'rotation_matrices_from_angles',
+        'rotation_matrices_from_vectors')
 
 
 def elementwise_dot(x, y):
@@ -185,17 +185,17 @@ def rotation_matrices_from_angles(angles, directions):
     matrices : ndarray
         Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
 
-    Notes
-    -----
-    The function `rotate_vector_collection` can be used to efficiently
-    apply the returned collection of matrices to a collection of 3d vectors
-
     Examples
     --------
     >>> npts = int(1e4)
     >>> angles = np.random.uniform(-np.pi/2., np.pi/2., npts)
     >>> directions = np.random.random((npts, 3))
     >>> rotation_matrices = rotation_matrices_from_angles(angles, directions)
+
+    Notes
+    -----
+    The function `rotate_vector_collection` can be used to efficiently
+    apply the returned collection of matrices to a collection of 3d vectors
 
     """
     directions = normalized_vectors(directions)
@@ -242,17 +242,17 @@ def rotation_matrices_from_vectors(v0, v1):
     matrices : ndarray
         Numpy array of shape (npts, 3, 3) rotating each v0 into the corresponding v1
 
-    Notes
-    -----
-    The function `rotate_vector_collection` can be used to efficiently
-    apply the returned collection of matrices to a collection of 3d vectors
-
     Examples
     --------
     >>> npts = int(1e4)
     >>> v0 = np.random.random((npts, 3))
     >>> v1 = np.random.random((npts, 3))
     >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
+
+    Notes
+    -----
+    The function `rotate_vector_collection` can be used to efficiently
+    apply the returned collection of matrices to a collection of 3d vectors
 
     """
     v0 = normalized_vectors(v0)
