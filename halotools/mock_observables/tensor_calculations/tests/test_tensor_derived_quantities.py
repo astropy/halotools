@@ -4,12 +4,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from scipy.stats import random_correlation
-from astropy.utils.misc import NumpyRNGContext
 
-from ..tensor_derived_quantities import (
-            principal_axes_from_inertia_tensors, sphericity_from_inertia_tensors)
-
-from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
+from ..tensor_derived_quantities import (principal_axes_from_inertia_tensors,
+            sphericity_from_inertia_tensors, triaxility_from_inertia_tensors)
 
 
 __all__ = ('test_principal_axes_from_inertia_tensors1', )
@@ -46,7 +43,8 @@ def test_sphericity_from_inertia_tensors():
     """ Use `scipy.stats.random_correlation` to generate matrices with known
     eigenvalues. Call the `sphericity_from_inertia_tensors` function to operate
     on these matrices, and verify that the returned sphericity agrees with
-    the sphericity of the input eigenvalues used to define the matrices.
+    an independent calculation of the sphericity
+    of the input eigenvalues used to define the matrices.
     """
     spherical_evals = (1., 1., 1.)
     non_spherical_evals = (0.1, 0.9, 2.)
@@ -59,5 +57,33 @@ def test_sphericity_from_inertia_tensors():
     matrices = np.array(tensors)
 
     sphericity = sphericity_from_inertia_tensors(matrices)
-    assert np.allclose(sphericity, (1, 0.05, 0.05, 1))
+
+    correct_non_sphericity = non_spherical_evals[0]/non_spherical_evals[2]
+    assert np.allclose(sphericity, (1, correct_non_sphericity, correct_non_sphericity, 1))
+
+
+def test_triaxiity_from_inertia_tensors():
+    """ Use `scipy.stats.random_correlation` to generate matrices with known
+    eigenvalues. Call the `triaxility_from_inertia_tensors` function to operate
+    on these matrices, and verify that the returned triaxility agrees with
+    an independent calculation of the triaxility
+    of the input eigenvalues used to define the matrices.
+    """
+    triaxial_evals = (2., 0.5, 0.5)
+    non_triaxial_evals = (2., 0.9, 0.1)
+
+    tensors = []
+    tensors.append(random_correlation.rvs(triaxial_evals))
+    tensors.append(random_correlation.rvs(non_triaxial_evals))
+    tensors.append(random_correlation.rvs(non_triaxial_evals))
+    tensors.append(random_correlation.rvs(triaxial_evals))
+    matrices = np.array(tensors)
+
+    triaxility = triaxility_from_inertia_tensors(matrices)
+
+    correct_non_triaxility = (
+        (non_triaxial_evals[0]**2-non_triaxial_evals[1]**2) /
+        (non_triaxial_evals[0]**2-non_triaxial_evals[2]**2)
+        )
+    assert np.allclose(triaxility, (1, correct_non_triaxility, correct_non_triaxility, 1))
 
