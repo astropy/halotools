@@ -6,7 +6,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 
-__all__ = ('elementwise_dot', )
+__all__ = ('elementwise_dot', 'elementwise_norm')
 
 
 def elementwise_dot(x, y):
@@ -60,3 +60,27 @@ def elementwise_norm(x):
     """
     x = np.atleast_2d(x)
     return np.sqrt(np.sum(x**2, axis=1))
+
+
+def normalized_vectors(vectors):
+    """ Return a unit-vector for each 3d vector in the input list of 3d points.
+
+    Parameters
+    ----------
+    x : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d points
+
+    Returns
+    -------
+    normed_x : ndarray
+        Numpy array of shape (npts, 3)
+
+    Examples
+    --------
+    >>> npts = int(1e3)
+    >>> x = np.random.random((npts, 3))
+    >>> normed_x = normalized_vectors(x)
+    """
+    vectors = np.atleast_2d(vectors)
+    npts = vectors.shape[0]
+    return vectors/elementwise_norm(vectors).reshape((npts, -1))
