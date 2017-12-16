@@ -6,7 +6,8 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 
-__all__ = ('elementwise_dot', 'elementwise_norm')
+__all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
+            'angles_between_list_of_vectors')
 
 
 def elementwise_dot(x, y):
@@ -84,3 +85,50 @@ def normalized_vectors(vectors):
     vectors = np.atleast_2d(vectors)
     npts = vectors.shape[0]
     return vectors/elementwise_norm(vectors).reshape((npts, -1))
+
+
+def angles_between_list_of_vectors(v0, v1, tol=1e-3):
+    """ Calculate the angle between a collection of 3d vectors
+
+    Examples
+    --------
+    v0 : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `v0` will be ignored.
+
+    v1 : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `v1` will be ignored.
+
+    tol : float, optional
+        Acceptable numerical error for errors in angle.
+        This variable is only used to round off numerical noise that otherwise
+        causes exceptions to be raised by the inverse cosine function.
+        Default is 0.001.
+
+    Returns
+    -------
+    angles : ndarray
+        Numpy array of shape (npts, ) storing the angles between each pair of
+        corresponding points in v0 and v1.
+
+        Returned values are in units of radians spanning [0, pi].
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> v0 = np.random.random((npts, 3))
+    >>> v1 = np.random.random((npts, 3))
+    >>> angles = angles_between_list_of_vectors(v0, v1)
+    """
+    dot = elementwise_dot(normalized_vectors(v0), normalized_vectors(v1))
+
+    #  Protect against tiny numerical excesses beyond the range [-1 ,1]
+    mask1 = (dot > 1) & (dot < 1 + tol)
+    dot = np.where(mask1, 1., dot)
+    mask2 = (dot < -1) & (dot > -1 - tol)
+    dot = np.where(mask2, -1., dot)
+
+    return np.arccos(dot)
