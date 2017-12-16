@@ -3,7 +3,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from scipy.stats import random_correlation
+import pytest
+
+try:
+    from scipy.stats import random_correlation
+    HAS_RANDOM_CORRELATION = True
+except ImportError:
+    HAS_RANDOM_CORRELATION = False
+
 
 from ..tensor_derived_quantities import (principal_axes_from_inertia_tensors,
             sphericity_from_inertia_tensors, triaxility_from_inertia_tensors)
@@ -13,6 +20,7 @@ __all__ = ('test_principal_axes_from_inertia_tensors1', )
 fixed_seed = 43
 
 
+@pytest.mark.skipif('not HAS_RANDOM_CORRELATION')
 def test_principal_axes_from_inertia_tensors1():
     """ Starting from 500 random positive definite symmetric matrices,
     enforce that the axes returned by the _principal_axes_from_inertia_tensors function
@@ -39,6 +47,7 @@ def test_principal_axes_from_inertia_tensors1():
         assert np.allclose(q, correct_evals[2]*p)
 
 
+@pytest.mark.skipif('not HAS_RANDOM_CORRELATION')
 def test_sphericity_from_inertia_tensors():
     """ Use `scipy.stats.random_correlation` to generate matrices with known
     eigenvalues. Call the `sphericity_from_inertia_tensors` function to operate
@@ -62,6 +71,7 @@ def test_sphericity_from_inertia_tensors():
     assert np.allclose(sphericity, (1, correct_non_sphericity, correct_non_sphericity, 1))
 
 
+@pytest.mark.skipif('not HAS_RANDOM_CORRELATION')
 def test_triaxiity_from_inertia_tensors():
     """ Use `scipy.stats.random_correlation` to generate matrices with known
     eigenvalues. Call the `triaxility_from_inertia_tensors` function to operate
