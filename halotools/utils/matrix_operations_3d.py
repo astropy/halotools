@@ -245,6 +245,14 @@ def rotation_matrices_from_vectors(v0, v1):
     -----
     The function `rotate_vector_collection` can be used to efficiently
     apply the returned collection of matrices to a collection of 3d vectors
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> v0 = np.random.random((npts, 3))
+    >>> v1 = np.random.random((npts, 3))
+    >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
+
     """
     v0 = normalized_vectors(v0)
     v1 = normalized_vectors(v1)
