@@ -144,3 +144,30 @@ def test_serial_parallel_agreement():
     tensors_parallel, sum_m_parallel = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, num_threads=2)
     assert np.shape(tensors_serial) == np.shape(tensors_parallel)
     assert np.allclose(tensors_serial, tensors_parallel, rtol=0.001)
+
+
+def test_pbcs():
+    """ Construct a test case where PBCs should not matter, and enforce that the function returns
+    the same inertia matrices regardless of whether an input period is passed
+    """
+    Lbox, rsmooth = 1., 0.01
+    pos1 = generate_3d_regular_mesh(3, 0, Lbox)
+    npts2_per_point = 5
+    small_sphere_size = rsmooth/10.
+
+    pos2 = generate_locus_of_3d_points(npts2_per_point,
+                xc=pos1[0, 0], yc=pos1[0, 1], zc=pos1[0, 2],
+                epsilon=small_sphere_size, seed=fixed_seed)
+    for i in range(1, pos1.shape[0]):
+        pos2_i = generate_locus_of_3d_points(npts2_per_point,
+                    xc=pos1[i, 0], yc=pos1[i, 1], zc=pos1[i, 2],
+                    epsilon=small_sphere_size, seed=fixed_seed)
+        pos2 = np.vstack((pos2, pos2_i))
+
+    with NumpyRNGContext(fixed_seed):
+        masses = np.random.random(pos2.shape[0])
+
+    tensors1, sum_m_cython1 = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=None)
+    tensors2, sum_m_cython2 = inertia_tensor_per_object_3d(pos1, pos2, masses, rsmooth, period=Lbox)
+    assert np.allclose(tensors1, tensors2)
+    assert np.allclose(sum_m_cython1, sum_m_cython2)
