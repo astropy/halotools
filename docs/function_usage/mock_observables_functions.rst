@@ -21,6 +21,15 @@ All of these can be imported from `halotools.mock_observables`.
 	delta_sigma
 	marked_tpcf
 
+
+Calculating the HOD
+====================
+
+.. autosummary::
+
+	hod_from_mock
+
+
 Galaxy Group Statistics
 ==========================
 
@@ -71,11 +80,12 @@ Large Scale Density
 	large_scale_density_spherical_volume
 	large_scale_density_spherical_annulus
 
-Calculating the HOD
+
+Tensor Calculations
 ====================
 
 .. autosummary::
 
-	hod_from_mock
-
+	inertia_tensor_per_object
+	principal_axes_from_inertia_tensors
 
