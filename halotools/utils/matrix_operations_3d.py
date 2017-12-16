@@ -91,8 +91,8 @@ def normalized_vectors(vectors):
 def angles_between_list_of_vectors(v0, v1, tol=1e-3):
     r""" Calculate the angle between a collection of 3d vectors
 
-    Examples
-    --------
+    Parameters
+    ----------
     v0 : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
 
@@ -139,8 +139,8 @@ def vectors_normal_to_planes(x, y):
     r""" Given a collection of 3d vectors x and y,
     return a collection of 3d unit-vectors that are orthogonal to x and y.
 
-    Examples
-    --------
+    Parameters
+    ----------
     x : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
 
@@ -267,8 +267,8 @@ def rotate_vector_collection(rotation_matrices, vectors):
     r""" Given a collection of rotation matrices and a collection of 3d vectors,
     apply each matrix to rotate the corresponding vector.
 
-    Examples
-    --------
+    Parameters
+    ----------
     rotation_matrices : ndarray
         Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
 
