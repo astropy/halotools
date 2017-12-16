@@ -6,8 +6,8 @@ import numpy as np
 from scipy.stats import random_correlation
 from astropy.utils.misc import NumpyRNGContext
 
-from ..inertia_tensor import inertia_tensor_per_object_3d
-from ..tensor_derived_quantities import principal_axes_from_inertia_tensors
+from ..tensor_derived_quantities import (
+            principal_axes_from_inertia_tensors, sphericity_from_inertia_tensors)
 
 from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
 
@@ -40,3 +40,24 @@ def test_principal_axes_from_inertia_tensors1():
         p = np.array((x, y, z))
         q = np.matmul(m, p)
         assert np.allclose(q, correct_evals[2]*p)
+
+
+def test_sphericity_from_inertia_tensors():
+    """ Use `scipy.stats.random_correlation` to generate matrices with known
+    eigenvalues. Call the `sphericity_from_inertia_tensors` function to operate
+    on these matrices, and verify that the returned sphericity agrees with
+    the sphericity of the input eigenvalues used to define the matrices.
+    """
+    spherical_evals = (1., 1., 1.)
+    non_spherical_evals = (0.1, 0.9, 2.)
+
+    tensors = []
+    tensors.append(random_correlation.rvs(spherical_evals))
+    tensors.append(random_correlation.rvs(non_spherical_evals))
+    tensors.append(random_correlation.rvs(non_spherical_evals))
+    tensors.append(random_correlation.rvs(spherical_evals))
+    matrices = np.array(tensors)
+
+    sphericity = sphericity_from_inertia_tensors(matrices)
+    assert np.allclose(sphericity, (1, 0.05, 0.05, 1))
+
