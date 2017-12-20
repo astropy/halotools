@@ -300,8 +300,8 @@ class ContinuousAssembias(HeavisideAssembias):
             else:
                 perturbation = self._galprop_perturbation(
                     prim_haloprop=prim_haloprop[no_edge_mask],
-                    #sec_haloprop=pv_sub_sec_haloprop/np.max(np.abs(pv_sub_sec_haloprop)),
-                    sec_haloprop = compute_conditional_percentiles(prim_haloprop = prim_haloprop[no_edge_mask], sec_haloprop=sec_haloprop[no_edge_mask])-no_edge_split,
+                    sec_haloprop=pv_sub_sec_haloprop/np.max(np.abs(pv_sub_sec_haloprop)),
+                    #sec_haloprop = compute_conditional_percentiles(prim_haloprop = prim_haloprop[no_edge_mask], sec_haloprop=sec_haloprop[no_edge_mask])-no_edge_split,
                     baseline_result=no_edge_result)
 
             no_edge_result += perturbation
