@@ -12,7 +12,7 @@ import functools
 from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
-from ..empirical_models import noisy_percentile 
+#from ..empirical_models.abunmatch.noisy_percentile import noisy_percentile 
 
 __all__ = ['SampleSelector']
 __author__ = ('Andrew Hearin', 'Sean McLaughlin')
@@ -300,85 +300,6 @@ def compute_conditional_percentiles(indices_of_prim_haloprop_bin, sec_haloprop, 
     percentiles[ind_sorted] = (np.arange(num_in_bin) + 1.0) / float(num_in_bin)
 
     return percentiles
-
-@compute_conditional_decorator
-def compute_conditional_shuffled_ranks(indices_of_prim_haloprop_bin, sec_haloprop, correlation_coeff, **kwargs):
-    r"""
-        In bins of the ``prim_haloprop``, compute the shuffled ranks using a noisy percentil 
-        of the input ``table`` based on the value of ``sec_haloprop``.
-
-        Note indices_of_prim_haloprop_bin is passed in from the decorator and does not need to be specified.
-
-        Parameters
-        ----------
-        table : astropy table, optional
-            a keyword argument that stores halo catalog being used to make mock galaxy population
-            If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys
-            must also be passed. If not passing a `table`, you must directly pass the
-            `prim_haloprop` and `sec_haloprop` keyword arguments.
-
-        prim_haloprop_key : string, optional
-            Name of the column of the input ``table`` that will be used to access the
-            primary halo property. `compute_conditional_percentiles` bins the ``table`` by
-            ``prim_haloprop_key`` when computing the result.
-
-        sec_haloprop_key : string, optional
-            Name of the column of the input ``table`` that will be used to access the
-            secondary halo property. `compute_conditional_percentiles` bins the ``table`` by
-            ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key``
-            to compute the ``prim_haloprop``-conditioned rank-order percentile.
-
-        prim_haloprop : array_like, optional
-            Array storing the primary halo property used to bin the input points.
-            If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`.
-
-        sec_haloprop : array_like, optional
-            Array storing the secondary halo property used to define the conditional percentiles
-            in each bin of `prim_haloprop`.
-
-        prim_haloprop_bin_boundaries : array, optional
-            Array defining the boundaries by which we will bin the input ``table``.
-            Default is None, in which case the binning will be automatically determined using
-            the ``dlog10_prim_haloprop`` keyword.
-
-        dlog10_prim_haloprop : float, optional
-            Logarithmic spacing of bins of the mass-like variable within which
-            we will assign secondary property percentiles. Default is 0.2.
-
-        correlation_coeff : float, required
-            The correlation coeff for the noisy percentile. Between -1 and 1.
-
-        Examples
-        --------
-        >>> from halotools.sim_manager import FakeSim
-        >>> fakesim = FakeSim()
-        >>> result = compute_conditional_shuffled_ranks(table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax', correlation_coeff = 0.6)
-
-
-        Notes
-        -----
-        The sign of the result is such that in bins of the primary property,
-        *smaller* values of the secondary property
-        receive *smaller* values of the returned percentile.
-
-        """
-    if sec_haloprop is None:
-        msg = ("\n``sec_haloprop`` must be passed into compute_conditional_shuffled_ranks, or a table"
-               "with ``sec_haloprop_key`` as a column.\n")
-        raise HalotoolsError(msg)
-    try:
-        assert np.all(-1 <= correlation_coeff <= 1)
-    except AssertionError:
-        msg = ("\n``correlation_coeff`` must be passed into compute_conditional_percentiles,"
-               "and must be between -1 and 1\n")
-        raise HalotoolsError(msg)
-
-
-    num_in_bin = len(indices_of_prim_haloprop_bin)
-    original_ranks = rankdata(sec_haloprop[indices_of_prim_haloprop_bin], 'ordinal') - 0.5
-    original_ranks /= num_in_bin
-
-    return noisy_percentile(original_ranks, correlation_coeff=correlation)
 
 
 @compute_conditional_decorator
