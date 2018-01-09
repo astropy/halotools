@@ -127,6 +127,12 @@ def marked_npairs_3d(sample1, sample2, rbins,
 
     >>> result = marked_npairs_3d(sample1, sample2, rbins, period = period, weights1 = weights1, weights2 = weights2, weight_func_id=1)
 
+    Notes
+    -----
+    See the docstring of the `~halotools.mock_observables.marked_tpcf` function
+    for a description of the available marking functions that can be passed in
+    via the ``wfunc`` optional argument.
+
     """
 
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,

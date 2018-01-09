@@ -266,6 +266,16 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 \end{array}
                 \right.
 
+    #. ratio weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) =
+                \left \{
+                \begin{array}{ll}
+                    w_2[1] & : w2[0] > w1[0]*w1[1] \\
+                    0.0 & : otherwise \\
+                \end{array}
+                \right.
+
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a
