@@ -9,6 +9,7 @@ from astropy.config.paths import _find_home
 
 from ..pairs import xy_z_wnpairs as pure_python_weighted_pairs
 from ..marked_npairs_xy_z import marked_npairs_xy_z
+from ..npairs_xy_z import npairs_xy_z
 from ..marked_npairs_3d import _func_signature_int_from_wfunc
 
 from ....custom_exceptions import HalotoolsError
@@ -420,3 +421,29 @@ def test_marked_npairs_behavior_weight_func_id10():
     result = marked_npairs_xy_z(grid_points, grid_points, rp_bins, pi_bins, period=period,
     weights1=weights, weights2=weights, weight_func_id=10, approx_cell1_size=[rmax, rmax, rmax])
     assert np.all(result == -3*test_result), error_msg
+
+
+@slow
+def test_marked_npairs_behavior_weight_func_id11():
+    """
+    weight_func_id=11
+    """
+
+    Npts, Npts2 = 1000, 10
+    grid_points, rp_bins, period = retrieve_mock_data(Npts, Npts2, 1)
+
+    pi_bins = np.array([0, 0.15])
+
+    weights1 = np.tile((1., 0.), Npts).reshape((Npts, 2))
+    weights2 = np.ones(Npts*2).reshape((Npts, 2))
+
+    result1 = marked_npairs_xy_z(grid_points, grid_points, rp_bins, pi_bins, period=period,
+            weights1=weights1, weights2=weights2, weight_func_id=11)
+
+    result2 = npairs_xy_z(grid_points, grid_points, rp_bins, pi_bins, period=period)
+    assert np.all(result1 == result2)
+
+    weights2 = np.tile((1., 2.), Npts).reshape((Npts, 2))
+    result3 = marked_npairs_xy_z(grid_points, grid_points, rp_bins, pi_bins, period=period,
+            weights1=weights1, weights2=weights2, weight_func_id=11)
+    assert np.all(result3 == 2*result2)
