@@ -134,3 +134,14 @@ cdef cnp.float64_t exweights(cnp.float64_t* w1, cnp.float64_t* w2):
         return 0.0
 
 
+cdef cnp.float64_t ratio_weights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    ratio weights
+    return w2[1] if w2[0]>w1[1]*w1[0], 0 otherwise
+    id: 11
+    expects length 2 arrays
+    """
+    if w2[0] > w1[0]*w1[1]:
+        return w2[1]
+    else:
+        return 0.0
