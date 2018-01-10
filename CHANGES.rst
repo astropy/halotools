@@ -5,6 +5,7 @@
 
 - Added new `inertia_tensor_per_object` function in `mock_observables` that calculates the inertia tensor for a set of points and masses in a periodic box.
 
+- Added new option for the marked correlation functions to accommodate counting pairs of points passing a variable merger ratio criteria
 
 0.6 (2017-12-15)
 ----------------
