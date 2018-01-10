@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
+cimport cython
 from libc.math cimport ceil
 
 from .marking_functions cimport *
@@ -18,43 +18,43 @@ ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     weights1in, weights2in, weight_func_idin, rbins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation. 
+    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
 
-    Parameters 
+    Parameters
     ------------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
 
-    x1in, y1in, z1in : arrays 
+    x1in, y1in, z1in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 1
 
-    x2in, y2in, z2in : arrays 
+    x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    weights1in : array 
+    weights1in : array
         Numpy array storing the weights for points in sample 1
 
-    weights2in : array 
+    weights2in : array
         Numpy array storing the weights for points in sample 2
 
     weight_func_id : int, optional
-        weighting function integer ID. 
+        weighting function integer ID.
 
     rbins : array
         Boundaries defining the bins in which pairs are counted.
 
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
 
-    Returns 
+    Returns
     --------
-    counts : array 
-        Integer array of length len(rbins) giving the number of pairs 
-        separated by a distance less than the corresponding entry of ``rbins``. 
+    counts : array
+        Integer array of length len(rbins) giving the number of pairs
+        separated by a distance less than the corresponding entry of ``rbins``.
 
     """
     cdef int weight_func_id = weight_func_idin
@@ -114,7 +114,7 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq, weight
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp
     cdef int Ni, Nj, i, j, k, l
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -146,9 +146,9 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -213,7 +213,7 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                         counts[k] += weight
                                         k=k-1
                                         if k<0: break
-                                        
+
     return np.array(counts)
 
 
@@ -221,7 +221,7 @@ cdef f_type return_weighting_function(weight_func_id):
     """
     returns a pointer to the user-specified weighting function.
     """
-    
+
     if weight_func_id==0:
         return custom_func
     elif weight_func_id==1:
@@ -244,5 +244,7 @@ cdef f_type return_weighting_function(weight_func_id):
         return tweights
     elif weight_func_id==10:
         return exweights
+    elif weight_func_id==11:
+        return ratio_weights
     else:
         raise ValueError('marking function does not exist')
