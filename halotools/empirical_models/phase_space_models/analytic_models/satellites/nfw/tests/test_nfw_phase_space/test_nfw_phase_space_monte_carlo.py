@@ -316,3 +316,18 @@ def test_seed_treatment1():
     satellites = nfw.mc_generate_nfw_phase_space_points(seed=43, Ngals=10)
     assert np.any(satellites['vx'] != satellites['vy'])
 
+
+def test_automatic_ngal_inference1():
+    """ Regression test for Issue #870 https://github.com/astropy/halotools/issues/870
+    """
+    nfw = NFWPhaseSpace()
+    posvel_table = nfw.mc_generate_nfw_phase_space_points(mass=(1e12, 1e13))
+    posvel_table = nfw.mc_generate_nfw_phase_space_points(conc=(5, 13))
+    posvel_table = nfw.mc_generate_nfw_phase_space_points(conc=(5, 13), mass=(1e12, 1e13))
+    posvel_table = nfw.mc_generate_nfw_phase_space_points(conc=5, mass=1e13, Ngals=100)
+
+    with pytest.raises(AssertionError) as err:
+        posvel_table = nfw.mc_generate_nfw_phase_space_points(
+            conc=(5, 13, 6), mass=(1e12, 1e13))
+    substr = "Input ``mass`` and ``conc`` must have same length"
+    assert substr in err.value.args[0]
