@@ -295,4 +295,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     >>> v2 = rotate_vector_collection(rotation_matrices, v0)
     >>> assert np.allclose(v1, v2)
     """
-    return np.einsum('ijk,ik->ij', rotation_matrices, vectors, optimize=optimize)
+    try:
+        np.einsum('ijk,ik->ij', rotation_matrices, vectors, optimize=optimize)
+    except TypeError:
+        return np.einsum('ijk,ik->ij', rotation_matrices, vectors)
