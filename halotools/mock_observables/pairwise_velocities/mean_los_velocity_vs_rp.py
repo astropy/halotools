@@ -211,7 +211,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
         return D1D1, D1D2, D2D2, N1N1, N1N2, N2N2
 
     # count the sum of radial velocities and number of pairs
-    weight_func_id = 13
+    weight_func_id = 3
     V1V1, V1V2, V2V2, N1N1, N1N2, N2N2 =\
         marked_pair_counts(sample1, sample2, rp_bins, pi_bins, period,
             num_threads, do_auto, do_cross,

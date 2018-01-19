@@ -86,7 +86,7 @@ The *sim_manager* package comes with a memory-efficient *TabularAsciiReader* des
 
 ```
 from halotools.sim_manager import CachedHaloCatalog
-halocat = CachedHaloCatalog(simname = any_simname, redshift = any_redshift, halo_finder = any_halo_finder)
+halocat = CachedHaloCatalog(simname=any_simname, redshift=any_redshift, halo_finder=any_halo_finder)
 print(halocat.halo_table[0:10])
 ```
 
@@ -121,7 +121,7 @@ The google group also serves as a public forum for asking questions about the co
 
 ## Citing Halotools
 
-If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper, as well as the DOI of the version of the code you used, e.g., 10.5281/zenodo.835894 for v0.5, the current latest release. Depending on what modules you use, other citations may also be appropriate; see the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
+If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper, as well as the DOI of the version of the code you used, e.g., 10.5281/zenodo.835894 for v0.6, the current latest release. Depending on what modules you use, other citations may also be appropriate; see the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
 
 
 ---

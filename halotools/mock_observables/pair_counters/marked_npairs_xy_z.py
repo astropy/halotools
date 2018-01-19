@@ -106,6 +106,12 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
     wN_pairs : numpy.ndarray
         2-D array of shape *(Nrp_bins,Npi_bins)* containing the weighted number
         counts of pairs
+
+    Notes
+    -----
+    See the docstring of the `~halotools.mock_observables.marked_tpcf` function
+    for a description of the available marking functions that can be passed in
+    via the ``wfunc`` optional argument.
     """
 
     # Process the inputs with the helper function

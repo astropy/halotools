@@ -1,4 +1,13 @@
-0.6 (unreleased)
+0.7 (unreleased)
+----------------
+
+- Added new `matrix_operations_3d` module in the `utils` subpackage that contains Numpy functions related to three-dimensional rotations.
+
+- Added new `inertia_tensor_per_object` function in `mock_observables` that calculates the inertia tensor for a set of points and masses in a periodic box.
+
+- Added new option for the marked correlation functions to accommodate counting pairs of points passing a variable merger ratio criteria
+
+0.6 (2017-12-15)
 ----------------
 
 - Changed the API for mock_observables.pair_counters.npairs_s_mu which now requires ``mu_bins`` to be in the conventional mu=cos(theta_LOS) format instead of mu=sin(theta_LOS). See https://github.com/astropy/halotools/pull/768
@@ -32,6 +41,14 @@
 - Fixed bug in `weighted_npairs_s_mu` when called in parallel. See https://github.com/astropy/halotools/issues/837.
 
 - Fixed bug in `radial_profile_3d` when called in parallel. See https://github.com/astropy/halotools/issues/854.
+
+- Fixed bug in `radial_profile_3d` when called without periodic boundary conditions. See https://github.com/astropy/halotools/issues/862
+
+- Fixed bug in `velocity_marked_npairs_3d` and `velocity_marked_npairs_xy_z` when called with default arguments. See https://github.com/astropy/halotools/issues/836.
+
+- Changed the `weight_func_id` numbers associated with weighting functions for `velocity_marked_npairs_3d` and `velocity_marked_npairs_xy_z` where e.g. 11 is now 1, etc.
+
+- Added new `test_installation` feature that dramatically shortens the length of time users need to spend verifying their installation
 
 
 0.5 (2017-05-31)

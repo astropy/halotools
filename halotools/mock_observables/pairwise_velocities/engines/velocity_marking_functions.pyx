@@ -24,6 +24,8 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
                                            cnp.float64_t* result3):
     """
     Calculate the relative radial velocity between two points.
+
+    func ID=1
     
     Parameters
     ----------
@@ -93,6 +95,8 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
     Calculate the relative radial velocity between two points minus an offset, and the 
     squared quantity.  This function is used to calculate the variance using the 
     "shifted data" technique where a constant value is subtracted from the value.
+
+    func ID=2
     
     Parameters
     ----------
@@ -158,6 +162,8 @@ cdef void relative_los_velocity_weights(cnp.float64_t* w1,
                                         cnp.float64_t* result3):
     """
     Calculate the relative line-of-sight (LOS) velocity between two points.
+
+    func ID=3
     
     Parameters
     ----------
@@ -212,6 +218,8 @@ cdef void los_velocity_variance_counter_weights(cnp.float64_t* w1,
     Calculate the relative LOS velocity between two points minus an offset, and the 
     squared quantity.  This function is used to calculate the variance using the 
     "shifted data" technique where a constant value is subtracted from the value.
+
+    func ID=4
     
     Parameters
     ----------
