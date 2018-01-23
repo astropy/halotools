@@ -20,8 +20,8 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def w_gplus(sample1, ellipticities1, sample2, alignments2, ellipticities2, rp_bins, pi_max,
-            period=None, num_threads=1,
+def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
+            randoms=None, period=None, num_threads=1,
             approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the projected projected gravitational shear-intrinsic ellipticity correlation function,
@@ -37,24 +37,21 @@ def w_gplus(sample1, ellipticities1, sample2, alignments2, ellipticities2, rp_bi
     Parameters
     ----------
     sample1 : array_like
-        Npts1 x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points with associated orientations.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
         format accepted by the ``sample1`` and ``sample2`` arguments.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-   ellipticities1: array_like
+    orientations1 : array_like
+        Npts1 x 2 numpy array containing projected orientation vectors for each point in ``sample1``.
 
-   sample2 : array_like, optional
+    ellipticities1: array_like
+        Npts1 x 1 numpy array containing ellipticities for each point in ``sample1``.
+
+    sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
-        Passing ``sample2`` as an input permits the calculation of
-        the cross-correlation function. Default is None, in which case only the
-        auto-correlation function will be calculated.
-
-    alignments2 : array_like
-
-    ellipticities2: array_like
 
     rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which
@@ -64,6 +61,12 @@ def w_gplus(sample1, ellipticities1, sample2, alignments2, ellipticities2, rp_bi
     pi_max : float
         maximum LOS distance defining the projection integral length-scale in the z-dimension.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+    
+    randoms : array_like, optional
+        Nran x 3 array containing 3-D positions of randomly distributed points.
+        If no randoms are provided (the default option), the
+        calculation can proceed using analytical randoms
+        (only valid for periodic boundary conditions).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -96,19 +99,9 @@ def w_gplus(sample1, ellipticities1, sample2, alignments2, ellipticities2, rp_bi
 
     Returns
     -------
-    correlation_function(s) : numpy.array
+    correlation_function : numpy.array
         *len(rp_bins)-1* length array containing the correlation function :math:`w_{g+}(r_p)`
         computed in each of the bins defined by input ``rp_bins``.
-
-        If ``sample2`` is not None (and not exactly the same as ``sample1``),
-        three arrays of length *len(rp_bins)-1* are returned:
-
-        .. math::
-            w_{g+11}(r_p), \ w_{g+12}(r_p), \ w_{g+22}(r_p),
-
-        the autocorrelation of ``sample1``, the cross-correlation between ``sample1``
-        and ``sample2``, and the autocorrelation of ``sample2``.  If ``do_auto`` or ``do_cross``
-        is set to False, the appropriate result(s) is not returned.
 
     Notes
     -----
@@ -124,63 +117,162 @@ def w_gplus(sample1, ellipticities1, sample2, alignments2, ellipticities2, rp_bi
     and the alingment of the :math:`j`-th galaxy relative the direction of the :math:`i`-th galaxy is given by:
 
     .. math::
-        e_{+}(j|i) = -e_1\cos(2\phi) - e_2\sin(2\phi)
+        e_{+}(j|i) = e\cos(2\phi)
+    
+    where :math:`\phi` is the angle between the orientation vector and the vector connecting the projected positions.
+
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a
+    periodic cube of Lbox = 250 Mpc/h.
+
+    >>> Npts = 1000
+    >>> Lbox = 250
+
+    >>> x = np.random.uniform(0, Lbox, Npts)
+    >>> y = np.random.uniform(0, Lbox, Npts)
+    >>> z = np.random.uniform(0, Lbox, Npts)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> sample1 = np.vstack((x,y,z)).T
+
+    We then create a set of random orientation vectors and ellipticities for each point
+
+    >>> random_orientations = np.random.random((len(data),2))
+    >>> random_ellipticities = np.random.random((len(data))
+
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array`
+    convenience function for this same purpose, which provides additional wrapper
+    behavior around `numpy.vstack` such as placing points into redshift-space.
+
+    >>> rp_bins = np.logspace(-1,1,10)
+    >>> pi_max = 0.25
+    >>> w = w_gplus(sample1, random_orientations, random_ellipticities, rp_bins, pi_max, period=Lbox)
 
     """
 
-    function_args = (sample1, sample2, None, ellipticities1, alignments2, ellipticities2,
+    function_args = (sample1, orientations1, ellipticities1, sample2, None, None,
         rp_bins, pi_max, period, num_threads, approx_cell1_size, approx_cell2_size)
 
-    sample1, alignments1, rp_bins, pi_max, sample2, alignments2, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = process_projected_alignment_args(*function_args)
+    sample1, orientations1, ellipticities1, sample2, None, None, rp_bins, pi_max, period,
+    num_threads, approx_cell1_size, approx_cell2_size, PBCs = process_projected_alignment_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
+    
+    #define weights to use in pair counting
+    weights1 = np.ones((N2,3))
+    weights1[:,0] = ellipticities1
+    weights1[:,1] = orientations1[:0]
+    weights1[:,2] = orientations1[:1]
+    weights2 = np.ones((N1,3)) #just a dummy, the orientations arent used for this sample 
 
     # count marked pairs
-    D1D1, D1D2, D2D2 = marked_pair_counts(sample1, sample2, alignments1, alignments2,
+    SD = marked_pair_counts(sample1, sample2,  weights1,  weights2,
+        rp_bins, pi_max, period, num_threads, approx_cell1_size, approx_cell2_size)
+    
+    # count marked random pairs
+    if do_SR:
+    	if randoms is not None:
+    		ran_weights = weights2
+    		SR = marked_pair_counts(sample1, randoms, weights1, ran_weights,
         rp_bins, pi_max, period, num_threads, do_auto, do_cross,
         _sample1_is_sample2, approx_cell1_size, approx_cell2_size)
+    	else:
+    		SR = 
+
+    # count random pairs
+    RR = random_counts()
 
 
 
 
-def marked_pair_counts(sample1, sample2, alignments1, alignments2, rp_bins, pi_max, period,
-        num_threads, do_auto, do_cross, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size):
+
+
+def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_max, period,
+        num_threads, approx_cell1_size, approx_cell2_size):
     """
     Count data pairs.
     """
-    D1D1 = positional_marked_npairs_xy_z(sample1, sample1, rp_bins, pi_max, period=period,
-        weights1=alignments1, weights2=alignments1,
+
+    weight_func_id = 1
+    SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_max, period=period,
+        weights1=weights1, weights2=weights1, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)
-    D1D1 = np.diff(np.diff(D1D1, axis=0), axis=1)
-    if _sample1_is_sample2:
-        D1D2 = D1D1
-        D2D2 = D1D1
-    else:
-        if do_cross is True:
-            D1D2 = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_max, period=period,
-                weights1=alignments1, weights2=alignments2,
-                num_threads=num_threads,
-                approx_cell1_size=approx_cell1_size,
-                approx_cell2_size=approx_cell2_size)
-            D1D2 = np.diff(np.diff(D1D2, axis=0), axis=1)
-        else:
-            D1D2 = None
-        if do_auto is True:
-            D2D2 = positional_marked_npairs_xy_z(sample2, sample2, rp_bins, pi_max, period=period,
-                weights1=alignments2, weights2=alignments2,
-                num_threads=num_threads,
-                approx_cell1_size=approx_cell2_size,
-                approx_cell2_size=approx_cell2_size)
-            D2D2 = np.diff(np.diff(D2D2, axis=0), axis=1)
-        else:
-            D2D2 = None
+    SD = np.diff(np.diff(SD, axis=0), axis=1)
 
-    return D1D1, D1D2, D2D2
+    return SD
+
+
+def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,
+        PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+        approx_cell1_size, approx_cell2_size, approx_cellran_size):
+    r"""
+    Count random pairs.
+    """
+
+    # No PBCs, randoms must have been provided.
+    if randoms is not None:
+        if do_RR is True:
+            RR = npairs_xy_z(randoms, randoms, rp_bins, pi_bins,
+                period=period, num_threads=num_threads,
+                approx_cell1_size=approx_cellran_size,
+                approx_cell2_size=approx_cellran_size)
+            RR = np.diff(np.diff(RR, axis=0), axis=1)
+        else:
+            RR = None
+        if do_DR is True:
+            D1R = npairs_xy_z(sample1, randoms, rp_bins, pi_bins,
+                period=period, num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cellran_size)
+            D1R = np.diff(np.diff(D1R, axis=0), axis=1)
+        else:
+            D1R = None
+        if _sample1_is_sample2:  # calculating the cross-correlation
+            D2R = None
+        else:
+            if do_DR is True:
+                D2R = npairs_xy_z(sample2, randoms, rp_bins, pi_bins,
+                    period=period, num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cellran_size)
+                D2R = np.diff(np.diff(D2R, axis=0), axis=1)
+            else:
+                D2R = None
+
+        return D1R, D2R, RR
+    # PBCs and no randoms--calculate randoms analytically.
+    elif randoms is None:
+
+        # set the number of randoms equal to the number of points in sample1
+        NR = len(sample1)
+
+        # do volume calculations
+        v = cylinder_volume(rp_bins, 2.0*pi_bins)  # volume of spheres
+        dv = np.diff(np.diff(v, axis=0), axis=1)  # volume of annuli
+        global_volume = period.prod()
+
+        # calculate randoms for sample1
+        N1 = np.shape(sample1)[0]
+        rho1 = N1/global_volume
+        D1R = (N1)*(dv*rho1)  # read note about pair counter
+
+        # calculate randoms for sample2
+        N2 = np.shape(sample2)[0]
+        rho2 = N2/global_volume
+        D2R = N2*(dv*rho2)  # read note about pair counter
+
+        # calculate the random-random pairs.
+        rhor = NR**2/global_volume
+        RR = (dv*rhor)  # RR is only the RR for the cross-correlation.
+
+        return D1R, D2R, RR
 
 
 
