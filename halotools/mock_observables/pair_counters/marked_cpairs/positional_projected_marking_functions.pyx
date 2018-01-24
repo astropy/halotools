@@ -33,7 +33,7 @@ cdef cnp.float64_t gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
             return w1[2]
         else:
             gamma = c_cos(2.0*c_acos(costheta))
-            return w1[2]*gamma
+            return w1[2]*w2[2]*gamma
     else:
         return 0.0
 
@@ -50,7 +50,7 @@ cdef cnp.float64_t gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
         y = (y2-y1)
         costheta = (w1[0]*x + w1[1]*y)/c_sqrt(dxy_sq)
         gamma = c_sin(2.0*c_acos(costheta))
-        return w1[2]*gamma
+        return w1[2]*w2[2]*gamma
     else:
         return 0.0
 

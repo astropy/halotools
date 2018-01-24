@@ -12,7 +12,7 @@ from .alignment_helpers import process_projected_alignment_args
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ..pair_counters import positional_marked_npairs_xy_z, npairs_xy_z
+from ..pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
 
 __all__ = ['w_gplus']
 __author__ = ['Duncan Campbell']
@@ -23,10 +23,12 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
             randoms1=None, randoms2=None, weights1=None, weights2=None,
+            ran_weights1=None, ran_weights2=None, estimator='Landy-Szalay',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the projected projected gravitational shear-intrinsic ellipticity correlation function,
-    :math:`w_{g+}(r_p)`, where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS).
+    Calculate the projected projected gravitational shear-intrinsic ellipticity correlation function (GI),
+    :math:`w_{g+}(r_p)`, where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS)
+    between two galaxies.  See the 'Notes' section for details of this calculation.
 
     The first two dimensions define the plane for perpendicular distances.  The third
     dimension is used for parallel distances, i.e. x,y positions are on the plane of the
@@ -38,7 +40,8 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     Parameters
     ----------
     sample1 : array_like
-        Npts1 x 3 numpy array containing 3-D positions of points with associated orientations.
+        Npts1 x 3 numpy array containing 3-D positions of points with associated
+        orientations and ellipticities.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
@@ -65,20 +68,31 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     randoms1 : array_like, optional
-        Nran1 x 3 array containing 3-D positions of randomly distributed points.
+        Nran1 x 3 array containing 3-D positions of randomly distributed points corresponding to ``sample1``.
         If no randoms are provided (the default option), the
         calculation can proceed using analytical randoms
         (only valid for periodic boundary conditions).
 
     randoms2 : array_like, optional
-        Nran2 x 3 array containing 3-D positions of randomly distributed points.
+        Nran2 x 3 array containing 3-D positions of randomly distributed points corresponding to ``sample2``.
         If no randoms are provided (the default option), the
         calculation can proceed using analytical randoms
         (only valid for periodic boundary conditions).
 
-    weights1 : array_like
+    weights1 : array_like, optional
+        Npts1 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts1).
 
-    weights2 : array_like
+    weights2 : array_like, optional
+        Npts2 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts2).
+
+    ran_weights1 : array_like, optional
+        Npran1 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Nran1).
+
+    ran_weights2 : array_like, optional
+        Nran2 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Nran2).
+
+    estimator :  string, optional
+        string indicating which estimator to use
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -117,6 +131,8 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
 
     Notes
     -----
+    
+    If the Landy-Szalay estimator is indicated, the projected GI-correlation function is calculated as:
 
     .. math::
         w_{g+}(r_p) = \frac{S_{+}D-S_{+}R}{R_sR}
@@ -124,23 +140,25 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     where
 
     .. math::
-        S_{+}D = \sum_{i \neq j} w_j*w_i e_{+}(j|i)
+        S_{+}D = \sum_{i \neq j} w_jw_i e_{+}(j|i)
 
-    :math:`w_j` and :math:`w_j` are weights.  Weights are set to one for all points by default.
+    :math:`w_j` and :math:`w_j` are weights.  Weights are set to 1 for all galaxies by default.
     The alingment of the :math:`j`-th galaxy relative to the direction to the :math:`i`-th galaxy is given by:
 
     .. math::
-        e_{+}(j|i) = e\cos(2\phi)
+        e_{+}(j|i) = e_j\cos(2\phi)
 
-    where :math:`e` is the ellipticity of the :math:`j`-th galaxy, and
-    :math:`\phi` is the angle between the orientation vector of the :math:`j`-th galaxy
-    and the vector connecting the projected position of the :math:`j`-th galaxy and the :math:`i`-th galaxy.
+    where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the 
+    orientation vector, :math:`\vec{o}_j`, and the projected direction between the :math:`j`-th 
+    and :math:`i`-th galaxy, :math:`\vec{r}_{p i,j}`.
+
+    .. math::
+        \cos(\phi) = \vec{o}_j \cdot \vec{r}_{p i,j}
 
     :math:`S_{+}R` is analgous to :math:`S_{+}D` but instead is computed
-    with respect to a random sample of points.
-
-    :math:`R_sR` are random pair counts, where :math:`R_s` corresponds to the shapes sample, ``sample1``
-    and R correspoinds to ``sample2``.
+    with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts, 
+    where :math:`R_s` corresponds to the shapes sample, i.e. the sample with orienttions
+    and ellipticies, ``sample1``, and R correspoinds to ``sample2``.
 
     Examples
     --------
@@ -160,24 +178,30 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
 
     >>> sample1 = np.vstack((x,y,z)).T
 
+    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array`
+    convenience function for this same purpose, which provides additional wrapper
+    behavior around `numpy.vstack` such as placing points into redshift-space.
+
     We then create a set of random orientation vectors and ellipticities for each point
 
     >>> random_orientations = np.random.random((Npts,2))
     >>> random_ellipticities = np.random.random(Npts)
 
-    Alternatively, you may use the `~halotools.mock_observables.return_xyz_formatted_array`
-    convenience function for this same purpose, which provides additional wrapper
-    behavior around `numpy.vstack` such as placing points into redshift-space.
+    We can the calculate the projected auto-GI correlation between these points:
 
     >>> rp_bins = np.logspace(-1,1,10)
     >>> pi_max = 0.25
     >>> w = w_gplus(sample1, random_orientations, random_ellipticities, sample1, rp_bins, pi_max, period=Lbox)
 
     """
-
-    alignment_args = (sample1, orientations1, ellipticities1, weights1, sample2, None, None, weights2)
+    
+    # process arguments
+    alignment_args = (sample1, orientations1, ellipticities1, weights1,
+                      sample2, None, None, weights2,
+                      randoms1, ran_weights1, randoms2, ran_weights2)
     sample1, orientations1, ellipticities1, weights1, sample2,\
-        orientations2, ellipticities2, weights2 = process_projected_alignment_args(*alignment_args)
+        orientations2, ellipticities2, weights2, randoms1, ran_weights1,\
+        randoms2, ran_weights2 = process_projected_alignment_args(*alignment_args)
 
     function_args = (sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size)
@@ -187,81 +211,142 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
-    if no_randoms:
+    if no_randoms: #set random density the the same as the sampels
         NR1 = N1
         NR2 = N2
     else:
         NR1 = len(randoms1)
         NR2 = len(randoms2)
 
-    #define weights to use in pair counting
-    weights1 = np.ones((N2, 3))
-    weights1[:, 0] = ellipticities1
-    weights1[:, 1] = orientations1[:,0]
-    weights1[:, 2] = orientations1[:,1]
-    weights2 = np.ones((N1, 3))  #just a dummy variable--the orientations arent used for this sample
+    #define merk vectors to use in pair counting
+    # sample 1
+    marks1 = np.ones((N1, 3))
+    marks1[:, 0] = orientations1[:,0]
+    marks1[:, 1] = orientations1[:,1]
+    marks1[:, 2] = ellipticities1 * weights1
+    # sample 2
+    marks2 = np.ones((N2, 3))
+    marks2[:, 0] = 0  # just a dummy variable--the orientations arent used for these samples
+    marks2[:, 1] = 0  # dummy
+    marks2[:, 2] = weights2
+    # randoms 1
+    ran_marks1 = np.ones((NR1, 3))
+    ran_marks1[:, 0] = 0  # dummy
+    ran_marks1[:, 1] = 0  # dummy
+    ran_marks1[:, 2] = ran_weights1
+    # randoms 2
+    ran_marks2 = np.ones((NR2, 3))
+    ran_marks2[:, 0] = 0  # dummy
+    ran_marks2[:, 1] = 0  # dummy
+    ran_marks2[:, 2] = ran_weights2
 
     # define pi bins
     pi_bins = np.array([0.0, pi_max])
 
+    do_SD, do_SR, do_RR = GI_estimator_requirements(estimator)
+
     # count marked pairs
-    SD = marked_pair_counts(sample1, sample2,  weights1,  weights2,
-        rp_bins, pi_bins, period, num_threads, approx_cell1_size, approx_cell2_size)
+    if do_SD:
+        SD = marked_pair_counts(sample1, sample2,  marks1,  marks2,
+                                rp_bins, pi_bins, period, num_threads,
+                                approx_cell1_size, approx_cell2_size)
 
     # count marked random pairs
-    if no_randoms:
-        SR = 0.0
-    else:
-        ran_weights = weights2
-        SR = marked_pair_counts(sample1, randoms2, weights1, ran_weights,
-        rp_bins, pi_bins, period, num_threads,  approx_cell1_size, approx_cell2_size)
+    if do_SR:
+        if no_randoms:
+            SR = 0.0
+        else:
+            ran_weights = weights2
+            SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
+                                    rp_bins, pi_bins, period, num_threads,
+                                    approx_cell1_size, approx_cell2_size)
 
     # count random pairs
-    RR = random_counts(sample1, sample2, randoms1, randoms2, weights1, weights2, rp_bins, pi_bins, period, PBCs,
-        num_threads, approx_cell1_size, approx_cell2_size)
+    if do_RR:
+        RR = random_counts(randoms1, randoms2, ran_weights1, ran_weights2,
+                           rp_bins, pi_bins, N1, N2, no_randoms, period, PBCs,
+                           num_threads, approx_cell1_size, approx_cell2_size)
 
-    result = (NR1*NR2)/(N1*N2)*(SD - SR)/RR
-
+    result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
+    
     return result
+
+
+def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Natural'):
+    r"""
+    apply the supplied GI estimator to calculate the correlation function.
+    """
+    if estimator == 'Natural':
+        factor = (NR1*NR2)/(N1*N2)
+        return factor*(SD/RR)
+    elif estimator == 'Landy-Szalay':
+        factor = (NR1*NR2)/(N1*N2)
+        return factor*(SD-SR)/RR
+    else: 
+        msg = ('The estimator provided is not supported.')
+        raise ValueError(msg)
+
+
+def GI_estimator_requirements(estimator):
+    r"""
+    Return the requirments for the supplied GI estimator.
+    """
+    do_SD = False
+    do_SR = False
+    do_RR = False
+
+    if estimator == 'Natural':
+        do_SD = True
+        do_RR = True
+        return do_SD, do_SR, do_RR
+    elif estimator == 'Landy-Szalay':
+        do_SD = True
+        do_SR = True
+        do_RR = True
+        return do_SD, do_SR, do_RR
+    else: 
+        msg = ('The estimator provided is not supported.')
+        raise ValueError(msg)
 
 
 def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, period,
         num_threads, approx_cell1_size, approx_cell2_size):
     r"""
-    Count data pairs.
+    Count marked pairs.
     """
 
     weight_func_id = 1
     SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
         weights1=weights1, weights2=weights1, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
-        approx_cell2_size=approx_cell1_size)
+        approx_cell2_size=approx_cell1_size)[1]
     SD = np.diff(np.diff(SD, axis=0), axis=1)
+    SD = SD.flatten()
 
     return SD
 
 
-def random_counts(sample1, sample2, randoms1, randoms2, weights1, weights2, rp_bins, pi_bins, period,
-        PBCs, num_threads, approx_cell1_size, approx_cell2_size):
+def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bins,
+                  N1, N2, no_randoms, period,
+                  PBCs, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Count random pairs.
     """
 
-    # No PBCs, randoms must have been provided.
-    if randoms1 is not None:
-        RR = npairs_xy_z(randoms1, randoms2, rp_bins, pi_bins,
+    if no_randoms==False:
+        RR = marked_npairs_xy_z(randoms1, randoms2, rp_bins, pi_bins,
                 period=period, num_threads=num_threads,
+                weights1=ran_weights1, weights2=ran_weights2, 
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
         RR = np.diff(np.diff(RR, axis=0), axis=1)
-
+        RR = RR.flatten()
+        
         return RR
-    # PBCs and no randoms--calculate randoms analytically.
-    elif randoms1 is None:
-
+    elif no_randoms:
         #set 'number' or randoms, this is just to make normalization simple
-        NR1 = len(sample1)
-        NR2 = len(sample2)
+        NR1 = N1
+        NR2 = N2
 
         # do volume calculations
         v = cylinder_volume(rp_bins, 2.0*pi_bins)
@@ -286,7 +371,7 @@ def _w_gplus_process_args(sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.redshift_space_tpcf`.
+    `~halotools.mock_observables.alignments.w_gplus`.
     """
     sample1 = enforce_sample_has_correct_shape(sample1)
 
