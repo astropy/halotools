@@ -26,7 +26,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
             ran_weights1=None, ran_weights2=None, estimator='Landy-Szalay',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the projected projected gravitational shear-intrinsic ellipticity correlation function (GI),
+    Calculate the projected gravitational shear-intrinsic ellipticity correlation function (GI),
     :math:`w_{g+}(r_p)`, where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS)
     between two galaxies.  See the 'Notes' section for details of this calculation.
 
@@ -44,8 +44,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
         orientations and ellipticities.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the
         Examples section below, for instructions on how to transform
-        your coordinate position arrays into the
-        format accepted by the ``sample1`` and ``sample2`` arguments.
+        your coordinate position arrays into the format accepted by the ``sample1`` and ``sample2`` arguments.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     orientations1 : array_like
@@ -132,12 +131,17 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     Notes
     -----
 
-    If the Landy-Szalay estimator is indicated, the projected GI-correlation function is calculated as:
+    The projected GI-correlation function is calculated as:
 
     .. math::
-        w_{g+}(r_p) = \frac{S_{+}D-S_{+}R}{R_sR}
+        w_{g+}(r_p) = 2 \int_0^{\pi_{\rm max}} \xi_{g+}(r_p, \pi) \mathrm{d}\pi
 
-    where
+    If the Landy-Szalay estimator is indicated, the correlation function is estimated as:
+
+    .. math::
+        \xi_{g+}(r_p, \pi) = \frac{S_{+}D-S_{+}R}{R_sR}
+
+     where
 
     .. math::
         S_{+}D = \sum_{i \neq j} w_jw_i e_{+}(j|i)
@@ -211,7 +215,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
-    if no_randoms: #set random density the the same as the sampels
+    if no_randoms:  # set random density the the same as the sampels
         NR1 = N1
         NR2 = N2
     else:
@@ -221,8 +225,8 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     #define merk vectors to use in pair counting
     # sample 1
     marks1 = np.ones((N1, 3))
-    marks1[:, 0] = orientations1[:,0]
-    marks1[:, 1] = orientations1[:,1]
+    marks1[:, 0] = orientations1[:, 0]
+    marks1[:, 1] = orientations1[:, 1]
     marks1[:, 2] = ellipticities1 * weights1
     # sample 2
     marks2 = np.ones((N2, 3))
@@ -251,14 +255,13 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
                                 rp_bins, pi_bins, period, num_threads,
                                 approx_cell1_size, approx_cell2_size)
     else:
-        do_SD = None
+        SD = None
 
     # count marked random pairs
     if do_SR:
         if no_randoms:
             SR = 0.0
         else:
-            ran_weights = weights2
             SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
                                     rp_bins, pi_bins, period, num_threads,
                                     approx_cell1_size, approx_cell2_size)
@@ -282,6 +285,7 @@ def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Natural'):
     r"""
     apply the supplied GI estimator to calculate the correlation function.
     """
+
     if estimator == 'Natural':
         factor = (NR1*NR2)/(N1*N2)
         return factor*(SD/RR)
@@ -323,7 +327,7 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, p
 
     weight_func_id = 1
     SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
-        weights1=weights1, weights2=weights1, weight_func_id=weight_func_id,
+        weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)[1]
     SD = np.diff(np.diff(SD, axis=0), axis=1)
@@ -339,7 +343,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
     Count random pairs.
     """
 
-    if no_randoms==False:
+    if no_randoms is False:
         RR = marked_npairs_xy_z(randoms1, randoms2, rp_bins, pi_bins,
                 period=period, num_threads=num_threads, weight_func_id=1,
                 weights1=ran_weights1, weights2=ran_weights2,
@@ -349,8 +353,9 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
         RR = RR.flatten()
 
         return RR
-    elif no_randoms:
-        #set 'number' or randoms, this is just to make normalization simple
+    else:
+        # set 'number' or randoms
+        # setting Nran to Ndata makes normalization simple
         NR1 = N1
         NR2 = N2
 
@@ -359,7 +364,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
         dv = np.diff(np.diff(v, axis=0), axis=1)
         global_volume = period.prod()
 
-        # calculate the random-random pairs.
+        # calculate the expected random-random pairs.
         rhor = (NR1*NR2)/global_volume
         RR = (dv*rhor)
 
