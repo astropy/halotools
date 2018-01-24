@@ -56,21 +56,21 @@ def process_projected_alignment_args(sample1, orientations1, ellipticities1, wei
         weights1 = np.atleast_1d(weights1).astype(float)
     else:
         weights1 = np.ones(len(sample1)).astype(float)
-    
+
     if weights2 is not None:
         weights2 = np.atleast_1d(weights2).astype(float)
     else:
         weights2 = np.ones(len(sample2)).astype(float)
-    
+
     if using_randoms:
         if ran_weights1 is not None:
             ran_weights1 = np.atleast_1d(ran_weights1).astype(float)
         else:
-            ran_weights1 = np.ones(len(ranodms1)).astype(float)
+            ran_weights1 = np.ones(len(randoms1)).astype(float)
         if ran_weights2 is not None:
             ran_weights2 = np.atleast_1d(ran_weights2).astype(float)
         else:
-            ran_weights2 = np.ones(len(ranodms2)).astype(float)
+            ran_weights2 = np.ones(len(randoms2)).astype(float)
 
     # process orientations
     if np.shape(orientations1) != (N1, 2):
@@ -79,7 +79,7 @@ def process_projected_alignment_args(sample1, orientations1, ellipticities1, wei
     if np.shape(orientations2) != (N2, 2):
         msg = ("`orientations2` is not the correct shape.")
         raise ValueError(msg)
-    
+
     # process ellipticities
     if np.shape(ellipticities1) != (N1,):
         msg = ("`ellipticities1` is not the correct shape.")
@@ -95,7 +95,7 @@ def process_projected_alignment_args(sample1, orientations1, ellipticities1, wei
     if np.shape(weights2) != (N2,):
         msg = ("`weights1` is not the correct shape.")
         raise ValueError(msg)
-    
+
     if using_randoms:
         if np.shape(ran_weights1) != (NR1,):
             msg = ("`ran_weights1` is not the correct shape.")

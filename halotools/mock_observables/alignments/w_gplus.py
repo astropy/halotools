@@ -131,7 +131,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
 
     Notes
     -----
-    
+
     If the Landy-Szalay estimator is indicated, the projected GI-correlation function is calculated as:
 
     .. math::
@@ -148,15 +148,15 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     .. math::
         e_{+}(j|i) = e_j\cos(2\phi)
 
-    where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the 
-    orientation vector, :math:`\vec{o}_j`, and the projected direction between the :math:`j`-th 
+    where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the
+    orientation vector, :math:`\vec{o}_j`, and the projected direction between the :math:`j`-th
     and :math:`i`-th galaxy, :math:`\vec{r}_{p i,j}`.
 
     .. math::
         \cos(\phi) = \vec{o}_j \cdot \vec{r}_{p i,j}
 
     :math:`S_{+}R` is analgous to :math:`S_{+}D` but instead is computed
-    with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts, 
+    with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts,
     where :math:`R_s` corresponds to the shapes sample, i.e. the sample with orienttions
     and ellipticies, ``sample1``, and R correspoinds to ``sample2``.
 
@@ -194,7 +194,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     >>> w = w_gplus(sample1, random_orientations, random_ellipticities, sample1, rp_bins, pi_max, period=Lbox)
 
     """
-    
+
     # process arguments
     alignment_args = (sample1, orientations1, ellipticities1, weights1,
                       sample2, None, None, weights2,
@@ -250,6 +250,8 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
         SD = marked_pair_counts(sample1, sample2,  marks1,  marks2,
                                 rp_bins, pi_bins, period, num_threads,
                                 approx_cell1_size, approx_cell2_size)
+    else:
+        do_SD = None
 
     # count marked random pairs
     if do_SR:
@@ -260,15 +262,19 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
             SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
                                     rp_bins, pi_bins, period, num_threads,
                                     approx_cell1_size, approx_cell2_size)
+    else:
+        SR = None
 
     # count random pairs
     if do_RR:
         RR = random_counts(randoms1, randoms2, ran_weights1, ran_weights2,
                            rp_bins, pi_bins, N1, N2, no_randoms, period, PBCs,
                            num_threads, approx_cell1_size, approx_cell2_size)
+    else:
+        RR = None
 
     result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
-    
+
     return result
 
 
@@ -282,7 +288,7 @@ def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Natural'):
     elif estimator == 'Landy-Szalay':
         factor = (NR1*NR2)/(N1*N2)
         return factor*(SD-SR)/RR
-    else: 
+    else:
         msg = ('The estimator provided is not supported.')
         raise ValueError(msg)
 
@@ -304,7 +310,7 @@ def GI_estimator_requirements(estimator):
         do_SR = True
         do_RR = True
         return do_SD, do_SR, do_RR
-    else: 
+    else:
         msg = ('The estimator provided is not supported.')
         raise ValueError(msg)
 
@@ -335,13 +341,13 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
 
     if no_randoms==False:
         RR = marked_npairs_xy_z(randoms1, randoms2, rp_bins, pi_bins,
-                period=period, num_threads=num_threads,
-                weights1=ran_weights1, weights2=ran_weights2, 
+                period=period, num_threads=num_threads, weight_func_id=1,
+                weights1=ran_weights1, weights2=ran_weights2,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
         RR = np.diff(np.diff(RR, axis=0), axis=1)
         RR = RR.flatten()
-        
+
         return RR
     elif no_randoms:
         #set 'number' or randoms, this is just to make normalization simple
@@ -357,7 +363,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
         rhor = (NR1*NR2)/global_volume
         RR = (dv*rhor)
 
-        return RR
+        return RR.flatten()
 
 
 def cylinder_volume(R, h):
