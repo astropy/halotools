@@ -12,6 +12,8 @@ from .rectangular_mesh import RectangularDoubleMesh
 
 from .marked_cpairs import positional_marked_npairs_xy_z_engine
 
+from ...custom_exceptions import HalotoolsError
+
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
@@ -248,7 +250,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "per point. The shape of your input `weights2` is (%i, %i)\n")
             raise HalotoolsError(msg %
                 (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
-    
+
     #dont normalize the weights for now.
     #normed_weights1 = weights1/np.sqrt(np.sum(weights1**2, axis=1)).reshape((npts_weights1, -1))
     #normed_weights2 = weights2/np.sqrt(np.sum(weights2**2, axis=1)).reshape((npts_weights2, -1))
@@ -269,6 +271,10 @@ def _func_signature_int_from_wfunc(weight_func_id):
     if weight_func_id == 1:
         return 3
     if weight_func_id == 2:
+        return 3
+    if weight_func_id == 3:
+        return 3
+    if weight_func_id == 4:
         return 3
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")

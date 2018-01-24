@@ -121,7 +121,7 @@ def positional_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq, weight
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, x2tmp, y2tmp, z2tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, x2tmp, y2tmp, z2tmp
     cdef int Ni, Nj, i, j, k, l, g
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -242,6 +242,10 @@ cdef f_type return_weighting_function(weight_func_id):
         return gamma_plus_func
     elif weight_func_id==2:
         return gamma_cross_func
+    elif weight_func_id==3:
+        return double_gamma_cross_func
+    elif weight_func_id==4:
+        return double_gamma_cross_func
     else:
         raise ValueError('marking function does not exist')
 

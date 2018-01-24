@@ -275,7 +275,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
 
     result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
 
-    return result
+    return result*2.0*pi_max  # factor of 2pi_max accounts for integration
 
 
 def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Natural'):
