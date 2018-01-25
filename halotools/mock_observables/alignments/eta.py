@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from math import pi
 
-#from .alignment_helpers import process_3d_alignment_args
+from .alignment_helpers import process_3d_alignment_args
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
@@ -125,7 +125,7 @@ def eta(sample1, orientations1, sample2, orientations2, rbins, weights1=None, we
 
     We then create a set of random orientation vectors for each point
 
-    >>> random_orientations = np.random.random((Npts,2))
+    >>> random_orientations = np.random.random((Npts,3))
 
     We can the calculate the auto-EE correlation between these points:
 
@@ -134,7 +134,55 @@ def eta(sample1, orientations1, sample2, orientations2, rbins, weights1=None, we
 
     """
 
-    pass
+    # process arguments
+    alignment_args = (sample1, orientations1, None, weights1,
+                      sample2, orientations2, None, weights2,
+                      None, None, None, None)
+    dum = 0.0  # dummy variable to store arguments not needed for this function
+    sample1, orientations1, dum, weights1,\
+    sample2, orientations2, dum, weights2,\
+    dum, dum, dum, dum = process_3d_alignment_args(*alignment_args)
+
+    function_args = (sample1, rbins, sample2, period, num_threads)
+    sample1, rbins, sample2, period, num_threads, PBCs = _eta_process_args(*function_args)
+
+    # How many points are there (for normalization purposes)?
+    N1 = len(sample1)
+    N2 = len(sample2)
+
+    marks1 = orientations1
+    marks2 = orientations2
+    marked_counts = marked_npairs_3d(sample1, sample2, rbins,
+                          period=period, weights1=marks1, weights2=marks2,
+                          weight_func_id=13, verbose=False, num_threads=num_threads,
+                          approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell1_size)
+
+    marks1 = weights1
+    marks2 = weights2
+    counts = marked_npairs_3d(sample1, sample2, rbins,
+                          period=period, weights1=marks1, weights2=marks2,
+                          weight_func_id=1, verbose=False, num_threads=num_threads,
+                          approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell1_size)
+
+    return marked_counts/counts - 1.0/3.0
 
 
+def _eta_process_args(sample1, rbins, sample2, period, num_threads):
+    r"""
+    Private method to do bounds-checking on the arguments passed to
+    `~halotools.mock_observables.alignments.eta`.
+    """
+
+    sample1 = enforce_sample_has_correct_shape(sample1)
+
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.amax(rbins)
+
+    period, PBCs = get_period(period)
+
+    _enforce_maximum_search_length([rmax, rmax, rmax], period)
+
+    num_threads = get_num_threads(num_threads)
+
+    return sample1, rbins, sample2, period, num_threads, PBCs
 
