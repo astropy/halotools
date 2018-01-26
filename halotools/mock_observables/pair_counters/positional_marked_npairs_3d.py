@@ -169,12 +169,12 @@ def positional_marked_npairs_3d(sample1, sample2, rbins,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = np.array(pool.map(engine, cell1_tuples))
-        marked_counts, counts = result[:, 0, :], result[:, 1, :]
+        counts, marked_counts = result[:, 0, :], result[:, 1, :]
         marked_counts = np.sum(np.array(marked_counts), axis=0)
         counts = np.sum(np.array(counts), axis=0)
         pool.close()
     else:
-        marked_counts, counts = engine(cell1_tuples[0])
+        counts, marked_counts = engine(cell1_tuples[0])
 
     return np.array(marked_counts), np.array(counts)
 
@@ -276,7 +276,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
     #normed_weights2 = weights2/np.sqrt(np.sum(weights2**2, axis=1)).reshape((npts_weights2, -1))
     #return normed_weights1, normed_weights2
 
-    return  weights1, weights2
+    return weights1, weights2
 
 
 def _func_signature_int_from_wfunc(weight_func_id):
