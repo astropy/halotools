@@ -70,5 +70,23 @@ cdef cnp.float64_t gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
     else:
         return 0.0
 
+cdef cnp.float64_t squareddot_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    calculate the squared dot product between a normalized vaector and the direction between points
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta
+
+    if rsq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)
+        return costheta*costheta
+    else:
+        return 0.0
+
 
 
