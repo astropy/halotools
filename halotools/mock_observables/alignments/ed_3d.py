@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.omega` function used to
-calculate the ellipticity-ellipticity correlation functon
+Module containing the `~halotools.mock_observables.alignments.ed_3d` function used to
+calculate the ellipticity-direction (ED) correlation functon
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -14,14 +14,14 @@ from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import positional_marked_npairs_3d, npairs_3d
 
-__all__ = ['eta']
+__all__ = ['ed_3d']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def omega(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
+def ed_3d(sample1, orientations1, sample2, rbins,
         period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the 3-D ellipticity-direction correlation function (ED), :math:`\omega(r)`.
@@ -83,12 +83,14 @@ def omega(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
 
     Notes
     -----
-    The ellipticity-ellipticity correlation function is defined as:
+    The ellipticity-direction correlation function is defined as:
 
     .. math::
-        \eta = \sum_{i \neq j}\frac{|\hat{e}_i \cdot \hat{e}_j|^2} - \frac{1}{3}
+        \omega = \sum_{i \neq j}\frac{|\hat{e}_i \cdot \hat{r}_{ij}|^2} - \frac{1}{3}
 
-    where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy.
+    where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy, and
+    :math:`\hat{r}_{ij}` is the normalized vector in the direction of the :math:`j`-th galaxy
+    from the :math:`i`-th galaxy
 
     Example
     --------
@@ -119,7 +121,7 @@ def omega(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
     We can the calculate the auto-EE correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
-    >>> result = omega(sample1, random_orientations, sample1, rbins, period=Lbox)
+    >>> result = ed_3d(sample1, random_orientations, sample1, rbins, period=Lbox)
 
     """
 
@@ -133,32 +135,34 @@ def omega(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
     dum, dum, dum, dum = process_3d_alignment_args(*alignment_args)
 
     function_args = (sample1, rbins, sample2, period, num_threads)
-    sample1, rbins, sample2, period, num_threads, PBCs = _eta_process_args(*function_args)
+    sample1, rbins, sample2, period, num_threads, PBCs = _ed_3d_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
 
     marks1 = orientations1
-    marks2 = np.zeros((N2,3))
-    marked_counts = positional_marked_npairs_3d(sample1, sample2, rbins,
-                                                period=period, weights1=marks1, weights2=marks2,
-                                                weight_func_id=4, verbose=False, num_threads=num_threads,
-                                                approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell1_size)
+    marks2 = np.zeros((N2, 3))
+    marked_counts, counts = positional_marked_npairs_3d(sample1, sample2, rbins,
+                                period=period, weights1=marks1, weights2=marks2,
+                                weight_func_id=4, verbose=False, num_threads=num_threads,
+                                approx_cell1_size=approx_cell1_size,
+                                approx_cell2_size=approx_cell1_size)
     marked_counts = np.diff(marked_counts)
 
-    counts = npairs_3d(sample1, sample2, rbins, period=period,
-                       verbose=False, num_threads=num_threads,
-                       approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell1_size)
+    counts = npairs_3d(sample1, sample2, rbins,
+                       period=period, verbose=False, num_threads=num_threads,
+                       approx_cell1_size=approx_cell1_size,
+                       approx_cell2_size=approx_cell1_size)
     counts = np.diff(counts)
 
     return marked_counts/counts - 1.0/3.0
 
 
-def _eta_process_args(sample1, rbins, sample2, period, num_threads):
+def _ed_3d_process_args(sample1, rbins, sample2, period, num_threads):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.alignments.eta`.
+    `~halotools.mock_observables.alignments.ed_3d`.
     """
 
     sample1 = enforce_sample_has_correct_shape(sample1)

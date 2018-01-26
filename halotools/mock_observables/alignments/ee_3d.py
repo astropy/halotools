@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.eta` function used to
-calculate the ellipticity-ellipticity correlation functon
+Module containing the `~halotools.mock_observables.alignments.ee_3d` function used to
+calculate the ellipticity-ellipticity (EE) correlation functon
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -14,14 +14,14 @@ from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import marked_npairs_3d, npairs_3d
 
-__all__ = ['eta']
+__all__ = ['ee_3d']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def eta(sample1, orientations1, sample2, orientations2, rbins, weights1=None, weights2=None,
+def ee_3d(sample1, orientations1, sample2, orientations2, rbins, weights1=None, weights2=None,
         period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the 3-D ellipticity-ellipticity correlation function (EE), :math:`\eta(r)`.
@@ -123,7 +123,7 @@ def eta(sample1, orientations1, sample2, orientations2, rbins, weights1=None, we
     We can the calculate the auto-EE correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
-    >>> result = eta(sample1, random_orientations, sample1, random_orientations, rbins, period=Lbox)
+    >>> result = ee_3d(sample1, random_orientations, sample1, random_orientations, rbins, period=Lbox)
 
     """
 
@@ -137,7 +137,7 @@ def eta(sample1, orientations1, sample2, orientations2, rbins, weights1=None, we
     dum, dum, dum, dum = process_3d_alignment_args(*alignment_args)
 
     function_args = (sample1, rbins, sample2, period, num_threads)
-    sample1, rbins, sample2, period, num_threads, PBCs = _eta_process_args(*function_args)
+    sample1, rbins, sample2, period, num_threads, PBCs = _ee_3d_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -159,10 +159,10 @@ def eta(sample1, orientations1, sample2, orientations2, rbins, weights1=None, we
     return marked_counts/counts - 1.0/3.0
 
 
-def _eta_process_args(sample1, rbins, sample2, period, num_threads):
+def _ee_3d_process_args(sample1, rbins, sample2, period, num_threads):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.alignments.eta`.
+    `~halotools.mock_observables.alignments.ee_3d`.
     """
 
     sample1 = enforce_sample_has_correct_shape(sample1)

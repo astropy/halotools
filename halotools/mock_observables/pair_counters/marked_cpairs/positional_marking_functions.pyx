@@ -11,6 +11,7 @@ from libc.math cimport sqrt as c_sqrt
 from libc.math cimport cos as c_cos
 from libc.math cimport acos as c_acos
 from libc.math cimport sin as c_sin
+from libc.math cimport fmin as c_min
 
 __author__ = ["Duncan Campbell"]
 
@@ -74,7 +75,7 @@ cdef cnp.float64_t squareddot_func(cnp.float64_t* w1, cnp.float64_t* w2,
             cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
             cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
     """
-    calculate the squared dot product between a normalized vaector and the direction between points
+    calculate the squared dot product between a normalized vaector and the normalized direction between points
     """
     cdef cnp.float64_t x, y, z
     cdef cnp.float64_t costheta
@@ -83,7 +84,7 @@ cdef cnp.float64_t squareddot_func(cnp.float64_t* w1, cnp.float64_t* w2,
         x = (x2-x1)
         y = (y2-y1)
         z = (z2-z1)
-        costheta = (w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq)
+        costheta = c_min((w1[0]*x + w1[1]*y + w1[2]*z)/c_sqrt(rsq), 1.0)
         return costheta*costheta
     else:
         return 0.0

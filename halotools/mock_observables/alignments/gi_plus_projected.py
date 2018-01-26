@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.w_gplus` function used to
-calculate the projected gravitational shear-intrinsic ellipticity correlation
+Module containing the `~halotools.mock_observables.alignments.gi_plus_projected` function used to
+calculate the projected gravitational shear-intrinsic ellipticity (GI) correlation
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -14,14 +14,14 @@ from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
 
-__all__ = ['w_gplus']
+__all__ = ['gi_plus_projected']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
+def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
             randoms1=None, randoms2=None, weights1=None, weights2=None,
             ran_weights1=None, ran_weights2=None, estimator='Landy-Szalay',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
@@ -34,7 +34,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     dimension is used for parallel distances, i.e. x,y positions are on the plane of the
     sky, and z is the redshift coordinate. This is the 'distant observer' approximation.
 
-    Note in particular that the `~halotools.mock_observables.w_gplus` function does not
+    Note in particular that the `~halotools.mock_observables.alignments.gi_plus_projected` function does not
     accept angular coordinates for the input ``sample1`` or ``sample2``.
 
     Parameters
@@ -195,7 +195,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
 
     >>> rp_bins = np.logspace(-1,1,10)
     >>> pi_max = 0.25
-    >>> w = w_gplus(sample1, random_orientations, random_ellipticities, sample1, rp_bins, pi_max, period=Lbox)
+    >>> w = gi_plus_projected(sample1, random_orientations, random_ellipticities, sample1, rp_bins, pi_max, period=Lbox)
 
     """
 
@@ -210,7 +210,7 @@ def w_gplus(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
     function_args = (sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size)
     sample1, rp_bins, pi_bins, sample2, randoms1, randoms2,\
-        period, num_threads, PBCs, no_randoms = _w_gplus_process_args(*function_args)
+        period, num_threads, PBCs, no_randoms = _gi_plus_projected_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -378,7 +378,7 @@ def cylinder_volume(R, h):
     return pi*np.outer(R**2.0, h)
 
 
-def _w_gplus_process_args(sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
+def _gi_plus_projected_process_args(sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
