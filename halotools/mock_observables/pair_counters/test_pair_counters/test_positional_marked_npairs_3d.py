@@ -8,7 +8,7 @@ from astropy.utils.misc import NumpyRNGContext
 from astropy.config.paths import _find_home
 
 from ..pairs import wnpairs as pure_python_weighted_pairs
-from ..marked_npairs_3d import positional_marked_npairs_3d, _func_signature_int_from_wfunc
+from ..positional_marked_npairs_3d import positional_marked_npairs_3d
 
 from ....custom_exceptions import HalotoolsError
 
@@ -36,13 +36,14 @@ else:
     APH_MACHINE = False
 
 
-def retrieve_mock_data(Npts, Npts2, Lbox):
+def retrieve_grid_mock_data(Npts, Lbox):
 
     # set up a regular grid of points to test pair counters
     epsilon = 0.001
-    gridx = np.linspace(0, Lbox-epsilon, Npts2)
-    gridy = np.linspace(0, Lbox-epsilon, Npts2)
-    gridz = np.linspace(0, Lbox-epsilon, Npts2)
+    Npts_per_dim = int(Npts**(1.0/3.0))
+    gridx = np.linspace(0, Lbox-epsilon, Npts_per_dim)
+    gridy = np.linspace(0, Lbox-epsilon, Npts_per_dim)
+    gridz = np.linspace(0, Lbox-epsilon, Npts_per_dim)
     xx, yy, zz = np.array(np.meshgrid(gridx, gridy, gridz))
     xx = xx.flatten()
     yy = yy.flatten()
@@ -55,20 +56,28 @@ def retrieve_mock_data(Npts, Npts2, Lbox):
     return grid_points, rbins, period
 
 
-def test_marked_npairs_3d_periodic():
+def retrieve_random_mock_data(Npts, Lbox):
+
+    random_points = np.random.random((Npts, 3))*Lbox
+    period = np.array([Lbox, Lbox, Lbox])
+
+    return random_points, period
+
+
+def test_positional_marked_npairs_3d_periodic():
     """
     Function tests marked_npairs with periodic boundary conditions.
     """
     Npts = 1000
     with NumpyRNGContext(fixed_seed):
-        random_sample = np.random.random((Npts, 3))
-        ran_weights1 = np.random.random((Npts, 1))
+        random_sample = retrieve_random_mock_data(Npts, 1.0)
+        ran_orientations = np.random.random((Npts, 3))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.array([0.0, 0.1, 0.2, 0.3])
 
-    result = marked_npairs_3d(random_sample, random_sample,
-        rbins, period=period, weights1=ran_weights1, weights2=ran_weights1, weight_func_id=1)
+    result = positional_marked_npairs_3d(random_sample, random_sample, rbins,
+        period=period, weights1=ran_orientations, weights2=ran_orientations, weight_func_id=1)
 
     test_result = pure_python_weighted_pairs(random_sample, random_sample, rbins,
         period=period, weights1=ran_weights1, weights2=ran_weights1)
