@@ -9,7 +9,7 @@ import warnings
 import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..w_gplus import w_gplus
+from ..gi_plus_projected import gi_plus_projected
 
 from ....custom_exceptions import HalotoolsError
 
@@ -40,23 +40,23 @@ def test_w_gplus_returned_shape():
     random_ellipticities = np.random.random((len(sample1)))
 
     # analytic randoms
-    result_1 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_1 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, period=period, num_threads=1)
 
     assert np.shape(result_1) == (len(rp_bins)-1, )
 
-    result_2 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_2 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, period=period, num_threads=3)
 
     assert np.shape(result_2) == (len(rp_bins)-1, )
 
     # real randoms
-    result_1 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_1 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, randoms1=randoms, randoms2=randoms, period=period, num_threads=1)
 
     assert np.shape(result_1) == (len(rp_bins)-1, )
 
-    result_2 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_2 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, randoms1=randoms, randoms2=randoms, period=period, num_threads=3)
 
     assert np.shape(result_2) == (len(rp_bins)-1, )
@@ -82,19 +82,19 @@ def test_w_gplus_threading():
     random_ellipticities = np.random.random((len(sample1)))
 
     # analytic randoms
-    result_1 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_1 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, period=period, num_threads=1)
 
-    result_2 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_2 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, period=period, num_threads=3)
 
     assert np.allclose(result_1, result_2)
 
     # real randoms
-    result_1 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_1 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, randoms1=randoms, randoms2=randoms, period=period, num_threads=1)
 
-    result_2 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_2 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, randoms1=randoms, randoms2=randoms, period=period, num_threads=3)
 
     assert np.allclose(result_1, result_2)
@@ -120,20 +120,20 @@ def test_w_gplus_estimators():
     random_ellipticities = np.random.random((len(sample1)))
 
     # analytic randoms
-    result_1 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_1 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, period=period, num_threads=1, estimator='Natural')
 
-    result_2 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_2 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, period=period, num_threads=1, estimator='Landy-Szalay')
 
     assert np.allclose(result_1, result_2)
 
     # real randoms
     # wont be exactly the same with randoms
-    result_1 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_1 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, randoms1=randoms, randoms2=randoms, period=period, num_threads=1, estimator='Natural')
 
-    result_2 = w_gplus(sample1, random_orientation, random_ellipticities, sample1,
+    result_2 = gi_plus_projected(sample1, random_orientation, random_ellipticities, sample1,
         rp_bins, pi_max, randoms1=randoms, randoms2=randoms, period=period, num_threads=1, estimator='Landy-Szalay')
 
     assert np.shape(result_1) == (len(rp_bins)-1, )
