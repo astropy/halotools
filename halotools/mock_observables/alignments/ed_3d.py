@@ -12,7 +12,7 @@ from .alignment_helpers import process_3d_alignment_args
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ..pair_counters import positional_marked_npairs_3d, npairs_3d
+from ..pair_counters import positional_marked_npairs_3d, npairs_3d, marked_npairs_3d
 
 __all__ = ['ed_3d']
 __author__ = ['Duncan Campbell']
@@ -21,7 +21,7 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def ed_3d(sample1, orientations1, sample2, rbins,
+def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
         period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the 3-D ellipticity-direction correlation function (ED), :math:`\omega(r)`.
@@ -45,6 +45,12 @@ def ed_3d(sample1, orientations1, sample2, rbins,
     rbins : array_like
         array of boundaries defining the radial bins in which pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+    
+    weights1 : array_like, optional
+        Npts1 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts1).
+
+    weights2 : array_like, optional
+        Npts2 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts2).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -118,7 +124,7 @@ def ed_3d(sample1, orientations1, sample2, rbins,
 
     >>> random_orientations = np.random.random((Npts,3))
 
-    We can the calculate the auto-EE correlation between these points:
+    We can the calculate the auto-ED correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
     >>> result = ed_3d(sample1, random_orientations, sample1, rbins, period=Lbox)
@@ -126,12 +132,12 @@ def ed_3d(sample1, orientations1, sample2, rbins,
     """
 
     # process arguments
-    alignment_args = (sample1, orientations1, None, None,
-                      sample2, None, None, None,
+    alignment_args = (sample1, orientations1, None, weights1,
+                      sample2, None, None, weights2,
                       None, None, None, None)
     dum = 0.0  # dummy variable to store arguments not needed for this function
-    sample1, orientations1, dum, dum,\
-    sample2, dum, dum, dum,\
+    sample1, orientations1, dum, weights1,\
+    sample2, dum, dum, weights2,\
     dum, dum, dum, dum = process_3d_alignment_args(*alignment_args)
 
     function_args = (sample1, rbins, sample2, period, num_threads)
@@ -141,19 +147,31 @@ def ed_3d(sample1, orientations1, sample2, rbins,
     N1 = len(sample1)
     N2 = len(sample2)
 
-    marks1 = orientations1
-    marks2 = np.zeros((N2, 3))
+    marks1 = np.zeros((N1, 4))
+    marks1[:,0] = weights1
+    marks1[:,1] = orientations1[:,0]
+    marks1[:,2] = orientations1[:,1]
+    marks1[:,3] = orientations1[:,2]
+    marks2 = weights2
     marked_counts, counts = positional_marked_npairs_3d(sample1, sample2, rbins,
                                 period=period, weights1=marks1, weights2=marks2,
                                 weight_func_id=4, verbose=False, num_threads=num_threads,
                                 approx_cell1_size=approx_cell1_size,
-                                approx_cell2_size=approx_cell1_size)
+                                approx_cell2_size=approx_cell2_size)
     marked_counts = np.diff(marked_counts)
-
-    counts = npairs_3d(sample1, sample2, rbins,
+    
+    # if no weights, use fast un-weihgted pair counter
+    if np.all(weights1==1.0) & np.all(weights2==1.0):
+        counts = npairs_3d(sample1, sample2, rbins,
                        period=period, verbose=False, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
-                       approx_cell2_size=approx_cell1_size)
+                       approx_cell2_size=approx_cell2_size)
+    else:
+        counts = marked_npairs_3d(sample1, sample2, rbins,
+                       weights1=weights1, weights2=weights2, weight_func_id=1,
+                       period=period, verbose=False, num_threads=num_threads,
+                       approx_cell1_size=approx_cell1_size,
+                       approx_cell2_size=approx_cell2_size)
     counts = np.diff(counts)
 
     return marked_counts/counts - 1.0/3.0
@@ -166,6 +184,10 @@ def _ed_3d_process_args(sample1, rbins, sample2, period, num_threads):
     """
 
     sample1 = enforce_sample_has_correct_shape(sample1)
+    sample2 = enforce_sample_has_correct_shape(sample2)
+    
+    N1 = len(sample1)
+    N2 = len(sample2)
 
     rbins = get_separation_bins_array(rbins)
     rmax = np.amax(rbins)

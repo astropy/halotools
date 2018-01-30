@@ -12,7 +12,7 @@ from .alignment_helpers import process_3d_alignment_args
 from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ..pair_counters import marked_npairs_3d, npairs_3d
+from ..pair_counters import marked_npairs_3d, npairs_3d, marked_npairs_3d
 
 __all__ = ['ee_3d']
 __author__ = ['Duncan Campbell']
@@ -49,6 +49,12 @@ def ee_3d(sample1, orientations1, sample2, orientations2, rbins, weights1=None, 
     rbins : array_like
         array of boundaries defining the radial bins in which pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+    
+     weights1 : array_like, optional
+        Npts1 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts1).
+
+    weights2 : array_like, optional
+        Npts2 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts2).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -128,12 +134,12 @@ def ee_3d(sample1, orientations1, sample2, orientations2, rbins, weights1=None, 
     """
 
     # process arguments
-    alignment_args = (sample1, orientations1, None, None,
-                      sample2, orientations2, None, None,
+    alignment_args = (sample1, orientations1, None, weights1,
+                      sample2, orientations2, None, weights2,
                       None, None, None, None)
     dum = 0.0  # dummy variable to store arguments not needed for this function
-    sample1, orientations1, dum, dum,\
-    sample2, orientations2, dum, dum,\
+    sample1, orientations1, dum, weights1,\
+    sample2, orientations2, dum, weights2,\
     dum, dum, dum, dum = process_3d_alignment_args(*alignment_args)
 
     function_args = (sample1, rbins, sample2, period, num_threads)
@@ -143,17 +149,34 @@ def ee_3d(sample1, orientations1, sample2, orientations2, rbins, weights1=None, 
     N1 = len(sample1)
     N2 = len(sample2)
 
-    marks1 = orientations1
-    marks2 = orientations2
+    marks1 = np.zeros((N1, 4))
+    marks1[:,0] = weights1
+    marks1[:,1] = orientations1[:,0]
+    marks1[:,2] = orientations1[:,1]
+    marks1[:,3] = orientations1[:,2]
+    marks2 = np.zeros((N2, 4))
+    marks2[:,0] = weights2
+    marks2[:,1] = orientations2[:,0]
+    marks2[:,2] = orientations2[:,1]
+    marks2[:,3] = orientations2[:,2]
     marked_counts = marked_npairs_3d(sample1, sample2, rbins,
                                      period=period, weights1=marks1, weights2=marks2,
                                      weight_func_id=13, verbose=False, num_threads=num_threads,
-                                     approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell1_size)
+                                     approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell2_size)
     marked_counts = np.diff(marked_counts)
 
-    counts = npairs_3d(sample1, sample2, rbins, period=period,
-                       verbose=False, num_threads=num_threads,
-                       approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell1_size)
+    # if no weights, use fast un-weihgted pair counter
+    if np.all(weights1==1.0) & np.all(weights2==1.0):
+        counts = npairs_3d(sample1, sample2, rbins,
+                       period=period, verbose=False, num_threads=num_threads,
+                       approx_cell1_size=approx_cell1_size,
+                       approx_cell2_size=approx_cell2_size)
+    else:
+        counts = marked_npairs_3d(sample1, sample2, rbins,
+                       weights1=weights1, weights2=weights2, weight_func_id=1,
+                       period=period, verbose=False, num_threads=num_threads,
+                       approx_cell1_size=approx_cell1_size,
+                       approx_cell2_size=approx_cell2_size)
     counts = np.diff(counts)
 
     return marked_counts/counts - 1.0/3.0
