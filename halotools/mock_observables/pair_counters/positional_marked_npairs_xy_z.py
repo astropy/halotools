@@ -104,9 +104,11 @@ def positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
 
     Returns
     -------
-    wN_pairs : numpy.ndarray
-        2-D array of shape *(Nrp_bins,Npi_bins)* containing the weighted number
-        counts of pairs
+    wN_pairs : numpy.array
+        Numpy array of shape (Nrp_bins, Nrpi_bins) containing the weighted number counts of pairs
+
+    N_pairs : numpy.array
+        Numpy array of shape (Nrp_bins, Nrpi_bins) containing the number counts of pairs
     """
 
     # Process the inputs with the helper function
@@ -156,24 +158,24 @@ def positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
     else:
         counts, marked_counts = engine(cell1_tuples[0])
 
-    return np.array(counts), np.array(marked_counts)
+    return np.array(marked_counts), np.array(counts)
 
 
 def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
     """
     """
 
-    correct_num_weights = _func_signature_int_from_wfunc(weight_func_id)
+    correct_num_weights1, correct_num_weights2 = _func_signature_int_from_wfunc(weight_func_id)
     npts_sample1 = np.shape(sample1)[0]
     npts_sample2 = np.shape(sample2)[0]
-    correct_shape1 = (npts_sample1, correct_num_weights)
-    correct_shape2 = (npts_sample2, correct_num_weights)
+    correct_shape1 = (npts_sample1, correct_num_weights1)
+    correct_shape2 = (npts_sample2, correct_num_weights2)
 
     # Process the input weights1
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
     if weights1 is None:
-        weights1 = np.ones((npts_sample1, 1), dtype=np.float64)
+        weights1 = np.ones(correct_shape1, dtype=np.float64)
     else:
         weights1 = np.atleast_1d(weights1)
         weights1 = weights1.astype("float64")
@@ -208,13 +210,13 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights1` is (%i, %i)\n")
             raise HalotoolsError(msg %
-                (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
+                (npts_sample1, weight_func_id, correct_num_weights1, npts_weights1, num_weights1))
 
     # Process the input weights2
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
     if weights2 is None:
-        weights2 = np.ones((npts_sample2, 1), dtype=np.float64)
+        weights2 = np.ones(correct_shape2, dtype=np.float64)
     else:
         weights2 = np.atleast_1d(weights2)
         weights2 = weights2.astype("float64")
@@ -249,12 +251,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights2` is (%i, %i)\n")
             raise HalotoolsError(msg %
-                (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
-
-    #dont normalize the weights for now.
-    #normed_weights1 = weights1/np.sqrt(np.sum(weights1**2, axis=1)).reshape((npts_weights1, -1))
-    #normed_weights2 = weights2/np.sqrt(np.sum(weights2**2, axis=1)).reshape((npts_weights2, -1))
-    #return normed_weights1, normed_weights2
+                (npts_sample2, weight_func_id, correct_num_weights2, npts_weights2, num_weights2))
 
     return  weights1, weights2
 
@@ -269,13 +266,13 @@ def _func_signature_int_from_wfunc(weight_func_id):
         raise ValueError(msg)
 
     if weight_func_id == 1:
-        return 3
+        return (3, 1)
     if weight_func_id == 2:
-        return 3
+        return (3, 1)
     if weight_func_id == 3:
-        return 3
+        return (3, 1)
     if weight_func_id == 4:
-        return 3
+        return (3, 1)
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")
         raise HalotoolsError(msg % weight_func_id)

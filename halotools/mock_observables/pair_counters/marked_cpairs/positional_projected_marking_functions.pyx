@@ -12,15 +12,36 @@ from libc.math cimport cos as c_cos
 from libc.math cimport acos as c_acos
 from libc.math cimport sin as c_sin
 from libc.math cimport fmin as c_min
+from libc.math cimport fmax as c_max
 
 
 __author__ = ["Duncan Campbell"]
+
+cdef cnp.float64_t pos_shape_dot_product_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
+    """
+    return the vector dot product of w1 along s, the vector connectinng point 1 and point 2
+    it is assumed that w1 has been normalized.
+    """
+    cdef cnp.float64_t x, y
+    cdef cnp.float64_t costheta
+
+    if dxy_sq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        costheta = (w1[1]*x + w1[2]*y)/c_sqrt(dxy_sq)
+        return w1[0]*w2[0]*costheta
+    else:
+        return 0.0
 
 
 cdef cnp.float64_t gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
             cnp.float64_t x1, cnp.float64_t y1,
             cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
     """
+    return cos(2phi), where phi is the angle between w1 and s, the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
     """
     cdef cnp.float64_t x, y
     cdef cnp.float64_t costheta, gamma
@@ -28,21 +49,20 @@ cdef cnp.float64_t gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
     if dxy_sq>0:
         x = (x2-x1)
         y = (y2-y1)
-        costheta = (w1[0]*x + w1[1]*y)/c_sqrt(dxy_sq)
-        if costheta >= 1.0:
-            return 0
-        elif costheta <= -1.0:
-            return w1[2]*w2[2]
-        else:
-            gamma = c_cos(2.0*c_acos(costheta))
-            return w1[2]*w2[2]*gamma
+        costheta = (w1[1]*x + w1[2]*y)/c_sqrt(dxy_sq)
+        # gamma = c_cos(2.0*c_acos(costheta))
+        gamma = 2.0*costheta*costheta - 1.0
+        return w1[0]*w2[0]*gamma
     else:
         return 0.0
+
 
 cdef cnp.float64_t gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
             cnp.float64_t x1, cnp.float64_t y1,
             cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
     """
+    return sin(2phi), where phi is the angle between w1 and s, the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
     """
     cdef cnp.float64_t x, y
     cdef cnp.float64_t costheta, gamma
@@ -50,54 +70,30 @@ cdef cnp.float64_t gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
     if dxy_sq>0:
         x = (x2-x1)
         y = (y2-y1)
-        costheta = (w1[0]*x + w1[1]*y)/c_sqrt(dxy_sq)
+        costheta = c_min((w1[1]*x + w1[2]*y)/c_sqrt(dxy_sq), 1.0)
+        costheta = c_max(costheta, -1.0)
         gamma = c_sin(2.0*c_acos(costheta))
-        return w1[2]*w2[2]*gamma
+        return w1[0]*w2[0]*gamma
     else:
         return 0.0
 
-cdef cnp.float64_t double_gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
+
+cdef cnp.float64_t squareddot_func(cnp.float64_t* w1, cnp.float64_t* w2,
             cnp.float64_t x1, cnp.float64_t y1,
             cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
     """
+    return cos^2(phi), where phi is the angle between w1 and s, the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
     """
     cdef cnp.float64_t x, y
-    cdef cnp.float64_t costheta1, costheta2, gamma1, gamma2
+    cdef cnp.float64_t costheta
 
     if dxy_sq>0:
         x = (x2-x1)
         y = (y2-y1)
-        costheta1 = c_min((w1[0]*x + w1[1]*y)/c_sqrt(dxy_sq), 1.0)
-        costheta2 = c_min((w2[0]*x + w2[1]*y)/c_sqrt(dxy_sq), 1.0)
-        if costheta1 >= 1.0:
-            return 0.0
-        elif costheta2 >= 1.0:
-            return 0.0
-        else:
-            gamma1 = c_cos(2.0*c_acos(costheta1))
-            gamma2 = c_cos(2.0*c_acos(costheta2))
-            return w1[2]*w2[2]*gamma1*gamma2
+        costheta = (w1[1]*x + w1[2]*y)/c_sqrt(dxy_sq)
+        return w1[0]*w2[0]*costheta*costheta
     else:
         return 0.0
-
-cdef cnp.float64_t double_gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
-            cnp.float64_t x1, cnp.float64_t y1,
-            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
-    """
-    """
-    cdef cnp.float64_t x, y
-    cdef cnp.float64_t costheta1, costheta2, gamma1, gamma2
-
-    if dxy_sq>0:
-        x = (x2-x1)
-        y = (y2-y1)
-        costheta1 = c_min((w1[0]*x + w1[1]*y)/c_sqrt(dxy_sq), 1.0)
-        costheta2 = c_min((w2[0]*x + w2[1]*y)/c_sqrt(dxy_sq), 1.0)
-        gamma1 = c_sin(2.0*c_acos(costheta1))
-        gamma2 = c_sin(2.0*c_acos(costheta2))
-        return w1[2]*w2[2]*gamma1*gamma2
-    else:
-        return 0.0
-
 
 

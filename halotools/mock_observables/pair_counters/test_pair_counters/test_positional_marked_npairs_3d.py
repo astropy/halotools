@@ -9,6 +9,7 @@ from astropy.config.paths import _find_home
 
 from ..pairs import wnpairs as pure_python_weighted_pairs
 from ..positional_marked_npairs_3d import positional_marked_npairs_3d
+from ..npairs_3d import npairs_3d
 
 from halotools.mock_observables.tests.cf_helpers import generate_3d_regular_mesh, generate_locus_of_3d_points
 from halotools.utils import normalized_vectors, angles_between_list_of_vectors
@@ -17,12 +18,7 @@ from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
-error_msg = ("\nThe `test_positional_marked_npairs_wfuncs_behavior` function performs \n"
-    "non-trivial checks on the returned values of marked correlation functions\n"
-    "calculated on a set of points with uniform weights.\n"
-    "One such check failed.\n")
-
-__all__ = ('test_1', )
+__all__ = ('test_1', 'test_2', 'test_3', 'test_4', 'test_threading', 'test_unweighted_counts')
 
 
 def generate_interlacing_grids(npts_per_dim, period=1.0):
@@ -42,13 +38,14 @@ def generate_interlacing_grids(npts_per_dim, period=1.0):
 
     return mesh1_points, mesh2_points
 
+
 def generate_aligned_vectors(npts, dim=3):
     """
     return a set of aligned vectors, all pointing in a random direction
     """
 
-    vector = normalized_vectors(np.random.random(3))
-    vectors = np.tile(vector, npts).reshape((npts, 3))
+    vector = normalized_vectors(np.random.random(dim))
+    vectors = np.tile(vector, npts).reshape((npts, dim))
 
     return vectors
 
@@ -97,7 +94,8 @@ def test_1():
                   period=None, weights1=weights1, weights2=weights2,
                   weight_func_id=1, num_threads=1)
     
-    assert np.isclose(weighted_counts[-1], avg_costheta*counts[-1], rtol=1.0/npts)
+    msg = ("weighted counts do not match expected result given the weighting function")
+    assert np.isclose(weighted_counts[-1], avg_costheta*counts[-1], rtol=1.0/npts), msg
 
 
 def test_2():
@@ -146,7 +144,8 @@ def test_2():
                   period=None, weights1=weights1, weights2=weights2,
                   weight_func_id=2, num_threads=1)
     
-    assert np.isclose(weighted_counts[-1], avg_two_costheta*counts[-1], rtol=1.0/npts)
+    msg = ("weighted counts do not match expected result given the weighting function")
+    assert np.isclose(weighted_counts[-1], avg_two_costheta*counts[-1], rtol=1.0/npts), msg
 
 
 def test_3():
@@ -192,8 +191,8 @@ def test_3():
                   period=None, weights1=weights1, weights2=weights2,
                   weight_func_id=3, num_threads=1)
     
-    assert np.isclose(weighted_counts[-1], avg_two_sintheta*counts[-1], rtol=1.0/npts)
-
+    msg = ("weighted counts do not match expected result given the weighting function")
+    assert np.isclose(weighted_counts[-1], avg_two_sintheta*counts[-1], rtol=1.0/npts), msg
 
 
 def test_4():
@@ -240,7 +239,99 @@ def test_4():
                   period=None, weights1=weights1, weights2=weights2,
                   weight_func_id=4, num_threads=1)
     
-    assert np.isclose(weighted_counts[-1], avg_costheta_squared*counts[-1], rtol=1.0/npts)
+    msg = ("weighted counts do not match expected result given the weighting function")
+    assert np.isclose(weighted_counts[-1], avg_costheta_squared*counts[-1], rtol=1.0/npts), msg
+
+
+def test_threading():
+    """
+    test to make sure the result is the same with and without threading for each weighting function
+    """
+    
+    npts = 100
+    random_coords = np.random.random((npts,3))
+    random_vectors = np.random.random((npts,3))*2.0-1.0
+
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.0, 0.3, 5)
+
+    weights1 = np.ones((npts, 4))
+    weights1[:,1] = random_vectors[:,0]
+    weights1[:,2] = random_vectors[:,1]
+    weights1[:,3] = random_vectors[:,2]
+    weights2 =  np.ones(npts)
+
+    msg = ("counts do not match for different ``num_threads``.")
+
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=1, num_threads=1)
+    weighted_counts_2, counts_2 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=1, num_threads=3)
+
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg
+    assert np.allclose(counts_1, counts_2), msg
+
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=2, num_threads=1)
+    weighted_counts_2, counts_2 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=2, num_threads=3)
+
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg
+    assert np.allclose(counts_1, counts_2), msg
+
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=3, num_threads=1)
+    weighted_counts_2, counts_2 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=3, num_threads=3)
+
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg
+    assert np.allclose(counts_1, counts_2), msg
+
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=4, num_threads=1)
+    weighted_counts_2, counts_2 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=4, num_threads=3)
+
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg
+    assert np.allclose(counts_1, counts_2), msg
+
+
+def test_unweighted_counts():
+    """
+    test to make sure the unweighted counts result is the same as npairs_3d
+    """
+    
+    npts = 100
+    random_coords = np.random.random((npts,3))
+    random_vectors = np.random.random((npts,3))*2.0-1.0
+
+    period = np.array([1.0, 1.0, 1.0])
+    rbins = np.linspace(0.0, 0.3, 5)
+
+    weights1 = np.ones((npts, 4))
+    weights1[:,1] = random_vectors[:,0]
+    weights1[:,2] = random_vectors[:,1]
+    weights1[:,3] = random_vectors[:,2]
+    weights2 =  np.ones(npts)
+
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords, random_coords, rbins,
+                  period=period, weights1=weights1, weights2=weights2,
+                  weight_func_id=1, num_threads=1)
+    counts_2 = npairs_3d(random_coords, random_coords, rbins, period=period,num_threads=3)
+    
+    msg = ('unweighted counts do no match npairs_3d result')
+    assert np.allclose(counts_1, counts_2), msg
+
+
+
 
 
 

@@ -237,15 +237,15 @@ cdef f_type return_weighting_function(weight_func_id):
     """
     returns a pointer to the user-specified weighting function.
     """
-
+    
     if weight_func_id==1:
-        return gamma_plus_func
+        return pos_shape_dot_product_func
     elif weight_func_id==2:
-        return gamma_cross_func
+        return gamma_plus_func
     elif weight_func_id==3:
-        return double_gamma_cross_func
+        return gamma_cross_func
     elif weight_func_id==4:
-        return double_gamma_cross_func
+        return squareddot_func
     else:
         raise ValueError('marking function does not exist')
 
