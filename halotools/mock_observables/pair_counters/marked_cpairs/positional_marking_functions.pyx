@@ -102,4 +102,57 @@ cdef cnp.float64_t squareddot_func(cnp.float64_t* w1, cnp.float64_t* w2,
         return 0.0
 
 
+cdef cnp.float64_t gamma_gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    return cos(2phi_1)*cos(2phi_2), where phi_1 is the angle between w1 and s,
+    phi_2 is the angle between w2 and s, and
+    the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta, gamma1, gamma2
+
+    if rsq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = (w1[1]*x + w1[2]*y + w1[3]*z)/c_sqrt(rsq)
+        gamma1 = 2.0*costheta*costheta - 1.0
+        costheta = -1.0*(w2[1]*x + w2[2]*y + w2[3]*z)/c_sqrt(rsq)
+        gamma2 = 2.0*costheta*costheta - 1.0
+        return w1[0]*w2[0]*gamma1*gamma2
+    else:
+        return 0.0
+
+
+cdef cnp.float64_t gamma_gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    return sin(2phi_1)*sin(2phi_2), where phi_1 is the angle between w1 and s,
+    phi_2 is the angle between w2 and s, and
+    the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta, gamma1, gamma2
+
+    if rsq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = c_min((w1[1]*x + w1[2]*y + w1[3]*z)/c_sqrt(rsq), 1.0)
+        costheta = c_max(costheta, -1.0)
+        gamma1 = c_sin(2.0*c_acos(costheta))
+        costheta = c_min(-1.0*(w2[1]*x + w2[2]*y + w2[3]*z)/c_sqrt(rsq), 1.0)
+        costheta = c_max(costheta, -1.0)
+        gamma2 = c_sin(2.0*c_acos(costheta))
+        return w1[0]*w2[0]*gamma1*gamma2
+    else:
+        return 0.0
+
+
+
 

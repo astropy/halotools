@@ -334,6 +334,10 @@ def _func_signature_int_from_wfunc(weight_func_id):
         return (4, 1)
     elif weight_func_id == 4:
         return (4, 1)
+    elif weight_func_id == 5:
+        return (4, 4)
+    elif weight_func_id == 6:
+        return (4, 4)
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")
         raise HalotoolsError(msg % weight_func_id)

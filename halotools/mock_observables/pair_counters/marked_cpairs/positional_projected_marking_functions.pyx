@@ -97,3 +97,53 @@ cdef cnp.float64_t squareddot_func(cnp.float64_t* w1, cnp.float64_t* w2,
         return 0.0
 
 
+cdef cnp.float64_t gamma_gamma_plus_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
+    """
+    return cos(2phi_1)*cos(2phi_2), where phi_1 is the angle between w1 and s,
+    phi_2 is the angle between w2 and s, and
+    the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
+    """
+    cdef cnp.float64_t x, y
+    cdef cnp.float64_t costheta, gamma1, gamma2
+
+    if dxy_sq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        costheta = (w1[1]*x + w1[2]*y)/c_sqrt(dxy_sq)
+        gamma1 = 2.0*costheta*costheta - 1.0
+        costheta = -1.0*(w2[1]*x + w2[2]*y)/c_sqrt(dxy_sq)
+        gamma2 = 2.0*costheta*costheta - 1.0
+        return w1[0]*w2[0]*gamma1*gamma2
+    else:
+        return 0.0
+
+
+cdef cnp.float64_t gamma_gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t dxy_sq):
+    """
+    return sin(2phi_1)*sin(2phi_2), where phi_1 is the angle between w1 and s,
+    phi_2 is the angle between w2 and s, and 
+    the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
+    """
+    cdef cnp.float64_t x, y
+    cdef cnp.float64_t costheta, gamma1, gamma2
+
+    if dxy_sq>0:
+        x = (x2-x1)
+        y = (y2-y1)
+        costheta = c_min((w1[1]*x + w1[2]*y)/c_sqrt(dxy_sq), 1.0)
+        costheta = c_max(costheta, -1.0)
+        gamma1 = c_sin(2.0*c_acos(costheta))
+        costheta = c_min(-1.0*(w2[1]*x + w2[2]*y)/c_sqrt(dxy_sq), 1.0)
+        costheta = c_max(costheta, -1.0)
+        gamma2 = c_sin(2.0*c_acos(costheta))
+        return w1[0]*w2[0]*gamma1*gamma2
+    else:
+        return 0.0
+
+
