@@ -231,24 +231,24 @@ def ii_plus_projected(sample1, orientations1, ellipticities1, sample2, orientati
     #define merk vectors to use in pair counting
     # sample 1
     marks1 = np.ones((N1, 3))
-    marks1[:, 0] = orientations1[:, 0]
-    marks1[:, 1] = orientations1[:, 1]
-    marks1[:, 2] = ellipticities1 * weights1
+    marks1[:, 0] = ellipticities1 * weights1
+    marks1[:, 1] = orientations1[:, 0]
+    marks1[:, 2] = orientations1[:, 1]
     # sample 2
     marks2 = np.ones((N2, 3))
-    marks2[:, 0] = orientations1[:, 0]
-    marks2[:, 1] = orientations1[:, 1]
-    marks2[:, 2] = ellipticities2 * weights2
+    marks2[:, 0] = ellipticities2 * weights2
+    marks2[:, 1] = orientations1[:, 0]
+    marks2[:, 2] = orientations1[:, 1]
     # randoms 1
     ran_marks1 = np.ones((NR1, 3))
-    ran_marks1[:, 0] = 0  # dummy
+    ran_marks1[:, 0] = ran_weights1
     ran_marks1[:, 1] = 0  # dummy
-    ran_marks1[:, 2] = ran_weights1
+    ran_marks1[:, 2] = 0  # dummy
     # randoms 2
     ran_marks2 = np.ones((NR2, 3))
-    ran_marks2[:, 0] = 0  # dummy
+    ran_marks2[:, 0] = ran_weights2
     ran_marks2[:, 1] = 0  # dummy
-    ran_marks2[:, 2] = ran_weights2
+    ran_marks2[:, 2] = 0  # dummy
 
     # define pi bins
     pi_bins = np.array([0.0, pi_max])
@@ -311,7 +311,7 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, p
     Count marked pairs.
     """
 
-    weight_func_id = 3
+    weight_func_id = 5
     SS = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
