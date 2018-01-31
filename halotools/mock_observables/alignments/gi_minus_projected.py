@@ -319,11 +319,11 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, p
     Count marked pairs.
     """
 
-    weight_func_id = 2
+    weight_func_id = 3
     SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
-        approx_cell2_size=approx_cell1_size)[1]
+        approx_cell2_size=approx_cell1_size)[0]
     SD = np.diff(np.diff(SD, axis=0), axis=1)
     SD = SD.flatten()
 
