@@ -38,8 +38,15 @@ def process_projected_alignment_args(sample1, orientations1, ellipticities1, wei
         ran_weights1 = None
         ran_weights2 = None
 
-    orientations1 = np.atleast_1d(orientations1).astype(float)
-    ellipticities1 = np.atleast_1d(ellipticities1).astype(float)
+    # check to see if orientations and ellipticities were provided for sample1
+    if orientations1 is not None:
+        orientations1 = np.atleast_1d(orientations1).astype(float)
+    else:
+        orientations1 = np.ones((N1, 2))
+    if ellipticities1 is not None:
+        ellipticities1 = np.atleast_1d(ellipticities1).astype(float)
+    else:
+        ellipticities1 = np.ones(N1)
 
     # check to see if orientations and ellipticities were provided for sample2
     if orientations2 is not None:
@@ -104,9 +111,17 @@ def process_projected_alignment_args(sample1, orientations1, ellipticities1, wei
             msg = ("`ran_weights1` is not the correct shape.")
             raise ValueError(msg)
 
+    # make sure neither orientations contain a vector of length 0
+    mag1 = np.sqrt(np.sum(orientations1**2, axis=1)).reshape((len(orientations1), -1))
+    mag2 = np.sqrt(np.sum(orientations2**2, axis=1)).reshape((len(orientations2), -1))
+
+    if np.any(mag1 == 0.0) | np.any(mag2 == 0.0):
+        msg = ("`orientations1` or `orientations2` contains a vector of length 0.")
+        raise ValueError(msg)
+
     # normalize the orientation vectors
-    orientations1 = orientations1/np.sqrt(np.sum(orientations1**2, axis=1)).reshape((len(orientations1), -1))
-    orientations2 = orientations2/np.sqrt(np.sum(orientations2**2, axis=1)).reshape((len(orientations2), -1))
+    orientations1 = orientations1/mag1
+    orientations2 = orientations2/mag2
 
     return sample1, orientations1, ellipticities1, weights1,\
         sample2, orientations2, ellipticities2, weights2,\
@@ -137,15 +152,15 @@ def process_3d_alignment_args(sample1, orientations1, ellipticities1, weights1,
         ran_weights1 = None
         ran_weights2 = None
 
-    # check to see if orientations and ellipticities were provided for sample2
+    # check to see if orientations and ellipticities were provided for sample1
     if orientations1 is not None:
         orientations1 = np.atleast_1d(orientations1).astype(float)
     else:
-        orientations1 = np.ones((N2, 3))
+        orientations1 = np.ones((N1, 3))
     if ellipticities1 is not None:
         ellipticities1 = np.atleast_1d(ellipticities1).astype(float)
     else:
-        ellipticities1 = np.ones(N2)
+        ellipticities1 = np.ones(N1)
 
     # check to see if orientations and ellipticities were provided for sample2
     if orientations2 is not None:
@@ -210,9 +225,17 @@ def process_3d_alignment_args(sample1, orientations1, ellipticities1, weights1,
             msg = ("`ran_weights1` is not the correct shape.")
             raise ValueError(msg)
 
+    # make sure neither orientations contain a vector of length 0
+    mag1 = np.sqrt(np.sum(orientations1**2, axis=1)).reshape((len(orientations1), -1))
+    mag2 = np.sqrt(np.sum(orientations2**2, axis=1)).reshape((len(orientations2), -1))
+
+    if np.any(mag1 == 0.0) | np.any(mag2 == 0.0):
+        msg = ("`orientations1` or `orientations2` contains a vector of length 0.")
+        raise ValueError(msg)
+
     # normalize the orientation vectors
-    orientations1 = orientations1/np.sqrt(np.sum(orientations1**2, axis=1)).reshape((len(orientations1), -1))
-    orientations2 = orientations2/np.sqrt(np.sum(orientations2**2, axis=1)).reshape((len(orientations2), -1))
+    orientations1 = orientations1/mag1
+    orientations2 = orientations2/mag2
 
     return sample1, orientations1, ellipticities1, weights1,\
         sample2, orientations2, ellipticities2, weights2,\
