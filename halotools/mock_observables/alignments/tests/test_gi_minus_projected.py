@@ -15,7 +15,7 @@ from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
-__all__ = ('test_returned_shape', 'test_threading', 'test_estimators')
+__all__ = ('test_returned_shape', 'test_threading', 'test_estimators', 'test_orientation_usage')
 
 fixed_seed = 43
 
@@ -138,4 +138,35 @@ def test_estimators():
 
     assert np.shape(result_1) == (len(rp_bins)-1, )
     assert np.shape(result_2) == (len(rp_bins)-1, )
+
+
+def test_orientation_usage():
+    """
+    test to make sure the results are sensitive to the orientations passed in
+    """
+
+    ND = 100
+    NR = 100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((ND, 3))
+        randoms = np.random.random((NR, 3))
+
+    period = np.array([1.0, 1.0, 1.0])
+    rp_bins = np.linspace(0.001, 0.3, 5)
+
+    pi_max = 0.2
+
+    random_orientation_1 = np.random.random((len(sample1), 2))
+    random_orientation_2 = np.random.random((len(sample1), 2))
+    random_ellipticities = np.random.random((len(sample1)))
+
+    # analytic randoms
+    result_1 = gi_minus_projected(sample1, random_orientation_1, random_ellipticities, sample1,
+        rp_bins, pi_max, period=period, num_threads=1, estimator='Natural')
+
+    result_2 = gi_minus_projected(sample1, random_orientation_2, random_ellipticities, sample1,
+        rp_bins, pi_max, period=period, num_threads=1, estimator='Natural')
+    
+    assert not np.allclose(result_1, result_2)
+
 
