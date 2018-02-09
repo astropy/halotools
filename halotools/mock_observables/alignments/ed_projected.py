@@ -97,7 +97,7 @@ def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None
     The ellipticity-direction projected correlation function is defined as:
 
     .. math::
-        \omega = \frac{\sum_{i \neq j}w_iw_j|\hat{e}_i \cdot \hat{r}_{ij}|^2}{\sum_{i \neq j} w_iw_j} - \frac{1}{3}
+        \omega = \frac{\sum_{i \neq j}w_iw_j|\hat{e}_i \cdot \hat{r}_{ij}|^2}{\sum_{i \neq j} w_iw_j} - \frac{1}{2}
 
     where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy, and
     :math:`\hat{r}_{ij}` is the normalized vector in the direction of the :math:`j`-th galaxy
@@ -180,7 +180,7 @@ def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None
                        approx_cell2_size=approx_cell2_size)
     counts = np.diff(np.diff(counts, axis=0),axis=1)
 
-    return marked_counts/counts - 1.0/3.0
+    return marked_counts/counts - 1.0/2.0
 
 
 def _ed_projected_process_args(sample1, rp_bins, pi_max, sample2, period, num_threads):
