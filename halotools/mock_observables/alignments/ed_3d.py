@@ -92,11 +92,12 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
     The ellipticity-direction correlation function is defined as:
 
     .. math::
-        \omega = \sum_{i \neq j}|\hat{e}_i \cdot \hat{r}_{ij}|^2 - \frac{1}{3}
+        \omega = \frac{\sum_{i \neq j}|\hat{e}_i \cdot \hat{r}_{ij}|^2}{\sum_{i \neq j} w_iw_j} - \frac{1}{3}
 
     where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy, and
     :math:`\hat{r}_{ij}` is the normalized vector in the direction of the :math:`j`-th galaxy
-    from the :math:`i`-th galaxy
+    from the :math:`i`-th galaxy.  :math:`w_i` and :math:`w_j` are the weights associated with
+    the :math:`i`-th and :math:`\hat{r}_{ij}`-th galaxy. The weights default to 1 if not set.
 
     Example
     --------

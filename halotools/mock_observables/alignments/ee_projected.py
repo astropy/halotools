@@ -101,9 +101,11 @@ def ee_projected(sample1, orientations1, sample2, orientations2, rp_bins, pi_max
     The ellipticity-ellipticity correlation function is defined as:
 
     .. math::
-        \eta = \sum_{i \neq j}|\hat{e}_i \cdot \hat{e}_j|^2 - \frac{1}{3}
+        \eta = \frac{\sum_{i \neq j}|\hat{e}_i \cdot \hat{e}_j|^2}{\sum_{i \neq j}} - \frac{1}{3}
 
     where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy.
+    :math:`w_i` and :math:`w_j` are the weights associated with the :math:`i`-th 
+    and :math:`\hat{r}_{ij}`-th galaxy. The weights default to 1 if not set.
 
     Example
     --------
