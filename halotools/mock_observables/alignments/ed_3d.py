@@ -84,7 +84,7 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
     Returns
     -------
     correlation_function : numpy.array
-        *len(rbins)-1* length array containing the correlation function :math:`\eta(r)`
+        *len(rbins)-1* length array containing the correlation function :math:`\omega(r)`
         computed in each of the bins defined by input ``rbins``.
 
     Notes
