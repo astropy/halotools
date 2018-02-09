@@ -253,7 +253,7 @@ def ii_plus_projected(sample1, orientations1, ellipticities1, sample2, orientati
     # define pi bins
     pi_bins = np.array([0.0, pi_max])
 
-    do_SS, do_RR = GI_estimator_requirements(estimator)
+    do_SS, do_RR = II_estimator_requirements(estimator)
 
     # count marked pairs
     if do_SS:
@@ -271,12 +271,12 @@ def ii_plus_projected(sample1, orientations1, ellipticities1, sample2, orientati
     else:
         RR = None
 
-    result = GI_estimator(SS, RR, N1, N2, NR1, NR2, estimator)
+    result = II_estimator(SS, RR, N1, N2, NR1, NR2, estimator)
 
     return result*2.0*pi_max  # factor of 2pi_max accounts for integration
 
 
-def GI_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
+def II_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
     r"""
     apply the supplied GI estimator to calculate the correlation function.
     """
@@ -288,7 +288,7 @@ def GI_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
         raise ValueError(msg)
 
 
-def GI_estimator_requirements(estimator):
+def II_estimator_requirements(estimator):
     r"""
     Return the requirments for the supplied GI estimator.
     """
