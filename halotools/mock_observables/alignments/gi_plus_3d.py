@@ -113,8 +113,8 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     Returns
     -------
     correlation_function : numpy.array
-        *len(rp_bins)-1* length array containing the correlation function :math:`w_{g+}(r_p)`
-        computed in each of the bins defined by input ``rp_bins``.
+        *len(rbins)-1* length array containing the correlation function :math:`w_{g+}(r)`
+        computed in each of the bins defined by input ``rbins``.
 
     Notes
     -----
@@ -136,11 +136,11 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
         e_{+}(j|i) = e_j\cos(2\phi)
 
     where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the
-    orientation vector, :math:`\vec{o}_j`, and the projected direction between the :math:`j`-th
-    and :math:`i`-th galaxy, :math:`\vec{r}_{p i,j}`.
+    orientation vector, :math:`\vec{o}_j`, and the direction between the :math:`j`-th
+    and :math:`i`-th galaxy, :math:`\vec{r}_{i,j}`.
 
     .. math::
-        \cos(\phi) = \vec{o}_j \cdot \vec{r}_{p i,j}
+        \cos(\phi) = \vec{o}_j \cdot \vec{r}_{i,j}
 
     :math:`S_{+}R` is analgous to :math:`S_{+}D` but instead is computed
     with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts,
@@ -176,8 +176,7 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
 
     We can the calculate the auto-GI correlation between these points:
 
-    >>> rp_bins = np.logspace(-1,1,10)
-    >>> pi_max = 0.25
+    >>> rbins = np.logspace(-1,1,10)
     >>> w = gi_plus_3d(sample1, random_orientations, random_ellipticities, sample1, rbins, period=Lbox)
 
     """
