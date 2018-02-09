@@ -206,22 +206,21 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
 
     #define merk vectors to use in pair counting
     # sample 1
-    marks1 = np.ones((N1, 3))
+    marks1 = np.ones((N1, 4))
     marks1[:, 0] = ellipticities1 * weights1
     marks1[:, 1] = orientations1[:, 0]
     marks1[:, 2] = orientations1[:, 1]
+    marks1[:, 3] = orientations1[:, 2]
     # sample 2
     marks2 = weights2
     # randoms 1
-    ran_marks1 = np.ones((NR1, 3))
+    ran_marks1 = np.ones((NR1, 4))
     ran_marks1[:, 0] = ran_weights1
     ran_marks1[:, 1] = 0  # dummy
     ran_marks1[:, 2] = 0  # dummy
+    ran_marks1[:, 3] = 0  # dummy
     # randoms 2
     ran_marks2 = ran_weights2
-
-    # define pi bins
-    pi_bins = np.array([0.0, pi_max])
 
     do_SD, do_SR, do_RR = GI_estimator_requirements(estimator)
 
@@ -239,7 +238,7 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
             SR = 0.0
         else:
             SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
-                                    rp_bins, pi_bins, period, num_threads,
+                                    rbins, period, num_threads,
                                     approx_cell1_size, approx_cell2_size)
     else:
         SR = None
@@ -247,14 +246,14 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     # count random pairs
     if do_RR:
         RR = random_counts(randoms1, randoms2, ran_weights1, ran_weights2,
-                           rp_bins, pi_bins, N1, N2, no_randoms, period, PBCs,
+                           rbins, N1, N2, no_randoms, period, PBCs,
                            num_threads, approx_cell1_size, approx_cell2_size)
     else:
         RR = None
 
     result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
 
-    return result*2.0*pi_max  # factor of 2pi_max accounts for integration
+    return result
 
 
 def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Natural'):
@@ -295,19 +294,18 @@ def GI_estimator_requirements(estimator):
         raise ValueError(msg)
 
 
-def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, period,
+def marked_pair_counts(sample1, sample2, weights1, weights2, rbins, period,
         num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Count marked pairs.
     """
 
     weight_func_id = 2
-    SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
+    SD = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)[0]
-    SD = np.diff(np.diff(SD, axis=0), axis=1)
-    SD = SD.flatten()
+    SD = np.diff(SD, axis=0)
 
     return SD
 
@@ -325,8 +323,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rbins,
                 weights1=ran_weights1, weights2=ran_weights2,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
-        RR = np.diff(np.diff(RR, axis=0), axis=1)
-        RR = RR.flatten()
+        RR = np.diff(RR, axis=0)
 
         return RR
     else:
@@ -359,7 +356,7 @@ def _gi_plus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.alignments.w_gplus`.
+    `~halotools.mock_observables.alignments.gi_plus_3d`.
     """
     sample1 = enforce_sample_has_correct_shape(sample1)
 
