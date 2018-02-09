@@ -168,3 +168,24 @@ cdef cnp.float64_t squareddotweights(cnp.float64_t* w1, cnp.float64_t* w2):
 
     return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])
 
+cdef cnp.float64_t projdotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    2d dot product weights
+    return the cosine of the angle between two vectors if the vectors are normalized
+    id: 14
+    expects length 4 arrays
+    """
+
+    return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2])
+
+
+cdef cnp.float64_t projsquareddotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    2d squared dot product weights
+    return the square cosine of the angle between two vectors if the vectors are normalized
+    id: 15
+    expects length 4 arrays
+    """
+
+    return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2])*(w1[1]*w2[1] + w1[2]*w2[2])
+
