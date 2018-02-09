@@ -133,7 +133,7 @@ def ii_minus_projected(sample1, orientations1, ellipticities1, sample2, orientat
     Returns
     -------
     correlation_function : numpy.array
-        *len(rp_bins)-1* length array containing the correlation function :math:`w_{g+}(r_p)`
+        *len(rp_bins)-1* length array containing the correlation function :math:`w_{--}(r_p)`
         computed in each of the bins defined by input ``rp_bins``.
 
     Notes
@@ -253,7 +253,7 @@ def ii_minus_projected(sample1, orientations1, ellipticities1, sample2, orientat
     # define pi bins
     pi_bins = np.array([0.0, pi_max])
 
-    do_SS, do_RR = GI_estimator_requirements(estimator)
+    do_SS, do_RR = II_estimator_requirements(estimator)
 
     # count marked pairs
     if do_SS:
@@ -271,14 +271,14 @@ def ii_minus_projected(sample1, orientations1, ellipticities1, sample2, orientat
     else:
         RR = None
 
-    result = GI_estimator(SS, RR, N1, N2, NR1, NR2, estimator)
+    result = II_estimator(SS, RR, N1, N2, NR1, NR2, estimator)
 
     return result*2.0*pi_max  # factor of 2pi_max accounts for integration
 
 
-def GI_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
+def II_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
     r"""
-    apply the supplied GI estimator to calculate the correlation function.
+    apply the supplied II estimator to calculate the correlation function.
     """
     if estimator == 'Natural':
         factor = (NR1*NR2)/(N1*N2)
@@ -288,9 +288,9 @@ def GI_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
         raise ValueError(msg)
 
 
-def GI_estimator_requirements(estimator):
+def II_estimator_requirements(estimator):
     r"""
-    Return the requirments for the supplied GI estimator.
+    Return the requirments for the supplied II estimator.
     """
 
     do_RR = False

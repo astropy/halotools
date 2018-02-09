@@ -133,7 +133,7 @@ def ii_plus_projected(sample1, orientations1, ellipticities1, sample2, orientati
     Returns
     -------
     correlation_function : numpy.array
-        *len(rp_bins)-1* length array containing the correlation function :math:`w_{g+}(r_p)`
+        *len(rp_bins)-1* length array containing the correlation function :math:`w_{++}(r_p)`
         computed in each of the bins defined by input ``rp_bins``.
 
     Notes
