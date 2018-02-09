@@ -94,13 +94,13 @@ def process_projected_alignment_args(sample1, orientations1, ellipticities1, wei
     if np.shape(ellipticities2) != (N2,):
         msg = ("`ellipticities2` is not the correct shape.")
         raise ValueError(msg)
-
+    
     # check to make sure weights are correct shape
     if np.shape(weights1) != (N1,):
         msg = ("`weights1` is not the correct shape.")
         raise ValueError(msg)
     if np.shape(weights2) != (N2,):
-        msg = ("`weights1` is not the correct shape.")
+        msg = ("`weights2` is not the correct shape.")
         raise ValueError(msg)
 
     if using_randoms:
@@ -208,7 +208,7 @@ def process_3d_alignment_args(sample1, orientations1, ellipticities1, weights1,
     if np.shape(ellipticities2) != (N2,):
         msg = ("`ellipticities2` is not the correct shape.")
         raise ValueError(msg)
-
+    
     # check to make sure weights are correct shape
     if np.shape(weights1) != (N1,):
         msg = ("`weights1` is not the correct shape.")
@@ -222,7 +222,7 @@ def process_3d_alignment_args(sample1, orientations1, ellipticities1, weights1,
             msg = ("`ran_weights1` is not the correct shape.")
             raise ValueError(msg)
         if np.shape(ran_weights2) != (NR2,):
-            msg = ("`ran_weights1` is not the correct shape.")
+            msg = ("`ran_weights2` is not the correct shape.")
             raise ValueError(msg)
 
     # make sure neither orientations contain a vector of length 0

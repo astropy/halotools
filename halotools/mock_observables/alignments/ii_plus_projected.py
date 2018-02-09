@@ -237,8 +237,8 @@ def ii_plus_projected(sample1, orientations1, ellipticities1, sample2, orientati
     # sample 2
     marks2 = np.ones((N2, 3))
     marks2[:, 0] = ellipticities2 * weights2
-    marks2[:, 1] = orientations1[:, 0]
-    marks2[:, 2] = orientations1[:, 1]
+    marks2[:, 1] = orientations2[:, 0]
+    marks2[:, 2] = orientations2[:, 1]
     # randoms 1
     ran_marks1 = np.ones((NR1, 3))
     ran_marks1[:, 0] = ran_weights1
