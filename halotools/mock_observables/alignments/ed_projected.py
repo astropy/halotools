@@ -24,7 +24,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None, weights2=None,
         period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the 3-D ellipticity-direction projected correlation function (ED), :math:`\omega(r_p)`.
+    Calculate the ellipticity-direction projected correlation function (ED), :math:`\omega(r_p)`.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
 
-    p_bins : array_like
+    rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
@@ -89,7 +89,7 @@ def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None
     Returns
     -------
     correlation_function : numpy.array
-        *len(rbins)-1* length array containing the correlation function :math:`\omega(r_p)`
+        *len(rp_bins)-1* length array containing the correlation function :math:`\omega(r_p)`
         computed in each of the bins defined by input ``rp_bins``.
 
     Notes
