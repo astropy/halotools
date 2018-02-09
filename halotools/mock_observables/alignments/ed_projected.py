@@ -97,7 +97,7 @@ def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None
     The ellipticity-direction projected correlation function is defined as:
 
     .. math::
-        \omega = \sum_{i \neq j}\frac{|\hat{e}_i \cdot \hat{r}_{ij}|^2} - \frac{1}{3}
+        \omega = \sum_{i \neq j}|\hat{e}_i \cdot \hat{r}_{ij}|^2 - \frac{1}{3}
 
     where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy, and
     :math:`\hat{r}_{ij}` is the normalized vector in the direction of the :math:`j`-th galaxy
