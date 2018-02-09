@@ -36,7 +36,7 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     orientations1 : array_like
-        Npts1 x 2 numpy array containing projected orientation vectors for each point in ``sample1``.
+        Npts1 x 3 numpy array containing orientation vectors for each point in ``sample1``.
         these will be normalized if not already.
 
     sample2 : array_like, optional

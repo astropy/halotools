@@ -43,7 +43,7 @@ def ee_3d(sample1, orientations1, sample2, orientations2, rbins, weights1=None, 
         Npts2 x 3 array containing 3-D positions of points.
 
     orientations2 : array_like
-        Npts1 x 2 numpy array containing projected orientation vectors for each point in ``sample2``.
+        Npts1 x 3 numpy array containing orientation vectors for each point in ``sample2``.
         these will be normalized if not already.
 
     rbins : array_like
