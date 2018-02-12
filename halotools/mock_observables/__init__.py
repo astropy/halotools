@@ -11,8 +11,10 @@ from .pairwise_velocities import *
 from .isolation_functions import *
 from .void_statistics import *
 from .catalog_analysis_helpers import *
+
 from .pair_counters import (npairs_3d, npairs_projected, npairs_xy_z,
-    marked_npairs_3d, marked_npairs_xy_z)
+    marked_npairs_3d, marked_npairs_xy_z, positional_marked_npairs_3d, positional_marked_npairs_xy_z)
+
 from .radial_profiles import *
 from .two_point_clustering import *
 from .large_scale_density import *
@@ -21,3 +23,4 @@ from .occupation_stats import hod_from_mock, get_haloprop_of_galaxies
 from .surface_density import *
 from .velocity_decomposition import *
 from .tensor_calculations import *
+from .alignments import *

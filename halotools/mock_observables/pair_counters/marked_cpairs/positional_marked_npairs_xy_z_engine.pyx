@@ -1,4 +1,4 @@
-"""
+r"""
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -7,20 +7,22 @@ cimport numpy as cnp
 cimport cython
 from libc.math cimport ceil
 
-from .marking_functions cimport *
-from .custom_marking_func cimport custom_func
+from .positional_projected_marking_functions cimport *
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
-__all__ = ('marked_npairs_3d_engine', )
+__all__ = ('positional_marked_npairs_xy_z_engine', )
 
-ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
+ctypedef double (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t rsq)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
-    weights1in, weights2in, weight_func_idin, rbins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
+def positional_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
+    weights1in, weights2in, weight_func_idin, rp_bins, pi_bins, cell1_tuple):
+    r""" Cython engine for counting pairs of points
+    as a function of three-dimensional separation.
 
     Parameters
     ------------
@@ -33,17 +35,19 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    weights1in : array
-        Numpy array storing the weights for points in sample 1
-
-    weights2in : array
-        Numpy array storing the weights for points in sample 2
-
     weight_func_id : int, optional
         weighting function integer ID.
 
-    rbins : array
-        Boundaries defining the bins in which pairs are counted.
+    weights1in : array
+
+    weights2in : array
+
+    rp_bins : array_like
+        numpy array of boundaries defining the bins of separation in the xy-plane
+        :math:`r_{\rm p}` in which pairs are counted.
+
+    pi_bins : numpy.array
+        array defining parallel separation in which to sum the pair counts
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -53,8 +57,8 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     Returns
     --------
     counts : array
-        Integer array of length len(rbins) giving the number of pairs
-        separated by a distance less than the corresponding entry of ``rbins``.
+        Integer array of length len(rp_bins) giving the number of pairs
+        separated by a distance less than the corresponding entry of ``rp_bins``.
 
     """
     cdef int weight_func_id = weight_func_idin
@@ -62,7 +66,8 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef f_type wfunc
     wfunc = return_weighting_function(weight_func_id)
 
-    cdef cnp.float64_t[:] rbins_squared = rbins*rbins
+    cdef cnp.float64_t[:] rp_bins_squared = rp_bins*rp_bins
+    cdef cnp.float64_t[:] pi_bins_squared = pi_bins*pi_bins
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -71,8 +76,10 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
-    cdef int num_rbins = len(rbins)
-    cdef cnp.float64_t[:] counts = np.zeros(num_rbins, dtype=np.float64)
+    cdef int num_rp_bins = len(rp_bins)
+    cdef int num_pi_bins = len(pi_bins)
+    cdef cnp.int64_t[:,:] counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.int64)
+    cdef cnp.float64_t[:,:] weighted_counts = np.zeros((num_rp_bins, num_pi_bins), dtype=np.float64)
 
     cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
@@ -113,9 +120,9 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_y2_per_y1 = num_y2divs // num_y1divs
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
-    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq, weight
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp
-    cdef int Ni, Nj, i, j, k, l
+    cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq, weight
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, x2tmp, y2tmp, z2tmp
+    cdef int Ni, Nj, i, j, k, l, g
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
     cdef cnp.float64_t[:] y_icell1, y_icell2
@@ -202,53 +209,64 @@ def marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance
-                                    dx = x1tmp - x_icell2[j]
-                                    dy = y1tmp - y_icell2[j]
-                                    dz = z1tmp - z_icell2[j]
-                                    dsq = dx*dx + dy*dy + dz*dz
+                                    x2tmp = x_icell2[j]
+                                    y2tmp = y_icell2[j]
+                                    z2tmp = z_icell2[j]
+                                    dx = x1tmp - x2tmp
+                                    dy = y1tmp - y2tmp
+                                    dz = z1tmp - z2tmp
+                                    dxy_sq = dx*dx + dy*dy
+                                    dz_sq = dz*dz
 
-                                    weight = wfunc(&w_icell1[i,0], &w_icell2[j,0])
-                                    k = num_rbins-1
-                                    while dsq <= rbins_squared[k]:
-                                        counts[k] += weight
+                                    weight = wfunc(&w_icell1[i,0], &w_icell2[j,0], x1tmp, y1tmp, x2tmp, y2tmp, dxy_sq)
+                                    k = num_rp_bins-1
+                                    while dxy_sq<=rp_bins_squared[k]:
+                                        g = num_pi_bins-1
+                                        while dz_sq<=pi_bins_squared[g]:
+                                            counts[k,g] += 1
+                                            weighted_counts[k,g] += weight
+                                            g=g-1
+                                            if g<0: break
                                         k=k-1
                                         if k<0: break
 
-    return np.array(counts)
+    return np.array(counts), np.array(weighted_counts)
 
 
 cdef f_type return_weighting_function(weight_func_id):
     """
     returns a pointer to the user-specified weighting function.
     """
-
-    if weight_func_id==0:
-        return custom_func
-    elif weight_func_id==1:
-        return mweights
+    
+    if weight_func_id==1:
+        return pos_shape_dot_product_func
     elif weight_func_id==2:
-        return sweights
+        return gamma_plus_func
     elif weight_func_id==3:
-        return eqweights
+        return gamma_cross_func
     elif weight_func_id==4:
-        return ineqweights
+        return squareddot_func
     elif weight_func_id==5:
-        return gweights
+        return gamma_gamma_plus_func
     elif weight_func_id==6:
-        return lweights
-    elif weight_func_id==7:
-        return tgweights
-    elif weight_func_id==8:
-        return tlweights
-    elif weight_func_id==9:
-        return tweights
-    elif weight_func_id==10:
-        return exweights
-    elif weight_func_id==11:
-        return ratio_weights
-    elif weight_func_id==12:
-        return dotweights
-    elif weight_func_id==13:
-        return squareddotweights
+        return gamma_gamma_cross_func
     else:
         raise ValueError('marking function does not exist')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
