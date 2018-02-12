@@ -8,8 +8,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from ..pairs import distance
+from halotools.utils import normalized_vectors
 
-__all__ = ['cos2theta_pairs', 'sin2theta_pairs']
+__all__ = ['cos2theta_pairs']
 __author__ = ['Duncan Campbell']
 
 
@@ -69,98 +70,8 @@ def cos2theta_pairs(sample1, orientations1, sample2, rbins, period=None):
             raise ValueError("period should have len == dimension of points")
             return None
 
-    k = len(period)  # number of dimensions
-
-    N1 = len(sample1)
-    N2 = len(sample2)
-    dd = np.zeros((N1*N2,))  # store radial pair separations
-    oo = np.zeros((N1*N2, k))  # store orientation vectors for each pair
-    vs = np.zeros((N1*N2, k))  # separation vectors for each pair
-    for i in range(0, N1):  # calculate distance between every point and every other point
-        x1 = sample1[i, :]
-        x2 = sample2
-        dd[i*N2:i*N2+N2] = distance(x1, x2, period)
-        vs[i*N2:i*N2+N2, :] = r_12(x1, x2, period)
-        oo[i*N2:i*N2+N2, :] = orientations1[i, :]
-
-    # sort results
-    sort_inds = np.argsort(dd)
-    dd = dd[sort_inds]
-    vs = vs[sort_inds]
-
-    # preform dot prouct between vs and orientations1
-    vs = vs/dd.reshape((len(dd), 1))  # normalize
-    mag1 = np.sqrt(np.sum(oo**2, axis=1)).reshape((len(oo), -1))
-    oo = oo/mag1  # normalize
-    costheta = (vs*oo).sum(1)  # remove zero length vectors
-    costheta[~np.isfinite(costheta)] = 0.0
-
-    # calculate average cos^2 theta in radial bins
-    n = np.zeros((rbins.size,), dtype=np.int)
-    omega = np.zeros((rbins.size,), dtype=np.float64)
-    for i in range(rbins.size):
-        inds = np.where(dd <= rbins[i])[0]
-        n[i] = len(inds)
-        omega[i] = np.sum(costheta[inds]**2)
-
-    return omega
-
-
-def sin2theta_pairs(sample1, orientations1, sample2, rbins, period=None):
-    r"""
-    Calulate the sum of the square of the sine of angles between vectors associetd with
-    sample1 and the direction between sample1 and sample2.
-
-    Parameters
-    ----------
-    sample1 : array_like
-        N by k numpy array of k-dimensional positions. Should be between zero and
-        period
-
-    sample2 : array_like
-        N by k numpy array of k-dimensional positions. Should be between zero and
-        period
-
-    rbins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted.
-        len(rbins) = Nrbins + 1.
-
-    period : array_like, optional
-        length k array defining  periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-        If none, PBCs are set to infinity.
-
-    Returns
-    -------
-    N_pairs : array of length len(rbins)
-        number counts of pairs
-    """
-
-    sample1 = np.atleast_2d(sample1)
-    orientations1 = np.atleast_2d(orientations1)
-    sample2 = np.atleast_2d(sample2)
-    rbins = np.atleast_1d(rbins)
-
-    # Check to make sure both data sets have the same dimension. Otherwise, throw an error
-    if np.shape(sample1)[-1] != np.shape(sample2)[-1]:
-        raise ValueError("sample1 and sample2 inputs do not have the same dimension.")
-        return None
-
-    # Check to make sure both data sets have the same dimension. Otherwise, throw an error
-    if np.shape(orientations1)[-1] != np.shape(sample1)[-1]:
-        raise ValueError("orientations1 and sample1 inputs do not have the same dimension.")
-        return None
-
-    # Process period entry and check for consistency.
-    if period is None:
-        period = np.array([np.inf]*np.shape(sample1)[-1])
-    else:
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
-        elif np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have len == dimension of points")
-            return None
+    # normalize orientation vectors
+    orientations1 = normalized_vectors(orientations1)
 
     k = len(period)  # number of dimensions
 
@@ -176,28 +87,22 @@ def sin2theta_pairs(sample1, orientations1, sample2, rbins, period=None):
         vs[i*N2:i*N2+N2, :] = r_12(x1, x2, period)
         oo[i*N2:i*N2+N2, :] = orientations1[i, :]
 
-    # sort results
-    sort_inds = np.argsort(dd)
-    dd = dd[sort_inds]
-    vs = vs[sort_inds]
-
     # preform dot prouct between vs and orientations1
-    vs = vs/dd.reshape((len(dd), 1))  # normalize
-    mag1 = np.sqrt(np.sum(oo**2, axis=1)).reshape((len(oo), -1))
-    oo = oo/mag1  # normalize
-    costheta = (vs*oo).sum(1)  # remove zero length vectors
-    costheta[~np.isfinite(costheta)] = 0.0
-    sintheta = np.sin(np.arccos(costheta))
+    vs = normalized_vectors(vs)  # normalize
+    costheta = (vs*oo).sum(1)
+    costheta[~np.isfinite(costheta)] = 0.0  # remove zero length vectors
+    cos2theta = costheta*costheta
+    print(costheta)
 
-    # calculate average cos^2 theta in radial bins
+    # calculate sum of cos^2 theta in radial bins
     n = np.zeros((rbins.size,), dtype=np.int)
     omega = np.zeros((rbins.size,), dtype=np.float64)
     for i in range(rbins.size):
         inds = np.where(dd <= rbins[i])[0]
         n[i] = len(inds)
-        omega[i] = np.sum(sintheta[inds]**2)
+        omega[i] = np.sum(cos2theta[inds])
 
-    return omega
+    return omega, n
 
 
 def r_12(x1, x2, period=None):
@@ -243,3 +148,6 @@ def r_12(x1, x2, period=None):
         m[:, n][mask] -= period[n]
 
     return m
+
+
+
