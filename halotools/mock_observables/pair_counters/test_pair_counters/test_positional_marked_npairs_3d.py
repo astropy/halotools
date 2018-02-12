@@ -39,6 +39,7 @@ def generate_interlacing_grids(npts_per_dim, period=1.0):
     return mesh1_points, mesh2_points
 
 
+
 def generate_aligned_vectors(npts, dim=3):
     """
     return a set of aligned vectors, all pointing in a random direction
@@ -48,6 +49,112 @@ def generate_aligned_vectors(npts, dim=3):
     vectors = np.tile(vector, npts).reshape((npts, dim))
 
     return vectors
+
+def compute_limiting(coords1,coords2,npts,rbins,weight_func_id,alignment):
+    # generate vectors parallel, perpendicular or antiparallel to separation vector (note that this should be two point clouds rather than a range of particle positions)
+    diff_coords = (coords2 - coords1)
+    norm_value = np.sqrt(diff_coords[:,0]**2 + diff_coords[:,1]**2 + diff_coords[:,2]**2)
+    if alignment=="parallel":
+        vector = (diff_coords.T/norm_value).T
+    elif alignment=="perpendicular":
+        vector =  np.cross(diff_coords, [0,0,1])
+    elif alignment=="antiparallel":
+        vector = -(diff_coords.T/norm_value).T
+
+    
+    weights1 = np.ones((npts, 4))
+    weights1[:,1] = vector[:,0]
+    weights1[:,2] = vector[:,1]
+    weights1[:,3] = vector[:,2]
+    weights2 =  np.ones(npts)
+    
+    #calculate weighted counts
+    weighted_counts, counts = positional_marked_npairs_3d(coords1, coords2, rbins,
+              period=None, weights1=weights1, weights2=weights2,
+              weight_func_id=weight_func_id, num_threads=1)
+    return weighted_counts,counts
+
+
+
+def test_limits():
+    """
+    test limiting cases for angles
+    """
+    # generate two locusts of points
+    npts= 100
+    epsilon = 0.000
+    # #cluster 1
+    coords1 = generate_locus_of_3d_points(npts, 0.1, 0.1, 0.1, epsilon=epsilon)
+    # cluster 2
+    coords2 = generate_locus_of_3d_points(npts, 0.9, 0.9, 0.9, epsilon=epsilon)
+    
+    #generate orientation vectors for cluster 1
+    vectors1 = generate_aligned_vectors(len(coords1))
+    
+    # calculate dot product between vectors1 and cluster 2
+    r = np.sqrt((0.9-0.1)**2 + (0.9-0.1)**2 + (0.9-0.1)**2)
+    
+    #define radial bins
+    rbins = np.array([0.0, 0.1, r+2.0*epsilon])
+    
+    
+    # weighting 1
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,1,alignment="parallel")
+    msg = ("weighted counts do not match expected parallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 1.0*counts[-1], rtol=1.0/npts), msg
+                                                          
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,1,alignment="perpendicular")
+    msg = ("weighted counts do not match expected perpendicular result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 0.0*counts[-1], atol=1.0/npts), msg
+                                                          
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,1,alignment="antiparallel")
+    msg = ("weighted counts do not match expected antiparallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], -1.0*counts[-1], rtol=1.0/npts), msg
+
+    # weighting 2
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,2,alignment="parallel")
+    msg = ("weighted counts do not match expected parallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 1.0*counts[-1], rtol=1.0/npts), msg
+    
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,2,alignment="perpendicular")
+    msg = ("weighted counts do not match expected perpendicular result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], -1.0*counts[-1], atol=1.0/npts), msg
+    
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,2,alignment="antiparallel")
+    msg = ("weighted counts do not match expected antiparallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 1.0*counts[-1], rtol=1.0/npts), msg
+
+   # weighting 3
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,3,alignment="parallel")
+    msg = ("weighted counts do not match expected parallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 0.0*counts[-1], atol=1.0/npts), msg
+    
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,3,alignment="perpendicular")
+    msg = ("weighted counts do not match expected perpendicular result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 0.0*counts[-1], atol=1.0/npts), msg
+    
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,3,alignment="antiparallel")
+    msg = ("weighted counts do not match expected antiparallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 0.0*counts[-1], atol=1.0/npts), msg
+
+
+     #weighting 4
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,4,alignment="parallel")
+    msg = ("weighted counts do not match expected parallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 1.0*counts[-1], rtol=1.0/npts), msg
+    
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,4,alignment="perpendicular")
+    msg = ("weighted counts do not match expected perpendicular result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 0.0*counts[-1], atol=1.0/npts), msg
+    
+    weighted_counts, counts = compute_limiting(coords1,coords2,npts,rbins,4,alignment="antiparallel")
+    msg = ("weighted counts do not match expected antiparallel result given the weighting function"+ str(weighted_counts[-1]) + " " + str(counts[-1]))
+    assert np.isclose(weighted_counts[-1], 1.0*counts[-1], rtol=1.0/npts), msg
+
+
+
+
+
 
 
 def test_1():
@@ -65,7 +172,7 @@ def test_1():
     
     #generate orientation vectors for cluster 1
     vectors1 = generate_aligned_vectors(len(coords1))
-  
+
     # calculate dot product between vectors1 and cluster 2
     r = np.sqrt((0.9-0.1)**2 + (0.9-0.1)**2 + (0.9-0.1)**2)
     # s, vector between coords1 and cluster2
@@ -81,6 +188,7 @@ def test_1():
 
     #define radial bins
     rbins = np.array([0.0, 0.1, r+2.0*epsilon])
+
 
     # define weights appropiate for weighting function
     weights1 = np.ones((npts, 4))
@@ -98,6 +206,9 @@ def test_1():
     assert np.isclose(weighted_counts[-1], avg_costheta*counts[-1], rtol=1.0/npts), msg
 
 
+
+
+
 def test_2():
     """
     test weighting function 2
@@ -113,6 +224,7 @@ def test_2():
     
     #generate orientation vectors for cluster 1
     vectors1 = generate_aligned_vectors(len(coords1))
+
   
     # calculate dot product between vectors1 and cluster 2
     r = np.sqrt((0.9-0.1)**2 + (0.9-0.1)**2 + (0.9-0.1)**2)
@@ -146,6 +258,10 @@ def test_2():
     
     msg = ("weighted counts do not match expected result given the weighting function")
     assert np.isclose(weighted_counts[-1], avg_two_costheta*counts[-1], rtol=1.0/npts), msg
+
+
+
+
 
 
 def test_3():
@@ -195,6 +311,8 @@ def test_3():
     assert np.isclose(weighted_counts[-1], avg_two_sintheta*counts[-1], rtol=1.0/npts), msg
 
 
+
+
 def test_4():
     """
     test weighting function 4
@@ -241,6 +359,122 @@ def test_4():
     
     msg = ("weighted counts do not match expected result given the weighting function")
     assert np.isclose(weighted_counts[-1], avg_costheta_squared*counts[-1], rtol=1.0/npts), msg
+
+
+
+
+
+
+def test_randoms():
+    """
+    test for randomly distributed points and orientations
+    """
+    
+    # generate two locusts of points
+    npts= 200
+    epsilon = 0.3
+    # #cluster 1
+    coords1 = generate_locus_of_3d_points(npts, 0.0, 0.0, 0.0, epsilon=epsilon)
+    coords2 = generate_locus_of_3d_points(npts, 0.0, 0.0, 0.0, epsilon=epsilon)
+
+    
+    #generate orientation vectors for cluster 1
+    vectors1 = normalized_vectors(np.random.random((npts,3))*2. - 1. )
+    
+    #define radial bins
+    rbins = np.array([0.0, 0.1, 2.0*epsilon])
+    s = np.zeros((npts,3))
+
+    s[:,0] = coords2[:,0] - coords1[:,0]
+    s[:,1] = coords2[:,1] - coords1[:,1]
+    s[:,2] = coords2[:,2] - coords1[:,2]
+
+    dist_a = s[:,0]**2 + s[:,1]**2 + s[:,2]**2
+
+
+    # define weights appropiate for weighting function
+    weights1 = np.ones((npts, 4))
+    weights1[:,1] = vectors1[:,0]
+    weights1[:,2] = vectors1[:,1]
+    weights1[:,3] = vectors1[:,2]
+    weights2 =  np.ones(npts)
+    
+    
+    
+
+    # weighting 1
+    #calculate weighted counts
+    weighted_counts, counts = positional_marked_npairs_3d(coords1, coords2, rbins,
+                        period=None, weights1=weights1, weights2=weights2,
+                        weight_func_id=1, num_threads=1)
+        
+    msg = ("weighted counts do not match expected result given the weighting function" +" "+ str(np.max(dist_a)) )
+    assert np.isclose(weighted_counts[-1], 0.0*counts[-1], atol=4000), msg
+
+
+
+
+
+def test_weighting_implementation():
+    """
+        test that indexing is correct for weighting
+        """
+    
+    # generate two locusts of points
+    npts= 100
+    epsilon = 0.05
+    # #cluster 1
+    coords1 = generate_locus_of_3d_points(npts, 0.1, 0.1, 0.1, epsilon=epsilon)
+    # cluster 2
+    coords2 = generate_locus_of_3d_points(npts, 0.9, 0.9, 0.9, epsilon=epsilon)
+    
+    #generate orientation vectors for cluster 1
+    vectors1 = generate_aligned_vectors(len(coords1))
+    
+    # generate a random index value to check for each cluster
+    idx = np.random.randint(npts)
+    idx2 = np.random.randint(npts)
+    
+    # calculate dot product between vectors1 and cluster 2
+    r = np.sqrt((0.9-0.1)**2 + (0.9-0.1)**2 + (0.9-0.1)**2)
+    # s, vector between coords1 and cluster2
+    s = np.zeros((3))
+    s[0] = coords2[idx2,0] - coords1[idx,0]
+    s[1] = coords2[idx2,1] - coords1[idx,1]
+    s[2] = coords2[idx2,2] - coords1[idx,2]
+    
+    #calculate dot product between orientation and direction between cluster 1 and 2
+    angles = angles_between_list_of_vectors(vectors1[idx], s)
+    costheta= np.cos(angles) # dot product between vectors
+    
+    idx_costheta = costheta
+    
+    #define radial bins
+    rbins = np.array([0.0, 0.1, r+2.0*epsilon])
+    
+    # define weights appropiate for weighting function
+    weights1 = np.zeros((npts, 4))
+    weights1[idx] = 1.0
+    weights1[:,1] = vectors1[:,0]
+    weights1[:,2] = vectors1[:,1]
+    weights1[:,3] = vectors1[:,2]
+    weights2 =  np.zeros(npts)
+    weights2[idx2] =  1.0
+    
+    #calculate weighted counts
+
+# weighting 1
+    #calculate weighted counts
+    weighted_counts, counts = positional_marked_npairs_3d(coords1, coords2, rbins,
+                            period=None, weights1=weights1, weights2=weights2,
+                            weight_func_id=1, num_threads=1)
+    
+    msg = ("weighted counts do not match expected result given the weighting function")
+    assert np.isclose(weighted_counts[-1], idx_costheta, rtol=0.01/npts), msg
+
+
+
+
 
 
 def test_threading():
