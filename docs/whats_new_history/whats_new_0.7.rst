@@ -22,6 +22,11 @@ There are many new functions in `halotools.utils` subpackage related to spatial 
     * `~halotools.utils.rotation_matrices_from_vectors`
     * `~halotools.utils.rotate_vector_collection`
 
+Probabilistic binning
+------------------------------------------------
+The `~halotools.utils.fuzzy_digitize` function in `halotools.utils` allows you to discretize an
+array in a probabilistic fashion, which can be useful for applications of conditional abundance matching.
+
 
 New Mock Observables
 ====================
