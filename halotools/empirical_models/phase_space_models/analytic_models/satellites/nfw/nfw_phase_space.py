@@ -897,9 +897,20 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         >>> vz_disp_inner_half = np.std(data['vz'][mask])
 
         """
+        m = np.atleast_1d(mass)
+        c = np.atleast_1d(conc)
+        if (len(m) > 1) & (len(c) > 1):
+            assert len(m) == len(c), "Input ``mass`` and ``conc`` must have same length"
+        elif len(m) > 1:
+            Ngals = len(m)
+            c = np.zeros(Ngals) + conc
+        elif len(c) > 1:
+            Ngals = len(c)
+            m = np.zeros(Ngals) + mass
+        else:
+            c = np.zeros(Ngals) + conc
+            m = np.zeros(Ngals) + mass
 
-        m = np.zeros(Ngals) + mass
-        c = np.zeros(Ngals) + conc
         rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass=m)
 
         x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, c,
