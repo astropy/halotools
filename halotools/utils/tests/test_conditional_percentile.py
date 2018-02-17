@@ -15,9 +15,9 @@ fixed_seed = 43
 
 
 def python_sliding_rank(x, y, window_length):
-    """ Return an array storing the rank-order of each element element in y
-    calculated over a sliding window, after first sorting the elements of y
-    according to the values of x.
+    """
+    Return an array storing the rank-order of each element element in y
+    computed over a fixed window length at each x
 
     This function is the kernel of calculation of P(y | x).
 

@@ -14,6 +14,9 @@ __all__ = ('cython_conditional_rank_kernel', )
 cdef int _bisect_left_kernel(double[:] arr, double value):
     """ Return the index where to insert ``value`` in list ``arr`` of length ``n``,
     assuming ``arr`` is sorted.
+
+    This function is equivalent to the bisect_left function implemented in the
+    python standard libary bisect.
     """
     cdef int n = arr.shape[0]
     cdef int ifirst_subarr = 0
@@ -36,6 +39,8 @@ cdef int _bisect_left_kernel(double[:] arr, double value):
 @cython.nonecheck(False)
 @cython.wraparound(False)
 cdef void _insert_first_pop_last_kernel(int* arr, int value_in, int n):
+    """ Insert the element ``value_in`` into the input array and pop out the last element
+    """
     cdef int i
     for i in range(n-2, -1, -1):
         arr[i+1] = arr[i]
@@ -46,7 +51,7 @@ cdef void _insert_first_pop_last_kernel(int* arr, int value_in, int n):
 @cython.nonecheck(False)
 @cython.wraparound(False)
 cdef int _correspondence_indices_shift(int idx_in, int idx_out, int idx):
-    """
+    """ Update the correspondence indices array
     """
     cdef int shift = 0
     if idx_in < idx_out:
@@ -83,7 +88,7 @@ def cython_conditional_rank_kernel(double[:] y_sorted, int nwin):
     """
     """
     cdef int nhalfwin = int(nwin/2)
-    cdef int iy, idx_in, idx_out, idx_temp, i
+    cdef int iy, idx_in, idx_out, idx_temp, i, idx
     cdef double value_in, value_out
     cdef int npts = y_sorted.shape[0]
     cdef double[:] result = np.zeros(npts, dtype='f8')
