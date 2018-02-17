@@ -15,7 +15,7 @@ fixed_seed = 43
 
 
 def python_sliding_rank(x, y, window_length):
-    """
+    r"""
     Return an array storing the rank-order of each element element in y
     computed over a fixed window length at each x
 
@@ -69,7 +69,7 @@ def python_sliding_rank(x, y, window_length):
 
 
 def test_brute_force_python_rank_comparison():
-    """ Generate some longer datasets for brute force comparison.
+    r""" Generate some longer datasets for brute force comparison.
     """
     npts = 300
     window_length_options = (5, 35, 77, 101, 203)

@@ -9,6 +9,9 @@
 
 - Added `~halotools.utils.fuzzy_digitize` function to `~halotools.utils` sub-package.
 
+- Added `~halotools.utils.sliding_conditional_percentile` function to `~halotools.utils` sub-package.
+
+
 0.6 (2017-12-15)
 ----------------
 

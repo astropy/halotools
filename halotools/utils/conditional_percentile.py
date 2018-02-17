@@ -10,7 +10,7 @@ __all__ = ('sliding_conditional_percentile', )
 
 
 def sliding_conditional_percentile(x, y, window_length):
-    """ Estimate the conditional cumulative distribution function Prob(< y | x)
+    r""" Estimate the conditional cumulative distribution function Prob(< y | x)
     using a sliding window of length ``window_length``.
 
     Parameters
@@ -50,7 +50,7 @@ def sliding_conditional_percentile(x, y, window_length):
 
 
 def rank_order_function(x):
-    """ Calculate the rank-order of each element in an input array.
+    r""" Calculate the rank-order of each element in an input array.
 
     Parameters
     ----------
@@ -70,7 +70,7 @@ def rank_order_function(x):
 
 
 def cython_sliding_rank(x, y, window_length):
-    """
+    r"""
     Return an array storing the rank-order of each element element in y
     computed over a fixed window length at each x
 
@@ -118,7 +118,7 @@ def cython_sliding_rank(x, y, window_length):
 
 
 def _check_xyn_bounds(x, y, n):
-    """ Enforce bounds checks on the inputs
+    r""" Enforce bounds checks on the inputs
     and return 1-d Numpy arrays with appropriate dtype
     """
     x = np.atleast_1d(x).astype('f8')

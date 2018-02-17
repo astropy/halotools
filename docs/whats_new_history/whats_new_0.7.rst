@@ -27,6 +27,10 @@ Probabilistic binning
 The `~halotools.utils.fuzzy_digitize` function in `halotools.utils` allows you to discretize an
 array in a probabilistic fashion, which can be useful for applications of conditional abundance matching.
 
+Estimation of Conditional Probability Distributions
+-----------------------------------------------------
+The `~halotools.utils.sliding_conditional_percentile` function in `halotools.utils` calculates Prob(< y | x) for any arbitrary distribution of two-dimensional data. This function can be used to estimate, for example, quantiles of galaxy size as a function of stellar mass, and also should be useful in applications of conditional abundance matching.
+
 
 New Mock Observables
 ====================
