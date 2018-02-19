@@ -37,6 +37,9 @@ def sliding_conditional_percentile(x, y, window_length):
     and also the performance. For estimations of Prob(< y | x) with sub-percent accuracy,
     values of ``window_length`` must exceed 100.
 
+    See :ref:`cam_tutorial` demonstrating how to use this
+    function in galaxy-halo modeling with several worked examples.
+
     Examples
     --------
     >>> x = np.random.rand(100)
