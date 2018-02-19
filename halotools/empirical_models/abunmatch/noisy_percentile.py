@@ -46,6 +46,9 @@ def noisy_percentile(percentile, correlation_coeff, seed=None, random_percentile
     you to introduce correlations of arbitrary strength with any other variable
     for which you also know the rank-order percentile.
 
+    Also see :ref:`cam_tutorial` demonstrating how to use this
+    function in galaxy-halo modeling with several worked examples.
+
     Parameters
     ----------
     percentile : ndarray
