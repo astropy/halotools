@@ -243,7 +243,7 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     # count marked random pairs
     if do_SR:
         if no_randoms:
-            SR = (-1.0/3.0)*RR
+            SR = (-1.0/3.0)*RR/2.0  # divide by the number of expected SR pairs
         else:
             SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
                                     rbins, period, num_threads,
