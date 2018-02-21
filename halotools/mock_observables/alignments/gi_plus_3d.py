@@ -232,14 +232,6 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     else:
         SD = None
 
-    # count marked random pairs
-    if do_SR:
-        if no_randoms:
-            SR = -1.0/3.0
-        else:
-            SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
-                                    rbins, period, num_threads,
-                                    approx_cell1_size, approx_cell2_size)
     else:
         SR = None
 
@@ -250,6 +242,15 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
                            num_threads, approx_cell1_size, approx_cell2_size)
     else:
         RR = None
+
+    # count marked random pairs
+    if do_SR:
+        if no_randoms:
+            SR = (-1.0/3.0)*RR
+        else:
+            SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
+                                    rbins, period, num_threads,
+                                    approx_cell1_size, approx_cell2_size)
 
     result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
 
