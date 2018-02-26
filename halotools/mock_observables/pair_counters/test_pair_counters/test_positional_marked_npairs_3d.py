@@ -7,7 +7,7 @@ import pytest
 from astropy.utils.misc import NumpyRNGContext
 from astropy.config.paths import _find_home
 
-from ..pairs import wnpairs as pure_python_weighted_pairs
+from .pure_python_positonal_marked_npairs import cos2theta_pairs
 from ..positional_marked_npairs_3d import positional_marked_npairs_3d
 from ..npairs_3d import npairs_3d
 
@@ -18,7 +18,7 @@ from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
-__all__ = ('test_1', 'test_2', 'test_3', 'test_4', 'test_threading', 'test_unweighted_counts')
+__all__ = ('test_1', 'test_2', 'test_3', 'test_4', 'test_threading', 'test_unweighted_counts', 'test_compare_to_pure_python_result')
 
 
 def generate_interlacing_grids(npts_per_dim, period=1.0):
@@ -528,3 +528,54 @@ def test_unweighted_counts():
     msg = ('unweighted counts do no match npairs_3d result')
     assert np.allclose(counts_1, counts_2), msg
 
+
+def test_compare_to_pure_python_result():
+    """
+    test to compare pair counter to a pure python implemnetation.
+    """
+
+    npts = 4
+    random_coords = np.random.random((npts, 3))
+    random_vectors = normalized_vectors(np.random.random((npts, 3))*2.0-1.0)
+
+    weights1 = np.ones((npts, 4))
+    weights1[:, 1] = random_vectors[:, 0]
+    weights1[:, 2] = random_vectors[:, 1]
+    weights1[:, 3] = random_vectors[:, 2]
+    weights2 = np.ones(npts)
+
+    # define radial bins
+    rbins=np.linspace(0.0, 0.3, 5)
+
+    #with PBCs
+    period = np.array([1.0, 1.0, 1.0])
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords , random_coords , rbins,
+                            period=period, weights1=weights1, weights2=weights2,
+                            weight_func_id=4, num_threads=1)
+
+    weighted_counts_2, counts_2 = cos2theta_pairs(random_coords , random_vectors, random_coords , rbins, period=period)
+
+    msg = ('result does not match pure python result')
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg
+
+    #without PBCs
+    period = None
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords , random_coords , rbins,
+                            period=period, weights1=weights1, weights2=weights2,
+                            weight_func_id=4, num_threads=1)
+
+    weighted_counts_2, counts_2 = cos2theta_pairs(random_coords , random_vectors, random_coords , rbins, period=period)
+
+    msg = ('result does not match pure python result')
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg
+
+    #without threads
+    period = np.array([1.0, 1.0, 1.0])
+    weighted_counts_1, counts_1 = positional_marked_npairs_3d(random_coords , random_coords , rbins,
+                            period=period, weights1=weights1, weights2=weights2,
+                            weight_func_id=4, num_threads=3)
+
+    weighted_counts_2, counts_2 = cos2theta_pairs(random_coords , random_vectors, random_coords , rbins, period=period)
+
+    msg = ('result does not match pure python result')
+    assert np.allclose(weighted_counts_1, weighted_counts_2), msg

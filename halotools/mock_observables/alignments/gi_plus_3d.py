@@ -244,7 +244,7 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     # count marked random pairs
     if do_SR:
         if no_randoms:
-            SR = (-1./6.)*RR
+            SR = (-1.0/3.0)*RR/2.0  # divide by the number of expected SR pairs
         else:
             SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
                                     rbins, period, num_threads,
@@ -256,15 +256,12 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
 
     return result
 
-def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Natural'):
+def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Landy-Szalay'):
     r"""
     apply the supplied GI estimator to calculate the correlation function.
     """
 
-    if estimator == 'Natural':
-        factor = (NR1*NR2)/(N1*N2)
-        return factor*(SD/RR)
-    elif estimator == 'Landy-Szalay':
+    if estimator == 'Landy-Szalay':
         factor = (NR1*NR2)/(N1*N2)
         return factor*(SD-SR)/RR
     else:
@@ -280,11 +277,7 @@ def GI_estimator_requirements(estimator):
     do_SR = False
     do_RR = False
 
-    if estimator == 'Natural':
-        do_SD = True
-        do_RR = True
-        return do_SD, do_SR, do_RR
-    elif estimator == 'Landy-Szalay':
+    if estimator == 'Landy-Szalay':
         do_SD = True
         do_SR = True
         do_RR = True
