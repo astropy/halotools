@@ -171,7 +171,7 @@ def ee_projected(sample1, orientations1, sample2, orientations2, rp_bins, pi_max
                                      approx_cell1_size=approx_cell1_size, approx_cell2_size=approx_cell2_size)
     marked_counts = np.diff(np.diff(marked_counts, axis=0), axis=1)
 
-    # if no weights, use fast un-weihgted pair counter
+    # if no weights, use fast un-weighted pair counter
     if np.all(weights1==1.0) & np.all(weights2==1.0):
         counts = npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                        period=period, verbose=False, num_threads=num_threads,
