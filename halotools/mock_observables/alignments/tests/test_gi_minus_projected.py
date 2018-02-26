@@ -1,5 +1,5 @@
 """
-Module providing unit-testing for the `~halotools.mock_observables.alignments.gi_minus_projected` function.
+Module providing unit-testing for the `~halotools.mock_observables.alignments.w_gplus` function.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -15,12 +15,12 @@ from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
-__all__ = ('test_returned_shape', 'test_threading', 'test_estimators', 'test_orientation_usage')
+__all__ = ('test_w_gplus_returned_shape', 'test_w_gplus_threading', 'test_orientation_usage')
 
 fixed_seed = 43
 
 
-def test_returned_shape():
+def test_w_gminus_returned_shape():
     """
     make sure the result that is returned has the correct shape
     """
@@ -62,7 +62,7 @@ def test_returned_shape():
     assert np.shape(result_2) == (len(rp_bins)-1, )
 
 
-def test_threading():
+def test_w_gminus_threading():
     """
     test to make sure the results are consistent when num_threads=1 or >1
     """
@@ -100,7 +100,7 @@ def test_threading():
     assert np.allclose(result_1, result_2)
 
 
-def test_estimators():
+def test_w_gminus_estimators():
     """
     test to make sure the results are consistent with the supplied estimator
     """
@@ -168,5 +168,3 @@ def test_orientation_usage():
         rp_bins, pi_max, period=period, num_threads=1, estimator='Natural')
     
     assert not np.allclose(result_1, result_2)
-
-

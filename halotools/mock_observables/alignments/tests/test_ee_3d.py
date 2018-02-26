@@ -41,7 +41,7 @@ def test_shape():
     assert np.shape(result_1) == (len(rbins)-1, )
 
     result_2 = ee_3d(sample1, random_orientation, sample1, random_orientation,
-        rbins, period=period, num_threads=3)
+        rbins, period=period, num_threads=1)
 
     assert np.shape(result_2) == (len(rbins)-1, )
 
@@ -110,7 +110,7 @@ def test_pbcs():
         rbins, period=period, num_threads=1)
 
     result_2 = ee_3d(sample1, random_orientation1, sample1, random_orientation2,
-        rbins, period=None, num_threads=3)
+        rbins, period=None, num_threads=1)
     
     tol = 10.0/ND
 

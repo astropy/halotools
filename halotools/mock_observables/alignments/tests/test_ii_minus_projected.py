@@ -15,7 +15,7 @@ from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
-__all__ = ('test_wminus_returned_shape', 'test_w_minus_threading', 'test_orientation_usage')
+__all__ = ('test_wminus_returned_shape', 'test_w_minus_threading', 'test_orientation_usage', 'test_round_result', 'test_position_usage')
 
 fixed_seed = 43
 
@@ -210,6 +210,32 @@ def test_integration_range():
         random_orientation, random_ellipticities, rp_bins, pi_max_2, period=period, num_threads=1, estimator='Natural')
     
     assert not np.allclose(result_1, result_2)
+
+def test_round_result():
+    """
+    test to make sure the projected correlation comes out as zero in the case of non-elliptical input
+    """
+
+    ND = 100
+    NR = 100
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((ND, 3))
+        sample2 = np.random.random((ND, 3))
+
+    period = np.array([1.0, 1.0, 1.0])
+    rp_bins = np.linspace(0.001, 0.3, 5)
+
+    pi_max = 0.2
+
+    random_orientation_1 = np.random.random((len(sample1), 2))
+    random_orientation_2 = np.random.random((len(sample1), 2))
+    zero_ellipticities = np.zeros((len(sample1)))
+
+    # analytic randoms
+    result_1 = ii_minus_projected(sample1, random_orientation_1, zero_ellipticities, sample2,
+        random_orientation_2, zero_ellipticities, rp_bins, pi_max, period=period, num_threads=1)
+    
+    assert np.allclose(result_1, 0.0)
 
 
 def test_position_usage():
