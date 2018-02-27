@@ -51,3 +51,9 @@ Rotations, dot products, and other operations in 3d space
     rotation_matrices_from_vectors
     rotate_vector_collection
 
+Probabilistic binning
+===============================================================
+
+.. autosummary::
+
+    fuzzy_digitize

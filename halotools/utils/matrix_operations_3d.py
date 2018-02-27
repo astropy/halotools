@@ -263,7 +263,7 @@ def rotation_matrices_from_vectors(v0, v1):
     return rotation_matrices_from_angles(angles, directions)
 
 
-def rotate_vector_collection(rotation_matrices, vectors):
+def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     r""" Given a collection of rotation matrices and a collection of 3d vectors,
     apply each matrix to rotate the corresponding vector.
 
@@ -295,4 +295,7 @@ def rotate_vector_collection(rotation_matrices, vectors):
     >>> v2 = rotate_vector_collection(rotation_matrices, v0)
     >>> assert np.allclose(v1, v2)
     """
-    return np.einsum('ijk,ik->ij', rotation_matrices, vectors)
+    try:
+        return np.einsum('ijk,ik->ij', rotation_matrices, vectors, optimize=optimize)
+    except TypeError:
+        return np.einsum('ijk,ik->ij', rotation_matrices, vectors)
