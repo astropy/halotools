@@ -317,7 +317,8 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rbins,
                 weights1=ran_weights1, weights2=ran_weights2,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
-        RR = np.diff(np.diff(RR, axis=0), axis=1)
+
+        RR = np.diff(RR, axis=0)
         RR = RR.flatten()
 
         return RR

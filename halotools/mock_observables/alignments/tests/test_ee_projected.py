@@ -9,7 +9,7 @@ import warnings
 import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..ed_3d import ed_3d
+from ..ee_projected import ee_projected
 
 from ....custom_exceptions import HalotoolsError
 
@@ -28,21 +28,22 @@ def test_shape():
     ND = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
-        random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_orientation = np.random.random((len(sample1), 2))*2 - 1.0
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
+    pi_max = 0.2
 
     # analytic randoms
-    result_1 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=1)
+    result_1 = ee_projected(sample1, random_orientation, sample1, random_orientation,
+        rbins, pi_max, period=period, num_threads=1)
 
-    assert np.shape(result_1) == (len(rbins)-1, )
+    assert np.shape(result_1) == (len(rbins)-1, 1)
 
-    result_2 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=3)
+    result_2 = ee_projected(sample1, random_orientation, sample1, random_orientation,
+        rbins, pi_max, period=period, num_threads=1)
 
-    assert np.shape(result_2) == (len(rbins)-1, )
+    assert np.shape(result_2) == (len(rbins)-1, 1)
 
 
 def test_threading():
@@ -53,16 +54,17 @@ def test_threading():
     ND = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
-        random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_orientation = np.random.random((len(sample1), 2))*2 - 1.0
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
+    pi_max = 0.2
 
-    result_1 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=1)
+    result_1 = ee_projected(sample1, random_orientation, sample1, random_orientation,
+        rbins, pi_max, period=period, num_threads=1)
 
-    result_2 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=3)
+    result_2 = ee_projected(sample1, random_orientation, sample1, random_orientation,
+        rbins, pi_max, period=period, num_threads=3)
 
     assert np.allclose(result_1, result_2)
 
@@ -75,16 +77,17 @@ def test_pbcs():
     ND = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
-        random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_orientation = np.random.random((len(sample1), 2))*2 - 1.0
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
+    pi_max = 0.2
 
-    result_1 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=1)
+    result_1 = ee_projected(sample1, random_orientation, sample1, random_orientation,
+        rbins, pi_max, period=period, num_threads=1)
 
-    result_2 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=None, num_threads=1)
+    result_2 = ee_projected(sample1, random_orientation, sample1, random_orientation,
+        rbins, pi_max, period=None, num_threads=1)
     
     tol = 10.0/ND
 
@@ -100,13 +103,14 @@ def test_random_result():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
-        random_orientation1 = np.random.random((len(sample1), 3))*2 - 1.0
+        random_orientation1 = np.random.random((len(sample1), 2))*2 - 1.0
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
+    pi_max = 0.2
 
-    result_1 = ed_3d(sample1, random_orientation1, sample2,
-        rbins, period=period, num_threads=1)
+    result_1 = ee_projected(sample1, random_orientation1, sample2, random_orientation1,
+        rbins, pi_max, period=period, num_threads=1)
     
     tol = 10.0/ND
 

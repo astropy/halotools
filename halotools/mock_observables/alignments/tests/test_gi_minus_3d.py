@@ -9,13 +9,13 @@ import warnings
 import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..ed_3d import ed_3d
+from ..gi_minus_3d import gi_minus_3d
 
 from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
-__all__ = ('test_shape', 'test_threading', 'test_pbcs', 'test_random_result')
+__all__ = ('test_shape', 'test_threading', 'test_pbcs', 'test_2pt_estimator', 'test_random_result')
 
 fixed_seed = 43
 
@@ -29,18 +29,19 @@ def test_shape():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_ellipticities = np.random.random((len(sample1)))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
 
     # analytic randoms
-    result_1 = ed_3d(sample1, random_orientation, sample1,
+    result_1 = gi_minus_3d(sample1, random_orientation, random_ellipticities, sample1,
         rbins, period=period, num_threads=1)
 
     assert np.shape(result_1) == (len(rbins)-1, )
 
-    result_2 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=3)
+    result_2 = gi_minus_3d(sample1, random_orientation, random_ellipticities, sample1,
+        rbins, period=period, num_threads=1)
 
     assert np.shape(result_2) == (len(rbins)-1, )
 
@@ -54,18 +55,18 @@ def test_threading():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_ellipticities = np.random.random((len(sample1)))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
 
-    result_1 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=1)
+    result_1 = gi_minus_3d(sample1, random_orientation, random_ellipticities, 
+        sample1, rbins, period=period, num_threads=1)
 
-    result_2 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=3)
+    result_2 = gi_minus_3d(sample1, random_orientation, random_ellipticities, 
+        sample1, rbins, period=period, num_threads=3)
 
     assert np.allclose(result_1, result_2)
-
 
 def test_pbcs():
     """
@@ -76,15 +77,18 @@ def test_pbcs():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_ellipticities = np.random.random((len(sample1)))
+        randoms1 = np.random.random((ND, 3))
+        randoms2 = np.random.random((ND, 3))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
 
-    result_1 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=period, num_threads=1)
+    result_1 = gi_minus_3d(sample1, random_orientation, random_ellipticities,
+        sample1, rbins, period=period, num_threads=1)
 
-    result_2 = ed_3d(sample1, random_orientation, sample1,
-        rbins, period=None, num_threads=1)
+    result_2 = gi_minus_3d(sample1, random_orientation, random_ellipticities,
+        sample1, rbins, period=None, randoms1=randoms1, randoms2=randoms2, num_threads=1)
     
     tol = 10.0/ND
 
@@ -98,17 +102,19 @@ def test_random_result():
 
     ND = 10000
     with NumpyRNGContext(fixed_seed):
+        randoms1 = np.random.random((ND, 3))
+        randoms2 = np.random.random((ND, 3))
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
-        random_orientation1 = np.random.random((len(sample1), 3))*2 - 1.0
+        random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
+        random_ellipticities = np.random.random((len(sample1)))
 
     period = np.array([1.0, 1.0, 1.0])
     rbins = np.linspace(0.001, 0.3, 5)
 
-    result_1 = ed_3d(sample1, random_orientation1, sample2,
-        rbins, period=period, num_threads=1)
+    result_1 = gi_minus_3d(sample1, random_orientation, random_ellipticities,
+        sample2, rbins, period=period, num_threads=1)
     
     tol = 10.0/ND
 
     assert np.allclose(result_1, 0.0, atol=tol)
-

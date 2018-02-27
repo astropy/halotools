@@ -197,20 +197,21 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
-    if no_randoms:  # set random density the the same as the sampels
+    if no_randoms:  # set random density the same as the samples
         NR1 = N1
         NR2 = N2
     else:
         NR1 = len(randoms1)
         NR2 = len(randoms2)
 
-    #define merk vectors to use in pair counting
+    #define mark vectors to use in pair counting
     # sample 1
     marks1 = np.ones((N1, 4))
     marks1[:, 0] = ellipticities1 * weights1
     marks1[:, 1] = orientations1[:, 0]
     marks1[:, 2] = orientations1[:, 1]
     marks1[:, 3] = orientations1[:, 2]
+
     # sample 2
     marks2 = weights2
     # randoms 1
@@ -255,7 +256,6 @@ def gi_plus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
 
     return result
 
-
 def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Landy-Szalay'):
     r"""
     apply the supplied GI estimator to calculate the correlation function.
@@ -294,10 +294,8 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rbins, period,
     """
 
     weight_func_id = 2
-    SD = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,
-        weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
-        num_threads=num_threads, approx_cell1_size=approx_cell1_size,
-        approx_cell2_size=approx_cell1_size)[0]
+    SD = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,num_threads=num_threads, approx_cell1_size=approx_cell1_size,approx_cell2_size=approx_cell2_size)[0]
+
     SD = np.diff(SD, axis=0)
 
     return SD
