@@ -105,7 +105,7 @@ def test_orientation_usage():
     test to make sure the results are sensitive to the orientations passed in
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
 
@@ -133,7 +133,7 @@ def test_ellipticity_usage():
     test to make sure the results are sensitive to the ellipticities passed in
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
 
@@ -161,7 +161,7 @@ def test_rpbinning_usage():
     test to make sure the results are sensitive to the rp bin edges passed in
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
 
@@ -189,7 +189,7 @@ def test_integration_range():
     test to make sure the results are sensitive to the line of sight integration range
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
 
@@ -243,7 +243,7 @@ def test_position_usage():
     test to make sure the results are sensitive to the position coordinates passed in
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))

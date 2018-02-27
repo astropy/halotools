@@ -25,7 +25,7 @@ def test_shape():
     make sure the result that is returned has the correct shape
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
 
@@ -51,7 +51,7 @@ def test_threading():
     test to make sure the results are consistent when num_threads=1 or >1
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
@@ -75,7 +75,7 @@ def test_random_result():
     test to make sure the correlation function returns the expected result for a random distribution of orientations
     """
 
-    ND = 10000
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
@@ -96,7 +96,7 @@ def test_pbcs():
     test to make sure the results are consistent with and without PBCs
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
@@ -123,7 +123,7 @@ def test_random_result():
     test to make sure the correlation function returns the expected result for a random distribution of orientations
     """
 
-    ND = 10000
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))

@@ -25,7 +25,7 @@ def test_shape():
     make sure the result that is returned has the correct shape
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         random_orientation1 = np.random.random((len(sample1), 3))*2 - 1.0
@@ -51,7 +51,7 @@ def test_threading():
     test to make sure the results are consistent when num_threads=1 or >1
     """
 
-    ND = 100
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         random_orientation = np.random.random((len(sample1), 3))*2 - 1.0
@@ -73,7 +73,7 @@ def test_round_result():
     Test to make sure the correlation comes out as expected in the case of non-elliptical input.
     """
 
-    ND = 10000
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
@@ -88,7 +88,7 @@ def test_round_result():
     result_1 = ii_plus_3d(sample1, random_orientation_1, zero_ellipticities,
         sample2,  random_orientation_2, zero_ellipticities, rbins, period=period, num_threads=1)
 
-    tol = 10.0/ND
+    tol = 2*10.0/ND
     
     assert np.allclose(result_1, 0.0, atol=tol)
 
@@ -101,7 +101,7 @@ def test_random_result():
     It actually comes out as (1/6)*(1/6)
     """
 
-    ND = 10000
+    ND = 1000
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((ND, 3))
         sample2 = np.random.random((ND, 3))
@@ -116,7 +116,7 @@ def test_random_result():
     result_1 = ii_plus_3d(sample1, random_orientation1, random_ellipticities1,
         sample2,  random_orientation2, random_ellipticities2, rbins, period=period, num_threads=1)
     
-    tol = 10.0/ND
+    tol = 2*10.0/ND
 
     assert np.allclose(result_1, 1./36., atol=tol)
 
