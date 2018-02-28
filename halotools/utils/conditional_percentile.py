@@ -51,7 +51,8 @@ def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False
     >>> window_length = 5
     >>> result = sliding_conditional_percentile(x, y, window_length)
     """
-    rank_orders = cython_sliding_rank(x, y, window_length)
+    rank_orders = cython_sliding_rank(x, y, window_length,
+                assume_x_is_sorted=assume_x_is_sorted)
     rank_order_percentiles = (1. + rank_orders)/float(window_length+1)
     return rank_order_percentiles
 
@@ -76,7 +77,7 @@ def rank_order_function(x):
     return unsorting_indices(np.argsort(x))
 
 
-def cython_sliding_rank(x, y, window_length):
+def cython_sliding_rank(x, y, window_length, assume_x_is_sorted=False):
     r"""
     Return an array storing the rank-order of each element element in y
     computed over a fixed window length at each x
@@ -94,6 +95,10 @@ def cython_sliding_rank(x, y, window_length):
     window_length : int
         Integer must be odd and less than ``npts``
 
+    assume_x_is_sorted : bool, optional
+        Performance enhancement flag that can be used for cases where input `x`
+        has already been sorted. Default is False.
+
     Returns
     -------
     sliding_rank_orders : ndarray
@@ -109,9 +114,12 @@ def cython_sliding_rank(x, y, window_length):
     x, y, nwin = _check_xyn_bounds(x, y, window_length)
     nhalfwin = int(nwin/2)
 
-    indx_x_sorted = np.argsort(x)
-    indx_x_unsorted = unsorting_indices(indx_x_sorted)
-    y_sorted = y[indx_x_sorted]
+    if assume_x_is_sorted:
+        y_sorted = y
+    else:
+        indx_x_sorted = np.argsort(x)
+        indx_x_unsorted = unsorting_indices(indx_x_sorted)
+        y_sorted = y[indx_x_sorted]
 
     result = np.array(cython_conditional_rank_kernel(y_sorted, nwin))
 
@@ -121,7 +129,10 @@ def cython_sliding_rank(x, y, window_length):
     rightmost_window_ranks = rank_order_function(y_sorted[-nwin:])
     result[-nhalfwin-1:] = rightmost_window_ranks[-nhalfwin-1:]
 
-    return result[indx_x_unsorted].astype(int)
+    if assume_x_is_sorted:
+        return result.astype(int)
+    else:
+        return result[indx_x_unsorted].astype(int)
 
 
 def _check_xyn_bounds(x, y, n):

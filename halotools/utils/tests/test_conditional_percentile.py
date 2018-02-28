@@ -93,7 +93,20 @@ def test_brute_force_python_rank_comparison():
     assert num_failures == 0, msg.format(num_failures, num_tests)
 
 
-def test_assume_x_is_sorted():
+def test1_assume_x_is_sorted():
+    npts = 1000
+    with NumpyRNGContext(fixed_seed):
+        x = np.sort(np.random.random(npts))
+        y = np.random.random(npts)
+    window_length = 101
+    p1 = sliding_conditional_percentile(deepcopy(x), deepcopy(y), window_length,
+            assume_x_is_sorted=True)
+    p2 = sliding_conditional_percentile(deepcopy(x), deepcopy(y), window_length,
+            assume_x_is_sorted=False)
+    assert np.allclose(p1, p2)
+
+
+def test2_assume_x_is_sorted():
     npts = 1000
     with NumpyRNGContext(fixed_seed):
         x = np.random.random(npts)
@@ -103,6 +116,24 @@ def test_assume_x_is_sorted():
             assume_x_is_sorted=True)
     p2 = sliding_conditional_percentile(deepcopy(x), deepcopy(y), window_length,
             assume_x_is_sorted=False)
-    assert np.all(p1 != p2)
+    assert not np.allclose(p1, p2)
 
 
+def test3_assume_x_is_sorted():
+    npts = 1000
+    with NumpyRNGContext(fixed_seed):
+        x = np.random.random(npts)
+        y = np.random.random(npts)
+    window_length = 101
+    p1 = sliding_conditional_percentile(deepcopy(x), deepcopy(y), window_length,
+            assume_x_is_sorted=False)
+
+    indx_x_sorted = np.argsort(x)
+    indx_x_unsorted = unsorting_indices(indx_x_sorted)
+    x_sorted = x[indx_x_sorted]
+    y_sorted = y[indx_x_sorted]
+    p2_sorted = sliding_conditional_percentile(x_sorted, y_sorted, window_length,
+            assume_x_is_sorted=True)
+    p2 = p2_sorted[indx_x_unsorted]
+
+    assert np.allclose(p1, p2)
