@@ -9,7 +9,7 @@ from .engines import cython_conditional_rank_kernel
 __all__ = ('sliding_conditional_percentile', )
 
 
-def sliding_conditional_percentile(x, y, window_length):
+def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False):
     r""" Estimate the conditional cumulative distribution function Prob(< y | x)
     using a sliding window of length ``window_length``.
 
@@ -23,6 +23,10 @@ def sliding_conditional_percentile(x, y, window_length):
 
     window_length : int
         Integer must be odd and less than ``npts``
+
+    assume_x_is_sorted : bool, optional
+        Performance enhancement flag that can be used for cases where input `x`
+        has already been sorted. Default is False.
 
     Returns
     -------
