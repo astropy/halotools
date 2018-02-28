@@ -3,13 +3,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
+
 from .array_utils import unsorting_indices
 from .engines import cython_conditional_rank_kernel
 
 __all__ = ('sliding_conditional_percentile', )
 
 
-def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False):
+def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False,
+            add_subgrid_noise=True, seed=None):
     r""" Estimate the conditional cumulative distribution function Prob(< y | x)
     using a sliding window of length ``window_length``.
 
@@ -27,6 +30,15 @@ def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False
     assume_x_is_sorted : bool, optional
         Performance enhancement flag that can be used for cases where input `x`
         has already been sorted. Default is False.
+
+    add_subgrid_noise : bool, optional
+        Flag determines whether random uniform noise will be added to fill in
+        the gaps at the sub-grid level determined by `window_length`. Default is True.
+
+    seed : int, optional
+        Random number seed used together with the `add_subgrid_noise` argument
+        to minimize discreteness effects due to the finite window size over which
+        Prob(< y | x) is estimated. Default is None, for stochastic results.
 
     Returns
     -------
@@ -54,6 +66,15 @@ def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False
     rank_orders = cython_sliding_rank(x, y, window_length,
                 assume_x_is_sorted=assume_x_is_sorted)
     rank_order_percentiles = (1. + rank_orders)/float(window_length+1)
+
+    if add_subgrid_noise:
+        dp = 1./float(window_length+1)
+        low = rank_order_percentiles - dp
+        high = rank_order_percentiles + dp
+        npts = len(rank_order_percentiles)
+        with NumpyRNGContext(seed):
+            rank_order_percentiles = np.random.uniform(low, high, npts)
+
     return rank_order_percentiles
 
 
