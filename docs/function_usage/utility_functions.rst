@@ -47,6 +47,7 @@ Rotations, dot products, and other operations in 3d space
 
     elementwise_dot
     angles_between_list_of_vectors
+    vectors_between_list_of_vectors
     rotation_matrices_from_angles
     rotation_matrices_from_vectors
     rotate_vector_collection

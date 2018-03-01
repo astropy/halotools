@@ -8,7 +8,7 @@ import numpy as np
 __all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
         'angles_between_list_of_vectors', 'vectors_normal_to_planes',
         'rotate_vector_collection', 'rotation_matrices_from_angles',
-        'rotation_matrices_from_vectors', 'vectors_between_two_lists_of_vectors')
+        'rotation_matrices_from_vectors', 'vectors_between_list_of_vectors')
 
 
 def elementwise_dot(x, y):
@@ -168,12 +168,12 @@ def vectors_normal_to_planes(x, y):
     return normalized_vectors(np.cross(x, y))
 
 
-def vectors_between_two_lists_of_vectors(x, y, p):
+def vectors_between_list_of_vectors(x, y, p):
     r"""
-    Starting from two lists of vectors, return a list of vectors
+    Starting from two input lists of vectors, return a list of vectors
     that lie in the same plane as the corresponding input vectors,
-    and where the input `p` allows the returned vectors to smoothly vary
-    between the input `x` and `y`.
+    and where the input `p` controls the angle between
+    the returned vs. input vectors.
 
     Parameters
     ----------
@@ -206,7 +206,7 @@ def vectors_between_two_lists_of_vectors(x, y, p):
     >>> x = np.random.random((npts, 3))
     >>> y = np.random.random((npts, 3))
     >>> p = np.random.uniform(0, 1, npts)
-    >>> v = vectors_between_two_lists_of_vectors(x, y, p)
+    >>> v = vectors_between_list_of_vectors(x, y, p)
     >>> angles_xy = angles_between_list_of_vectors(x, y)
     >>> angles_xp = angles_between_list_of_vectors(x, v)
     >>> assert np.allclose(angles_xy*p, angles_xp)
