@@ -3,13 +3,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from astropy.utils.misc import NumpyRNGContext
+
 from .array_utils import unsorting_indices
 from .engines import cython_conditional_rank_kernel
 
 __all__ = ('sliding_conditional_percentile', )
 
 
-def sliding_conditional_percentile(x, y, window_length):
+def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False,
+            add_subgrid_noise=True, seed=None):
     r""" Estimate the conditional cumulative distribution function Prob(< y | x)
     using a sliding window of length ``window_length``.
 
@@ -23,6 +26,19 @@ def sliding_conditional_percentile(x, y, window_length):
 
     window_length : int
         Integer must be odd and less than ``npts``
+
+    assume_x_is_sorted : bool, optional
+        Performance enhancement flag that can be used for cases where input `x`
+        has already been sorted. Default is False.
+
+    add_subgrid_noise : bool, optional
+        Flag determines whether random uniform noise will be added to fill in
+        the gaps at the sub-grid level determined by `window_length`. Default is True.
+
+    seed : int, optional
+        Random number seed used together with the `add_subgrid_noise` argument
+        to minimize discreteness effects due to the finite window size over which
+        Prob(< y | x) is estimated. Default is None, for stochastic results.
 
     Returns
     -------
@@ -47,8 +63,18 @@ def sliding_conditional_percentile(x, y, window_length):
     >>> window_length = 5
     >>> result = sliding_conditional_percentile(x, y, window_length)
     """
-    rank_orders = cython_sliding_rank(x, y, window_length)
+    rank_orders = cython_sliding_rank(x, y, window_length,
+                assume_x_is_sorted=assume_x_is_sorted)
     rank_order_percentiles = (1. + rank_orders)/float(window_length+1)
+
+    if add_subgrid_noise:
+        dp = 1./float(window_length+1)
+        low = rank_order_percentiles - dp
+        high = rank_order_percentiles + dp
+        npts = len(rank_order_percentiles)
+        with NumpyRNGContext(seed):
+            rank_order_percentiles = np.random.uniform(low, high, npts)
+
     return rank_order_percentiles
 
 
@@ -72,7 +98,7 @@ def rank_order_function(x):
     return unsorting_indices(np.argsort(x))
 
 
-def cython_sliding_rank(x, y, window_length):
+def cython_sliding_rank(x, y, window_length, assume_x_is_sorted=False):
     r"""
     Return an array storing the rank-order of each element element in y
     computed over a fixed window length at each x
@@ -90,6 +116,10 @@ def cython_sliding_rank(x, y, window_length):
     window_length : int
         Integer must be odd and less than ``npts``
 
+    assume_x_is_sorted : bool, optional
+        Performance enhancement flag that can be used for cases where input `x`
+        has already been sorted. Default is False.
+
     Returns
     -------
     sliding_rank_orders : ndarray
@@ -105,9 +135,12 @@ def cython_sliding_rank(x, y, window_length):
     x, y, nwin = _check_xyn_bounds(x, y, window_length)
     nhalfwin = int(nwin/2)
 
-    indx_x_sorted = np.argsort(x)
-    indx_x_unsorted = unsorting_indices(indx_x_sorted)
-    y_sorted = y[indx_x_sorted]
+    if assume_x_is_sorted:
+        y_sorted = y
+    else:
+        indx_x_sorted = np.argsort(x)
+        indx_x_unsorted = unsorting_indices(indx_x_sorted)
+        y_sorted = y[indx_x_sorted]
 
     result = np.array(cython_conditional_rank_kernel(y_sorted, nwin))
 
@@ -117,7 +150,10 @@ def cython_sliding_rank(x, y, window_length):
     rightmost_window_ranks = rank_order_function(y_sorted[-nwin:])
     result[-nhalfwin-1:] = rightmost_window_ranks[-nhalfwin-1:]
 
-    return result[indx_x_unsorted].astype(int)
+    if assume_x_is_sorted:
+        return result.astype(int)
+    else:
+        return result[indx_x_unsorted].astype(int)
 
 
 def _check_xyn_bounds(x, y, n):
