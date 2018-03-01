@@ -8,7 +8,7 @@ import numpy as np
 __all__ = ('elementwise_dot', 'elementwise_norm', 'normalized_vectors',
         'angles_between_list_of_vectors', 'vectors_normal_to_planes',
         'rotate_vector_collection', 'rotation_matrices_from_angles',
-        'rotation_matrices_from_vectors')
+        'rotation_matrices_from_vectors', 'vectors_between_two_lists_of_vectors')
 
 
 def elementwise_dot(x, y):
@@ -166,6 +166,59 @@ def vectors_normal_to_planes(x, y):
 
     """
     return normalized_vectors(np.cross(x, y))
+
+
+def vectors_between_two_lists_of_vectors(x, y, p):
+    r"""
+    Starting from two lists of vectors, return a list of vectors
+    that lie in the same plane as the corresponding input vectors,
+    and where the input `p` allows the returned vectors to smoothly vary
+    between the input `x` and `y`.
+
+    Parameters
+    ----------
+    x : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `x` will be ignored.
+
+    y : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `y` will be ignored.
+
+    p : ndarray
+        Numpy array of shape (npts, ) storing values in the closed interval [0, 1].
+        For values of `p` equal to zero, the returned vectors will be
+        exactly aligned with the input `x`; when `p` equals unity, the returned
+        vectors will be aligned with `y`.
+
+    Returns
+    -------
+    v : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+        lying in the plane spanned by `x` and `y`. The angle between `v` and `x`
+        will be equal to :math:`p*\theta_{\rm xy}`.
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> x = np.random.random((npts, 3))
+    >>> y = np.random.random((npts, 3))
+    >>> p = np.random.uniform(0, 1, npts)
+    >>> v = vectors_between_two_lists_of_vectors(x, y, p)
+    >>> angles_xy = angles_between_list_of_vectors(x, y)
+    >>> angles_xp = angles_between_list_of_vectors(x, v)
+    >>> assert np.allclose(angles_xy*p, angles_xp)
+    """
+    assert np.all(p >= 0), "All values of p must be non-negative"
+    assert np.all(p <= 1), "No value of p can exceed unity"
+
+    z = vectors_normal_to_planes(x, y)
+    theta = angles_between_list_of_vectors(x, y)
+    angles = p*theta
+    rotation_matrices = rotation_matrices_from_angles(angles, z)
+    return rotate_vector_collection(rotation_matrices, x)
 
 
 def rotation_matrices_from_angles(angles, directions):
