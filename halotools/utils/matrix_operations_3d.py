@@ -170,7 +170,7 @@ def vectors_normal_to_planes(x, y):
 
 def vectors_between_list_of_vectors(x, y, p):
     r"""
-    Starting from two input lists of vectors, return a list of vectors
+    Starting from two input lists of vectors, return a list of unit-vectors
     that lie in the same plane as the corresponding input vectors,
     and where the input `p` controls the angle between
     the returned vs. input vectors.
@@ -196,7 +196,7 @@ def vectors_between_list_of_vectors(x, y, p):
     Returns
     -------
     v : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+        Numpy array of shape (npts, 3) storing a collection of 3d unit-vectors
         lying in the plane spanned by `x` and `y`. The angle between `v` and `x`
         will be equal to :math:`p*\theta_{\rm xy}`.
 
@@ -218,7 +218,7 @@ def vectors_between_list_of_vectors(x, y, p):
     theta = angles_between_list_of_vectors(x, y)
     angles = p*theta
     rotation_matrices = rotation_matrices_from_angles(angles, z)
-    return rotate_vector_collection(rotation_matrices, x)
+    return normalized_vectors(rotate_vector_collection(rotation_matrices, x))
 
 
 def rotation_matrices_from_angles(angles, directions):
