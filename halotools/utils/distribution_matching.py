@@ -80,7 +80,7 @@ def distribution_matching_indices(input_distribution, output_distribution,
 
 def resample_x_to_match_y(x, y, bins, seed=None):
     """ Return the indices that resample `x` (with replacement) so that the
-    resampled distribution matches the histogram of `y` tabulated in the input `bins`.
+    resampled distribution matches the histogram of `y`.
     The returned indexing array will be sorted so that
     the i^th element of x[idx] is as close as possible to the
     i^th value of x, subject to the the constraint that x[idx] matches y.
@@ -94,7 +94,8 @@ def resample_x_to_match_y(x, y, bins, seed=None):
         Numpy array of shape (ny, )
 
     bins : ndarray
-        Numpy array of shape (nbins, )
+        Numpy array of shape (nbins, ) defining how the distribution `y`
+        will be binned to evaluate its PDF.
 
     seed : int, optional
         Random number seed used to generate indices.

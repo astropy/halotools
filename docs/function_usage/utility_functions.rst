@@ -38,7 +38,7 @@ Matching one distribution to another
 .. autosummary::
 
     distribution_matching_indices
-
+    resample_x_to_match_y
 
 Rotations, dot products, and other operations in 3d space
 ===============================================================

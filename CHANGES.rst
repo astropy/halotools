@@ -11,6 +11,8 @@
 
 - Added `~halotools.utils.sliding_conditional_percentile` function to `~halotools.utils` sub-package.
 
+- Added new `resample_x_to_match_y` function to `halotools.utils`.
+
 
 0.6 (2017-12-15)
 ----------------
