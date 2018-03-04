@@ -5,7 +5,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 
-__all__ = ('distribution_matching_indices', )
+__all__ = ('distribution_matching_indices', 'resample_x_to_match_y')
 
 
 def distribution_matching_indices(input_distribution, output_distribution,
@@ -32,7 +32,8 @@ def distribution_matching_indices(input_distribution, output_distribution,
         determined by `numpy.histogram`.
 
     seed : int, optional
-        Random number seed used to generate indices. Default is None for stochastic results.
+        Random number seed used to generate indices.
+        Default is None for stochastic results.
 
     Returns
     -------
@@ -74,4 +75,51 @@ def distribution_matching_indices(input_distribution, output_distribution,
     candidate_indices = np.arange(len(input_distribution))
     with NumpyRNGContext(seed):
         indices = np.random.choice(candidate_indices, size=nselect, replace=True, p=prob_select)
+    return indices
+
+
+def resample_x_to_match_y(x, y, bins, seed=None):
+    """ Return the indices that resample `x` (with replacement) so that the
+    resampled distribution matches the histogram of `y`.
+    The returned indexing array will be sorted so that
+    the i^th element of x[idx] is as close as possible to the
+    i^th value of x, subject to the the constraint that x[idx] matches y.
+
+    Parameters
+    ----------
+    x : ndarray
+        Numpy array of shape (nx, )
+
+    y : ndarray
+        Numpy array of shape (ny, )
+
+    bins : ndarray
+        Numpy array of shape (nbins, ) defining how the distribution `y`
+        will be binned to evaluate its PDF.
+
+    seed : int, optional
+        Random number seed used to generate indices.
+        Default is None for stochastic results.
+
+    Returns
+    -------
+    indices : ndarray
+        Numpy array of shape (nx, )
+
+    Examples
+    --------
+    >>> nx, ny = int(1e5), int(1e4)
+    >>> x = np.random.normal(loc=0, size=nx, scale=1)
+    >>> y = np.random.normal(loc=1, size=ny, scale=0.5)
+    >>> bins = np.linspace(-5, 5, 100)
+    >>> indices = resample_x_to_match_y(x, y, bins)
+    >>> rescaled_x = x[indices]
+    """
+    nselect = len(x)
+    idx = distribution_matching_indices(x, y, nselect, bins, seed=seed)
+    xnew = x[idx]
+    idx_sorted_xnew = np.argsort(xnew)
+    idx_sorted_x = np.argsort(x)
+    indices = np.empty_like(x).astype(int)
+    indices[idx_sorted_x] = idx[idx_sorted_xnew]
     return indices
