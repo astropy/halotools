@@ -108,7 +108,7 @@ Now we show how to map star-formation rate onto these halos using CAM.
 
 .. code:: python
 
-    from halotools.empirical_models.abunmatch.bin_free_cam import conditional_abunmatch
+    from halotools.empirical_models import conditional_abunmatch
     nwin = 101
     halo_sfr = conditional_abunmatch(halo_mstar, halo_acc_rate, galaxy_mstar, galaxy_sfr, nwin)
 
