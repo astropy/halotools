@@ -13,6 +13,8 @@
 
 - Added new `resample_x_to_match_y` function to `halotools.utils`.
 
+- Renamed old implementation of `conditional_abunmatch` to `conditional_abunmatch_bin_based`
+
 
 0.6 (2017-12-15)
 ----------------
