@@ -158,7 +158,7 @@ def test_brute_force_interior_points():
     num_tests = 50
 
     nwin = 11
-    nhalfwin = nwin/2
+    nhalfwin = int(nwin/2)
 
     for i in range(num_tests):
         seed = fixed_seed + i
@@ -193,7 +193,7 @@ def test_brute_force_left_endpoints():
     num_tests = 50
 
     nwin = 11
-    nhalfwin = nwin/2
+    nhalfwin = int(nwin/2)
 
     for i in range(num_tests):
         seed = fixed_seed + i
@@ -228,7 +228,7 @@ def test_brute_force_right_points():
     num_tests = 50
 
     nwin = 11
-    nhalfwin = nwin/2
+    nhalfwin = int(nwin/2)
 
     for i in range(num_tests):
         seed = fixed_seed + i
