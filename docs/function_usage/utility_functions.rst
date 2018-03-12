@@ -58,3 +58,10 @@ Probabilistic binning
 .. autosummary::
 
     fuzzy_digitize
+
+Estimating two-dimensional PDFs
+===============================================================
+
+.. autosummary::
+
+    sliding_conditional_percentile

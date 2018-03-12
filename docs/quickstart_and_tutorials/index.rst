@@ -49,7 +49,7 @@ Galaxy-Halo Modeling
    tutorials/model_building/preloaded_models/index
    tutorials/model_building/index
    ../source_notes/empirical_models/factories/index
-   ../quickstart_and_tutorials/tutorials/model_building/cam_tutorial
+   ../quickstart_and_tutorials/tutorials/model_building/cam_tutorial_pages/cam_tutorial
 
 Galaxy/Halo Catalog Analysis
 ---------------------------------------------------------
