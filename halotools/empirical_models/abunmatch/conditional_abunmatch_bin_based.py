@@ -93,6 +93,14 @@ def conditional_abunmatch_bin_based(haloprop, galprop, sigma=0., npts_lookup_tab
     see the `deconvolution abundance matching code <https://bitbucket.org/yymao/abundancematching/>`_
     written by Yao-Yuan Mao.
 
+    With the release of Halotools v0.7, this function had its name changed.
+    The previous name given to this function was "conditional_abunmatch".
+    Halotools v0.7 has a new function `~halotools.empirical_models.conditional_abunmatch`
+    with this name that largely replaces the functionality here.
+    See :ref:`cam_tutorial` demonstrating how to use the new
+    function in galaxy-halo modeling with several worked examples.
+
+
     """
     haloprop_table, galprop_table = its.build_cdf_lookup(galprop, npts_lookup_table)
     haloprop_percentiles = its.rank_order_percentile(haloprop)
