@@ -15,6 +15,8 @@
 
 - Renamed old implementation of `conditional_abunmatch` to `conditional_abunmatch_bin_based`
 
+- Added new bin-free implementation of `conditional_abunmatch`.
+
 
 0.6 (2017-12-15)
 ----------------
