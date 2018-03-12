@@ -54,7 +54,7 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
 
     Notes
     -----
-    See the Transformation of Probability tutorial at https://github.com/jbailinua/probability
+    See the `Transformation of Probability tutorial <https://github.com/jbailinua/probability/>`_
     for pedagogical derivations associated with inverse transformation sampling.
 
     Examples

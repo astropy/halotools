@@ -13,8 +13,7 @@ __all__ = ('sliding_conditional_percentile', )
 
 def sliding_conditional_percentile(x, y, window_length, assume_x_is_sorted=False,
             add_subgrid_noise=True, seed=None):
-    r""" Estimate the conditional cumulative distribution function Prob(< y | x)
-    using a sliding window of length ``window_length``.
+    r""" Estimate the cumulative distribution function Prob(< y | x).
 
     Parameters
     ----------

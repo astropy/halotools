@@ -38,3 +38,10 @@ New Mock Observables
 Inertia Tensor calculation
 -------------------------------
 The pairwise calculation `~halotools.mock_observables.inertia_tensor_per_object` computes the inertia tensor of a mass distribution surrounding each point in a sample of galaxies or halos.
+
+API Changes
+===========
+
+* The old implementation of the `~halotools.empirical_models.conditional_abunmatch` function has been renamed to be `~halotools.empirical_models.conditional_abunmatch_bin_based`.
+
+* There is an entirely distinct, bin-free implementation of Conditional Abundance Matching that now bears the name `~halotools.empirical_models.conditional_abunmatch`.
