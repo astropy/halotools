@@ -44,27 +44,27 @@ cdef int _bisect_left_kernel(double[:] arr, double value):
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-cdef void _insert_first_pop_last_kernel(int* arr, int value_in1, int n):
-    """ Insert the element ``value_in1`` into the input array and pop out the last element
+cdef void _insert_first_pop_last_kernel(int* arr, int value_in, int n):
+    """ Insert the element ``value_in`` into the input array and pop out the last element
     """
     cdef int i
     for i in range(n-2, -1, -1):
         arr[i+1] = arr[i]
-    arr[0] = value_in1
+    arr[0] = value_in
 
 
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-cdef int _correspondence_indices_shift(int idx_in1, int idx_out1, int idx):
+cdef int _correspondence_indices_shift(int idx_in, int idx_out, int idx):
     """ Update the correspondence indices array
     """
     cdef int shift = 0
-    if idx_in1 < idx_out1:
-        if idx_in1 <= idx < idx_out1:
+    if idx_in < idx_out:
+        if idx_in <= idx < idx_out:
             shift = 1
-    elif idx_in1 > idx_out1:
-        if idx_out1 < idx <= idx_in1:
+    elif idx_in > idx_out:
+        if idx_out < idx <= idx_in:
             shift = -1
     return shift
 
@@ -72,42 +72,42 @@ cdef int _correspondence_indices_shift(int idx_in1, int idx_out1, int idx):
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-cdef void _insert_pop_kernel(double* arr, int idx_in1, int idx_out1, double value_in1):
-    """ Pop out the value stored in index ``idx_out1`` of array ``arr``,
-    and insert ``value_in1`` at index ``idx_in1`` of the final array.
+cdef void _insert_pop_kernel(double* arr, int idx_in, int idx_out, double value_in):
+    """ Pop out the value stored in index ``idx_out`` of array ``arr``,
+    and insert ``value_in`` at index ``idx_in`` of the final array.
     """
     cdef int i
 
-    if idx_in1 <= idx_out1:
-        for i in range(idx_out1-1, idx_in1-1, -1):
+    if idx_in <= idx_out:
+        for i in range(idx_out-1, idx_in-1, -1):
             arr[i+1] = arr[i]
     else:
-        for i in range(idx_out1, idx_in1):
+        for i in range(idx_out, idx_in):
             arr[i] = arr[i+1]
-    arr[idx_in1] = value_in1
+    arr[idx_in] = value_in
 
 
-def setup_initial_indices(iy2, nwin, npts2):
-    """ Search an array of length npts2 to identify
-    the unique window of width nwin centered iy2. Care is taken to deal with
-    the left and right edges. For elements iy2 < nwin/2, the first nwin elements
-    of the array are used; for elements iy2 > npts2-nwin/2,
+def setup_initial_indices(int iy, int nwin, int npts):
+    """ Search an array of length npts to identify
+    the unique window of width nwin centered iy. Care is taken to deal with
+    the left and right edges. For elements iy < nwin/2, the first nwin elements
+    of the array are used; for elements iy > npts-nwin/2,
     the last nwin elements are used.
     """
-    nhalfwin = int(nwin/2)
-    init_iy2_low = iy2 - nhalfwin
-    init_iy2_high = init_iy2_low+nwin
+    cdef int nhalfwin = int(nwin/2)
+    cdef int init_iy_low = iy - nhalfwin
+    cdef int init_iy_high = init_iy_low+nwin
 
-    if init_iy2_low < 0:
-        init_iy2_low = 0
-        init_iy2_high = init_iy2_low + nwin
-        iy2 = init_iy2_low + nhalfwin
-    elif init_iy2_high > npts2 - nhalfwin:
-        init_iy2_high = npts2
-        init_iy2_low = init_iy2_high - nwin
-        iy2 = init_iy2_low + nhalfwin
+    if init_iy_low < 0:
+        init_iy_low = 0
+        init_iy_high = init_iy_low + nwin
+        iy = init_iy_low + nhalfwin
+    elif init_iy_high > npts - nhalfwin:
+        init_iy_high = npts
+        init_iy_low = init_iy_high - nwin
+        iy = init_iy_low + nhalfwin
 
-    return iy2, init_iy2_low, init_iy2_high
+    return iy, init_iy_low, init_iy_high
 
 
 @cython.boundscheck(False)
@@ -122,31 +122,33 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
     window with a matching rank-order and use this value as ynew[i].
     The algorithm has been implemented so that the windows are only sorted once
     at the beginning, and as the windows slide along the arrays with increasing i,
-    elements are popped in and popped out so preserve the sorted order.
+    elements are popped in and popped out so as to preserve the sorted order.
 
     When using add_subgrid_noise, the algorithm differs slightly. Rather than setting
     ynew[i] to the value in the second window with the matching rank-order,
     instead we assign a random uniform number from the range spanned by
-    (y2_window[rank-1],y2_window[rank+1]). This eliminates discreteness effects
+    (y2_window[rank-1],y2_window[rank+1]). This reduces discreteness effects
     and comes at no loss of precision since the PDF is not known to an accuracy
     better than 1/nwin.
 
-    The arrays named sorted_cdf_values store the two windows.
+    The arrays named sorted_cdf_values store the y-values in the two windows.
     The arrays correspondence_indx are responsible for the bookkeeping involved in
     maintaining a sorted order as elements are popped in and popped out.
     The way this works is that as the window slides along from left to right,
-    the leftmost value is the one that should be popped out
-    (that is, the y value corresponding to the smallest x in the window).
-    However, the position of this element within sorted_cdf_values can be anywhere.
-    So the correspondence_indx array is used to keep track of the x-ordering
-    of the values within the windows.
-    In particular, element 0 in correspondence_indx stores the position of the
-    most-recently added element to sorted_cdf_values;
-    element nwin-1 in correspondence_indx stores the position of the
-    element of sorted_cdf_values that will be the next one popped out;
-    element nwin/2 stores the position of the middle of the window within
-    sorted_cdf_values. Since the position within sorted_cdf_values is the rank,
-    then sorted_cdf_values[correspondence_indx[nwin/2]] stores the value of ynew.
+    the y value corresponding to the smallest x in the window should be
+    the next one popped out. However, the position of this element within
+    sorted_cdf_values can be anywhere, since there is no strict connection
+    between the values of x and y. So the correspondence_indx array is used
+    to keep track of the x-ordering of the y-values stored in the sorted_cdf_values
+    windows. In particular, the value of the first element in correspondence_indx
+    stores the position of the most-recently added element to sorted_cdf_values
+    (i.e., the element with the largest x); the last element in correspondence_indx,
+    element nwin-1, stores the position of the element of sorted_cdf_values
+    that will be the next one popped out (i.e., the element with the largest x);
+    the middle element of correspondence_indx, element nwin/2,
+    stores the position of the middle of the sorted_cdf_values window.
+    Since the position within sorted_cdf_values is the rank,
+    then sorted_cdf_values[correspondence_indx[nwin/2]] stores the value of ynew[i].
 
     """
     cdef int nhalfwin = int(nwin/2)
