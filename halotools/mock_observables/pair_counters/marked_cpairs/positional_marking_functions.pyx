@@ -154,5 +154,44 @@ cdef cnp.float64_t gamma_gamma_cross_func(cnp.float64_t* w1, cnp.float64_t* w2,
         return 0.0
 
 
+cdef cnp.float64_t squareddot_eq_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    return cos^2(phi), where phi is the angle between w1 and s, the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta
+
+    if (rsq>0) & (w1[4]==w2[1]):
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = (w1[1]*x + w1[2]*y + w1[3]*z)/c_sqrt(rsq)
+        return w1[0]*w2[0]*costheta*costheta
+    else:
+        return 0.0
+
+
+cdef cnp.float64_t squareddot_ineq_func(cnp.float64_t* w1, cnp.float64_t* w2,
+            cnp.float64_t x1, cnp.float64_t y1, cnp.float64_t z1,
+            cnp.float64_t x2, cnp.float64_t y2, cnp.float64_t z2, cnp.float64_t rsq):
+    """
+    return cos^2(phi), where phi is the angle between w1 and s, the vector connecting point 1 and point 2
+    it is assumed that w1 and w2 have been normalized.
+    """
+    cdef cnp.float64_t x, y, z
+    cdef cnp.float64_t costheta
+
+    if (rsq>0) & (w1[4]!=w2[1]):
+        x = (x2-x1)
+        y = (y2-y1)
+        z = (z2-z1)
+        costheta = (w1[1]*x + w1[2]*y + w1[3]*z)/c_sqrt(rsq)
+        return w1[0]*w2[0]*costheta*costheta
+    else:
+        return 0.0
+
 
 

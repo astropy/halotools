@@ -254,5 +254,9 @@ cdef f_type return_weighting_function(weight_func_id):
         return projdotweights
     elif weight_func_id==15:
         return projsquareddotweights
+    elif weight_func_id==16:
+        return squareddotweights_eq
+    elif weight_func_id==17:
+        return squareddotweights_ineq
     else:
         raise ValueError('marking function does not exist')

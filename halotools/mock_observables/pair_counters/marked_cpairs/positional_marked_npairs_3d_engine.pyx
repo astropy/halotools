@@ -241,5 +241,9 @@ cdef f_type return_weighting_function(weight_func_id):
         return gamma_gamma_plus_func
     if weight_func_id==6:
         return gamma_gamma_cross_func
+    if weight_func_id==7:
+        return squareddot_eq_func
+    if weight_func_id==8:
+        return squareddot_ineq_func
     else:
         raise ValueError('marking function does not exist')
