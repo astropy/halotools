@@ -7,10 +7,10 @@ from ...utils import unsorting_indices
 
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
-__all__ = ('conditional_abunmatch', 'randomly_resort')
+__all__ = ('conditional_abunmatch_bin_based', 'randomly_resort')
 
 
-def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, seed=None):
+def conditional_abunmatch_bin_based(haloprop, galprop, sigma=0., npts_lookup_table=1000, seed=None):
     """ Function used to model a correlation between two variables,
     ``haloprop`` and ``galprop``, using conditional abundance matching (CAM).
 
@@ -64,7 +64,7 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     --------
     Suppose we would like to do some CAM-style modeling of a correlation between some
     halo property ``haloprop`` and some galaxy property ``galprop``.
-    The `conditional_abunmatch` function
+    The `conditional_abunmatch_bin_based` function
     can be used to map values of the galaxy property onto the halos in such a way that the
     PDF of ``galprop`` is preserved and a correlation (of variable strength)
     between ``haloprop`` and ``galprop`` is introduced.
@@ -74,11 +74,11 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     >>> spin_at_fixed_mpeak = 10**np.random.normal(loc=mean, size=size, scale=std)
     >>> num_gals_in_mstar_bin = int(1e3)
     >>> some_galprop_at_fixed_mstar = np.random.power(2.5, size=num_gals_in_mstar_bin)
-    >>> modeled_galprop = conditional_abunmatch(spin_at_fixed_mpeak, some_galprop_at_fixed_mstar)
+    >>> modeled_galprop = conditional_abunmatch_bin_based(spin_at_fixed_mpeak, some_galprop_at_fixed_mstar)
 
     Notes
     -----
-    To approximate the input ``galprop`` distribution, the implementation of `conditional_abunmatch`
+    To approximate the input ``galprop`` distribution, the implementation of `conditional_abunmatch_bin_based`
     builds a lookup table for the CDF of the input ``galprop`` using a simple call to `numpy.interp`,
     which can result in undesired edge case behavior if
     a large fraction of model galaxies lie outside the range of the data.
@@ -92,6 +92,14 @@ def conditional_abunmatch(haloprop, galprop, sigma=0., npts_lookup_table=1000, s
     For code that provides careful treatment of this extrapolation in such cases,
     see the `deconvolution abundance matching code <https://bitbucket.org/yymao/abundancematching/>`_
     written by Yao-Yuan Mao.
+
+    With the release of Halotools v0.7, this function had its name changed.
+    The previous name given to this function was "conditional_abunmatch".
+    Halotools v0.7 has a new function `~halotools.empirical_models.conditional_abunmatch`
+    with this name that largely replaces the functionality here.
+    See :ref:`cam_tutorial` demonstrating how to use the new
+    function in galaxy-halo modeling with several worked examples.
+
 
     """
     haloprop_table, galprop_table = its.build_cdf_lookup(galprop, npts_lookup_table)

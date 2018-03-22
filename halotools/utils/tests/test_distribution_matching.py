@@ -3,7 +3,7 @@
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-from ..distribution_matching import distribution_matching_indices
+from ..distribution_matching import distribution_matching_indices, resample_x_to_match_y
 
 __all__ = ('test_distribution_matching_indices1', )
 
@@ -28,3 +28,25 @@ def test_distribution_matching_indices1():
     result_percentiles = np.percentile(result, percentile_table)
     correct_percentiles = np.percentile(output_distribution, percentile_table)
     assert np.allclose(result_percentiles, correct_percentiles, rtol=0.1)
+
+
+def test_resample_x_to_match_y():
+    """
+    """
+    nx, ny = int(9.9999e5), int(1e6)
+    with NumpyRNGContext(fixed_seed):
+        x = np.random.normal(loc=0, size=nx, scale=1)
+        y = np.random.normal(loc=0.5, size=ny, scale=0.25)
+    bins = np.linspace(y.min(), y.max(), 100)
+    indices = resample_x_to_match_y(x, y, bins, seed=fixed_seed)
+    rescaled_x = x[indices]
+
+    idx_x_sorted = np.argsort(x)
+    assert np.all(np.diff(rescaled_x[idx_x_sorted]) >= 0)
+
+    try:
+        result, __ = np.histogram(rescaled_x, bins, density=True)
+        correct_result, __ = np.histogram(y, bins, density=True)
+        assert np.allclose(result, correct_result, atol=0.02)
+    except TypeError:
+        pass
