@@ -13,44 +13,19 @@ from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
     _cell1_parallelization_indices, _enclose_in_box, _enforce_maximum_search_length)
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
+from ...utils import rotation_matrices_from_vectors
+
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('inertia_tensor_per_object', )
 
 
-def reduced_inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale,
-            id1=None, id2=None, q1=None, s1=None,
+def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
+            weights2=None, id1=None, id2=None, v1=None, q1=None, s1=None,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r""" For each point in `sample1`, identify all `sample2` points within the input
-    `smoothing_scale`; using those points together with the input `weights2`,
-    the `inertia_tensor_per_object` function calculates the inertia tensor
-    of the mass distribution surrounding each point in `sample1`.
-
-    For every pair of points, :math:`i, j` in `sample1`, `sample2`,
-    the contribution to the inertia tensor is:
-
-    .. math::
-
-        \mathcal{I}_{\rm ij} = m_{\rm j}\begin{bmatrix}
-                \delta x_{\rm ij}*\delta x_{\rm ij} & \delta x_{\rm ij}*\delta y_{\rm ij} & \delta x_{\rm ij}*\delta z_{\rm ij} \\
-                \delta y_{\rm ij}*\delta x_{\rm ij} & \delta y_{\rm ij}*\delta y_{\rm ij} & \delta y_{\rm ij}*\delta z_{\rm ij} \\
-                \delta z_{\rm ij}*\delta x_{\rm ij} & \delta z_{\rm ij}*\delta y_{\rm ij} & \delta z_{\rm ij}*\delta z_{\rm ij}
-            \end{bmatrix}
-
-    The :math:`\delta x_{\rm ij}`, :math:`\delta y_{\rm ij}`, and :math:`\delta z_{\rm ij}` terms
-    store the coordinate distances between the pair of points
-    (optionally accounting for periodic boundary conditions), and :math:`m_{\rm j}` stores
-    the mass of the `sample2` point.
-
-    To calculate the inertia tensor :math:`\mathcal{I}_{\rm i}` for the
-    :math:`i^{\rm th}` point in `sample1`, the `inertia_tensor_per_object` function
-    sums up the contributions :math:`\mathcal{I}_{\rm ij}` for all :math:`j` such that the
-    distance between the two points :math:`D_{\rm ij}`
-    is less than the smoothing scale :math:`D_{\rm smooth}`:
-
-    .. math::
-
-        \mathcal{I}_{\rm i} = \sum_{j}^{r_{\rm ij} < D_{\rm smooth}} \mathcal{I}_{\rm ij}
-
+    `smoothing_scale` where `id1`  is equal to `id2`; using those points together with
+    the input `weights2`, the `inertia_tensor_per_object` function calculates the
+    reducded inertia tensor of the mass distribution surrounding each point in `sample1`.
 
     Parameters
     ----------
@@ -67,21 +42,30 @@ def reduced_inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scal
         Numpy array of shape (npts2, 3) storing 3-D positions of the point masses
         used to calculate the inertia tensor of every `sample1` point.
 
-    weights2 : array_like
-        Numpy array of shape (npts2,) storing the mass of each `sample2` point
-        used to calculate the inertia tensor of every `sample1` point.
-
     smoothing_scale : float
         Three-dimensional distance from each `sample1` point defining
         which points in `sample2` are used to compute the inertia tensor
 
-    id1 : array_like
+    weights2 : array_like, optional
+        Numpy array of shape (npts2,) storing the mass of each `sample2` point
+        used to calculate the inertia tensor of every `sample1` point.
+        Default is np.ones(npts2).
 
-    id2 = array_like
+    id1 : array_like, optional
+        array of integer IDs of shape (npts1, ).  Default is np.ones(npts1).
 
-    q1 : array_like
+    id2 : array_like, optional
+        array of integer IDs of shape (npts2, ).  Default is np.ones(npts2).
 
-    s1 = array_like
+    v1 : array_like
+        array of principle eigenvectors for `sample1`. The array must be of shape (npts1, 3).
+        The default is np.array([1,0,0]*npts1).reshape((npts1,3))
+
+    q1 : array_like, optional
+        array of intermediate axis ratios (b/a) of shape (npts1, ). Default is np.ones(npts1).
+
+    s1 : array_like, optional
+        array of minor axis ratios (c/a) of shape (npts1, ). Default is np.ones(npts1).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -113,8 +97,8 @@ def reduced_inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scal
 
     Returns
     -------
-    inertia_tensors : ndarray
-        Numpy array of shape (npts1, 3, 3) storing the inertia tensor for every
+    reduced_inertia_tensors : ndarray
+        Numpy array of shape (npts1, 3, 3) storing the reduced inertia tensor for every
         object in `sample1`.
 
     sum_of_masses : ndarray
@@ -128,10 +112,44 @@ def reduced_inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scal
     >>> sample2 = np.random.random((npts2, 3))
     >>> weights2 = np.random.random(npts2)
     >>> smoothing_scale = 0.1
-    >>> result = inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scale)
+    >>> result = reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2)
 
     Notes
     -----
+    The reduced inertia tensor is calculated by pairwise.  For every pair of points,
+    :math:`i, j` in `sample1`, `sample2`, the contribution to the reduced inertia tensor is:
+
+    .. math::
+
+        \widetilde{\mathcal{I}}_{\rm ij} = \frac{m_{\rm j}}{r_{\rm ij}^2}\begin{bmatrix}
+                \delta x_{\rm ij}\times\delta x_{\rm ij} & \delta x_{\rm ij}\times\delta y_{\rm ij} & \delta x_{\rm ij}\times\delta z_{\rm ij} \\
+                \delta y_{\rm ij}\times\delta x_{\rm ij} & \delta y_{\rm ij}\times\delta y_{\rm ij} & \delta y_{\rm ij}\times\delta z_{\rm ij} \\
+                \delta z_{\rm ij}\times\delta x_{\rm ij} & \delta z_{\rm ij}\times\delta y_{\rm ij} & \delta z_{\rm ij}\times\delta z_{\rm ij}
+            \end{bmatrix}
+
+    The :math:`\delta x_{\rm ij}`, :math:`\delta y_{\rm ij}`, and :math:`\delta z_{\rm ij}` terms
+    store the coordinate distances between the pair of points
+    (optionally accounting for periodic boundary conditions), :math:`m_{\rm j}` stores
+    the mass of the `sample2` point, and :math:`r_{ij}` is the elliptical distance
+    in the eigenvector coordinate system bteween the `sample1` and `sample2` point:
+
+    .. math::
+        r_{\rm ij} = \sqrt{\delta {x'}_{\rm ij}^2 + \delta {y'}_{\rm ij}^2/q_{\rm i}^2 + \delta {z'}_{\rm ij}^2/s_{\rm i}^2 }
+
+    where, e.g., :math:`\delta {x'}_{\rm ij}` is x-position of the :math:`j^{\rm th}` point in `sample2`
+    in the eigenvector coordinate system centered on the :math:`i^{\rm th}` point in `sample1`,
+    specified by `v1`.
+
+    To calculate the reduced inertia tensor :math:`\widetilde{\mathcal{I}}_{\rm i}` for the
+    :math:`i^{\rm th}` point in `sample1`, the `reduced_inertia_tensor_per_object` function
+    sums up the contributions :math:`\widetilde{\mathcal{I}}_{\rm ij}` for all :math:`j` such that the
+    distance between the two points :math:`D_{\rm ij}` is less than the smoothing scale :math:`D_{\rm smooth}`,
+    and `id1` is equal to `id2`:
+
+    .. math::
+
+        \widetilde{\mathcal{I}}_{\rm i} = \sum_{j}^{D_{\rm ij} < D_{\rm smooth}} \mathcal{I}_{\rm ij}
+
     There are several convenience functions available to derive quantities
     from the returned inertia tensors:
 
@@ -159,6 +177,49 @@ def reduced_inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scal
         x2in = sample2[:, 0]
         y2in = sample2[:, 1]
         z2in = sample2[:, 2]
+
+    # process arguments
+    N1 = np.shape(sample1)[0]
+    N2 = np.shape(sample2)[0]
+
+    # weights
+    if weights2 is None:
+        weights2 = np.ones(N2).astype('float')
+    else:
+        weights2 = np.atleast_1d(weights2).astype('float')
+
+    # particle IDs
+    if id1 is None:
+        id1 = np.ones(N1).astype('int')
+    else:
+        id1 = np.atleast_1d(id1).astype('int')
+    if id2 is None:
+        id2 = np.ones(N2)
+    else:
+        id2 = np.atleast_1d(id2).astype('int')
+
+    # axis ratios
+    if q1 is None:
+        q1 = np.ones(N1).astype('float')
+    else:
+        q1 = np.atleast_1d(q1).astype('float')
+    if s1 is None:
+        s1 = np.ones(N1).astype('float')
+    else:
+        s1 = np.atleast_1d(s1).astype('float')
+
+    # principle axis
+    v0 = np.zeros((N1,3))
+    v0[:,0] = 1.0
+    if v1 is None:
+        v1 = v0
+    else:
+        v1 = np.atleast_1d(v1)
+    assert np.shape(v1) == (N1,3)
+
+    # calculate rotation matrices to tranform sample2 coordinates into
+    # the eigenvector coordinate system for each popint in sample1
+    rot_m = rotation_matrices_from_vectors(v0,v1)
 
     msg = "np.shape(weights2) = {0} should be ({1}, )"
     assert np.shape(weights2) == (sample2.shape[0], ), msg.format(np.shape(weights2), sample2.shape[0])
@@ -197,7 +258,7 @@ def reduced_inertia_tensor_per_object(sample1, sample2, weights2, smoothing_scal
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(reduced_inertia_tensor_per_object_engine, double_mesh,
-        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale)
+        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale, rot_m)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(

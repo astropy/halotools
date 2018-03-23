@@ -16,8 +16,8 @@ __all__ = ('inertia_tensor_per_object_engine', )
 @cython.wraparound(False)
 @cython.nonecheck(False)
 def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1in, q1in, s1in, x2in, y2in, z2in, id2in, weights2in,
-            rsmooth, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
+            rsmooth, rot_m_in, cell1_tuple):
+    """ Cython engine for calculating the reducded inertia tensor
 
     Parameters
     ------------
@@ -41,6 +41,9 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
 
     weights2in : array
         Numpy array of weights
+
+    rot_m_in : array
+        array of rotation matrices
 
     rsmooth : array
 
@@ -93,6 +96,9 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     cdef cnp.float64_t[:] w2_sorted = np.ascontiguousarray(
         weights2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
+    cdef cnp.float64_t[:, :, :] rot_m_sorted = np.ascontiguousarray(
+        rot_m_in[double_mesh.mesh1.idx_sorted, :, :], dtype=np.float64)
+
     cdef int npts1 = len(x1_sorted)
     cdef cnp.float64_t[:, :, :] inertia_tensor = np.zeros((npts1, 3, 3), dtype=np.float64)
 
@@ -137,7 +143,8 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     cdef cnp.float64_t[:] q_icell1, s_icell1
     cdef cnp.int64_t[:] id_icell1, id_icell2
 
-    cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2, q1sq, s1sq
+    cdef cnp.float64_t dx_prime, dy_prime, dz_prime
+    cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2, q1sq, s1sq, rnsq
     cdef int id1, id2
     cdef cnp.float64_t[:] sum_weights = np.zeros(len(x1_sorted), dtype=np.float64)
 
@@ -232,13 +239,21 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
                                     dx = x1tmp - x_icell2[j]
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
+
+                                    dx_prime = rot_m_sorted[ifirst1 + i, 0, 0]*dx + rot_m_sorted[ifirst1 + i, 1, 0]*dy + rot_m_sorted[ifirst1 + i, 2, 0]*dz
+                                    dy_prime = rot_m_sorted[ifirst1 + i, 0, 1]*dx + rot_m_sorted[ifirst1 + i, 1, 1]*dy + rot_m_sorted[ifirst1 + i, 2, 1]*dz
+                                    dz_prime = rot_m_sorted[ifirst1 + i, 0, 2]*dx + rot_m_sorted[ifirst1 + i, 1, 2]*dy + rot_m_sorted[ifirst1 + i, 2, 2]*dz
+                                    #dx_prime = dx
+                                    #dy_prime = dy
+                                    #dz_prime = dz
+
                                     dsq = dx*dx + dy*dy + dz*dz
-                                    rnsq = dx*dx + dy*dy/(q1sq) + dz*dz/(s1sq)
+                                    rnsq = dx_prime*dx_prime + dy_prime*dy_prime / q1sq + dz_prime*dz_prime / s1sq
 
                                     w2 = w_icell2[j]
                                     id2 = id_icell2[j]
 
-                                    if (dsq < rsmooth_squared) & (id1==id2):
+                                    if (dsq < rsmooth_squared) & (id1==id2) & (rnsq>0):
                                         xx = dx*dx*w2
                                         yy = dy*dy*w2
                                         zz = dz*dz*w2
@@ -246,18 +261,18 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
                                         xz = dx*dz*w2
                                         yz = dy*dz*w2
 
-                                        inertia_tensor[ifirst1 + i, 0, 0] += xx
-                                        inertia_tensor[ifirst1 + i, 1, 1] += yy
-                                        inertia_tensor[ifirst1 + i, 2, 2] += zz
+                                        inertia_tensor[ifirst1 + i, 0, 0] += xx/rnsq
+                                        inertia_tensor[ifirst1 + i, 1, 1] += yy/rnsq
+                                        inertia_tensor[ifirst1 + i, 2, 2] += zz/rnsq
 
-                                        inertia_tensor[ifirst1 + i, 0, 1] += xy
-                                        inertia_tensor[ifirst1 + i, 1, 0] += xy
+                                        inertia_tensor[ifirst1 + i, 0, 1] += xy/rnsq
+                                        inertia_tensor[ifirst1 + i, 1, 0] += xy/rnsq
 
-                                        inertia_tensor[ifirst1 + i, 0, 2] += xz
-                                        inertia_tensor[ifirst1 + i, 2, 0] += xz
+                                        inertia_tensor[ifirst1 + i, 0, 2] += xz/rnsq
+                                        inertia_tensor[ifirst1 + i, 2, 0] += xz/rnsq
 
-                                        inertia_tensor[ifirst1 + i, 1, 2] += yz
-                                        inertia_tensor[ifirst1 + i, 2, 1] += yz
+                                        inertia_tensor[ifirst1 + i, 1, 2] += yz/rnsq
+                                        inertia_tensor[ifirst1 + i, 2, 1] += yz/rnsq
 
                                         sum_weights[ifirst1 + i] += w2
 
@@ -268,6 +283,7 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     sum_weights_array = np.array(sum_weights)
     idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
     sum_weights_array = sum_weights_array[idx_unsorted]
+
     return sorted_tensor[idx_unsorted, :, :], sum_weights_array
 
 
