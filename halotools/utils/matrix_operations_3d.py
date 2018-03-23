@@ -313,6 +313,10 @@ def rotation_matrices_from_vectors(v0, v1):
     directions = vectors_normal_to_planes(v0, v1)
     angles = angles_between_list_of_vectors(v0, v1)
 
+    # where angles are 0.0, replace directions with v0
+    mask = (angles==0.0)
+    directions[mask] = v0[mask]
+
     return rotation_matrices_from_angles(angles, directions)
 
 
