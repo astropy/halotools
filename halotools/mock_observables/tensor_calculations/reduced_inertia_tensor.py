@@ -42,7 +42,7 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         Numpy array of shape (npts2, 3) storing 3-D positions of the point masses
         used to calculate the inertia tensor of every `sample1` point.
 
-    smoothing_scale : float
+    smoothing_scale : array_like
         Three-dimensional distance from each `sample1` point defining
         which points in `sample2` are used to compute the inertia tensor
 
@@ -161,6 +161,8 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
     period, PBCs = get_period(period)
 
+    max_smoothing_scale = np.max(smoothing_scale)
+
     # At this point, period may still be set to None,
     # in which case we must remap our points inside the smallest enclosing cube
     # and set ``period`` equal to this cube size.
@@ -169,7 +171,7 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
             _enclose_in_box(
                 sample1[:, 0], sample1[:, 1], sample1[:, 2],
                 sample2[:, 0], sample2[:, 1], sample2[:, 2],
-                min_size=[smoothing_scale*3.0, smoothing_scale*3.0, smoothing_scale*3.0]))
+                min_size=[max_smoothing_scale*3.0, max_smoothing_scale*3.0, max_smoothing_scale*3.0]))
     else:
         x1in = sample1[:, 0]
         y1in = sample1[:, 1]
@@ -235,13 +237,13 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     assert np.shape(s1) == (sample1.shape[0], ), msg.format(np.shape(s1), sample1.shape[0])
 
     xperiod, yperiod, zperiod = period
-    _enforce_maximum_search_length(smoothing_scale, period)
+    _enforce_maximum_search_length(max_smoothing_scale, period)
     enforce_sample_respects_pbcs(x1in, y1in, z1in, period)
     enforce_sample_respects_pbcs(x2in, y2in, z2in, period)
 
-    search_xlength = smoothing_scale
-    search_ylength = smoothing_scale
-    search_zlength = smoothing_scale
+    search_xlength = max_smoothing_scale
+    search_ylength = max_smoothing_scale
+    search_zlength = max_smoothing_scale
 
     # Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -257,8 +259,9 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
+    smoothing_scale_sq = smoothing_scale*smoothing_scale
     engine = partial(reduced_inertia_tensor_per_object_engine, double_mesh,
-        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale, rot_m)
+        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale_sq, rot_m)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(

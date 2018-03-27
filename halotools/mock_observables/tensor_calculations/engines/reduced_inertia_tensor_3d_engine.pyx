@@ -16,7 +16,7 @@ __all__ = ('inertia_tensor_per_object_engine', )
 @cython.wraparound(False)
 @cython.nonecheck(False)
 def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1in, q1in, s1in, x2in, y2in, z2in, id2in, weights2in,
-            rsmooth, rot_m_in, cell1_tuple):
+            r_max_sq_in, rot_m_in, cell1_tuple):
     """ Cython engine for calculating the reducded inertia tensor
 
     Parameters
@@ -45,7 +45,7 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     rot_m_in : array
         array of rotation matrices
 
-    rsmooth : array
+    r_max : array
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -60,7 +60,7 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
         for each point in ``x1in``.
 
     """
-    cdef cnp.float64_t rsmooth_squared = rsmooth*rsmooth
+
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -88,6 +88,8 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     cdef cnp.int64_t[:] id2_sorted = np.ascontiguousarray(
         id2in[double_mesh.mesh2.idx_sorted], dtype=np.int64)
 
+    cdef cnp.float64_t[:] r_max_sorted_sq = np.ascontiguousarray(
+        r_max_sq_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] q1_sorted = np.ascontiguousarray(
         q1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] s1_sorted = np.ascontiguousarray(
@@ -143,8 +145,10 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     cdef cnp.float64_t[:] q_icell1, s_icell1
     cdef cnp.int64_t[:] id_icell1, id_icell2
 
+    cdef cnp.float64_t[:] rmax_sq_icell1
+
     cdef cnp.float64_t dx_prime, dy_prime, dz_prime
-    cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2, q1sq, s1sq, rnsq
+    cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2, q1sq, s1sq, rnsq, rmaxsq
     cdef int id1, id2
     cdef cnp.float64_t[:] sum_weights = np.zeros(len(x1_sorted), dtype=np.float64)
 
@@ -158,6 +162,7 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
         id_icell1 = id1_sorted[ifirst1:ilast1]
         q_icell1 = q1_sorted[ifirst1:ilast1]
         s_icell1 = s1_sorted[ifirst1:ilast1]
+        rmax_sq_icell1 = r_max_sorted_sq[ifirst1:ilast1]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -253,7 +258,7 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
                                     w2 = w_icell2[j]
                                     id2 = id_icell2[j]
 
-                                    if (dsq < rsmooth_squared) & (id1==id2) & (rnsq>0):
+                                    if (dsq < rmax_sq_icell1[i]) & (id1==id2) & (rnsq>0):
                                         xx = dx*dx*w2
                                         yy = dy*dy*w2
                                         zz = dz*dz*w2
