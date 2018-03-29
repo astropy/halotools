@@ -192,4 +192,4 @@ def axis_ratios_from_inertia_tensors(inertia_tensors):
     b_to_a = second_evals/first_evals
     c_to_a = third_evals/first_evals
 
-    return b_to_a, c_to_a
+    return np.sqrt(b_to_a), np.sqrt(c_to_a)
