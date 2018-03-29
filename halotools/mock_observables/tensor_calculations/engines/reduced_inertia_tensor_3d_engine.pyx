@@ -245,15 +245,9 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
 
-                                    #dx_prime = rot_m_sorted[ifirst1 + i, 0, 0]*dx + rot_m_sorted[ifirst1 + i, 1, 0]*dy + rot_m_sorted[ifirst1 + i, 2, 0]*dz
-                                    #dy_prime = rot_m_sorted[ifirst1 + i, 0, 1]*dx + rot_m_sorted[ifirst1 + i, 1, 1]*dy + rot_m_sorted[ifirst1 + i, 2, 1]*dz
-                                    #dz_prime = rot_m_sorted[ifirst1 + i, 0, 2]*dx + rot_m_sorted[ifirst1 + i, 1, 2]*dy + rot_m_sorted[ifirst1 + i, 2, 2]*dz
                                     dx_prime = rot_m_sorted[ifirst1 + i, 0, 0]*dx + rot_m_sorted[ifirst1 + i, 0, 1]*dy + rot_m_sorted[ifirst1 + i, 0, 2]*dz
                                     dy_prime = rot_m_sorted[ifirst1 + i, 1, 0]*dx + rot_m_sorted[ifirst1 + i, 1, 1]*dy + rot_m_sorted[ifirst1 + i, 1, 2]*dz
                                     dz_prime = rot_m_sorted[ifirst1 + i, 2, 0]*dx + rot_m_sorted[ifirst1 + i, 2, 1]*dy + rot_m_sorted[ifirst1 + i, 2, 2]*dz
-                                    #dx_prime = dx
-                                    #dy_prime = dy
-                                    #dz_prime = dz
 
                                     dsq = dx*dx + dy*dy + dz*dz
                                     rnsq = dx_prime*dx_prime + dy_prime*dy_prime / q1sq + dz_prime*dz_prime / s1sq

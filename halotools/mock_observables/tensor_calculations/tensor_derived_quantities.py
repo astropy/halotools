@@ -31,7 +31,7 @@ def eigenvectors(inertia_tensors):
     second_evecs = evecs[:, 1]
     first_evecs = evecs[:, 2]
 
-    return first_evecs, second_evecs, first_evecs
+    return first_evecs, second_evecs, third_evecs
 
 
 def eigenvalues(inertia_tensors):
@@ -56,7 +56,7 @@ def eigenvalues(inertia_tensors):
     second_evecs = evals[:, 1]
     first_evecs = evals[:, 2]
 
-    return first_evals, second_evals, first_evals
+    return first_evals, second_evals, third_evals
 
 
 def principal_axes_from_inertia_tensors(inertia_tensors):

@@ -213,7 +213,6 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         v1, v2, v3 = eigenvectors(inertia_tensor_0)
         q1, s1 = axis_ratios_from_inertia_tensors(inertia_tensor_0)
         rot_m = rotation3d(v1, v2, v3)
-        print(q1)
 
     msg = "np.shape(weights2) = {0} should be ({1}, )"
     assert np.shape(weights2) == (sample2.shape[0], ), msg.format(np.shape(weights2), sample2.shape[0])
