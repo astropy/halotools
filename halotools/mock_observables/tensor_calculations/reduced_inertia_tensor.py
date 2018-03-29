@@ -13,14 +13,15 @@ from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
     _cell1_parallelization_indices, _enclose_in_box, _enforce_maximum_search_length)
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
-from ...utils import rotation_matrices_from_vectors
+from ...utils import rotation_matrices_from_vectors, normalized_vectors, elementwise_dot
+from .tensor_derived_quantities import axis_ratios_from_inertia_tensors, eigenvectors
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('inertia_tensor_per_object', )
 
 
 def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
-            weights2=None, id1=None, id2=None, v1=None, q1=None, s1=None,
+            weights2=None, id1=None, id2=None, inertia_tensor_0=None,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r""" For each point in `sample1`, identify all `sample2` points within the input
     `smoothing_scale` where `id1`  is equal to `id2`; using those points together with
@@ -57,15 +58,9 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     id2 : array_like, optional
         array of integer IDs of shape (npts2, ).  Default is np.ones(npts2).
 
-    v1 : array_like
-        array of principle eigenvectors for `sample1`. The array must be of shape (npts1, 3).
-        The default is np.array([1,0,0]*npts1).reshape((npts1,3))
-
-    q1 : array_like, optional
-        array of intermediate axis ratios (b/a) of shape (npts1, ). Default is np.ones(npts1).
-
-    s1 : array_like, optional
-        array of minor axis ratios (c/a) of shape (npts1, ). Default is np.ones(npts1).
+    inertia_tensor_0 :  array_like, optional
+        array of shape (npts1, 3, 3) storing an initial inertia tensor for each
+        point in `sample1`.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -161,6 +156,15 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
     period, PBCs = get_period(period)
 
+    # process arguments
+    N1 = np.shape(sample1)[0]
+    N2 = np.shape(sample2)[0]
+
+    smoothing_scale = np.atleast_1d(smoothing_scale)
+    if len(smoothing_scale)==1:
+        smoothing_scale = np.array([smoothing_scale]*N1).reshape((N1,))
+    assert np.shape(smoothing_scale) == (N1,), print(np.shape(smoothing_scale))
+
     max_smoothing_scale = np.max(smoothing_scale)
 
     # At this point, period may still be set to None,
@@ -180,10 +184,6 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         y2in = sample2[:, 1]
         z2in = sample2[:, 2]
 
-    # process arguments
-    N1 = np.shape(sample1)[0]
-    N2 = np.shape(sample2)[0]
-
     # weights
     if weights2 is None:
         weights2 = np.ones(N2).astype('float')
@@ -200,28 +200,20 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     else:
         id2 = np.atleast_1d(id2).astype('int')
 
-    # axis ratios
-    if q1 is None:
-        q1 = np.ones(N1).astype('float')
-    else:
-        q1 = np.atleast_1d(q1).astype('float')
-    if s1 is None:
-        s1 = np.ones(N1).astype('float')
-    else:
-        s1 = np.atleast_1d(s1).astype('float')
-
-    # principle axis
-    v0 = np.zeros((N1,3))
-    v0[:,0] = 1.0
-    if v1 is None:
-        v1 = v0
-    else:
-        v1 = np.atleast_1d(v1)
-    assert np.shape(v1) == (N1,3)
-
     # calculate rotation matrices to tranform sample2 coordinates into
-    # the eigenvector coordinate system for each popint in sample1
-    rot_m = rotation_matrices_from_vectors(v0,v1)
+    # the eigenvector coordinate system for each point in sample1
+    if inertia_tensor_0 is None:
+        rot_m = np.array([1.0,0.0,0.0,
+                          0.0,1.0,0.0,
+                          0.0,0.0,1.0]*N1).reshape((N1, 3, 3))
+        q1 = np.ones(N1)
+        s1 = np.ones(N1)
+    else:
+        assert np.shape(inertia_tensor_0)==(N1,3,3)
+        v1, v2, v3 = eigenvectors(inertia_tensor_0)
+        q1, s1 = axis_ratios_from_inertia_tensors(inertia_tensor_0)
+        rot_m = rotation3d(v1, v2, v3)
+        print(q1)
 
     msg = "np.shape(weights2) = {0} should be ({1}, )"
     assert np.shape(weights2) == (sample2.shape[0], ), msg.format(np.shape(weights2), sample2.shape[0])
@@ -280,3 +272,62 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         tensors, sum_of_masses = result
 
     return np.array(tensors), np.array(sum_of_masses)
+
+
+def rotation3d(ux, uy, uz):
+    """
+    Calculate a collection of rotation matrices defined by an input collection
+    of basis vectors.
+
+    Parameters
+    ----------
+    ux : array_like
+        Numpy array of shape (npts, 3) storing a collection of unit vexctors
+
+    uy : array_like
+        Numpy array of shape (npts, 3) storing a collection of unit vexctors
+
+    uz : array_like
+        Numpy array of shape (npts, 3) storing a collection of unit vexctors
+
+    Returns
+    -------
+    matrices : ndarray
+        Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
+    """
+
+    N = np.shape(ux)[0]
+
+    # assume initial unit vectors are the standard ones
+    ex = np.array([1.0, 0.0, 0.0]*N).reshape(N, 3)
+    ey = np.array([0.0, 1.0, 0.0]*N).reshape(N, 3)
+    ez = np.array([0.0, 0.0, 1.0]*N).reshape(N, 3)
+
+    ux = normalized_vectors(ux)
+    uy = normalized_vectors(uy)
+    uz = normalized_vectors(uz)
+
+    r_11 = elementwise_dot(ex, ux)
+    r_12 = elementwise_dot(ex, uy)
+    r_13 = elementwise_dot(ex, uz)
+
+    r_21 = elementwise_dot(ey, ux)
+    r_22 = elementwise_dot(ey, uy)
+    r_23 = elementwise_dot(ey, uz)
+
+    r_31 = elementwise_dot(ez, ux)
+    r_32 = elementwise_dot(ez, uy)
+    r_33 = elementwise_dot(ez, uz)
+
+    r = np.zeros((N, 3, 3))
+    r[:,0,0] = r_11
+    r[:,0,1] = r_12
+    r[:,0,2] = r_13
+    r[:,1,0] = r_21
+    r[:,1,1] = r_22
+    r[:,1,2] = r_23
+    r[:,2,0] = r_31
+    r[:,2,1] = r_32
+    r[:,2,2] = r_33
+
+    return r
