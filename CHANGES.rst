@@ -17,6 +17,8 @@
 
 - Added new bin-free implementation of `conditional_abunmatch`.
 
+- Added new utils function `bijective_distribution_matching`
+
 
 0.6 (2017-12-15)
 ----------------
