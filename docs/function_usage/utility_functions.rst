@@ -39,6 +39,7 @@ Matching one distribution to another
 
     distribution_matching_indices
     resample_x_to_match_y
+    bijective_distribution_matching
 
 Rotations, dot products, and other operations in 3d space
 ===============================================================
@@ -46,6 +47,7 @@ Rotations, dot products, and other operations in 3d space
 .. autosummary::
 
     elementwise_dot
+    elementwise_norm
     angles_between_list_of_vectors
     vectors_between_list_of_vectors
     rotation_matrices_from_angles
