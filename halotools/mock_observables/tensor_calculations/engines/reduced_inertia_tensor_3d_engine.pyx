@@ -15,8 +15,9 @@ __all__ = ('inertia_tensor_per_object_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1in, q1in, s1in, x2in, y2in, z2in, id2in, weights2in,
-            r_max_sq_in, rot_m_in, cell1_tuple):
+def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1in, q1in, s1in,
+                                             x2in, y2in, z2in, id2in, weights2in,
+                                             r_max_sq_in, rot_m_in, cell1_tuple):
     """ Cython engine for calculating the reducded inertia tensor
 
     Parameters
@@ -45,7 +46,8 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     rot_m_in : array
         array of rotation matrices
 
-    r_max : array
+    r_max_sq_in : array
+        Boundaries defining the maximum square distance between points to consider.
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in

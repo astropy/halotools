@@ -17,15 +17,15 @@ from ...utils import rotation_matrices_from_vectors, normalized_vectors, element
 from .tensor_derived_quantities import axis_ratios_from_inertia_tensors, eigenvectors
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
-__all__ = ('inertia_tensor_per_object', )
+__all__ = ('reduced_inertia_tensor_per_object', )
 
 
 def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
             weights2=None, id1=None, id2=None, inertia_tensor_0=None,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r""" For each point in `sample1`, identify all `sample2` points within the input
-    `smoothing_scale` where `id1`  is equal to `id2`; using those points together with
-    the input `weights2`, the `inertia_tensor_per_object` function calculates the
+    `smoothing_scale` where `id1` is equal to `id2`; using those points together with
+    the input `weights2`, the `reduced_inertia_tensor_per_object` function calculates the
     reducded inertia tensor of the mass distribution surrounding each point in `sample1`.
 
     Parameters
@@ -44,13 +44,15 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         used to calculate the inertia tensor of every `sample1` point.
 
     smoothing_scale : array_like
-        Three-dimensional distance from each `sample1` point defining
-        which points in `sample2` are used to compute the inertia tensor
+        Numpy array of shape (npts1, ) storing the three-dimensional distance 
+        from each `sample1` point defining which points in `sample2` are used 
+        to compute the inertia tensor.  If a single float is passed, that value
+        is used for all points in `sample1`.
 
     weights2 : array_like, optional
         Numpy array of shape (npts2,) storing the mass of each `sample2` point
         used to calculate the inertia tensor of every `sample1` point.
-        Default is np.ones(npts2).
+        Default is np.ones(npts2), i.e. equal weight to each point.
 
     id1 : array_like, optional
         array of integer IDs of shape (npts1, ).  Default is np.ones(npts1).
@@ -60,7 +62,9 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
 
     inertia_tensor_0 :  array_like, optional
         array of shape (npts1, 3, 3) storing an initial inertia tensor for each
-        point in `sample1`.
+        point in `sample1`.  This used to calculate the elliptical distance :math:`r_{ij}`,
+        see notes section below for details.  The default is 3 by 3 identity matrix for
+        each point in `sample1`.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -111,8 +115,8 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
 
     Notes
     -----
-    The reduced inertia tensor is calculated by pairwise.  For every pair of points,
-    :math:`i, j` in `sample1`, `sample2`, the contribution to the reduced inertia tensor is:
+    The reduced inertia tensor is calculated pairwise.  For every pair of points,
+    :math:`i, j` in `sample1` and `sample2`, the contribution to the reduced inertia tensor is:
 
     .. math::
 
@@ -126,14 +130,14 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     store the coordinate distances between the pair of points
     (optionally accounting for periodic boundary conditions), :math:`m_{\rm j}` stores
     the mass of the `sample2` point, and :math:`r_{ij}` is the elliptical distance
-    in the eigenvector coordinate system bteween the `sample1` and `sample2` point:
+    in the eigenvector coordinate system, sepcified by `inertia_tensor_0`, 
+    bteween the `sample1` and `sample2` points:
 
     .. math::
         r_{\rm ij} = \sqrt{\delta {x'}_{\rm ij}^2 + \delta {y'}_{\rm ij}^2/q_{\rm i}^2 + \delta {z'}_{\rm ij}^2/s_{\rm i}^2 }
 
     where, e.g., :math:`\delta {x'}_{\rm ij}` is x-position of the :math:`j^{\rm th}` point in `sample2`
-    in the eigenvector coordinate system centered on the :math:`i^{\rm th}` point in `sample1`,
-    specified by `v1`.
+    in the eigenvector coordinate system centered on the :math:`i^{\rm th}` point in `sample1`.
 
     To calculate the reduced inertia tensor :math:`\widetilde{\mathcal{I}}_{\rm i}` for the
     :math:`i^{\rm th}` point in `sample1`, the `reduced_inertia_tensor_per_object` function
@@ -151,6 +155,7 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         * `~halotools.mock_observables.principal_axes_from_inertia_tensors`
         * `~halotools.mock_observables.sphericity_from_inertia_tensors`
         * `~halotools.mock_observables.triaxility_from_inertia_tensors`
+        * `~halotools.mock_observables.axis_ratios_from_inertia_tensors`
 
     """
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
@@ -160,10 +165,12 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     N1 = np.shape(sample1)[0]
     N2 = np.shape(sample2)[0]
 
+    # extract maximum smoothing scale
     smoothing_scale = np.atleast_1d(smoothing_scale)
     if len(smoothing_scale)==1:
         smoothing_scale = np.array([smoothing_scale]*N1).reshape((N1,))
-    assert np.shape(smoothing_scale) == (N1,), print(np.shape(smoothing_scale))
+    msg = "np.shape(smoothing) = {0} should be ({1}, )"
+    assert np.shape(smoothing_scale) == (N1,), msg.format(np.shape(smoothing_scale), sample1.shape[0])
 
     max_smoothing_scale = np.max(smoothing_scale)
 

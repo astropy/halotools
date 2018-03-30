@@ -15,9 +15,10 @@ __all__ = ('inertia_tensor_per_object_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, weights2in,
-            rsmooth, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
+def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1in,
+                                     x2in, y2in, z2in, id2in, weights2in,
+                                     r_max_sq_in, cell1_tuple):
+    """ Cython engine for calculating the inertia tensor
 
     Parameters
     ------------
@@ -30,8 +31,11 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
     x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    rbins : array
-        Boundaries defining the bins in which pairs are counted.
+    id1in, id2in : arrays
+        Numpy array of integers storing membership IDs
+
+    r_max_sq_in : array
+        Boundaries defining the maximum square distance between points to consider.
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -46,7 +50,7 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
         for each point in ``x1in``.
 
     """
-    cdef cnp.float64_t rsmooth_squared = rsmooth*rsmooth
+
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
@@ -68,6 +72,14 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
         y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] z2_sorted = np.ascontiguousarray(
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+
+    cdef cnp.int64_t[:] id1_sorted = np.ascontiguousarray(
+        id1in[double_mesh.mesh1.idx_sorted], dtype=np.int64)
+    cdef cnp.int64_t[:] id2_sorted = np.ascontiguousarray(
+        id2in[double_mesh.mesh2.idx_sorted], dtype=np.int64)
+
+    cdef cnp.float64_t[:] r_max_sorted_sq = np.ascontiguousarray(
+        r_max_sq_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
 
     cdef cnp.float64_t[:] w2_sorted = np.ascontiguousarray(
         weights2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
@@ -113,6 +125,9 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
     cdef cnp.float64_t[:] y_icell1, y_icell2
     cdef cnp.float64_t[:] z_icell1, z_icell2
     cdef cnp.float64_t[:] w_icell2
+    cdef cnp.int64_t[:] id_icell1, id_icell2
+
+    cdef cnp.float64_t[:] rmax_sq_icell1
 
     cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2
     cdef cnp.float64_t[:] sum_weights = np.zeros(len(x1_sorted), dtype=np.float64)
@@ -124,6 +139,8 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
         x_icell1 = x1_sorted[ifirst1:ilast1]
         y_icell1 = y1_sorted[ifirst1:ilast1]
         z_icell1 = z1_sorted[ifirst1:ilast1]
+        id_icell1 = id1_sorted[ifirst1:ilast1]
+        rmax_sq_icell1 = r_max_sorted_sq[ifirst1:ilast1]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -178,6 +195,7 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
                         y_icell2 = y2_sorted[ifirst2:ilast2]
                         z_icell2 = z2_sorted[ifirst2:ilast2]
                         w_icell2 = w2_sorted[ifirst2:ilast2]
+                        id_icell2 = id2_sorted[ifirst2:ilast2]
 
                         Nj = ilast2 - ifirst2
                         #loop over points in cell1 points
@@ -186,6 +204,8 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
+
+                                id1 = id_icell1[i]
 
                                 xx = 0.
                                 yy = 0.
@@ -203,8 +223,9 @@ def inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
                                     dsq = dx*dx + dy*dy + dz*dz
 
                                     w2 = w_icell2[j]
+                                    id2 = id_icell2[j]
 
-                                    if dsq < rsmooth_squared:
+                                    if (dsq < rmax_sq_icell1[i]) & (id1==id2):
                                         xx = dx*dx*w2
                                         yy = dy*dy*w2
                                         zz = dz*dz*w2

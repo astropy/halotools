@@ -37,7 +37,7 @@ def test_1():
     q1 = np.ones(N1)
     s1 = np.ones(N1)
 
-    tensors1, sum_of_masses1 = inertia_tensor_per_object(sample1, sample2, masses2a, rsmooth, period=None)
+    tensors1, sum_of_masses1 = inertia_tensor_per_object(sample1, sample2, rsmooth, weights2=masses2a, period=None)
     tensors2, sum_of_masses2 = reduced_inertia_tensor_per_object(sample1, sample2, rsmooth, masses2b, period=None)
     
     assert np.allclose(tensors2,tensors1)
