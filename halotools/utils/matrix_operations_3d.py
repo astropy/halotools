@@ -314,7 +314,9 @@ def rotation_matrices_from_vectors(v0, v1):
     angles = angles_between_list_of_vectors(v0, v1)
 
     # where angles are 0.0, replace directions with v0
-    mask = (angles==0.0)
+    mask_a = (np.isnan(directions[:,0]) | np.isnan(directions[:,1]) | np.isnan(directions[:,2]))
+    mask_b = (angles==0.0)
+    mask = mask_a | mask_b
     directions[mask] = v0[mask]
 
     return rotation_matrices_from_angles(angles, directions)
