@@ -127,8 +127,7 @@ def resample_x_to_match_y(x, y, bins, seed=None):
 
 
 def bijective_distribution_matching(x_in, x_desired):
-    """ Replace the values in ``x_in`` with ``x_desired``,
-    preserving the rank-order of ``x_in``
+    """ Replace the values in ``x_in`` with ``x_desired``, preserving the rank-order of ``x_in``
 
     Parameters
     ----------
@@ -149,6 +148,12 @@ def bijective_distribution_matching(x_in, x_desired):
     >>> x_in = np.random.normal(loc=0, scale=0.5, size=npts)
     >>> x_desired = np.random.normal(loc=2, scale=1, size=npts)
     >>> x_out = bijective_distribution_matching(x_in, x_desired)
+
+    In the figure below, the left hand panel shows that the output distribution
+    is in exact agreement with the desired distribution. The right hand panel
+    shows that the rank-order of the input distribution is preserved.
+
+    .. image:: /_static/bijective_distribution_matching_demo.png
     """
     x_in = np.atleast_1d(x_in)
     x_desired = np.atleast_1d(x_desired)
