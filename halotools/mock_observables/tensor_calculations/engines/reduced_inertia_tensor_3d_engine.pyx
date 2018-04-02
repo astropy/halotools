@@ -17,7 +17,7 @@ __all__ = ('inertia_tensor_per_object_engine', )
 @cython.nonecheck(False)
 def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1in, q1in, s1in,
                                              x2in, y2in, z2in, id2in, weights2in,
-                                             r_max_sq_in, rot_m_in, cell1_tuple):
+                                             r_max_sq_in, rot_m_in, ed_max_sq_in, cell1_tuple):
     """ Cython engine for calculating the reducded inertia tensor
 
     Parameters
@@ -48,6 +48,9 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
 
     r_max_sq_in : array
         Boundaries defining the maximum square distance between points to consider.
+
+    ed_max_sq_in : array
+        Boundaries defining the maximum elliptical square distance between points to consider.
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -92,6 +95,8 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
 
     cdef cnp.float64_t[:] r_max_sorted_sq = np.ascontiguousarray(
         r_max_sq_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] ed_max_sorted_sq = np.ascontiguousarray(
+        ed_max_sq_in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] q1_sorted = np.ascontiguousarray(
         q1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] s1_sorted = np.ascontiguousarray(
@@ -150,7 +155,7 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
     cdef cnp.float64_t[:] rmax_sq_icell1
 
     cdef cnp.float64_t dx_prime, dy_prime, dz_prime
-    cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2, q1sq, s1sq, rnsq, rmaxsq
+    cdef cnp.float64_t xx, yy, zz, xy, xz, yz, w2, inv_q1sq, inv_s1sq, rnsq, rmaxsq
     cdef int id1, id2
     cdef cnp.float64_t[:] sum_weights = np.zeros(len(x1_sorted), dtype=np.float64)
 
@@ -230,8 +235,8 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
                                 z1tmp = z_icell1[i] - z2shift
 
                                 id1 = id_icell1[i]
-                                q1sq = q_icell1[i]*q_icell1[i]
-                                s1sq = s_icell1[i]*s_icell1[i]
+                                inv_q1sq = 1.0/(q_icell1[i]*q_icell1[i])
+                                inv_s1sq = 1.0/(s_icell1[i]*s_icell1[i])
 
                                 xx = 0.
                                 yy = 0.
@@ -247,17 +252,17 @@ def reduced_inertia_tensor_per_object_engine(double_mesh, x1in, y1in, z1in, id1i
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
 
-                                    dx_prime = rot_m_sorted[ifirst1 + i, 0, 0]*dx + rot_m_sorted[ifirst1 + i, 0, 1]*dy + rot_m_sorted[ifirst1 + i, 0, 2]*dz
-                                    dy_prime = rot_m_sorted[ifirst1 + i, 1, 0]*dx + rot_m_sorted[ifirst1 + i, 1, 1]*dy + rot_m_sorted[ifirst1 + i, 1, 2]*dz
-                                    dz_prime = rot_m_sorted[ifirst1 + i, 2, 0]*dx + rot_m_sorted[ifirst1 + i, 2, 1]*dy + rot_m_sorted[ifirst1 + i, 2, 2]*dz
+                                    dx_prime = rot_m_sorted[ifirst1 + i, 0, 0]*dx + rot_m_sorted[ifirst1 + i, 1, 0]*dy + rot_m_sorted[ifirst1 + i, 2, 0]*dz
+                                    dy_prime = rot_m_sorted[ifirst1 + i, 0, 1]*dx + rot_m_sorted[ifirst1 + i, 1, 1]*dy + rot_m_sorted[ifirst1 + i, 2, 1]*dz
+                                    dz_prime = rot_m_sorted[ifirst1 + i, 0, 2]*dx + rot_m_sorted[ifirst1 + i, 1, 2]*dy + rot_m_sorted[ifirst1 + i, 2, 2]*dz
 
                                     dsq = dx*dx + dy*dy + dz*dz
-                                    rnsq = dx_prime*dx_prime + dy_prime*dy_prime / q1sq + dz_prime*dz_prime / s1sq
+                                    rnsq = dx_prime*dx_prime + (dy_prime*dy_prime) * inv_q1sq + (dz_prime*dz_prime) * inv_s1sq
 
                                     w2 = w_icell2[j]
                                     id2 = id_icell2[j]
 
-                                    if (dsq < rmax_sq_icell1[i]) & (id1==id2) & (rnsq>0):
+                                    if (dsq < rmax_sq_icell1[i]) & (id1==id2) & (rnsq>0) & (rnsq<ed_max_sorted_sq[ifirst1 + i]):
                                         xx = dx*dx*w2
                                         yy = dy*dy*w2
                                         zz = dz*dz*w2

@@ -27,9 +27,9 @@ def eigenvectors(inertia_tensors):
     """
 
     evals, evecs = np.linalg.eigh(inertia_tensors)
-    third_evecs = evecs[:, 0]
-    second_evecs = evecs[:, 1]
-    first_evecs = evecs[:, 2]
+    third_evecs = evecs[:, :, 0]
+    second_evecs = evecs[:, :, 1]
+    first_evecs = evecs[:, :, 2]
 
     return first_evecs, second_evecs, third_evecs
 
@@ -52,9 +52,9 @@ def eigenvalues(inertia_tensors):
     """
 
     evals, evecs= np.linalg.eigh(inertia_tensors)
-    third_evecs = evals[:, 0]
-    second_evecs = evals[:, 1]
-    first_evecs = evals[:, 2]
+    third_evals = evals[:, 0]
+    second_evals = evals[:, 1]
+    first_evals = evals[:, 2]
 
     return first_evals, second_evals, third_evals
 

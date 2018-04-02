@@ -21,7 +21,7 @@ __all__ = ('reduced_inertia_tensor_per_object', )
 
 
 def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
-            weights2=None, id1=None, id2=None, inertia_tensor_0=None,
+            weights2=None, id1=None, id2=None, inertia_tensor_0=None, ed_max=None,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r""" For each point in `sample1`, identify all `sample2` points within the input
     `smoothing_scale` where `id1` is equal to `id2`; using those points together with
@@ -44,8 +44,8 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         used to calculate the inertia tensor of every `sample1` point.
 
     smoothing_scale : array_like
-        Numpy array of shape (npts1, ) storing the three-dimensional distance 
-        from each `sample1` point defining which points in `sample2` are used 
+        Numpy array of shape (npts1, ) storing the three-dimensional distance
+        from each `sample1` point defining which points in `sample2` are used
         to compute the inertia tensor.  If a single float is passed, that value
         is used for all points in `sample1`.
 
@@ -65,6 +65,12 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         point in `sample1`.  This used to calculate the elliptical distance :math:`r_{ij}`,
         see notes section below for details.  The default is 3 by 3 identity matrix for
         each point in `sample1`.
+
+    ed_max : array_like, optional
+        array of shape (npts1, ) storing the maximum ellitpcial distance from
+        each `sample1` point defining which points in `sample2` are used
+        to compute the inertia tensor.  If a single float is passed, that value
+        is used for all points in `sample1`.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -130,7 +136,7 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
     store the coordinate distances between the pair of points
     (optionally accounting for periodic boundary conditions), :math:`m_{\rm j}` stores
     the mass of the `sample2` point, and :math:`r_{ij}` is the elliptical distance
-    in the eigenvector coordinate system, sepcified by `inertia_tensor_0`, 
+    in the eigenvector coordinate system, sepcified by `inertia_tensor_0`,
     bteween the `sample1` and `sample2` points:
 
     .. math::
@@ -221,6 +227,14 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
         q1, s1 = axis_ratios_from_inertia_tensors(inertia_tensor_0)
         rot_m = rotation3d(v1, v2, v3)
 
+    if ed_max is None:
+        ed_max = np.ones(N1)/(q1*s1)**2
+    else:
+        ed_max = np.atleast_1d(ed_max)
+        if len(ed_max) == (1,):
+            ed_max = np.ones(N1)*ed_max[0]
+        assert np.shape(ed_max)==(N1,)
+
     msg = "np.shape(weights2) = {0} should be ({1}, )"
     assert np.shape(weights2) == (sample2.shape[0], ), msg.format(np.shape(weights2), sample2.shape[0])
 
@@ -258,8 +272,9 @@ def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
 
     # Create a function object that has a single argument, for parallelization purposes
     smoothing_scale_sq = smoothing_scale*smoothing_scale
+    ed_max_sq = ed_max*ed_max
     engine = partial(reduced_inertia_tensor_per_object_engine, double_mesh,
-        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale_sq, rot_m)
+        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale_sq, rot_m, ed_max_sq)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
