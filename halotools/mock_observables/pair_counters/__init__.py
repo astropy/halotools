@@ -14,3 +14,5 @@ from .weighted_npairs_s_mu import weighted_npairs_s_mu
 from .npairs_per_object_3d import npairs_per_object_3d
 from .pairwise_distance_3d import pairwise_distance_3d
 from .pairwise_distance_xy_z import pairwise_distance_xy_z
+from .pairwise_distance_elliptical import pairwise_distance_elliptical
+

@@ -2,7 +2,7 @@ from distutils.extension import Extension
 import os
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ("inertia_tensor_3d_engine.pyx", )
+SOURCES = ("inertia_tensor_3d_engine.pyx", "reduced_inertia_tensor_3d_engine.pyx")
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 

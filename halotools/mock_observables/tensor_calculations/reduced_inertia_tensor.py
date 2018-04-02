@@ -6,23 +6,27 @@ import numpy as np
 import multiprocessing
 from functools import partial
 
-from .engines import inertia_tensor_per_object_engine
+from .engines import reduced_inertia_tensor_per_object_engine
 
 from ..mock_observables_helpers import get_num_threads, get_period, enforce_sample_respects_pbcs
 from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
     _cell1_parallelization_indices, _enclose_in_box, _enforce_maximum_search_length)
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
+from ...utils import rotation_matrices_from_vectors, normalized_vectors, elementwise_dot
+from .tensor_derived_quantities import axis_ratios_from_inertia_tensors, eigenvectors
 
-__all__ = ('inertia_tensor_per_object', )
+__author__ = ('Andrew Hearin', 'Duncan Campbell')
+__all__ = ('reduced_inertia_tensor_per_object', )
 
 
-def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, id1=None, id2=None,
+def reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale,
+            weights2=None, id1=None, id2=None, inertia_tensor_0=None, ed_max=None,
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r""" For each point in `sample1`, identify all `sample2` points within the input
-    `smoothing_scale`; using those points together with the input `weights2`,
-    the `inertia_tensor_per_object` function calculates the inertia tensor
-    of the mass distribution surrounding each point in `sample1`.
+    `smoothing_scale` where `id1` is equal to `id2`; using those points together with
+    the input `weights2`, the `reduced_inertia_tensor_per_object` function calculates the
+    reducded inertia tensor of the mass distribution surrounding each point in `sample1`.
 
     Parameters
     ----------
@@ -40,8 +44,8 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
         used to calculate the inertia tensor of every `sample1` point.
 
     smoothing_scale : array_like
-        Numpy array of shape (npts1, ) storing the three-dimensional distance 
-        from each `sample1` point defining which points in `sample2` are used 
+        Numpy array of shape (npts1, ) storing the three-dimensional distance
+        from each `sample1` point defining which points in `sample2` are used
         to compute the inertia tensor.  If a single float is passed, that value
         is used for all points in `sample1`.
 
@@ -55,6 +59,18 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
 
     id2 : array_like, optional
         array of integer IDs of shape (npts2, ).  Default is np.ones(npts2).
+
+    inertia_tensor_0 :  array_like, optional
+        array of shape (npts1, 3, 3) storing an initial inertia tensor for each
+        point in `sample1`.  This used to calculate the elliptical distance :math:`r_{ij}`,
+        see notes section below for details.  The default is 3 by 3 identity matrix for
+        each point in `sample1`.
+
+    ed_max : array_like, optional
+        array of shape (npts1, ) storing the maximum ellitpcial distance from
+        each `sample1` point defining which points in `sample2` are used
+        to compute the inertia tensor.  If a single float is passed, that value
+        is used for all points in `sample1`.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -86,8 +102,8 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
 
     Returns
     -------
-    inertia_tensors : ndarray
-        Numpy array of shape (npts1, 3, 3) storing the inertia tensor for every
+    reduced_inertia_tensors : ndarray
+        Numpy array of shape (npts1, 3, 3) storing the reduced inertia tensor for every
         object in `sample1`.
 
     sum_of_masses : ndarray
@@ -101,35 +117,43 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
     >>> sample2 = np.random.random((npts2, 3))
     >>> weights2 = np.random.random(npts2)
     >>> smoothing_scale = 0.1
-    >>> result = inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2)
+    >>> result = reduced_inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2)
 
     Notes
     -----
-    For every pair of points, :math:`i, j` in `sample1`, `sample2`,
-    the contribution to the inertia tensor is:
+    The reduced inertia tensor is calculated pairwise.  For every pair of points,
+    :math:`i, j` in `sample1` and `sample2`, the contribution to the reduced inertia tensor is:
 
     .. math::
 
-        \mathcal{I}_{\rm ij} = m_{\rm j}\begin{bmatrix}
-                \delta x_{\rm ij}*\delta x_{\rm ij} & \delta x_{\rm ij}*\delta y_{\rm ij} & \delta x_{\rm ij}*\delta z_{\rm ij} \\
-                \delta y_{\rm ij}*\delta x_{\rm ij} & \delta y_{\rm ij}*\delta y_{\rm ij} & \delta y_{\rm ij}*\delta z_{\rm ij} \\
-                \delta z_{\rm ij}*\delta x_{\rm ij} & \delta z_{\rm ij}*\delta y_{\rm ij} & \delta z_{\rm ij}*\delta z_{\rm ij}
+        \widetilde{\mathcal{I}}_{\rm ij} = \frac{m_{\rm j}}{r_{\rm ij}^2}\begin{bmatrix}
+                \delta x_{\rm ij}\times\delta x_{\rm ij} & \delta x_{\rm ij}\times\delta y_{\rm ij} & \delta x_{\rm ij}\times\delta z_{\rm ij} \\
+                \delta y_{\rm ij}\times\delta x_{\rm ij} & \delta y_{\rm ij}\times\delta y_{\rm ij} & \delta y_{\rm ij}\times\delta z_{\rm ij} \\
+                \delta z_{\rm ij}\times\delta x_{\rm ij} & \delta z_{\rm ij}\times\delta y_{\rm ij} & \delta z_{\rm ij}\times\delta z_{\rm ij}
             \end{bmatrix}
 
     The :math:`\delta x_{\rm ij}`, :math:`\delta y_{\rm ij}`, and :math:`\delta z_{\rm ij}` terms
     store the coordinate distances between the pair of points
-    (optionally accounting for periodic boundary conditions), and :math:`m_{\rm j}` stores
-    the mass of the `sample2` point.
+    (optionally accounting for periodic boundary conditions), :math:`m_{\rm j}` stores
+    the mass of the `sample2` point, and :math:`r_{ij}` is the elliptical distance
+    in the eigenvector coordinate system, sepcified by `inertia_tensor_0`,
+    bteween the `sample1` and `sample2` points:
 
-    To calculate the inertia tensor :math:`\mathcal{I}_{\rm i}` for the
-    :math:`i^{\rm th}` point in `sample1`, the `inertia_tensor_per_object` function
-    sums up the contributions :math:`\mathcal{I}_{\rm ij}` for all :math:`j` such that the
-    distance between the two points :math:`D_{\rm ij}`
-    is less than the smoothing scale :math:`D_{\rm smooth}`:
+    .. math::
+        r_{\rm ij} = \sqrt{\delta {x'}_{\rm ij}^2 + \delta {y'}_{\rm ij}^2/q_{\rm i}^2 + \delta {z'}_{\rm ij}^2/s_{\rm i}^2 }
+
+    where, e.g., :math:`\delta {x'}_{\rm ij}` is x-position of the :math:`j^{\rm th}` point in `sample2`
+    in the eigenvector coordinate system centered on the :math:`i^{\rm th}` point in `sample1`.
+
+    To calculate the reduced inertia tensor :math:`\widetilde{\mathcal{I}}_{\rm i}` for the
+    :math:`i^{\rm th}` point in `sample1`, the `reduced_inertia_tensor_per_object` function
+    sums up the contributions :math:`\widetilde{\mathcal{I}}_{\rm ij}` for all :math:`j` such that the
+    distance between the two points :math:`D_{\rm ij}` is less than the smoothing scale :math:`D_{\rm smooth}`,
+    and `id1` is equal to `id2`:
 
     .. math::
 
-        \mathcal{I}_{\rm i} = \sum_{j}^{r_{\rm ij} < D_{\rm smooth}} \mathcal{I}_{\rm ij}
+        \widetilde{\mathcal{I}}_{\rm i} = \sum_{j}^{D_{\rm ij} < D_{\rm smooth}} \mathcal{I}_{\rm ij}
 
     There are several convenience functions available to derive quantities
     from the returned inertia tensors:
@@ -151,7 +175,7 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
     smoothing_scale = np.atleast_1d(smoothing_scale)
     if len(smoothing_scale)==1:
         smoothing_scale = np.array([smoothing_scale]*N1).reshape((N1,))
-    msg = "np.shape(smoothing_scale) = {0} should be ({1}, )"
+    msg = "np.shape(smoothing) = {0} should be ({1}, )"
     assert np.shape(smoothing_scale) == (N1,), msg.format(np.shape(smoothing_scale), sample1.shape[0])
 
     max_smoothing_scale = np.max(smoothing_scale)
@@ -189,6 +213,28 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
     else:
         id2 = np.atleast_1d(id2).astype('int')
 
+    # calculate rotation matrices to tranform sample2 coordinates into
+    # the eigenvector coordinate system for each point in sample1
+    if inertia_tensor_0 is None:
+        rot_m = np.array([1.0,0.0,0.0,
+                          0.0,1.0,0.0,
+                          0.0,0.0,1.0]*N1).reshape((N1, 3, 3))
+        q1 = np.ones(N1)
+        s1 = np.ones(N1)
+    else:
+        assert np.shape(inertia_tensor_0)==(N1,3,3)
+        v1, v2, v3 = eigenvectors(inertia_tensor_0)
+        q1, s1 = axis_ratios_from_inertia_tensors(inertia_tensor_0)
+        rot_m = rotation3d(v1, v2, v3)
+
+    if ed_max is None:
+        ed_max = np.ones(N1)/(q1*s1)**2
+    else:
+        ed_max = np.atleast_1d(ed_max)
+        if len(ed_max) == (1,):
+            ed_max = np.ones(N1)*ed_max[0]
+        assert np.shape(ed_max)==(N1,)
+
     msg = "np.shape(weights2) = {0} should be ({1}, )"
     assert np.shape(weights2) == (sample2.shape[0], ), msg.format(np.shape(weights2), sample2.shape[0])
 
@@ -196,6 +242,11 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
     assert np.shape(id1) == (sample1.shape[0], ), msg.format(np.shape(id1), sample1.shape[0])
     msg = "np.shape(id2) = {0} should be ({1}, )"
     assert np.shape(id2) == (sample2.shape[0], ), msg.format(np.shape(id2), sample2.shape[0])
+
+    msg = "np.shape(q1) = {0} should be ({1}, )"
+    assert np.shape(q1) == (sample1.shape[0], ), msg.format(np.shape(q1), sample1.shape[0])
+    msg = "np.shape(s1) = {0} should be ({1}, )"
+    assert np.shape(s1) == (sample1.shape[0], ), msg.format(np.shape(s1), sample1.shape[0])
 
     xperiod, yperiod, zperiod = period
     _enforce_maximum_search_length(max_smoothing_scale, period)
@@ -221,8 +272,9 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
 
     # Create a function object that has a single argument, for parallelization purposes
     smoothing_scale_sq = smoothing_scale*smoothing_scale
-    engine = partial(inertia_tensor_per_object_engine, double_mesh,
-        x1in, y1in, z1in, id1, x2in, y2in, z2in, id2, weights2, smoothing_scale_sq)
+    ed_max_sq = ed_max*ed_max
+    engine = partial(reduced_inertia_tensor_per_object_engine, double_mesh,
+        x1in, y1in, z1in, id1, q1, s1, x2in, y2in, z2in, id2, weights2, smoothing_scale_sq, rot_m, ed_max_sq)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -241,3 +293,62 @@ def inertia_tensor_per_object(sample1, sample2, smoothing_scale, weights2=None, 
         tensors, sum_of_masses = result
 
     return np.array(tensors), np.array(sum_of_masses)
+
+
+def rotation3d(ux, uy, uz):
+    """
+    Calculate a collection of rotation matrices defined by an input collection
+    of basis vectors.
+
+    Parameters
+    ----------
+    ux : array_like
+        Numpy array of shape (npts, 3) storing a collection of unit vexctors
+
+    uy : array_like
+        Numpy array of shape (npts, 3) storing a collection of unit vexctors
+
+    uz : array_like
+        Numpy array of shape (npts, 3) storing a collection of unit vexctors
+
+    Returns
+    -------
+    matrices : ndarray
+        Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
+    """
+
+    N = np.shape(ux)[0]
+
+    # assume initial unit vectors are the standard ones
+    ex = np.array([1.0, 0.0, 0.0]*N).reshape(N, 3)
+    ey = np.array([0.0, 1.0, 0.0]*N).reshape(N, 3)
+    ez = np.array([0.0, 0.0, 1.0]*N).reshape(N, 3)
+
+    ux = normalized_vectors(ux)
+    uy = normalized_vectors(uy)
+    uz = normalized_vectors(uz)
+
+    r_11 = elementwise_dot(ex, ux)
+    r_12 = elementwise_dot(ex, uy)
+    r_13 = elementwise_dot(ex, uz)
+
+    r_21 = elementwise_dot(ey, ux)
+    r_22 = elementwise_dot(ey, uy)
+    r_23 = elementwise_dot(ey, uz)
+
+    r_31 = elementwise_dot(ez, ux)
+    r_32 = elementwise_dot(ez, uy)
+    r_33 = elementwise_dot(ez, uz)
+
+    r = np.zeros((N, 3, 3))
+    r[:,0,0] = r_11
+    r[:,0,1] = r_12
+    r[:,0,2] = r_13
+    r[:,1,0] = r_21
+    r[:,1,1] = r_22
+    r[:,1,2] = r_23
+    r[:,2,0] = r_31
+    r[:,2,1] = r_32
+    r[:,2,2] = r_33
+
+    return r
