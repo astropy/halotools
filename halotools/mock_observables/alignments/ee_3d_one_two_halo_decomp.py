@@ -167,7 +167,7 @@ def ee_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
 
     # process halo ids
     sample1_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype('int')
-    sample2_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype('int')
+    sample2_host_halo_id = np.atleast_1d(sample2_host_halo_id).astype('int')
     if np.shape(sample1_host_halo_id) != (N1,):
         msg = ('`sample1_host_halo_id` is not a 1D array of length ``len(samnple1)``.')
         raise ValueError(msg)
