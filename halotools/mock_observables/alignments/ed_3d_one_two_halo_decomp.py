@@ -145,10 +145,14 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
 
     >>> random_orientations = np.random.random((Npts,3))
 
+    And a set of random halo ids for each point
+
+    >>> halo_ids = np.random.randint(1, 10, Npts)
+
     We can the calculate the auto-ED correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
-    >>> result = ed_3d(sample1, random_orientations, sample1, rbins, period=Lbox)
+    >>> result = ed_3d_one_two_halo_decomp(sample1, random_orientations,  halo_ids, sample1, halo_ids, rbins, period=Lbox)
 
     """
 
@@ -242,15 +246,15 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
     marks2[:,0] = sample2_host_halo_id
     marks2[:,1] = weights2
 
-    counts_1h = marked_npairs_3d(sample1, sample2, rbins,
-                       weights1=marks1, weights2=marks2, weight_func_id=3,
+    counts_1h = marked_npairs_3d(sample1[mask1], sample2[mask2], rbins,
+                       weights1=marks1[mask1], weights2=marks2[mask2], weight_func_id=3,
                        period=period, verbose=False, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
                        approx_cell2_size=approx_cell2_size)
     counts_1h = np.diff(counts_1h)
 
-    counts_2h = marked_npairs_3d(sample1, sample2, rbins,
-                       weights1=marks1, weights2=marks2, weight_func_id=4,
+    counts_2h = marked_npairs_3d(sample1[mask1], sample2[mask2], rbins,
+                       weights1=marks1[mask1], weights2=marks2[mask2], weight_func_id=4,
                        period=period, verbose=False, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
                        approx_cell2_size=approx_cell2_size)
