@@ -259,4 +259,4 @@ cdef f_type return_weighting_function(weight_func_id):
     elif weight_func_id==17:
         return squareddotweights_ineq
     else:
-        raise ValueError('marking function does not exist')
+        raise ValueError('marking function does not exist, id={0}'.format(weight_func_id))
