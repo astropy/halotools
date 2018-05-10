@@ -574,7 +574,7 @@ class TabularAsciiReader(object):
         header_length = int(self.header_len())
         print(("Number of rows in detected header = %i \n" % header_length))
 
-        chunklist = []
+        full_array = np.zeros(num_data_rows, dtype=self.dt)
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
 
             for skip_header_row in range(header_length):
@@ -587,15 +587,13 @@ class TabularAsciiReader(object):
                 chunk_array = np.array(list(
                     self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt)
                 cut_chunk = self.apply_row_cut(chunk_array)
-                chunklist.append(cut_chunk)
+                full_array[_i*num_rows_in_chunk:(_i+1)*num_rows_in_chunk] = cut_chunk
 
             # Now for the remainder chunk
             chunk_array = np.array(list(
                 self.data_chunk_generator(num_rows_in_chunk_remainder, f)), dtype=self.dt)
             cut_chunk = self.apply_row_cut(chunk_array)
-            chunklist.append(cut_chunk)
-
-        full_array = np.concatenate(chunklist)
+            full_array[num_full_chunks*num_rows_in_chunk:] = cut_chunk
 
         end = time()
         runtime = (end-start)
