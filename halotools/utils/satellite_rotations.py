@@ -63,7 +63,10 @@ def rotate_satellite_vectors(satellite_vectors, satellite_hostid, satellite_rota
     host_halo_id = np.atleast_1d(host_halo_id)
     host_halo_axis = np.atleast_2d(host_halo_axis)
 
-    has_match = np.isin(satellite_hostid, host_halo_id)
+    try:
+        has_match = np.isin(satellite_hostid, host_halo_id)
+    except AttributeError:
+        has_match = np.in1d(satellite_hostid, host_halo_id)
     satellite_rotation_angles[~has_match] = 0.
 
     idxA, idxB = crossmatch(satellite_hostid, host_halo_id)
@@ -132,7 +135,10 @@ def calculate_satellite_radial_vector(sat_hostid, sat_x, sat_y, sat_z,
     radial_distances : ndarray
         Numpy array of shape (num_sats, )
     """
-    has_match = np.isin(sat_hostid, host_halo_id)
+    try:
+        has_match = np.isin(sat_hostid, host_halo_id)
+    except AttributeError:
+        has_match = np.in1d(sat_hostid, host_halo_id)
 
     sat_hostid = np.atleast_1d(sat_hostid)[has_match]
     sat_x = np.atleast_1d(sat_x)[has_match]
