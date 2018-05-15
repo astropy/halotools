@@ -21,6 +21,7 @@ Calculating quantities for objects grouped into a common halo
 .. autosummary::
 
 	group_member_generator
+    compute_richness
 
 
 Generating Monte Carlo realizations
@@ -67,3 +68,13 @@ Estimating two-dimensional PDFs
 .. autosummary::
 
     sliding_conditional_percentile
+
+
+Satellite orientations and intra-halo positions
+===============================================================
+
+.. autosummary::
+
+    rotate_satellite_vectors
+    calculate_satellite_radial_vector
+    reposition_satellites_from_radial_vectors

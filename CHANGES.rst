@@ -19,6 +19,8 @@
 
 - Added new utils function `bijective_distribution_matching`
 
+- Added new utils module `satellite_rotations` implementing functions that can be used to remap satellite orientations and positions within their halos
+
 
 0.6 (2017-12-15)
 ----------------
