@@ -168,7 +168,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.vstack(result)
+        counts = np.sum(result, axis=0)
         pool.close()
     else:
         result = engine(cell1_tuples[0])

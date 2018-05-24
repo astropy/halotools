@@ -209,3 +209,27 @@ def test_cic_pbc():
         result_pbc = counts_in_cylinders(sample1, sample2, rp_max, pi_max, period=1)
         result_nopbc = counts_in_cylinders(sample1, sample2, rp_max, pi_max, period=None)
         assert np.allclose(result_pbc, result_nopbc)
+
+
+def test_parallel_serial_consistency():
+    """ Enforce that the counts-in-cylinder function returns identical results
+    when called in serial or parallel.
+
+    This is a regression test for Issue #908,
+    https://github.com/astropy/halotools/issues/908.
+    """
+    period = 1
+    sample1 = generate_3d_regular_mesh(5)
+
+    npts2 = 100
+    sample2 = generate_locus_of_3d_points(npts2, xc=0.101, yc=0.101, zc=0.101)
+
+    proj_search_radius, cylinder_half_length = 0.02, 0.02
+
+    result1 = counts_in_cylinders(
+        sample1, sample2, proj_search_radius, cylinder_half_length, period=period)
+    result2 = counts_in_cylinders(
+        sample1, sample2, proj_search_radius, cylinder_half_length, period=period, num_threads=4)
+
+    assert result1.shape == result2.shape
+
