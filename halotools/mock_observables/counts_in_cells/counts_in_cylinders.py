@@ -13,14 +13,21 @@ from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
     _cell1_parallelization_indices, _enclose_in_box, _enforce_maximum_search_length)
 
-from ...utils.array_utils import array_is_monotonic, custom_len
+from ...utils.array_utils import custom_len
 
 __author__ = ('Andrew Hearin', )
 
-__all__ = ('counts_in_cylinders', )
-
+__all__ = ('counts_in_cylinders', 'idx_in_cylinders')
 
 def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
+        period=None, verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None):
+
+    indexes = idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
+        period, verbose, num_threads, approx_cell1_size, approx_cell2_size)
+    return np.array([len(i) for i in indexes])
+
+def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         period=None, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
@@ -168,14 +175,17 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.sum(result, axis=0)
+        counts = [[] for i in result[0]]
+        for r in result:
+            for i in range(len(r)):
+                counts[i].extend(r[i])
+        counts = np.array([np.array(i, dtype=np.int32) for i in counts])
         pool.close()
     else:
-        result = engine(cell1_tuples[0])
-        counts = np.vstack(result)
+        counts = engine(cell1_tuples[0])
+        counts = np.array([np.array(i, dtype=np.int32) for i in counts])
 
-    return counts.flatten()
-
+    return counts
 
 def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
         period, verbose, num_threads, approx_cell1_size, approx_cell2_size):

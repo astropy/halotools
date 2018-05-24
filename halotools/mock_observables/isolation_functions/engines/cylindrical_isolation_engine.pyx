@@ -219,4 +219,3 @@ def cylindrical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
     new_is_isolated[is_isolated] = 1
 
     return new_is_isolated
-

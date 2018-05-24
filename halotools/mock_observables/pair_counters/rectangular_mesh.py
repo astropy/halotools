@@ -237,13 +237,13 @@ class RectangularDoubleMesh(object):
             Maximum number of cells per dimension. Default is 50.
 
         """
-        self.xperiod = xperiod
+        self.xperiod = xperiod # size of the box
         self.yperiod = yperiod
         self.zperiod = zperiod
-        self.search_xlength = search_xlength
+        self.search_xlength = search_xlength # Max length over which we want to search (e.g. 50Mpc in the case of photoz, 10Mpc in the case of specz)
         self.search_ylength = search_ylength
         self.search_zlength = search_zlength
-        self._PBCs = PBCs
+        self._PBCs = PBCs # Does it have periodic boundary conditions? By default it does
 
         self._check_sensible_constructor_inputs()
 
@@ -252,8 +252,8 @@ class RectangularDoubleMesh(object):
         approx_y1cell_size = sample1_cell_size(yperiod, search_ylength, approx_y1cell_size,
             max_cells_per_dimension=max_cells_per_dimension_cell1)
         approx_z1cell_size = sample1_cell_size(zperiod, search_zlength, approx_z1cell_size,
-                max_cells_per_dimension=max_cells_per_dimension_cell1)
-        self.mesh1 = RectangularMesh(x1, y1, z1, xperiod, yperiod, zperiod,
+                max_cells_per_dimension=max_cells_per_dimension_cell1) # Work out the number of cells we should have using some logic...
+        self.mesh1 = RectangularMesh(x1, y1, z1, xperiod, yperiod, zperiod, # build mesh 1
             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size)
 
         approx_x2cell_size = sample2_cell_sizes(xperiod, self.mesh1.xcell_size, approx_x2cell_size,

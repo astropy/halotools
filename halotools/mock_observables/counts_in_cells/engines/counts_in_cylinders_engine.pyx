@@ -75,8 +75,8 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.float64_t zperiod = double_mesh.zperiod
-    cdef cnp.int64_t first_cell1_element = cell1_tuple[0]
-    cdef cnp.int64_t last_cell1_element = cell1_tuple[1]
+    cdef cnp.int64_t first_cell1_element = cell1_tuple[0] # start cell
+    cdef cnp.int64_t last_cell1_element = cell1_tuple[1] # end cell
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
@@ -95,7 +95,9 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     cdef cnp.float64_t[:] z2_sorted = np.ascontiguousarray(
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
-    cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
+    # cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
+    # cdef cnp.int64_t[:] indexes = np.zeros(len(x1_sorted), dtype=[("i1", np.int32), ("i2", np.int32)])
+    indexes = [[] for i in range(len(x1_sorted))]
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -137,29 +139,29 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     cdef cnp.float64_t[:] y_icell1, y_icell2
     cdef cnp.float64_t[:] z_icell1, z_icell2
 
-    for icell1 in range(first_cell1_element, last_cell1_element):
-        ifirst1 = cell1_indices[icell1]
-        ilast1 = cell1_indices[icell1+1]
-        x_icell1 = x1_sorted[ifirst1:ilast1]
+    for icell1 in range(first_cell1_element, last_cell1_element): # We only run this on certain cells (so this can be parallelized)
+        ifirst1 = cell1_indices[icell1] # the index of the first thing in this cell
+        ilast1 = cell1_indices[icell1+1] # this index of the last thing in this cell
+        x_icell1 = x1_sorted[ifirst1:ilast1] # the x, y, z coords of the things in this cell
         y_icell1 = y1_sorted[ifirst1:ilast1]
         z_icell1 = z1_sorted[ifirst1:ilast1]
 
-        Ni = ilast1 - ifirst1
-        if Ni > 0:
+        Ni = ilast1 - ifirst1 # The number of things in this cell
+        if Ni > 0: # there is no else, so this could just be: if Ni == 0: continue
 
-            ix1 = icell1 // (num_y1divs*num_z1divs)
+            ix1 = icell1 // (num_y1divs*num_z1divs) # the index of where this cell is in x, y, z space
             iy1 = (icell1 - ix1*num_y1divs*num_z1divs) // num_z1divs
             iz1 = icell1 - (ix1*num_y1divs*num_z1divs) - (iy1*num_z1divs)
 
-            leftmost_ix2 = ix1*num_x2_per_x1 - num_x2_covering_steps
-            leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
+            leftmost_ix2 = ix1*num_x2_per_x1 - num_x2_covering_steps # the index in sample2 space that is as far to the left (right) that we possibly need to look
+            leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps # This will go negative or > than our period at some point so we handle wraparound below
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
             rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
             rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
             rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
-            for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
+            for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2): # For all the cells in sample2 in the x direction
                 if nonPBC_ix2 < 0:
                     x2shift = -xperiod*PBCs
                 elif nonPBC_ix2 >= num_x2divs:
@@ -169,7 +171,7 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                 # Now apply the PBCs
                 ix2 = nonPBC_ix2 % num_x2divs
 
-                for nonPBC_iy2 in range(leftmost_iy2, rightmost_iy2):
+                for nonPBC_iy2 in range(leftmost_iy2, rightmost_iy2): # For all the cells in sample2 in the y direction
                     if nonPBC_iy2 < 0:
                         y2shift = -yperiod*PBCs
                     elif nonPBC_iy2 >= num_y2divs:
@@ -179,7 +181,7 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                     # Now apply the PBCs
                     iy2 = nonPBC_iy2 % num_y2divs
 
-                    for nonPBC_iz2 in range(leftmost_iz2, rightmost_iz2):
+                    for nonPBC_iz2 in range(leftmost_iz2, rightmost_iz2): # For all the cells ... I think you get the point
                         if nonPBC_iz2 < 0:
                             z2shift = -zperiod*PBCs
                         elif nonPBC_iz2 >= num_z2divs:
@@ -189,17 +191,20 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                         # Now apply the PBCs
                         iz2 = nonPBC_iz2 % num_z2divs
 
-                        icell2 = ix2*(num_y2divs*num_z2divs) + iy2*num_z2divs + iz2
-                        ifirst2 = cell2_indices[icell2]
-                        ilast2 = cell2_indices[icell2+1]
+                        icell2 = ix2*(num_y2divs*num_z2divs) + iy2*num_z2divs + iz2 # This is the cell number in sample2 space
+                        ifirst2 = cell2_indices[icell2] # the index of the first thing in this cell
+                        ilast2 = cell2_indices[icell2+1] # ditto but last
 
-                        x_icell2 = x2_sorted[ifirst2:ilast2]
+                        x_icell2 = x2_sorted[ifirst2:ilast2] # The cut of those things
                         y_icell2 = y2_sorted[ifirst2:ilast2]
                         z_icell2 = z2_sorted[ifirst2:ilast2]
 
-                        Nj = ilast2 - ifirst2
+                        Nj = ilast2 - ifirst2 # And the number.
                         #loop over points in cell1
-                        if Nj > 0:
+                        if Nj > 0: # Another continue
+
+
+                            # And now we have our subsamples. Just a nice double for loop
                             for i in range(0,Ni):
                                 x1tmp = x_icell1[i] - x2shift
                                 y1tmp = y_icell1[i] - y2shift
@@ -217,11 +222,13 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                                     dz_sq = dz*dz
 
                                     if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp):
-                                        counts[ifirst1+i] += 1
+                                        # counts[ifirst1+i] += 1
+                                        # indexes[n] = (ifirst1+i, ifirst2+j)
+                                        indexes[ifirst1+i].append(ifirst2+j)
 
     # At this point, we have calculated our counts on the input arrays *after* sorting
     # Since the order of counts matters in this calculation, we need to undo the sorting
-    sorted_counts = np.array(counts)
     idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
-    return sorted_counts[idx_unsorted]
-
+    sorted_indexes = np.array(indexes)
+    out = sorted_indexes[idx_unsorted]
+    return out
