@@ -25,7 +25,11 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     indexes = idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         period, verbose, num_threads, approx_cell1_size, approx_cell2_size)
-    return np.array([len(i) for i in indexes])
+
+    idx, idx_cnt = np.unique(indexes["i1"], return_counts=True)
+    counts = np.zeros(len(sample1))
+    counts[idx] = idx_cnt
+    return counts
 
 def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         period=None, verbose=False, num_threads=1,
@@ -175,17 +179,17 @@ def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = [[] for i in result[0]]
-        for r in result:
-            for i in range(len(r)):
-                counts[i].extend(r[i])
-        counts = np.array([np.array(i, dtype=np.int32) for i in counts])
+        indexes = np.array((
+            np.concatenate([np.array(res[0]) for res in result]),
+            np.concatenate([np.array(res[1]) for res in result])
+        )).T.ravel().view(dtype=[('i1', np.int64), ('i2', np.int64)])
         pool.close()
     else:
-        counts = engine(cell1_tuples[0])
-        counts = np.array([np.array(i, dtype=np.int32) for i in counts])
+        result = engine(cell1_tuples[0])
+        indexes = np.array((result[0], result[1])).T.ravel().view(
+                dtype=[('i1', np.int64), ('i2', np.int64)])
 
-    return counts
+    return indexes
 
 def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
         period, verbose, num_threads, approx_cell1_size, approx_cell2_size):

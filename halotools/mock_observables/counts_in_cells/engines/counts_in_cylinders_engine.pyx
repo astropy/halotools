@@ -96,8 +96,16 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
     # cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
-    # cdef cnp.int64_t[:] indexes = np.zeros(len(x1_sorted), dtype=[("i1", np.int32), ("i2", np.int32)])
-    indexes = [[] for i in range(len(x1_sorted))]
+
+    # This should really be a single Nx2 array. I couldn't work out the pyx syntax for
+    # some of the indexing (for the unsorting). However, having 2 arrays is slightly more
+    # memory efficient (during the resizing).
+    cdef cnp.int64_t[:] indexes1 = np.ascontiguousarray(
+            np.zeros(len(x1_sorted), dtype=np.int64))
+    cdef cnp.int64_t[:] indexes2 = np.ascontiguousarray(
+            np.zeros(len(x1_sorted), dtype=np.int64))
+    cdef int n = 0
+    # indexes = [[] for i in range(len(x1_sorted))]
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -223,12 +231,16 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
 
                                     if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp):
                                         # counts[ifirst1+i] += 1
-                                        # indexes[n] = (ifirst1+i, ifirst2+j)
-                                        indexes[ifirst1+i].append(ifirst2+j)
+                                        indexes1[n] = ifirst1+i
+                                        indexes2[n] = ifirst2+j
+                                        n += 1
+                                        if n == len(indexes1):
+                                            indexes1 = np.resize(indexes1, n*2)
+                                            indexes2 = np.resize(indexes2, n*2)
 
-    # At this point, we have calculated our counts on the input arrays *after* sorting
-    # Since the order of counts matters in this calculation, we need to undo the sorting
-    idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
-    sorted_indexes = np.array(indexes)
-    out = sorted_indexes[idx_unsorted]
-    return out
+    # At this point, we have calculated our pairs on the input arrays *after* sorting
+    # Since the order matters in this calculation, we need to undo the sorting
+    # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
+    indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:n]]
+    indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:n]]
+    return indexes1_uns, indexes2_uns

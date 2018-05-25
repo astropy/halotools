@@ -1,15 +1,29 @@
 """
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from astropy.utils.misc import NumpyRNGContext
 
-from ...tests.cf_helpers import generate_locus_of_3d_points, generate_3d_regular_mesh
-
-__all__ = ('pure_python_counts_in_cylinders', )
+__all__ = ('pure_python_counts_in_cylinders', 'pure_python_idx_in_cylinders')
 
 fixed_seed = 43
+
+def pure_python_idx_in_cylinders(
+        sample1, sample2, rp_max, pi_max, period=None):
+    if period is None:
+        xperiod, yperiod, zperiod = np.inf, np.inf, np.inf
+    else:
+        xperiod, yperiod, zperiod = period, period, period
+
+    npts1, npts2 = len(sample1), len(sample2)
+
+    indexes = []
+
+    for i in range(npts1):
+        for j in range(npts2):
+            if _point_within_cylinder(sample1[i], sample2[j], rp_max[i], pi_max[i], xperiod, yperiod, zperiod):
+                indexes.append((i, j))
+
+    return np.array(indexes, dtype=[("i1", np.int), ("i2", np.int)])
 
 
 def pure_python_counts_in_cylinders(
@@ -30,30 +44,30 @@ def pure_python_counts_in_cylinders(
 
     for i in range(npts1):
         for j in range(npts2):
-            dx = sample1[i, 0] - sample2[j, 0]
-            dy = sample1[i, 1] - sample2[j, 1]
-            dz = sample1[i, 2] - sample2[j, 2]
-
-            if dx > xperiod/2.:
-                dx = xperiod - dx
-            elif dx < -xperiod/2.:
-                dx = -(xperiod + dx)
-
-            if dy > yperiod/2.:
-                dy = yperiod - dy
-            elif dy < -yperiod/2.:
-                dy = -(yperiod + dy)
-
-            if dz > zperiod/2.:
-                dz = zperiod - dz
-            elif dz < -zperiod/2.:
-                dz = -(zperiod + dz)
-
-            rp = np.sqrt(dx*dx + dy*dy)
-            dz = abs(dz)
-            rp_cylinder = rp_max[i]
-            pi_cylinder = pi_max[i]
-            if (rp <= rp_cylinder) & (dz <= pi_cylinder):
+            if _point_within_cylinder(sample1[i], sample2[j], rp_max[i], pi_max[i], xperiod, yperiod, zperiod):
                 counts[i] += 1
-
     return counts
+
+def _point_within_cylinder(p1, p2, rp_cylinder, pi_cylinder, xperiod, yperiod, zperiod):
+    dx = p1[0] - p2[0]
+    dy = p1[1] - p2[1]
+    dz = p1[2] - p2[2]
+
+    if dx > xperiod/2.:
+        dx = xperiod - dx
+    elif dx < -xperiod/2.:
+        dx = -(xperiod + dx)
+
+    if dy > yperiod/2.:
+        dy = yperiod - dy
+    elif dy < -yperiod/2.:
+        dy = -(yperiod + dy)
+
+    if dz > zperiod/2.:
+        dz = zperiod - dz
+    elif dz < -zperiod/2.:
+        dz = -(zperiod + dz)
+
+    rp = np.sqrt(dx*dx + dy*dy)
+    dz = abs(dz)
+    return (rp <= rp_cylinder) & (dz <= pi_cylinder)

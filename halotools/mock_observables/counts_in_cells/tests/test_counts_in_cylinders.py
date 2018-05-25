@@ -109,6 +109,7 @@ def test_counts_in_cylinders_brute_force1():
         brute_force_result = pure_python_counts_in_cylinders(sample1, sample2, rp_max, pi_max)
         result = counts_in_cylinders(sample1, sample2, rp_max, pi_max)
         assert brute_force_result.shape == result.shape
+        assert np.sum(result) == np.sum(brute_force_result)
         assert np.all(result == brute_force_result)
 
 
@@ -211,7 +212,7 @@ def test_cic_pbc():
         assert np.allclose(result_pbc, result_nopbc)
 
 
-def test_parallel_serial_consistency():
+def test_counts_in_cylinders_parallel_serial_consistency():
     """ Enforce that the counts-in-cylinder function returns identical results
     when called in serial or parallel.
 
