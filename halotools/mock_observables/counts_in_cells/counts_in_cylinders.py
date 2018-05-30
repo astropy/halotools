@@ -88,8 +88,8 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     Returns
     -------
     num_pairs : array_like
-        Numpy array of shape (Npts1, len(rbins)) storing the numbers of points
-        in ``sample2`` inside spheres surrounding each point in ``sample1``.
+        Numpy array of length Npts1 storing the numbers of points in ``sample2``
+        inside the cylinder surrounding each point in ``sample1``.
 
     Examples
     --------
