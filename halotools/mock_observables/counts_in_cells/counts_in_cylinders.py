@@ -34,6 +34,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         period=None, verbose=False, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
+    # TODO docs are wrong
     """
     Function counts the number of points in ``sample2`` separated by a xy-distance
     *r* and z-distance *z* from each point in ``sample1``,
