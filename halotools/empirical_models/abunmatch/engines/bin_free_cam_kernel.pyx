@@ -6,7 +6,7 @@ import numpy as np
 cimport cython
 from ....utils import unsorting_indices
 
-__all__ = ('cython_bin_free_cam_kernel', )
+__all__ = ('cython_bin_free_cam_kernel', 'get_value')
 
 
 cdef double random_uniform():
@@ -113,7 +113,7 @@ def setup_initial_indices(int iy, int nwin, int npts):
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-cdef int find_index(int[:] arr, int val):
+cdef int _find_index(int[:] arr, int val):
     for i in range(len(arr)):
         if arr[i] == val:
             return i
@@ -123,7 +123,7 @@ cdef int find_index(int[:] arr, int val):
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-cdef double get_value(int rank1, int nwin, double[:] sorted_values, int add_subgrid_noise):
+def get_value(int rank1, int nwin, double[:] sorted_values, int add_subgrid_noise):
     if add_subgrid_noise == 0:
         return sorted_values[rank1]
     else:
@@ -137,9 +137,6 @@ cdef double get_value(int rank1, int nwin, double[:] sorted_values, int add_subg
         high_cdf = sorted_values[high_rank]
         return low_cdf + (high_cdf-low_cdf)*random_uniform()
 
-
-def p(x, extra=None):
-    print(np.array(x), extra)
 
 @cython.boundscheck(False)
 @cython.nonecheck(False)
@@ -280,14 +277,13 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
         # We have the rank1
         # We want the x sorted index, for the
 
-        print(find_index(correspondence_indx2, rank1))
         #  The array sorted_cdf_values2 is now centered on the correct point of y2
         #  We have already calculated the rank-order of the point iy1, rank1
         #  So we either directly map sorted_cdf_values2[rank1] to ynew,
         #  or alternatively we randomly draw a value between
         #  sorted_cdf_values2[rank1-1] and sorted_cdf_values2[rank1+1]
         if return_indexes == 1:
-            y1_new_indexes[iy1] = iy2 + nhalfwin - find_index(correspondence_indx2, rank1)
+            y1_new_indexes[iy1] = iy2 + nhalfwin - _find_index(correspondence_indx2, rank1)
         else:
             y1_new_values[iy1] = get_value(rank1, nwin, sorted_cdf_values2, add_subgrid_noise)
 

@@ -75,8 +75,7 @@ def test2():
         itest_rank = window_ranks[nhalfwin]
         itest_correct_result = sorted_window2[itest_rank]
         itest_result = result[itest]
-        print(itest_result, itest_correct_result)
-        # assert itest_result == itest_correct_result
+        assert itest_result == itest_correct_result
 
     #  Test left edge
     for itest in range(nhalfwin):
@@ -89,9 +88,8 @@ def test2():
         itest_correct_result = sorted_window2[itest_rank]
         itest_result = result[itest]
         msg = "itest_result = {0}, correct result = {1}"
-        print(itest_result, itest_correct_result)
-        # assert itest_result == itest_correct_result, msg.format(
-        #     itest_result, itest_correct_result)
+        assert itest_result == itest_correct_result, msg.format(
+            itest_result, itest_correct_result)
 
     #  Test right edge
     for iwin in range(nhalfwin+1, nwin):
@@ -105,9 +103,8 @@ def test2():
         itest_correct_result = sorted_window2[itest_rank]
         itest_result = result[itest]
         msg = "itest_result = {0}, correct result = {1}"
-        print(itest_result, itest_correct_result)
-        # assert itest_result == itest_correct_result, msg.format(
-        #     itest_result, itest_correct_result)
+        assert itest_result == itest_correct_result, msg.format(
+            itest_result, itest_correct_result)
 
 
 def test3():
@@ -387,11 +384,13 @@ def test_subgrid_noise1():
     result2 = conditional_abunmatch(x, y, x2, y2, nwin1, add_subgrid_noise=True)
     assert np.allclose(result, result2, atol=0.1)
     assert not np.allclose(result, result2, atol=0.02)
+    assert np.all(result - result2 != 0)
 
     nwin2 = 1001
     result = conditional_abunmatch(x, y, x2, y2, nwin2, add_subgrid_noise=False)
     result2 = conditional_abunmatch(x, y, x2, y2, nwin2, add_subgrid_noise=True)
     assert np.allclose(result, result2, atol=0.02)
+    assert np.all(result - result2 != 0)
 
 
 def test_initial_sorting1():

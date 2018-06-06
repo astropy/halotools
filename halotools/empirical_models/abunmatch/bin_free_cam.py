@@ -3,7 +3,7 @@
 import numpy as np
 from ...utils import unsorting_indices
 from ...utils.conditional_percentile import _check_xyn_bounds, rank_order_function
-from .engines import cython_bin_free_cam_kernel
+from .engines import cython_bin_free_cam_kernel, get_value
 from .tests.naive_python_cam import sample2_window_indices
 
 
@@ -138,7 +138,7 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
             ]
         else:
             leftmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
-            result[ix1] = leftmost_sorted_window_y2[leftmost_window_ranks[iw]]
+            result[ix1] = get_value(leftmost_window_ranks[iw], nwin, leftmost_sorted_window_y2, int(add_subgrid_noise))
 
         iw += 1
 
@@ -155,7 +155,7 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
             ]
         else:
             rightmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
-            result[ix1] = rightmost_sorted_window_y2[rightmost_window_ranks[iw]]
+            result[ix1] = get_value(rightmost_window_ranks[iw], nwin, rightmost_sorted_window_y2, int(add_subgrid_noise))
         iw += 1
 
     if not assume_x_is_sorted:
