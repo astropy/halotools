@@ -6,7 +6,7 @@ import numpy as np
 cimport cython
 from ....utils import unsorting_indices
 
-__all__ = ('cython_bin_free_cam_kernel', 'get_value')
+__all__ = ('cython_bin_free_cam_kernel', 'get_value_at_rank')
 
 
 cdef double random_uniform():
@@ -123,7 +123,7 @@ cdef int _find_index(int[:] arr, int val):
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def get_value(int rank1, int nwin, double[:] sorted_values, int add_subgrid_noise):
+def get_value_at_rank(double[:] sorted_values, int rank1, int nwin, int add_subgrid_noise):
     if add_subgrid_noise == 0:
         return sorted_values[rank1]
     else:
@@ -192,18 +192,13 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
 
     cdef int rank1, rank2
 
-    # y1 and y2 are sorted by the primary properties
-    # We now need to sort them by the secondary properties (so that we can find the percentile).
-
     #  Set up initial window arrays for y1
     cdf_values1 = np.copy(y1[:nwin])
-    idx_sorted_cdf_values1 = np.argsort(cdf_values1) # Now we have sorted by SM - in the window of ~halo masses.
+    idx_sorted_cdf_values1 = np.argsort(cdf_values1)
     cdef double[:] sorted_cdf_values1 = np.ascontiguousarray(
         cdf_values1[idx_sorted_cdf_values1], dtype='f8')
     cdef int[:] correspondence_indx1 = np.ascontiguousarray(
         unsorting_indices(idx_sorted_cdf_values1)[::-1], dtype='i4')
-
-    # Note that we have the indexes where x2 would fit in x
 
     #  Set up initial window arrays for y2
     cdef int iy2_init = i2_match[nhalfwin]
@@ -233,22 +228,20 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
 
     #  Loop over elements of the first array, ignoring the first and last nwin/2 points,
     #  which will be treated separately by the python wrapper.
-    for iy1 in range(nhalfwin, npts1-nhalfwin): # for each element that we can do easily (not too near the edge)
+    for iy1 in range(nhalfwin, npts1-nhalfwin):
 
-        rank1 = correspondence_indx1[nhalfwin] # Where the middle index is
-        iy2_match = min(i2_match[iy1], iy2_max) # the x index that y2 corresponds to
-
-        # This is making sure that we are over the same x range in both arrays
-        # Or at least that the x range is centered at the same place
+        rank1 = correspondence_indx1[nhalfwin]
+        #  Where to center the second window (making sure we don't slide off the end)
+        iy2_match = min(i2_match[iy1], iy2_max)
 
         #  Continue to slide the window along the second array
         #  until we find the matching point, updating the window with each iteration
         while iy2 < iy2_match:
 
             #  Find the value coming in and the value coming out
-            value_in2 = y2[iy2 + nhalfwin + 1] # Next x in
+            value_in2 = y2[iy2 + nhalfwin + 1]
             idx_out2 = correspondence_indx2[nwin-1]
-            value_out2 = sorted_cdf_values2[idx_out2] # Thing to go out
+            value_out2 = sorted_cdf_values2[idx_out2]
 
             #  Find the position where we will insert the new point into the second window
             idx_in2 = _bisect_left_kernel(sorted_cdf_values2, value_in2)
@@ -265,17 +258,7 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
             #  Update the CDF window
             _insert_pop_kernel(&sorted_cdf_values2[0], idx_in2, idx_out2, value_in2)
 
-
-            # Very important,
-            # iy2 is the index at the center of the y2 array
-            # iy1 is the index at the center of the y1 array
             iy2 += 1
-
-        # So now we have got to here
-        # We have iy1 which is the index of the x sorted array that we are at
-        # We have iy2 which is the index of the x sorted array at the center of y2
-        # We have the rank1
-        # We want the x sorted index, for the
 
         #  The array sorted_cdf_values2 is now centered on the correct point of y2
         #  We have already calculated the rank-order of the point iy1, rank1
@@ -285,7 +268,7 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
         if return_indexes == 1:
             y1_new_indexes[iy1] = iy2 + nhalfwin - _find_index(correspondence_indx2, rank1)
         else:
-            y1_new_values[iy1] = get_value(rank1, nwin, sorted_cdf_values2, add_subgrid_noise)
+            y1_new_values[iy1] = get_value_at_rank(sorted_cdf_values2, rank1, nwin, add_subgrid_noise)
 
         #  Move on to the next value in y1
 

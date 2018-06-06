@@ -3,30 +3,12 @@
 import numpy as np
 from ...utils import unsorting_indices
 from ...utils.conditional_percentile import _check_xyn_bounds, rank_order_function
-from .engines import cython_bin_free_cam_kernel, get_value
+from .engines import cython_bin_free_cam_kernel, get_value_at_rank
 from .tests.naive_python_cam import sample2_window_indices
 
 
 def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
             assume_x_is_sorted=False, assume_x2_is_sorted=False, return_indexes=False):
-    # Let's say that we want to map SSFR onto a model with Halo + stellar mass
-    # We theorize that SSFR is propto accretion (which we also know from our model)
-
-    # x/y are the model params (e.g. from a sim/theory)
-        # In this case, SM and accretion
-    # x2/y2 are the true distribution (e.g. from observation)
-        # In this case, SM and SSFR
-
-    # Note that the xs are the same thing
-    # But that the Ys contain the things we are modelling on
-
-    # Now, for each x, y (call them xi, yi)
-        # Find a bunch of rows in x that are close to xi. Use their ys to get P(y | xi)
-        # Find the percentile of our y in this distribution
-        # Find a bunch of rows in x2 that are close to xi. Use their ys to get P(y2 | xi)
-        # Find the y2 at the same percentile as our y was in that distribution.
-        # Claim that this y2 is what we expect for this galaxy, given this model
-
     r"""
     Given a set of input points with primary property `x` and secondary property `y`,
     use conditional abundance matching to map new values `ynew` onto the input points
@@ -97,10 +79,10 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
 
     """
     if (return_indexes and add_subgrid_noise):
-        raise Exception("Can't both return indexes and add noise")
+        raise ValueError("Can't add subgrid noise when returning indexes")
 
     x, y, nwin = _check_xyn_bounds(x, y, nwin)
-    x2, y2, nwin = _check_xyn_bounds(x2, y2, nwin) # assert these are 1d arrays, nwin is odd
+    x2, y2, nwin = _check_xyn_bounds(x2, y2, nwin)
     nhalfwin = int(nwin/2)
     npts1 = len(x)
 
@@ -133,12 +115,12 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
 
         if return_indexes:
             leftmost_window_sorting_indexes = np.argsort(y2_sorted[iy2_low:iy2_high])
-            result[ix1] = iy2_low + leftmost_window_sorting_indexes[ # this is the index that would be moved to that rank
-                    leftmost_window_ranks[iw] # this is the rank we care about
+            result[ix1] = iy2_low + leftmost_window_sorting_indexes[
+                    leftmost_window_ranks[iw]
             ]
         else:
             leftmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
-            result[ix1] = get_value(leftmost_window_ranks[iw], nwin, leftmost_sorted_window_y2, int(add_subgrid_noise))
+            result[ix1] = get_value_at_rank(leftmost_sorted_window_y2, leftmost_window_ranks[iw], nwin, int(add_subgrid_noise))
 
         iw += 1
 
@@ -150,15 +132,15 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
 
         if return_indexes:
             rightmost_window_sorting_indexes = np.argsort(y2_sorted[iy2_low:iy2_high])
-            result[ix1] = iy2_low + rightmost_window_sorting_indexes[ # this is the index that would be moved to that rank
-                    rightmost_window_ranks[iw] # this is the rank we care about
+            result[ix1] = iy2_low + rightmost_window_sorting_indexes[
+                    rightmost_window_ranks[iw]
             ]
         else:
             rightmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
-            result[ix1] = get_value(rightmost_window_ranks[iw], nwin, rightmost_sorted_window_y2, int(add_subgrid_noise))
+            result[ix1] = get_value_at_rank(rightmost_sorted_window_y2, rightmost_window_ranks[iw], nwin, int(add_subgrid_noise))
         iw += 1
 
-    if not assume_x_is_sorted:
-        result = result[unsorting_indices(idx_x_sorted)]
-
-    return result
+    if assume_x_is_sorted:
+        return result
+    else:
+        return result[unsorting_indices(idx_x_sorted)]
