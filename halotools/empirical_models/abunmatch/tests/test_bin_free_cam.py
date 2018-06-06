@@ -505,3 +505,23 @@ def test_initial_sorting4():
         assume_x_is_sorted=True, assume_x2_is_sorted=True,
         add_subgrid_noise=False)
     assert np.allclose(result, result4[unsorting_indices(idx_x_sorted)])
+
+def test_return_indexes():
+    n1, n2 = int(1e2), int(1e2)
+
+    with NumpyRNGContext(fixed_seed):
+        x = np.random.uniform(0, 10, n1)
+        y = np.random.uniform(0, 1, n1)
+
+    with NumpyRNGContext(fixed_seed):
+        x2 = np.random.uniform(0, 10, n2)
+        y2 = np.random.uniform(-4, -3, n2)
+
+    print(y2[:10])
+    nwin = 5
+    values = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=False)
+    indexes = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=True)
+    print(values)
+    print(y2[indexes])
+
+    assert np.all(y2[indexes] == values)
