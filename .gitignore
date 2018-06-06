@@ -16,6 +16,8 @@ MANIFEST
 */cython_version.py
 htmlcov
 .coverage
+v/*
+.pytest_cache/*
 
 # Sphinx
 docs/api
