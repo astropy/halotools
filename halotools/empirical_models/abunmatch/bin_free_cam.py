@@ -47,10 +47,15 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
         Performance enhancement flag that can be used for cases where input `x2` and `y2`
         have been pre-sorted so that `x2` is monotonically increasing. Default is False.
 
+    return_indexes : bool, optional
+        Return the indexes in y2 of where to find the new values, rather than the values.
+        `add_subgrid_noise` must be set to False is this is set.
+        Default is False.
+
     Returns
     -------
     ynew : ndarray
-        Numpy array of shape (n1, ) storing the new values of
+        Numpy array of shape (n1, ) storing the new values (or indexes if return_indexes is True) of
         the secondary property for the input points.
 
     Examples
