@@ -117,7 +117,7 @@ cdef int _find_index(int[:] arr, int val):
     for i in range(len(arr)):
         if arr[i] == val:
             return i
-    raise Exception("not found")
+    return -1
 
 
 @cython.boundscheck(False)
@@ -262,7 +262,10 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
         #  or alternatively we randomly draw a value between
         #  sorted_cdf_values2[rank1-1] and sorted_cdf_values2[rank1+1]
         if return_indexes == 1:
-            y1_new_indexes[iy1] = iy2 + nhalfwin - _find_index(correspondence_indx2, rank1)
+            index = _find_index(correspondence_indx2, rank1)
+            if index == -1:
+                raise Exception("Index {} not found in correspondence_indx2".format(rank1))
+            y1_new_indexes[iy1] = iy2 + nhalfwin - index
         else:
             y1_new_values[iy1] = get_value_at_rank(sorted_cdf_values2, rank1, nwin, add_subgrid_noise)
 
