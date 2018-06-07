@@ -9,6 +9,7 @@ from ....utils import unsorting_indices
 
 
 fixed_seed = 43
+fixed_seed2 = 44
 
 
 def test1():
@@ -520,15 +521,23 @@ def test_return_indexes():
         x = np.random.uniform(0, 10, n1)
         y = np.random.uniform(0, 1, n1)
 
-    with NumpyRNGContext(fixed_seed):
+    with NumpyRNGContext(fixed_seed2):
         x2 = np.random.uniform(0, 10, n2)
         y2 = np.random.uniform(-4, -3, n2)
 
     nwin = 5
-    values = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=False)
-    indexes = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=True)
-    print()
-    print(values)
-    print(y2[indexes])
+    for sorted_x in [False, True]:
+        for sorted_x2 in [False, True]:
+            x_, y_, x2_, y2_ = x, y, x2, y2
+            if sorted_x:
+                x_, y_ = np.sort(x_), np.sort(y_)
+            if sorted_x2:
+                x2_, y2_ = np.sort(x2_), np.sort(y2_)
 
-    assert np.all(y2[indexes] == values)
+
+            values = conditional_abunmatch(x_, y_, x2_, y2_, nwin, add_subgrid_noise=False,
+                    assume_x_is_sorted=sorted_x, assume_x2_is_sorted=sorted_x2, return_indexes=False)
+            indexes = conditional_abunmatch(x_, y_, x2_, y2_, nwin, add_subgrid_noise=False,
+                    assume_x_is_sorted=sorted_x, assume_x2_is_sorted=sorted_x2, return_indexes=True)
+
+            assert np.all(y2_[indexes] == values), "{}, {}".format(sorted_x, sorted_x2)

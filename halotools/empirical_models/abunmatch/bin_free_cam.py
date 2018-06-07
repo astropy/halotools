@@ -143,11 +143,12 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
         iw += 1
 
 
-    if assume_x_is_sorted:
-        return result
-
     if return_indexes:
-        # I don't think that this is right...
+        # The result indexes point to the location in y2_sorted. Undo that if required
+        result = result if assume_x2_is_sorted else idx_x2_sorted[result]
+        # The result indexes are ordered like y_sorted. Undo that if required
+        result = result if assume_x_is_sorted else result[unsorting_indices(idx_x_sorted)]
         return result
     else:
-        return result[unsorting_indices(idx_x_sorted)]
+        # The result values are ordered like y_sorted, Undo that if required
+        return result if assume_x_is_sorted else result[unsorting_indices(idx_x_sorted)]
