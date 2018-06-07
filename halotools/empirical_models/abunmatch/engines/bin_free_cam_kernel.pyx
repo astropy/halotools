@@ -120,10 +120,17 @@ cdef int _find_index(int[:] arr, int val):
     return -1
 
 
+# Public version of _get_value_at_rank as we need to call this from python.
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
 def get_value_at_rank(double[:] sorted_values, int rank1, int nwin, int add_subgrid_noise):
+    return _get_value_at_rank(sorted_values, rank1, nwin, add_subgrid_noise)
+
+@cython.boundscheck(False)
+@cython.nonecheck(False)
+@cython.wraparound(False)
+cdef double _get_value_at_rank(double[:] sorted_values, int rank1, int nwin, int add_subgrid_noise):
     if add_subgrid_noise == 0:
         return sorted_values[rank1]
     else:
@@ -204,6 +211,7 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
     cdef int iy2_max = npts2 - nhalfwin - 1
 
     cdef int low_rank, high_rank
+    cdef int index
     cdef double low_cdf, high_cdf
 
     #  Ensure that any bookkeeping error in setting up the window
@@ -267,7 +275,7 @@ def cython_bin_free_cam_kernel(double[:] y1, double[:] y2, int[:] i2_match, int 
                 raise Exception("Index {} not found in correspondence_indx2".format(rank1))
             y1_new_indexes[iy1] = iy2 + nhalfwin - index
         else:
-            y1_new_values[iy1] = get_value_at_rank(sorted_cdf_values2, rank1, nwin, add_subgrid_noise)
+            y1_new_values[iy1] = _get_value_at_rank(sorted_cdf_values2, rank1, nwin, add_subgrid_noise)
 
         #  Move on to the next value in y1
 
