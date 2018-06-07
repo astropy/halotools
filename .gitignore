@@ -16,8 +16,6 @@ MANIFEST
 */cython_version.py
 htmlcov
 .coverage
-v/*
-.pytest_cache/*
 
 # Sphinx
 docs/api
@@ -45,11 +43,12 @@ distribute-*.tar.gz
 # Other
 .*.swp
 *~
-temporary_testing_script.py 
+temporary_testing_script.py
 *.ipynb
 .ipynb_checkpoints/*
 */.ipynb_checkpoints/*
 */*/.ipynb_checkpoints/*
+.pytest_cache/*
 
 # Mac OSX
 .DS_Store
