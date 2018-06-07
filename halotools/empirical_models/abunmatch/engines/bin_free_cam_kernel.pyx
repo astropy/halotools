@@ -128,7 +128,7 @@ def get_value_at_rank(double[:] sorted_values, int rank1, int nwin, int add_subg
         return sorted_values[rank1]
     else:
         low_rank = max(rank1 - 1, 0)
-        high_rank = min(rank1 + 1, nwin)
+        high_rank = min(rank1 + 1, nwin - 1)
         low_cdf = sorted_values[low_rank]
         high_cdf = sorted_values[high_rank]
         return low_cdf + (high_cdf-low_cdf)*random_uniform()

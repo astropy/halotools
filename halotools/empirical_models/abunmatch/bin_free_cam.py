@@ -78,6 +78,8 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
     `~halotools.empirical_models.conditional_abunmatch_bin_based`.
 
     """
+    # add_subgrid_noise = False
+    # return_indexes = True
     if (return_indexes and add_subgrid_noise):
         raise ValueError("Can't add subgrid noise when returning indexes")
 
@@ -140,7 +142,12 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
             result[ix1] = get_value_at_rank(rightmost_sorted_window_y2, rightmost_window_ranks[iw], nwin, int(add_subgrid_noise))
         iw += 1
 
+
     if assume_x_is_sorted:
+        return result
+
+    if return_indexes:
+        # I don't think that this is right...
         return result
     else:
         return result[unsorting_indices(idx_x_sorted)]

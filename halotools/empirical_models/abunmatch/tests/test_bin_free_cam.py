@@ -59,6 +59,7 @@ def test2():
     print("ranks2  = {0}".format(cython_sliding_rank(x2, y2, nwin)))
 
     result = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False)
+    result2 = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=True)
 
     print("\n\nynew  = {0}".format(np.abs(result)))
     print("y2    = {0}".format(y2))
@@ -364,6 +365,10 @@ def test_hard_coded_case6():
             x2, ranks_sample2, y2, nwin)
 
     result = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False)
+    result2 = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=True)
+    print(result)
+    print(result2)
+    print(np.array(y2)[result2])
 
     assert np.allclose(result, pure_python_result)
 
@@ -382,6 +387,8 @@ def test_subgrid_noise1():
     nwin1 = 201
     result = conditional_abunmatch(x, y, x2, y2, nwin1, add_subgrid_noise=False)
     result2 = conditional_abunmatch(x, y, x2, y2, nwin1, add_subgrid_noise=True)
+
+    print(np.count_nonzero(np.abs(result - result2) > 0.1))
     assert np.allclose(result, result2, atol=0.1)
     assert not np.allclose(result, result2, atol=0.02)
     assert np.all(result - result2 != 0)
@@ -507,7 +514,7 @@ def test_initial_sorting4():
     assert np.allclose(result, result4[unsorting_indices(idx_x_sorted)])
 
 def test_return_indexes():
-    n1, n2 = int(1e2), int(1e2)
+    n1, n2 = int(1e1), int(1e1)
 
     with NumpyRNGContext(fixed_seed):
         x = np.random.uniform(0, 10, n1)
@@ -517,10 +524,10 @@ def test_return_indexes():
         x2 = np.random.uniform(0, 10, n2)
         y2 = np.random.uniform(-4, -3, n2)
 
-    print(y2[:10])
     nwin = 5
     values = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=False)
     indexes = conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=False, return_indexes=True)
+    print()
     print(values)
     print(y2[indexes])
 
