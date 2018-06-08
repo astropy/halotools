@@ -3,12 +3,12 @@
 import numpy as np
 from ...utils import unsorting_indices
 from ...utils.conditional_percentile import _check_xyn_bounds, rank_order_function
-from .engines import cython_bin_free_cam_kernel
+from .engines import cython_bin_free_cam_kernel, get_value_at_rank
 from .tests.naive_python_cam import sample2_window_indices
 
 
 def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
-            assume_x_is_sorted=False, assume_x2_is_sorted=False):
+            assume_x_is_sorted=False, assume_x2_is_sorted=False, return_indexes=False):
     r"""
     Given a set of input points with primary property `x` and secondary property `y`,
     use conditional abundance matching to map new values `ynew` onto the input points
@@ -47,10 +47,15 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
         Performance enhancement flag that can be used for cases where input `x2` and `y2`
         have been pre-sorted so that `x2` is monotonically increasing. Default is False.
 
+    return_indexes : bool, optional
+        Return the indexes in y2 of where to find the new values, rather than the values.
+        `add_subgrid_noise` must be set to False is this is set.
+        Default is False.
+
     Returns
     -------
     ynew : ndarray
-        Numpy array of shape (n1, ) storing the new values of
+        Numpy array of shape (n1, ) storing the new values (or indexes if return_indexes is True) of
         the secondary property for the input points.
 
     Examples
@@ -78,6 +83,9 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
     `~halotools.empirical_models.conditional_abunmatch_bin_based`.
 
     """
+    if (return_indexes and add_subgrid_noise):
+        raise ValueError("Can't add subgrid noise when returning indexes")
+
     x, y, nwin = _check_xyn_bounds(x, y, nwin)
     x2, y2, nwin = _check_xyn_bounds(x2, y2, nwin)
     nhalfwin = int(nwin/2)
@@ -102,27 +110,48 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
     i2_matched = np.searchsorted(x2_sorted, x_sorted).astype('i4')
 
     result = np.array(cython_bin_free_cam_kernel(
-        y_sorted, y2_sorted, i2_matched, nwin, int(add_subgrid_noise)))
+        y_sorted, y2_sorted, i2_matched, nwin, int(add_subgrid_noise), int(return_indexes)))
 
     #  Finish the leftmost points in pure python
     iw = 0
+    leftmost_window_ranks = rank_order_function(y_sorted[:nwin])
     for ix1 in range(0, nhalfwin):
         iy2_low, iy2_high = sample2_window_indices(ix1, x_sorted, x2_sorted, nwin)
-        leftmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
-        leftmost_window_ranks = rank_order_function(y_sorted[:nwin])
-        result[ix1] = leftmost_sorted_window_y2[leftmost_window_ranks[iw]]
+
+        if return_indexes:
+            leftmost_window_sorting_indexes = np.argsort(y2_sorted[iy2_low:iy2_high])
+            result[ix1] = iy2_low + leftmost_window_sorting_indexes[
+                    leftmost_window_ranks[iw]
+            ]
+        else:
+            leftmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
+            result[ix1] = get_value_at_rank(leftmost_sorted_window_y2, leftmost_window_ranks[iw], nwin, int(add_subgrid_noise))
+
         iw += 1
 
     #  Finish the rightmost points in pure python
     iw = nhalfwin + 1
+    rightmost_window_ranks = rank_order_function(y_sorted[-nwin:])
     for ix1 in range(npts1-nhalfwin, npts1):
         iy2_low, iy2_high = sample2_window_indices(ix1, x_sorted, x2_sorted, nwin)
-        rightmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
-        rightmost_window_ranks = rank_order_function(y_sorted[-nwin:])
-        result[ix1] = rightmost_sorted_window_y2[rightmost_window_ranks[iw]]
+
+        if return_indexes:
+            rightmost_window_sorting_indexes = np.argsort(y2_sorted[iy2_low:iy2_high])
+            result[ix1] = iy2_low + rightmost_window_sorting_indexes[
+                    rightmost_window_ranks[iw]
+            ]
+        else:
+            rightmost_sorted_window_y2 = np.sort(y2_sorted[iy2_low:iy2_high])
+            result[ix1] = get_value_at_rank(rightmost_sorted_window_y2, rightmost_window_ranks[iw], nwin, int(add_subgrid_noise))
         iw += 1
 
-    if assume_x_is_sorted:
+
+    if return_indexes:
+        # The result indexes point to the location in y2_sorted. Undo that if required
+        result = result if assume_x2_is_sorted else idx_x2_sorted[result]
+        # The result indexes are ordered like y_sorted. Undo that if required
+        result = result if assume_x_is_sorted else result[unsorting_indices(idx_x_sorted)]
         return result
     else:
-        return result[unsorting_indices(idx_x_sorted)]
+        # The result values are ordered like y_sorted, Undo that if required
+        return result if assume_x_is_sorted else result[unsorting_indices(idx_x_sorted)]

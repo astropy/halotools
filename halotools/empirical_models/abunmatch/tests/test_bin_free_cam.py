@@ -2,6 +2,7 @@
 """
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
+import pytest
 from ..bin_free_cam import conditional_abunmatch
 from ....utils.conditional_percentile import cython_sliding_rank, rank_order_function
 from .naive_python_cam import pure_python_rank_matching
@@ -9,6 +10,7 @@ from ....utils import unsorting_indices
 
 
 fixed_seed = 43
+fixed_seed2 = 44
 
 
 def test1():
@@ -384,11 +386,13 @@ def test_subgrid_noise1():
     result2 = conditional_abunmatch(x, y, x2, y2, nwin1, add_subgrid_noise=True)
     assert np.allclose(result, result2, atol=0.1)
     assert not np.allclose(result, result2, atol=0.02)
+    assert np.all(result - result2 != 0)
 
     nwin2 = 1001
     result = conditional_abunmatch(x, y, x2, y2, nwin2, add_subgrid_noise=False)
     result2 = conditional_abunmatch(x, y, x2, y2, nwin2, add_subgrid_noise=True)
     assert np.allclose(result, result2, atol=0.02)
+    assert np.all(result - result2 != 0)
 
 
 def test_initial_sorting1():
@@ -503,3 +507,40 @@ def test_initial_sorting4():
         assume_x_is_sorted=True, assume_x2_is_sorted=True,
         add_subgrid_noise=False)
     assert np.allclose(result, result4[unsorting_indices(idx_x_sorted)])
+
+def test_no_subgrid_noise_with_return_indexes():
+    x, y = np.arange(5), np.arange(5)
+    x2, y2 = np.arange(10), np.arange(10)
+    nwin = 3
+    with pytest.raises(ValueError) as err:
+        conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True, return_indexes=True)
+    assert str(err.value) == "Can't add subgrid noise when returning indexes"
+
+
+def test_return_indexes():
+    n1, n2 = int(1e2), int(1e2)
+
+    with NumpyRNGContext(fixed_seed):
+        x = np.random.uniform(0, 10, n1)
+        y = np.random.uniform(0, 1, n1)
+
+    with NumpyRNGContext(fixed_seed2):
+        x2 = np.random.uniform(0, 10, n2)
+        y2 = np.random.uniform(-4, -3, n2)
+
+    nwin = 9
+    for sorted_x in [False, True]:
+        for sorted_x2 in [False, True]:
+            x_, y_, x2_, y2_ = x, y, x2, y2
+            if sorted_x:
+                x_, y_ = np.sort(x_), np.sort(y_)
+            if sorted_x2:
+                x2_, y2_ = np.sort(x2_), np.sort(y2_)
+
+
+            values = conditional_abunmatch(x_, y_, x2_, y2_, nwin, add_subgrid_noise=False,
+                    assume_x_is_sorted=sorted_x, assume_x2_is_sorted=sorted_x2, return_indexes=False)
+            indexes = conditional_abunmatch(x_, y_, x2_, y2_, nwin, add_subgrid_noise=False,
+                    assume_x_is_sorted=sorted_x, assume_x2_is_sorted=sorted_x2, return_indexes=True)
+
+            assert np.all(y2_[indexes] == values), "{}, {}".format(sorted_x, sorted_x2)
