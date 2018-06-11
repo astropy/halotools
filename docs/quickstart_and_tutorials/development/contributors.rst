@@ -21,6 +21,7 @@ Core package contributors
 
 * Matt Becker
 * Peter Behroozi
+* Chris Bradshaw
 * Duncan Campbell
 * Benedikt Diemer
 * Yu Feng
