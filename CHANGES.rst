@@ -21,6 +21,8 @@
 
 - Added new utils module `satellite_rotations` implementing functions that can be used to remap satellite orientations and positions within their halos
 
+- Added new `load_um_binary_sfr_catalog` function to load SFR catalogs from UniverseMachine into memory
+
 
 0.6 (2017-12-15)
 ----------------
