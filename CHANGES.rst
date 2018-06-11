@@ -23,6 +23,8 @@
 
 - Added new `load_um_binary_sfr_catalog` function to load SFR catalogs from UniverseMachine into memory
 
+- Added new `return_indexes` feature to conditional_abunmatch function. See https://github.com/astropy/halotools/pull/913.
+
 
 0.6 (2017-12-15)
 ----------------
