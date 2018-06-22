@@ -196,7 +196,7 @@ def test_counts_in_cylinders_error_handling():
         approx_cell1_size=0.2, approx_cell2_size=0.2)
 
 
-def test_cic_pbc():
+def test_counts_in_cylinders_pbc():
     npts1 = 1000
     npts2 = 9000
 
@@ -233,4 +233,3 @@ def test_counts_in_cylinders_parallel_serial_consistency():
         sample1, sample2, proj_search_radius, cylinder_half_length, period=period, num_threads=4)
 
     assert result1.shape == result2.shape
-
