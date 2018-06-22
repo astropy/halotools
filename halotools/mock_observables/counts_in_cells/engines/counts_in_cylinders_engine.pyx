@@ -15,7 +15,13 @@ __all__ = ('counts_in_cylinders_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rp_max, pi_max, cell1_tuple):
+def counts_in_cylinders_engine(
+        double_mesh,
+        x1in, y1in, z1in,
+        x2in, y2in, z2in,
+        rp_max, pi_max,
+        return_indexes,
+        cell1_tuple):
     """
     Cython engine for determining counting the number of points in ``sample2``
     in a cylinder surrounding each point in ``sample1``.
@@ -53,6 +59,9 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
         i.e., the half the length of a cylinder,
         to search for neighbors around each point in 'sample 1'
 
+    return_indexes : bool
+        If true we also want the indexes of the matches
+
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
         double_mesh.mesh1 that will be looped over. Intended for use with
@@ -63,6 +72,9 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     counts : numpy.array
         Length-Npts1 integer array storing the number of ``sample2`` points
         inside a cylinder centered at each point in ``sample1``.
+
+    indexes : (Optional - only if return_indexes)
+        TODO
     """
 
     rp_max_squared_tmp = rp_max*rp_max
@@ -95,17 +107,15 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     cdef cnp.float64_t[:] z2_sorted = np.ascontiguousarray(
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
-    # cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
-
-    # This should really be a single Nx2 array. I couldn't work out the pyx syntax for
-    # some of the indexing (for the unsorting). However, having 2 arrays is slightly more
-    # memory efficient (during the resizing).
-    cdef cnp.int64_t[:] indexes1 = np.ascontiguousarray(
-            np.zeros(len(x1_sorted), dtype=np.int64))
-    cdef cnp.int64_t[:] indexes2 = np.ascontiguousarray(
-            np.zeros(len(x1_sorted), dtype=np.int64))
+    cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
     cdef int n = 0
-    # indexes = [[] for i in range(len(x1_sorted))]
+    cdef int initial_size = len(x1_sorted) if return_indexes else 0
+    # Could halve memory usage with cnp.uint32_t. Would be fine unless len(inputs) > 4 Billion.
+    # When will the biggest sims be larger than this?
+    cdef cnp.int64_t[:] indexes1 = np.ascontiguousarray(
+            np.zeros(initial_size, dtype=np.int64))
+    cdef cnp.int64_t[:] indexes2 = np.ascontiguousarray(
+            np.zeros(initial_size, dtype=np.int64))
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -230,17 +240,27 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                                     dz_sq = dz*dz
 
                                     if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp):
-                                        # counts[ifirst1+i] += 1
-                                        indexes1[n] = ifirst1+i
-                                        indexes2[n] = ifirst2+j
-                                        n += 1
-                                        if n == len(indexes1):
-                                            indexes1 = np.resize(indexes1, n*2)
-                                            indexes2 = np.resize(indexes2, n*2)
+                                        counts[ifirst1+i] += 1
+
+                                        if return_indexes:
+                                            indexes1[n] = ifirst1+i
+                                            indexes2[n] = ifirst2+j
+                                            n += 1
+                                            if n == len(indexes1):
+                                                indexes1 = np.resize(indexes1, n*2)
+                                                indexes2 = np.resize(indexes2, n*2)
+
 
     # At this point, we have calculated our pairs on the input arrays *after* sorting
     # Since the order matters in this calculation, we need to undo the sorting
     # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
-    indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:n]]
-    indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:n]]
-    return indexes1_uns, indexes2_uns
+    counts_uns = np.array(counts)[unsorting_indices(double_mesh.mesh1.idx_sorted)]
+    if return_indexes:
+        indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:n]]
+        indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:n]]
+        return counts_uns, indexes1_uns, indexes2_uns
+
+    return counts_uns
+
+# cdef append_to_indexes(idx1, idx2, indexes1, indexes2, n_idx):
+

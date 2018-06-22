@@ -171,7 +171,7 @@ def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(counts_in_cylinders_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length, True)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -181,13 +181,13 @@ def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
         indexes = np.array((
-            np.concatenate([np.array(res[0]) for res in result]),
-            np.concatenate([np.array(res[1]) for res in result])
+            np.concatenate([np.array(res[1]) for res in result]),
+            np.concatenate([np.array(res[2]) for res in result])
         )).T.ravel().view(dtype=[('i1', np.int64), ('i2', np.int64)])
         pool.close()
     else:
         result = engine(cell1_tuples[0])
-        indexes = np.array((result[0], result[1])).T.ravel().view(
+        indexes = np.array((result[1], result[2])).T.ravel().view(
                 dtype=[('i1', np.int64), ('i2', np.int64)])
 
     return indexes
