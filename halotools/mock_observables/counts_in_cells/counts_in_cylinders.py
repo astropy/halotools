@@ -169,10 +169,10 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         result = pool.map(engine, cell1_tuples)
         pool.close()
         if return_indexes:
-            counts = np.sum(np.array([res[0] for res in result]), axis=0).flatten()
+            counts = np.sum([res[0] for res in result], axis=0)
             indexes = np.array((
-                np.concatenate([np.array(res[1]) for res in result]),
-                np.concatenate([np.array(res[2]) for res in result])
+                np.concatenate([res[1] for res in result]),
+                np.concatenate([res[2] for res in result])
             ))
         else:
             counts = np.sum(result, axis=0)
