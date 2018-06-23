@@ -5,6 +5,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 cimport numpy as cnp
 cimport cython
+# from cpython.mem cimport PyMem_Realloc
+
 from libc.math cimport ceil
 
 from ....utils import unsorting_indices
@@ -107,15 +109,16 @@ def counts_in_cylinders_engine(
     cdef cnp.float64_t[:] z2_sorted = np.ascontiguousarray(
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
+    cdef bint c_return_indexes = return_indexes
     cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
-    cdef int n = 0
-    cdef int initial_size = len(x1_sorted) if return_indexes else 0
+    cdef int current_indexes_cnt = 0
+    cdef int current_indexes_len = len(x1_sorted) if c_return_indexes else 0
     # Could halve memory usage with cnp.uint32_t. Would be fine unless len(inputs) > 4 Billion.
     # When will the biggest sims be larger than this?
     cdef cnp.int64_t[:] indexes1 = np.ascontiguousarray(
-            np.zeros(initial_size, dtype=np.int64))
+            np.zeros(current_indexes_len, dtype=np.int64))
     cdef cnp.int64_t[:] indexes2 = np.ascontiguousarray(
-            np.zeros(initial_size, dtype=np.int64))
+            np.zeros(current_indexes_len, dtype=np.int64))
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -240,22 +243,27 @@ def counts_in_cylinders_engine(
                                     if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp):
                                         counts[ifirst1+i] += 1
 
-                                        if return_indexes:
-                                            indexes1[n] = ifirst1+i
-                                            indexes2[n] = ifirst2+j
-                                            n += 1
-                                            if n == len(indexes1):
-                                                indexes1 = np.resize(indexes1, n*2)
-                                                indexes2 = np.resize(indexes2, n*2)
+                                        if c_return_indexes:
+                                            indexes1[current_indexes_cnt] = ifirst1+i
+                                            indexes2[current_indexes_cnt] = ifirst2+j
+                                            current_indexes_cnt += 1
+                                            if current_indexes_cnt == current_indexes_len:
+                                                current_indexes_len *= 2
+                                                indexes1 = np.resize(indexes1, current_indexes_len)
+                                                indexes2 = np.resize(indexes2, current_indexes_len)
+                                                # indexes1 = <cnp.int64_t[:current_indexes_len]>PyMem_Realloc(
+                                                #         &indexes1[0], sizeof(cnp.int64_t) * current_indexes_len)
+                                                # indexes2 = <cnp.int64_t[:current_indexes_len]>PyMem_Realloc(
+                                                #         &indexes2[0], sizeof(cnp.int64_t) * current_indexes_len)
 
 
     # At this point, we have calculated our pairs on the input arrays *after* sorting
     # Since the order matters in this calculation, we need to undo the sorting
     # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
     counts_uns = np.array(counts)[unsorting_indices(double_mesh.mesh1.idx_sorted)]
-    if return_indexes:
-        indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:n]]
-        indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:n]]
+    if c_return_indexes:
+        indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:current_indexes_cnt]]
+        indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:current_indexes_cnt]]
         return counts_uns, indexes1_uns, indexes2_uns
 
     return counts_uns

@@ -254,6 +254,7 @@ def test_counts_in_cylinders_with_indexes(num_threads):
 
         assert np.all(_sort(indexes) == _sort(brute_force_indexes))
         assert np.all(counts == brute_force_counts)
+        assert len(indexes) > npts1 # assert that we have tested array resizing
 
 def _sort(indexes):
     return np.sort(indexes, order=["i1", "i2"])
