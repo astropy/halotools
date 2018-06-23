@@ -17,11 +17,11 @@ from ...utils.array_utils import custom_len
 
 __author__ = ('Andrew Hearin', )
 
-__all__ = ('counts_in_cylinders')
+__all__ = ('counts_in_cylinders', )
 
 def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period=None, verbose=False, num_threads=1, return_indexes=False,
-        approx_cell1_size=None, approx_cell2_size=None):
+        period=None, verbose=False, num_threads=1,
+        approx_cell1_size=None, approx_cell2_size=None, return_indexes=False):
     """
     Function counts the number of points in ``sample2`` separated by a xy-distance
     *r* and z-distance *z* from each point in ``sample1``,
@@ -158,7 +158,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(counts_in_cylinders_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length, True)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length, return_indexes)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -167,16 +167,22 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.sum(np.array([res[0] for res in result]), axis=0).flatten()
-        indexes = np.array((
-            np.concatenate([np.array(res[1]) for res in result]),
-            np.concatenate([np.array(res[2]) for res in result])
-        ))
         pool.close()
+        if return_indexes:
+            counts = np.sum(np.array([res[0] for res in result]), axis=0).flatten()
+            indexes = np.array((
+                np.concatenate([np.array(res[1]) for res in result]),
+                np.concatenate([np.array(res[2]) for res in result])
+            ))
+        else:
+            counts = np.sum(result, axis=0)
     else:
         result = engine(cell1_tuples[0])
-        counts = result[0]
-        indexes = np.array((result[1], result[2]))
+        if return_indexes:
+            counts = result[0]
+            indexes = np.array((result[1], result[2]))
+        else:
+            counts = result
 
     if return_indexes:
         return counts, indexes.T.ravel().view(dtype=[('i1', np.int64), ('i2', np.int64)])
