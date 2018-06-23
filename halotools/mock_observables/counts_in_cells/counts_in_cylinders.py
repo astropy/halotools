@@ -17,24 +17,11 @@ from ...utils.array_utils import custom_len
 
 __author__ = ('Andrew Hearin', )
 
-__all__ = ('counts_in_cylinders', 'idx_in_cylinders')
+__all__ = ('counts_in_cylinders')
 
 def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period=None, verbose=False, num_threads=1,
+        period=None, verbose=False, num_threads=1, return_indexes=False,
         approx_cell1_size=None, approx_cell2_size=None):
-
-    indexes = idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period, verbose, num_threads, approx_cell1_size, approx_cell2_size)
-
-    idx, idx_cnt = np.unique(indexes["i1"], return_counts=True)
-    counts = np.zeros(len(sample1))
-    counts[idx] = idx_cnt
-    return counts
-
-def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period=None, verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None):
-    # TODO docs are wrong
     """
     Function counts the number of points in ``sample2`` separated by a xy-distance
     *r* and z-distance *z* from each point in ``sample1``,
@@ -180,17 +167,20 @@ def idx_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
+        counts = np.sum(np.array([res[0] for res in result]), axis=0).flatten()
         indexes = np.array((
             np.concatenate([np.array(res[1]) for res in result]),
             np.concatenate([np.array(res[2]) for res in result])
-        )).T.ravel().view(dtype=[('i1', np.int64), ('i2', np.int64)])
+        ))
         pool.close()
     else:
         result = engine(cell1_tuples[0])
-        indexes = np.array((result[1], result[2])).T.ravel().view(
-                dtype=[('i1', np.int64), ('i2', np.int64)])
+        counts = result[0]
+        indexes = np.array((result[1], result[2]))
 
-    return indexes
+    if return_indexes:
+        return counts, indexes.T.ravel().view(dtype=[('i1', np.int64), ('i2', np.int64)])
+    return counts
 
 def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
         period, verbose, num_threads, approx_cell1_size, approx_cell2_size):

@@ -6,7 +6,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 import pytest
 
-from .pure_python_counts_in_cells import pure_python_counts_in_cylinders
+from .pure_python_counts_in_cells import pure_python_counts_in_cylinders, pure_python_idx_in_cylinders
 
 from ..counts_in_cylinders import counts_in_cylinders
 
@@ -233,3 +233,26 @@ def test_counts_in_cylinders_parallel_serial_consistency():
         sample1, sample2, proj_search_radius, cylinder_half_length, period=period, num_threads=4)
 
     assert result1.shape == result2.shape
+
+@pytest.mark.parametrize("num_threads", [1, 4])
+def test_counts_in_cylinders_with_indexes(num_threads):
+    """
+    """
+    npts1 = 100
+    npts2 = 90
+
+    for seed in seed_list:
+        with NumpyRNGContext(seed):
+            sample1 = np.random.random((npts1, 3))
+            sample2 = np.random.random((npts2, 3))
+
+        rp_max = np.zeros(npts1) + 0.2
+        pi_max = np.zeros(npts1) + 0.2
+        brute_force_result = pure_python_idx_in_cylinders(sample1, sample2, rp_max, pi_max)
+        _, indexes = counts_in_cylinders(
+                sample1, sample2, rp_max, pi_max, return_indexes=True, num_threads=num_threads)
+
+        assert np.all(_sort(indexes) == _sort(brute_force_result))
+
+def _sort(indexes):
+    return np.sort(indexes, order=["i1", "i2"])

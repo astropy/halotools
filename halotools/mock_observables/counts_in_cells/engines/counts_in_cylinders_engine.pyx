@@ -261,6 +261,3 @@ def counts_in_cylinders_engine(
         return counts_uns, indexes1_uns, indexes2_uns
 
     return counts_uns
-
-# cdef append_to_indexes(idx1, idx2, indexes1, indexes2, n_idx):
-
