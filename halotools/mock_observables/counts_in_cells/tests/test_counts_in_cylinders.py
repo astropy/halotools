@@ -248,11 +248,13 @@ def test_counts_in_cylinders_with_indexes(num_threads):
 
         rp_max = np.zeros(npts1) + 0.2
         pi_max = np.zeros(npts1) + 0.2
-        brute_force_result = pure_python_idx_in_cylinders(sample1, sample2, rp_max, pi_max)
-        _, indexes = counts_in_cylinders(
+        brute_force_indexes = pure_python_idx_in_cylinders(sample1, sample2, rp_max, pi_max)
+        brute_force_counts = pure_python_counts_in_cylinders(sample1, sample2, rp_max, pi_max)
+        counts, indexes = counts_in_cylinders(
                 sample1, sample2, rp_max, pi_max, return_indexes=True, num_threads=num_threads)
 
-        assert np.all(_sort(indexes) == _sort(brute_force_result))
+        assert np.all(_sort(indexes) == _sort(brute_force_indexes))
+        assert np.all(counts == brute_force_counts)
 
 def _sort(indexes):
     return np.sort(indexes, order=["i1", "i2"])
