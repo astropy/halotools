@@ -60,7 +60,7 @@ def counts_in_cylinders_engine(
         to search for neighbors around each point in 'sample 1'
 
     return_indexes : bool
-        If true, will also return the indexes
+        If true, return both counts and the indexes of the pairs.
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in

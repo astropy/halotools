@@ -84,11 +84,20 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for
         ``approx_cell1_size`` for details.
 
+    return_indexes: bool, optional
+        If true, return both counts and the indexes of the pairs.
+
     Returns
     -------
     num_pairs : array_like
         Numpy array of length Npts1 storing the numbers of points in ``sample2``
         inside the cylinder surrounding each point in ``sample1``.
+
+    indexes : array_like, optional
+        If ``return_indexes`` is true, return a structured array of length
+        num_pairs with the indexes of the pairs. Column ``i1`` is the index in
+        ``sample1`` at the center of the cylinder and column ``i2`` is the index
+        in ``sample2`` that is contained in the cylinder.
 
     Examples
     --------
