@@ -143,7 +143,8 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     # Process the inputs with the helper function
     result = _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius,
-            cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size,
+            return_indexes)
     x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length = result[0:8]
     period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[8:]
     xperiod, yperiod, zperiod = period
@@ -195,7 +196,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     return counts
 
 def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period, verbose, num_threads, approx_cell1_size, approx_cell2_size):
+        period, verbose, num_threads, approx_cell1_size, approx_cell2_size, return_indexes):
     """
     """
     num_threads = get_num_threads(num_threads)
@@ -207,6 +208,11 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     x2 = sample2[:, 0]
     y2 = sample2[:, 1]
     z2 = sample2[:, 2]
+
+    if return_indexes and ((len(x1) > 2e32) or (len(x2) > 2e32)):
+        msg = """Return indexes uses a uint32 and so can only handle inputs shorter than
+        2e32 (~4 Billion)."""
+        raise ValueError(msg)
 
     proj_search_radius = np.atleast_1d(proj_search_radius).astype('f8')
     if len(proj_search_radius) == 1:

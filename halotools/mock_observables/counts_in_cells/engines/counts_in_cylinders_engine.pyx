@@ -113,12 +113,10 @@ def counts_in_cylinders_engine(
     cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
     cdef int current_indexes_cnt = 0
     cdef int current_indexes_len = len(x1_sorted) if c_return_indexes else 0
-    # Could halve memory usage with cnp.uint32_t. Would be fine unless len(inputs) > 4 Billion.
-    # When will the biggest sims be larger than this?
-    cdef cnp.int64_t[:] indexes1 = np.ascontiguousarray(
-            np.zeros(current_indexes_len, dtype=np.int64))
-    cdef cnp.int64_t[:] indexes2 = np.ascontiguousarray(
-            np.zeros(current_indexes_len, dtype=np.int64))
+    cdef cnp.uint32_t[:] indexes1 = np.ascontiguousarray(
+            np.zeros(current_indexes_len, dtype=np.uint32))
+    cdef cnp.uint32_t[:] indexes2 = np.ascontiguousarray(
+            np.zeros(current_indexes_len, dtype=np.uint32))
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -260,7 +258,7 @@ def counts_in_cylinders_engine(
         indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:current_indexes_cnt]]
         indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:current_indexes_cnt]]
         return counts_uns, np.array((indexes1_uns, indexes2_uns)).T.ravel().view(
-                dtype=[('i1', np.int64), ('i2', np.int64)])
+                dtype=[('i1', np.uint32), ('i2', np.uint32)])
 
 
     return counts_uns
