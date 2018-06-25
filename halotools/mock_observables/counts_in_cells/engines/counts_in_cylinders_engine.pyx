@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 cimport numpy as cnp
 cimport cython
-# from cpython.mem cimport PyMem_Realloc
 
 from libc.math cimport ceil
 
@@ -251,11 +250,6 @@ def counts_in_cylinders_engine(
                                                 current_indexes_len *= 2
                                                 indexes1 = np.resize(indexes1, current_indexes_len)
                                                 indexes2 = np.resize(indexes2, current_indexes_len)
-                                                # indexes1 = <cnp.int64_t[:current_indexes_len]>PyMem_Realloc(
-                                                #         &indexes1[0], sizeof(cnp.int64_t) * current_indexes_len)
-                                                # indexes2 = <cnp.int64_t[:current_indexes_len]>PyMem_Realloc(
-                                                #         &indexes2[0], sizeof(cnp.int64_t) * current_indexes_len)
-
 
     # At this point, we have calculated our pairs on the input arrays *after* sorting
     # Since the order matters in this calculation, we need to undo the sorting
