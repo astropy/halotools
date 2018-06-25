@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 cimport numpy as cnp
 cimport cython
-
 from libc.math cimport ceil
 
 from ....utils import unsorting_indices
@@ -61,7 +60,7 @@ def counts_in_cylinders_engine(
         to search for neighbors around each point in 'sample 1'
 
     return_indexes : bool
-        If true we also want the indexes of the matches
+        If true, will also return the indexes
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -74,8 +73,10 @@ def counts_in_cylinders_engine(
         Length-Npts1 integer array storing the number of ``sample2`` points
         inside a cylinder centered at each point in ``sample1``.
 
-    indexes : (Optional - only if return_indexes)
-        TODO
+    indexes : numpy.array
+        Num pairs length structured array with column ``i1``, the index of the
+        sample 1 point, and column ``i2``, the index of the sample 2 point in
+        in that cylinder
     """
 
     rp_max_squared_tmp = rp_max*rp_max
@@ -258,6 +259,8 @@ def counts_in_cylinders_engine(
     if c_return_indexes:
         indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:current_indexes_cnt]]
         indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:current_indexes_cnt]]
-        return counts_uns, indexes1_uns, indexes2_uns
+        return counts_uns, np.array((indexes1_uns, indexes2_uns)).T.ravel().view(
+                dtype=[('i1', np.int64), ('i2', np.int64)])
+
 
     return counts_uns

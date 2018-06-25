@@ -170,22 +170,19 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         pool.close()
         if return_indexes:
             counts = np.sum([res[0] for res in result], axis=0)
-            indexes = np.array((
-                np.concatenate([res[1] for res in result]),
-                np.concatenate([res[2] for res in result])
-            ))
+            indexes = np.concatenate([res[1] for res in result])
         else:
             counts = np.sum(result, axis=0)
     else:
         result = engine(cell1_tuples[0])
         if return_indexes:
             counts = result[0]
-            indexes = np.array((result[1], result[2]))
+            indexes = result[1]
         else:
             counts = result
 
     if return_indexes:
-        return counts, indexes.T.ravel().view(dtype=[('i1', np.int64), ('i2', np.int64)])
+        return counts, indexes
     return counts
 
 def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
