@@ -255,10 +255,9 @@ def counts_in_cylinders_engine(
     # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
     counts_uns = np.array(counts)[unsorting_indices(double_mesh.mesh1.idx_sorted)]
     if c_return_indexes:
-        indexes1_uns = double_mesh.mesh1.idx_sorted[indexes1[:current_indexes_cnt]]
-        indexes2_uns = double_mesh.mesh2.idx_sorted[indexes2[:current_indexes_cnt]]
-        return counts_uns, np.array((indexes1_uns, indexes2_uns)).T.ravel().view(
-                dtype=[('i1', np.uint32), ('i2', np.uint32)])
-
+        indexes = np.zeros(current_indexes_cnt, dtype=[("i1", np.uint32), ("i2", np.uint32)])
+        indexes["i1"] = double_mesh.mesh1.idx_sorted[indexes1[:current_indexes_cnt]]
+        indexes["i2"] = double_mesh.mesh2.idx_sorted[indexes2[:current_indexes_cnt]]
+        return counts_uns, indexes
 
     return counts_uns
