@@ -113,10 +113,8 @@ def counts_in_cylinders_engine(
     cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
     cdef int current_indexes_cnt = 0
     cdef int current_indexes_len = len(x1_sorted) if c_return_indexes else 0
-    cdef cnp.uint32_t[:] indexes1 = np.ascontiguousarray(
-            np.zeros(current_indexes_len, dtype=np.uint32))
-    cdef cnp.uint32_t[:] indexes2 = np.ascontiguousarray(
-            np.zeros(current_indexes_len, dtype=np.uint32))
+    cdef cnp.uint32_t[:,:] indexes = np.ascontiguousarray(
+            np.zeros((current_indexes_len, 2), dtype=np.uint32))
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -242,22 +240,23 @@ def counts_in_cylinders_engine(
                                         counts[ifirst1+i] += 1
 
                                         if c_return_indexes:
-                                            indexes1[current_indexes_cnt] = ifirst1+i
-                                            indexes2[current_indexes_cnt] = ifirst2+j
+                                            indexes[current_indexes_cnt, 0] = ifirst1+i
+                                            indexes[current_indexes_cnt, 1] = ifirst2+j
                                             current_indexes_cnt += 1
                                             if current_indexes_cnt == current_indexes_len:
                                                 current_indexes_len *= 2
-                                                indexes1 = np.resize(indexes1, current_indexes_len)
-                                                indexes2 = np.resize(indexes2, current_indexes_len)
+                                                indexes = np.resize(indexes, (current_indexes_len, 2))
 
     # At this point, we have calculated our pairs on the input arrays *after* sorting
     # Since the order matters in this calculation, we need to undo the sorting
     # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
     counts_uns = np.array(counts)[unsorting_indices(double_mesh.mesh1.idx_sorted)]
     if c_return_indexes:
-        indexes = np.zeros(current_indexes_cnt, dtype=[("i1", np.uint32), ("i2", np.uint32)])
-        indexes["i1"] = double_mesh.mesh1.idx_sorted[indexes1[:current_indexes_cnt]]
-        indexes["i2"] = double_mesh.mesh2.idx_sorted[indexes2[:current_indexes_cnt]]
-        return counts_uns, indexes
+        np_indexes = np.squeeze(
+                np.asarray(indexes[:current_indexes_cnt]).view(
+	            dtype=[("i1", np.uint32), ("i2", np.uint32)]))
+        np_indexes["i1"] = double_mesh.mesh1.idx_sorted[np_indexes["i1"]]
+        np_indexes["i2"] = double_mesh.mesh2.idx_sorted[np_indexes["i2"]]
+        return counts_uns, np_indexes
 
     return counts_uns
