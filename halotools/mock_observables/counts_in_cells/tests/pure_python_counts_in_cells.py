@@ -24,7 +24,8 @@ def pure_python_idx_in_cylinders(
             if _point_within_cylinder(sample1[i], sample2[j], rp_max[i], pi_max[i], xperiod, yperiod, zperiod):
                 indexes.append((i, j))
 
-    return np.array(indexes, dtype=[("i1", "u4"), ("i2", "u4")])
+    # https://github.com/numpy/numpy/issues/2407 for .encode("ascii")
+    return np.array(indexes, dtype=[("i1".encode("ascii"), np.uint32), ("i2".encode("ascii"), np.uint32)])
 
 
 def pure_python_counts_in_cylinders(
