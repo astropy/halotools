@@ -210,8 +210,9 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     z2 = sample2[:, 2]
 
     if return_indexes and ((len(x1) > 2e32) or (len(x2) > 2e32)):
-        msg = """Return indexes uses a uint32 and so can only handle inputs shorter than
-        2e32 (~4 Billion)."""
+        msg = ("Return indexes uses a uint32 and so can only handle inputs shorter than " +
+            "2e32 (~4 Billion). If you are affected by this please raise an Issue on " +
+            "https://github.com/astropy/halotools.\n")
         raise ValueError(msg)
 
     proj_search_radius = np.atleast_1d(proj_search_radius).astype('f8')
