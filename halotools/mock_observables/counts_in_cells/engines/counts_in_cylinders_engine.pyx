@@ -252,10 +252,10 @@ def counts_in_cylinders_engine(
     # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
     counts_uns = np.array(counts)[unsorting_indices(double_mesh.mesh1.idx_sorted)]
     if c_return_indexes:
-        # https://github.com/numpy/numpy/issues/2407 for .encode("ascii")
+        # https://github.com/numpy/numpy/issues/2407 for str("colname")
         np_indexes = np.squeeze(
                 np.asarray(indexes[:current_indexes_cnt]).view(
-	            dtype=[("i1".encode("ascii"), np.uint32), ("i2".encode("ascii"), np.uint32)]))
+	            dtype=[(str("i1"), np.uint32), (str("i2"), np.uint32)]))
         np_indexes["i1"] = double_mesh.mesh1.idx_sorted[np_indexes["i1"]]
         np_indexes["i2"] = double_mesh.mesh2.idx_sorted[np_indexes["i2"]]
         return counts_uns, np_indexes
