@@ -519,7 +519,8 @@ class PreservingNgalHeavisideAssembias(HeavisideAssembias):
             with NumpyRNGContext(seed):
                 score = np.random.rand(total)
             score.sort()
-            x = first_occupation_moment.cumsum() / first_occupation_moment.sum()
+            x = first_occupation_moment.cumsum(dtype=np.float64)
+            x /= x[-1]
             result = np.ediff1d(np.insert(np.searchsorted(score, x), 0, 0))
         else:
             msg = ("\nYou have chosen to set ``_upper_occupation_bound`` to some value \n"
