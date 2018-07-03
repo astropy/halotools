@@ -14,6 +14,7 @@ from astropy.table import Table
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
 from .. import model_helpers, model_defaults
+import weakref
 
 try:
     from ... import mock_observables
@@ -76,6 +77,7 @@ class MockFactory(object):
         except:
             pass
 
+
         # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
 
@@ -85,6 +87,15 @@ class MockFactory(object):
         self.additional_haloprops = list(set(self.additional_haloprops))
 
         self.galaxy_table = Table()
+
+    @property
+    def model(self):
+        """ model, a weak reference to the model because mock is always a member of model """
+        return self._model()
+
+    @model.setter
+    def model(self, value):
+        self._model = weakref.ref(value)
 
     @abstractmethod
     def populate(self, **kwargs):
