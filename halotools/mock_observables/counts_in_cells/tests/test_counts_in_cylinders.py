@@ -6,7 +6,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 import pytest
 
-from .pure_python_counts_in_cells import pure_python_counts_in_cylinders
+from .pure_python_counts_in_cells import pure_python_counts_in_cylinders, pure_python_idx_in_cylinders
 
 from ..counts_in_cylinders import counts_in_cylinders
 
@@ -195,7 +195,7 @@ def test_counts_in_cylinders_error_handling():
         approx_cell1_size=0.2, approx_cell2_size=0.2)
 
 
-def test_cic_pbc():
+def test_counts_in_cylinders_pbc():
     npts1 = 1000
     npts2 = 9000
 
@@ -211,7 +211,7 @@ def test_cic_pbc():
         assert np.allclose(result_pbc, result_nopbc)
 
 
-def test_parallel_serial_consistency():
+def test_counts_in_cylinders_parallel_serial_consistency():
     """ Enforce that the counts-in-cylinder function returns identical results
     when called in serial or parallel.
 
@@ -233,3 +233,28 @@ def test_parallel_serial_consistency():
 
     assert result1.shape == result2.shape
 
+@pytest.mark.parametrize("num_threads", [1, 4])
+def test_counts_in_cylinders_with_indexes(num_threads):
+    """
+    """
+    npts1 = 100
+    npts2 = 90
+
+    for seed in seed_list:
+        with NumpyRNGContext(seed):
+            sample1 = np.random.random((npts1, 3))
+            sample2 = np.random.random((npts2, 3))
+
+        rp_max = np.zeros(npts1) + 0.2
+        pi_max = np.zeros(npts1) + 0.2
+        brute_force_indexes = pure_python_idx_in_cylinders(sample1, sample2, rp_max, pi_max)
+        brute_force_counts = pure_python_counts_in_cylinders(sample1, sample2, rp_max, pi_max)
+        counts, indexes = counts_in_cylinders(
+                sample1, sample2, rp_max, pi_max, return_indexes=True, num_threads=num_threads)
+
+        assert np.all(_sort(indexes) == _sort(brute_force_indexes))
+        assert np.all(counts == brute_force_counts)
+        assert len(indexes) > npts1 # assert that we have tested array resizing
+
+def _sort(indexes):
+    return np.sort(indexes, order=["i1", "i2"])
