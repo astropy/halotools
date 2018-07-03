@@ -276,12 +276,12 @@ class ModelFactory(object):
         :ref:`param_dict_mechanism`
         """
 
-        def decorated_func(*args, **kwargs):
+        def decorated_func(*args, __param_dict__=self.param_dict, **kwargs):
 
             # Update the param_dict as necessary
-            for key in list(self.param_dict.keys()):
+            for key in list(__param_dict__.keys()):
                 if key in component_model.param_dict:
-                    component_model.param_dict[key] = self.param_dict[key]
+                    component_model.param_dict[key] = __param_dict__[key]
 
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
