@@ -14,6 +14,8 @@ __all__ = ('test_hearin15', )
 
 
 
+@pytest.mark.skipif(sys.platform == 'win32',
+                    reason="does not run on windows")
 def test_memory_leak():
     model = PrebuiltHodModelFactory('hearin15')
     halocat = FakeSim()
