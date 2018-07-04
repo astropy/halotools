@@ -13,6 +13,23 @@ from ....utils.python_string_comparisons import compare_strings_py23_safe
 __all__ = ('test_hearin15', )
 
 
+
+def test_memory_leak():
+    model = PrebuiltHodModelFactory('hearin15')
+    halocat = FakeSim()
+    import resource
+
+    model.populate_mock(halocat)
+    maxrss = []
+    for i in range(9):
+        model.mock.populate()
+        maxrss.append(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+    import numpy
+    # memory usage shall not increase significantly per run.
+    assert (numpy.diff(maxrss) < 1024).all()
+
+
 def test_hearin15():
     """
     """
