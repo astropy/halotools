@@ -276,7 +276,9 @@ class ModelFactory(object):
         :ref:`param_dict_mechanism`
         """
 
-        def decorated_func(*args, __param_dict__=self.param_dict, **kwargs):
+        # do not pass self into the scope
+        __param_dict__ = self.param_dict
+        def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
             for key in list(__param_dict__.keys()):
