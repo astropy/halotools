@@ -508,13 +508,15 @@ def test_initial_sorting4():
         add_subgrid_noise=False)
     assert np.allclose(result, result4[unsorting_indices(idx_x_sorted)])
 
+
 def test_no_subgrid_noise_with_return_indexes():
-    x, y = np.arange(5), np.arange(5)
-    x2, y2 = np.arange(10), np.arange(10)
-    nwin = 3
-    with pytest.raises(ValueError) as err:
-        conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True, return_indexes=True)
-    assert str(err.value) == "Can't add subgrid noise when returning indexes"
+    """ Enforce that add_subgrid_noise is automatically set to False when return_indexes is True
+    """
+    n1, n2 = int(1e3), int(1e4)
+    x, y = np.arange(n1), np.arange(n1)
+    x2, y2 = np.arange(n2), np.arange(n2)
+    nwin = 35
+    conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True, return_indexes=True)
 
 
 def test_return_indexes():
