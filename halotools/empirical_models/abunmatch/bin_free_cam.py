@@ -83,8 +83,8 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
     `~halotools.empirical_models.conditional_abunmatch_bin_based`.
 
     """
-    if (return_indexes and add_subgrid_noise):
-        raise ValueError("Can't add subgrid noise when returning indexes")
+    if return_indexes:
+        add_subgrid_noise = False
 
     x, y, nwin = _check_xyn_bounds(x, y, nwin)
     x2, y2, nwin = _check_xyn_bounds(x2, y2, nwin)
