@@ -35,6 +35,7 @@
 *.sql
 *.sqlite
 *.ipynb_checkpoints
+*.pytest_cache
 
 # OS generated files #
 ######################
