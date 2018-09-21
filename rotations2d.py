@@ -1,15 +1,17 @@
 r"""
-A set of rotation utilites for manipuklating 3D vectors
+A set of rotation utilites for manipuklating 2D vectors
 """
 
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from .vector_calculations import *
+from .vector_utilities import elementwise_dot, elementwise_norm, normalized_vectors
 
 
-__all__=['rotate_vector_collection', 'random_rotation', 'rotation_matrices_from_angles',
-         'rotation_matrices_from_vectors', 'random_perpendicular_directions']
+__all__=['rotate_vector_collection',
+         'rotation_matrices_from_angles',
+         'rotation_matrices_from_vectors',
+         'rotation_matrices_from_basis']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
@@ -147,7 +149,7 @@ def rotation_matrices_from_vectors(v0, v1):
     return rotation_matrices_from_angles(angles)
 
 
-def rotation2d(ux, uy):
+def rotation_matrices_from_basis(ux, uy):
     """
     Calculate a collection of rotation matrices defined by an input collection
     of basis vectors.

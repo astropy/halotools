@@ -5,7 +5,7 @@ A set of rotaiton utilites
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from .vector_calculations import *
+from .vector_utilities import elementwise_dot, elementwise_norm, normalized_vectors
 
 
 __all__=['rotate_vector_collection',
