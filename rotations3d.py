@@ -5,12 +5,13 @@ A set of rotaiton utilites
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from .vector_utilities import elementwise_dot, elementwise_norm, normalized_vectors
+from .vector_utilities import (elementwise_dot, elementwise_norm,
+                               normalized_vectors, angles_between_list_of_vectors)
 
 
 __all__=['rotate_vector_collection',
          'rotation_matrices_from_angles', 'rotation_matrices_from_vectors', 'rotation_matrices_from_basis',
-         'vectors_between_list_of_vectors', 'vectors_normal_to_planes', ' project_onto_plane']
+         'vectors_between_list_of_vectors', 'vectors_normal_to_planes', 'project_onto_plane']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 

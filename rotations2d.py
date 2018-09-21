@@ -5,7 +5,8 @@ A set of rotation utilites for manipuklating 2D vectors
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from .vector_utilities import elementwise_dot, elementwise_norm, normalized_vectors
+from .vector_utilities import (elementwise_dot, elementwise_norm,
+                               normalized_vectors, angles_between_list_of_vectors)
 
 
 __all__=['rotate_vector_collection',
