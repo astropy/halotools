@@ -4,6 +4,16 @@ This package contains functions to rotate collections of 2D and 3D vectors.
 
 Some of the functionality of this package is taken from the [Halotools](https://halotools.readthedocs.io/en/latest/) utilities sudmodule, and reproduced here for convenience.    
 
+
+## Description
+
+This package contains tools to perform:
+
+* rotations of 3D vectors,
+* rotations of 2D vectors,
+* and monte carlo rotations of 2D and 3D vectors.
+
+
 ## Requirements
 
 In order to use the functions in this package, you will need the following python packages installed:
