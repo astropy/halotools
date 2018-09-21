@@ -168,7 +168,9 @@ def normalized_vectors(vectors):
     """
     vectors = np.atleast_2d(vectors)
     npts = vectors.shape[0]
-    return vectors/elementwise_norm(vectors).reshape((npts, -1))
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return vectors/elementwise_norm(vectors).reshape((npts, -1))
 
 
 def elementwise_norm(x):
