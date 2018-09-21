@@ -8,8 +8,9 @@ import numpy as np
 from .vector_calculations import *
 
 
-__all__=['rotate_vector_collection', 'random_rotation', 'rotation_matrices_from_angles',
-         'rotation_matrices_from_vectors']
+__all__=['rotate_vector_collection',
+         'rotation_matrices_from_angles', 'rotation_matrices_from_vectors', 'rotation_matrices_from_basis',
+         'vectors_between_list_of_vectors', 'vectors_normal_to_planes', ' project_onto_plane']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
@@ -163,10 +164,9 @@ def rotation_matrices_from_vectors(v0, v1):
     return rotation_matrices_from_angles(angles, directions)
 
 
-def rotation3d(ux, uy, uz):
+def rotation_matrices_from_basis(ux, uy, uz):
     """
-    Calculate a collection of rotation matrices defined by an input collection
-    of basis vectors.
+    Calculate a collection of rotation matrices defined by a set of basis vectors
     
     Parameters
     ----------
@@ -220,4 +220,116 @@ def rotation3d(ux, uy, uz):
     r[:,2,2] = r_33
 
     return r
+
+
+def vectors_between_list_of_vectors(x, y, p):
+    r"""
+    Starting from two input lists of vectors, return a list of unit-vectors
+    that lie in the same plane as the corresponding input vectors,
+    and where the input `p` controls the angle between
+    the returned vs. input vectors.
+
+    Parameters
+    ----------
+    x : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `x` will be ignored.
+
+    y : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `y` will be ignored.
+
+    p : ndarray
+        Numpy array of shape (npts, ) storing values in the closed interval [0, 1].
+        For values of `p` equal to zero, the returned vectors will be
+        exactly aligned with the input `x`; when `p` equals unity, the returned
+        vectors will be aligned with `y`.
+
+    Returns
+    -------
+    v : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d unit-vectors
+        lying in the plane spanned by `x` and `y`. The angle between `v` and `x`
+        will be equal to :math:`p*\theta_{\rm xy}`.
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> x = np.random.random((npts, 3))
+    >>> y = np.random.random((npts, 3))
+    >>> p = np.random.uniform(0, 1, npts)
+    >>> v = vectors_between_list_of_vectors(x, y, p)
+    >>> angles_xy = angles_between_list_of_vectors(x, y)
+    >>> angles_xp = angles_between_list_of_vectors(x, v)
+    >>> assert np.allclose(angles_xy*p, angles_xp)
+    """
+    assert np.all(p >= 0), "All values of p must be non-negative"
+    assert np.all(p <= 1), "No value of p can exceed unity"
+
+    z = vectors_normal_to_planes(x, y)
+    theta = angles_between_list_of_vectors(x, y)
+    angles = p*theta
+    rotation_matrices = rotation_matrices_from_angles(angles, z)
+    return normalized_vectors(rotate_vector_collection(rotation_matrices, x))
+
+
+def vectors_normal_to_planes(x, y):
+    r""" Given a collection of 3d vectors x and y,
+    return a collection of 3d unit-vectors that are orthogonal to x and y.
+
+    Parameters
+    ----------
+    x : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `x` will be ignored.
+
+    y : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+        Note that the normalization of `y` will be ignored.
+
+    Returns
+    -------
+    z : ndarray
+        Numpy array of shape (npts, 3). Each 3d vector in z will be orthogonal
+        to the corresponding vector in x and y.
+
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> x = np.random.random((npts, 3))
+    >>> y = np.random.random((npts, 3))
+    >>> normed_z = angles_between_list_of_vectors(x, y)
+
+    """
+    return normalized_vectors(np.cross(x, y))
+
+
+def project_onto_plane(x1, x2):
+    r"""
+    Given a collection of 3D vectors, x1 and x2, project each vector
+    in x1 onto the plane normal to the corresponding vector x2
+
+    Parameters
+    ----------
+    x1 : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d points
+
+    x2 : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d points
+
+    Returns
+    -------
+    result : ndarray
+        Numpy array of shape (npts, 3) storing a collection of 3d points
+
+    """
+
+    n = normalized_vectors(x2)
+    d = elementwise_dot(x1,n)
+    
+    return x - d[:,np.newaxis]*n
 
