@@ -9,6 +9,10 @@ from __future__ import (division, print_function, absolute_import,
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 from .vector_utilities import *
+from .rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
+from .rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
+from .rotations3d import rotate_vector_collection as rotate_vector_collection_3d
+from .rotations2d import rotate_vector_collection as rotate_vector_collection_2d
 
 
 __all__=['random_rotation_3d',
@@ -40,9 +44,9 @@ def random_rotation_3d(vectors, seed=None):
     with NumpyRNGContext(seed):
         ran_direction = normalized_vectors(np.random.random((3,)))*2.0 - 1.0
 
-    ran_rot = rotation_matrices_from_angles(ran_angle, ran_direction)
+    ran_rot = rotation_matrices_from_angles_3d(ran_angle, ran_direction)
 
-    return rotate_vector_collection(ran_rot, vectors)
+    return rotate_vector_collection_3d(ran_rot, vectors)
 
 
 def random_rotation_2d(vectors, seed=None):
@@ -65,12 +69,9 @@ def random_rotation_2d(vectors, seed=None):
 
     ran_angle = np.random.random(size=1)*(np.pi)
 
-    with NumpyRNGContext(seed):
-        ran_direction = normalized_vectors(np.random.random((2,)))*2.0 - 1.0
+    ran_rot = rotation_matrices_from_angles_2d(ran_angle)
 
-    ran_rot = rotation_matrices_from_angles(ran_angle, ran_direction)
-
-    return rotate_vector_collection(ran_rot, vectors)
+    return rotate_vector_collection_2d(ran_rot, vectors)
 
 
 def random_perpendicular_directions(v, seed=None):
