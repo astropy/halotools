@@ -24,7 +24,7 @@ In order to use the functions in this package, you will need the following pytho
 
 ## Installation
 
-Place this directory in your PYTHONPATH.  The variuous functions can then be imported as, e.g.:  
+Place this directory in your PYTHONPATH.  The various functions can then be imported as, e.g.:  
 
 ```
 from rotations.rotations3d import rotate_vector_collection
