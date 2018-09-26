@@ -100,7 +100,7 @@ def elementwise_dot(x, y):
 
 
 def angles_between_list_of_vectors(v0, v1, tol=1e-3):
-    r""" Calculate the angle between a collection of 3d vectors
+    r""" Calculate the angle between a collection of n-dimensional vectors
 
     Parameters
     ----------
@@ -129,8 +129,9 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3):
     Examples
     --------
     >>> npts = int(1e4)
-    >>> v0 = np.random.random((npts, 3))
-    >>> v1 = np.random.random((npts, 3))
+    >>> ndim = 3
+    >>> v0 = np.random.random((npts, ndim))
+    >>> v1 = np.random.random((npts, ndim))
     >>> angles = angles_between_list_of_vectors(v0, v1)
     """
 
