@@ -1,5 +1,5 @@
 r"""
-A set of rotation utilites for manipuklating 2D vectors
+A set of rotation utilites for manipulating 2-dimensional vectors
 """
 
 from __future__ import (division, print_function, absolute_import,
@@ -17,25 +17,25 @@ __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
 def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
-    r""" 
+    r"""
     Given a collection of rotation matrices and a collection of 2d vectors,
     apply each matrix to rotate the corresponding vector.
-    
+
     Parameters
     ----------
     rotation_matrices : ndarray
         Numpy array of shape (npts, 2, 2) storing a collection of rotation matrices.
         If an array of shape (2, 2) is passed, all the vectors
         are rotated using the same rotation matrix.
-    
+
     vectors : ndarray
         Numpy array of shape (npts, 2) storing a collection of 3d vectors
-    
+
     Returns
     -------
     rotated_vectors : ndarray
         Numpy array of shape (npts, 2) storing a collection of 3d vectors
-    
+
     Examples
     --------
     In this example, we'll randomly generate two sets of unit-vectors, `v0` and `v1`.
@@ -43,7 +43,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     rotation matrices that rotate each `v0` into the corresponding `v1`.
     Then we'll use the `rotate_vector_collection` function to apply each
     rotation, and verify that we recover each of the `v1`.
-    
+
     >>> npts = int(1e4)
     >>> v0 = normalized_vectors(np.random.random((npts, 2)))
     >>> v1 = normalized_vectors(np.random.random((npts, 2)))
@@ -64,7 +64,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
 
 
 def rotation_matrices_from_angles(angles):
-    r""" 
+    r"""
     Calculate a collection of rotation matrices defined by
     an input collection of rotation angles and rotation axes.
 
@@ -102,14 +102,14 @@ def rotation_matrices_from_angles(angles):
 
     R[:, 0, 1] = sina
     R[:, 1, 0] = -sina
-    
+
     return R
 
 
 def rotation_matrices_from_vectors(v0, v1):
-    r""" 
+    r"""
     Calculate a collection of rotation matrices defined by the unique
-    transformation rotating v1 into v2 about the mutually perpendicular axis.
+    transformation rotating v1 into v2.
 
     Parameters
     ----------
@@ -138,7 +138,7 @@ def rotation_matrices_from_vectors(v0, v1):
     Notes
     -----
     The function `rotate_vector_collection` can be used to efficiently
-    apply the returned collection of matrices to a collection of 3d vectors
+    apply the returned collection of matrices to a collection of 2d vectors
 
     """
     v0 = normalized_vectors(v0)
@@ -154,15 +154,15 @@ def rotation_matrices_from_basis(ux, uy):
     """
     Calculate a collection of rotation matrices defined by an input collection
     of basis vectors.
-    
+
     Parameters
     ----------
     ux : array_like
-        Numpy array of shape (npts, 2) storing a collection of unit vexctors
-    
+        Numpy array of shape (npts, 2) storing a collection of unit vectors
+
     uy : array_like
-        Numpy array of shape (npts, 2) storing a collection of unit vexctors
-    
+        Numpy array of shape (npts, 2) storing a collection of unit vectors
+
     Returns
     -------
     matrices : ndarray
@@ -172,8 +172,8 @@ def rotation_matrices_from_basis(ux, uy):
     N = np.shape(ux)[0]
 
     # assume initial unit vectors are the standard ones
-    ex = np.array([1.0, 0.0]*N).reshape(N, 3)
-    ey = np.array([0.0, 1.0]*N).reshape(N, 3)
+    ex = np.array([1.0, 0.0]*N).reshape(N, 2)
+    ey = np.array([0.0, 1.0]*N).reshape(N, 2)
 
     ux = normalized_vectors(ux)
     uy = normalized_vectors(uy)
