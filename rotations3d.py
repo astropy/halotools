@@ -9,57 +9,9 @@ from .vector_utilities import (elementwise_dot, elementwise_norm,
                                normalized_vectors, angles_between_list_of_vectors)
 
 
-__all__=['rotate_vector_collection',
-         'rotation_matrices_from_angles', 'rotation_matrices_from_vectors', 'rotation_matrices_from_basis',
+__all__=['rotation_matrices_from_angles', 'rotation_matrices_from_vectors', 'rotation_matrices_from_basis',
          'vectors_between_list_of_vectors', 'vectors_normal_to_planes', 'project_onto_plane']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
-
-
-def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
-    r"""
-    Given a collection of rotation matrices and a collection of 3d vectors,
-    apply each matrix to rotate the corresponding vector.
-
-    Parameters
-    ----------
-    rotation_matrices : ndarray
-        Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices.
-        If an array of shape (3, 3) is passed, all the vectors
-        are rotated using the same rotation matrix.
-
-    vectors : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d vectors
-
-    Returns
-    -------
-    rotated_vectors : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d vectors
-
-    Examples
-    --------
-    In this example, we'll randomly generate two sets of unit-vectors, `v0` and `v1`.
-    We'll use the `rotation_matrices_from_vectors` function to generate the
-    rotation matrices that rotate each `v0` into the corresponding `v1`.
-    Then we'll use the `rotate_vector_collection` function to apply each
-    rotation, and verify that we recover each of the `v1`.
-
-    >>> npts = int(1e4)
-    >>> v0 = normalized_vectors(np.random.random((npts, 3)))
-    >>> v1 = normalized_vectors(np.random.random((npts, 3)))
-    >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
-    >>> v2 = rotate_vector_collection(rotation_matrices, v0)
-    >>> assert np.allclose(v1, v2)
-    """
-
-    # apply same rotation matrix to all vectors
-    if np.shape(rotation_matrices) == (3, 3):
-        return np.dot(rotation_matrices, vectors.T).T
-    # rotate each vector by associated rotation matrix
-    else:
-        try:
-            return np.einsum('ijk,ik->ij', rotation_matrices, vectors, optimize=optimize)
-        except TypeError:
-            return np.einsum('ijk,ik->ij', rotation_matrices, vectors)
 
 
 def rotation_matrices_from_angles(angles, directions):
