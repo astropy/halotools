@@ -100,8 +100,8 @@ def rotation_matrices_from_angles(angles):
     R[:, 0, 0] = cosa
     R[:, 1, 1] = cosa
 
-    R[:, 0, 1] = sina
-    R[:, 1, 0] = -sina
+    R[:, 0, 1] = -sina
+    R[:, 1, 0] = sina
     
     return R
 
@@ -145,8 +145,6 @@ def rotation_matrices_from_vectors(v0, v1):
     v1 = normalized_vectors(v1)
     angles = angles_between_list_of_vectors(v0, v1)
 
-    # where angles are 0.0, replace directions with v0
-    mask = (angles==0.0)
     return rotation_matrices_from_angles(angles)
 
 
