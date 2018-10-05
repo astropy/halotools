@@ -27,9 +27,14 @@ In order to use the functions in this package, you will need the following pytho
 Place this directory in your PYTHONPATH.  The various functions can then be imported as, e.g.:  
 
 ```
-from rotations.rotations3d import rotate_vector_collection
+from rotations import rotate_vector_collection
 ```  
 
+or for 2- and 3-D specific functions,
+
+```
+from rotations.rotations3d import rotation_matrices_from_vectors
+``` 
 
 contact:
 duncanc@andrew.cmu.edu
