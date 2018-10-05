@@ -143,7 +143,9 @@ def rotation_matrices_from_vectors(v0, v1):
     """
     v0 = normalized_vectors(v0)
     v1 = normalized_vectors(v1)
-    angles = angles_between_list_of_vectors(v0, v1)
+    
+    # use the atan2 function to get the direction of rotation right
+    angles = np.arctan2(v0[:,0], v0[:,1])-np.arctan2(v1[:,0],v1[:,1])
 
     return rotation_matrices_from_angles(angles)
 
