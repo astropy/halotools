@@ -8,7 +8,11 @@ from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
-from .vector_calculations import *
+from .vector_utilities import *
+from .rotations2d import rotate_vector_collection as rotate_vector_collection_2d
+from .rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
+from .rotations3d import rotate_vector_collection as rotate_vector_collection_3d
+from .rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
 
 
 __all__=['random_rotation_3d', 'random_rotation_2d',
@@ -33,15 +37,14 @@ def random_rotation_3d(vectors, seed=None):
     rotated_vectors : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
     """
-
-    ran_angle = np.random.random(size=1)*(np.pi)
     
     with NumpyRNGContext(seed):
         ran_direction = normalized_vectors(np.random.random((3,)))*2.0 - 1.0
+        ran_angle = np.random.random(size=1)*(np.pi)
     
-    ran_rot = rotation_matrices_from_angles(ran_angle, ran_direction)
+    ran_rot = rotation_matrices_from_angles_3d(ran_angle, ran_direction)
 
-    return rotate_vector_collection(ran_rot, vectors)
+    return rotate_vector_collection_3d(ran_rot, vectors)
 
 
 def random_rotation_2d(vectors, seed=None):
@@ -62,14 +65,12 @@ def random_rotation_2d(vectors, seed=None):
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
     """
 
-    ran_angle = np.random.random(size=1)*(np.pi)
-
     with NumpyRNGContext(seed):
-        ran_direction = normalized_vectors(np.random.random((2,)))*2.0 - 1.0
+        ran_angle = np.random.random(size=1)*(np.pi)
     
-    ran_rot = rotation_matrices_from_angles(ran_angle, ran_direction)
+    ran_rot = rotation_matrices_from_angles_2d(ran_angle, ran_direction)
 
-    return rotate_vector_collection(ran_rot, vectors)
+    return rotate_vector_collection_2d(ran_rot, vectors)
 
 
 def random_perpendicular_directions(v, seed=None):
