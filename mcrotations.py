@@ -69,7 +69,7 @@ def random_rotation_2d(vectors, seed=None):
     with NumpyRNGContext(seed):
         ran_angle = np.random.random(size=1)*(np.pi)
     
-    ran_rot = rotation_matrices_from_angles_2d(ran_angle, ran_direction)
+    ran_rot = rotation_matrices_from_angles_2d(ran_angle)
 
     return rotate_vector_collection_2d(ran_rot, vectors)
 
