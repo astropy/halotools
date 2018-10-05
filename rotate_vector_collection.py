@@ -15,7 +15,7 @@ __author__ = ['Duncan Campbell', 'Andrew Hearin']
 def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     r"""
     Given a collection of rotation matrices and a collection of 3d vectors,
-    apply each an asscoiated matrix to rotate a corresponding vector.
+    apply an asscoiated matrix to rotate corresponding vector(s).
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
         3.) array of shape (nsets, ndim, ndim) storing a collection of rotation matrices.
 
     vectors : ndarray
-        The corresponding options for
+        The corresponding options for above are:
         1.) array of shape (npts, ndim) storing a collection of 3d vectors
         2.) array of shape (npts, ndim) storing a collection of 3d vectors
         3.) array of shape (nsets, npts, ndim) storing a collection of 3d vectors
@@ -35,6 +35,16 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     -------
     rotated_vectors : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+    Notes
+    -----
+    This function is set up to preform either:
+    1. rotation operations on a single collection of vectors,
+    either applying a single rotation matrix to all vectors in the collection,
+    or applying a unique rotation matrix to each vector in the set.
+    2. applying a one rotation matrix to each collection of vectors.
+
+    The behavior of the function is determined by the arguments supplied by the user.
 
     Examples
     --------
