@@ -9,9 +9,8 @@ from __future__ import (division, print_function, absolute_import,
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 from .vector_utilities import *
-from .rotations2d import rotate_vector_collection as rotate_vector_collection_2d
+from .rotate_vector_collection import rotate_vector_collection
 from .rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
-from .rotations3d import rotate_vector_collection as rotate_vector_collection_3d
 from .rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
 
 
@@ -45,7 +44,7 @@ def random_rotation_3d(vectors, seed=None):
     
     ran_rot = rotation_matrices_from_angles_3d(ran_angle, ran_direction)
 
-    return rotate_vector_collection_3d(ran_rot, vectors)
+    return rotate_vector_collection(ran_rot, vectors)
 
 
 def random_rotation_2d(vectors, seed=None):
@@ -71,7 +70,7 @@ def random_rotation_2d(vectors, seed=None):
     
     ran_rot = rotation_matrices_from_angles_2d(ran_angle)
 
-    return rotate_vector_collection_2d(ran_rot, vectors)
+    return rotate_vector_collection(ran_rot, vectors)
 
 
 def random_perpendicular_directions(v, seed=None):

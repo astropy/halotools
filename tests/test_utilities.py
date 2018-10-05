@@ -5,10 +5,9 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 from ..vector_utilities import *
+from ..rotate_vector_collection import rotate_vector_collection
 from ..rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
-from ..rotations2d import rotate_vector_collection as rotate_vector_collection_2d
 from ..rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
-from ..rotations3d import rotate_vector_collection as rotate_vector_collection_3d
 from ..rotations3d import vectors_normal_to_planes
 
 __all__ = ('test_normalized_vectors', 'test_elementwise_norm', 'test_elementwise_dot',
@@ -78,7 +77,7 @@ def test_elementwise_dot():
 
     # get a set of perpendicular vectors
     rot = rotation_matrices_from_angles_2d(np.ones(npts)*np.pi/2.0)
-    v2 = rotate_vector_collection_2d(rot, v1)
+    v2 = rotate_vector_collection(rot, v1)
 
     # assert the dot products are all zero
     assert np.allclose(elementwise_dot(v1,v2),np.zeros(npts))
@@ -95,7 +94,7 @@ def test_elementwise_dot():
 
     # get a set of vectors rotated by 90 degrees
     rot = rotation_matrices_from_angles_3d(np.ones(npts)*np.pi/2.0, v3)
-    v4 = rotate_vector_collection_2d(rot, v1)
+    v4 = rotate_vector_collection(rot, v1)
 
     # assert the dot products are all zero
     assert np.allclose(elementwise_dot(v1,v4),np.zeros(npts))
@@ -117,7 +116,7 @@ def test_angles_between_list_of_vectors():
     # get a set of vectors rotated by random angles
     angles = np.random.uniform(-np.pi/2.0, np.pi/2.0, npts)
     rot = rotation_matrices_from_angles_2d(angles)
-    v2 = rotate_vector_collection_2d(rot, v1)
+    v2 = rotate_vector_collection(rot, v1)
 
     # assert the dot products are all zero
     assert np.allclose(angles_between_list_of_vectors(v1,v2),np.fabs(angles))
@@ -133,7 +132,7 @@ def test_angles_between_list_of_vectors():
     # get a set of vectors rotated by random angles
     angles = np.random.uniform(-np.pi/2.0, np.pi/2.0, npts)
     rot = rotation_matrices_from_angles_3d(angles, v3)
-    v4 = rotate_vector_collection_2d(rot, v1)
+    v4 = rotate_vector_collection(rot, v1)
 
     # assert the dot products are all zero
     assert np.allclose(angles_between_list_of_vectors(v1,v4),np.fabs(angles))

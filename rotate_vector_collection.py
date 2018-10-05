@@ -52,11 +52,19 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     >>> assert np.allclose(v1, v2)
     """
 
-    ndim = np.shape(rotation_matrices)[-1]
+    ndim_rotm = np.shape(rotation_matrices)[-1]
+    ndim_vec = np.shape(vectors)[-1]
+
+    assert ndim_rotm==ndim_vec
 
     # apply same rotation matrix to all vectors
-    if len(np.shape(rotation_matrices)) == 2:
+    if (len(np.shape(rotation_matrices)) == 2):
         return np.dot(rotation_matrices, vectors.T).T
+
+    # apply same rotation matrix to all vectors
+    if (np.shape(rotation_matrices)[0] == 1):
+        return np.dot(rotation_matrices[0], vectors.T).T
+    
     # rotate each vector by associated rotation matrix
     else:
         # n1 sets of n2 vectors of ndim dimension
@@ -68,6 +76,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
             ein_string = 'ijk,ik->ij'
             n1, ndim = np.shape(vectors)
         
+        print(np.shape(rotation_matrices),(n1,ndim,ndim))
         assert np.shape(rotation_matrices)==(n1,ndim,ndim)
         
         try:
