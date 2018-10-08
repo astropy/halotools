@@ -74,7 +74,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     # apply same rotation matrix to all vectors
     if (np.shape(rotation_matrices)[0] == 1):
         return np.dot(rotation_matrices[0], vectors.T).T
-    
+
     # rotate each vector by associated rotation matrix
     else:
         # n1 sets of n2 vectors of ndim dimension
@@ -85,10 +85,7 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
         elif len(np.shape(vectors))==2:
             ein_string = 'ijk,ik->ij'
             n1, ndim = np.shape(vectors)
-        
-        print(np.shape(rotation_matrices),(n1,ndim,ndim))
-        assert np.shape(rotation_matrices)==(n1,ndim,ndim)
-        
+
         try:
             return np.einsum(ein_string, rotation_matrices, vectors, optimize=optimize)
         except TypeError:
