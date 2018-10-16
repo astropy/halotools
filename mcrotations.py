@@ -37,11 +37,11 @@ def random_rotation_3d(vectors, seed=None):
     rotated_vectors : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
     """
-    
+
     with NumpyRNGContext(seed):
         ran_direction = normalized_vectors(np.random.random((3,)))*2.0 - 1.0
         ran_angle = np.random.random(size=1)*(np.pi)
-    
+
     ran_rot = rotation_matrices_from_angles_3d(ran_angle, ran_direction)
 
     return rotate_vector_collection(ran_rot, vectors)
@@ -67,7 +67,7 @@ def random_rotation_2d(vectors, seed=None):
 
     with NumpyRNGContext(seed):
         ran_angle = np.random.random(size=1)*(np.pi)
-    
+
     ran_rot = rotation_matrices_from_angles_2d(ran_angle)
 
     return rotate_vector_collection(ran_rot, vectors)
@@ -97,7 +97,7 @@ def random_perpendicular_directions(v, seed=None):
     npts = v.shape[0]
 
     with NumpyRNGContext(seed):
-        w = np.random.random((npts, 3))
+        w = np.random.random((npts, 3))*2.0 - 1.0
 
     vnorms = elementwise_norm(v).reshape((npts, 1))
     wnorms = elementwise_norm(w).reshape((npts, 1))
