@@ -14,7 +14,7 @@ __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     r"""
-    Given a collection of rotation matrices and a collection of 3d vectors,
+    Given a collection of rotation matrices and a collection of n-dimensional vectors,
     apply an asscoiated matrix to rotate corresponding vector(s).
 
     Parameters
@@ -27,14 +27,14 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
 
     vectors : ndarray
         The corresponding options for above are:
-        1.) array of shape (npts, ndim) storing a collection of 3d vectors
-        2.) array of shape (npts, ndim) storing a collection of 3d vectors
-        3.) array of shape (nsets, npts, ndim) storing a collection of 3d vectors
+        1.) array of shape (npts, ndim) storing a collection of ndim-dimensional vectors
+        2.) array of shape (npts, ndim) storing a collection of ndim-dimensional vectors
+        3.) array of shape (nsets, npts, ndim) storing a collection of ndim-dimensional vectors
 
     Returns
     -------
     rotated_vectors : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d vectors
+        Numpy array of shape (npts, ndim) storing a collection of ndim-dimensional vectors
 
     Notes
     -----
@@ -54,9 +54,9 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     Then we'll use the `rotate_vector_collection` function to apply each
     rotation, and verify that we recover each of the `v1`.
 
-    >>> npts = int(1e4)
-    >>> v0 = normalized_vectors(np.random.random((npts, 3)))
-    >>> v1 = normalized_vectors(np.random.random((npts, 3)))
+    >>> npts, ndim = int(1e4), 3
+    >>> v0 = normalized_vectors(np.random.random((npts, ndim)))
+    >>> v1 = normalized_vectors(np.random.random((npts, ndim)))
     >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
     >>> v2 = rotate_vector_collection(rotation_matrices, v0)
     >>> assert np.allclose(v1, v2)
