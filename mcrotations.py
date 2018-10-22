@@ -16,7 +16,8 @@ from .rotations3d import rotation_matrices_from_angles as rotation_matrices_from
 
 __all__=['random_rotation_3d',
          'random_rotation_2d',
-         'random_perpendicular_directions']
+         'random_perpendicular_directions',
+         'random_unit_vectors_3d']
 __author__ = ['Duncan Campbell']
 
 
@@ -97,7 +98,7 @@ def random_perpendicular_directions(v, seed=None):
     npts = v.shape[0]
 
     with NumpyRNGContext(seed):
-        w = np.random.random((npts, 3))*2.0 - 1.0
+        w = random_unit_vectors_3d(npts)
 
     vnorms = elementwise_norm(v).reshape((npts, 1))
     wnorms = elementwise_norm(w).reshape((npts, 1))
@@ -111,5 +112,16 @@ def random_perpendicular_directions(v, seed=None):
     e_v_perp_norm = elementwise_norm(e_v_perp).reshape((npts, 1))
 
     return e_v_perp/e_v_perp_norm
+
+
+def random_unit_vectors_3d(npts):
+    r"""
+    """
+
+    ndim = 3
+    x = np.random.normal(size=(npts,ndim), scale=1.0)
+    r = np.sqrt(np.sum((x)**2, axis=-1))
+
+    return (1.0/r[:,np.newaxis])*x
 
 
