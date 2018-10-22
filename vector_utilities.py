@@ -99,7 +99,7 @@ def elementwise_dot(x, y):
     return np.sum(x*y, axis=1)
 
 
-def angles_between_list_of_vectors(v0, v1, tol=1e-3):
+def angles_between_list_of_vectors(v0, v1, tol=1e-3, vn=None):
     r""" Calculate the angle between a collection of n-dimensional vectors
 
     Parameters
@@ -117,6 +117,9 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3):
         This variable is only used to round off numerical noise that otherwise
         causes exceptions to be raised by the inverse cosine function.
         Default is 0.001.
+
+    n1 : ndarray
+        normal vector
 
     Returns
     -------
@@ -136,13 +139,18 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3):
     """
 
     dot = elementwise_dot(normalized_vectors(v0), normalized_vectors(v1))
-
-    #  Protect against tiny numerical excesses beyond the range [-1 ,1]
-    mask1 = (dot > 1) & (dot < 1 + tol)
-    dot = np.where(mask1, 1., dot)
-    mask2 = (dot < -1) & (dot > -1 - tol)
-    dot = np.where(mask2, -1., dot)
-
-    return np.arccos(dot)
+    
+    if vn is None:
+        #  Protect against tiny numerical excesses beyond the range [-1 ,1]
+        mask1 = (dot > 1) & (dot < 1 + tol)
+        dot = np.where(mask1, 1., dot)
+        mask2 = (dot < -1) & (dot > -1 - tol)
+        dot = np.where(mask2, -1., dot)
+        a = np.arccos(dot)
+    else:
+        cross = np.cross(v0,v1)
+        a = np.arctan2(elementwise_dot(cross, vn), dot)
+    
+    return a   
 
 
