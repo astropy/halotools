@@ -40,7 +40,7 @@ def random_rotation_3d(vectors, seed=None):
     """
 
     with NumpyRNGContext(seed):
-        ran_direction = normalized_vectors(np.random.random((3,)))*2.0 - 1.0
+        ran_direction = random_unit_vectors_3d(1)[0]
         ran_angle = np.random.random(size=1)*(np.pi)
 
     ran_rot = rotation_matrices_from_angles_3d(ran_angle, ran_direction)
