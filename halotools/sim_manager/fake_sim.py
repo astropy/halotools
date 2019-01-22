@@ -40,13 +40,13 @@ class FakeSim(UserSuppliedHaloCatalog):
         ----------
         num_massbins : int, optional
             Number of distinct masses that will appear in the halo catalog.
-            Default is 6.
+            Default is 10.
 
         num_halos_per_massbin : int, optional
-            Default is 1000
+            Default is 100
 
         num_ptcl : int, optional
-            Number of dark matter particles. Default is 1000.
+            Number of dark matter particles. Default is 20000.
 
         seed : int, optional
             Random number seed used to generate the fake halos and particles.
