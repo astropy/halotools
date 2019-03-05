@@ -64,16 +64,19 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
 
     ndim_rotm = np.shape(rotation_matrices)[-1]
     ndim_vec = np.shape(vectors)[-1]
-
     assert ndim_rotm==ndim_vec
+
+    if len(np.shape(vectors))==2:
+        ntps, ndim = np.shape(vectors)
+        nsets = 0
+    elif len(np.shape(vectors))==3:
+        nsets, ntps, ndim = np.shape(vectors)
 
     # apply same rotation matrix to all vectors
     if (len(np.shape(rotation_matrices)) == 2):
+        if nsets == 1:
+            vectors = vectors[0]
         return np.dot(rotation_matrices, vectors.T).T
-
-    # apply same rotation matrix to all vectors
-    if (np.shape(rotation_matrices)[0] == 1):
-        return np.dot(rotation_matrices[0], vectors.T).T
 
     # rotate each vector by associated rotation matrix
     else:
