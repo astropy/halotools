@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.ed_3d` function used to
-calculate the ellipticity-direction (ED) correlation functon
+Module containing the `~halotools.mock_observables.alignments.ed_3d_one_two_halo_decomp` function used to
+calculate the 1-halo and 2-halo contributions to the ellipticity-direction (ED) correlation functon.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -23,9 +23,11 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 
 def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
-                              sample2, sample2_host_halo_id,
-                              rbins,  weights1=None, weights2=None, period=None,
-                              num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+                              sample2, sample2_host_halo_id, rbins,
+                              weights1=None, weights2=None,
+                              mask1=None, mask2=None,
+                              period=None, num_threads=1,
+                              approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the one and two halo componenents of the 3-D ellipticity-direction
     correlation function (ED), :math:`\omega_{\rm 1h}(r)`, and :math:`\omega_{\rm 2h}(r)`.
@@ -44,23 +46,31 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
         these will be normalized if not already.
 
     sample1_host_halo_id : array_like
-        *len(sample1)* integer array of host halo ids.
+        Npts1 length integer array of host halo ids.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
 
     sample2_host_halo_id : array_like
-        *len(sample2)* integer array of host halo ids.
+        Npts2 length integer array of host halo ids.
 
     rbins : array_like
         array of boundaries defining the radial bins in which pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     weights1 : array_like, optional
-        Npts1 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts1).
+        Npts1 array of weights.  If this parameter is not specified, it is set to numpy.ones(Npts1).
 
     weights2 : array_like, optional
-        Npts2 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts2).
+        Npts2 array of weights.  If this parameter is not specified, it is set to numpy.ones(Npts2).
+
+    mask1 : array_like, optional
+        Npts1 boolean array indicating which galaxies in `sample1` contributes to the ED correlation function.
+        The default is np.array([True]*Npts1).
+
+    mask2 : array_lile, optional
+        Npts2 boolean array indicating which galaxies in `sample2` contributes to the ED correlation function.
+        The default is np.array([True]*Npts2).
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -93,9 +103,9 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
 
     Returns
     -------
-    correlation_function : numpy.array
-        *len(rbins)-1* length array containing the correlation function :math:`\omega(r)`
-        computed in each of the bins defined by input ``rbins``.
+    correlation_functions : numpy.array
+        Two *len(rbins)-1* length array containing the correlation function :math:`\omega_{1\rm h}(r)`
+        and :math:`\omega_{2\rm h}(r)` computed in each of the bins defined by input ``rbins``.
 
     Notes
     -----
@@ -135,10 +145,14 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
 
     >>> random_orientations = np.random.random((Npts,3))
 
+    And a set of random halo ids for each point
+
+    >>> halo_ids = np.random.randint(1, 10, Npts)
+
     We can the calculate the auto-ED correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
-    >>> result = ed_3d(sample1, random_orientations, sample1, rbins, period=Lbox)
+    >>> result = ed_3d_one_two_halo_decomp(sample1, random_orientations,  halo_ids, sample1, halo_ids, rbins, period=Lbox)
 
     """
 
@@ -158,9 +172,27 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
     N1 = len(sample1)
     N2 = len(sample2)
 
+    # process mask1
+    if mask1 is None:
+        mask1 = np.array([True]*N1)
+    else:
+        mask1 = np.atleast_1d(mask1).astype('bool')
+        if np.shape(mask1) != (N1,):
+            msg = ('`mask1` is not the correct shape.')
+            raise ValueError(msg)
+    
+    # process mask2
+    if mask2 is None:
+        mask2 = np.array([True]*N2)
+    else:
+        mask2 = np.atleast_1d(mask2).astype('bool')
+        if np.shape(mask2) != (N2,):
+            msg = ('`mask2` is not the correct shape.')
+            raise ValueError(msg)
+
     # process halo ids
     sample1_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype('int')
-    sample2_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype('int')
+    sample2_host_halo_id = np.atleast_1d(sample2_host_halo_id).astype('int')
     if np.shape(sample1_host_halo_id) != (N1,):
         msg = ('`sample1_host_halo_id` is not a 1D array of length ``len(samnple1)``.')
         raise ValueError(msg)
@@ -178,21 +210,21 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
     marks2[:,0] = weights2
     marks2[:,1] = sample2_host_halo_id
 
-    marked_counts_1h, counts = positional_marked_npairs_3d(sample1, sample2, rbins,
-                                period=period, weights1=marks1, weights2=marks2,
+    marked_counts_1h, counts = positional_marked_npairs_3d(sample1[mask1], sample2[mask2], rbins,
+                                period=period, weights1=marks1[mask1], weights2=marks2[mask2],
                                 weight_func_id=7, verbose=False, num_threads=num_threads,
                                 approx_cell1_size=approx_cell1_size,
                                 approx_cell2_size=approx_cell2_size)
     marked_counts_1h = np.diff(marked_counts_1h)
 
-    marked_counts_2h, counts = positional_marked_npairs_3d(sample1, sample2, rbins,
-                                period=period, weights1=marks1, weights2=marks2,
+    marked_counts_2h, counts = positional_marked_npairs_3d(sample1[mask1], sample2[mask2], rbins,
+                                period=period, weights1=marks1[mask1], weights2=marks2[mask2],
                                 weight_func_id=8, verbose=False, num_threads=num_threads,
                                 approx_cell1_size=approx_cell1_size,
                                 approx_cell2_size=approx_cell2_size)
     marked_counts_2h = np.diff(marked_counts_2h)
 
-    # if no weights, use fast un-weihgted pair counter
+    # if no weights, use fast un-weighted pair counter
     if np.all(weights1==1.0) & np.all(weights2==1.0):
         counts = npairs_3d(sample1, sample2, rbins,
                        period=period, verbose=False, num_threads=num_threads,
@@ -214,15 +246,15 @@ def ed_3d_one_two_halo_decomp(sample1, orientations1, sample1_host_halo_id,
     marks2[:,0] = sample2_host_halo_id
     marks2[:,1] = weights2
 
-    counts_1h = marked_npairs_3d(sample1, sample2, rbins,
-                       weights1=marks1, weights2=marks2, weight_func_id=3,
+    counts_1h = marked_npairs_3d(sample1[mask1], sample2[mask2], rbins,
+                       weights1=marks1[mask1], weights2=marks2[mask2], weight_func_id=3,
                        period=period, verbose=False, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
                        approx_cell2_size=approx_cell2_size)
     counts_1h = np.diff(counts_1h)
 
-    counts_2h = marked_npairs_3d(sample1, sample2, rbins,
-                       weights1=marks1, weights2=marks2, weight_func_id=4,
+    counts_2h = marked_npairs_3d(sample1[mask1], sample2[mask2], rbins,
+                       weights1=marks1[mask1], weights2=marks2[mask2], weight_func_id=4,
                        period=period, verbose=False, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
                        approx_cell2_size=approx_cell2_size)
