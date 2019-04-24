@@ -13,16 +13,15 @@ from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
     _cell1_parallelization_indices, _enclose_in_box, _enforce_maximum_search_length)
 
-from ...utils.array_utils import array_is_monotonic, custom_len
+from ...utils.array_utils import custom_len
 
 __author__ = ('Andrew Hearin', )
 
 __all__ = ('counts_in_cylinders', )
 
-
 def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         period=None, verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None):
+        approx_cell1_size=None, approx_cell2_size=None, return_indexes=False):
     """
     Function counts the number of points in ``sample2`` separated by a xy-distance
     *r* and z-distance *z* from each point in ``sample1``,
@@ -85,11 +84,20 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for
         ``approx_cell1_size`` for details.
 
+    return_indexes: bool, optional
+        If true, return both counts and the indexes of the pairs.
+
     Returns
     -------
     num_pairs : array_like
-        Numpy array of shape (Npts1, len(rbins)) storing the numbers of points
-        in ``sample2`` inside spheres surrounding each point in ``sample1``.
+        Numpy array of length Npts1 storing the numbers of points in ``sample2``
+        inside the cylinder surrounding each point in ``sample1``.
+
+    indexes : array_like, optional
+        If ``return_indexes`` is true, return a structured array of length
+        num_pairs with the indexes of the pairs. Column ``i1`` is the index in
+        ``sample1`` at the center of the cylinder and column ``i2`` is the index
+        in ``sample2`` that is contained in the cylinder.
 
     Examples
     --------
@@ -135,7 +143,8 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     # Process the inputs with the helper function
     result = _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius,
-            cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size,
+            return_indexes)
     x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length = result[0:8]
     period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[8:]
     xperiod, yperiod, zperiod = period
@@ -159,7 +168,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(counts_in_cylinders_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length)
+        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length, return_indexes)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -168,17 +177,26 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine, cell1_tuples)
-        counts = np.vstack(result)
         pool.close()
+        if return_indexes:
+            counts = np.sum([res[0] for res in result], axis=0)
+            indexes = np.concatenate([res[1] for res in result])
+        else:
+            counts = np.sum(result, axis=0)
     else:
         result = engine(cell1_tuples[0])
-        counts = np.vstack(result)
+        if return_indexes:
+            counts = result[0]
+            indexes = result[1]
+        else:
+            counts = result
 
-    return counts.flatten()
-
+    if return_indexes:
+        return counts, indexes
+    return counts
 
 def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period, verbose, num_threads, approx_cell1_size, approx_cell2_size):
+        period, verbose, num_threads, approx_cell1_size, approx_cell2_size, return_indexes):
     """
     """
     num_threads = get_num_threads(num_threads)
@@ -190,6 +208,12 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     x2 = sample2[:, 0]
     y2 = sample2[:, 1]
     z2 = sample2[:, 2]
+
+    if return_indexes and ((len(x1) > 2e32) or (len(x2) > 2e32)):
+        msg = ("Return indexes uses a uint32 and so can only handle inputs shorter than " +
+            "2e32 (~4 Billion). If you are affected by this please raise an Issue on " +
+            "https://github.com/astropy/halotools.\n")
+        raise ValueError(msg)
 
     proj_search_radius = np.atleast_1d(proj_search_radius).astype('f8')
     if len(proj_search_radius) == 1:

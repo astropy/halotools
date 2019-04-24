@@ -1,12 +1,15 @@
-""" Module containing the `~halotools.utils.crossmatch` function used to
+r""" Module containing the `~halotools.utils.crossmatch` function used to
 calculate indices providing the correspondence between two data tables
 sharing a common objectID.
 """
 import numpy as np
 
 
+__all__ = ('crossmatch', 'compute_richness')
+
+
 def crossmatch(x, y, skip_bounds_checking=False):
-    """
+    r"""
     Finds where the elements of ``x`` appear in the array ``y``, including repeats.
 
     The elements in x may be repeated, but the elements in y must be unique.
@@ -57,8 +60,8 @@ def crossmatch(x, y, skip_bounds_checking=False):
 
     Notes
     -----
-    The matching between ``x`` and ``y`` is done on the sorted arrays.  A consequence of 
-    this is that x[idx_x] and y[idx_y] will generally be a subset of ``x`` and ``y`` in 
+    The matching between ``x`` and ``y`` is done on the sorted arrays.  A consequence of
+    this is that x[idx_x] and y[idx_y] will generally be a subset of ``x`` and ``y`` in
     sorted order.
 
     Examples
@@ -172,3 +175,38 @@ def crossmatch(x, y, skip_bounds_checking=False):
 
     # Undo the original sorting and return the result
     return idx_x_sorted[idx_x], idx_y_sorted[idx_y]
+
+
+def compute_richness(unique_halo_ids, halo_id_of_galaxies):
+    r""" For every ID in unique_halo_ids,
+    calculate the number of times the ID appears in halo_id_of_galaxies.
+
+    Parameters
+    ----------
+    unique_halo_ids : ndarray
+        Numpy array of shape (num_halos, ) storing unique integers
+
+    halo_id_of_galaxies : ndarray
+        Numpy integer array of shape (num_halos, ) storing the host ID of each galaxy
+
+    Returns
+    -------
+    richness : ndarray
+        Numpy integer array of shape (num_halos, ) storing halo richness
+
+    Examples
+    --------
+    >>> num_hosts = 100
+    >>> num_sats = int(1e5)
+    >>> unique_halo_ids = np.arange(5, num_hosts + 5)
+    >>> halo_id_of_galaxies = np.random.randint(0, 5000, num_sats)
+    >>> richness = compute_richness(unique_halo_ids, halo_id_of_galaxies)
+    """
+    unique_halo_ids = np.atleast_1d(unique_halo_ids).astype(int)
+    halo_id_of_galaxies = np.atleast_1d(halo_id_of_galaxies).astype(int)
+    richness_result = np.zeros_like(unique_halo_ids).astype(int)
+
+    vals, counts = np.unique(halo_id_of_galaxies, return_counts=True)
+    idxA, idxB = crossmatch(vals, unique_halo_ids)
+    richness_result[idxB] = counts[idxA]
+    return richness_result

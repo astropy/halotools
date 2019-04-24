@@ -5,7 +5,7 @@ in all HOD-style models of the galaxy-halo connection.
 """
 
 import numpy as np
-from scipy.stats import poisson
+from scipy.special import pdtrik
 from astropy.extern import six
 from abc import ABCMeta
 from astropy.utils.misc import NumpyRNGContext
@@ -180,13 +180,11 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input table.
         """
-        # The scipy built-in Poisson number generator raises an exception
-        # if its input is zero, so here we impose a simple workaround
-        first_occupation_moment = np.where(first_occupation_moment <= 0,
-            model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
-
+        # We don't use the built-in Poisson number generator so that when a seed
+        # is specified, it preserves the ranks among rvs even when mean is changed.
         with NumpyRNGContext(seed):
-            result = poisson.rvs(first_occupation_moment)
+            result = np.ceil(pdtrik(np.random.rand(*first_occupation_moment.shape),
+                                    first_occupation_moment)).astype(np.int)
         if 'table' in kwargs:
             kwargs['table']['halo_num_'+self.gal_type] = result
         return result
