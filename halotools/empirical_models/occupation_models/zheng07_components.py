@@ -422,7 +422,9 @@ class Zheng07Sats(OccupationComponent):
         # If a central occupation model was passed to the constructor,
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.modulate_with_cenocc:
-            mean_ncen = self.central_occupation_model.mean_occupation(**kwargs)
+            # compatible with AB models
+            mean_ncen = getattr(self.central_occupation_model, "baseline_mean_occupation",\
+                                    self.central_occupation_model.mean_occupation)(**kwargs)
             mean_nsat *= mean_ncen
 
         return mean_nsat
