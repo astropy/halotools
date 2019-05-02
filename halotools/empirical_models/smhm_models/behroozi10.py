@@ -6,6 +6,7 @@ from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
 import numpy as np
+from warnings import warn
 
 from .smhm_helpers import safely_retrieve_redshift
 
@@ -207,6 +208,15 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         log_stellar_mass_table = np.linspace(8.5, 12.5, 100)
         log_halo_mass_table = self.mean_log_halo_mass(log_stellar_mass_table, redshift=redshift)
+
+        if not np.all(np.isfinite(log_halo_mass_table)):
+            msg = ("The value of the mean_stellar_mass function in the Behroozi+10 model \n"
+                "is calculated by numerically inverting results "
+                "from the mean_log_halo_mass function.\nThese lookup tables "
+                "have infinite-valued entries, which may lead to incorrect results.\n"
+                "This is likely caused by the values of one or more of the model parameters "
+                "being set to unphysically large/small values.")
+            warn(msg)
 
         interpol_func = model_helpers.custom_spline(log_halo_mass_table, log_stellar_mass_table)
 
