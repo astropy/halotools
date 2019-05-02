@@ -256,5 +256,21 @@ def test_counts_in_cylinders_with_indexes(num_threads):
         assert np.all(counts == brute_force_counts)
         assert len(indexes) > npts1 # assert that we have tested array resizing
 
+def test_counts_in_cylinders_single_index():
+    sample1 = np.random.random((1, 3))
+    sample2 = sample1
+    rp_max = np.zeros(1) + 0.2
+    pi_max = np.zeros(1) + 0.2
+    counts, indexes = counts_in_cylinders(sample1, sample2, rp_max, pi_max, return_indexes=True)
+    assert len(indexes) == 1 and counts == np.array([1])
+
+def test_counts_in_cylinders_indexes_no_match():
+    sample1 = np.random.random((1, 3))
+    sample2 = sample1 + 0.2
+    rp_max = np.zeros(1) + 0.02
+    pi_max = np.zeros(1) + 0.02
+    counts, indexes = counts_in_cylinders(sample1, sample2, rp_max, pi_max, return_indexes=True)
+    assert len(indexes) == 0 and counts == np.array([0])
+
 def _sort(indexes):
     return np.sort(indexes, order=["i1", "i2"])
