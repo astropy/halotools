@@ -202,7 +202,7 @@ class MonteCarloGalProf(object):
         # To do this, we first determine the index in the profile function table
         # where the relevant function object is stored:
         rad_prof_func_table_indices = (
-            self.rad_prof_func_table_indices[digitized_param_list]
+            self.rad_prof_func_table_indices[np.array(digitized_param_list, dtype='intp')]
             )
         # Now we have an array of indices for our functions, and we need to evaluate
         # the i^th function on the i^th element of rho.
@@ -519,7 +519,7 @@ class MonteCarloGalProf(object):
         # To do this, we first determine the index in the profile function table
         # where the relevant function object is stored:
         vel_prof_func_table_indices = (
-            self.rad_prof_func_table_indices[digitized_param_list]
+            self.rad_prof_func_table_indices[np.array(digitized_param_list, dtype='intp')]
             )
         # Now we have an array of indices for our functions, and we need to evaluate
         # the i^th function on the i^th element of rho.
