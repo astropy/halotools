@@ -276,12 +276,17 @@ class ModelFactory(object):
         :ref:`param_dict_mechanism`
         """
 
+        # do not pass self into the scope;
+        # assuming param_dict is not replaced during life cycle of self.
+        # passing `self` causes a cycle reference when
+        # the function is assigned as attributes of self.
+        __param_dict__ = self.param_dict
         def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
-            for key in list(self.param_dict.keys()):
+            for key in list(__param_dict__.keys()):
                 if key in component_model.param_dict:
-                    component_model.param_dict[key] = self.param_dict[key]
+                    component_model.param_dict[key] = __param_dict__[key]
 
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
