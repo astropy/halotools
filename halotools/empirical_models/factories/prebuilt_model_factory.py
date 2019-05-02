@@ -122,7 +122,7 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
             dictionary_retriever = sfr_models.smhm_binary_sfr_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
-            raise HalotoolsError(msg)
+            raise HalotoolsError(msg % model_nickname)
 
         result = dictionary_retriever(**constructor_kwargs)
         if type(result) is dict:
