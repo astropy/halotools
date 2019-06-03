@@ -7,8 +7,10 @@ cimport numpy as cnp
 cimport cython
 from libc.math cimport ceil, log
 
+from ....utils import unsorting_indices
+
 __author__ = ('Andrew Hearin', 'Johannes U. Lange')
-__all__ = ('weighted_npairs_xy_engine', )
+__all__ = ('mean_delta_sigma_engine', )
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -56,14 +58,20 @@ def mean_delta_sigma_engine(double_mesh, x1in, y1in, x2in, y2in, m2in, rp_bins, 
     cdef int PBCs = double_mesh._PBCs
 
     cdef int Ncell1 = double_mesh.mesh1.ncells
-    cdef int num_rp_bins = len(rp_bins)
-    cdef cnp.float64_t[:] delta_sigma = np.zeros(num_rp_bins - 1, dtype=np.float64)
+    cdef int num_rp_bins = len(rp_bins) - 1
 
-    cdef cnp.float64_t[:] x1 = np.ascontiguousarray(x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] y1 = np.ascontiguousarray(y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] x2 = np.ascontiguousarray(x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
-    cdef cnp.float64_t[:] m2 = np.ascontiguousarray(m2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] x1_sorted = np.ascontiguousarray(
+        x1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y1_sorted = np.ascontiguousarray(
+        y1in[double_mesh.mesh1.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] x2_sorted = np.ascontiguousarray(
+        x2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] y2_sorted = np.ascontiguousarray(
+        y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+    cdef cnp.float64_t[:] m2_sorted = np.ascontiguousarray(
+        m2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
+
+    cdef cnp.float64_t[:, :] delta_sigma = np.zeros((len(x1_sorted), num_rp_bins), dtype=np.float64)
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(double_mesh.mesh1.cell_id_indices, dtype=np.int64)
@@ -100,8 +108,8 @@ def mean_delta_sigma_engine(double_mesh, x1in, y1in, x2in, y2in, m2in, rp_bins, 
     for icell1 in range(first_cell1_element, last_cell1_element):
         ifirst1 = cell1_indices[icell1]
         ilast1 = cell1_indices[icell1+1]
-        x_icell1 = x1[ifirst1:ilast1]
-        y_icell1 = y1[ifirst1:ilast1]
+        x_icell1 = x1_sorted[ifirst1:ilast1]
+        y_icell1 = y1_sorted[ifirst1:ilast1]
 
         Ni = ilast1 - ifirst1
         if Ni > 0:
@@ -139,9 +147,9 @@ def mean_delta_sigma_engine(double_mesh, x1in, y1in, x2in, y2in, m2in, rp_bins, 
                     ifirst2 = cell2_indices[icell2]
                     ilast2 = cell2_indices[icell2+1]
 
-                    x_icell2 = x2[ifirst2:ilast2]
-                    y_icell2 = y2[ifirst2:ilast2]
-                    w_icell2 = m2[ifirst2:ilast2]
+                    x_icell2 = x2_sorted[ifirst2:ilast2]
+                    y_icell2 = y2_sorted[ifirst2:ilast2]
+                    w_icell2 = m2_sorted[ifirst2:ilast2]
 
                     Nj = ilast2 - ifirst2
                     #loop over points in cell1 points
@@ -158,27 +166,19 @@ def mean_delta_sigma_engine(double_mesh, x1in, y1in, x2in, y2in, m2in, rp_bins, 
 
                                 m2tmp = w_icell2[j]
 
-                                k = num_rp_bins-1
-                                while dxy_sq <= rp_bins_squared[k]:
-                                    if dxy_sq > rp_bins_squared[k-1]:
-                                      delta_sigma[k-1] -= m2tmp * (1 - log(rp_bins_squared[k] / dxy_sq))
+                                k = num_rp_bins - 1
+                                while dxy_sq <= rp_bins_squared[k + 1] and k >= 0:
+                                    if dxy_sq > rp_bins_squared[k]:
+                                      delta_sigma[ifirst1 + i, k] -= m2tmp * (1 - log(rp_bins_squared[k+1] / dxy_sq))
                                     else:
-                                      delta_sigma[k-1] += m2tmp * 2 * d_log_rp_bins[k-1]
-                                    k=k-1
-                                    if k<1: break
+                                      delta_sigma[ifirst1 + i, k] += m2tmp * 2 * d_log_rp_bins[k]
+                                    k -= 1
 
-    for k in range(num_rp_bins-1):
-        delta_sigma[k] /= np.pi * (rp_bins_squared[k+1] - rp_bins_squared[k])
+    for k in range(num_rp_bins):
+        for i in range(len(x1_sorted)):
+            delta_sigma[i, k] /= np.pi * (rp_bins_squared[k+1] - rp_bins_squared[k])
 
-    return np.array(delta_sigma)
-
-
-
-
-
-
-
-
-
-
-
+    # At this point, we have calculated our counts on the input arrays *after* sorting
+    # Since the order of counts matters in this calculation, we need to undo the sorting
+    idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
+    return np.array(delta_sigma)[idx_unsorted, :]

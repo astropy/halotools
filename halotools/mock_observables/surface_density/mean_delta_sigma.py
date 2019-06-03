@@ -25,7 +25,8 @@ __author__ = ('Andrew Hearin', 'Johannes Ulf Lange')
 
 def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
                      rp_bins, period=None, verbose=False, num_threads=1,
-                     approx_cell1_size=None, approx_cell2_size=None):
+                     approx_cell1_size=None, approx_cell2_size=None,
+                     per_object=False):
     r"""
     Calculate :math:`\Delta\Sigma(r_p)`, the galaxy-galaxy lensing signal
     as a function of projected distance.
@@ -237,13 +238,15 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
         result = pool.map(counting_engine, cell1_tuples)
-        total_delta_sigma = np.sum(np.array(result), axis=0)
+        delta_sigma = np.sum(np.array(result), axis=0)
         pool.close()
     else:
-        total_delta_sigma = counting_engine(cell1_tuples[0])
+        delta_sigma = counting_engine(cell1_tuples[0])
 
-    return np.array(total_delta_sigma / (len(x1in)))
-
+    if per_object:
+        return delta_sigma
+    else:
+        return np.mean(delta_sigma, axis=0)
 
 def _mean_delta_sigma_process_args(
         galaxies, particles, particle_masses, downsampling_factor, rp_bins,
