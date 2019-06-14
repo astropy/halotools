@@ -276,7 +276,7 @@ def rotation_matrices_from_angles(angles, directions):
 
 def rotation_matrices_from_vectors(v0, v1):
     r""" Calculate a collection of rotation matrices defined by the unique
-    transformation rotating v1 into v2 about the mutually perpendicular axis.
+    transformation rotating v0 into v1 about the mutually perpendicular axis.
 
     Parameters
     ----------
