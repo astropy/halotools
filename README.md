@@ -2,7 +2,7 @@
 
 This package contains functions to rotate collections of 2D and 3D vectors.
 
-Some of the functionality of this package is taken from the [Halotools](https://halotools.readthedocs.io/en/latest/) utilities sudmodule, and reproduced here for convenience.    
+Some of the functionality of this package is taken from the [Halotools](https://halotools.readthedocs.io/en/latest/) utilities sudmodule, reproduced here for convenience.    
 
 
 ## Description
@@ -35,6 +35,13 @@ or for 2- and 3-D specific functions,
 ```
 from rotations.rotations3d import rotation_matrices_from_vectors
 ``` 
+
+You can run the testing suite for this package using the [pytest](https://docs.pytest.org/en/latest/) framework by executing the following command in the package directory:
+
+```
+pytest
+```
+
 
 contact:
 duncanc@andrew.cmu.edu
