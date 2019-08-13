@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from astropy.extern.six.moves import xrange as range
+from six.moves import xrange as range
 from astropy.utils.misc import NumpyRNGContext
 
 from ..pair_counters import npairs_per_object_3d

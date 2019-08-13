@@ -7,7 +7,7 @@ from __future__ import absolute_import
 import numpy as np
 from multiprocessing import cpu_count
 from copy import copy
-from astropy.extern import six
+import six
 from abc import ABCMeta, abstractmethod
 from astropy.table import Table
 

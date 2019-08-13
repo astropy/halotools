@@ -21,7 +21,7 @@ except ImportError:
     raise HalotoolsError("Must have requests package installed to use the DownloadManager")
 
 import posixpath
-from astropy.extern.six.moves import urllib
+from six.moves import urllib
 
 import os
 import fnmatch

@@ -6,7 +6,7 @@ in all HOD-style models of the galaxy-halo connection.
 
 import numpy as np
 from scipy.special import pdtrik
-from astropy.extern import six
+import six
 from abc import ABCMeta
 from astropy.utils.misc import NumpyRNGContext
 

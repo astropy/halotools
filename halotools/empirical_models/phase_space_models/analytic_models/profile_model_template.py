@@ -6,7 +6,7 @@ within dark matter halos.
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
-from astropy.extern import six
+import six
 from abc import ABCMeta, abstractmethod
 from scipy.integrate import quad as quad_integration
 from scipy.optimize import minimize as scipy_minimize

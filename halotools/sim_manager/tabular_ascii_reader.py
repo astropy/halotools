@@ -10,7 +10,7 @@ import collections
 from time import time
 import numpy as np
 
-from astropy.extern.six.moves import xrange as range
+from six.moves import xrange as range
 
 from ..utils.python_string_comparisons import _passively_decode_string
 
