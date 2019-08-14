@@ -5,7 +5,7 @@ any composite model of the galaxy-halo connection.
 """
 
 import numpy as np
-from astropy.extern import six
+import six
 from abc import ABCMeta
 
 

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from time import time
 import sys
-from astropy.extern.six.moves import urllib
+from six.moves import urllib
 
 __all__ = ['file_len', 'download_file_from_url']
 

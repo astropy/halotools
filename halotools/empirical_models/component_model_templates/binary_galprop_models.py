@@ -5,7 +5,7 @@ used to map a binary-valued galaxy property to a halo catalog.
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
-from astropy.extern import six
+import six
 from abc import ABCMeta
 from astropy.utils.misc import NumpyRNGContext
 
