@@ -15,12 +15,18 @@ def pure_python_idx_in_cylinders(
     else:
         xperiod, yperiod, zperiod = period, period, period
 
+    autocorr = False
+    if sample2 is None:
+        sample2, autocorr = sample1, True
+
     npts1, npts2 = len(sample1), len(sample2)
 
     indexes = []
 
     for i in range(npts1):
         for j in range(npts2):
+            if i == j and autocorr:
+                continue
             if _point_within_cylinder(sample1[i], sample2[j], rp_max[i], pi_max[i], xperiod, yperiod, zperiod):
                 indexes.append((i, j))
 
@@ -40,12 +46,18 @@ def pure_python_counts_in_cylinders(
     else:
         xperiod, yperiod, zperiod = period, period, period
 
+    autocorr = False
+    if sample2 is None:
+        sample2, autocorr = sample1, True
+
     npts1, npts2 = len(sample1), len(sample2)
 
     counts = np.zeros(npts1, dtype=int)
 
     for i in range(npts1):
         for j in range(npts2):
+            if i == j and autocorr:
+                continue
             if _point_within_cylinder(sample1[i], sample2[j], rp_max[i], pi_max[i], xperiod, yperiod, zperiod):
                 counts[i] += 1
     return counts
