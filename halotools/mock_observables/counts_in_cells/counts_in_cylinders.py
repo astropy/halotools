@@ -38,8 +38,9 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         format accepted by the ``sample1`` and ``sample2`` arguments.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points.
+    sample2 : array_like
+        Npts2 x 3 array containing 3-D positions of points. If this is None, an
+        autocorrelation on sample1 will be done instead.
 
     proj_search_radius : array_like
         Length-Npts1 array defining the xy-distance around each point in ``sample1``
@@ -146,7 +147,7 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
             cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size,
             return_indexes)
     x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length = result[0:8]
-    period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[8:]
+    period, num_threads, PBCs, approx_cell1_size, approx_cell2_size, autocorr = result[8:]
     xperiod, yperiod, zperiod = period
 
     rp_max = np.max(proj_search_radius)
@@ -191,6 +192,12 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         else:
             counts = result
 
+    # All pairs will match with themselves. We don't want this if we are doing an autocorr
+    if autocorr:
+        counts -= 1
+        if return_indexes:
+            indexes = indexes[indexes["i1"] != indexes["i2"]]
+
     if return_indexes:
         return counts, indexes
     return counts
@@ -200,6 +207,10 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     """
     """
     num_threads = get_num_threads(num_threads)
+
+    autocorr = False
+    if sample2 is None:
+        sample2, autocorr = sample1, True
 
     # Passively enforce that we are working with ndarrays
     x1 = sample1[:, 0]
@@ -274,4 +285,4 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
 
     return (x1, y1, z1, x2, y2, z2,
         proj_search_radius, cylinder_half_length, period, num_threads, PBCs,
-        approx_cell1_size, approx_cell2_size)
+        approx_cell1_size, approx_cell2_size, autocorr)
