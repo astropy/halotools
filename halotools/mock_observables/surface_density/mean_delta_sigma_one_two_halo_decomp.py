@@ -31,18 +31,8 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
             per_object=False):
     r"""
     Calculate :math:`\Delta\Sigma(r_p)`, the galaxy-galaxy lensing signal
-    as a function of projected distance.
-
-    The `delta_sigma` function calculates :math:`\Delta\Sigma(r_p)` by calculating
-    the excess surface density of particles in cylinders surrounding the input galaxies.
-    The input particles should be a random downsampling of particles in the
-    same simulation snapshot as the model galaxies.
-
-    By using the ``particle_masses`` argument, the function works equally well
-    with DM-only simulations as with hydro simulations that include
-    particles of variable mass.
-
-    Example calls to this function appear in the documentation below.
+    as a function of projected distance, decomposing the signal into
+    1-halo and 2-halo contributions.
 
     See also :ref:`galaxy_catalog_analysis_tutorial3`.
 
@@ -91,6 +81,27 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
 
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
+    halo_radii : ndarray, optional
+        Numpy array of shape (num_gal, ) storing the radius associated with each galaxy
+        If halo_radii is not passed, then galaxy_halo_ids and particle_halo_ids
+        must both be passed
+
+    galaxy_halo_ids : ndarray, optional
+        Numpy array of shape (num_gal, ) storing the halo ID associated with each galaxy
+        If galaxy_halo_ids is not passed, then particle_halo_ids must also be passed,
+        and halo_radii should not be passed
+
+    particle_halo_ids : ndarray, optional
+        Numpy array of shape (num_ptcl, ) storing the halo ID associated with each particle
+        If particle_halo_ids is not passed, then galaxy_halo_ids must also be passed,
+        and halo_radii should not be passed
+
+    per_object : bool, optional
+        Boolean flag specifying whether the function will return the per-object
+        lensing signal. Default is False, in which the returned array will be
+        an average over the entire sample. If True, the returned ndarray will
+        have shape (num_gal, num_rbins)
+
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
         using the python ``multiprocessing`` module. Default is 1 for a purely serial
@@ -114,9 +125,19 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
 
     Returns
     -------
-    Delta_Sigma : array_like
-        Numpy array of shape (num_rbins-1, ) storing :math:`\Delta\Sigma(r_p)`
-        in comoving units of :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1.
+    Delta_Sigma_1h : array_like
+        Numpy array of shape (num_rbins-1, ) storing the 1-halo-term contribution
+        to :math:`\Delta\Sigma(r_p)`. Result is provided in comoving units of
+        :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1.
+
+        If per_object is True, Delta_Sigma_1h will instead have shape (num_gal, num_rbins)
+
+    Delta_Sigma_2h : array_like
+        Numpy array of shape (num_rbins-1, ) storing the 2-halo-term contribution
+        to :math:`\Delta\Sigma(r_p)`. Result is provided in comoving units of
+        :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1.
+
+        If per_object is True, Delta_Sigma_2h will instead have shape (num_gal, num_rbins)
 
     Examples
     --------

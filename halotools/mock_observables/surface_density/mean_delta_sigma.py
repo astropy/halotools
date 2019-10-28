@@ -89,6 +89,12 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
+    per_object : bool, optional
+        Boolean flag specifying whether the function will return the per-object
+        lensing signal. Default is False, in which the returned array will be
+        an average over the entire sample. If True, the returned ndarray will
+        have shape (num_gal, num_rbins)
+
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
         using the python ``multiprocessing`` module. Default is 1 for a purely serial
@@ -115,6 +121,8 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     Delta_Sigma : array_like
         Numpy array of shape (num_rbins-1, ) storing :math:`\Delta\Sigma(r_p)`
         in comoving units of :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1.
+
+        If per_object is True, Delta_Sigma will instead have shape (num_gal, num_rbins)
 
     Examples
     --------
