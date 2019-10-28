@@ -5,6 +5,7 @@ calculate galaxy-galaxy lensing.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+from warnings import warn
 
 from .surface_density_helpers import annular_area_weighted_midpoints
 from .surface_density_helpers import log_interpolation_with_inner_zero_masking as log_interp
@@ -202,6 +203,8 @@ def delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     :ref:`galaxy_catalog_analysis_tutorial3`
 
     """
+    warn("The delta_sigma function has been replaced by mean_delta_sigma"
+            " and will be deleted after v0.7", DeprecationWarning)
 
     #  Perform bounds-checking and error-handling in private helper functions
     args = (galaxies, particles, particle_masses, downsampling_factor,
