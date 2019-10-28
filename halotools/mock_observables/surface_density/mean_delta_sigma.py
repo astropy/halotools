@@ -17,7 +17,7 @@ from ..pair_counters.mesh_helpers import _set_approximate_2d_cell_sizes
 from ..pair_counters.mesh_helpers import _cell1_parallelization_indices
 from ..pair_counters.mesh_helpers import _enclose_in_square
 
-from ...utils.array_utils import array_is_monotonic, custom_len
+from ...utils.array_utils import custom_len
 
 __all__ = ('mean_delta_sigma', )
 __author__ = ('Andrew Hearin', 'Johannes Ulf Lange')
