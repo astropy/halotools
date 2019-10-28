@@ -129,6 +129,29 @@ def test_delta_sigma_consistency2():
     assert np.allclose(ds1, np.mean(ds2, axis=0))
 
 
+def test_delta_sigma_consistency3():
+    """Enforce agreement between PBC and no-PBC when all points are at the
+    center of the box.
+    """
+    num_centers, num_ptcl = 100, 500
+    with NumpyRNGContext(fixed_seed):
+        centers = np.random.uniform(0.499, 0.501, size=(num_centers, 3))
+        particles = np.random.random((num_ptcl, 3))
+
+    particle_masses = np.ones(num_ptcl)
+    downsampling_factor = 1
+
+    rp_bins = np.linspace(0.1, 0.3, 5)
+    Lbox = 1.
+
+    ds0 = mean_delta_sigma(centers, particles, particle_masses,
+        downsampling_factor, rp_bins, period=Lbox)
+    ds1 = mean_delta_sigma(centers, particles, particle_masses,
+        downsampling_factor, rp_bins, period=None)
+
+    assert np.allclose(ds0, ds1)
+
+
 def test_delta_sigma_raises_exceptions1():
     num_centers, num_ptcl = 100, 500
     with NumpyRNGContext(fixed_seed):
