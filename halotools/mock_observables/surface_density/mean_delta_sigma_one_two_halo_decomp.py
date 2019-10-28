@@ -8,7 +8,7 @@ import numpy as np
 from functools import partial
 import multiprocessing
 
-from .engines import mean_ds_12h_halo_id_engine
+from .engines import mean_ds_12h_halo_id_engine, mean_ds_12h_rhalo_engine
 
 from ..mock_observables_helpers import (get_num_threads, get_separation_bins_array,
     get_period, enforce_sample_respects_pbcs, enforce_sample_has_correct_shape)
@@ -180,6 +180,9 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
     >>> particle_halo_ids = np.random.randint(0, len(galaxies), len(particles))
     >>> ds_1h, ds_2h = mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period, galaxy_halo_ids=galaxy_halo_ids, particle_halo_ids=particle_halo_ids)
 
+    >>> halo_radii = np.random.uniform(0, 0.1, len(galaxies))
+    >>> ds_1h, ds_2h = mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period, halo_radii=halo_radii)
+
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
     the `delta_sigma` functions are in *comoving* units of
     :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1,
@@ -208,13 +211,15 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
     """
     # Process the inputs with the helper function
     result = _mean_delta_sigma_process_args(
-        galaxies, particles, particle_masses, galaxy_halo_ids, particle_halo_ids,
+        galaxies, particles, particle_masses, halo_radii, galaxy_halo_ids, particle_halo_ids,
         downsampling_factor, rp_bins,
         period, num_threads, approx_cell1_size, approx_cell2_size)
-    x1in, y1in, x2in, y2in, w2in = result[0:5]
-    (galaxy_halo_ids, particle_halo_ids, rp_bins, period,
-            num_threads, PBCs, approx_cell1_size, approx_cell2_size) = result[5:]
-    xperiod, yperiod = period[:2]
+
+    x1in, y1in, z1in, x2in, y2in, z2in, w2in = result[0:7]
+    halo_radii, galaxy_halo_ids, particle_halo_ids, rp_bins, period = result[7:12]
+    num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[12:]
+
+    xperiod, yperiod, zperiod = period
 
     rp_max = np.max(rp_bins)
     search_xlength, search_ylength = rp_max, rp_max
@@ -232,10 +237,12 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
         approx_x2cell_size, approx_y2cell_size,
         search_xlength, search_ylength, xperiod, yperiod, PBCs)
 
-    # Create a function object that has a single argument, for parallelization
-    # purposes
-    counting_engine = partial(mean_ds_12h_halo_id_engine, double_mesh, x1in, y1in,
-                galaxy_halo_ids, x2in, y2in, w2in, particle_halo_ids, rp_bins)
+    if halo_radii is None:
+        counting_engine = partial(mean_ds_12h_halo_id_engine, double_mesh, x1in, y1in,
+                    galaxy_halo_ids, x2in, y2in, w2in, particle_halo_ids, rp_bins)
+    else:
+        counting_engine = partial(mean_ds_12h_rhalo_engine, double_mesh, zperiod, x1in, y1in, z1in, halo_radii,
+                    x2in, y2in, z2in, w2in, rp_bins)
 
     # # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -257,12 +264,9 @@ def mean_delta_sigma_one_two_halo_decomp(galaxies, particles, particle_masses,
 
 
 def _mean_delta_sigma_process_args(
-        galaxies, particles, particle_masses, galaxy_halo_ids, particle_halo_ids,
+        galaxies, particles, particle_masses, halo_radii, galaxy_halo_ids, particle_halo_ids,
         downsampling_factor, rp_bins,
         period, num_threads, approx_cell1_size, approx_cell2_size):
-
-    galaxy_halo_ids = np.atleast_1d(galaxy_halo_ids).astype('i8')
-    particle_halo_ids = np.atleast_1d(particle_halo_ids).astype('i8')
 
     period, PBCs = get_period(period)
     if PBCs is False:
@@ -298,17 +302,44 @@ def _mean_delta_sigma_process_args(
 
     x1 = galaxies[:, 0]
     y1 = galaxies[:, 1]
+    z1 = galaxies[:, 2]
     x2 = particles[:, 0]
     y2 = particles[:, 1]
+    z2 = particles[:, 2]
+
+    if halo_radii is None:
+        try:
+            galaxy_halo_ids = np.atleast_1d(galaxy_halo_ids).astype('i8')
+            particle_halo_ids = np.atleast_1d(particle_halo_ids).astype('i8')
+            assert galaxy_halo_ids.shape[0] == x1.shape[0]
+        except (TypeError, ValueError):
+            msg = "If halo_radii argument is None, must pass both galaxy_halo_ids and particle_halo_ids"
+            raise ValueError(msg)
+        except AssertionError:
+            msg = "Input galaxy_halo_ids must have length as input galaxies"
+            raise ValueError(msg)
+    elif (galaxy_halo_ids is None) and (particle_halo_ids is None):
+        try:
+            halo_radii = np.atleast_1d(halo_radii).astype('f8')
+            assert halo_radii.shape[0] == x1.shape[0]
+        except (TypeError, ValueError):
+            msg = "If galaxy_halo_ids is None, must pass halo_radii"
+            raise ValueError(msg)
+        except AssertionError:
+            msg = "Input halo_radii must have length as input galaxies"
+            raise ValueError(msg)
+    else:
+        msg = "Must either pass halo_radii, or alternatively must pass both galaxy_halo_ids and particle_halo_ids"
+        raise ValueError(msg)
 
     rp_bins = get_separation_bins_array(rp_bins)
     rp_max = np.max(rp_bins)
 
-    if period is None:
-        PBCs = False
-        x1, y1, x2, y2, period = (
-            _enclose_in_square(x1, y1, x2, y2,
-                               min_size=[rp_max*3.0, rp_max*3.0]))
+    # if period is None:
+    #     PBCs = False
+    #     x1, y1, x2, y2, period = (
+    #         _enclose_in_square(x1, y1, x2, y2,
+    #                            min_size=[rp_max*3.0, rp_max*3.0]))
 
     num_threads = get_num_threads(num_threads, enforce_max_cores=False)
 
@@ -321,8 +352,8 @@ def _mean_delta_sigma_process_args(
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size]
 
-    return (x1, y1, x2, y2, particle_masses * downsampling_factor,
-            galaxy_halo_ids, particle_halo_ids, rp_bins,
+    return (x1, y1, z1, x2, y2, z2, particle_masses * downsampling_factor,
+            halo_radii, galaxy_halo_ids, particle_halo_ids, rp_bins,
             period, num_threads, PBCs, approx_cell1_size, approx_cell2_size)
 
 
