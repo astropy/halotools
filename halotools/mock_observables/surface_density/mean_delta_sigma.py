@@ -254,6 +254,17 @@ def _mean_delta_sigma_process_args(
         period, num_threads, approx_cell1_size, approx_cell2_size):
 
     period, PBCs = get_period(period)
+    if PBCs is False:
+        _result = _enclose_in_box(
+                galaxies[:, 0], galaxies[:, 1], galaxies[:, 2],
+                particles[:, 0], particles[:, 1], particles[:, 2])
+        _x1, _y1, _z1, _x2, _y2, _z2, period = _result
+        galaxies[:, 0] = _x1
+        galaxies[:, 1] = _y1
+        galaxies[:, 2] = _z1
+        particles[:, 0] = _x2
+        particles[:, 1] = _y2
+        particles[:, 2] = _z2
 
     galaxies = enforce_sample_has_correct_shape(galaxies)
     particles = enforce_sample_has_correct_shape(particles)
@@ -301,3 +312,53 @@ def _mean_delta_sigma_process_args(
 
     return (x1, y1, x2, y2, particle_masses * downsampling_factor, rp_bins,
             period, num_threads, PBCs, approx_cell1_size, approx_cell2_size)
+
+
+def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
+    """
+    Build box which encloses all points, shifting the points so that
+    the "leftmost" point is (0,0,0).
+
+    Parameters
+    ----------
+    x1,y1,z1 : array_like
+        cartesian positions of points
+
+    x2,y2,z2 : array_like
+        cartesian positions of points
+
+    min_size : array_like
+        minimum lengths of a side of the box.  If the minimum box constructed around the
+        points has a side i less than ``min_size[i]``, then the box is padded in order to
+        obtain the minimum specified size.
+
+    Returns
+    -------
+    x1, y1, z1, x2, y2, z2, Lbox
+        shifted positions and box size.
+    """
+    xmin = np.min([np.min(x1), np.min(x2)])
+    ymin = np.min([np.min(y1), np.min(y2)])
+    zmin = np.min([np.min(z1), np.min(z2)])
+    xmax = np.max([np.max(x1), np.max(x2)])
+    ymax = np.max([np.max(y1), np.max(y2)])
+    zmax = np.max([np.max(z1), np.max(z2)])
+
+    xyzmin = np.min([xmin, ymin, zmin])
+    xyzmax = np.max([xmax, ymax, zmax])-xyzmin
+
+    x1 = x1 - xyzmin
+    y1 = y1 - xyzmin
+    z1 = z1 - xyzmin
+    x2 = x2 - xyzmin
+    y2 = y2 - xyzmin
+    z2 = z2 - xyzmin
+
+    Lbox = np.array([xyzmax, xyzmax, xyzmax])
+
+    if min_size is not None:
+        min_size = np.atleast_1d(min_size)
+        if np.any(Lbox < min_size):
+            Lbox[(Lbox < min_size)] = min_size[(Lbox < min_size)]
+
+    return x1, y1, z1, x2, y2, z2, Lbox
