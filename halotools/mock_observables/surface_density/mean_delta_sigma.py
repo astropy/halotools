@@ -174,7 +174,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     >>> rp_bins = np.logspace(-1, 1, 10)
     >>> period = model.mock.Lbox
-    >>> rp_mids, ds = delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
+    >>> ds = mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
 
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
     the `delta_sigma` functions are in *comoving* units of
@@ -247,6 +247,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
         return delta_sigma
     else:
         return np.mean(delta_sigma, axis=0)
+
 
 def _mean_delta_sigma_process_args(
         galaxies, particles, particle_masses, downsampling_factor, rp_bins,
