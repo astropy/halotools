@@ -152,6 +152,8 @@ def npairs_3d(sample1, sample2, rbins, period=None,
 
 def _npairs_3d_process_args(sample1, sample2, rbins, period,
         num_threads, approx_cell1_size, approx_cell2_size):
+    """
+    """
     if num_threads is not 1:
         if num_threads == 'max':
             num_threads = multiprocessing.cpu_count()
