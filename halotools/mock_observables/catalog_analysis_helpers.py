@@ -131,7 +131,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
         galaxy positions under the distant-observer approximation.
         Default is no distortions.
 
-    cosmology : object, optional
+    cosmology : astropy.cosmology.Cosmology, optional
         Cosmology to assume when applying redshift-space distortions,
         e.g., the cosmology of the simulation.
         Default is set in `sim_manager.sim_defaults`.
@@ -264,7 +264,7 @@ def apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lb
         redshift of the snapshot. If using a lightcone, this argument is the
         redshift of each point.
 
-    cosmology : object
+    cosmology : astropy.cosmology.Cosmology
         Cosmology to assume when applying redshift-space distortions,
         e.g., the cosmology of the simulation.
 
@@ -308,9 +308,9 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
 
     Nsub : array_like
         Length-3 numpy array of integers indicating how many times to split the volume
-        along each dimension.  If single integer, N, is supplied, ``Nsub`` is set to
+        along each dimension.  If a single integer, N, is supplied, ``Nsub`` is set to
         [N,N,N], and the volume is split along each dimension N times.  The total number
-        of subvolumes is then given by numpy.prod(Nsub).
+        of subvolumes is given by numpy.prod(Nsub).
 
     Lbox : array_like
         Length-3 numpy array definging the lengths of the sides of the cubical volume
@@ -320,7 +320,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     Returns
     -------
     labels : numpy.array
-        numpy array with integer labels in the range [1,numpy.prod(Nsub)] indicating
+        (Npts, ) numpy array with integer labels in the range [1,numpy.prod(Nsub)] indicating
         the subvolume each point in ``sample`` occupies.
 
     N_sub_vol : int

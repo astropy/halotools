@@ -143,6 +143,7 @@ def get_separation_bins_array(separation_bins):
     try:
         assert separation_bins.ndim == 1
         assert len(separation_bins) > 1
+        # cbx_aph: There are lots of places like this where we never check that the array is increasing if it has 2 elements. The reason for this is that array_is_monotonic requires 3 elements. This could easily be fixed because I think we could allow 2 elements arrays to array_is_monotonic - it would always be monotonic but we would know whether it was increasing or decreasing
         if len(separation_bins) > 2:
             assert array_is_monotonic(separation_bins, strict=True) == 1
         assert np.all(separation_bins > 0)

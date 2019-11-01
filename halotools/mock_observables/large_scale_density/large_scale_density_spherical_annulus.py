@@ -75,7 +75,7 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
         will be apportioned into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use Lbox/10 in each dimension,
-        which will return reasonable result performance for most use-cases.
+        which will return reasonable performance for most use-cases.
         Performance can vary sensitively with this parameter, so it is highly
         recommended that you experiment with this parameter when carrying out
         performance-critical calculations.
@@ -88,7 +88,7 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
     Returns
     --------
     number_density : array_like
-        Length-Npts array of number densities
+        Length-Npts1 array of number densities
 
     Examples
     ---------
@@ -105,9 +105,9 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
             period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = npairs_per_object_3d(sample, tracers, rbins, period=period,
+    result = npairs_per_object_3d(sample, tracers, rbins, period=period,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size)
-    result = np.diff(_, axis=1)
+    result = np.diff(result, axis=1)
 
     environment_volume = (4/3.)*np.pi*(outer_radius**3 - inner_radius**3)
     number_density = result/environment_volume

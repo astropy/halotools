@@ -17,7 +17,7 @@ __all__ = ('npairs_per_object_3d', )
 
 
 def npairs_per_object_3d(sample1, sample2, rbins, period=None,
-        verbose=False, num_threads=1,
+        num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of points in ``sample2`` separated by a distance
@@ -47,9 +47,6 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
         be a periodic cube (by far the most common case).
         If period is set to None, the default option,
         PBCs are set to infinity.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -105,7 +102,7 @@ def npairs_per_object_3d(sample1, sample2, rbins, period=None,
 
     # Process the inputs with the helper function
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period

@@ -60,7 +60,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         If a single float is given, ``rp_max`` is assumed to be the same for each galaxy in
         ``sample1``. Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    pi_max : float
+    pi_max : array_like
         half the length of cylinders to search for neighbors around galaxies in ``sample1``.
         If a single float is given, ``pi_max`` is assumed to be the same for each galaxy in
         ``sample1``. Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
@@ -105,7 +105,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use ``rp_max``/10 in the xy-dimensions
         and ``pi_max``/10 in the z-dimension,
-        which will return reasonable result performance for most use-cases.
+        which will return reasonable performance for most use-cases.
         Performance can vary sensitively with this parameter, so it is highly
         recommended that you experiment with this parameter when carrying out
         performance-critical calculations.
@@ -117,7 +117,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
     Returns
     -------
     is_isolated : numpy.array
-        array of booleans indicating if each point in `sample1` is isolated.
+        (Npts1, ) array of booleans indicating if each point in `sample1` is isolated.
 
     Notes
     -----

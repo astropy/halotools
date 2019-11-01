@@ -19,7 +19,7 @@ __all__ = ('velocity_marked_npairs_3d', )
 
 def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         weights1=None, weights2=None,
-        weight_func_id=1, verbose=False, num_threads=1,
+        weight_func_id=1, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     """
     Calculate the number of velocity weighted pairs with separations greater than or equal to r, :math:`W(>r)`.
@@ -67,9 +67,6 @@ def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         velocity weighting function integer ID. Each weighting function requires a specific
         number of weights per point, *N_weights*.  See the Notes for a description of
         available weighting functions.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -140,7 +137,7 @@ def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
     """
 
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period

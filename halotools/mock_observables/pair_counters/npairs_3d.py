@@ -18,8 +18,7 @@ __all__ = ('npairs_3d', )
 
 
 def npairs_3d(sample1, sample2, rbins, period=None,
-        verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points separated by
     a three-dimensional distance smaller than the input ``rbins``.
@@ -56,9 +55,6 @@ def npairs_3d(sample1, sample2, rbins, period=None,
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
 
-    verbose : Boolean, optional
-        If True, print out information and progress.
-
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
         using the python ``multiprocessing`` module. Default is 1 for a purely serial
@@ -71,7 +67,7 @@ def npairs_3d(sample1, sample2, rbins, period=None,
         will be apportioned into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use Lbox/10 in each dimension,
-        which will return reasonable result performance for most use-cases.
+        which will return reasonable performance for most use-cases.
         Performance can vary sensitively with this parameter, so it is highly
         recommended that you experiment with this parameter when carrying out
         performance-critical calculations.
@@ -82,7 +78,7 @@ def npairs_3d(sample1, sample2, rbins, period=None,
 
     Returns
     -------
-    num_pairs : array_like
+    num_pairs : numpy.array
         Numpy array of length len(rbins) storing the numbers of pairs in the input bins.
 
     Examples
@@ -114,7 +110,7 @@ def npairs_3d(sample1, sample2, rbins, period=None,
 
     # Process the inputs with the helper function
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
@@ -155,9 +151,7 @@ def npairs_3d(sample1, sample2, rbins, period=None,
 
 
 def _npairs_3d_process_args(sample1, sample2, rbins, period,
-        verbose, num_threads, approx_cell1_size, approx_cell2_size):
-    """
-    """
+        num_threads, approx_cell1_size, approx_cell2_size):
     if num_threads is not 1:
         if num_threads == 'max':
             num_threads = multiprocessing.cpu_count()

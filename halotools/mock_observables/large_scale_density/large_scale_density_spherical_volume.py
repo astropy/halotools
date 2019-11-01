@@ -18,6 +18,7 @@ __author__ = ('Andrew Hearin', )
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
+# cbx: I think all the code here could pretty easily be replaced with that of `large_scale_density_spherical_annulus`
 def large_scale_density_spherical_volume(sample, tracers, radius,
         period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
         norm_by_mean_density=False):
@@ -74,7 +75,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
         will be apportioned into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use Lbox/10 in each dimension,
-        which will return reasonable result performance for most use-cases.
+        which will return reasonable performance for most use-cases.
         Performance can vary sensitively with this parameter, so it is highly
         recommended that you experiment with this parameter when carrying out
         performance-critical calculations.
@@ -87,7 +88,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
     Returns
     --------
     number_density : array_like
-        Length-Npts array of number densities
+        Length-Npts1 array of number densities
 
     Examples
     ---------
@@ -103,9 +104,8 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
             sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = npairs_per_object_3d(sample, tracers, rbins, period=period,
-        num_threads=num_threads, approx_cell1_size=approx_cell1_size)
-    result = _[:, 0]
+    result = npairs_per_object_3d(sample, tracers, rbins, period=period,
+        num_threads=num_threads, approx_cell1_size=approx_cell1_size)[:, 0]
 
     environment_volume = (4/3.)*np.pi*radius**3
     number_density = result/environment_volume
@@ -123,8 +123,8 @@ def _large_scale_density_spherical_volume_process_args(
     """
     sample = np.atleast_1d(sample)
     tracers = np.atleast_1d(tracers)
-    _ = np.atleast_1d(radius).astype(float)
-    rbins = np.append(_, _[0]+0.0001)
+    rbins = np.atleast_1d(radius).astype(float)
+    rbins = np.append(rbins, rbins[0]+0.0001)
 
     if period is None:
         if sample_volume is None:
