@@ -26,6 +26,7 @@ Getting Started
    quickstart_and_tutorials/index
    function_usage/index
    source_notes/index
+   quickstart_and_tutorials/development/index
 
 ***********
 What's New?
