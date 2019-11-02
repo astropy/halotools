@@ -47,4 +47,3 @@ You can see the built documentation in ``docs/_build/html/``. The easiest way to
    python3 -m http.server
 
 The docs should then be viewable at ``localhost:8000`` (the port will be logged when you start the server).
-

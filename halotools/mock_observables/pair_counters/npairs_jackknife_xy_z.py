@@ -22,7 +22,7 @@ __all__ = ('npairs_jackknife_xy_z', )
 
 def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
         period=None, weights1=None, weights2=None,
-        jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1,
+        jtags1=None, jtags2=None, N_samples=0, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Pair counter used to make jackknife error estimates of redshift-space pair counter
@@ -76,9 +76,6 @@ def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
     N_samples : int, optional
         Total number of jackknife samples. All values of ``jtags1`` and ``jtags2``
         should be in the range [1, N_samples].
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -155,7 +152,7 @@ def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
     """
     # Process the inputs with the helper function
     result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period

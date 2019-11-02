@@ -17,8 +17,7 @@ __all__ = ('npairs_per_object_3d', )
 
 
 def npairs_per_object_3d(sample1, sample2, rbins, period=None,
-        num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of points in ``sample2`` separated by a distance
     ``r`` from each point in ``sample1``, where ``r`` is defined by the input ``rbins``.

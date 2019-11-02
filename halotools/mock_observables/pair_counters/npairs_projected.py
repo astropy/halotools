@@ -18,8 +18,7 @@ __all__ = ('npairs_projected', )
 
 
 def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
-        verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points with separation in the xy-plane
     less than the input ``rp_bins`` and separation in the z-dimension less than
@@ -61,9 +60,6 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -121,7 +117,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
 
     # Process the inputs with the helper function
     result = _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_max, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
@@ -162,7 +158,7 @@ def npairs_projected(sample1, sample2, rp_bins, pi_max, period=None,
 
 
 def _npairs_projected_process_args(sample1, sample2, rp_bins, pi_max, period,
-        verbose, num_threads, approx_cell1_size, approx_cell2_size):
+        num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
     if num_threads is not 1:

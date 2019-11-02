@@ -21,7 +21,7 @@ __all__ = ('weighted_npairs_xy', )
 
 
 def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
-        period=None, verbose=False, num_threads=1,
+        period=None, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function counts the total mass of ``sample2`` enclosed within
@@ -111,8 +111,7 @@ def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
     """
     # Process the inputs with the helper function
     result = _weighted_npairs_xy_process_args(sample1, sample2, sample2_mass,
-            rp_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            rp_bins, period, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, x2in, y2in, w2in = result[0:5]
     rp_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[5:]
     xperiod, yperiod = period
@@ -153,7 +152,7 @@ def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
 
 
 def _weighted_npairs_xy_process_args(sample1, sample2, w2, rp_bins, period,
-        verbose, num_threads, approx_cell1_size, approx_cell2_size):
+        num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
     if num_threads is not 1:

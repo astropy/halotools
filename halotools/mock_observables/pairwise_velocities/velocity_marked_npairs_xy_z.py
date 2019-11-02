@@ -6,8 +6,7 @@ from functools import partial
 from ..pair_counters.npairs_xy_z import _npairs_xy_z_process_args
 from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
-from .velocity_marked_npairs_3d import (
-    _func_signature_int_from_vel_weight_func_id, _velocity_marked_npairs_3d_process_weights)
+from .velocity_marked_npairs_3d import _velocity_marked_npairs_3d_process_weights
 from .engines import velocity_marked_npairs_xy_z_engine
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
@@ -17,8 +16,7 @@ __all__ = ('velocity_marked_npairs_xy_z', )
 
 
 def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
-        weights1=None, weights2=None,
-        weight_func_id=1, verbose=False, num_threads=1,
+        weights1=None, weights2=None, weight_func_id=1, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the number of velocity weighted pairs
@@ -75,9 +73,6 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         velocity weighting function integer ID. Each weighting function requires a specific
         number of weights per point, *N_weights*.  See the Notes for a description of
         available weighting functions.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -148,7 +143,7 @@ def velocity_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
 
     """
     result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
