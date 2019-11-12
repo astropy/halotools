@@ -21,8 +21,8 @@ __all__ = ('npairs_jackknife_xy_z', )
 
 
 def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
-        period=None, weights1=None, weights2=None,
-        jtags1=None, jtags2=None, N_samples=0, num_threads=1,
+        jtags1, jtags2, N_samples,
+        period=None, weights1=None, weights2=None, num_threads=1,
         approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Pair counter used to make jackknife error estimates of redshift-space pair counter
@@ -52,6 +52,20 @@ def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
         maximum LOS distance defining the projection integral length-scale in the z-dimension.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
+    jtags1 : array_like
+        Numpy array of shape (Npts1, ) containing integer tags used to define jackknife sample
+        membership. Tags are in the range [1, N_samples].
+        The tag '0' is a reserved tag and should not be used.
+
+    jtags2 : array_like
+        Numpy array of shape (Npts2, ) containing integer tags used to define jackknife sample
+        membership. Tags are in the range [1, N_samples].
+        The tag '0' is a reserved tag and should not be used.
+
+    N_samples : int
+        Total number of jackknife samples. All values of ``jtags1`` and ``jtags2``
+        should be in the range [1, N_samples].
+
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
@@ -62,20 +76,6 @@ def npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins,
 
     weights2 : array_like, optional
         Numpy array of shape (Npts2, ) containing weights used for weighted pair counts.
-
-    jtags1 : array_like, optional
-        Numpy array of shape (Npts1, ) containing integer tags used to define jackknife sample
-        membership. Tags are in the range [1, N_samples].
-        The tag '0' is a reserved tag and should not be used.
-
-    jtags2 : array_like, optional
-        Numpy array of shape (Npts2, ) containing integer tags used to define jackknife sample
-        membership. Tags are in the range [1, N_samples].
-        The tag '0' is a reserved tag and should not be used.
-
-    N_samples : int, optional
-        Total number of jackknife samples. All values of ``jtags1`` and ``jtags2``
-        should be in the range [1, N_samples].
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -220,19 +220,13 @@ def _npairs_jackknife_xy_z_process_weights_jtags(sample1, sample2,
             raise HalotoolsError("weights2 should have same len as sample2")
 
     # Process jtags_1 entry and check for consistency.
-    if jtags1 is None:
-        jtags1 = np.array([0]*np.shape(sample1)[0], dtype=np.int)
-    else:
-        jtags1 = np.asarray(jtags1).astype("int")
-        if np.shape(jtags1)[0] != np.shape(sample1)[0]:
-            raise HalotoolsError("jtags1 should have same len as sample1")
+    jtags1 = np.asarray(jtags1).astype("int")
+    if np.shape(jtags1)[0] != np.shape(sample1)[0]:
+        raise HalotoolsError("jtags1 should have same len as sample1")
     # Process jtags_2 entry and check for consistency.
-    if jtags2 is None:
-        jtags2 = np.array([0]*np.shape(sample2)[0], dtype=np.int)
-    else:
-        jtags2 = np.asarray(jtags2).astype("int")
-        if np.shape(jtags2)[0] != np.shape(sample2)[0]:
-            raise HalotoolsError("jtags2 should have same len as sample2")
+    jtags2 = np.asarray(jtags2).astype("int")
+    if np.shape(jtags2)[0] != np.shape(sample2)[0]:
+        raise HalotoolsError("jtags2 should have same len as sample2")
 
     # Check bounds of jackknife tags
     if np.min(jtags1) < 1:

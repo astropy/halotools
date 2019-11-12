@@ -33,7 +33,7 @@ def velocity_marked_npairs_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, 
     x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    weight_func_id : int, optional
+    weight_func_id : int
         weighting function integer ID.
 
     weights1in : array

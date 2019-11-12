@@ -21,10 +21,10 @@ def weighted_npairs_s_mu(sample1, sample2, weights1, weights2, s_bins, mu_bins, 
         num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function performs a *weighted* count of the number of pairs of points separated by less than
-    radial separation, :math:`s`, given by ``s_bins`` and
+    distance r:math:`s`, given by ``s_bins`` along the line-of-sight (LOS), and
     angular distance, :math:`\mu\equiv\cos(\theta_{\rm los})`, given by ``mu_bins``,
     where :math:`\theta_{\rm los}` is the angle between :math:`\vec{s}` and
-    the line-of-sight (LOS).
+    the (LOS).
 
     The first two dimensions (x, y) define the plane for perpendicular distances.
     The third dimension (z) defines the LOS.  i.e. x,y positions are on

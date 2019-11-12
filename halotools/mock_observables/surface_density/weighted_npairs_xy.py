@@ -30,7 +30,7 @@ def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
     Parameters
     ----------
     sample1 : array_like
-        Array of shape (Npts1, 2) containing 3-D positions of points.
+        Array of shape (Npts1, 2) containing XY positions of points.
         See the :ref:`mock_obs_pos_formatting` documentation page, or the
         Examples section below, for instructions on how to transform
         your coordinate position arrays into the
@@ -38,7 +38,7 @@ def weighted_npairs_xy(sample1, sample2, sample2_mass, rp_bins,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like
-        Array of shape (Npts2, 2) containing 3-D positions of points.
+        Array of shape (Npts2, 2) containing XY positions of points.
 
     sample2_mass : array_like
         Array of shape (Npts2, ) containing the masses of the ``sample2`` points.

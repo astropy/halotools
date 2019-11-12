@@ -54,14 +54,14 @@ def velocity_marked_npairs_3d(sample1, sample2, rbins, period=None,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     weights1 : array_like, optional
-        Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
+        Either a 1-D array of length *Npts1*, or a 2-D array of length *Npts1* x *N_weights*,
         containing the weights used for the weighted pair counts. If this parameter is
-        None, the weights are set to np.ones(*(N1,N_weights)*).
+        None, the weights are set to np.ones(*(Npts1,N_weights)*).
 
     weights2 : array_like, optional
-        Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
+        Either a 1-D array of length *Npts2*, or a 2-D array of length *Npts2* x *N_weights*,
         containing the weights used for the weighted pair counts. If this parameter is
-        None, the weights are set to np.ones(*(N1,N_weights)*).
+        None, the weights are set to np.ones(*(Npts2,N_weights)*).
 
     weight_func_id : int, optional
         velocity weighting function integer ID. Each weighting function requires a specific
@@ -200,7 +200,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
     if weights1 is None:
-        weights1 = np.ones((npts_sample1, 1), dtype=np.float64)
+        weights1 = np.ones(correct_shape1, dtype=np.float64)
     else:
         weights1 = np.atleast_1d(weights1)
         weights1 = weights1.astype("float64")
@@ -241,7 +241,7 @@ def _velocity_marked_npairs_3d_process_weights(sample1, sample2, weights1, weigh
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
     if weights2 is None:
-        weights2 = np.ones((npts_sample2, 1), dtype=np.float64)
+        weights2 = np.ones(correct_shape2, dtype=np.float64)
     else:
         weights2 = np.atleast_1d(weights2)
         weights2 = weights2.astype("float64")
@@ -289,6 +289,7 @@ def _func_signature_int_from_vel_weight_func_id(weight_func_id):
         msg = "\n weight_func_id parameter must be an integer ID of a weighting function."
         raise HalotoolsError(msg)
 
+    # cbx: seriousl you need 6 weights?
     elif weight_func_id == 1:
         return 6
     elif weight_func_id == 2:
