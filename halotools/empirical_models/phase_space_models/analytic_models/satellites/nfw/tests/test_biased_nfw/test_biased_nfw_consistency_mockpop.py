@@ -112,7 +112,7 @@ def test_consistency2():
 
     msg = ("Mocks made with unbiased profiles should have \n"
     "larger values of <r / Rvir> relative to a biased model with conc_gal_bias=10")
-    assert mean_r_by_R_lowmass_unbiased - 0.05 > mean_r_by_R_lowmass_biased, msg
+    assert mean_r_by_R_lowmass_unbiased - mean_r_by_R_lowmass_biased > 0.01, msg
 
 
 @pytest.mark.skipif('not APH_MACHINE')
