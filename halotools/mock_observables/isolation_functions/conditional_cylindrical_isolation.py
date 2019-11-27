@@ -105,7 +105,7 @@ def conditional_cylindrical_isolation(sample1, sample2, rp_max, pi_max,
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use ``rp_max``/10 in the xy-dimensions
         and ``pi_max``/10 in the z-dimension,
-        which will return reasonable performance for most use-cases.
+        which will return reasonable result performance for most use-cases.
         Performance can vary sensitively with this parameter, so it is highly
         recommended that you experiment with this parameter when carrying out
         performance-critical calculations.

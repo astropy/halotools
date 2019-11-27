@@ -76,7 +76,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
         will be apportioned into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine.
         Default choice is to use ``r_max``/10 in each dimension,
-        which will return reasonable performance for most use-cases.
+        which will return reasonable result performance for most use-cases.
         Performance can vary sensitively with this parameter, so it is highly
         recommended that you experiment with this parameter when carrying out
         performance-critical calculations.
