@@ -18,7 +18,6 @@ __author__ = ('Andrew Hearin', )
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-# cbx: I think all the code here could pretty easily be replaced with that of `large_scale_density_spherical_annulus`
 def large_scale_density_spherical_volume(sample, tracers, radius,
         period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
         norm_by_mean_density=False):

@@ -289,7 +289,6 @@ def _func_signature_int_from_vel_weight_func_id(weight_func_id):
         msg = "\n weight_func_id parameter must be an integer ID of a weighting function."
         raise HalotoolsError(msg)
 
-    # cbx: seriousl you need 6 weights?
     elif weight_func_id == 1:
         return 6
     elif weight_func_id == 2:

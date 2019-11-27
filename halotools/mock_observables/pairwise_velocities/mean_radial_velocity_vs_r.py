@@ -169,7 +169,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
     """
     result = _process_args(sample1, velocities1, sample2, velocities2,
         rbins_absolute, rbins_normalized, normalize_rbins_by,
-        period, num_threads, approx_cell1_size, approx_cell2_size, None)
+        period, num_threads, approx_cell1_size, approx_cell2_size)
 
     sample1, velocities1, sample2, velocities2, max_rbins_absolute, period,\
         num_threads, _sample1_is_sample2, PBCs, \
@@ -230,7 +230,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1,
 
 def _process_args(sample1, velocities1, sample2, velocities2,
         rbins_absolute, rbins_normalized, normalize_rbins_by,
-        period, num_threads, approx_cell1_size, approx_cell2_size, seed):
+        period, num_threads, approx_cell1_size, approx_cell2_size):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.pairwise_velocity_stats`.

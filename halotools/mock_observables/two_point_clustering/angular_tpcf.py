@@ -184,7 +184,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         elif randoms is None:
 
             # set the number of randoms equal to the number of points in sample1
-            # cbx: Why not use much more? Less noise at no cost right?
+            # cbx: Maybe stupid question but why not use much more? Less noise at no cost right?
             NR = len(sample1)
 
             # do area calculations
@@ -202,7 +202,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             D2R = N2*(da*rho2)
 
             # calculate the random-random pairs.
-            # cbx: This should be NR(NR-1) if we are doing an autocorr
+            # cbx: This should be NR(NR-1) if we are doing an autocorr I think? Maybe it doesn't matter.
             rhor = NR**2/global_area
             RR = (da*rhor)
 
@@ -239,7 +239,6 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         return D1D1, D1D2, D2D2
 
     # What needs to be done?
-    # cbx: do_DD is never used
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
 
     # How many points are there (for normalization purposes)?
