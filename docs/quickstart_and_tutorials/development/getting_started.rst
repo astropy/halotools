@@ -42,7 +42,7 @@ Then build documentation with, ::
    cd docs
    make html
 
-You can see the built documentation in ``docs/_build/html/``. The easiest way to view it in your browser is to spin up a local server. In the built directory run, ::
+You can see the built documentation in ``docs/_build/html/``. The easiest way to view it in your browser is to spin up a local server. One way to do this is to run, from the built directory, ::
 
    python3 -m http.server
 

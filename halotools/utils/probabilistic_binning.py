@@ -26,7 +26,8 @@ def fuzzy_digitize(x, centroids, min_counts=2, seed=43):
 
     centroids : ndarray
         Numpy array of shape (num_centroids, ). The values of ``centroids`` must
-        strictly encompass the range of values spanned by ``x``.
+        strictly encompass the range of values spanned by ``x`` and must also be
+        monotonically increasing.
 
     min_counts : int, optional
         Minimum required number of elements assigned to each centroid.
@@ -56,6 +57,7 @@ def fuzzy_digitize(x, centroids, min_counts=2, seed=43):
     .. image:: /_static/fuzzy_binning_example.png
 
     """
+    assert np.all(np.diff(centroids) > 0), "centroids must be monotonically increasing"
     assert centroids[0] < x.min(), "smallest bin must be less than smallest element in x"
     assert centroids[-1] > x.max(), "largest bin must be less than largest element in x"
 
