@@ -198,7 +198,7 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
 
     Create some 'randoms' in the same way:
 
-    >>> Nran = Npts*500
+    >>> Nran = Npts*5
     >>> xran = np.random.uniform(0, Lbox, Nran)
     >>> yran = np.random.uniform(0, Lbox, Nran)
     >>> zran = np.random.uniform(0, Lbox, Nran)
