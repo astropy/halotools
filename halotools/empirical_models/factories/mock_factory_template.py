@@ -267,17 +267,6 @@ class MockFactory(object):
 
         >>> r, quiescent_clustering, q_sf_cross_clustering, star_forming_clustering = mock.compute_galaxy_clustering(quiescent = True, include_crosscorr = True) # doctest: +SKIP
 
-        Finally, suppose we wish to ask a very targeted question about how some physical effect
-        impacts the clustering of galaxies in a specific halo mass range.
-        For example, suppose we wish to study the two-point function of satellite galaxies
-        residing in cluster-mass halos. For this we can use the more flexible mask_function
-        option to select our population:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = mock.compute_galaxy_clustering(mask_function = my_masking_function) # doctest: +SKIP
-
         Notes
         -----
         The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper
@@ -401,18 +390,6 @@ class MockFactory(object):
         Compute the galaxy-matter cross-clustering for quiescent galaxies and for star-forming galaxies:
 
         >>> r, quiescent_matter_clustering, star_forming_matter_clustering = mock.compute_galaxy_matter_cross_clustering(quiescent = True, include_complement = True) # doctest: +SKIP
-
-        Finally, suppose we wish to ask a very targeted question about how some physical effect
-        impacts the clustering of galaxies in a specific halo mass range.
-        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies
-        residing in cluster-mass halos. For this we can use the more flexible mask_function
-        option to select our population:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = mock.compute_galaxy_matter_cross_clustering(mask_function = my_masking_function) # doctest: +SKIP
-
 
         Notes
         -----

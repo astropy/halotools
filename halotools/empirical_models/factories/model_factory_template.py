@@ -410,15 +410,6 @@ class ModelFactory(object):
 
         >>> r, cen_cen, cen_sat, sat_sat = model.compute_average_galaxy_clustering(gal_type = 'centrals', include_crosscorr = True) # doctest: +SKIP
 
-        Your second option is to use the ``mask_function`` option.
-        For example, suppose we wish to study the clustering of satellite galaxies
-        residing in cluster-mass halos:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = model.compute_average_galaxy_clustering(mask_function = my_masking_function) # doctest: +SKIP
-
         Notes
         -----
         The `compute_average_galaxy_clustering` method
@@ -599,15 +590,6 @@ class ModelFactory(object):
         keyword argument, the function will also return the correlation function of the complementary subset.
 
         >>> r, cen_clustering, sat_clustering = model.compute_average_galaxy_matter_cross_clustering(gal_type = 'centrals', include_complement = True) # doctest: +SKIP
-
-        Your second option is to use the ``mask_function`` option.
-        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies
-        residing in cluster-mass halos:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = model.compute_average_galaxy_matter_cross_clustering(mask_function = my_masking_function) # doctest: +SKIP
 
         Returns
         --------
