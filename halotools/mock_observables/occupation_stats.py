@@ -60,9 +60,9 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
     >>> haloprop_bins = np.logspace(11, 15, 15)
     >>> mean_ncen, bin_edges = hod_from_mock(central_host_mass, halo_mass, haloprop_bins)
     """
-    _result = binned_statistic(haloprop_galaxies, None, bins=haloprop_bins, statistic='count')
+    _result = binned_statistic(haloprop_galaxies, haloprop_galaxies, bins=haloprop_bins, statistic='count')
     galaxy_counts, bin_edges, bin_number = _result
-    _result = binned_statistic(haloprop_halos, None, bins=haloprop_bins, statistic='count')
+    _result = binned_statistic(haloprop_halos, haloprop_halos, bins=haloprop_bins, statistic='count')
     halo_counts, bin_edges, bin_number = _result
 
     bins_with_galaxies_but_no_halos = (galaxy_counts > 0) & (halo_counts == 0)
