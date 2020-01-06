@@ -1,3 +1,4 @@
+# cython: language_level=2
 """ Module containing the `~halotools.mock_observables.isolation_functions.engines.marked_cylindrical_isolation_engine`
 cython function driving the `~halotools.mock_observables.marked_cylindrical_isolation` function.
 """

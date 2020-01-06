@@ -1,11 +1,12 @@
+# cython: language_level=2
 """
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
-from libc.math cimport ceil 
+cimport cython
+from libc.math cimport ceil
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
 __all__ = ('npairs_jackknife_3d_engine', )
@@ -13,51 +14,51 @@ __all__ = ('npairs_jackknife_3d_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     weights1in, weights2in, jtags1in, jtags2in, cnp.int64_t N_samples, rbins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation. 
+    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
 
-    Parameters 
+    Parameters
     ------------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
 
-    x1in, y1in, z1in : arrays 
+    x1in, y1in, z1in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 1
 
-    x2in, y2in, z2in : arrays 
+    x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    weights1in : array 
+    weights1in : array
         Numpy array storing the weights for points in sample 1
 
-    weights2in : array 
+    weights2in : array
         Numpy array storing the weights for points in sample 2
 
-    jtags1in : array 
+    jtags1in : array
         Numpy array storing the subvolume label integers for points in sample 1
 
-    jtags2in : array 
+    jtags2in : array
         Numpy array storing the subvolume label integers for points in sample 2
 
-    N_samples : int 
-        Total number of cells into which the simulated box has been subdivided 
+    N_samples : int
+        Total number of cells into which the simulated box has been subdivided
 
     rbins : array
         Boundaries defining the bins in which pairs are counted.
 
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
 
-    Returns 
+    Returns
     --------
-    counts : array 
-        Integer array of length len(rbins) giving the number of pairs 
-        separated by a distance less than the corresponding entry of ``rbins``. 
+    counts : array
+        Integer array of length len(rbins) giving the number of pairs
+        separated by a distance less than the corresponding entry of ``rbins``.
 
-    """    
+    """
     cdef cnp.float64_t[:] rbins_squared = rbins*rbins
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
@@ -113,13 +114,13 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp
 
     cdef cnp.int64_t j1, j2
     cdef cnp.float64_t w1, w2
 
     cdef int Ni, Nj, i, j, k, l
-    cdef cnp.int64_t s 
+    cdef cnp.int64_t s
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
     cdef cnp.float64_t[:] y_icell1, y_icell2
@@ -153,9 +154,9 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -228,9 +229,9 @@ def npairs_jackknife_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                         while dsq<=rbins_squared[k]:
                                             counts[s,k] += jweight(s, j1, j2, w1, w2)
                                             k=k-1
-                                            if k<0: break                                        
-                                        
-                                        
+                                            if k<0: break
+
+
     return np.array(counts)
 
 
@@ -238,50 +239,50 @@ cdef inline cnp.float64_t jweight(cnp.int64_t j, cnp.int64_t j1, cnp.int64_t j2,
     cnp.float64_t w1, cnp.float64_t w2):
     """
     Return the jackknife weighted count.
-    
+
     parameters
     ----------
     j : int
         subsample being removed
-    
+
     j1 : int
         integer label indicating which subsample point 1 occupies
-    
+
     j2 : int
         integer label indicating which subsample point 2 occupies
-    
+
     w1 : float
         weight associated with point 1
-    
+
     w2 : float
         weight associated with point 2
-    
+
     Returns
     -------
     w : double
         0.0, w1*w2*0.5, or w1*w2
-    
+
     Notes
     -----
     We use the tag '0' to indicated we want to use the entire sample, i.e. no subsample
     should be labeled with a '0'.
-    
+
     jackknife wiehgt is caclulated as follows:
     if both points are inside the sample, return w1*w2
     if both points are outside the sample, return 0.0
     if one point is within and one point is outside the sample, return 0.5*w1*w2
     """
     cdef cnp.float64_t result
-    if j==0: 
+    if j==0:
         result = w1 * w2
     # both outside the sub-sample
-    elif (j1 == j2) & (j1 == j): 
+    elif (j1 == j2) & (j1 == j):
         result = 0.0
     # both inside the sub-sample
-    elif (j1 != j) & (j2 != j): 
+    elif (j1 != j) & (j2 != j):
         result = (w1 * w2)
     # only one inside the sub-sample
-    elif (j1 != j2) & ((j1 == j) | (j2 == j)): 
+    elif (j1 != j2) & ((j1 == j) | (j2 == j)):
         result = 0.5*(w1 * w2)
 
     return result

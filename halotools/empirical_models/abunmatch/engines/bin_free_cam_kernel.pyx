@@ -1,3 +1,4 @@
+# cython: language_level=2
 """
 """
 from libc.stdlib cimport rand, RAND_MAX

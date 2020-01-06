@@ -1,13 +1,14 @@
-""" Module containing the `~halotools.mock_observables.isolation_functions.engines.marked_spherical_isolation_engine` 
-cython function driving the `~halotools.mock_observables.marked_spherical_isolation` function. 
+# cython: language_level=2
+""" Module containing the `~halotools.mock_observables.isolation_functions.engines.marked_spherical_isolation_engine`
+cython function driving the `~halotools.mock_observables.marked_spherical_isolation` function.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
+cimport cython
 from libc.math cimport ceil
-from .isolation_criteria_marking_functions cimport (trivial, gt_cond, lt_cond, 
+from .isolation_criteria_marking_functions cimport (trivial, gt_cond, lt_cond,
     eq_cond, neq_cond, lg_cond, tg_cond)
 
 __author__ = ('Andrew Hearin', 'Duncan Campbell')
@@ -18,61 +19,61 @@ ctypedef bint (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2)
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     weights1in, weights2in, weight_func_idin, r_max, cell1_tuple):
     """
-    Cython engine for determining if points in 'sample 1' are isolated, meaning no 
+    Cython engine for determining if points in 'sample 1' are isolated, meaning no
     neighbors within a spherical volume, with respect to points in 'sample 2', where
-    points are counted as neighbors if and only if a weighting function dependent on 
+    points are counted as neighbors if and only if a weighting function dependent on
     weights for each point in sample 1 and sample 2 evaulates to true.
-    
+
     Parameters
     ----------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
-    
+
     x1in : numpy.array
         array storing Cartesian x-coordinates of points of 'sample 1'
-        
+
     y1in : numpy.array
         array storing Cartesian y-coordinates of points of 'sample 1'
-        
+
     z1in : numpy.array
         array storing Cartesian z-coordinates of points of 'sample 1'
-        
+
     x2in : numpy.array
         array storing Cartesian x-coordinates of points of 'sample 2'
-        
+
     y2in : numpy.array
         array storing Cartesian y-coordinates of points of 'sample 2'
-        
+
     z2in : numpy.array
         array storing Cartesian z-coordinates of points of 'sample 2'
-        
+
     weights1in : numpy.ndarray
         array storing weight(s) for each point in 'sample 1'
-        
+
     weights2in : numpy.ndarray
         array storing weight(s) for each point in 'sample 2'
-        
+
     weight_func_idin : int
         integer ID of weighting function (conditional function) to be used
-        
+
     r_max : numpy.array
         array storing the radial distance to search for neighbors around each point
         in 'sample 1'
-        
+
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
-        
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
+
     Returns
     -------
     is_isolated : numpy.array
         boolean array indicating if each point in 'sample 1' is isolated
     """
-    
+
     cdef int weight_func_id = weight_func_idin
 
     cdef f_type wfunc
@@ -131,7 +132,7 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dsq, weight
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, r_max_squaredtmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp, r_max_squaredtmp
     cdef int Ni, Nj, i, j, k, l, current_data1_index
 
     cdef cnp.float64_t[:] x_icell1, x_icell2
@@ -163,9 +164,9 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -218,7 +219,7 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
                                 y1tmp = y_icell1[i] - y2shift
                                 z1tmp = z_icell1[i] - z2shift
                                 r_max_squaredtmp = r_max_squared[ifirst1+i]
-                                
+
                                 #loop over points in cell2 points
                                 for j in range(0,Nj):
                                     #calculate the square distance
@@ -231,8 +232,8 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
 
                                     if (dsq < r_max_squaredtmp) & (weight == 1) & (dsq > 0.0):
                                         has_neighbor[ifirst1+i] = 1
-                                        break 
-                                        
+                                        break
+
     #turn result into numpy array
     new_has_neighbor = np.array(has_neighbor)
 
@@ -244,7 +245,7 @@ def marked_spherical_isolation_engine(double_mesh, x1in, y1in, z1in, x2in, y2in,
 
     new_is_isolated = np.zeros(Npts1)
     new_is_isolated[is_isolated] = 1
-    
+
     return new_is_isolated
 
 
@@ -252,7 +253,7 @@ cdef f_type return_conditional_function(cond_func_id):
     """
     returns a pointer to the user-specified conditional function.
     """
-    
+
     if cond_func_id==0:
         return trivial
     elif cond_func_id==1:
