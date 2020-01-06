@@ -1,3 +1,4 @@
+# cython: language_level=2
 """
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -62,7 +63,7 @@ def npairs_jackknife_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in
         separated by a distance less than the corresponding entry of ``rbins``.
 
     """
-    
+
     cdef cnp.float64_t[:] rp_bins_squared = rp_bins*rp_bins
     cdef cnp.float64_t[:] pi_bins_squared = pi_bins*pi_bins
     cdef cnp.float64_t xperiod = double_mesh.xperiod

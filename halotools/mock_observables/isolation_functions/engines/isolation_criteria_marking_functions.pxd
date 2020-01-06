@@ -1,3 +1,4 @@
+# cython: language_level=2
 cimport numpy as cnp
 
 cdef bint trivial(cnp.float64_t* w1, cnp.float64_t* w2)

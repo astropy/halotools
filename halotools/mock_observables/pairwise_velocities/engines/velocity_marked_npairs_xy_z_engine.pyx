@@ -1,10 +1,11 @@
+# cython: language_level=2
 """
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
+cimport cython
 from libc.math cimport ceil
 
 from .velocity_marking_functions cimport *
@@ -17,27 +18,27 @@ ctypedef void (*f_type)(cnp.float64_t* w1, cnp.float64_t* w2, cnp.float64_t* shi
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     weights1in, weights2in, int weight_func_id, rp_bins, pi_bins, cell1_tuple):
-    """ Cython engine for counting pairs of points as a function of three-dimensional separation. 
+    """ Cython engine for counting pairs of points as a function of three-dimensional separation.
 
-    Parameters 
+    Parameters
     ------------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
 
-    x1in, y1in, z1in : arrays 
+    x1in, y1in, z1in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 1
 
-    x2in, y2in, z2in : arrays 
+    x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
     weight_func_id : int, optional
-        weighting function integer ID. 
+        weighting function integer ID.
 
-    weights1in : array 
+    weights1in : array
 
-    weights2in : array 
+    weights2in : array
 
     rp_bins : array
         Boundaries defining the bins in which pairs are counted.
@@ -46,15 +47,15 @@ def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
         array defining parallel separation in which to sum the pair counts
 
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
 
-    Returns 
+    Returns
     --------
-    counts : array 
-        Integer array of length len(rp_bins) giving the number of pairs 
-        separated by a distance less than the corresponding entry of ``rp_bins``. 
+    counts : array
+        Integer array of length len(rp_bins) giving the number of pairs
+        separated by a distance less than the corresponding entry of ``rp_bins``.
 
     """
     cdef f_type wfunc
@@ -117,7 +118,7 @@ def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
     cdef int num_z2_per_z1 = num_z2divs // num_z1divs
 
     cdef cnp.float64_t x2shift, y2shift, z2shift, dx, dy, dz, dxy_sq, dz_sq, weight
-    cdef cnp.float64_t x1tmp, y1tmp, z1tmp 
+    cdef cnp.float64_t x1tmp, y1tmp, z1tmp
     cdef cnp.float64_t holder1 = 0.
     cdef cnp.float64_t holder2 = 0.
     cdef cnp.float64_t holder3 = 0.
@@ -153,9 +154,9 @@ def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -231,9 +232,9 @@ def velocity_marked_npairs_xy_z_engine(double_mesh, x1in, y1in, z1in, x2in, y2in
                                             if g<0: break
                                         k=k-1
                                         if k<0: break
-                                        
+
     return np.array(counts1), np.array(counts2), np.array(counts3)
-    
+
 
 cdef f_type return_velocity_weighting_function(weight_func_id):
     """

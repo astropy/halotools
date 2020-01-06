@@ -1,3 +1,4 @@
+# cython: language_level=2
 """
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -50,7 +51,7 @@ def mean_ds_12h_halo_id_engine(double_mesh, x1in, y1in, id1in, x2in, y2in, m2in,
 
     """
     cdef cnp.float64_t[:] rp_bins_squared = rp_bins*rp_bins
-    cdef cnp.float64_t[:] d_log_rp_bins = np.log(rp_bins[1:] / rp_bins[:-1])
+    cdef cnp.float64_t[:] d_log_rp_bins = np.log(rp_bins[1:] / rp_bins[:len(rp_bins)-1])
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
     cdef cnp.int64_t first_cell1_element = cell1_tuple[0]

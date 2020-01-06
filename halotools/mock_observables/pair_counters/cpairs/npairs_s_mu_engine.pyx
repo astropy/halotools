@@ -1,3 +1,4 @@
+# cython: language_level=2
 """
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -49,11 +50,11 @@ def npairs_s_mu_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     counts : array
         Integer array of length len(s_bins) giving the number of pairs
         separated by a distance less than the corresponding entry of ``s_bins``.
-    
+
     Notes
     -----
     mu is defined as the sin(theta_LOS) so that as theta_LOS increases, mu increases.
-    
+
     """
     cdef cnp.float64_t[:] sqr_s_bins = s_bins_in * s_bins_in
     cdef cnp.float64_t[:] sqr_mu_bins = mu_bins_in * mu_bins_in
