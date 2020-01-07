@@ -1,9 +1,6 @@
 language: python
 
 python:
-    - 2.7
-    - 3.5
-    - 3.6
     - 3.7
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
@@ -38,17 +35,12 @@ env:
 
 matrix:
     include:
-        # Do a coverage test in Python 3
-        - python: 2.7
+        # Coverage test in Python 3.7
+        - python: 3.7
           env: SETUP_CMD='test --coverage'
 
-        # Check for sphinx doc build warnings - we do this first because it
-        # may run for a long time
-        - python: 2.7
-          env: SETUP_CMD='build_sphinx -w'
-
         # Significant docstring formatting changes in 3.6, so we check both
-        - python: 3.6
+        - python: 3.7
           env: SETUP_CMD='build_sphinx -w'
 
         # Try Astropy development version
@@ -61,7 +53,7 @@ matrix:
           env: NUMPY_VERSION=prerelease SETUP_CMD='test' ASTROPY_USE_SYSTEM_PYTEST=1
 
         # try a version *without* h5py - we need this for readthedocs
-        - python: 2.7
+        - python: 3.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
 # before_install:
