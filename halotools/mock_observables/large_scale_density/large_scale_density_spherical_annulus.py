@@ -88,7 +88,7 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
     Returns
     --------
     number_density : array_like
-        Length-Npts array of number densities
+        Length-Npts1 array of number densities
 
     Examples
     ---------
@@ -105,9 +105,9 @@ def large_scale_density_spherical_annulus(sample, tracers, inner_radius, outer_r
             period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = npairs_per_object_3d(sample, tracers, rbins, period=period,
+    result = npairs_per_object_3d(sample, tracers, rbins, period=period,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size)
-    result = np.diff(_, axis=1)
+    result = np.diff(result, axis=1)
 
     environment_volume = (4/3.)*np.pi*(outer_radius**3 - inner_radius**3)
     number_density = result/environment_volume

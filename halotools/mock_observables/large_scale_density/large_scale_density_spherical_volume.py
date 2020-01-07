@@ -87,7 +87,7 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
     Returns
     --------
     number_density : array_like
-        Length-Npts array of number densities
+        Length-Npts1 array of number densities
 
     Examples
     ---------
@@ -103,9 +103,8 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
             sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size)
         )
 
-    _ = npairs_per_object_3d(sample, tracers, rbins, period=period,
-        num_threads=num_threads, approx_cell1_size=approx_cell1_size)
-    result = _[:, 0]
+    result = npairs_per_object_3d(sample, tracers, rbins, period=period,
+        num_threads=num_threads, approx_cell1_size=approx_cell1_size)[:, 0]
 
     environment_volume = (4/3.)*np.pi*radius**3
     number_density = result/environment_volume
@@ -123,8 +122,8 @@ def _large_scale_density_spherical_volume_process_args(
     """
     sample = np.atleast_1d(sample)
     tracers = np.atleast_1d(tracers)
-    _ = np.atleast_1d(radius).astype(float)
-    rbins = np.append(_, _[0]+0.0001)
+    rbins = np.atleast_1d(radius).astype(float)
+    rbins = np.append(rbins, rbins[0]+0.0001)
 
     if period is None:
         if sample_volume is None:

@@ -21,57 +21,60 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero
 
 def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         velocities2=None, period=None, do_auto=True, do_cross=True,
-        num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None, seed=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\sigma_{z12}(r_p)`.
+    Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD),
+    as a function of radial distance from ``sample1`` :math:`\sigma_{z12}(r_p)`.
 
     Example calls to this function appear in the documentation below.
 
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts1 x 3 numpy array containing 3-D positions of points.
 
     velocities1 : array_like
-        N1pts x 3 array containing the 3-D components of the velocities.
+        Npts1 x 3 array containing the 3-D components of the velocities.
 
     rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     pi_max : float
         maximum LOS separation
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     sample2 : array_like, optional
-        Npts x 3 array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points.
 
     velocities2 : array_like, optional
-        N1pts x 3 array containing the 3-D components of the velocities.
+        Npts2 x 3 array containing the 3-D components of the velocities.
 
     period : array_like, optional
         length 3 array defining  periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
 
     do_auto : boolean, optional
-        caclulate the auto-pairwise velocities?
+        calculate the auto-pairwise velocities?
 
     do_cross : boolean, optional
-        caclulate the cross-pairwise velocities?
+        calculate the cross-pairwise velocities?
 
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
 
-    seed : int, optional
-        Random number seed used to randomly downsample data, if applicable.
-        Default is None, in which case downsampling will be stochastic.
-
     Returns
     -------
-    sigma_12 : numpy.array
-        *len(rbins)-1* length array containing the dispersion of the pairwise velocity,
-        :math:`\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
+    sigma : numpy.array or tuple(numpy.arrays)
+        Each numpy.array is a *len(rbins)-1* length array containing the dispersion
+        of the pairwise velocity, :math:`\sigma_{12}(r)`, computed in each of the bins
+        defined by ``rbins``.
+        If sample2 is None, returns :math:`\sigma_{11}(r)`
+        If ``do_auto`` and ``do_cross`` are True, returns (:math:`\sigma_{11}(r)`, :math:`\sigma_{12}(r)`, :math:`\sigma_{22}(r)`)
+        If only ``do_auto`` is True, returns (:math:`\sigma_{11}(r)`, :math:`\sigma_{22}(r)`)
+        If only ``do_cross`` is True, returns :math:`\sigma_{12}(r)`
 
     Notes
     -----
@@ -94,6 +97,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     For demonstration purposes we create a randomly distributed set of points within a
     periodic unit cube.
 
+    >>> from halotools.mock_observables import los_pvd_vs_rp
     >>> Npts = 1000
     >>> Lbox = 1.0
     >>> period = np.array([Lbox,Lbox,Lbox])
@@ -138,7 +142,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     # process input arguments
     function_args = (sample1, velocities1, sample2, velocities2, period,
         do_auto, do_cross, num_threads,
-        approx_cell1_size, approx_cell2_size, seed)
+        approx_cell1_size, approx_cell2_size, None)
     sample1, velocities1, sample2, velocities2,\
         period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs =\

@@ -12,7 +12,9 @@ __author__ = ('Andrew Hearin', )
 
 def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
     r"""
-    Calculate the HOD of a mock galaxy sample.
+    Calculate the HOD of a mock galaxy sample. It returns the expected number
+    of galaxies per halo, in bins of whatever halo property
+    ``haloprop_galaxies`` and ``haloprop_halos`` are given in.
 
     Parameters
     ----------
@@ -27,10 +29,14 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
         Array of shape (num_halos, ) used to bin the halos in the same manner
         as the galaxies so that the counts in each bin can be properly normalized.
 
+        Note that this property (e.g. halo mass) must be the same as used for
+        ``haloprop_halos``.
+
     haloprop_bins : ndarray, optional
-        Array defining the bin edges. If this array is not passed, then you will probably
-        obtain better results if you pass in logarithmic quantities for the
-        ``haloprop_galaxies`` and ``haloprop_halos`` arrays.
+        Array defining the bin edges. If None, this defaults to 10 linearly
+        spaced bins and so you will probably obtain better results if you
+        pass in logarithmic quantities for the ``haloprop_galaxies``
+        and ``haloprop_halos`` arrays.
 
     Returns
     -------
@@ -44,10 +50,12 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
     Examples
     --------
     In the following calculation, we'll populate a mock catalog and then manually
-    compute the central galaxy HOD from the ``galaxy_table``.
+    compute the central galaxy HOD (number of central galaxies above the mass
+    threshold as a function of halo mass) from the ``galaxy_table``.
 
     >>> from halotools.empirical_models import PrebuiltHodModelFactory
     >>> from halotools.sim_manager import FakeSim
+    >>> from halotools.mock_observables import hod_from_mock
     >>> model = PrebuiltHodModelFactory('leauthaud11', threshold=10.75)
     >>> halocat = FakeSim()
     >>> model.populate_mock(halocat)
@@ -81,9 +89,9 @@ def hod_from_mock(haloprop_galaxies, haloprop_halos, haloprop_bins=None):
 
 
 def get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos):
-    """ Calculate the host halo property of every galaxy with a ``halo_id`` that
-    matches one of the input halos. This function can be used, for example,
-    to calculate the host halo mass of a galaxy.
+    """ Determine the halo property in ``haloprop_halos`` for each galaxy.
+    This crossmatches the galaxy catalog with the halo catalog using their
+    ``halo_id``. Return the halo property for galaxies with a match, else nan.
 
     Parameters
     ----------
@@ -99,7 +107,7 @@ def get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos):
 
     haloprop_halos : ndarray
         Array of shape (num_halos, ) storing the halo property of interest,
-        e.g., ``halo_mvir``.
+        e.g., ``halo_vpeak`` or ``halo_spin``.
 
     Returns
     -------
@@ -117,6 +125,7 @@ def get_haloprop_of_galaxies(halo_id_galaxies, halo_id_halos, haloprop_halos):
 
     >>> from halotools.empirical_models import PrebuiltHodModelFactory
     >>> from halotools.sim_manager import FakeSim
+    >>> from halotools.mock_observables import get_haloprop_of_galaxies
     >>> model = PrebuiltHodModelFactory('leauthaud11')
     >>> halocat = FakeSim()
     >>> model.populate_mock(halocat)

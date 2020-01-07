@@ -24,7 +24,7 @@ np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD
 
 
 def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
-        do_auto=True, do_cross=True, estimator='Natural', num_threads=1, seed=None):
+        do_auto=True, do_cross=True, estimator='Natural', num_threads=1):
     r"""
     Calculate the angular two-point correlation function, :math:`w(\theta)`.
 
@@ -49,8 +49,8 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     randoms : array_like, optional
         Nran x 2 array containing ra,dec positions of points in degrees.  If no randoms
-        are provided analytic randoms are used (only valid for for continious all-sky
-        converage).
+        are provided analytic randoms are used (only valid for for continuous all-sky
+        coverage).
 
     do_auto : boolean, optional
         Boolean determines whether the auto-correlation function will
@@ -72,10 +72,6 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         calculation, in which case a multiprocessing Pool object will
         never be instantiated. A string 'max' may be used to indicate that
         the pair counters should use all available cores on the machine.
-
-    seed : int, optional
-        Random number seed used to randomly downsample data, if applicable.
-        Default is None, in which case downsampling will be stochastic.
 
     Returns
     -------
@@ -128,7 +124,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
     # check input arguments using clustering helper functions
     function_args = (sample1, theta_bins, sample2, randoms, do_auto, do_cross,
-        estimator, num_threads, seed)
+        estimator, num_threads)
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
     sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
@@ -188,6 +184,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         elif randoms is None:
 
             # set the number of randoms equal to the number of points in sample1
+            # cbx: Maybe stupid question but why not use much more? Less noise at no cost right?
             NR = len(sample1)
 
             # do area calculations
@@ -205,13 +202,14 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             D2R = N2*(da*rho2)
 
             # calculate the random-random pairs.
+            # cbx: This should be NR(NR-1) if we are doing an autocorr I think? Maybe it doesn't matter.
             rhor = NR**2/global_area
             RR = (da*rhor)
 
             return D1R, D2R, RR
 
     def pair_counts(sample1, sample2, chord_bins,
-            N_thread, do_auto, do_cross, _sample1_is_sample2):
+            num_threads, do_auto, do_cross, _sample1_is_sample2):
         """
         Count data-data pairs.
         """
@@ -280,7 +278,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
 
 
 def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
-        do_auto, do_cross, estimator, num_threads, seed):
+        do_auto, do_cross, estimator, num_threads):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.angular_tpcf`.

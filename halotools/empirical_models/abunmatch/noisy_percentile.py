@@ -69,7 +69,7 @@ def noisy_percentile(percentile, correlation_coeff, seed=None, random_percentile
     Returns
     -------
     noisy_percentile : ndarray
-        Numpy array of shape (ngals, ) storing an array such that
+        Numpy array of shape (npts, ) storing an array such that
         the Spearman rank-order correlation coefficient between
         ``percentile`` and ``noisy_percentile`` is equal to the input
         ``correlation_coeff``.

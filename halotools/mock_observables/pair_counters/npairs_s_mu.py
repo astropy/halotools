@@ -18,7 +18,7 @@ __all__ = ('npairs_s_mu', )
 
 
 def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
-        verbose=False, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Function counts the number of pairs of points separated by less than
     radial separation, :math:`s`, given by ``s_bins`` and
@@ -67,9 +67,6 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
         in each dimension. If you instead provide a single scalar, Lbox,
         period is assumed to be the same in all Cartesian directions.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -155,7 +152,7 @@ def npairs_s_mu(sample1, sample2, s_bins, mu_bins, period=None,
 
     # Process the inputs with the helper function
     result = _npairs_3d_process_args(sample1, sample2, s_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     s_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period

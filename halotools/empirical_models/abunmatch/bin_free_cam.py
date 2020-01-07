@@ -11,9 +11,14 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
             assume_x_is_sorted=False, assume_x2_is_sorted=False, return_indexes=False):
     r"""
     Given a set of input points with primary property `x` and secondary property `y`,
-    use conditional abundance matching to map new values `ynew` onto the input points
-    such that :math:`P(<y_{\rm new} | x) = P(<y_2 | x)`, and also that
-    `y` and `ynew` are in monotonic correspondence at fixed `x`.
+    and a mapping between that primary property and another secondary property
+    (`y2 | x2`), assign values of the `y2` property to the input points.
+
+    The `y2` that is assigned (`ynew`) is in monotonic correspondence with `y` at
+    fixed `x`. Therefore, :math:`P(<y_{\rm new} | x) = P(<y | x)`.
+
+    See :ref:`cam_tutorial` demonstrating how to use this function in galaxy-halo
+    modeling with several worked examples.
 
     Parameters
     ----------
@@ -24,10 +29,10 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
         Numpy array of shape (n1, ) storing the secondary property of the input points.
 
     x2 : ndarray
-        Numpy array of shape (n2, ) storing the primary property of the desired distribution.
+        Numpy array of shape (n2, ) storing the primary property of the desired distribution. This should be the same physical property (e.g. halo mass) as x.
 
     y2 : ndarray
-        Numpy array of shape (n2, ) storing the secondary property of the desired distribution.
+        Numpy array of shape (n2, ) storing the secondary property of the desired distribution. This is a different physical property to y.
 
     nwin : int
         Odd integer specifying the size of the window
@@ -74,9 +79,6 @@ def conditional_abunmatch(x, y, x2, y2, nwin, add_subgrid_noise=True,
     and also the performance. For estimations of Prob(< y | x) with sub-percent accuracy,
     values of ``window_length`` must exceed 100. Values more tha a few hundred are
     likely overkill when using the (recommended) sub-grid noise option.
-
-    See :ref:`cam_tutorial` demonstrating how to use this
-    function in galaxy-halo modeling with several worked examples.
 
     With the release of Halotools v0.7, this function replaced a previous function
     of the same name. The old function is now called

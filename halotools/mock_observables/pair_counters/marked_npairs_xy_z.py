@@ -21,7 +21,7 @@ __all__ = ('marked_npairs_xy_z', )
 
 def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                   period=None, weights1=None, weights2=None,
-                  weight_func_id=0, verbose=False, num_threads=1,
+                  weight_func_id=0, num_threads=1,
                   approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the number of weighted pairs with separations greater than
@@ -77,9 +77,6 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
         number of weights per point, *N_weights*.  See the Notes for a description of
         available weighting functions.
 
-    verbose : Boolean, optional
-        If True, print out information and progress.
-
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
         using the python ``multiprocessing`` module. Default is 1 for a purely serial
@@ -116,7 +113,7 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
 
     # Process the inputs with the helper function
     result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period

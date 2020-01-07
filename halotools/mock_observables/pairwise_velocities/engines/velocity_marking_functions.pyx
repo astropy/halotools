@@ -31,12 +31,12 @@ cdef void relative_radial_velocity_weights(cnp.float64_t* w1,
     ----------
     w1 : pointer to an array
         weights array associated with data1.
-        w1[0:2] x,y,z positions
+        w1[0:3] x,y,z positions
         w1[3:6] vx, vy, vz velocities
 
     w2 : pointer to an array
         weights array associated with data2
-        w2[0:2] x,y,z positions
+        w2[0:3] x,y,z positions
         w2[3:6] vx, vy, vz velocities
 
     shift : pointer to an array
@@ -102,13 +102,13 @@ cdef void radial_velocity_variance_counter_weights(cnp.float64_t* w1,
     ----------
     w1 : pointer to an array
         weights array associated with data1.
-        w1[0:2] x,y,z positions
+        w1[0:3] x,y,z positions
         w1[3:6] vx, vy, vz velocities
         w1[6] offset
 
     w2 : pointer to an array
         weights array associated with data2
-        w2[0:2] x,y,z positions
+        w2[0:3] x,y,z positions
         w2[3:6] vx, vy, vz velocities
         w2[6] offset
 
