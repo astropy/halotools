@@ -82,6 +82,8 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(**constructor_kwargs)
             assert hasattr(halocat, 'redshift')
             assert hasattr(halocat, 'Lbox')
+            assert hasattr(halocat, 'num_ptcl_per_dim')
+            assert hasattr(halocat, 'cosmology')
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_halo_ptcl_consistency(self):
