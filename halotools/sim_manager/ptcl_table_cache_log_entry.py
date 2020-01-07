@@ -197,7 +197,7 @@ class PtclTableCacheLogEntry(object):
         """
 
         try:
-            f = h5py.File(self.fname)
+            f = h5py.File(self.fname, 'r')
 
             for key in PtclTableCacheLogEntry.log_attributes:
                 ptcl_log_attr = getattr(self, key)
@@ -261,7 +261,7 @@ class PtclTableCacheLogEntry(object):
         """
         try:
             data = Table.read(_passively_decode_string(self.fname), path='data')
-            f = h5py.File(self.fname)
+            f = h5py.File(self.fname, 'r')
             Lbox = np.empty(3)
             Lbox[:] = f.attrs['Lbox']
 
@@ -316,7 +316,7 @@ class PtclTableCacheLogEntry(object):
         """
 
         try:
-            f = h5py.File(self.fname)
+            f = h5py.File(self.fname, 'r')
             required_set = set(PtclTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
 

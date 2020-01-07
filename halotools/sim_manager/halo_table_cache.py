@@ -318,7 +318,7 @@ class HaloTableCache(object):
             return str(msg)
 
         try:
-            f = h5py.File(fname)
+            f = h5py.File(fname, 'r')
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
             assert required_set.issubset(actual_set)
@@ -335,7 +335,7 @@ class HaloTableCache(object):
             except:
                 pass
 
-        f = h5py.File(fname)
+        f = h5py.File(fname, 'a')
         constructor_kwargs = {}
 
         # We need to get rid of the byte attributes here to avoid failures

@@ -108,8 +108,8 @@ class TestCachedHaloCatalog(TestCase):
                 assert halo_log_entry.simname == ptcl_log_entry.simname
                 assert halo_log_entry.redshift == ptcl_log_entry.redshift
 
-                hf = h5py.File(halo_log_entry.fname)
-                pf = h5py.File(ptcl_log_entry.fname)
+                hf = h5py.File(halo_log_entry.fname, 'r')
+                pf = h5py.File(ptcl_log_entry.fname, 'r')
 
                 assert hf.attrs['simname'] == pf.attrs['simname']
 
