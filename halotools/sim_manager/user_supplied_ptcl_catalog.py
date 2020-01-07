@@ -296,7 +296,7 @@ class UserSuppliedPtclCatalog(object):
 
         self.ptcl_table.write(fname, path='data', overwrite=overwrite)
 
-        f = h5py.File(fname)
+        f = h5py.File(fname, 'a')
 
         redshift_string = get_redshift_string(self.redshift)
 

@@ -564,7 +564,7 @@ class CachedHaloCatalog(object):
                 self.log_entry.fname + "\n\n")
             raise InvalidCacheLogEntry(msg)
 
-        f = h5py.File(self.log_entry.fname)
+        f = h5py.File(self.log_entry.fname, 'r')
         for attr_key in list(f.attrs.keys()):
             if attr_key == 'redshift':
                 setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))

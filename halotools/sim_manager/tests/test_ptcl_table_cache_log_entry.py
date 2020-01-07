@@ -128,7 +128,7 @@ class TestPtclTableCacheLogEntry(TestCase):
             pass
         self.table1.write(self.fnames[num_scenario], path='data')
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'r')
         k = list(f.attrs.keys())
         f.close()
 
@@ -149,7 +149,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.close()
@@ -157,7 +157,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache is False
         assert "``particle_mass``" in log_entry._cache_safety_message
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
@@ -176,7 +176,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         for attr in self.hard_coded_log_attrs:
             if attr != 'redshift':
                 f.attrs[attr] = getattr(log_entry, attr)
@@ -189,13 +189,13 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache is False
         assert "does not match" in log_entry._cache_safety_message
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         f.attrs['redshift'] = 1.3390001
         f.close()
         assert log_entry.safe_for_cache is False
         assert "does not match" not in log_entry._cache_safety_message
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         f.attrs['redshift'] = '1.3390001'
         f.close()
         assert log_entry.safe_for_cache is False
@@ -213,7 +213,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         for attr in self.hard_coded_log_attrs:
             if attr != 'redshift':
                 f.attrs[attr] = getattr(log_entry, attr)
@@ -239,7 +239,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 2.
@@ -262,7 +262,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario], 'a')
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
