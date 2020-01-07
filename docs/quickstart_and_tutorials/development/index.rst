@@ -15,6 +15,5 @@ contribute to the Halotools code base.
    staying_up_to_date
    bug_reports
    getting_started
-   getting_started_developers
    contributors
    ../../changelog
