@@ -39,3 +39,11 @@ def test_noisy_percentile3():
     u2 = noisy_percentile(u, r_desired, random_percentile=uran)
     r_achieved = spearmanr(u, u2)[0]
     assert np.allclose(r_desired, r_achieved, atol=0.02)
+
+
+def test_negative_unity_noisy_percentile():
+    """Regression test for #939.
+    """
+    r_desired = -1
+    u2 = noisy_percentile(u, r_desired, seed=fixed_seed)
+    assert np.allclose(u2, u[::-1])
