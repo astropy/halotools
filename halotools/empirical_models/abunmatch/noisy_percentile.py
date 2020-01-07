@@ -147,8 +147,10 @@ def noisy_percentile(percentile, correlation_coeff, seed=None, random_percentile
     Correlation strengths between zero and unity span the intermediary cases.
 
     """
-    if np.all(np.abs(correlation_coeff) == 1):
+    if np.all(correlation_coeff == 1):
         return percentile
+    elif np.all(correlation_coeff == -1):
+        return percentile[::-1]
 
     percentile = np.atleast_1d(percentile)
     correlation_coeff = np.atleast_1d(correlation_coeff)
