@@ -97,32 +97,28 @@ randomly downsampled the particles in the snapshot to perform your calculation.
 
 .. code:: python
 
-    from halotools.mock_observables import delta_sigma
-
-    rp_bins = np.logspace(-1, 1, 15)
+    logrp_bins = np.linspace(-1,1,15)
+    rp_bins = 10**logrp_bins
 
     particle_masses = halocat.particle_mass
     period=model.mock.Lbox
     downsampling_factor = (halocat.num_ptcl_per_dim**3)/float(len(particle_positions))
 
-    rp_bins = np.logspace(-1,1,15)
+    result_mstar11_in_mpc = mean_delta_sigma(mstar11_positions, particle_positions,
+                                         particle_masses, downsampling_factor,
+                                        rp_bins, period)
 
-    rp, result_mstar11_in_mpc = delta_sigma(mstar11_positions, particle_positions,
-                        particle_masses, downsampling_factor,
-                        rp_bins, period, cosmology=halocat.cosmology, num_threads='max')
+    result_mstar105_in_mpc = mean_delta_sigma(mstar105_positions, particle_positions,
+                                         particle_masses, downsampling_factor,
+                                        rp_bins, period)
 
-    rp, result_mstar105_in_mpc = delta_sigma(mstar105_positions, particle_positions,
-                        particle_masses, downsampling_factor,
-                        rp_bins, period, cosmology=halocat.cosmology, num_threads='max')
+    result_mstar105_central_in_mpc = mean_delta_sigma(mstar105_central_positions, particle_positions,
+                                         particle_masses, downsampling_factor,
+                                        rp_bins, period)
 
-    rp, result_mstar105_central_in_mpc = delta_sigma(mstar105_central_positions, particle_positions,
-                        particle_masses, downsampling_factor,
-                        rp_bins, period, cosmology=halocat.cosmology, num_threads='max')
-
-    rp, result_mstar105_satellite_in_mpc = delta_sigma(mstar105_satellite_positions, particle_positions,
-                        particle_masses, downsampling_factor,
-                        rp_bins, period, cosmology=halocat.cosmology, num_threads='max')
-
+    result_mstar105_satellite_in_mpc = mean_delta_sigma(mstar105_satellite_positions, particle_positions,
+                                         particle_masses, downsampling_factor,
+                                        rp_bins, period)
 
 Recall that all Halotools length units are comoving and in Mpc/h. However, the conventional units to
 plot :math:`\Delta\Sigma` are :math:`h*M_{\odot}/pc^2`, since in those units the galaxy-galaxy
@@ -143,22 +139,23 @@ Plot the results
 ~~~~~~~~~~~~~~~~~~~~
 .. code:: python
 
+    logrp_mids = 0.5*(logrp_bins[:-1] + logrp_bins[1:])
+
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 
     __=plt.loglog()
 
-    __=ax.plot(rp, result_mstar11_in_pc, label=r'All galaxies: $M_{\ast} > 10^{11}M_{\odot}$')
-    __=ax.plot(rp, result_mstar105_satellite_in_pc, label=r'Satellites: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
-    __=ax.plot(rp, result_mstar105_in_pc, label=r'All galaxies: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
-    __=ax.plot(rp, result_mstar105_central_in_pc, label=r'Centrals: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    __=ax.plot(10**logrp_mids, result_mstar11_in_pc, label=r'All galaxies: $M_{\ast} > 10^{11}M_{\odot}$')
+    __=ax.plot(10**logrp_mids, result_mstar105_satellite_in_pc, label=r'Satellites: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    __=ax.plot(10**logrp_mids, result_mstar105_in_pc, label=r'All galaxies: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    __=ax.plot(10**logrp_mids, result_mstar105_central_in_pc, label=r'Centrals: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
 
-    __=ax.set_xlim(xmin = 0.1, xmax = 10)
-    __=ax.set_ylim(ymin = 0.5, ymax = 200)
+    __=ax.set_xlim(0.1, 10)
+    __=ax.set_ylim(0.5, 200)
 
     __=ax.set_xlabel(r'$R_{\rm p} $  $\rm{[Mpc / h]}$', fontsize=16)
     __=ax.set_ylabel(r'$\Delta\Sigma(R_{\rm p})$  $[h M_{\odot} / {\rm pc}^2]$', fontsize=16)
     __=ax.legend(loc='best', fontsize=13)
-    __=plt.xticks(fontsize=15); plt.yticks(fontsize=15)
 
 .. image:: gg_lensing_tutorial3.png
 
