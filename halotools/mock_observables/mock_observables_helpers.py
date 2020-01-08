@@ -75,14 +75,15 @@ def get_num_threads(input_num_threads, enforce_max_cores=False):
             raise ValueError(msg)
 
     if num_threads > num_available_cores:
-        msg = ("Input ``num_threads`` = %i exceeds the ``num_available_cores`` = %i.\n")
+        msg = ("Input ``num_threads`` = {0} exceeds the ``num_available_cores`` = {1}.\n")
+        warn(msg.format(num_threads, num_available_cores))
 
         if enforce_max_cores is True:
-            msg += ("Since ``enforce_max_cores`` is True, "
-                "setting ``num_threads`` to ``num_available_cores``.\n")
-            num_threads = num_available_cores
+            msg = ("Since ``enforce_max_cores`` is True,\n"
+                "setting ``num_threads`` to ``num_available_cores``.")
+            warn(msg)
 
-        warn(msg % (num_threads, num_available_cores))
+            num_threads = num_available_cores
 
     return num_threads
 
