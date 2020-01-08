@@ -31,7 +31,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     Calculate :math:`\Delta\Sigma(r_p)`, the galaxy-galaxy lensing signal
     as a function of projected distance.
 
-    The `delta_sigma` function calculates :math:`\Delta\Sigma(r_p)` by calculating
+    The `mean_delta_sigma` function calculates :math:`\Delta\Sigma(r_p)` by calculating
     the excess surface density of particles in cylinders surrounding the input galaxies.
     The input particles should be a random downsampling of particles in the
     same simulation snapshot as the model galaxies.
@@ -126,7 +126,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     Examples
     --------
-    For demonstration purposes we will calculate `delta_sigma` using a mock
+    For demonstration purposes we will calculate `mean_delta_sigma` using a mock
     catalog generated with the `~halotools.sim_manager.FakeSim`
     that is generated on-the-fly.
 
@@ -140,7 +140,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     >>> model.populate_mock(halocat)
 
     Now we retrieve the positions of our mock galaxies and transform the arrays
-    into the shape of the ndarray expected by the `~halotools.mock_observables.delta_sigma`
+    into the shape of the ndarray expected by the `~halotools.mock_observables.mean_delta_sigma`
     function. We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
@@ -163,7 +163,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     The default Halotools catalogs come with ~1e6 particles.
     Using this many particles may be overkill: in many typical use-cases,
-    the `delta_sigma` function converges at the percent-level using
+    the `mean_delta_sigma` function converges at the percent-level using
     an order of magnitude fewer particles.
     The code below shows how to (optionally) downsample these particles
     using a Halotools convenience function.
@@ -185,7 +185,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     >>> ds = mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
 
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
-    the `delta_sigma` functions are in *comoving* units of
+    the `mean_delta_sigma` functions are in *comoving* units of
     :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1,
     whereas the typical units used to plot :math:`\Delta\Sigma` are in
     *physical* units of :math:`M_{\odot} / {\rm pc}^2` using the value of
@@ -194,14 +194,14 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     The code shown above demonstrates how to calculate :math:`\Delta\Sigma` via the excess
     surface density of mass using the z-axis as the axis of projection. However, it may be useful
     to project along the other Cartesian axes, for example to help beat down sample variance.
-    While the `delta_sigma` function is written to always use the "third" dimension as the
+    While the `mean_delta_sigma` function is written to always use the "third" dimension as the
     projection axis, you can easily hack the code to project along, say, the y-axis by simply
     transposing your y- and z-coordinates when you pack them into a 2-d array:
 
     >>> particles = np.vstack((px, pz, py)).T
     >>> galaxies = np.vstack((x, z, y)).T
 
-    Using the above ``particles`` and ``galaxies`` and otherwise calling the `delta_sigma`
+    Using the above ``particles`` and ``galaxies`` and otherwise calling the `mean_delta_sigma`
     function as normal will instead calculate the surface mass density by projecting
     along the y-axis.
 
