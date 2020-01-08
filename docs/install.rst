@@ -34,6 +34,8 @@ you will need to build the code from source following the instructions in the ne
 	in the :ref:`installing_halotools_with_virtualenv`
 	section of the documentation.
 
+.. _install_from_source:
+
 Building from source
 ====================
 
