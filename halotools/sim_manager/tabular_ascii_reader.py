@@ -381,10 +381,10 @@ class TabularAsciiReader(object):
 
         """
         try:
-            assert (type(header_char) == str) or (type(header_char) == str)
+            assert (type(header_char) == str) or (type(header_char) == bytes)
             assert len(header_char) == 1
         except AssertionError:
-            msg = ("\nThe input ``header_char`` must be a single string character.\n")
+            msg = ("\nThe input ``header_char`` must be a single string/bytes character.\n")
             raise TypeError(msg)
         return header_char
 
