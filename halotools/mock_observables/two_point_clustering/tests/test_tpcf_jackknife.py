@@ -32,7 +32,7 @@ def test_tpcf_jackknife_corr_func():
         randoms = np.random.random((Npts*10, 3))
 
     result_1, err = tpcf_jackknife(sample1, randoms, rbins,
-        Nsub=5, period=period, num_threads=1)
+        Nsub=2, period=period, num_threads=1)
 
     result_2 = tpcf(sample1, rbins,
         randoms=randoms, period=period, num_threads=1)
@@ -51,7 +51,7 @@ def test_tpcf_jackknife_no_pbc():
         randoms = np.random.random((Npts*10, 3))
 
     result_1, err = tpcf_jackknife(sample1, randoms, rbins,
-        Nsub=5, num_threads=1)
+        Nsub=2, num_threads=1)
 
 
 @pytest.mark.slow
@@ -66,7 +66,7 @@ def test_tpcf_jackknife_cross_corr():
         randoms = np.random.random((Nran*10, 3))
 
     result = tpcf_jackknife(sample1, randoms, rbins,
-        period=period, Nsub=3, num_threads=1, sample2=sample2)
+        period=period, Nsub=2, num_threads=1, sample2=sample2)
 
 
 @pytest.mark.slow
@@ -81,7 +81,7 @@ def test_tpcf_jackknife_no_randoms():
         randoms = [Nran]
 
     result = tpcf_jackknife(sample1, randoms, rbins,
-        period=period, Nsub=3, num_threads=1, sample2=sample2)
+        period=period, Nsub=2, num_threads=1, sample2=sample2)
 
 
 @pytest.mark.slow
@@ -96,7 +96,7 @@ def test_tpcf_jackknife_alt_estimator():
         randoms = [Nran]
 
     result = tpcf_jackknife(sample1, randoms, rbins, estimator='Hewett',
-        period=period, Nsub=3, num_threads=1, sample2=sample2)
+        period=period, Nsub=2, num_threads=1, sample2=sample2)
 
 
 @pytest.mark.slow
@@ -111,6 +111,6 @@ def test_tpcf_jackknife_cov_matrix():
 
     nbins = len(rbins)-1
 
-    result_1, err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, period=period, num_threads=1)
+    result_1, err = tpcf_jackknife(sample1, randoms, rbins, Nsub=2, period=period, num_threads=1)
 
     assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"
