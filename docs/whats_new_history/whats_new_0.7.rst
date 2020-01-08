@@ -12,16 +12,6 @@ Halotools ``v0.7`` is currently under development. The latest release is ``v0.6`
 New Utility Functions
 =====================
 
-Rotations, dot products, and other 3d operations
-------------------------------------------------
-There are many new functions in `halotools.utils` subpackage related to spatial rotations in three dimensions:
-
-    * `~halotools.utils.elementwise_dot`
-    * `~halotools.utils.angles_between_list_of_vectors`
-    * `~halotools.utils.rotation_matrices_from_angles`
-    * `~halotools.utils.rotation_matrices_from_vectors`
-    * `~halotools.utils.rotate_vector_collection`
-
 Probabilistic binning
 ------------------------------------------------
 The `~halotools.utils.fuzzy_digitize` function in `halotools.utils` allows you to discretize an
