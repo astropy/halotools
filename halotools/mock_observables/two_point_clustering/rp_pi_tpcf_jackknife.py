@@ -331,12 +331,12 @@ def rp_pi_tpcf_jackknife(sample1, randoms, rp_bins, pi_bins, Nsub=[5, 5, 5],
         xi_22_sub_flat = np.reshape(xi_22_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
     if (do_cross is True):
         xi_12_sub_flat = np.reshape(xi_12_sub, (N_sub_vol, (len(rp_bins)-1)*(len(pi_bins)-1)))
-    
+
     if (do_auto is True):
-        xi_11_cov = np.matrix(np.cov(xi_11_sub_flat.T, bias=True))*(N_sub_vol-1)
-        xi_22_cov = np.matrix(np.cov(xi_22_sub_flat.T, bias=True))*(N_sub_vol-1)
+        xi_11_cov = np.array(np.cov(xi_11_sub_flat.T, bias=True))*(N_sub_vol-1)
+        xi_22_cov = np.array(np.cov(xi_22_sub_flat.T, bias=True))*(N_sub_vol-1)
     if (do_cross is True):
-        xi_12_cov = np.matrix(np.cov(xi_12_sub_flat.T, bias=True))*(N_sub_vol-1)
+        xi_12_cov = np.array(np.cov(xi_12_sub_flat.T, bias=True))*(N_sub_vol-1)
 
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov

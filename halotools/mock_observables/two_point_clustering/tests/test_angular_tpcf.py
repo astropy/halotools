@@ -29,18 +29,18 @@ def test_angular_tpcf1():
 def test_angular_tpcf2():
     Npts1, Npts2 = 1000, 500
     angular_coords1 = sample_spherical_surface(Npts1, seed=fixed_seed)
-    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed)
+    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed+1)
 
     theta_bins = np.logspace(-1, 1, 5)
-    w1 = angular_tpcf(angular_coords1, theta_bins, sample2=angular_coords1)
-    w2 = angular_tpcf(angular_coords1, theta_bins, sample2=angular_coords2)
+    w1 = angular_tpcf(angular_coords1, theta_bins, sample2=angular_coords1, do_cross=False)
+    w2 = angular_tpcf(angular_coords1, theta_bins, sample2=angular_coords2, do_auto=False)
     assert not np.all(w1 == w2)
 
 
 def test_angular_tpcf3():
     Npts1, Npts2, Nran = 1000, 500, 4000
     angular_coords1 = sample_spherical_surface(Npts1, seed=fixed_seed)
-    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed)
+    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed+1)
     randoms = sample_spherical_surface(Nran, seed=fixed_seed)
 
     theta_bins = np.logspace(-1, 1, 5)
@@ -50,7 +50,7 @@ def test_angular_tpcf3():
 def test_angular_tpcf_auto_consistency():
     Npts1, Npts2, Nran = 1000, 500, 4000
     angular_coords1 = sample_spherical_surface(Npts1, seed=fixed_seed)
-    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed)
+    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed+1)
     randoms = sample_spherical_surface(Nran, seed=fixed_seed)
 
     theta_bins = np.logspace(-1, 1, 5)
@@ -67,7 +67,7 @@ def test_angular_tpcf_auto_consistency():
 def test_angular_tpcf_cross_consistency():
     Npts1, Npts2, Nran = 1000, 500, 4000
     angular_coords1 = sample_spherical_surface(Npts1, seed=fixed_seed)
-    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed)
+    angular_coords2 = sample_spherical_surface(Npts2, seed=fixed_seed+1)
     randoms = sample_spherical_surface(Nran, seed=fixed_seed)
 
     theta_bins = np.logspace(-1, 1, 5)

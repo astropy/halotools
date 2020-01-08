@@ -108,7 +108,7 @@ def test_mass_in_cylinder_stack_parallel():
     mass_encl_two_threads = mass_in_cylinder_stack(centers, particles, masses,
         downsampling_factor, rp_bins, Lbox, num_threads=2)
     mass_encl_eleven_threads = mass_in_cylinder_stack(centers, particles, masses,
-        downsampling_factor, rp_bins, Lbox, num_threads=11)
+        downsampling_factor, rp_bins, Lbox, num_threads='max')
     assert np.allclose(mass_encl_serial, mass_encl_two_threads)
     assert np.allclose(mass_encl_serial, mass_encl_eleven_threads)
 

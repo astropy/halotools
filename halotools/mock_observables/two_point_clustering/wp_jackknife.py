@@ -319,10 +319,10 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
 
     # calculate the covariance matrix
     if (do_auto is True):
-        xi_11_cov = np.matrix(np.cov(xi_11_sub.T, bias=True))*(N_sub_vol-1)
-        xi_22_cov = np.matrix(np.cov(xi_22_sub.T, bias=True))*(N_sub_vol-1)
+        xi_11_cov = np.array(np.cov(xi_11_sub.T, bias=True))*(N_sub_vol-1)
+        xi_22_cov = np.array(np.cov(xi_22_sub.T, bias=True))*(N_sub_vol-1)
     if (do_cross is True):
-        xi_12_cov = np.matrix(np.cov(xi_12_sub.T, bias=True))*(N_sub_vol-1)
+        xi_12_cov = np.array(np.cov(xi_12_sub.T, bias=True))*(N_sub_vol-1)
 
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov

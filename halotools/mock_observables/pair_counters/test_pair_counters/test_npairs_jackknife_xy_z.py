@@ -148,22 +148,21 @@ def test_parallel_serial_consistency():
     result_2 = npairs_jackknife_xy_z(random_sample, random_sample, rp_bins, pi_bins, period=period,
         jtags1=jtags1, jtags2=jtags1, N_samples=10,
         weights1=weights1, weights2=weights1, num_threads=2)
-    
+
     assert np.allclose(result_1,result_2), 'threaded and non-threaded results are not consistent'
-    
 
 
 def test_process_weights1():
 
-    npts1, npts2 = 10, 10
-    N_samples = 5
+    npts1, npts2 = 10000, 20000
+    N_samples = 3
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts1, 3))
         sample2 = np.random.random((npts2, 3))
         weights1 = np.random.rand(npts1)
         weights2 = np.random.rand(npts2)
-        jtags1 = np.random.randint(1, N_samples, npts1)
-        jtags2 = np.random.randint(1, N_samples, npts2)
+        jtags1 = np.random.randint(1, N_samples+1, npts1)
+        jtags2 = np.random.randint(1, N_samples+1, npts2)
 
     __ = process_weights(sample1, sample2,
         weights1, weights2, jtags1, jtags2, N_samples)
