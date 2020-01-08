@@ -18,7 +18,7 @@ All of these can be imported from `halotools.mock_observables`.
 	s_mu_tpcf
 	tpcf_jackknife
 	tpcf_one_two_halo_decomp
-	delta_sigma
+	mean_delta_sigma
 	marked_tpcf
 
 

@@ -14,7 +14,7 @@ of shape *(Npts, Ndim)* storing the coordinates.
 All the `~halotools.mock_observables` functions that operate on multi-dimensional data
 follow this convention. For example,
 `~halotools.mock_observables.tpcf`, `~halotools.mock_observables.void_prob_func`
-and `~halotools.mock_observables.delta_sigma` all accept data formatted as
+and `~halotools.mock_observables.mean_delta_sigma` all accept data formatted as
 `~numpy.ndarray` of shape *(Npts, 3)*, while `~halotools.mock_observables.angular_tpcf` accepts
 a `~numpy.ndarray` of shape *(Npts, 2)*.
 

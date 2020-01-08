@@ -19,11 +19,11 @@
 
 - Added new utils function `bijective_distribution_matching`
 
-- Added new utils module `satellite_rotations` implementing functions that can be used to remap satellite orientations and positions within their halos
-
 - Added new `load_um_binary_sfr_catalog` function to load SFR catalogs from UniverseMachine into memory
 
 - Added new `return_indexes` feature to conditional_abunmatch function. See https://github.com/astropy/halotools/pull/913.
+
+- New function `mean_delta_sigma` replaces old `delta_sigma` function. See #980.
 
 
 0.6 (2017-12-15)

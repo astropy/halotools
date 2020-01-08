@@ -632,7 +632,7 @@ class ModelFactory(object):
         The only difference between this use-case and the one demonstrated in
         the tutorial is that here you will use the `~halotools.mock_observables.tpcf`
         to calculate the cross-correlation between dark matter particles and galaxies,
-        rather than calling the `~halotools.mock_observables.delta_sigma` function.
+        rather than calling the `~halotools.mock_observables.mean_delta_sigma` function.
 
         """
         if summary_statistic == 'mean':

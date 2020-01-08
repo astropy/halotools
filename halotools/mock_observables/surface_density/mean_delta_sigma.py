@@ -23,7 +23,7 @@ __all__ = ('mean_delta_sigma', )
 __author__ = ('Andrew Hearin', 'Johannes Ulf Lange')
 
 
-def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
+def mean_delta_sigma(galaxies, particles, effective_particle_masses,
                      rp_bins, period=None, verbose=False, num_threads=1,
                      approx_cell1_size=None, approx_cell2_size=None,
                      per_object=False):
@@ -31,14 +31,14 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     Calculate :math:`\Delta\Sigma(r_p)`, the galaxy-galaxy lensing signal
     as a function of projected distance.
 
-    The `delta_sigma` function calculates :math:`\Delta\Sigma(r_p)` by calculating
+    The `mean_delta_sigma` function calculates :math:`\Delta\Sigma(r_p)` by calculating
     the excess surface density of particles in cylinders surrounding the input galaxies.
     The input particles should be a random downsampling of particles in the
     same simulation snapshot as the model galaxies.
 
-    By using the ``particle_masses`` argument, the function works equally well
+    By using the ``effective_particle_masses`` argument, the function works equally well
     with DM-only simulations as with hydro simulations that include
-    particles of variable mass.
+    multiple species of particles with different masses and/or different downsampling rates.
 
     Example calls to this function appear in the documentation below.
 
@@ -60,8 +60,8 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    particle_masses : float or ndarray
-        Float or array storing the mass of each particle in units of Msun with h=1 units.
+    effective_particle_masses : float or ndarray
+        Float or array storing the effective mass of each particle in units of Msun with h=1 units.
 
         If passing in an ndarray, must be of shape (num_ptcl, ),
         one array element for every particle.
@@ -69,9 +69,10 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
         If passing in a single float, it will be assumed that every particle
         has the same mass (as is the case in a typical DM-only simulation).
 
-    downsampling_factor : float
-        Factor by which the particles have been randomly downsampled.
-        Should be unity if all simulation particles have been chosen.
+        The effective mass is simply the actual mass multiplied by the downsampling rate.
+        For example, if your simulation has a particle mass of 10**8 and you are using a
+        sample of particles that have been randomly downsampled at a 1% rate, then
+        your effective particle mass will be 10**10.
 
         See the Examples section below for how this can be calculated
         from Halotools-provided catalogs.
@@ -126,7 +127,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     Examples
     --------
-    For demonstration purposes we will calculate `delta_sigma` using a mock
+    For demonstration purposes we will calculate `mean_delta_sigma` using a mock
     catalog generated with the `~halotools.sim_manager.FakeSim`
     that is generated on-the-fly.
 
@@ -140,7 +141,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     >>> model.populate_mock(halocat)
 
     Now we retrieve the positions of our mock galaxies and transform the arrays
-    into the shape of the ndarray expected by the `~halotools.mock_observables.delta_sigma`
+    into the shape of the ndarray expected by the `~halotools.mock_observables.mean_delta_sigma`
     function. We transform our *x, y, z* points into the array shape used by the pair-counter by
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
     is used throughout the `~halotools.mock_observables` sub-package:
@@ -163,7 +164,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
     The default Halotools catalogs come with ~1e6 particles.
     Using this many particles may be overkill: in many typical use-cases,
-    the `delta_sigma` function converges at the percent-level using
+    the `mean_delta_sigma` function converges at the percent-level using
     an order of magnitude fewer particles.
     The code below shows how to (optionally) downsample these particles
     using a Halotools convenience function.
@@ -173,19 +174,16 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     >>> particles = randomly_downsample_data(particles, num_ptcls_to_use)
     >>> particle_masses = np.zeros(num_ptcls_to_use) + halocat.particle_mass
 
-    Whether or not you perform additional downsampling, you will need to account
-    for the fact that you are not using the entire snapshot of particles by
-    providing the ``downsampling_factor`` argument:
-
     >>> total_num_ptcl_in_snapshot = halocat.num_ptcl_per_dim**3
     >>> downsampling_factor = total_num_ptcl_in_snapshot/float(len(particles))
+    >>> effective_particle_masses = downsampling_factor * particle_masses
 
     >>> rp_bins = np.logspace(-1, 1, 10)
     >>> period = model.mock.Lbox
-    >>> ds = mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor, rp_bins, period)
+    >>> ds = mean_delta_sigma(galaxies, particles, effective_particle_masses, rp_bins, period)
 
     Take care with the units. The values for :math:`\Delta\Sigma` returned by
-    the `delta_sigma` functions are in *comoving* units of
+    the `mean_delta_sigma` functions are in *comoving* units of
     :math:`h M_{\odot} / {\rm Mpc}^2` assuming h=1,
     whereas the typical units used to plot :math:`\Delta\Sigma` are in
     *physical* units of :math:`M_{\odot} / {\rm pc}^2` using the value of
@@ -194,14 +192,14 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     The code shown above demonstrates how to calculate :math:`\Delta\Sigma` via the excess
     surface density of mass using the z-axis as the axis of projection. However, it may be useful
     to project along the other Cartesian axes, for example to help beat down sample variance.
-    While the `delta_sigma` function is written to always use the "third" dimension as the
+    While the `mean_delta_sigma` function is written to always use the "third" dimension as the
     projection axis, you can easily hack the code to project along, say, the y-axis by simply
     transposing your y- and z-coordinates when you pack them into a 2-d array:
 
     >>> particles = np.vstack((px, pz, py)).T
     >>> galaxies = np.vstack((x, z, y)).T
 
-    Using the above ``particles`` and ``galaxies`` and otherwise calling the `delta_sigma`
+    Using the above ``particles`` and ``galaxies`` and otherwise calling the `mean_delta_sigma`
     function as normal will instead calculate the surface mass density by projecting
     along the y-axis.
 
@@ -212,7 +210,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
     """
     # Process the inputs with the helper function
     result = _mean_delta_sigma_process_args(
-        galaxies, particles, particle_masses, downsampling_factor, rp_bins,
+        galaxies, particles, effective_particle_masses, rp_bins,
         period, num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, x2in, y2in, w2in = result[0:5]
     rp_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[5:]
@@ -258,7 +256,7 @@ def mean_delta_sigma(galaxies, particles, particle_masses, downsampling_factor,
 
 
 def _mean_delta_sigma_process_args(
-        galaxies, particles, particle_masses, downsampling_factor, rp_bins,
+        galaxies, particles, effective_particle_masses, rp_bins,
         period, num_threads, approx_cell1_size, approx_cell2_size):
 
     period, PBCs = get_period(period)
@@ -277,16 +275,12 @@ def _mean_delta_sigma_process_args(
     galaxies = enforce_sample_has_correct_shape(galaxies)
     particles = enforce_sample_has_correct_shape(particles)
 
-    particle_masses = np.atleast_1d(particle_masses)
-    if len(particle_masses) == 1:
-        particle_masses = np.zeros(particles.shape[0]) + particle_masses[0]
+    effective_particle_masses = np.atleast_1d(effective_particle_masses)
+    if len(effective_particle_masses) == 1:
+        effective_particle_masses = np.zeros(particles.shape[0]) + effective_particle_masses[0]
     else:
         msg = "Must have same number of ``particle_masses`` as particles"
-        assert particle_masses.shape[0] == particles.shape[0], msg
-
-    msg = "downsampling_factor = {0} < 1, which is impossible".format(
-        downsampling_factor)
-    assert downsampling_factor >= 1, msg
+        assert effective_particle_masses.shape[0] == particles.shape[0], msg
 
     enforce_sample_respects_pbcs(galaxies[:, 0], galaxies[:, 1],
                                  galaxies[:, 2], period)
@@ -318,7 +312,7 @@ def _mean_delta_sigma_process_args(
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size]
 
-    return (x1, y1, x2, y2, particle_masses * downsampling_factor, rp_bins,
+    return (x1, y1, x2, y2, effective_particle_masses, rp_bins,
             period, num_threads, PBCs, approx_cell1_size, approx_cell2_size)
 
 
