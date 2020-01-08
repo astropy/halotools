@@ -1,4 +1,3 @@
 from .delta_sigma import delta_sigma, delta_sigma_from_precomputed_pairs
 from .mass_in_cylinders import total_mass_enclosed_per_cylinder
 from .mean_delta_sigma import mean_delta_sigma
-from .mean_delta_sigma_one_two_halo_decomp import mean_delta_sigma_one_two_halo_decomp
