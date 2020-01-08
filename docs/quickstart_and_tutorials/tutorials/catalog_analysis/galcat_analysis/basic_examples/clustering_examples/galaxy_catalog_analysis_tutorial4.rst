@@ -28,7 +28,7 @@ default halo catalog.
     from halotools.empirical_models import PrebuiltHodModelFactory
     model = PrebuiltHodModelFactory('tinker13', threshold = 10.25)
     from halotools.sim_manager import CachedHaloCatalog
-    halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0, halo_finder = 'rockstar')
+    halocat = CachedHaloCatalog(simname='bolshoi', redshift=0, halo_finder='rockstar')
     model.populate_mock(halocat)
 
 Extract subsamples of galaxy positions
@@ -94,32 +94,6 @@ projection distance :math:`\pi_{\rm max}`.
     wp_blue = wp(blue_positions, rp_bins, pi_max,
         period=model.mock.Lbox, num_threads='max')
 
-Plot the results
-~~~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-    rp_bin_centers = (rp_bins[:1] + rp_bins[1:])/2.
-
-    plt.plot(rp_bin_centers, wp_all,
-             label=r'All galaxies',
-             color='k')
-    plt.plot(rp_bin_centers, wp_red,
-             label=r'Quiescent galaxies',
-             color='red')
-    plt.plot(rp_bin_centers, wp_blue,
-             label=r'Star-forming galaxies',
-             color='blue')
-
-    plt.xlim(xmin = 0.1, xmax = 10)
-    plt.ylim(ymin = 0.5, ymax = 5e3)
-    plt.loglog()
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xlabel(r'$r_{\rm p} $  $\rm{[Mpc]}$', fontsize=25)
-    plt.ylabel(r'$w_{\rm p}(r_{\rm p})$', fontsize=25)
-    plt.title(r'$M_{\ast} > 10^{10.25}M_{\odot}$', fontsize=20)
-    plt.legend(loc='best', fontsize=20)
 
 .. image:: wp_tutorial4.png
 
@@ -137,34 +111,6 @@ red-red, blue-blue, and red-blue clustering all in a single call to
                                                sample2 = blue_positions,
                                                period=model.mock.Lbox, num_threads='max',
                                                do_auto = True, do_cross = True)
-
-Plot the results
-~~~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-    plt.plot(rp_bin_centers, wp_red_blue,
-             label=r'Cross-correlation',
-             color='green')
-    plt.plot(rp_bin_centers, wp_red_red,
-             label=r'Quiescent galaxies',
-             color='red')
-    plt.plot(rp_bin_centers, wp_blue_blue,
-             label=r'Star-forming galaxies',
-             color='blue')
-    plt.plot(rp_bin_centers, wp_all, '--',
-             label=r'All galaxies',
-             color='k')
-
-    plt.xlim(xmin = 0.1, xmax = 10)
-    plt.ylim(ymin = 0.5, ymax = 5e3)
-    plt.loglog()
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xlabel(r'$r_{\rm p} $  $\rm{[Mpc]}$', fontsize=25)
-    plt.ylabel(r'$w_{\rm p}(r_{\rm p})$', fontsize=25)
-    plt.title(r'$M_{\ast} > 10^{10.25}M_{\odot}$', fontsize=20)
-    plt.legend(loc='best', fontsize=20)
 
 
 .. image:: wp_red_blue_cross.png
