@@ -8,10 +8,11 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..wp_jackknife import wp_jackknife
 from ..wp import wp
+from ...tests.cf_helpers import generate_3d_regular_mesh
 
 slow = pytest.mark.slow
 
-__all__ = ['test_wp_jackknife_corr_func', 'test_wp_jackknife_cov_matrix']
+__all__ = ['test_tpcf_jackknife_corr_func', 'test_wp_jackknife_cov_matrix']
 
 # create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
@@ -32,8 +33,10 @@ def test_tpcf_jackknife_corr_func():
         sample1 = np.random.random((Npts, 3))
         randoms = np.random.random((Npts*10, 3))
 
+    randoms = np.concatenate((randoms, generate_3d_regular_mesh(20, dmin=0, dmax=period)))
+
     result_1, err = wp_jackknife(sample1, randoms, rp_bins, pi_max,
-        Nsub=5, period=period, num_threads=1)
+        Nsub=2, period=period, num_threads=1)
 
     result_2 = wp(sample1, rp_bins, pi_max,
         randoms=randoms, period=period, num_threads=1)
@@ -52,7 +55,7 @@ def test_wp_jackknife_no_pbc():
         randoms = np.random.random((Npts*10, 3))
 
     result_1, err = wp_jackknife(sample1, randoms, rp_bins, pi_max,
-        Nsub=5, num_threads=1)
+        Nsub=2, num_threads=1)
 
 
 @pytest.mark.slow
@@ -67,7 +70,7 @@ def test_wp_jackknife_cross_corr():
         randoms = np.random.random((Nran*10, 3))
 
     result = wp_jackknife(sample1, randoms, rp_bins, pi_max,
-        period=period, Nsub=3, num_threads=1, sample2=sample2)
+        period=period, Nsub=2, num_threads=1, sample2=sample2)
 
 
 @pytest.mark.slow
@@ -82,7 +85,7 @@ def test_wp_jackknife_no_randoms():
         randoms = [Nran]
 
     result = wp_jackknife(sample1, randoms, rp_bins, pi_max,
-        period=period, Nsub=3, num_threads=1, sample2=sample2)
+        period=period, Nsub=2, num_threads=1, sample2=sample2)
 
 
 @pytest.mark.slow
@@ -97,7 +100,7 @@ def test_wp_jackknife_alt_estimator():
         randoms = [Nran]
 
     result = wp_jackknife(sample1, randoms, rp_bins, pi_max, estimator='Hewett',
-        period=period, Nsub=3, num_threads=1, sample2=sample2)
+        period=period, Nsub=2, num_threads=1, sample2=sample2)
 
 
 @pytest.mark.slow
@@ -112,7 +115,7 @@ def test_wp_jackknife_cov_matrix():
 
     nbins = len(rp_bins)-1
 
-    result_1, err = wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=5, period=period, num_threads=1)
+    result_1, err = wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=2, period=period, num_threads=1)
 
     assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"
 
@@ -130,6 +133,6 @@ def test_do_auto_false():
     #     period=period, Nsub=3, num_threads=1, sample2=sample2,
     #     do_auto=False)
     result = wp_jackknife(sample1, randoms, rp_bins, pi_max,
-        period=period, Nsub=3, num_threads=1, sample2=sample2, do_auto=False)
+        period=period, Nsub=2, num_threads=1, sample2=sample2, do_auto=False)
 
 
