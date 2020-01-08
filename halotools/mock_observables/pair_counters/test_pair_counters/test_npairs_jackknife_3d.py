@@ -118,15 +118,15 @@ def test_npairs_jackknife_3d_nonperiodic():
 
 def test_process_weights1():
 
-    npts1, npts2 = 10, 10
+    npts1, npts2 = 100, 120
     N_samples = 5
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts1, 3))
         sample2 = np.random.random((npts2, 3))
         weights1 = np.random.rand(npts1)
         weights2 = np.random.rand(npts2)
-        jtags1 = np.random.randint(1, N_samples, npts1)
-        jtags2 = np.random.randint(1, N_samples, npts2)
+        jtags1 = np.random.randint(1, N_samples+1, npts1)
+        jtags2 = np.random.randint(1, N_samples+1, npts2)
 
     __ = _npairs_jackknife_3d_process_weights_jtags(sample1, sample2,
         weights1, weights2, jtags1, jtags2, N_samples)
