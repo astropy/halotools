@@ -103,21 +103,22 @@ randomly downsampled the particles in the snapshot to perform your calculation.
     particle_masses = halocat.particle_mass
     period=model.mock.Lbox
     downsampling_factor = (halocat.num_ptcl_per_dim**3)/float(len(particle_positions))
+    effective_particle_masses = particle_masses*downsampling_factor
 
     result_mstar11_in_mpc = mean_delta_sigma(mstar11_positions, particle_positions,
-                                         particle_masses, downsampling_factor,
+                                         effective_particle_masses,
                                         rp_bins, period)
 
     result_mstar105_in_mpc = mean_delta_sigma(mstar105_positions, particle_positions,
-                                         particle_masses, downsampling_factor,
+                                         effective_particle_masses,
                                         rp_bins, period)
 
     result_mstar105_central_in_mpc = mean_delta_sigma(mstar105_central_positions, particle_positions,
-                                         particle_masses, downsampling_factor,
+                                         effective_particle_masses,
                                         rp_bins, period)
 
     result_mstar105_satellite_in_mpc = mean_delta_sigma(mstar105_satellite_positions, particle_positions,
-                                         particle_masses, downsampling_factor,
+                                         effective_particle_masses,
                                         rp_bins, period)
 
 Recall that all Halotools length units are comoving and in Mpc/h. However, the conventional units to
