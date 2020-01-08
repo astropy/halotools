@@ -132,7 +132,11 @@ def test_pairwise_velocity_stats_process_args6():
         sample1 = np.random.random((10, 3))
         velocities1 = np.random.random((10, 3))
 
-    result = _pairwise_velocity_stats_process_args(sample1, velocities1, sample1, velocities1,
+    with NumpyRNGContext(fixed_seed+1):
+        sample2 = np.random.random((10, 3))
+        velocities2 = np.random.random((10, 3))
+
+    result = _pairwise_velocity_stats_process_args(sample1, velocities1, sample2, velocities2,
         period, do_auto, do_cross, num_threads, approx_cell1_size, approx_cell2_size,
         fixed_seed)
     sample1, velocities1, sample2, velocities2, period, do_auto,\
