@@ -174,7 +174,7 @@ To list a few examples of functions you can use the ``mock_observables`` sub-pac
 
     3. marked correlation functions with highly customizable weights, `~halotools.mock_observables.marked_tpcf`,
 
-    4. galaxy-galaxy lensing, `~halotools.mock_observables.delta_sigma`,
+    4. galaxy-galaxy lensing, `~halotools.mock_observables.mean_delta_sigma`,
 
     5. friends-of-friends group identification, `~halotools.mock_observables.FoFGroups`.
 
