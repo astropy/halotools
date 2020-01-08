@@ -12,7 +12,5 @@ from .crossmatch import *
 from .array_indexing_manipulations import *
 from .inverse_transformation_sampling import *
 from .distribution_matching import *
-from .matrix_operations_3d import *
 from .probabilistic_binning import fuzzy_digitize
 from .conditional_percentile import sliding_conditional_percentile
-from .satellite_rotations import *
