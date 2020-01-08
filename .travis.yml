@@ -58,6 +58,8 @@ matrix:
 
         # try on windows
         - os: windows
+          language: c
+          compiler: gcc
           env: PYTHON_VERSION=3.7 SETUP_CMD='test'
 
 # before_install:
