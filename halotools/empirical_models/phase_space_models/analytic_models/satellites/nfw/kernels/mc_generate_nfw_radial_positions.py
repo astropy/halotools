@@ -76,11 +76,6 @@ def mc_generate_nfw_radial_positions(num_pts=int(1e4), conc=5,
     >>> radial_positions = mc_generate_nfw_radial_positions(halo_mass = 1e12, conc = 10)
     >>> radial_positions = mc_generate_nfw_radial_positions(halo_radius = 0.25)
     """
-    if ('halo_radius' in kwargs) and ('halo_mass' in kwargs):
-        msg = ("\nDo not specify both ``halo_mass`` and ``halo_radius``. \n"
-            "Pick a single option, and the other will be determined self-consistently.")
-        raise HalotoolsError(msg)
-
     try:
         halo_radius = kwargs['halo_radius']
     except KeyError:
