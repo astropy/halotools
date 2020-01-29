@@ -2,47 +2,42 @@
 
 .. _whats_new:
 
-*****************************
-What's New in Halotools v0.6?
-*****************************
+*******************************************
+What's New in Halotools v0.7?
+*******************************************
 
-Halotools ``v0.6`` is now available for installation with conda and pip. New features are summarized below. See :ref:`changelog` for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
+Halotools ``v0.7`` is now available for installation with conda and pip. New features are summarized below. See :ref:`changelog` for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
 
-Quick Installation Verification
-===============================
 
-It is now much faster to verify successful installation of the latest version of halotools. After installing the code, you can now run a targeted subset of unit tests, rather than the entire test suite:
+New Utility Functions
+=====================
 
-.. code:: python
+Probabilistic binning
+------------------------------------------------
+The `~halotools.utils.fuzzy_digitize` function in `halotools.utils` allows you to discretize an
+array in a probabilistic fashion, which can be useful for applications of conditional abundance matching.
 
-    import halotools
-    halotools.test_installation()
+Estimation of Conditional Probability Distributions
+-----------------------------------------------------
+The `~halotools.utils.sliding_conditional_percentile` function in `halotools.utils` calculates Prob(< y | x) for any arbitrary distribution of two-dimensional data. This function can be used to estimate, for example, quantiles of galaxy size as a function of stellar mass, and also should be useful in applications of conditional abundance matching.
 
 
 New Mock Observables
 ====================
 
-Radial distances and velocities
+Inertia Tensor calculation
 -------------------------------
-There are new functions in the `~halotools.mock_observables` sub-package that calculate element-wise radial distances and velocities, `~halotools.mock_observables.radial_distance`  and `~halotools.mock_observables.radial_distance_and_velocity`.
+The pairwise calculation `~halotools.mock_observables.inertia_tensor_per_object` computes the inertia tensor of a mass distribution surrounding each point in a sample of galaxies or halos.
 
-Jackknife error estimation
----------------------------
-New functions `~halotools.mock_observables.wp_jackknife` and `~halotools.mock_observables.rp_pi_tpcf_jackknife` give jackknife error estimation for the `~halotools.mock_observables.wp` and `~halotools.mock_observables.rp_pi_tpcf` functions.
+API Changes
+===========
 
-Weighted pair counts as a function of (s, mu)
----------------------------------------------
-New `halotools.mock_observables.pair_counters.weighted_npairs_s_mu` function gives weighting option for counting pairs in (s, mu) space.
+* The old implementation of the `~halotools.empirical_models.conditional_abunmatch` function has been renamed to be `~halotools.empirical_models.conditional_abunmatch_bin_based`.
 
-Utility functions
-==================
+* There is an entirely distinct, bin-free implementation of Conditional Abundance Matching that now bears the name `~halotools.empirical_models.conditional_abunmatch`.
 
-Matching two distributions for statistical comparison
-------------------------------------------------------
-The `halotools.utils.distribution_matching_indices` function Monte Carlo resamples one distribution until it matches another.
+* The `~halotools.mock_observables.mean_delta_sigma` function has replaced the previous calculation of gg-lensing. See #95 and #980.
 
-
-API Change
-==========
-
-* The `~halotools.mock_observables.pair_counters.npairs_s_mu` function now has a change to the meaning of the ``mu_bins`` input argument. This argument should now be interpreted as the conventional mu=cos(theta_LOS) instead of mu=sin(theta_LOS).
+Bug Fixes
+=========
+See issues tagged with the v0.7 milestone for a complete list of all bug fixes and changes.

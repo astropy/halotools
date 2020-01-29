@@ -1,4 +1,4 @@
-0.7 (unreleased)
+0.7
 ----------------
 
 - Added new `matrix_operations_3d` module in the `utils` subpackage that contains Numpy functions related to three-dimensional rotations.
@@ -23,7 +23,7 @@
 
 - Added new `return_indexes` feature to conditional_abunmatch function. See https://github.com/astropy/halotools/pull/913.
 
-- New function `mean_delta_sigma` replaces old `delta_sigma` function. See #980.
+- New function `mean_delta_sigma` replaces old `delta_sigma` function. See #955.
 
 
 0.6 (2017-12-15)
