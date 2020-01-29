@@ -310,3 +310,22 @@ def test_mc_generate_nfw_radial_positions_stochasticity():
         halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=44)
     assert np.allclose(r1, r2, rtol=0.001)
     assert not np.allclose(r1, r3, rtol=0.001)
+
+
+def test_user_defined_halo_radius():
+    """Regression test for #940
+    """
+    M = 1e14
+    model = NFWProfile()
+    virial_radius = model.halo_mass_to_halo_radius(M)
+    user_defined_radius = 7
+
+    r = model.mc_generate_nfw_radial_positions(
+        halo_radius=user_defined_radius, conc=5, num_pts=int(1000), seed=43)
+    assert np.all(r <= user_defined_radius)
+    assert np.any(r > virial_radius)
+
+    r = model.mc_generate_nfw_radial_positions(
+        halo_mass=M, conc=5, num_pts=int(1000), seed=43)
+    assert np.all(r <= virial_radius)
+
