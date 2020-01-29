@@ -1,4 +1,4 @@
-0.7
+0.7 (2020-1-29)
 ----------------
 
 - Added new `matrix_operations_3d` module in the `utils` subpackage that contains Numpy functions related to three-dimensional rotations.
