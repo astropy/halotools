@@ -21,7 +21,8 @@ __all__ = ('counts_in_cylinders', )
 
 def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
         period=None, verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None, return_indexes=False):
+        approx_cell1_size=None, approx_cell2_size=None, return_indexes=False,
+        condition=None, condition_args=()):
     """
     Function counts the number of points in ``sample2`` separated by a xy-distance
     *r* and z-distance *z* from each point in ``sample1``,
@@ -87,6 +88,23 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     return_indexes: bool, optional
         If true, return both counts and the indexes of the pairs.
+
+    condition : str, optional
+        Require a condition to be met for a pair to be counted.
+        Built-in options:   - None | "always_true"
+                            - "mass_frac"
+
+    condition_args : tuple, optional
+        Arguments passed to the condition constructor
+        "always_true":
+            *args will be ignored
+
+        "mass_frac":
+            -mass1 (array of mass of sample 1; required)
+            -mass2 (array of mass of sample 2; required)
+            -mass_frac_lim (tuple of min,max; required)
+            -lower_equality (bool to use lim[0] <= frac; optional)
+            -upper_equality (bool to use frac <= lim[1]; optional)
 
     Returns
     -------
@@ -169,7 +187,9 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     # Create a function object that has a single argument, for parallelization purposes
     engine = partial(counts_in_cylinders_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length, return_indexes)
+                     double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
+                     proj_search_radius, cylinder_half_length,
+                     return_indexes, condition, condition_args)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -211,6 +231,10 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     autocorr = False
     if sample2 is None:
         sample2, autocorr = sample1, True
+
+    # The engine expects position arrays to be double-precision
+    sample1 = np.asarray(sample1, dtype=np.float64)
+    sample2 = np.asarray(sample2, dtype=np.float64)
 
     # Passively enforce that we are working with ndarrays
     x1 = sample1[:, 0]
