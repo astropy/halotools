@@ -3,10 +3,10 @@
 .. _whats_new_v0p7:
 
 *******************************************
-What's New in (unreleased) Halotools v0.7?
+What's New in Halotools v0.7?
 *******************************************
 
-Halotools ``v0.7`` is currently under development. The latest release is ``v0.6``, which can now be installed with conda or pip. New features currently be developed for future release ``v0.7`` are summarized below. See :ref:`changelog` for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
+Halotools ``v0.7`` is now available for installation with conda and pip. New features are summarized below. See :ref:`changelog` for details on smaller issues and bug-fixes. See :ref:`whats_new_v0x_history` for full release history information.
 
 
 New Utility Functions
@@ -35,3 +35,9 @@ API Changes
 * The old implementation of the `~halotools.empirical_models.conditional_abunmatch` function has been renamed to be `~halotools.empirical_models.conditional_abunmatch_bin_based`.
 
 * There is an entirely distinct, bin-free implementation of Conditional Abundance Matching that now bears the name `~halotools.empirical_models.conditional_abunmatch`.
+
+* The `~halotools.mock_observables.mean_delta_sigma` function has replaced the previous calculation of gg-lensing. See #95 and #980.
+
+Bug Fixes
+=========
+See issues tagged with the v0.7 milestone for a complete list of all bug fixes and changes.

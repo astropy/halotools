@@ -9,19 +9,13 @@ License and Citation Information
 Citing Halotools
 ------------------
 
-The first "official" release of Halotools (v0.2) was accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication,
-we ask that you cite this paper in your work, as well as the DOI of the version of the code you used, e.g., DOI 10.5281/zenodo.835894 for v0.5, the current latest release.
+The first release of Halotools (v0.2) was accompanied with a code-release paper, http://arxiv.org/abs/1606.04106. If you use Halotools modules to support your science publication,
+we ask that you cite this paper in your work, ideally taking note of the version of the code you used, e.g., v0.7.
 
 Depending on what you use Halotools to do, there may be additional citations that are appropriate.
 For example, if you use a model in the `~halotools.empirical_models` sub-package
 and/or a simulation in the `~halotools.sim_manager` sub-package that has
 a ``publications`` attribute, each of the papers in that list should be cited.
-
-Because Halotools is a large package
-with modular functionality, it will promote reproducibility of your results
-if you explicitly state in your paper which features of the code you used,
-and which version of the package you used. If you used one of the Halotools-provided catalogs,
-be sure to explicitly declare which catalog, including its ``version_name``.
 
 Throughout the course of your project,
 one of the Halotools development team may support your work by incorporating a new feature
@@ -30,7 +24,7 @@ for the sake of your project.
 In such an event, please consider a co-authorship invitation for that member of the development team
 in addition to the above citations.
 You can always request such support by
-either a private email or by raising a public issue on GitHub and
+either slack or personal email, or by raising a public issue on GitHub and
 tagging the issue with the ``feature request`` label and/or ``question`` label.
 
 Halotools License

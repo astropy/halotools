@@ -105,23 +105,19 @@ Although the *sim_manager* provides an object-oriented framework for creating a 
 
 [![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.5, is now available on pip. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
+Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.7, is now available on pip and conda-forge. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
 
 ---
 
 ## Asking questions and staying up-to-date
 
-If you would like to receive notifications of new code releases, sign up for the google group
-
-https://groups.google.com/forum/#!forum/halotools
-
-The google group also serves as a public forum for asking questions about the code. You are also welcome to contact Andrew Hearin directly by email at ahearin@anl.gov, or by tagging @aphearin on GitHub.
+You can contact Andrew Hearin directly by email at ahearin@anl.gov, or by tagging @aphearin on GitHub.
 
 ---
 
 ## Citing Halotools
 
-If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper, as well as the DOI of the version of the code you used, e.g., 10.5281/zenodo.835894 for v0.6, the current latest release. Depending on what modules you use, other citations may also be appropriate; see the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
+If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper, ideally taking note of the version of the code you used, e.g., v0.7. Depending on what modules you use, other citations may also be appropriate; see the *License and Citation Information* section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
 
 
 ---

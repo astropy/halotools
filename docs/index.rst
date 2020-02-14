@@ -36,7 +36,6 @@ What's New?
    :maxdepth: 1
 
    whats_new
-   whats_new_history/whats_new_0.7
    changelog
 
 *********
