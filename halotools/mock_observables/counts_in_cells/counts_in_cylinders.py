@@ -91,20 +91,24 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
 
     condition : str, optional
         Require a condition to be met for a pair to be counted.
-        Built-in options:   - None | "always_true"
-                            - "mass_frac"
+        See options below:
+        None | "always_true":
+            Count all pairs in cylinder
+
+        "mass_frac":
+            Only count pairs which satisfy lim[0] < mass2/mass1 < lim[1]
 
     condition_args : tuple, optional
         Arguments passed to the condition constructor
-        "always_true":
-            *args will be ignored
+        None | "always_true":
+            condition_args will be ignored
 
         "mass_frac":
             -mass1 (array of mass of sample 1; required)
             -mass2 (array of mass of sample 2; required)
-            -mass_frac_lim (tuple of min,max; required)
-            -lower_equality (bool to use lim[0] <= frac; optional)
-            -upper_equality (bool to use frac <= lim[1]; optional)
+            -lim (tuple of min,max; required)
+            -lower_equality (bool to use lim[0] <= m2/m1; optional)
+            -upper_equality (bool to use m2/m1 <= lim[1]; optional)
 
     Returns
     -------

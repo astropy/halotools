@@ -68,8 +68,12 @@ def counts_in_cylinders_engine(
 
     condition : str, optional
         Require a condition to be met for a pair to be counted.
-        Built-in options:   - None | "always_true"
-                            - "mass_frac"
+        See options below:
+        None | "always_true":
+            Count all pairs in cylinder
+
+        "mass_frac":
+            Only count pairs which satisfy lim[0] < mass2/mass1 < lim[1]
 
     condition_args : tuple, optional
         Arguments passed to the condition constructor
@@ -79,9 +83,9 @@ def counts_in_cylinders_engine(
         "mass_frac":
             -mass1 (array of mass of sample 1; required)
             -mass2 (array of mass of sample 2; required)
-            -mass_frac_lim (tuple of min,max; required)
-            -lower_equality (bool to use lim[0] <= frac; optional)
-            -upper_equality (bool to use frac <= lim[1]; optional)
+            -lim (tuple of min,max; required)
+            -lower_equality (bool to use lim[0] <= m2/m1; optional)
+            -upper_equality (bool to use m2/m1 <= lim[1]; optional)
 
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
@@ -274,13 +278,13 @@ def counts_in_cylinders_engine(
                                         if cond.func(i_original, j_original):
                                             counts[ifirst1+i] += 1
 
-                                        if c_return_indexes:
-                                            indexes[current_indexes_cnt, 0] = ifirst1+i
-                                            indexes[current_indexes_cnt, 1] = ifirst2+j
-                                            current_indexes_cnt += 1
-                                            if current_indexes_cnt == current_indexes_len:
-                                                current_indexes_len *= 2
-                                                indexes = np.resize(indexes, (current_indexes_len, 2))
+                                            if c_return_indexes:
+                                                indexes[current_indexes_cnt, 0] = ifirst1+i
+                                                indexes[current_indexes_cnt, 1] = ifirst2+j
+                                                current_indexes_cnt += 1
+                                                if current_indexes_cnt == current_indexes_len:
+                                                    current_indexes_len *= 2
+                                                    indexes = np.resize(indexes, (current_indexes_len, 2))
 
     # At this point, we have calculated our pairs on the input arrays *after* sorting
     # Since the order matters in this calculation, we need to undo the sorting

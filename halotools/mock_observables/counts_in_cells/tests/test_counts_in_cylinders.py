@@ -301,3 +301,31 @@ def test_counts_in_cylinders_autocorr1():
 
 def _sort(indexes):
     return np.sort(indexes, order=["i1", "i2"])
+
+def test_counts_in_cylinders_condition_true():
+    npair, indexes = _mass_frac_tester(True)
+    assert np.all(npair == 1)
+    assert np.all(indexes["i1"] == indexes["i2"])
+
+def test_counts_in_cylinders_condition_false():
+    npair, indexes = _mass_frac_tester(False)
+    assert np.all(npair == 0)
+    assert len(indexes) == 0
+
+def _mass_frac_tester(equality):
+    sample1 = sample2 = np.arange(30).reshape(10, 3)
+    proj_search_radius = 1.0
+    cylinder_half_length = 1.0
+
+    m1 = np.logspace(-20,20,10)
+    m2 = m1 / 2.0
+    lim = (0.5, 0.5)
+    lower_equality = upper_equality = equality
+    args = (m1, m2, lim, lower_equality, upper_equality)
+
+    return counts_in_cylinders(sample1, sample2,
+                               proj_search_radius,
+                               cylinder_half_length,
+                               return_indexes=True,
+                               condition="mass_frac",
+                               condition_args=args)
