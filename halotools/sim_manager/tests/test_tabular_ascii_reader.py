@@ -70,7 +70,7 @@ class TestTabularAsciiReader(TestCase):
             reader = TabularAsciiReader(self.dummy_fname,
                 columns_to_keep_dict={'mass': (2, 'f4')},
                 header_char='###')
-        substr = 'must be a single string character'
+        substr = 'must be a single string/bytes character'
         assert substr in err.value.args[0]
 
     def test_process_columns_to_keep(self):

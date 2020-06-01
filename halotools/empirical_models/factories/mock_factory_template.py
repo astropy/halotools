@@ -7,13 +7,14 @@ from __future__ import absolute_import
 import numpy as np
 from multiprocessing import cpu_count
 from copy import copy
-from astropy.extern import six
+import six
 from abc import ABCMeta, abstractmethod
 from astropy.table import Table
 
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
 from .. import model_helpers, model_defaults
+import weakref
 
 try:
     from ... import mock_observables
@@ -76,6 +77,7 @@ class MockFactory(object):
         except:
             pass
 
+
         # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
 
@@ -85,6 +87,15 @@ class MockFactory(object):
         self.additional_haloprops = list(set(self.additional_haloprops))
 
         self.galaxy_table = Table()
+
+    @property
+    def model(self):
+        """ model, a weak reference to the model because mock is always a member of model """
+        return self._model()
+
+    @model.setter
+    def model(self, value):
+        self._model = weakref.ref(value)
 
     @abstractmethod
     def populate(self, **kwargs):
@@ -256,17 +267,6 @@ class MockFactory(object):
 
         >>> r, quiescent_clustering, q_sf_cross_clustering, star_forming_clustering = mock.compute_galaxy_clustering(quiescent = True, include_crosscorr = True) # doctest: +SKIP
 
-        Finally, suppose we wish to ask a very targeted question about how some physical effect
-        impacts the clustering of galaxies in a specific halo mass range.
-        For example, suppose we wish to study the two-point function of satellite galaxies
-        residing in cluster-mass halos. For this we can use the more flexible mask_function
-        option to select our population:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = mock.compute_galaxy_clustering(mask_function = my_masking_function) # doctest: +SKIP
-
         Notes
         -----
         The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper
@@ -390,18 +390,6 @@ class MockFactory(object):
         Compute the galaxy-matter cross-clustering for quiescent galaxies and for star-forming galaxies:
 
         >>> r, quiescent_matter_clustering, star_forming_matter_clustering = mock.compute_galaxy_matter_cross_clustering(quiescent = True, include_complement = True) # doctest: +SKIP
-
-        Finally, suppose we wish to ask a very targeted question about how some physical effect
-        impacts the clustering of galaxies in a specific halo mass range.
-        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies
-        residing in cluster-mass halos. For this we can use the more flexible mask_function
-        option to select our population:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = mock.compute_galaxy_matter_cross_clustering(mask_function = my_masking_function) # doctest: +SKIP
-
 
         Notes
         -----

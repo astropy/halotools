@@ -463,3 +463,22 @@ class TestUserSuppliedHaloCatalog(TestCase):
             shutil.rmtree(self.dummy_cache_baseloc)
         except:
             pass
+
+
+def test_support_for_empty_halo_catalogs():
+    """Regression test for #960."""
+    Nhalos = 0
+    Lbox = 100
+    redshift = 0.0
+    halo_x = np.linspace(0, Lbox, Nhalos)
+    halo_y = np.linspace(0, Lbox, Nhalos)
+    halo_z = np.linspace(0, Lbox, Nhalos)
+    halo_mass = np.logspace(10, 15, Nhalos)
+    halo_id = np.arange(0, Nhalos, dtype=np.int)
+    good_halocat_args = (
+        {'halo_x': halo_x, 'halo_y': halo_y,
+        'halo_z': halo_z, 'halo_id': halo_id, 'halo_mass': halo_mass}
+        )
+    halocat = UserSuppliedHaloCatalog(Lbox=Lbox, particle_mass=100, redshift=0.,
+                    **good_halocat_args)
+    assert halocat.halo_table['halo_x'].shape == (0, )

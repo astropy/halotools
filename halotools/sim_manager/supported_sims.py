@@ -6,7 +6,7 @@ halo catalogs as they are loaded into memory.
 """
 
 from abc import ABCMeta
-from astropy.extern import six
+import six
 from astropy import cosmology
 import numpy as np
 

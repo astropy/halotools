@@ -54,7 +54,7 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
 
     Notes
     -----
-    See the Transformation of Probability tutorial at https://github.com/jbailinua/probability
+    See the `Transformation of Probability tutorial <https://github.com/jbailinua/probability/>`_
     for pedagogical derivations associated with inverse transformation sampling.
 
     Examples
@@ -95,7 +95,7 @@ def monte_carlo_from_cdf_lookup(x_table, y_table, mc_input='random',
     in some other array, ``x``. You can accomplish this by passing in the rank-order
     percentile values of ``x`` instead of uniform randoms.
     This is the basis of the conditional abundance matching technique
-    implemented by the `~halotools.empirical_models.conditional_abunmatch` function.
+    implemented by the `~halotools.empirical_models.conditional_abunmatch_bin_based` function.
 
     To see an example of how this works, let's create some fake data for some property *x*
     that we wish to model as being correlated with Monte Carlo realizations of *y* while

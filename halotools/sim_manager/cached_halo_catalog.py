@@ -564,7 +564,7 @@ class CachedHaloCatalog(object):
                 self.log_entry.fname + "\n\n")
             raise InvalidCacheLogEntry(msg)
 
-        f = h5py.File(self.log_entry.fname)
+        f = h5py.File(self.log_entry.fname, 'r')
         for attr_key in list(f.attrs.keys()):
             if attr_key == 'redshift':
                 setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))
@@ -580,7 +580,9 @@ class CachedHaloCatalog(object):
             for attr in matching_sim._attrlist:
                 if hasattr(self, attr):
                     try:
-                        assert np.all(getattr(self, attr) == getattr(matching_sim, attr))
+                        a = _passively_decode_string(getattr(self, attr))
+                        b = _passively_decode_string(getattr(matching_sim, attr))
+                        assert np.all(a == b)
                     except AssertionError:
                         msg = ("The ``" + attr + "`` metadata of the hdf5 file \n"
                             "is inconsistent with the corresponding attribute of the \n" +
@@ -602,7 +604,7 @@ class CachedHaloCatalog(object):
                 cl = getattr(supported_sims, clname)
                 obj = cl()
                 if isinstance(obj, supported_sims.NbodySimulation):
-                    if self.simname == obj.simname:
+                    if compare_strings_py23_safe(self.simname, obj.simname):
                         matching_sim = obj
             except TypeError:
                 pass

@@ -1,3 +1,4 @@
+# cython: language_level=2
 """ Module containing the `~halotools.empirical_models.occupation_models.engines.cacciato09_sats_mc_prim_galprop_engine`
 cython function driving the `mc_prim_galprop` function of the
 `~halotools.empirical_models.occupation_models.Cacciato09Sats` class.

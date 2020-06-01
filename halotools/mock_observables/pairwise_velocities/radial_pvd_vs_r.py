@@ -25,7 +25,7 @@ __author__ = ('Andrew Hearin', 'Duncan Campbell')
 def radial_pvd_vs_r(sample1, velocities1,
         rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
         sample2=None, velocities2=None, period=None,
-        num_threads=1, approx_cell1_size=None, approx_cell2_size=None, seed=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the pairwise radial velocity dispersion as a function of absolute distance,
     or as a function of :math:`s = r / R_{\rm vir}`.
@@ -167,7 +167,7 @@ def radial_pvd_vs_r(sample1, velocities1,
     """
     result = _process_args(sample1, velocities1, sample2, velocities2,
         rbins_absolute, rbins_normalized, normalize_rbins_by,
-        period, num_threads, approx_cell1_size, approx_cell2_size, seed)
+        period, num_threads, approx_cell1_size, approx_cell2_size)
 
     sample1, velocities1, sample2, velocities2, max_rbins_absolute, period,\
         num_threads, _sample1_is_sample2, PBCs, \

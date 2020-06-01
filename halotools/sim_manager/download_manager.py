@@ -21,7 +21,7 @@ except ImportError:
     raise HalotoolsError("Must have requests package installed to use the DownloadManager")
 
 import posixpath
-from astropy.extern.six.moves import urllib
+from six.moves import urllib
 
 import os
 import fnmatch
@@ -290,7 +290,7 @@ class DownloadManager(object):
                 "of the DownloadManager class.\n")
             raise HalotoolsError(msg)
 
-        f = h5py.File(output_fname)
+        f = h5py.File(output_fname, 'a')
         f.attrs['fname'] = str(output_fname)
         f.close()
 
@@ -564,7 +564,7 @@ class DownloadManager(object):
                 "the \ndownload_ptcl_table method "
                 "of the DownloadManager class.\n")
             raise HalotoolsError(msg)
-        f = h5py.File(output_fname)
+        f = h5py.File(output_fname, 'a')
         f.attrs['fname'] = str(output_fname)
         f.close()
 

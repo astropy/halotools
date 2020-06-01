@@ -1,1 +1,1 @@
-from .heaviside_assembias import HeavisideAssembias
+from .heaviside_assembias import *

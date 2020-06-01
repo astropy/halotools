@@ -18,8 +18,7 @@ __all__ = ('npairs_xy_z', )
 
 
 def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
-        verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None):
+        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
     Function counts the number of pairs of points with separation in the xy-plane
     less than the input ``rp_bins`` and separation in the z-dimension less than
@@ -66,9 +65,6 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
         period is assumed to be the same in all Cartesian directions.
         If set to None (the default option), PBCs are set to infinity.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -126,7 +122,7 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
 
     # Process the inputs with the helper function
     result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
@@ -168,7 +164,7 @@ def npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=None,
 
 
 def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
-        verbose, num_threads, approx_cell1_size, approx_cell2_size):
+        num_threads, approx_cell1_size, approx_cell2_size):
     """
     """
     if num_threads is not 1:

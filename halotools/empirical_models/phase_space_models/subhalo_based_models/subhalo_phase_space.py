@@ -351,8 +351,8 @@ def _sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=F
         try:
             assert np.all(x1 >= 0)
             assert np.all(x2 >= 0)
-            assert np.all(x1 < period)
-            assert np.all(x2 < period)
+            assert np.all(x1 <= period)
+            assert np.all(x2 <= period)
         except AssertionError:
             msg = "If period is not None, all values of x and y must be between [0, period)"
             raise ValueError(msg)

@@ -1,3 +1,4 @@
+# cython: language_level=2
 """
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -15,7 +16,13 @@ __all__ = ('counts_in_cylinders_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, rp_max, pi_max, cell1_tuple):
+def counts_in_cylinders_engine(
+        double_mesh,
+        x1in, y1in, z1in,
+        x2in, y2in, z2in,
+        rp_max, pi_max,
+        return_indexes,
+        cell1_tuple):
     """
     Cython engine for determining counting the number of points in ``sample2``
     in a cylinder surrounding each point in ``sample1``.
@@ -53,6 +60,9 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
         i.e., the half the length of a cylinder,
         to search for neighbors around each point in 'sample 1'
 
+    return_indexes : bool
+        If true, return both counts and the indexes of the pairs.
+
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
         double_mesh.mesh1 that will be looped over. Intended for use with
@@ -63,6 +73,11 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     counts : numpy.array
         Length-Npts1 integer array storing the number of ``sample2`` points
         inside a cylinder centered at each point in ``sample1``.
+
+    indexes : numpy.array
+        Num pairs length structured array with column ``i1``, the index of the
+        sample 1 point, and column ``i2``, the index of the sample 2 point in
+        in that cylinder
     """
 
     rp_max_squared_tmp = rp_max*rp_max
@@ -95,7 +110,12 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     cdef cnp.float64_t[:] z2_sorted = np.ascontiguousarray(
         z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
+    cdef bint c_return_indexes = return_indexes
     cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
+    cdef int current_indexes_cnt = 0
+    cdef int current_indexes_len = len(x1_sorted) if c_return_indexes else 0
+    cdef cnp.uint32_t[:,:] indexes = np.ascontiguousarray(
+            np.zeros((current_indexes_len, 2), dtype=np.uint32))
 
     cdef cnp.int64_t icell1, icell2
     cdef cnp.int64_t[:] cell1_indices = np.ascontiguousarray(
@@ -140,6 +160,7 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
     for icell1 in range(first_cell1_element, last_cell1_element):
         ifirst1 = cell1_indices[icell1]
         ilast1 = cell1_indices[icell1+1]
+
         x_icell1 = x1_sorted[ifirst1:ilast1]
         y_icell1 = y1_sorted[ifirst1:ilast1]
         z_icell1 = z1_sorted[ifirst1:ilast1]
@@ -219,9 +240,24 @@ def counts_in_cylinders_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
                                     if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp):
                                         counts[ifirst1+i] += 1
 
-    # At this point, we have calculated our counts on the input arrays *after* sorting
-    # Since the order of counts matters in this calculation, we need to undo the sorting
-    sorted_counts = np.array(counts)
-    idx_unsorted = unsorting_indices(double_mesh.mesh1.idx_sorted)
-    return sorted_counts[idx_unsorted]
+                                        if c_return_indexes:
+                                            indexes[current_indexes_cnt, 0] = ifirst1+i
+                                            indexes[current_indexes_cnt, 1] = ifirst2+j
+                                            current_indexes_cnt += 1
+                                            if current_indexes_cnt == current_indexes_len:
+                                                current_indexes_len *= 2
+                                                indexes = np.resize(indexes, (current_indexes_len, 2))
 
+    # At this point, we have calculated our pairs on the input arrays *after* sorting
+    # Since the order matters in this calculation, we need to undo the sorting
+    # We also need to reassign these to a non-cdef'ed variables so they can be pickled for pool
+    counts_uns = np.array(counts)[unsorting_indices(double_mesh.mesh1.idx_sorted)]
+    if c_return_indexes:
+        # https://github.com/numpy/numpy/issues/2407 for str("colname")
+        np_indexes = np.asarray(indexes[:current_indexes_cnt]).flatten().view(
+	            dtype=[(str("i1"), np.uint32), (str("i2"), np.uint32)])
+        np_indexes["i1"] = double_mesh.mesh1.idx_sorted[np_indexes["i1"]]
+        np_indexes["i2"] = double_mesh.mesh2.idx_sorted[np_indexes["i2"]]
+        return counts_uns, np_indexes
+
+    return counts_uns

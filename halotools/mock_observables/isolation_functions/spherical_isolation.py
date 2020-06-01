@@ -88,7 +88,7 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     Returns
     -------
     is_isolated : numpy.array
-        array of booleans indicating if each point in `sample1` is isolated.
+        (Npts1, ) array of booleans indicating if each point in `sample1` is isolated.
 
     Examples
     --------

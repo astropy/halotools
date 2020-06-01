@@ -7,4 +7,4 @@ Abundance Matching and Age Matching
 
 .. autosummary::
 
-    conditional_abunmatch
+    conditional_abunmatch_bin_based

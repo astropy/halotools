@@ -1,10 +1,11 @@
+#cython: language_level=2
 """
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 cimport numpy as cnp
-cimport cython 
+cimport cython
 from libc.math cimport ceil
 
 __author__ = ('Andrew Hearin', )
@@ -13,45 +14,45 @@ __all__ = ('radial_profile_3d_engine', )
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, 
+def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     squared_normalize_rbins_by_in, sample2_quantity_in, rbins_normalized, cell1_tuple):
-    """ Cython engine for computing radial profiles 
-    as a function of (optionally normalized) three-dimensional separation. 
+    """ Cython engine for computing radial profiles
+    as a function of (optionally normalized) three-dimensional separation.
 
-    Parameters 
+    Parameters
     ------------
-    double_mesh : object 
+    double_mesh : object
         Instance of `~halotools.mock_observables.RectangularDoubleMesh`
 
-    x1in, y1in, z1in : arrays 
+    x1in, y1in, z1in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 1
 
-    x2in, y2in, z2in : arrays 
+    x2in, y2in, z2in : arrays
         Numpy arrays storing Cartesian coordinates of points in sample 2
 
-    squared_normalize_rbins_by_in : array 
+    squared_normalize_rbins_by_in : array
 
-    sample2_quantity_in : array 
+    sample2_quantity_in : array
 
     rbins_normalized : array
         Boundaries defining the bins in which pairs are counted.
 
     cell1_tuple : tuple
-        Two-element tuple defining the first and last cells in 
-        double_mesh.mesh1 that will be looped over. Intended for use with 
-        python multiprocessing. 
+        Two-element tuple defining the first and last cells in
+        double_mesh.mesh1 that will be looped over. Intended for use with
+        python multiprocessing.
 
-    Returns 
+    Returns
     --------
-    weighted_counts : array 
-        Array of length len(rbins_normalized) giving the number of pairs 
-        in ``sample2``separated from points in ``sample1`` by a distance less than 
-        the corresponding entry of ``rbins_normalized``, 
-        weighted by the values stored in sample2_quantity_in. 
+    weighted_counts : array
+        Array of length len(rbins_normalized) giving the number of pairs
+        in ``sample2``separated from points in ``sample1`` by a distance less than
+        the corresponding entry of ``rbins_normalized``,
+        weighted by the values stored in sample2_quantity_in.
 
-    counts : array 
-        Array of length len(rbins_normalized) giving the number of pairs 
-        in ``sample2``separated from points in ``sample1`` by a distance less than 
+    counts : array
+        Array of length len(rbins_normalized) giving the number of pairs
+        in ``sample2``separated from points in ``sample1`` by a distance less than
         the corresponding entry of ``rbins_normalized``.
     """
 
@@ -141,9 +142,9 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
             leftmost_iy2 = iy1*num_y2_per_y1 - num_y2_covering_steps
             leftmost_iz2 = iz1*num_z2_per_z1 - num_z2_covering_steps
 
-            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps 
-            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps 
-            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps 
+            rightmost_ix2 = (ix1+1)*num_x2_per_x1 + num_x2_covering_steps
+            rightmost_iy2 = (iy1+1)*num_y2_per_y1 + num_y2_covering_steps
+            rightmost_iz2 = (iz1+1)*num_z2_per_z1 + num_z2_covering_steps
 
             for nonPBC_ix2 in range(leftmost_ix2, rightmost_ix2):
                 if nonPBC_ix2 < 0:
@@ -210,7 +211,7 @@ def radial_profile_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
                                         counts2[k] += 1.
                                         k=k-1
                                         if k<0: break
-                                        
+
     return np.array(counts), np.array(counts2)
 
 

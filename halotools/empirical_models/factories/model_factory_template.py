@@ -5,7 +5,7 @@ any composite model of the galaxy-halo connection.
 """
 
 import numpy as np
-from astropy.extern import six
+import six
 from abc import ABCMeta
 
 
@@ -276,12 +276,17 @@ class ModelFactory(object):
         :ref:`param_dict_mechanism`
         """
 
+        # do not pass self into the scope;
+        # assuming param_dict is not replaced during life cycle of self.
+        # passing `self` causes a cycle reference when
+        # the function is assigned as attributes of self.
+        __param_dict__ = self.param_dict
         def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
-            for key in list(self.param_dict.keys()):
+            for key in list(__param_dict__.keys()):
                 if key in component_model.param_dict:
-                    component_model.param_dict[key] = self.param_dict[key]
+                    component_model.param_dict[key] = __param_dict__[key]
 
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
@@ -404,15 +409,6 @@ class ModelFactory(object):
         and its complement:
 
         >>> r, cen_cen, cen_sat, sat_sat = model.compute_average_galaxy_clustering(gal_type = 'centrals', include_crosscorr = True) # doctest: +SKIP
-
-        Your second option is to use the ``mask_function`` option.
-        For example, suppose we wish to study the clustering of satellite galaxies
-        residing in cluster-mass halos:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = model.compute_average_galaxy_clustering(mask_function = my_masking_function) # doctest: +SKIP
 
         Notes
         -----
@@ -595,15 +591,6 @@ class ModelFactory(object):
 
         >>> r, cen_clustering, sat_clustering = model.compute_average_galaxy_matter_cross_clustering(gal_type = 'centrals', include_complement = True) # doctest: +SKIP
 
-        Your second option is to use the ``mask_function`` option.
-        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies
-        residing in cluster-mass halos:
-
-        >>> def my_masking_function(table): # doctest: +SKIP
-        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
-        >>>     return result # doctest: +SKIP
-        >>> r, cluster_sat_clustering = model.compute_average_galaxy_matter_cross_clustering(mask_function = my_masking_function) # doctest: +SKIP
-
         Returns
         --------
         rbin_centers : array
@@ -645,7 +632,7 @@ class ModelFactory(object):
         The only difference between this use-case and the one demonstrated in
         the tutorial is that here you will use the `~halotools.mock_observables.tpcf`
         to calculate the cross-correlation between dark matter particles and galaxies,
-        rather than calling the `~halotools.mock_observables.delta_sigma` function.
+        rather than calling the `~halotools.mock_observables.mean_delta_sigma` function.
 
         """
         if summary_statistic == 'mean':

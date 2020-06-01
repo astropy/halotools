@@ -1,5 +1,5 @@
+# cython: language_level=2
 # cython: profile=False
-
 """
 objective weighting functions.
 """

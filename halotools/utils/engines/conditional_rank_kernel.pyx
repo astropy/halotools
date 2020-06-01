@@ -1,3 +1,4 @@
+# cython: language_level=2
 """
 """
 import numpy as np

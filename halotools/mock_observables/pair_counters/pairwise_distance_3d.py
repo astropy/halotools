@@ -25,7 +25,7 @@ def pairwise_distance_3d(data1, data2, r_max, period=None,
         approx_cell1_size=None, approx_cell2_size=None):
     """
     Function returns pairs of points separated by
-    a three-dimensional distance smaller than or eqaul to the input ``r_max``.
+    a three-dimensional distance smaller than or equal to the input ``r_max``.
 
     Note that if data1 == data2 that the
     `~halotools.mock_observables.pairwise_distance_3d` function double-counts pairs.

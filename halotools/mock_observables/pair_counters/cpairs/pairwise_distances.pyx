@@ -1,5 +1,5 @@
+# cython: language_level=2
 # cython: profile=False
-
 """
 calculate and return the pairwise distances between two sets of points.
 """

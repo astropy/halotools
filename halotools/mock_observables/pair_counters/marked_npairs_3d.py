@@ -20,18 +20,23 @@ __author__ = ('Duncan Campbell', 'Andrew Hearin')
 __all__ = ('marked_npairs_3d', )
 
 
-def marked_npairs_3d(sample1, sample2, rbins,
-                  period=None, weights1=None, weights2=None,
-                  weight_func_id=0, verbose=False, num_threads=1,
+# cbx_aph: weight_function_id is not optional. However moving it to be a
+# required arg is a breaking change.
+def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
+                  period=None, weights1=None, weights2=None, num_threads=1,
                   approx_cell1_size=None, approx_cell2_size=None):
     """
-    Calculate the number of weighted pairs with separations greater than or equal to r, :math:`W(>r)`.
+    Calculate the weighted number of pairs with separations less than or equal to
+    the input ``rbins``, :math:`W(<r)`.
 
     The weight given to each pair is determined by the weights for a pair,
     :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated
     by the ``weight_func_id`` parameter, :math:`f(w_1,w_2)`.
 
     Note that if sample1 == sample2 that the `marked_npairs` function double-counts pairs.
+
+    Note that this does not count the number of pairs *between* the bins, but rather the
+    total number with separation smaller than each bin.
 
     Parameters
     ----------
@@ -51,6 +56,11 @@ def marked_npairs_3d(sample1, sample2, rbins,
         numpy array of length *Nrbins+1* defining the boundaries of bins in which
         pairs are counted.
 
+    weight_func_id : int, optional
+        weighting function integer ID. Each weighting function requires a specific
+        number of weights per point, *N_weights*.  See the Notes for a description of
+        available weighting functions.
+
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
         in each dimension. If you instead provide a single scalar, Lbox,
@@ -65,14 +75,6 @@ def marked_npairs_3d(sample1, sample2, rbins,
         Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
         containing the weights used for the weighted pair counts. If this parameter is
         None, the weights are set to np.ones(*(N1,N_weights)*).
-
-    weight_func_id : int, optional
-        weighting function integer ID. Each weighting function requires a specific
-        number of weights per point, *N_weights*.  See the Notes for a description of
-        available weighting functions.
-
-    verbose : Boolean, optional
-        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -136,7 +138,7 @@ def marked_npairs_3d(sample1, sample2, rbins,
     """
 
     result = _npairs_3d_process_args(sample1, sample2, rbins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
@@ -195,7 +197,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
     _converted_to_2d_from_1d = False
     # First convert weights1 into a 2-d ndarray
     if weights1 is None:
-        weights1 = np.ones((npts_sample1, 1), dtype=np.float64)
+        weights1 = np.ones(correct_shape1, dtype=np.float64)
     else:
         weights1 = np.atleast_1d(weights1)
         weights1 = weights1.astype("float64")
@@ -236,7 +238,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
     _converted_to_2d_from_1d = False
     # Now convert weights2 into a 2-d ndarray
     if weights2 is None:
-        weights2 = np.ones((npts_sample2, 1), dtype=np.float64)
+        weights2 = np.ones(correct_shape2, dtype=np.float64)
     else:
         weights2 = np.atleast_1d(weights2)
         weights2 = weights2.astype("float64")

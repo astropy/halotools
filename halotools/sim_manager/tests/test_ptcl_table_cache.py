@@ -74,7 +74,7 @@ class TestPtclTableCache(TestCase):
                 'good_simname1', 'good_version_name', get_redshift_string(0.0),
                 self.good_table_fname)
 
-            f = h5py.File(self.good_table_fname)
+            f = h5py.File(self.good_table_fname, 'a')
             for attr_name in self.good_log_entry.log_attributes:
                 attr = getattr(self.good_log_entry, attr_name).encode('ascii')
                 f.attrs.create(attr_name, attr)
@@ -93,7 +93,7 @@ class TestPtclTableCache(TestCase):
                 'good_simname2', 'good_version_name',
                 get_redshift_string(1.0), self.good_table2_fname)
 
-            f = h5py.File(self.good_table2_fname)
+            f = h5py.File(self.good_table2_fname, 'a')
             for attr_name in self.good_log_entry2.log_attributes:
                 attr = getattr(self.good_log_entry2, attr_name).encode('ascii')
                 f.attrs.create(attr_name, attr)
@@ -148,7 +148,7 @@ class TestPtclTableCache(TestCase):
 
         entry = self.good_log_entry
         fname = entry.fname
-        f = h5py.File(fname)
+        f = h5py.File(fname, 'a')
         del f.attrs['version_name']
         f.close()
         result = cache.determine_log_entry_from_fname(fname)

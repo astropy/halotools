@@ -707,7 +707,7 @@ class RockstarHlistReader(TabularAsciiReader):
             raise HalotoolsError(uninstalled_h5py_msg)
 
         # Now add the metadata
-        f = h5py.File(self.output_fname)
+        f = h5py.File(self.output_fname, 'a')
         f.attrs.create('simname', np.string_(self.simname))
         f.attrs.create('halo_finder', np.string_(self.halo_finder))
         redshift_string = np.string_(get_redshift_string(self.redshift))

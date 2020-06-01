@@ -1,4 +1,4 @@
-0.7 (unreleased)
+0.7 (2020-1-29)
 ----------------
 
 - Added new `matrix_operations_3d` module in the `utils` subpackage that contains Numpy functions related to three-dimensional rotations.
@@ -10,6 +10,20 @@
 - Added `~halotools.utils.fuzzy_digitize` function to `~halotools.utils` sub-package.
 
 - Added `~halotools.utils.sliding_conditional_percentile` function to `~halotools.utils` sub-package.
+
+- Added new `resample_x_to_match_y` function to `halotools.utils`.
+
+- Renamed old implementation of `conditional_abunmatch` to `conditional_abunmatch_bin_based`
+
+- Added new bin-free implementation of `conditional_abunmatch`.
+
+- Added new utils function `bijective_distribution_matching`
+
+- Added new `load_um_binary_sfr_catalog` function to load SFR catalogs from UniverseMachine into memory
+
+- Added new `return_indexes` feature to conditional_abunmatch function. See https://github.com/astropy/halotools/pull/913.
+
+- New function `mean_delta_sigma` replaces old `delta_sigma` function. See #955.
 
 
 0.6 (2017-12-15)

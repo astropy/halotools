@@ -177,10 +177,8 @@ class UserSuppliedHaloCatalog(object):
             halo_id = np.array(kwargs['halo_id'])
             assert type(halo_id) is np.ndarray
             Nhalos = custom_len(halo_id)
-            assert Nhalos > 1
         except KeyError:
-            msg = ("\nThe UserSuppliedHaloCatalog requires a ``halo_id`` keyword argument "
-                "storing an ndarray of length Nhalos > 1.\n")
+            msg = ("\nThe UserSuppliedHaloCatalog requires a ``halo_id`` keyword argument.")
             raise HalotoolsError(msg)
 
         halo_table_dict = (
@@ -413,7 +411,7 @@ class UserSuppliedHaloCatalog(object):
 
         self.halo_table.write(fname, path='data', overwrite=overwrite)
 
-        f = h5py.File(fname)
+        f = h5py.File(fname, 'a')
 
         redshift_string = get_redshift_string(self.redshift)
 

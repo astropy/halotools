@@ -37,6 +37,7 @@ def test_zheng07_composite2():
                     threshold=threshold, upper_occupation_bound=1.)
 
             self.param_dict['new_cen_param'] = 0.5
+            self._suppress_repeated_param_warning = True
 
         def mean_occupation(self, **kwargs):
             halo_table = kwargs['table']
@@ -45,7 +46,8 @@ def test_zheng07_composite2():
 
     centrals_occupation = MyCenModel(threshold=-20)
     satellites_occupation = Zheng07Sats(threshold=-20,
-        modulate_with_cenocc=True, cenocc_model=centrals_occupation)
+        modulate_with_cenocc=True, cenocc_model=centrals_occupation,
+        _suppress_repeated_param_warning=True)
 
     centrals_profile = TrivialPhaseSpace()
     satellites_profile = NFWPhaseSpace()

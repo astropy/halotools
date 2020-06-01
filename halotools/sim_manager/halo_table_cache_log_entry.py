@@ -218,7 +218,7 @@ class HaloTableCacheLogEntry(object):
 
         try:
             import h5py
-            f = h5py.File(self.fname)
+            f = h5py.File(self.fname, 'r')
 
             for key in HaloTableCacheLogEntry.log_attributes:
                 try:
@@ -304,7 +304,7 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            f = h5py.File(self.fname)
+            f = h5py.File(self.fname, 'r')
             Lbox = f.attrs['Lbox']
             f.close()
             try:
@@ -401,7 +401,7 @@ class HaloTableCacheLogEntry(object):
         msg = ''
 
         try:
-            f = h5py.File(self.fname)
+            f = h5py.File(self.fname, 'r')
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
 

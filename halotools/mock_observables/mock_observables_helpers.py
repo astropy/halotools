@@ -75,14 +75,15 @@ def get_num_threads(input_num_threads, enforce_max_cores=False):
             raise ValueError(msg)
 
     if num_threads > num_available_cores:
-        msg = ("Input ``num_threads`` = %i exceeds the ``num_available_cores`` = %i.\n")
+        msg = ("Input ``num_threads`` = {0} exceeds the ``num_available_cores`` = {1}.\n")
+        warn(msg.format(num_threads, num_available_cores))
 
         if enforce_max_cores is True:
-            msg += ("Since ``enforce_max_cores`` is True, "
-                "setting ``num_threads`` to ``num_available_cores``.\n")
-            num_threads = num_available_cores
+            msg = ("Since ``enforce_max_cores`` is True,\n"
+                "setting ``num_threads`` to ``num_available_cores``.")
+            warn(msg)
 
-        warn(msg % (num_threads, num_available_cores))
+            num_threads = num_available_cores
 
     return num_threads
 
@@ -143,6 +144,7 @@ def get_separation_bins_array(separation_bins):
     try:
         assert separation_bins.ndim == 1
         assert len(separation_bins) > 1
+        # cbx_aph: There are lots of places like this where we never check that the array is increasing if it has 2 elements. The reason for this is that array_is_monotonic requires 3 elements. This could easily be fixed because I think we could allow 2 elements arrays to array_is_monotonic - it would always be monotonic but we would know whether it was increasing or decreasing
         if len(separation_bins) > 2:
             assert array_is_monotonic(separation_bins, strict=True) == 1
         assert np.all(separation_bins > 0)

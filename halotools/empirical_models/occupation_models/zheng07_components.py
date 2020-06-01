@@ -9,12 +9,13 @@ import warnings
 from .occupation_model_template import OccupationComponent
 
 from .. import model_defaults
-from ..assembias_models import HeavisideAssembias
+from ..assembias_models import HeavisideAssembias, PreservingNgalHeavisideAssembias
 
 from ...custom_exceptions import HalotoolsError
 
 __all__ = ('Zheng07Cens', 'Zheng07Sats',
-           'AssembiasZheng07Cens', 'AssembiasZheng07Sats')
+           'AssembiasZheng07Cens', 'AssembiasZheng07Sats',
+           'PreservingNgalAssembiasZheng07Cens', 'PreservingNgalAssembiasZheng07Sats')
 
 
 class Zheng07Cens(OccupationComponent):
@@ -421,7 +422,9 @@ class Zheng07Sats(OccupationComponent):
         # If a central occupation model was passed to the constructor,
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.modulate_with_cenocc:
-            mean_ncen = self.central_occupation_model.mean_occupation(**kwargs)
+            # compatible with AB models
+            mean_ncen = getattr(self.central_occupation_model, "baseline_mean_occupation",\
+                                    self.central_occupation_model.mean_occupation)(**kwargs)
             mean_nsat *= mean_ncen
 
         return mean_nsat
@@ -599,6 +602,120 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
         """
         Zheng07Cens.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self,
+            lower_assembias_bound=self._lower_occupation_bound,
+            upper_assembias_bound=self._upper_occupation_bound,
+            method_name_to_decorate='mean_occupation', **kwargs)
+
+
+
+class PreservingNgalAssembiasZheng07Sats(Zheng07Sats, PreservingNgalHeavisideAssembias):
+    r""" Assembly-biased modulation of `Zheng07Sats` that preserves N_gals.
+    """
+
+    def __init__(self, **kwargs):
+        r"""
+        Parameters
+        ----------
+        threshold : float, optional
+            Luminosity threshold of the mock galaxy sample. If specified,
+            input value must agree with one of the thresholds used in Zheng07 to fit HODs:
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional
+            String giving the column name of the primary halo property governing
+            the occupation statistics of gal_type galaxies.
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        sec_haloprop_key : string, optional
+            String giving the column name of the secondary halo property
+            governing the assembly bias. Must be a key in the table
+            passed to the methods of `HeavisideAssembiasComponent`.
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        split : float or list, optional
+            Fraction or list of fractions between 0 and 1 defining how
+            we split halos into two groupings based on
+            their conditional secondary percentiles.
+            Default is 0.5 for a constant 50/50 split.
+
+        split_abscissa : list, optional
+            Values of the primary halo property at which the halos are split as described above in
+            the ``split`` argument. If ``loginterp`` is set to True (the default behavior),
+            the interpolation will be done in the logarithm of the primary halo property.
+            Default is to assume a constant 50/50 split.
+
+        assembias_strength : float or list, optional
+            Fraction or sequence of fractions between -1 and 1
+            defining the assembly bias correlation strength.
+            Default is 0.5.
+
+        assembias_strength_abscissa : list, optional
+            Values of the primary halo property at which the assembly bias strength is specified.
+            Default is to assume a constant strength of 0.5. If passing a list, the strength
+            will interpreted at the input ``assembias_strength_abscissa``.
+            Default is to assume a constant strength of 0.5.
+
+        """
+        Zheng07Sats.__init__(self, **kwargs)
+        PreservingNgalHeavisideAssembias.__init__(self,
+            method_name_to_decorate='mean_occupation',
+            lower_assembias_bound=self._lower_occupation_bound,
+            upper_assembias_bound=self._upper_occupation_bound,
+            **kwargs)
+
+
+class PreservingNgalAssembiasZheng07Cens(Zheng07Cens, PreservingNgalHeavisideAssembias):
+    r""" Assembly-biased modulation of `Zheng07Cens` that preserves N_gals.
+    """
+
+    def __init__(self, **kwargs):
+        r"""
+        Parameters
+        ----------
+        threshold : float, optional
+            Luminosity threshold of the mock galaxy sample. If specified,
+            input value must agree with one of the thresholds used in Zheng07 to fit HODs:
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional
+            String giving the column name of the primary halo property governing
+            the occupation statistics of gal_type galaxies.
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        sec_haloprop_key : string, optional
+            String giving the column name of the secondary halo property
+            governing the assembly bias. Must be a key in the table
+            passed to the methods of `HeavisideAssembiasComponent`.
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        split : float or list, optional
+            Fraction or list of fractions between 0 and 1 defining how
+            we split halos into two groupings based on
+            their conditional secondary percentiles.
+            Default is 0.5 for a constant 50/50 split.
+
+        split_abscissa : list, optional
+            Values of the primary halo property at which the halos are split as described above in
+            the ``split`` argument. If ``loginterp`` is set to True (the default behavior),
+            the interpolation will be done in the logarithm of the primary halo property.
+            Default is to assume a constant 50/50 split.
+
+        assembias_strength : float or list, optional
+            Fraction or sequence of fractions between -1 and 1
+            defining the assembly bias correlation strength.
+            Default is 0.5.
+
+        assembias_strength_abscissa : list, optional
+            Values of the primary halo property at which the assembly bias strength is specified.
+            Default is to assume a constant strength of 0.5. If passing a list, the strength
+            will interpreted at the input ``assembias_strength_abscissa``.
+            Default is to assume a constant strength of 0.5.
+
+        """
+        Zheng07Cens.__init__(self, **kwargs)
+        PreservingNgalHeavisideAssembias.__init__(self,
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
             method_name_to_decorate='mean_occupation', **kwargs)

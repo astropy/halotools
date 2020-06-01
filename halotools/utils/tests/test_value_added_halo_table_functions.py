@@ -10,7 +10,7 @@ from collections import Counter
 import numpy as np
 
 import pytest
-from astropy.extern.six.moves import xrange as range
+from six.moves import xrange as range
 
 from ..value_added_halo_table_functions import broadcast_host_halo_property, add_halo_hostid
 from ..crossmatch import crossmatch

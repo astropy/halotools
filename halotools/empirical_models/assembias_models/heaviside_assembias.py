@@ -7,6 +7,7 @@ any method of any component model, as in
 
 import numpy as np
 from warnings import warn
+from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults, model_helpers
 
@@ -15,7 +16,7 @@ from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
 import collections
 
-__all__ = ('HeavisideAssembias', )
+__all__ = ('HeavisideAssembias', 'PreservingNgalHeavisideAssembias')
 __author__ = ('Andrew Hearin', )
 
 
@@ -491,3 +492,48 @@ class HeavisideAssembias(object):
             return result
 
         return wrapper
+
+
+class PreservingNgalHeavisideAssembias(HeavisideAssembias):
+    def assembias_mc_occupation(self, seed=None, **kwargs):
+        first_occupation_moment_orig = self.mean_occupation_orig(**kwargs)
+        first_occupation_moment = self.mean_occupation(**kwargs)
+        if self._upper_occupation_bound == 1:
+            with NumpyRNGContext(seed):
+                score = np.random.rand(custom_len(first_occupation_moment_orig))
+            total = np.count_nonzero(first_occupation_moment_orig > score)
+            result = np.where(first_occupation_moment > score, 1, 0)
+            diff = result.sum() - total
+            if diff < 0:
+                x = (first_occupation_moment / score)
+                result.fill(0)
+                result[x.argsort()[-total:]] = 1
+            elif diff > 0:
+                x = (1.0-first_occupation_moment) / (1.0-score)
+                result.fill(0)
+                result[x.argsort()[:total]] = 1
+        elif self._upper_occupation_bound == float("inf"):
+            total = self._poisson_distribution(first_occupation_moment_orig.sum(), seed=seed)
+            if seed is not None:
+                seed += 1
+            with NumpyRNGContext(seed):
+                score = np.random.rand(total)
+            score.sort()
+            x = first_occupation_moment.cumsum(dtype=np.float64)
+            x /= x[-1]
+            result = np.ediff1d(np.insert(np.searchsorted(score, x), 0, 0))
+        else:
+            msg = ("\nYou have chosen to set ``_upper_occupation_bound`` to some value \n"
+                "besides 1 or infinity. In such cases, you must also \n"
+                "write your own ``mc_occupation`` method that overrides the method in the \n"
+                "OccupationComponent super-class\n")
+            raise HalotoolsError(msg)
+
+        if 'table' in kwargs:
+            kwargs['table']['halo_num_'+self.gal_type] = result
+        return result
+
+    def _decorate_baseline_method(self):
+        self.mean_occupation_orig = self.mean_occupation
+        self.mc_occupation = self.assembias_mc_occupation
+        super(PreservingNgalHeavisideAssembias, self)._decorate_baseline_method()
