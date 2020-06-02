@@ -1,3 +1,4 @@
+# cython: language_level=2
 # cython: profile=False
 """
 Marking function definitions that take the 3D position of each point as an argument

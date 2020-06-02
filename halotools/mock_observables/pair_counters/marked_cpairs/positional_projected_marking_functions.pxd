@@ -1,3 +1,4 @@
+  # cython: language_level=2
 cimport numpy as cnp
 
 ##### built-in projected positional weighting functions####
