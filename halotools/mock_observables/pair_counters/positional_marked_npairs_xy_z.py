@@ -109,11 +109,45 @@ def positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
 
     N_pairs : numpy.array
         Numpy array of shape (Nrp_bins, Nrpi_bins) containing the number counts of pairs
+
+    Examples
+    --------
+    For demonstration purposes we create randomly distributed sets of points within a
+    periodic unit cube, using random weights.
+
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
+    >>> period = [Lbox, Lbox, Lbox]
+    >>> rp_bins = np.logspace(-1, 1.5, 15)
+    >>> pi_bins = [20, 40, 60]
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> z1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> z2 = np.random.uniform(0, Lbox, Npts2)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> sample1 = np.vstack([x1, y1, z1]).T
+    >>> sample2 = np.vstack([x2, y2, z2]).T
+
+    We create a set of random weights:
+
+    >>> weights1 = np.random.random((Npts1, 3))
+    >>> weights2 = np.random.random((Npts2, 1))
+
+    The weighted counts are calculated by:
+
+    >>> weighted_counts, counts = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period, weights1=weights1, weights2=weights2, weight_func_id=1)
+
     """
 
     # Process the inputs with the helper function
     result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+            num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
     rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
