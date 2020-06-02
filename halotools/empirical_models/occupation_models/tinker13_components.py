@@ -20,6 +20,13 @@ from ...custom_exceptions import HalotoolsError
 __all__ = ('Tinker13Cens', 'Tinker13QuiescentSats',
            'Tinker13ActiveSats', 'AssembiasTinker13Cens')
 
+# The following 4 lines of copde maintain python 2 and 3 compatability.
+# See Tinker13Cens.mean_occupation() method for the use the unicode type
+try:
+    unicode  # Python 2: type "unicode" is built-in
+except NameError:
+    unicode = str  # Python 3
+
 
 class Tinker13Cens(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from
