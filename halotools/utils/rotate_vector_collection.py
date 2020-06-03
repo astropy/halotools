@@ -54,6 +54,8 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
     Then we'll use the `rotate_vector_collection` function to apply each
     rotation, and verify that we recover each of the `v1`.
 
+    >>> from halotools.utils.rotations3d import rotation_matrices_from_vectors
+    >>> from halotools.utils import normalized_vectors
     >>> npts, ndim = int(1e4), 3
     >>> v0 = normalized_vectors(np.random.random((npts, ndim)))
     >>> v1 = normalized_vectors(np.random.random((npts, ndim)))

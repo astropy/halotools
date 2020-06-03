@@ -8,10 +8,10 @@ from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
-from vector_utilities import *
-from rotate_vector_collection import rotate_vector_collection
-from rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
-from rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
+from .vector_utilities import *
+from .rotate_vector_collection import rotate_vector_collection
+from .rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
+from .rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
 
 
 __all__=['random_rotation_3d',
@@ -116,6 +116,7 @@ def random_perpendicular_directions(v, seed=None):
 
 def random_unit_vectors_3d(npts):
     r"""
+    generate random 3D unit vectors
     """
 
     ndim = 3
@@ -123,5 +124,19 @@ def random_unit_vectors_3d(npts):
     r = np.sqrt(np.sum((x)**2, axis=-1))
 
     return (1.0/r[:,np.newaxis])*x
+
+
+def random_unit_vectors_2d(npts):
+    r"""
+    generate random 2D unit vectors
+    """
+
+    ndim = 2
+    r = 1.0
+    phi = np.random.uniform(0.0, 2.0*np.pi, size=(npts,ndim))
+    x = r*np.cos(phi)
+    y = r*np.sin(phi)
+
+    return np.vstack((x,y)).T
 
 

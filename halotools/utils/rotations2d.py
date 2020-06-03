@@ -5,7 +5,7 @@ A set of rotation utilites for manipulating 2-dimensional vectors
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from rotations.vector_utilities import (elementwise_dot, elementwise_norm,
+from .vector_utilities import (elementwise_dot, elementwise_norm,
                                normalized_vectors, angles_between_list_of_vectors)
 
 
@@ -32,9 +32,10 @@ def rotation_matrices_from_angles(angles):
 
     Examples
     --------
+    >>> from halotools.utils.mcrotations import random_unit_vectors_2d
     >>> npts = int(1e4)
     >>> angles = np.random.uniform(-np.pi/2., np.pi/2., npts)
-    >>> rotation_matrices = rotation_matrices_from_angles(angles, directions)
+    >>> rotation_matrices = rotation_matrices_from_angles(angles)
 
     Notes
     -----

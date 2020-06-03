@@ -5,8 +5,9 @@ A set of rotation utilites for manipulating 3-dimensional vectors
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from rotations.vector_utilities import (elementwise_dot, elementwise_norm,
+from .vector_utilities import (elementwise_dot, elementwise_norm,
                                normalized_vectors, angles_between_list_of_vectors)
+from halotools.utils import rotate_vector_collection
 
 
 __all__=['rotation_matrices_from_angles', 'rotation_matrices_from_vectors', 'rotation_matrices_from_basis',

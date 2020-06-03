@@ -2,8 +2,8 @@
 """
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
-from rotations.vector_utilities import *
-from rotations.mcrotations import *
+from ..vector_utilities import *
+from ..mcrotations import *
 
 __all__ = ('test_random_rotation_3d',
            'test_random_rotation_3d',

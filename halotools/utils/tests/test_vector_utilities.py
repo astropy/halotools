@@ -4,11 +4,11 @@ test suite for vector_utilities.py
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-from rotations.vector_utilities import *
-from rotations.rotate_vector_collection import rotate_vector_collection
-from rotations.rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
-from rotations.rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
-from rotations.rotations3d import vectors_normal_to_planes
+from ..vector_utilities import *
+from ..rotate_vector_collection import rotate_vector_collection
+from ..rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
+from ..rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
+from ..rotations3d import vectors_normal_to_planes
 
 __all__ = ('test_normalized_vectors', 'test_elementwise_norm', 'test_elementwise_dot',
            'test_angles_between_list_of_vectors')
