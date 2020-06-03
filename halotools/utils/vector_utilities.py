@@ -27,6 +27,8 @@ def normalized_vectors(vectors):
 
     Examples
     --------
+    Let's create a set of semi-random 3D unit vectors.
+
     >>> npts = int(1e3)
     >>> ndim = 3
     >>> x = np.random.random((npts, ndim))
@@ -74,24 +76,29 @@ def elementwise_dot(x, y):
     Parameters
     ----------
     x : ndarray
-        Numpy array of shape (npts, ndim) storing a collection of dimensional points
+        Numpy array of shape (npts, ndim) storing a collection of n-dimensional vectors
 
     y : ndarray
-        Numpy array of shape (npts, ndim) storing a collection of dimensional points
+        Numpy array of shape (npts, ndim) storing a collection of n-dimensional vectors
 
     Returns
     -------
     result : ndarray
         Numpy array of shape (npts, ) storing the dot product between each
-        pair of corresponding points in x and y.
+        pair of corresponding vectors in x and y.
 
     Examples
     --------
+    Let's create two sets of semi-random 3D vectors, x1 and x2.
+    
     >>> npts = int(1e3)
     >>> ndim = 3
-    >>> x = np.random.random((npts, ndim))
-    >>> y = np.random.random((npts, ndim))
-    >>> dots = elementwise_dot(x, y)
+    >>> x1 = np.random.random((npts, ndim))
+    >>> x2 = np.random.random((npts, ndim))
+
+    We then can find the dot product between each pair of vectors in x1 and x2.  
+
+    >>> dots = elementwise_dot(x1, x2)
     """
 
     x = np.atleast_2d(x)
@@ -131,11 +138,16 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3, vn=None):
 
     Examples
     --------
+    Let's create two sets of semi-random 3D unit vectors.
+
     >>> npts = int(1e4)
     >>> ndim = 3
-    >>> v0 = np.random.random((npts, ndim))
     >>> v1 = np.random.random((npts, ndim))
-    >>> angles = angles_between_list_of_vectors(v0, v1)
+    >>> v2 = np.random.random((npts, ndim))
+
+    We then can find the angle between each pair of vectors in v1 and v2.  
+
+    >>> angles = angles_between_list_of_vectors(v1, v2)
     """
 
     dot = elementwise_dot(normalized_vectors(v0), normalized_vectors(v1))

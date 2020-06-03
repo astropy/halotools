@@ -1,4 +1,4 @@
-r"""
+"""
 A set of rotation utilites that apply monte carlo
 roations to collections of 2- and 3-dimensional vectors
 """
@@ -17,7 +17,8 @@ from .rotations3d import rotation_matrices_from_angles as rotation_matrices_from
 __all__=['random_rotation_3d',
          'random_rotation_2d',
          'random_perpendicular_directions',
-         'random_unit_vectors_3d']
+         'random_unit_vectors_3d',
+         'random_unit_vectors_2d']
 __author__ = ['Duncan Campbell']
 
 
@@ -37,6 +38,17 @@ def random_rotation_3d(vectors, seed=None):
     -------
     rotated_vectors : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d vectors
+
+    Example
+    -------
+    Create a random set of 3D unit vectors.
+
+    >>> npts = 1000
+    >>> x1 = random_unit_vectors_3d(npts)
+
+    Randomly rotate these vectors.
+
+    >>> x2 = random_rotation_3d(x1)
     """
 
     with NumpyRNGContext(seed):
@@ -64,6 +76,17 @@ def random_rotation_2d(vectors, seed=None):
     -------
     rotated_vectors : ndarray
         Numpy array of shape (npts, 2) storing a collection of 2d vectors
+
+    Example
+    -------
+    Create a random set of 2D unit vectors.
+
+    >>> npts = 1000
+    >>> x1 = random_unit_vectors_2d(npts)
+
+    Randomly rotate these vectors.
+
+    >>> x2 = random_rotation_2d(x1)
     """
 
     with NumpyRNGContext(seed):
@@ -76,7 +99,7 @@ def random_rotation_2d(vectors, seed=None):
 
 def random_perpendicular_directions(v, seed=None):
     r"""
-    Given an input list of 3d vectors, v, return a list of 3d vectors
+    Given an input list of 3D vectors, v, return a list of 3D vectors
     such that each returned vector has unit-length and is
     orthogonal to the corresponding vector in v.
 
@@ -92,6 +115,17 @@ def random_perpendicular_directions(v, seed=None):
     -------
     result : ndarray
         Numpy array of shape (npts, 3)
+
+    Example
+    -------
+    Create a random set of 3D unit vectors.
+
+    >>> npts = 1000
+    >>> x1 = random_unit_vectors_3d(npts)
+
+    For each vector in x1, create a perpendicular vector
+
+    >>> x2 = random_perpendicular_directions(x1)
     """
 
     v = np.atleast_2d(v)
@@ -116,7 +150,17 @@ def random_perpendicular_directions(v, seed=None):
 
 def random_unit_vectors_3d(npts):
     r"""
-    generate random 3D unit vectors
+    Generate random 3D unit vectors.
+
+    Parameters
+    ----------
+    npts : int
+        number of vectors
+
+    Returns
+    -------
+    result : numpy.array
+        Numpy array of shape (npts, 3) containing random unit vectors
     """
 
     ndim = 3
@@ -128,12 +172,21 @@ def random_unit_vectors_3d(npts):
 
 def random_unit_vectors_2d(npts):
     r"""
-    generate random 2D unit vectors
+    Generate random 2D unit vectors.
+
+    Parameters
+    ----------
+    npts : int
+        number of vectors
+
+    Returns
+    -------
+    result : numpy.array
+        Numpy array of shape (npts, 2) containing random unit vectors
     """
 
-    ndim = 2
     r = 1.0
-    phi = np.random.uniform(0.0, 2.0*np.pi, size=(npts,ndim))
+    phi = np.random.uniform(0.0, 2.0*np.pi, size=(npts,))
     x = r*np.cos(phi)
     y = r*np.sin(phi)
 
