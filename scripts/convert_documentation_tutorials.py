@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import os
 import sys
 import fnmatch
@@ -70,7 +71,7 @@ def add_asterisk_header(fname):
     f.close()
     print("Printing lines in first cell:")
     for line in lines:
-        print line
+        print(line)
     title = lines[3]
     asterisks = get_asterisks_line(title)
     lines.insert(4, asterisks)
