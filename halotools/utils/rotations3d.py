@@ -74,8 +74,9 @@ def rotation_matrices_from_angles(angles, directions):
 
 def rotation_matrices_from_vectors(v0, v1):
     r"""
-    Calculate a collection of rotation matrices defined by the unique
-    transformation rotating v1 into v2 about the mutually perpendicular axis.
+    Calculate a collection of rotation matrices defined by two sets of vectors,
+    v1 into v2, such that the resulting matrices rotate v1 into v2 about 
+    the mutually perpendicular axis.
 
     Parameters
     ----------
@@ -183,17 +184,17 @@ def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
     uz = normalized_vectors(uz)
 
     d_theta = angles_between_list_of_vectors(ux, uy)
-    if np.any((np.pi/2.0 - d_theta) > tol):
+    if np.any(np.fabs(np.pi/2.0 - d_theta) > tol):
         msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
         raise ValueError(msg)
 
     d_theta = angles_between_list_of_vectors(ux, uz)
-    if np.any((np.pi/2.0 - d_theta) > tol):
+    if np.any(np.fabs(np.pi/2.0 - d_theta) > tol):
         msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
         raise ValueError(msg)
 
     d_theta = angles_between_list_of_vectors(uy, uz)
-    if np.any((np.pi/2.0 - d_theta) > tol):
+    if np.any(np.fabs(np.pi/2.0 - d_theta) > tol):
         msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
         raise ValueError(msg)
 
@@ -257,15 +258,28 @@ def vectors_between_list_of_vectors(x, y, p):
 
     Examples
     --------
+    Create two set of 3D vectors
+
     >>> npts = int(1e4)
     >>> x = np.random.random((npts, 3))
     >>> y = np.random.random((npts, 3))
+
+    Define the parameter `p` fpr each pair of vectors
+
     >>> p = np.random.uniform(0, 1, npts)
+
+    Find a set of vectors between the two sets
+
     >>> v = vectors_between_list_of_vectors(x, y, p)
+
+    Note that `p` determines how close the new vector is to 
+    the corresponding vectors in the original sets. 
+
     >>> angles_xy = angles_between_list_of_vectors(x, y)
     >>> angles_xp = angles_between_list_of_vectors(x, v)
     >>> assert np.allclose(angles_xy*p, angles_xp)
     """
+
     assert np.all(p >= 0), "All values of p must be non-negative"
     assert np.all(p <= 1), "No value of p can exceed unity"
 
@@ -300,11 +314,15 @@ def vectors_normal_to_planes(x, y):
 
     Examples
     --------
+    Define a set of random 3D vectors
+
     >>> npts = int(1e4)
     >>> x = np.random.random((npts, 3))
     >>> y = np.random.random((npts, 3))
-    >>> normed_z = angles_between_list_of_vectors(x, y)
 
+    now calculate a thrid set of vectors to a corresponding pair in `x` and `y`.
+
+    >>> normed_z = angles_between_list_of_vectors(x, y)
     """
     return normalized_vectors(np.cross(x, y))
 
@@ -329,9 +347,15 @@ def project_onto_plane(x1, x2):
 
     Examples
     --------
+    Define a set of random 3D vectors.
+
     >>> npts = int(1e4)
     >>> x1 = np.random.random((npts, 3))
     >>> x2 = np.random.random((npts, 3))
+
+    Find the projection of each vector in `x1` onto a plane defined by
+    each vector in `x2`.
+
     >>> x3 = project_onto_plane(x1, x2)
 
     Notes
