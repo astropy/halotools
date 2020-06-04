@@ -3,8 +3,8 @@
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-from rotations.rotate_vector_collection import rotate_vector_collection
-from rotations.rotations3d import *
+from ..rotate_vector_collection import rotate_vector_collection
+from ..rotations3d import *
 
 __all__ = ('test_rotation_3d',
            )
