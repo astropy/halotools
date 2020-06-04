@@ -1,11 +1,11 @@
 """
-A function to rotate collectios of n-dimensional vectors
+A function to rotate collections of n-dimensional vectors
 """
 
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from rotations.vector_utilities import (elementwise_dot, elementwise_norm,
+from .vector_utilities import (elementwise_dot, elementwise_norm,
                                normalized_vectors, angles_between_list_of_vectors)
 
 
