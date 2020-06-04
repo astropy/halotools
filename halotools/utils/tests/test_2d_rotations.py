@@ -6,9 +6,11 @@ from astropy.utils.misc import NumpyRNGContext
 from ..rotate_vector_collection import rotate_vector_collection
 from ..rotations2d import *
 
-__all__ = ('test_rotation_matrices_from_vectors',
+__all__ = ('test_rotation_matrices_from_vectors_1',
+           'test_rotation_matrices_from_vectors_2'
            'test_rotation_matrices_from_angles',
-           'test_rotation_matrices_from_basis' )
+           'test_rotation_matrices_from_basis_1',
+           'test_rotation_matrices_from_basis_2' )
 
 fixed_seed = 43
 
@@ -25,7 +27,7 @@ def test_rotation_matrices_from_vectors_1():
     assert np.all(~np.isnan(rot_m))
 
 
-def test_rotation_matrices_from_vectors():
+def test_rotation_matrices_from_vectors_2():
     """
     validate 90 degree rotation result
     """
@@ -57,7 +59,7 @@ def test_rotation_matrices_from_angles():
     assert np.all(~np.isnan(rot_m))
 
 
-def test_rotation_matrices_from_basis():
+def test_rotation_matrices_from_basis_1():
     """
     test to make sure null rotations return identiy matrix
     """
@@ -73,3 +75,24 @@ def test_rotation_matrices_from_basis():
     rot_m = rotation_matrices_from_basis(ux, uy)
 
     assert np.all(~np.isnan(rot_m))
+
+def test_rotation_matrices_from_basis_2():
+    """
+    validate 90 degree rotation result
+    """
+
+    npts = 1000
+    ndim = 2
+
+    ux = np.zeros((npts,ndim))
+    ux[:,1] = 1.0 # carteisian +y-axis
+    uy = np.zeros((npts,ndim))
+    uy[:,0] = -1.0 # carteisian -x-axis
+
+    rot_m = rotation_matrices_from_basis(ux, uy)
+
+    # rotate (0,1) by 45 degrees counter-clockwise.
+    v = rotate_vector_collection(rot_m, ux)
+    
+    assert np.allclose(v,uy)
+

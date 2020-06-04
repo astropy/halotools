@@ -1,5 +1,5 @@
 """
-A set of rotation utilites for manipulating 3-dimensional vectors
+A set of vector rotation utilites for manipulating 3-dimensional vectors
 """
 
 from __future__ import (division, print_function, absolute_import,
@@ -35,9 +35,12 @@ def rotation_matrices_from_angles(angles, directions):
 
     Examples
     --------
+    Create a set of random rotation matrices.
+
+    >>> from halotools.utils.mcrotations import random_unit_vectors_3d
     >>> npts = int(1e4)
     >>> angles = np.random.uniform(-np.pi/2., np.pi/2., npts)
-    >>> directions = np.random.random((npts, 3))
+    >>> directions = random_unit_vectors_3d(npts)
     >>> rotation_matrices = rotation_matrices_from_angles(angles, directions)
 
     Notes
@@ -93,9 +96,12 @@ def rotation_matrices_from_vectors(v0, v1):
 
     Examples
     --------
+    Create a set of random rotation matrices.
+
+    >>> from halotools.utils.mcrotations import random_unit_vectors_3d
     >>> npts = int(1e4)
-    >>> v0 = np.random.random((npts, 3))
-    >>> v1 = np.random.random((npts, 3))
+    >>> v0 = random_unit_vectors_3d(npts)
+    >>> v1 = random_unit_vectors_3d(npts)
     >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
 
     Notes
@@ -118,8 +124,8 @@ def rotation_matrices_from_vectors(v0, v1):
     return rotation_matrices_from_angles(angles, directions)
 
 
-def rotation_matrices_from_basis(ux, uy, uz):
-    """
+def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
+    r"""
     Calculate a collection of rotation matrices defined by a set of basis vectors
 
     Parameters
@@ -133,10 +139,36 @@ def rotation_matrices_from_basis(ux, uy, uz):
     uz : array_like
         Numpy array of shape (npts, 3) storing a collection of unit vexctors
 
+    tol : float, optional
+        angular tolerance for orthogonality of the input basis vectors in radians.
+
     Returns
     -------
     matrices : ndarray
         Numpy array of shape (npts, 3, 3) storing a collection of rotation matrices
+
+    Example
+    -------
+    Let's build a rotation matrix that rotates from a frame 
+    rotated by 45 degrees to the standard frame.
+
+    >>> u1 = [np.sqrt(2), np.sqrt(2), 0.0]
+    >>> u2 = [np.sqrt(2), -1.0*np.sqrt(2), 0.0]
+    >>> u3 = [0,0,1.0]
+    >>> rot = rotation_matrices_from_basis(u1, u2, u3)
+
+    Notes
+    -----
+    The rotation matrices transform from the Cartesian frame defined by the standard 
+    basis vectors,
+    
+    .. math::
+        \u_1=(1,0,0)
+        \u_2=(0,1,0) 
+        \u_3=(0,0,1) 
+
+    The function `rotate_vector_collection` can be used to efficiently
+    apply the returned collection of matrices to a collection of 3d vectors
     """
 
     N = np.shape(ux)[0]
@@ -149,6 +181,21 @@ def rotation_matrices_from_basis(ux, uy, uz):
     ux = normalized_vectors(ux)
     uy = normalized_vectors(uy)
     uz = normalized_vectors(uz)
+
+    d_theta = angles_between_list_of_vectors(ux, uy)
+    if np.any((np.pi/2.0 - d_theta) > tol):
+        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+        raise ValueError(msg)
+
+    d_theta = angles_between_list_of_vectors(ux, uz)
+    if np.any((np.pi/2.0 - d_theta) > tol):
+        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+        raise ValueError(msg)
+
+    d_theta = angles_between_list_of_vectors(uy, uz)
+    if np.any((np.pi/2.0 - d_theta) > tol):
+        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+        raise ValueError(msg)
 
     r_11 = elementwise_dot(ex, ux)
     r_12 = elementwise_dot(ex, uy)
@@ -265,7 +312,7 @@ def vectors_normal_to_planes(x, y):
 def project_onto_plane(x1, x2):
     r"""
     Given a collection of 3D vectors, x1 and x2, project each vector
-    in x1 onto the plane normal to the corresponding vector x2
+    in x1 onto the plane normal to the corresponding vector x2.
 
     Parameters
     ----------
@@ -280,10 +327,20 @@ def project_onto_plane(x1, x2):
     result : ndarray
         Numpy array of shape (npts, 3) storing a collection of 3d points
 
+    Examples
+    --------
+    >>> npts = int(1e4)
+    >>> x1 = np.random.random((npts, 3))
+    >>> x2 = np.random.random((npts, 3))
+    >>> x3 = project_onto_plane(x1, x2)
+
+    Notes
+    -----
+    This operations is sometimes called "vector rejection".
     """
 
     n = normalized_vectors(x2)
     d = elementwise_dot(x1,n)
 
-    return x - d[:,np.newaxis]*n
+    return x1 - d[:,np.newaxis]*n
 

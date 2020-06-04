@@ -1,5 +1,5 @@
 r"""
-A set of rotation utilites for manipulating 2-dimensional vectors
+A set of vector rotation utilites for manipulating 2-dimensional vectors
 """
 
 from __future__ import (division, print_function, absolute_import,
@@ -103,8 +103,8 @@ def rotation_matrices_from_vectors(v0, v1):
     return rotation_matrices_from_angles(angles)
 
 
-def rotation_matrices_from_basis(ux, uy):
-    """
+def rotation_matrices_from_basis(ux, uy, tol=np.pi/1000.0):
+    r"""
     Calculate a collection of rotation matrices defined by an input collection
     of basis vectors.
 
@@ -116,10 +116,34 @@ def rotation_matrices_from_basis(ux, uy):
     uy : array_like
         Numpy array of shape (npts, 2) storing a collection of unit vectors
 
+    tol : float, optional
+        angular tolerance for orthogonality of the input basis vectors in radians.
+
     Returns
     -------
     matrices : ndarray
         Numpy array of shape (npts, 2, 2) storing a collection of rotation matrices
+
+    Example
+    -------
+    Let's build a rotation matrix that roates from a frame 
+    rotated by 45 degrees to the standard frame.
+
+    >>> u1 = [np.sqrt(2), np.sqrt(2)]
+    >>> u2 = [np.sqrt(2), -1.0*np.sqrt(2)]
+    >>> rot = rotation_matrices_from_basis(u1, u2)
+
+    Notes
+    -----
+    The rotation matrices transform from the Cartesian frame defined by the standard 
+    basis vectors,
+    
+    .. math::
+        \u_1=(1,0)
+        \u_2=(0,1)
+
+    The function `rotate_vector_collection` can be used to efficiently
+    apply the returned collection of matrices to a collection of 2d vectors 
     """
 
     N = np.shape(ux)[0]
@@ -130,6 +154,11 @@ def rotation_matrices_from_basis(ux, uy):
 
     ux = normalized_vectors(ux)
     uy = normalized_vectors(uy)
+
+    d_theta = angles_between_list_of_vectors(ux, uy)
+    if np.any((np.pi/2.0 - d_theta) > tol):
+        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+        raise ValueError(msg)
 
     r_11 = elementwise_dot(ex, ux)
     r_12 = elementwise_dot(ex, uy)
