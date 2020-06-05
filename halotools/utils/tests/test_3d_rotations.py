@@ -3,7 +3,7 @@
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
-from ..vector_utilities import angles_between_list_of_vectors, elementwise_dot
+from ..vector_utilities import *
 from ..rotate_vector_collection import rotate_vector_collection
 from ..rotations3d import *
 
@@ -11,9 +11,7 @@ __all__ = ('test_rotation_matrices_from_vectors',
            'test_rotation_matrices_from_angles',
            'test_rotation_matrices_from_basis_1',
            'test_rotation_matrices_from_basis_2',
-           'test_vectors_between_list_of_vectors',
-           'test_vectors_normal_to_planes',
-           'test_project_onto_plane' )
+           'test_vectors_between_list_of_vectors')
 
 fixed_seed = 43
 
@@ -143,30 +141,4 @@ def test_vectors_between_list_of_vectors():
 
     assert np.allclose(angles_xy*p, angles_xp)
 
-
-def test_vectors_normal_to_planes():
-    """
-    """
-
-    npts = 1000
-    x1 = np.random.random((npts, 3))
-    x2 = np.random.random((npts, 3))
-
-    x3 = vectors_normal_to_planes(x1, x2)
-
-    assert np.allclose(elementwise_dot(x3, x1),0.0)
-    assert np.allclose(elementwise_dot(x3, x2),0.0)
-
-
-def test_project_onto_plane():
-    """
-    """
-
-    npts = 1000
-    x1 = np.random.random((npts, 3))
-    x2 = np.random.random((npts, 3))
-
-    x3 = project_onto_plane(x1, x2)
-
-    assert np.allclose(elementwise_dot(x3, x2),0.0)
 

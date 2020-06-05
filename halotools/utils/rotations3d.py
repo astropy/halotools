@@ -5,13 +5,14 @@ A set of vector rotation utilites for manipulating 3-dimensional vectors
 from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 import numpy as np
-from .vector_utilities import (elementwise_dot, elementwise_norm,
-                               normalized_vectors, angles_between_list_of_vectors)
+from .vector_utilities import *
 from halotools.utils import rotate_vector_collection
 
 
-__all__=['rotation_matrices_from_angles', 'rotation_matrices_from_vectors', 'rotation_matrices_from_basis',
-         'vectors_between_list_of_vectors', 'vectors_normal_to_planes', 'project_onto_plane']
+__all__=['rotation_matrices_from_angles',
+         'rotation_matrices_from_vectors',
+         'rotation_matrices_from_basis',
+         'vectors_between_list_of_vectors']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
@@ -288,83 +289,3 @@ def vectors_between_list_of_vectors(x, y, p):
     angles = p*theta
     rotation_matrices = rotation_matrices_from_angles(angles, z)
     return normalized_vectors(rotate_vector_collection(rotation_matrices, x))
-
-
-def vectors_normal_to_planes(x, y):
-    r""" Given a collection of 3d vectors x and y,
-    return a collection of 3d unit-vectors that are orthogonal to x and y.
-
-    Parameters
-    ----------
-    x : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d vectors
-
-        Note that the normalization of `x` will be ignored.
-
-    y : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d vectors
-
-        Note that the normalization of `y` will be ignored.
-
-    Returns
-    -------
-    z : ndarray
-        Numpy array of shape (npts, 3). Each 3d vector in z will be orthogonal
-        to the corresponding vector in x and y.
-
-    Examples
-    --------
-    Define a set of random 3D vectors
-
-    >>> npts = int(1e4)
-    >>> x = np.random.random((npts, 3))
-    >>> y = np.random.random((npts, 3))
-
-    now calculate a thrid set of vectors to a corresponding pair in `x` and `y`.
-
-    >>> normed_z = angles_between_list_of_vectors(x, y)
-    """
-    return normalized_vectors(np.cross(x, y))
-
-
-def project_onto_plane(x1, x2):
-    r"""
-    Given a collection of 3D vectors, x1 and x2, project each vector
-    in x1 onto the plane normal to the corresponding vector x2.
-
-    Parameters
-    ----------
-    x1 : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d points
-
-    x2 : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d points
-
-    Returns
-    -------
-    result : ndarray
-        Numpy array of shape (npts, 3) storing a collection of 3d points
-
-    Examples
-    --------
-    Define a set of random 3D vectors.
-
-    >>> npts = int(1e4)
-    >>> x1 = np.random.random((npts, 3))
-    >>> x2 = np.random.random((npts, 3))
-
-    Find the projection of each vector in `x1` onto a plane defined by
-    each vector in `x2`.
-
-    >>> x3 = project_onto_plane(x1, x2)
-
-    Notes
-    -----
-    This operations is sometimes called "vector rejection".
-    """
-
-    n = normalized_vectors(x2)
-    d = elementwise_dot(x1,n)
-
-    return x1 - d[:,np.newaxis]*n
-

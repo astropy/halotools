@@ -8,10 +8,10 @@ from ..vector_utilities import *
 from ..rotate_vector_collection import rotate_vector_collection
 from ..rotations2d import rotation_matrices_from_angles as rotation_matrices_from_angles_2d
 from ..rotations3d import rotation_matrices_from_angles as rotation_matrices_from_angles_3d
-from ..rotations3d import vectors_normal_to_planes
 
 __all__ = ('test_normalized_vectors', 'test_elementwise_norm', 'test_elementwise_dot',
-           'test_angles_between_list_of_vectors')
+           'test_angles_between_list_of_vectors',
+           'test_vectors_normal_to_planes', 'test_project_onto_plane' )
 
 fixed_seed = 43
 
@@ -138,5 +138,30 @@ def test_angles_between_list_of_vectors():
     assert np.allclose(angles_between_list_of_vectors(v1,v4),np.fabs(angles))
 
 
+def test_vectors_normal_to_planes():
+    """
+    """
+
+    npts = 1000
+    x1 = np.random.random((npts, 3))
+    x2 = np.random.random((npts, 3))
+
+    x3 = vectors_normal_to_planes(x1, x2)
+
+    assert np.allclose(elementwise_dot(x3, x1),0.0)
+    assert np.allclose(elementwise_dot(x3, x2),0.0)
+
+
+def test_project_onto_plane():
+    """
+    """
+
+    npts = 1000
+    x1 = np.random.random((npts, 3))
+    x2 = np.random.random((npts, 3))
+
+    x3 = project_onto_plane(x1, x2)
+
+    assert np.allclose(elementwise_dot(x3, x2),0.0)
 
 
