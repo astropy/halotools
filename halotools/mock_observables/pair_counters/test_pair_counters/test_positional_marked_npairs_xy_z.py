@@ -11,7 +11,7 @@ from ..positional_marked_npairs_xy_z import positional_marked_npairs_xy_z
 from ..npairs_xy_z import npairs_xy_z
 
 from halotools.mock_observables.tests.cf_helpers import generate_3d_regular_mesh, generate_locus_of_3d_points
-from rotations.vector_utilities import normalized_vectors, angles_between_list_of_vectors, elementwise_norm
+from halotools.utils.vector_utilities import normalized_vectors, angles_between_list_of_vectors, elementwise_norm
 
 from ....custom_exceptions import HalotoolsError
 
