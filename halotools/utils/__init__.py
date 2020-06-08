@@ -14,3 +14,5 @@ from .inverse_transformation_sampling import *
 from .distribution_matching import *
 from .probabilistic_binning import fuzzy_digitize
 from .conditional_percentile import sliding_conditional_percentile
+from .vector_utilities import *
+from .rotate_vector_collection import rotate_vector_collection
