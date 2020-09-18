@@ -104,3 +104,12 @@ def test_host_centric_distance():
 
     msg = "host_centric_distance key was never mapped during mock population"
     assert np.any(model.mock.galaxy_table["host_centric_distance"] > 0), msg
+
+
+def test_mass_definition_flexibility():
+    """ Regression test for Issue #993.
+    """
+    model = PrebuiltHodModelFactory("zheng07", mdef="200m")
+    halocat = FakeSim(seed=43)
+    halocat.halo_table["halo_m200m"] = np.copy(halocat.halo_table["halo_mvir"])
+    model.populate_mock(halocat, seed=43)
