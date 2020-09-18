@@ -42,7 +42,7 @@ class AnalyticDensityProf(object):
     the profile is the necessary and sufficient ingredient.
     """
 
-    def __init__(self, cosmology, redshift, mdef, **kwargs):
+    def __init__(self, cosmology, redshift, mdef, halo_boundary_key=None, **kwargs):
         r"""
         Parameters
         -----------
@@ -55,6 +55,9 @@ class AnalyticDensityProf(object):
         mdef: str
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
 
+        halo_boundary_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
+
         """
         self.cosmology = cosmology
         self.redshift = redshift
@@ -65,7 +68,10 @@ class AnalyticDensityProf(object):
         self.density_threshold = halo_boundary_functions.density_threshold(
             cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
         )
-        self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
+        if halo_boundary_key is None:
+            self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
+        else:
+            self.halo_boundary_key = halo_boundary_key
         self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
         self.gal_prof_param_keys = []

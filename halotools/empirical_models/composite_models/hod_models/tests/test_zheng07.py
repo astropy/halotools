@@ -109,7 +109,12 @@ def test_host_centric_distance():
 def test_mass_definition_flexibility():
     """ Regression test for Issue #993.
     """
-    model = PrebuiltHodModelFactory("zheng07", mdef="200m")
+    model = PrebuiltHodModelFactory(
+        "zheng07", mdef="200m", halo_boundary_key="halo_radius_arbitrary"
+    )
     halocat = FakeSim(seed=43)
     halocat.halo_table["halo_m200m"] = np.copy(halocat.halo_table["halo_mvir"])
+    halocat.halo_table["halo_radius_arbitrary"] = np.copy(
+        halocat.halo_table["halo_mvir"]
+    )
     model.populate_mock(halocat, seed=43)

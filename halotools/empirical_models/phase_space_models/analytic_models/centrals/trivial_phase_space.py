@@ -27,6 +27,7 @@ class TrivialPhaseSpace(object):
         cosmology=sim_defaults.default_cosmology,
         redshift=sim_defaults.default_redshift,
         mdef=model_defaults.halo_mass_definition,
+        halo_boundary_key=None,
         **kwargs
     ):
         """
@@ -59,7 +60,10 @@ class TrivialPhaseSpace(object):
         self.cosmology = cosmology
         self.redshift = redshift
         self.mdef = mdef
-        self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
+        if halo_boundary_key is None:
+            self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
+        else:
+            self.halo_boundary_key = halo_boundary_key
 
     def assign_phase_space(self, table, **kwargs):
         r"""

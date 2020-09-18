@@ -71,6 +71,9 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
             Default is set in `~halotools.empirical_models.model_defaults`.
 
+        halo_boundary_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
+
         concentration_key : string, optional
             Column name of the halo catalog storing NFW concentration.
 
