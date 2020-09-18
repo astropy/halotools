@@ -22,16 +22,20 @@ from ...utils.table_utils import SampleSelector
 from ...custom_exceptions import HalotoolsError
 
 
-__all__ = ['HodMockFactory']
-__author__ = ['Andrew Hearin']
+__all__ = ["HodMockFactory"]
+__author__ = ["Andrew Hearin"]
 
-unavailable_haloprop_msg = ("Your model requires that the ``%s`` key appear in the halo catalog,\n"
-    "but this column is not available in the catalog you attempted to populate.\n")
+unavailable_haloprop_msg = (
+    "Your model requires that the ``%s`` key appear in the halo catalog,\n"
+    "but this column is not available in the catalog you attempted to populate.\n"
+)
 
-missing_halo_upid_msg = ("All HOD-style models populate host halos with mock galaxies.\n"
+missing_halo_upid_msg = (
+    "All HOD-style models populate host halos with mock galaxies.\n"
     "The way Halotools distinguishes host halos from subhalos is via the ``halo_upid`` column,\n"
     "with halo_upid = -1 for host halos and !=-1 for subhalos.\n"
-    "The halo catalog you passed to the HodMockFactory does not have the ``halo_upid`` column.\n")
+    "The halo catalog you passed to the HodMockFactory does not have the ``halo_upid`` column.\n"
+)
 
 
 class HodMockFactory(MockFactory):
@@ -51,8 +55,12 @@ class HodMockFactory(MockFactory):
 
     """
 
-    def __init__(self, Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
-            halo_mass_column_key='halo_mvir', **kwargs):
+    def __init__(
+        self,
+        Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
+        halo_mass_column_key="halo_mvir",
+        **kwargs
+    ):
         """
         Parameters
         ----------
@@ -86,7 +94,7 @@ class HodMockFactory(MockFactory):
 
         MockFactory.__init__(self, **kwargs)
 
-        halocat = kwargs['halocat']
+        halocat = kwargs["halocat"]
         self.Num_ptcl_requirement = Num_ptcl_requirement
         self.halo_mass_column_key = halo_mass_column_key
 
@@ -115,22 +123,24 @@ class HodMockFactory(MockFactory):
 
         """
         try:
-            assert 'halo_upid' in list(halocat.halo_table.keys())
+            assert "halo_upid" in list(halocat.halo_table.keys())
         except AssertionError:
             raise HalotoolsError(missing_halo_upid_msg)
 
         # Make cuts on halo catalog #
         # Select host halos only, since this is an HOD-style model
         halo_table, subhalo_table = SampleSelector.host_halo_selection(
-            table=halocat.halo_table, return_subhalos=True)
+            table=halocat.halo_table, return_subhalos=True
+        )
 
         # make a (possibly trivial) completeness cut
-        cutoff_mvir = self.Num_ptcl_requirement*self.particle_mass
+        cutoff_mvir = self.Num_ptcl_requirement * self.particle_mass
         mass_cut = halo_table[self.halo_mass_column_key] > cutoff_mvir
         max_column_value = np.max(halo_table[self.halo_mass_column_key])
         halo_table = halo_table[mass_cut]
         if len(halo_table) == 0:
-            msg = ("During the pre-processing phase of HOD mock-making \n"
+            msg = (
+                "During the pre-processing phase of HOD mock-making \n"
                 "controlled by the `preprocess_halo_catalog` method of the HodMockFactory,\n"
                 "a cut on halo completeness is made. The column used in this cut\n"
                 "is determined by the value of the halo_mass_column_key string \n"
@@ -142,15 +152,23 @@ class HodMockFactory(MockFactory):
                 "the processing of the halo catalog,\n"
                 "for example, an incorrect column number and/or dtype.\n"
                 "Alternatively, the value of Num_ptcl_requirement = %.2e \n"
-                "that was passed to the HodMockFactory constructor could be the problem.\n")
-            raise HalotoolsError(msg % (
-                self.halo_mass_column_key, max_column_value, cutoff_mvir,
-                self.particle_mass, self.Num_ptcl_requirement))
+                "that was passed to the HodMockFactory constructor could be the problem.\n"
+            )
+            raise HalotoolsError(
+                msg
+                % (
+                    self.halo_mass_column_key,
+                    max_column_value,
+                    cutoff_mvir,
+                    self.particle_mass,
+                    self.Num_ptcl_requirement,
+                )
+            )
 
         # If any component model needs the subhalo_table, bind it to the mock object
         for component_model in self.model.model_dictionary.values():
             try:
-                f = getattr(component_model, 'preprocess_subhalo_table')
+                f = getattr(component_model, "preprocess_subhalo_table")
                 halo_table, self.subhalo_table = f(halo_table, subhalo_table)
             except AttributeError:
                 pass
@@ -289,17 +307,17 @@ class HodMockFactory(MockFactory):
         # The _testing_mode keyword is for unit-testing only
         # it has been intentionally left out of the docstring
         try:
-            self._testing_mode = kwargs['_testing_mode']
+            self._testing_mode = kwargs["_testing_mode"]
         except KeyError:
             self._testing_mode = False
 
         try:
-            self.enforce_PBC = kwargs['enforce_PBC']
+            self.enforce_PBC = kwargs["enforce_PBC"]
         except KeyError:
             self.enforce_PBC = True
 
         try:
-            masking_function = kwargs['masking_function']
+            masking_function = kwargs["masking_function"]
             mask = masking_function(self._orig_halo_table)
             self.halo_table = self._orig_halo_table[mask]
         except:
@@ -318,21 +336,23 @@ class HodMockFactory(MockFactory):
             # For the gal_type_slice indices of
             # the pre-allocated array self.gal_type,
             # set each string-type entry equal to the gal_type string
-            self.galaxy_table['gal_type'][gal_type_slice] = (
-                np.repeat(gal_type, self._total_abundance[gal_type], axis=0))
+            self.galaxy_table["gal_type"][gal_type_slice] = np.repeat(
+                gal_type, self._total_abundance[gal_type], axis=0
+            )
 
             # Store all other relevant host halo properties into their
             # appropriate pre-allocated array
             for halocatkey in self.additional_haloprops:
                 self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
-                    self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
+                    self.halo_table[halocatkey], self._occupation[gal_type], axis=0
+                )
 
-        self.galaxy_table['x'] = self.galaxy_table['halo_x']
-        self.galaxy_table['y'] = self.galaxy_table['halo_y']
-        self.galaxy_table['z'] = self.galaxy_table['halo_z']
-        self.galaxy_table['vx'] = self.galaxy_table['halo_vx']
-        self.galaxy_table['vy'] = self.galaxy_table['halo_vy']
-        self.galaxy_table['vz'] = self.galaxy_table['halo_vz']
+        self.galaxy_table["x"] = self.galaxy_table["halo_x"]
+        self.galaxy_table["y"] = self.galaxy_table["halo_y"]
+        self.galaxy_table["z"] = self.galaxy_table["halo_z"]
+        self.galaxy_table["vx"] = self.galaxy_table["halo_vx"]
+        self.galaxy_table["vy"] = self.galaxy_table["halo_vy"]
+        self.galaxy_table["vz"] = self.galaxy_table["halo_vz"]
 
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
@@ -346,28 +366,37 @@ class HodMockFactory(MockFactory):
             func(table=self.galaxy_table[gal_type_slice], seed=seed, **d)
 
         if self.enforce_PBC is True:
-            self.galaxy_table['x'], self.galaxy_table['vx'] = (
-                model_helpers.enforce_periodicity_of_box(
-                    self.galaxy_table['x'], self.Lbox[0],
-                    velocity=self.galaxy_table['vx'],
-                    check_multiple_box_lengths=self._testing_mode)
-                )
+            (
+                self.galaxy_table["x"],
+                self.galaxy_table["vx"],
+            ) = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table["x"],
+                self.Lbox[0],
+                velocity=self.galaxy_table["vx"],
+                check_multiple_box_lengths=self._testing_mode,
+            )
 
-            self.galaxy_table['y'], self.galaxy_table['vy'] = (
-                model_helpers.enforce_periodicity_of_box(
-                    self.galaxy_table['y'], self.Lbox[1],
-                    velocity=self.galaxy_table['vy'],
-                    check_multiple_box_lengths=self._testing_mode)
-                )
+            (
+                self.galaxy_table["y"],
+                self.galaxy_table["vy"],
+            ) = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table["y"],
+                self.Lbox[1],
+                velocity=self.galaxy_table["vy"],
+                check_multiple_box_lengths=self._testing_mode,
+            )
 
-            self.galaxy_table['z'], self.galaxy_table['vz'] = (
-                model_helpers.enforce_periodicity_of_box(
-                    self.galaxy_table['z'], self.Lbox[2],
-                    velocity=self.galaxy_table['vz'],
-                    check_multiple_box_lengths=self._testing_mode)
-                )
+            (
+                self.galaxy_table["z"],
+                self.galaxy_table["vz"],
+            ) = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table["z"],
+                self.Lbox[2],
+                velocity=self.galaxy_table["vz"],
+                check_multiple_box_lengths=self._testing_mode,
+            )
 
-        if hasattr(self.model, 'galaxy_selection_func'):
+        if hasattr(self.model, "galaxy_selection_func"):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
             self.galaxy_table = self.galaxy_table[mask]
 
@@ -386,14 +415,16 @@ class HodMockFactory(MockFactory):
         # We will keep track of the calling sequence with a list called _remaining_methods_to_call
         # Each time a function in this list is called, we will remove that function from the list
         # Mock generation will be complete when _remaining_methods_to_call is exhausted
-        self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
+        self._remaining_methods_to_call = copy(
+            self.model._mock_generation_calling_sequence
+        )
 
         # Call all composite model methods that should be called prior to mc_occupation
         # All such function calls must be applied to the table, since we do not yet know
         # how much memory we need for the mock galaxy_table
         galprops_assigned_to_halo_table = []
         for func_name in self.model._mock_generation_calling_sequence:
-            if 'mc_occupation' in func_name:
+            if "mc_occupation" in func_name:
                 # exit when we encounter a ``mc_occupation_`` function
                 break
             else:
@@ -405,8 +436,12 @@ class HodMockFactory(MockFactory):
                 if seed is not None:
                     seed += 1
                 func(table=self.halo_table, seed=seed, **d)
-                galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
-                galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
+                galprops_assigned_to_halo_table_by_func = (
+                    func._galprop_dtypes_to_allocate.names
+                )
+                galprops_assigned_to_halo_table.extend(
+                    galprops_assigned_to_halo_table_by_func
+                )
                 self._remaining_methods_to_call.remove(func_name)
         # Now update the list of additional_haloprops, if applicable
         # This is necessary because each of the above function calls created new
@@ -414,8 +449,7 @@ class HodMockFactory(MockFactory):
         # np.repeat inside mock.populate() so that mock galaxies inherit these newly-created columns
         # Since there is already a loop over additional_haloprops inside mock.populate() that does this,
         # then all we need to do is append to this list
-        galprops_assigned_to_halo_table = list(set(
-            galprops_assigned_to_halo_table))
+        galprops_assigned_to_halo_table = list(set(galprops_assigned_to_halo_table))
         self.additional_haloprops.extend(galprops_assigned_to_halo_table)
         self.additional_haloprops = list(set(self.additional_haloprops))
 
@@ -424,49 +458,51 @@ class HodMockFactory(MockFactory):
         self._gal_type_indices = {}
 
         for gal_type in self.gal_types:
-            self.halo_table['halo_num_'+gal_type] = 0
+            self.halo_table["halo_num_" + gal_type] = 0
 
         first_galaxy_index = 0
         for gal_type in self.gal_types:
-            occupation_func_name = 'mc_occupation_'+gal_type
+            occupation_func_name = "mc_occupation_" + gal_type
             occupation_func = getattr(self.model, occupation_func_name)
             # Call the component model to get a Monte Carlo
             # realization of the abundance of gal_type galaxies
             if seed is not None:
                 seed += 1
 
-            self._occupation[gal_type] = occupation_func(table=self.halo_table, seed=seed)
-            self.halo_table['halo_num_'+gal_type][:] = self._occupation[gal_type]
+            self._occupation[gal_type] = occupation_func(
+                table=self.halo_table, seed=seed
+            )
+            self.halo_table["halo_num_" + gal_type][:] = self._occupation[gal_type]
 
             # Now use the above result to set up the indexing scheme
-            self._total_abundance[gal_type] = (
-                self._occupation[gal_type].sum()
-                )
+            self._total_abundance[gal_type] = self._occupation[gal_type].sum()
             last_galaxy_index = first_galaxy_index + self._total_abundance[gal_type]
             # Build a bookkeeping device to keep track of
             # which array elements pertain to which gal_type.
             self._gal_type_indices[gal_type] = slice(
-                first_galaxy_index, last_galaxy_index)
+                first_galaxy_index, last_galaxy_index
+            )
             first_galaxy_index = last_galaxy_index
             # Remove the mc_occupation function from the list of methods to call
             self._remaining_methods_to_call.remove(occupation_func_name)
-            self.additional_haloprops.append('halo_num_'+gal_type)
+            self.additional_haloprops.append("halo_num_" + gal_type)
 
         self.Ngals = np.sum(list(self._total_abundance.values()))
 
         # Allocate memory for all additional halo properties,
         # including profile parameters of the halos such as 'conc_NFWmodel'
         for halocatkey in self.additional_haloprops:
-            self.galaxy_table[halocatkey] = np.zeros(self.Ngals,
-                dtype=self.halo_table[halocatkey].dtype)
+            self.galaxy_table[halocatkey] = np.zeros(
+                self.Ngals, dtype=self.halo_table[halocatkey].dtype
+            )
 
         # Separately allocate memory for the galaxy profile parameters
         for galcatkey in self.model.halo_prof_param_keys:
-            self.galaxy_table[galcatkey] = 0.
+            self.galaxy_table[galcatkey] = 0.0
         for galcatkey in self.model.gal_prof_param_keys:
-            self.galaxy_table[galcatkey] = 0.
+            self.galaxy_table[galcatkey] = 0.0
 
-        self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)
+        self.galaxy_table["gal_type"] = np.zeros(self.Ngals, dtype=object)
 
         dt = self.model._galprop_dtypes_to_allocate
         for key in dt.names:
@@ -487,7 +523,7 @@ class HodMockFactory(MockFactory):
         # All such function calls must be applied to the table.
         halo_table = Table(np.copy(self.halo_table))
         for func_name in self.model._mock_generation_calling_sequence:
-            if 'mc_occupation' in func_name:
+            if "mc_occupation" in func_name:
                 # exit when we encounter a ``mc_occupation_`` function
                 break
             else:
@@ -498,7 +534,7 @@ class HodMockFactory(MockFactory):
         # realization of the abundance of galaxies for all gal_type.
         ngals = 0
         for gal_type in self.gal_types:
-            occupation_func_name = 'mc_occupation_'+gal_type
+            occupation_func_name = "mc_occupation_" + gal_type
             occupation_func = getattr(self.model, occupation_func_name)
             if seed is not None:
                 seed += 1
