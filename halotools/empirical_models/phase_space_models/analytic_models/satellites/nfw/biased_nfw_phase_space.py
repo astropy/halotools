@@ -14,16 +14,18 @@ from .kernels import biased_dimless_vrad_disp
 
 from ..... import model_defaults
 
-__author__ = ('Andrew Hearin', )
-__all__ = ('BiasedNFWPhaseSpace', )
+__author__ = ("Andrew Hearin",)
+__all__ = ("BiasedNFWPhaseSpace",)
 
 
-lookup_table_performance_warning = ("You have selected {0} bins to digitize host halo concentration \n"
+lookup_table_performance_warning = (
+    "You have selected {0} bins to digitize host halo concentration \n"
     "and {1} bins to digitize the galaxy bias parameter.\n"
     "To populate mocks, the BiasedNFWPhaseSpace class builds a lookup table with shape ({0}, {1}, {2}),\n"
     "one entry for every numerical solution to the Jeans equation.\n"
     "Using this fine of a binning requires a long pre-computation of {3} integrals\n."
-    "Make sure you actually need to use so many bins")
+    "Make sure you actually need to use so many bins"
+)
 
 
 class BiasedNFWPhaseSpace(NFWPhaseSpace):
@@ -37,6 +39,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
     including descriptions of how the relevant equations are
     implemented in the Halotools code base, see :ref:`nfw_profile_tutorial`.
     """
+
     def __init__(self, profile_integration_tol=1e-5, **kwargs):
         r"""
         Parameters
@@ -67,6 +70,9 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         mdef: str, optional
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
             Default is set in `~halotools.empirical_models.model_defaults`.
+
+        halo_boundary_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
 
         concentration_key : string, optional
             Column name of the halo catalog storing NFW concentration.
@@ -142,20 +148,30 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         NFWPhaseSpace.__init__(self, **kwargs)
         self._profile_integration_tol = profile_integration_tol
 
-        self.gal_prof_param_keys = ['conc_NFWmodel', 'conc_gal_bias']
+        self.gal_prof_param_keys = ["conc_NFWmodel", "conc_gal_bias"]
 
         prof_lookup_bins = self._retrieve_prof_lookup_info(**kwargs)
         self.setup_prof_lookup_tables(*prof_lookup_bins)
 
-        self._mock_generation_calling_sequence = ['calculate_conc_gal_bias', 'assign_phase_space']
-        self._methods_to_inherit = ['calculate_conc_gal_bias']
+        self._mock_generation_calling_sequence = [
+            "calculate_conc_gal_bias",
+            "assign_phase_space",
+        ]
+        self._methods_to_inherit = ["calculate_conc_gal_bias"]
 
-        self._galprop_dtypes_to_allocate = np.dtype([
-            ('host_centric_distance', 'f8'),
-            ('x', 'f8'), ('y', 'f8'), ('z', 'f8'),
-            ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'),
-            ('conc_gal_bias', 'f8'), ('conc_galaxy', 'f8')
-            ])
+        self._galprop_dtypes_to_allocate = np.dtype(
+            [
+                ("host_centric_distance", "f8"),
+                ("x", "f8"),
+                ("y", "f8"),
+                ("z", "f8"),
+                ("vx", "f8"),
+                ("vy", "f8"),
+                ("vz", "f8"),
+                ("conc_gal_bias", "f8"),
+                ("conc_galaxy", "f8"),
+            ]
+        )
 
         self.param_dict = self._initialize_conc_bias_param_dict(**kwargs)
 
@@ -163,37 +179,50 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         r""" Set up the appropriate number of keys in the parameter dictionary
         and give the keys standardized names.
         """
-        if 'conc_gal_bias_logM_abscissa' in list(kwargs.keys()):
+        if "conc_gal_bias_logM_abscissa" in list(kwargs.keys()):
             _conc_bias_logM_abscissa = np.atleast_1d(
-                kwargs.get('conc_gal_bias_logM_abscissa')).astype('f4')
-            d = ({'conc_gal_bias_param'+str(i): 1.
-                for i in range(len(_conc_bias_logM_abscissa))})
-            d2 = ({'conc_gal_bias_logM_abscissa_param'+str(i): float(logM)
-                for i, logM in enumerate(_conc_bias_logM_abscissa)})
+                kwargs.get("conc_gal_bias_logM_abscissa")
+            ).astype("f4")
+            d = {
+                "conc_gal_bias_param" + str(i): 1.0
+                for i in range(len(_conc_bias_logM_abscissa))
+            }
+            d2 = {
+                "conc_gal_bias_logM_abscissa_param" + str(i): float(logM)
+                for i, logM in enumerate(_conc_bias_logM_abscissa)
+            }
             self._num_conc_bias_params = len(_conc_bias_logM_abscissa)
             for key, value in d2.items():
                 d[key] = value
             return d
 
         else:
-            return {'conc_gal_bias': 1.}
+            return {"conc_gal_bias": 1.0}
 
     def _retrieve_prof_lookup_info(self, **kwargs):
         r""" Retrieve the arrays defining the lookup table control points
         """
-        cmin, cmax = model_defaults.min_permitted_conc, model_defaults.max_permitted_conc
-        dc = 1.
-        npts_conc = int(np.round((cmax-cmin)/float(dc)))
+        cmin, cmax = (
+            model_defaults.min_permitted_conc,
+            model_defaults.max_permitted_conc,
+        )
+        dc = 1.0
+        npts_conc = int(np.round((cmax - cmin) / float(dc)))
         default_conc_arr = np.linspace(cmin, cmax, npts_conc)
-        conc_arr = kwargs.get('concentration_bins', default_conc_arr)
+        conc_arr = kwargs.get("concentration_bins", default_conc_arr)
 
-        conc_gal_bias_arr = kwargs.get('conc_gal_bias_bins',
-            model_defaults.default_conc_gal_bias_bins)
+        conc_gal_bias_arr = kwargs.get(
+            "conc_gal_bias_bins", model_defaults.default_conc_gal_bias_bins
+        )
 
         npts_conc, npts_gal_bias = len(conc_arr), len(conc_gal_bias_arr)
-        if npts_conc*npts_gal_bias > 300:
-            args = (npts_conc, npts_gal_bias, model_defaults.Npts_radius_table,
-                npts_conc*npts_gal_bias*model_defaults.Npts_radius_table)
+        if npts_conc * npts_gal_bias > 300:
+            args = (
+                npts_conc,
+                npts_gal_bias,
+                model_defaults.Npts_radius_table,
+                npts_conc * npts_gal_bias * model_defaults.Npts_radius_table,
+            )
             warn(lookup_table_performance_warning.format(*args))
 
         return [conc_arr, conc_gal_bias_arr]
@@ -235,7 +264,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         r""" Private method used to ensure that biased concentrations are still
         bound by the min/max bounds permitted by the lookup tables.
         """
-        gal_conc = conc_gal_bias*halo_conc
+        gal_conc = conc_gal_bias * halo_conc
 
         try:
             cmin = self._conc_NFWmodel_lookup_table_min
@@ -335,7 +364,9 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         """
         return NFWPhaseSpace.cumulative_mass_PDF(self, scaled_radius, halo_conc)
 
-    def dimensionless_radial_velocity_dispersion(self, scaled_radius, halo_conc, conc_gal_bias):
+    def dimensionless_radial_velocity_dispersion(
+        self, scaled_radius, halo_conc, conc_gal_bias
+    ):
         r"""
         Analytical solution to the isotropic jeans equation for an NFW potential,
         rendered dimensionless via scaling by the virial velocity.
@@ -361,8 +392,12 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
             The returned result has the same dimension as the input ``scaled_radius``.
         """
         gal_conc = self._clipped_galaxy_concentration(halo_conc, conc_gal_bias)
-        return biased_dimless_vrad_disp(scaled_radius, halo_conc, gal_conc,
-                profile_integration_tol=self._profile_integration_tol)
+        return biased_dimless_vrad_disp(
+            scaled_radius,
+            halo_conc,
+            gal_conc,
+            profile_integration_tol=self._profile_integration_tol,
+        )
 
     def radial_velocity_dispersion(self, radius, total_mass, halo_conc, conc_gal_bias):
         r"""
@@ -394,13 +429,12 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         """
         virial_velocities = self.virial_velocity(total_mass)
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
-        scaled_radius = radius/halo_radius
+        scaled_radius = radius / halo_radius
 
-        dimensionless_velocities = (
-            self.dimensionless_radial_velocity_dispersion(
-                scaled_radius, halo_conc, conc_gal_bias)
-            )
-        return dimensionless_velocities*virial_velocities
+        dimensionless_velocities = self.dimensionless_radial_velocity_dispersion(
+            scaled_radius, halo_conc, conc_gal_bias
+        )
+        return dimensionless_velocities * virial_velocities
 
     def calculate_conc_gal_bias(self, seed=None, **kwargs):
         r""" Calculate the ratio of the galaxy concentration to the halo concentration,
@@ -430,33 +464,39 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
             Ratio of the galaxy concentration to the halo concentration,
             :math:`c_{\rm gal}/c_{\rm halo}`.
         """
-        if 'table' in list(kwargs.keys()):
-            table = kwargs['table']
+        if "table" in list(kwargs.keys()):
+            table = kwargs["table"]
             mass = table[self.prim_haloprop_key]
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = np.atleast_1d(kwargs['prim_haloprop']).astype('f4')
+        elif "prim_haloprop" in list(kwargs.keys()):
+            mass = np.atleast_1d(kwargs["prim_haloprop"]).astype("f4")
         else:
-            msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
-                "to the ``assign_conc_gal_bias`` function of the ``BiasedNFWPhaseSpace`` class.\n")
+            msg = (
+                "\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
+                "to the ``assign_conc_gal_bias`` function of the ``BiasedNFWPhaseSpace`` class.\n"
+            )
             raise KeyError(msg)
 
-        if 'conc_gal_bias_logM_abscissa_param0' in self.param_dict.keys():
-            abscissa_keys = list('conc_gal_bias_logM_abscissa_param'+str(i)
-                for i in range(self._num_conc_bias_params))
+        if "conc_gal_bias_logM_abscissa_param0" in self.param_dict.keys():
+            abscissa_keys = list(
+                "conc_gal_bias_logM_abscissa_param" + str(i)
+                for i in range(self._num_conc_bias_params)
+            )
             abscissa = [self.param_dict[key] for key in abscissa_keys]
 
-            ordinates_keys = list('conc_gal_bias_param'+str(i)
-                for i in range(self._num_conc_bias_params))
+            ordinates_keys = list(
+                "conc_gal_bias_param" + str(i)
+                for i in range(self._num_conc_bias_params)
+            )
             ordinates = [self.param_dict[key] for key in ordinates_keys]
 
             result = np.interp(np.log10(mass), abscissa, ordinates)
         else:
-            result = np.zeros_like(mass) + self.param_dict['conc_gal_bias']
+            result = np.zeros_like(mass) + self.param_dict["conc_gal_bias"]
 
-        if 'table' in list(kwargs.keys()):
-            table['conc_gal_bias'][:] = result
-            halo_conc = table['conc_NFWmodel']
+        if "table" in list(kwargs.keys()):
+            table["conc_gal_bias"][:] = result
+            halo_conc = table["conc_NFWmodel"]
             gal_conc = self._clipped_galaxy_concentration(halo_conc, result)
-            table['conc_galaxy'][:] = gal_conc
+            table["conc_galaxy"][:] = gal_conc
         else:
             return result

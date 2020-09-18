@@ -14,9 +14,13 @@ The simplest way to install the latest release of the code is with pip. Before i
 
 	pip install halotools
 
-Alternatively, you can install using conda::
+Alternatively, you can install using the astropy channel on conda::
 
 	conda install -c astropy halotools
+
+or via conda-forge:
+
+    conda install -c conda-forge halotools
 
 Either pip or conda will install the latest official release of the code.
 If instead you want the latest master branch,
@@ -58,13 +62,13 @@ The first step is to clone the halotools repository::
 Installing one of the official releases
 ------------------------------------------
 
-All official releases of the code are tagged with their version name, e.g., v0.5.
+All official releases of the code are tagged with their version name, e.g., v0.7.
 To install a particular release::
 
-	git checkout v0.5
+	git checkout v0.7
 	python setup.py install
 
-This will install the v0.5 release of the code. Other official release versions (e.g., v0.1) can be installed similarly.
+This will install the v0.7 release of the code. Other official release versions (e.g., v0.5) can be installed similarly.
 
 Installing the most recent master branch
 ------------------------------------------
@@ -113,7 +117,7 @@ The h5py package is used for fast I/O of large simulated datasets.
 
 If you did not use pip, then you should be aware of the following strict requirements:
 
-- `Python <http://www.python.org/>`_: 2.7.x or 3.x
+- `Python <http://www.python.org/>`_: 3.7.x
 
 - `Numpy <http://www.numpy.org/>`_: 1.9 or later
 
@@ -121,7 +125,7 @@ If you did not use pip, then you should be aware of the following strict require
 
 - `Cython <http://www.cython.org/>`_: 0.23 or later
 
-- `Astropy`_: 1.0 or later
+- `Astropy`_: 4.0 or later
 
 - `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs.
 

@@ -20,8 +20,8 @@ from ..... import model_defaults
 from ......sim_manager import sim_defaults
 
 
-__all__ = ('NFWProfile', )
-__author__ = ('Andrew Hearin', 'Benedikt Diemer')
+__all__ = ("NFWProfile",)
+__author__ = ("Andrew Hearin", "Benedikt Diemer")
 
 
 class NFWProfile(AnalyticDensityProf):
@@ -35,13 +35,17 @@ class NFWProfile(AnalyticDensityProf):
     implemented in the Halotools code base, see :ref:`nfw_profile_tutorial`.
 
     """
-    def __init__(self,
-            cosmology=sim_defaults.default_cosmology,
-            redshift=sim_defaults.default_redshift,
-            mdef=model_defaults.halo_mass_definition,
-            conc_mass_model=model_defaults.conc_mass_model,
-            concentration_key=model_defaults.concentration_key,
-            **kwargs):
+
+    def __init__(
+        self,
+        cosmology=sim_defaults.default_cosmology,
+        redshift=sim_defaults.default_redshift,
+        mdef=model_defaults.halo_mass_definition,
+        conc_mass_model=model_defaults.conc_mass_model,
+        concentration_key=model_defaults.concentration_key,
+        halo_boundary_key=None,
+        **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -56,6 +60,9 @@ class NFWProfile(AnalyticDensityProf):
         mdef: str, optional
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
             Default is set in `~halotools.empirical_models.model_defaults`.
+
+        halo_boundary_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
 
         conc_mass_model : string or callable, optional
             Specifies the function used to model the relation between
@@ -77,20 +84,24 @@ class NFWProfile(AnalyticDensityProf):
         --------
         >>> nfw = NFWProfile()
         """
-        AnalyticDensityProf.__init__(self, cosmology, redshift, mdef)
+        AnalyticDensityProf.__init__(
+            self, cosmology, redshift, mdef, halo_boundary_key=halo_boundary_key
+        )
 
-        self.gal_prof_param_keys = ['conc_NFWmodel']
-        self.halo_prof_param_keys = ['conc_NFWmodel']
+        self.gal_prof_param_keys = ["conc_NFWmodel"]
+        self.halo_prof_param_keys = ["conc_NFWmodel"]
 
-        self.publications = ['arXiv:9611107', 'arXiv:0002395']
+        self.publications = ["arXiv:9611107", "arXiv:0002395"]
 
-        self._initialize_conc_mass_behavior(conc_mass_model,
-                concentration_key=concentration_key)
+        self._initialize_conc_mass_behavior(
+            conc_mass_model, concentration_key=concentration_key
+        )
 
     def _initialize_conc_mass_behavior(self, conc_mass_model, **kwargs):
-        if conc_mass_model == 'direct_from_halo_catalog':
-            self.concentration_key = kwargs.get('concentration_key',
-                    model_defaults.concentration_key)
+        if conc_mass_model == "direct_from_halo_catalog":
+            self.concentration_key = kwargs.get(
+                "concentration_key", model_defaults.concentration_key
+            )
 
         self.conc_mass_model = conc_mass_model
 
@@ -170,24 +181,29 @@ class NFWProfile(AnalyticDensityProf):
         >>> fake_halo_table = Table({'halo_mvir': fake_masses})
         >>> model_conc = nfw.conc_NFWmodel(table=fake_halo_table)
         """
-        if self.conc_mass_model == 'direct_from_halo_catalog':
+        if self.conc_mass_model == "direct_from_halo_catalog":
             try:
-                table = kwargs['table']
+                table = kwargs["table"]
             except KeyError:
-                msg = ("Must pass ``table`` argument to the ``conc_NFWmodel`` function\n"
-                    "when ``conc_mass_model`` is set to ``direct_from_halo_catalog``\n")
+                msg = (
+                    "Must pass ``table`` argument to the ``conc_NFWmodel`` function\n"
+                    "when ``conc_mass_model`` is set to ``direct_from_halo_catalog``\n"
+                )
                 raise KeyError(msg)
-            result = direct_from_halo_catalog(table=table,
-                    concentration_key=self.concentration_key)
+            result = direct_from_halo_catalog(
+                table=table, concentration_key=self.concentration_key
+            )
 
-        elif self.conc_mass_model == 'dutton_maccio14':
-            msg = ("Must either pass a ``prim_haloprop`` argument, \n"
-                "or a ``table`` argument with an astropy Table that has the ``{0}`` key")
+        elif self.conc_mass_model == "dutton_maccio14":
+            msg = (
+                "Must either pass a ``prim_haloprop`` argument, \n"
+                "or a ``table`` argument with an astropy Table that has the ``{0}`` key"
+            )
             try:
-                mass = kwargs['table'][self.prim_haloprop_key]
+                mass = kwargs["table"][self.prim_haloprop_key]
             except:
                 try:
-                    mass = kwargs['prim_haloprop']
+                    mass = kwargs["prim_haloprop"]
                 except:
                     raise KeyError(msg.format(self.prim_haloprop_key))
             result = dutton_maccio14(mass, self.redshift)
@@ -473,7 +489,7 @@ class NFWProfile(AnalyticDensityProf):
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
         scale_radius = halo_radius / conc
-        return 2.16258*scale_radius
+        return 2.16258 * scale_radius
 
     def vmax(self, total_mass, conc):
         r""" Maximum circular velocity of the halo profile,
@@ -608,7 +624,7 @@ class NFWProfile(AnalyticDensityProf):
         >>> radial_positions = nfw.mc_generate_nfw_radial_positions(halo_mass = 1e12, conc = 10)
         >>> radial_positions = nfw.mc_generate_nfw_radial_positions(halo_radius = 0.25)
         """
-        kwargs['mdef'] = self.mdef
-        kwargs['cosmology'] = self.cosmology
-        kwargs['redshift'] = self.redshift
+        kwargs["mdef"] = self.mdef
+        kwargs["cosmology"] = self.cosmology
+        kwargs["redshift"] = self.redshift
         return standalone_mc_generate_nfw_radial_positions(**kwargs)
