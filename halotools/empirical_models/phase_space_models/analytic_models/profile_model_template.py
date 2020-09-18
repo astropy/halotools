@@ -17,11 +17,11 @@ from . import halo_boundary_functions
 
 from ... import model_defaults
 
-newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
+newtonG = G.to(u.km * u.km * u.Mpc / (u.Msun * u.s * u.s))
 
-__author__ = ['Andrew Hearin', 'Benedikt Diemer']
+__author__ = ["Andrew Hearin", "Benedikt Diemer"]
 
-__all__ = ['AnalyticDensityProf']
+__all__ = ["AnalyticDensityProf"]
 
 
 @six.add_metaclass(ABCMeta)
@@ -63,8 +63,8 @@ class AnalyticDensityProf(object):
         # The following four attributes are derived quantities from the above,
         # so that self-consistency between them is ensured
         self.density_threshold = halo_boundary_functions.density_threshold(
-            cosmology=self.cosmology,
-            redshift=self.redshift, mdef=self.mdef)
+            cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
+        )
         self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
         self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
@@ -157,11 +157,13 @@ class AnalyticDensityProf(object):
 
         """
         halo_radius = self.halo_mass_to_halo_radius(mass)
-        scaled_radius = radius/halo_radius
+        scaled_radius = radius / halo_radius
 
-        dimensionless_mass = self.dimensionless_mass_density(scaled_radius, *prof_params)
+        dimensionless_mass = self.dimensionless_mass_density(
+            scaled_radius, *prof_params
+        )
 
-        density = self.density_threshold*dimensionless_mass
+        density = self.density_threshold * dimensionless_mass
         return density
 
     def _enclosed_dimensionless_mass_integrand(self, scaled_radius, *prof_params):
@@ -183,8 +185,10 @@ class AnalyticDensityProf(object):
         integrand: array_like
             function to be integrated to yield the amount of enclosed mass.
         """
-        dimensionless_density = self.dimensionless_mass_density(scaled_radius, *prof_params)
-        return dimensionless_density*4*np.pi*scaled_radius**2
+        dimensionless_density = self.dimensionless_mass_density(
+            scaled_radius, *prof_params
+        )
+        return dimensionless_density * 4 * np.pi * scaled_radius ** 2
 
     def cumulative_mass_PDF(self, scaled_radius, *prof_params):
         r"""
@@ -219,12 +223,20 @@ class AnalyticDensityProf(object):
 
         for i in range(len(x)):
             enclosed_mass[i], _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand, 0., x[i], epsrel=1e-5,
-                args=prof_params)
+                self._enclosed_dimensionless_mass_integrand,
+                0.0,
+                x[i],
+                epsrel=1e-5,
+                args=prof_params,
+            )
 
         total, _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand, 0., 1.0, epsrel=1e-5,
-                args=prof_params)
+            self._enclosed_dimensionless_mass_integrand,
+            0.0,
+            1.0,
+            epsrel=1e-5,
+            args=prof_params,
+        )
 
         return enclosed_mass / total
 
@@ -259,7 +271,7 @@ class AnalyticDensityProf(object):
         """
         radius = np.atleast_1d(radius).astype(np.float64)
         scaled_radius = radius / self.halo_mass_to_halo_radius(total_mass)
-        mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass
+        mass = self.cumulative_mass_PDF(scaled_radius, *prof_params) * total_mass
 
         return mass
 
@@ -289,7 +301,9 @@ class AnalyticDensityProf(object):
         See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
-        return np.sqrt(self.cumulative_mass_PDF(scaled_radius, *prof_params)/scaled_radius)
+        return np.sqrt(
+            self.cumulative_mass_PDF(scaled_radius, *prof_params) / scaled_radius
+        )
 
     def virial_velocity(self, total_mass):
         r""" The circular velocity evaluated at the halo boundary,
@@ -310,8 +324,9 @@ class AnalyticDensityProf(object):
         See :ref:`halo_profile_definitions` for derivations and implementation details.
 
         """
-        return halo_boundary_functions.halo_mass_to_virial_velocity(total_mass,
-            self.cosmology, self.redshift, self.mdef)
+        return halo_boundary_functions.halo_mass_to_virial_velocity(
+            total_mass, self.cosmology, self.redshift, self.mdef
+        )
 
     def circular_velocity(self, radius, total_mass, *prof_params):
         r"""
@@ -344,13 +359,14 @@ class AnalyticDensityProf(object):
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
         scaled_radius = np.atleast_1d(radius) / halo_radius
         return self.dimensionless_circular_velocity(
-            scaled_radius, *prof_params)*self.virial_velocity(total_mass)
+            scaled_radius, *prof_params
+        ) * self.virial_velocity(total_mass)
 
     def _vmax_helper(self, scaled_radius, *prof_params):
         """ Helper function used to calculate `vmax` and `rmax`.
         """
         encl = self.cumulative_mass_PDF(scaled_radius, *prof_params)
-        return -1.*encl/scaled_radius
+        return -1.0 * encl / scaled_radius
 
     def rmax(self, total_mass, *prof_params):
         r""" Radius at which the halo attains its maximum circular velocity.
@@ -380,7 +396,7 @@ class AnalyticDensityProf(object):
 
         result = scipy_minimize(self._vmax_helper, guess, args=prof_params)
 
-        return result.x[0]*halo_radius
+        return result.x[0] * halo_radius
 
     def vmax(self, total_mass, *prof_params):
         r""" Maximum circular velocity of the halo profile.
@@ -408,7 +424,9 @@ class AnalyticDensityProf(object):
         result = scipy_minimize(self._vmax_helper, guess, args=prof_params)
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
 
-        return self.circular_velocity(result.x[0]*halo_radius, total_mass, *prof_params)
+        return self.circular_velocity(
+            result.x[0] * halo_radius, total_mass, *prof_params
+        )
 
     def halo_mass_to_halo_radius(self, total_mass):
         r"""
@@ -434,8 +452,8 @@ class AnalyticDensityProf(object):
 
         """
         return halo_boundary_functions.halo_mass_to_halo_radius(
-            total_mass, cosmology=self.cosmology,
-            redshift=self.redshift, mdef=self.mdef)
+            total_mass, cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
+        )
 
     def halo_radius_to_halo_mass(self, radius):
         r"""
@@ -461,5 +479,5 @@ class AnalyticDensityProf(object):
 
         """
         return halo_boundary_functions.halo_radius_to_halo_mass(
-            radius, cosmology=self.cosmology,
-            redshift=self.redshift, mdef=self.mdef)
+            radius, cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
+        )
