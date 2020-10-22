@@ -242,7 +242,7 @@ class OccupationComponent(object):
         nsat_lo = np.floor(first_occupation_moment)
         with NumpyRNGContext(seed):
             uran = np.random.uniform(nsat_lo, nsat_lo + 1, first_occupation_moment.size)
-        result = np.where(uran < first_occupation_moment, nsat_lo, nsat_lo + 1)
+        result = np.where(uran > first_occupation_moment, nsat_lo, nsat_lo + 1)
         if "table" in kwargs:
             kwargs["table"]["halo_num_" + self.gal_type] = result
         return result

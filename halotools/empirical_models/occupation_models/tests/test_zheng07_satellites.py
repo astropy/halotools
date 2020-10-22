@@ -324,3 +324,15 @@ def test_get_published_parameters3():
         d2 = default_model.get_published_parameters(default_model.threshold)
 
         assert d1 == d2
+
+
+def test_weighted_nearest_integer():
+    model1 = Zheng07Sats()
+    model2 = Zheng07Sats(second_moment="weighted_nearest_integer")
+
+    mtest = np.zeros(int(1e5)) + 1e13
+    nsat1 = model1.mc_occupation(prim_haloprop=mtest)
+    nsat2 = model2.mc_occupation(prim_haloprop=mtest)
+
+    assert np.allclose(nsat1.mean(), nsat2.mean(), rtol=0.05)
+    assert np.std(nsat1) > np.std(nsat2) + 0.1
