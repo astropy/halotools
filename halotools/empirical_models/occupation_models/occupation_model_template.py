@@ -42,6 +42,12 @@ class OccupationComponent(object):
             Upper bound on the number of gal_type galaxies per halo.
             The only currently supported values are unity or infinity.
 
+        second_moment : string, optional
+            Method for computing the second occupation moment.
+            For centrals, only Bernoulli is supported.
+            For satellites, options are "poisson" and "weighted_nearest_integer".
+            Satellite default is "poisson".
+
         prim_haloprop_key : string, optional
             String giving the column name of the primary halo property governing
             the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``.
@@ -65,6 +71,8 @@ class OccupationComponent(object):
             raise KeyError(msg)
 
         self._lower_occupation_bound = 0.0
+
+        self._second_moment = kwargs.get("second_moment", "poisson")
 
         if not hasattr(self, "param_dict"):
             self.param_dict = {}
@@ -134,9 +142,16 @@ class OccupationComponent(object):
                 first_occupation_moment, seed=seed, **kwargs
             )
         elif self._upper_occupation_bound == float("inf"):
-            return self._poisson_distribution(
-                first_occupation_moment, seed=seed, **kwargs
-            )
+            if self._second_moment == "poisson":
+                return self._poisson_distribution(
+                    first_occupation_moment, seed=seed, **kwargs
+                )
+            elif self._second_moment == "weighted_nearest_integer":
+                return self._weighted_nearest_integer(
+                    first_occupation_moment, seed=seed, **kwargs
+                )
+            else:
+                raise ValueError("Unrecognized second moment")
         else:
             msg = (
                 "\nYou have chosen to set ``_upper_occupation_bound`` to some value \n"
@@ -201,6 +216,33 @@ class OccupationComponent(object):
                     first_occupation_moment,
                 )
             ).astype(np.int)
+        if "table" in kwargs:
+            kwargs["table"]["halo_num_" + self.gal_type] = result
+        return result
+
+    def _weighted_nearest_integer(self, first_occupation_moment, seed=None, **kwargs):
+        """ Non-Poisson distribution for satellite occupation statistics.
+        If <Nsat> = i + r where r is the remainder, then the Monte Carlo realization
+        will produce Nsat = i with probability r, and Nsat = i + 1 with probability 1-r.
+
+        Parameters
+        ----------
+        first_occupation_moment : array
+            Array giving the first moment of the occupation distribution function.
+
+        seed : int, optional
+            Random number seed used to generate the Monte Carlo realization.
+            Default is None.
+
+        Returns
+        -------
+        mc_abundance : array
+            Integer array giving the number of galaxies in each of the input table.
+        """
+        nsat_lo = np.floor(first_occupation_moment)
+        with NumpyRNGContext(seed):
+            uran = np.random.uniform(nsat_lo, nsat_lo + 1, first_occupation_moment.size)
+        result = np.where(uran < first_occupation_moment, nsat_lo, nsat_lo + 1)
         if "table" in kwargs:
             kwargs["table"]["halo_num_" + self.gal_type] = result
         return result
