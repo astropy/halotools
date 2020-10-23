@@ -138,6 +138,19 @@ def test_Cacciato09Cens7():
     assert p_value > 0.001
 
 
+def test_Cacciato09Cens8():
+    """Verify that the prim_galprop_max keyword argument behaves as expected.
+    """
+    model = Cacciato09Cens(threshold=10)
+    marr = np.logspace(10, 13, 100)
+    ncen1 = model.mean_occupation(prim_haloprop=marr)
+    ncen2 = model.mean_occupation(prim_haloprop=marr, prim_galprop_max=10 ** 15)
+    assert np.allclose(ncen1, ncen2, atol=0.01)
+
+    ncen3 = model.mean_occupation(prim_haloprop=marr, prim_galprop_max=10 ** 11.1)
+    assert not np.allclose(ncen1, ncen3, atol=0.01)
+
+
 def test_Cacciato09Cens_median_prim_galprop_raises_exception():
     model = Cacciato09Cens(threshold=10.5)
     with pytest.raises(HalotoolsError) as err:
