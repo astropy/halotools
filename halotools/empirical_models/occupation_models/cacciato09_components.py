@@ -165,7 +165,7 @@ class Cacciato09Cens(OccupationComponent):
                 np.exp(-(np.log10(prim_galprop / med_prim_galprop))**2 / (2.0 *
                        self.param_dict['sigma']**2)))
 
-    def mean_occupation(self, prim_galprop_min=None, **kwargs):
+    def mean_occupation(self, prim_galprop_min=None, prim_galprop_max=None, **kwargs):
         r""" Expected number of central galaxies in a halo. Derived from
         integrating the CLF from the primary galaxy property threshold to
         infinity.
@@ -176,6 +176,11 @@ class Cacciato09Cens(OccupationComponent):
             Lower limit of the CLF integration used to calculate the expected
             number of central galaxies. If not specified, the lower limit is the
             threshold.
+       
+       prim_galprop_max : float, optional
+            Upper limit of the CLF integration used to calculate the expected
+            number of central galaxies. If not specified, the upper limit is
+            infinity.
 
         prim_haloprop : array, optional
             Array of mass-like variable upon which occupation statistics are
@@ -198,11 +203,26 @@ class Cacciato09Cens(OccupationComponent):
             prim_galprop_min = prim_galprop_min
         else:
             prim_galprop_min = 10**self.threshold
+        
+        if prim_galprop_max is not None:
+            if prim_galprop_max <= prim_galprop_min:
+                msg = ("\nFor the ``mean_occupation`` function of the "
+                       "``Cacciato09Cens`` class the ``prim_galprop_max`` "
+                       "keyword must be bigger than 10^threshold or "
+                       "``prim_galprop_min`` if provided.\n")
+                raise HalotoolsError(msg)
 
         log_prim_galprop = np.log10(self.median_prim_galprop(**kwargs))
-
-        return (0.5 * erfc((np.log10(prim_galprop_min) - log_prim_galprop) /
+        
+        
+        result = (0.5 * erfc((np.log10(prim_galprop_min) - log_prim_galprop) /
                            (np.sqrt(2.0) * self.param_dict['sigma'])))
+       
+        if prim_galprop_max is not None:
+            result = (0.5 * erfc((np.log10(prim_galprop_max) - log_prim_galprop) /
+                           (np.sqrt(2.0) * self.param_dict['sigma'])) - result)
+  
+        return result
 
     def mc_prim_galprop(self, **kwargs):
         r""" Method to generate Monte Carlo realizations of the primary galaxy
