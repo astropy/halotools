@@ -219,8 +219,8 @@ class Cacciato09Cens(OccupationComponent):
                            (np.sqrt(2.0) * self.param_dict['sigma'])))
        
         if prim_galprop_max is not None:
-            result = (0.5 * erfc((np.log10(prim_galprop_max) - log_prim_galprop) /
-                           (np.sqrt(2.0) * self.param_dict['sigma'])) - result)
+            result = (result - 0.5 * erfc((np.log10(prim_galprop_max) - log_prim_galprop) /
+                           (np.sqrt(2.0) * self.param_dict['sigma'])))
   
         return result
 
