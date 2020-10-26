@@ -147,7 +147,7 @@ def test_Cacciato09Cens8():
     ncen2 = model.mean_occupation(prim_haloprop=marr, prim_galprop_max=10 ** 15)
     assert np.allclose(ncen1, ncen2, atol=0.01)
 
-    ncen3 = model.mean_occupation(prim_haloprop=marr, prim_galprop_max=10 ** 11.1)
+    ncen3 = model.mean_occupation(prim_haloprop=marr, prim_galprop_max=10 ** 10.3)
     assert not np.allclose(ncen1, ncen3, atol=0.01)
 
 
