@@ -239,7 +239,7 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input table.
         """
-        nsat_lo = np.floor(first_occupation_moment)
+        nsat_lo = np.floor(first_occupation_moment).astype(int)
         with NumpyRNGContext(seed):
             uran = np.random.uniform(nsat_lo, nsat_lo + 1, first_occupation_moment.size)
         result = np.where(uran > first_occupation_moment, nsat_lo, nsat_lo + 1)
