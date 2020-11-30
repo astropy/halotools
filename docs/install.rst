@@ -14,11 +14,7 @@ The simplest way to install the latest release of the code is with pip. Before i
 
 	pip install halotools
 
-Alternatively, you can install using the astropy channel on conda::
-
-	conda install -c astropy halotools
-
-or via conda-forge:
+Alternatively, you can install using the conda-forge channel on conda::
 
     conda install -c conda-forge halotools
 
