@@ -21,17 +21,12 @@ jobs:
           - name: Ubuntu - Python 3.7 with all optional dependencies
             os: ubuntu-latest
             python: 3.7
-            toxenv: py37-test-alldeps
+            toxenv: 'py37-test-alldeps'
 
           - name: MacOs - Python 3.7 with all optional dependencies
             os: macos-latest
             python: 3.7
-            toxenv: py37-test-alldeps
-
-          - name: Windows - Python 3.7 with all optional dependencies
-            os: windows-latest
-            python: 3.7
-            toxenv: py37-test-alldeps
+            toxenv: 'py37-test-alldeps'
 
     steps:
     - name: Checkout code
