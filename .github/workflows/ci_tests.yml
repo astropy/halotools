@@ -6,7 +6,8 @@ on:
     - master
   #  tags: # run CI if specific tags are pushed
   pull_request:
-    - master
+    branches:
+      - master
 
 jobs:
   # Github Actions supports ubuntu, windows, and macos virtual environments:
