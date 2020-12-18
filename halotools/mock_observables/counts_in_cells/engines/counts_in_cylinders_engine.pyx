@@ -8,6 +8,8 @@ cimport numpy as cnp
 cimport cython
 from libc.math cimport ceil
 
+from .conditions.conditions cimport Condition
+from .conditions.conditions import choose_condition
 from ....utils import unsorting_indices
 
 __author__ = ('Andrew Hearin', )
@@ -22,6 +24,7 @@ def counts_in_cylinders_engine(
         x2in, y2in, z2in,
         rp_max, pi_max,
         return_indexes,
+        condition, condition_args,
         cell1_tuple):
     """
     Cython engine for determining counting the number of points in ``sample2``
@@ -63,6 +66,27 @@ def counts_in_cylinders_engine(
     return_indexes : bool
         If true, return both counts and the indexes of the pairs.
 
+    condition : str, optional
+        Require a condition to be met for a pair to be counted.
+        See options below:
+        None | "always_true":
+            Count all pairs in cylinder
+
+        "mass_frac":
+            Only count pairs which satisfy lim[0] < mass2/mass1 < lim[1]
+
+    condition_args : tuple, optional
+        Arguments passed to the condition constructor
+        "always_true":
+            *args will be ignored
+
+        "mass_frac":
+            -mass1 (array of mass of sample 1; required)
+            -mass2 (array of mass of sample 2; required)
+            -lim (tuple of min,max; required)
+            -lower_equality (bool to use lim[0] <= m2/m1; optional)
+            -upper_equality (bool to use m2/m1 <= lim[1]; optional)
+
     cell1_tuple : tuple
         Two-element tuple defining the first and last cells in
         double_mesh.mesh1 that will be looped over. Intended for use with
@@ -86,6 +110,16 @@ def counts_in_cylinders_engine(
     pi_max_squared_tmp = pi_max*pi_max
     cdef cnp.float64_t[:] pi_max_squared = np.ascontiguousarray(
         pi_max_squared_tmp[double_mesh.mesh1.idx_sorted])
+
+    # Store the original order to use during loop
+    cdef cnp.int64_t[:] idx_sorted1 = double_mesh.mesh1.idx_sorted
+    cdef cnp.int64_t[:] idx_sorted2 = double_mesh.mesh2.idx_sorted
+    cdef cnp.int64_t i_original
+    cdef cnp.int64_t j_original
+
+    # Choose the condition function
+    cdef Condition cond = choose_condition(condition, condition_args)
+
 
     cdef cnp.float64_t xperiod = double_mesh.xperiod
     cdef cnp.float64_t yperiod = double_mesh.yperiod
@@ -238,15 +272,19 @@ def counts_in_cylinders_engine(
                                     dz_sq = dz*dz
 
                                     if (dxy_sq < rp_max_squaredtmp) & (dz_sq < pi_max_squaredtmp):
-                                        counts[ifirst1+i] += 1
 
-                                        if c_return_indexes:
-                                            indexes[current_indexes_cnt, 0] = ifirst1+i
-                                            indexes[current_indexes_cnt, 1] = ifirst2+j
-                                            current_indexes_cnt += 1
-                                            if current_indexes_cnt == current_indexes_len:
-                                                current_indexes_len *= 2
-                                                indexes = np.resize(indexes, (current_indexes_len, 2))
+                                        i_original = idx_sorted1[ifirst1+i]
+                                        j_original = idx_sorted2[ifirst2+j]
+                                        if cond.func(i_original, j_original):
+                                            counts[ifirst1+i] += 1
+
+                                            if c_return_indexes:
+                                                indexes[current_indexes_cnt, 0] = ifirst1+i
+                                                indexes[current_indexes_cnt, 1] = ifirst2+j
+                                                current_indexes_cnt += 1
+                                                if current_indexes_cnt == current_indexes_len:
+                                                    current_indexes_len *= 2
+                                                    indexes = np.resize(indexes, (current_indexes_len, 2))
 
     # At this point, we have calculated our pairs on the input arrays *after* sorting
     # Since the order matters in this calculation, we need to undo the sorting
