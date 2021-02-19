@@ -122,10 +122,8 @@ class HodMockFactory(MockFactory):
             Default is set in `~halotools.empirical_models.model_defaults`.
 
         """
-        try:
-            assert "halo_upid" in list(halocat.halo_table.keys())
-        except AssertionError:
-            raise HalotoolsError(missing_halo_upid_msg)
+        if "halo_upid" not in list(halocat.halo_table.keys()):
+            halocat.halo_table["halo_upid"] = -1
 
         # Make cuts on halo catalog #
         # Select host halos only, since this is an HOD-style model
