@@ -61,7 +61,6 @@ def test_unavailable_upid():
     m = PrebuiltHodModelFactory("zheng07")
 
     m.populate_mock(halocat=halocat)
-    assert np.allclose(m.mock.halo_table["halo_upid"], -1)
 
 
 def test_censat_consistency_check():

@@ -73,6 +73,8 @@ class SubhaloMockFactory(MockFactory):
         """Method to pre-process a halo catalog upon instantiation of the mock object."""
         halo_table = halocat.halo_table
 
+        self.additional_haloprops.append("halo_upid")
+
         if ("halo_hostid" not in self.additional_haloprops) & (
             "halo_hostid" in list(halo_table.keys())
         ):

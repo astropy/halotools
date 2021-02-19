@@ -36,7 +36,6 @@ default_haloprop_list_inherited_by_mock = [
     "halo_vz",
     "halo_mvir",
     "halo_rvir",
-    "halo_upid",
 ]
 
 prim_haloprop_key = "halo_mvir"
