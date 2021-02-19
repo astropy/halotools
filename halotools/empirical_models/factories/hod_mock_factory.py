@@ -39,7 +39,7 @@ missing_halo_upid_msg = (
 
 
 class HodMockFactory(MockFactory):
-    """ Class responsible for populating a simulation with a
+    """Class responsible for populating a simulation with a
     population of mock galaxies based on an HOD-style model
     built by the `~halotools.empirical_models.HodModelFactory` class.
 
@@ -101,7 +101,7 @@ class HodMockFactory(MockFactory):
         self.preprocess_halo_catalog(halocat)
 
     def preprocess_halo_catalog(self, halocat):
-        """ Method to pre-process a halo catalog upon instantiation of
+        """Method to pre-process a halo catalog upon instantiation of
         the mock object. This pre-processing includes identifying the
         catalog columns that will be used by the model to create the mock,
         building lookup tables associated with the halo profile,
@@ -401,7 +401,7 @@ class HodMockFactory(MockFactory):
             self.galaxy_table = self.galaxy_table[mask]
 
     def allocate_memory(self, seed=None):
-        """ Method allocates the memory for all the numpy arrays
+        """Method allocates the memory for all the numpy arrays
         that will store the information about the mock.
         These arrays are bound directly to the mock object.
 
@@ -509,7 +509,7 @@ class HodMockFactory(MockFactory):
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype=dt[key].type)
 
     def estimate_ngals(self, seed=None):
-        """ Method to estimate the number of galaxies produced by the
+        """Method to estimate the number of galaxies produced by the
         mock.populate() method. It runs one realization of all
         mc_occupation methods and reports the total number of galaxies
         produced. However, no extra memory is allocated for the
