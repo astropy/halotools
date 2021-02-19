@@ -25,7 +25,7 @@ __author__ = ("Andrew Hearin", "Benedikt Diemer")
 
 
 class NFWProfile(AnalyticDensityProf):
-    r""" Model for the spatial distribution of mass
+    r"""Model for the spatial distribution of mass
     and/or galaxies residing in an NFW halo profile,
     based on Navarro, Frenk and White (1995),
     `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_.
@@ -44,6 +44,7 @@ class NFWProfile(AnalyticDensityProf):
         conc_mass_model=model_defaults.conc_mass_model,
         concentration_key=model_defaults.concentration_key,
         halo_boundary_key=None,
+        prim_haloprop_key=None,
         **kwargs
     ):
         r"""
@@ -60,9 +61,17 @@ class NFWProfile(AnalyticDensityProf):
         mdef: str, optional
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
             Default is set in `~halotools.empirical_models.model_defaults`.
+            Use "custom" to allow arbitrary relationshipts between mass and radius.
+            When mdef is set to "custom", the `prim_haloprop_key` must also be passed.
 
         halo_boundary_key : str, optional
             Default behavior is to use the column associated with the input mdef.
+            When mdef is set to "custom", any halo boundary is permitted.
+            When mdef is set to "custom", the `prim_haloprop_key` must also be passed.
+
+        prim_haloprop_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
+            When mdef is set to "custom", the `prim_haloprop_key` must also be passed.
 
         conc_mass_model : string or callable, optional
             Specifies the function used to model the relation between
@@ -85,7 +94,12 @@ class NFWProfile(AnalyticDensityProf):
         >>> nfw = NFWProfile()
         """
         AnalyticDensityProf.__init__(
-            self, cosmology, redshift, mdef, halo_boundary_key=halo_boundary_key
+            self,
+            cosmology,
+            redshift,
+            mdef,
+            halo_boundary_key=halo_boundary_key,
+            prim_haloprop_key=prim_haloprop_key,
         )
 
         self.gal_prof_param_keys = ["conc_NFWmodel"]
@@ -106,7 +120,7 @@ class NFWProfile(AnalyticDensityProf):
         self.conc_mass_model = conc_mass_model
 
     def conc_NFWmodel(self, *args, **kwargs):
-        r""" NFW concentration as a function of halo mass.
+        r"""NFW concentration as a function of halo mass.
 
         Parameters
         ----------
@@ -387,7 +401,7 @@ class NFWProfile(AnalyticDensityProf):
         return AnalyticDensityProf.enclosed_mass(self, radius, total_mass, conc)
 
     def virial_velocity(self, total_mass):
-        r""" The circular velocity evaluated at the halo boundary,
+        r"""The circular velocity evaluated at the halo boundary,
         :math:`V_{\rm vir} \equiv \sqrt{GM_{\rm halo}/R_{\rm halo}}`.
 
         Parameters
@@ -455,7 +469,7 @@ class NFWProfile(AnalyticDensityProf):
         return AnalyticDensityProf.circular_velocity(self, radius, total_mass, conc)
 
     def rmax(self, total_mass, conc):
-        r""" Radius at which the halo attains its maximum circular velocity,
+        r"""Radius at which the halo attains its maximum circular velocity,
         :math:`R_{\rm max}^{\rm NFW} = 2.16258R_{\Delta}/c`.
 
         Parameters
@@ -492,7 +506,7 @@ class NFWProfile(AnalyticDensityProf):
         return 2.16258 * scale_radius
 
     def vmax(self, total_mass, conc):
-        r""" Maximum circular velocity of the halo profile,
+        r"""Maximum circular velocity of the halo profile,
         :math:`V_{\rm max}^{\rm NFW} = V_{\rm cir}^{\rm NFW}(r = 2.16258R_{\Delta}/c)`.
 
         Parameters
@@ -577,7 +591,7 @@ class NFWProfile(AnalyticDensityProf):
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
 
     def mc_generate_nfw_radial_positions(self, **kwargs):
-        r""" Return a Monte Carlo realization of points in an NFW profile.
+        r"""Return a Monte Carlo realization of points in an NFW profile.
 
         See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique.
 

@@ -26,7 +26,7 @@ __all__ = ["AnalyticDensityProf"]
 
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
-    r""" Container class for any analytical radial profile model.
+    r"""Container class for any analytical radial profile model.
 
     See :ref:`profile_template_tutorial` for a review of the mathematics of
     halo profiles, and a thorough description of how the relevant equations
@@ -63,16 +63,20 @@ class AnalyticDensityProf(object):
         self.redshift = redshift
         self.mdef = mdef
 
-        # The following four attributes are derived quantities from the above,
-        # so that self-consistency between them is ensured
-        self.density_threshold = halo_boundary_functions.density_threshold(
-            cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
-        )
         if halo_boundary_key is None:
             self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
         else:
             self.halo_boundary_key = halo_boundary_key
-        self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
+        # The following four attributes are derived quantities from the above,
+        # so that self-consistency between them is ensured
+        if self.mdef == "custom":
+            self.density_threshold = None
+            self.prim_haloprop_key = kwargs["prim_haloprop_key"]
+        else:
+            self.density_threshold = halo_boundary_functions.density_threshold(
+                cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
+            )
+            self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
         self.gal_prof_param_keys = []
         self.halo_prof_param_keys = []
@@ -169,6 +173,12 @@ class AnalyticDensityProf(object):
             scaled_radius, *prof_params
         )
 
+        if self.density_threshold is None:
+            msg = (
+                "When using mdef=`custom`, "
+                "there is no way to compute the SO mass_density"
+            )
+            raise ValueError(msg)
         density = self.density_threshold * dimensionless_mass
         return density
 
@@ -282,7 +292,7 @@ class AnalyticDensityProf(object):
         return mass
 
     def dimensionless_circular_velocity(self, scaled_radius, *prof_params):
-        r""" Circular velocity scaled by the virial velocity,
+        r"""Circular velocity scaled by the virial velocity,
         :math:`V_{\rm cir}(x) / V_{\rm vir}`, as a function of
         dimensionless position :math:`\tilde{r} = r / R_{\rm vir}`.
 
@@ -312,7 +322,7 @@ class AnalyticDensityProf(object):
         )
 
     def virial_velocity(self, total_mass):
-        r""" The circular velocity evaluated at the halo boundary,
+        r"""The circular velocity evaluated at the halo boundary,
         :math:`V_{\rm vir} \equiv \sqrt{GM_{\rm halo}/R_{\rm halo}}`.
 
         Parameters
@@ -369,13 +379,12 @@ class AnalyticDensityProf(object):
         ) * self.virial_velocity(total_mass)
 
     def _vmax_helper(self, scaled_radius, *prof_params):
-        """ Helper function used to calculate `vmax` and `rmax`.
-        """
+        """Helper function used to calculate `vmax` and `rmax`."""
         encl = self.cumulative_mass_PDF(scaled_radius, *prof_params)
         return -1.0 * encl / scaled_radius
 
     def rmax(self, total_mass, *prof_params):
-        r""" Radius at which the halo attains its maximum circular velocity.
+        r"""Radius at which the halo attains its maximum circular velocity.
 
         Parameters
         ----------
@@ -405,7 +414,7 @@ class AnalyticDensityProf(object):
         return result.x[0] * halo_radius
 
     def vmax(self, total_mass, *prof_params):
-        r""" Maximum circular velocity of the halo profile.
+        r"""Maximum circular velocity of the halo profile.
 
         Parameters
         ----------
