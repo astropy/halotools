@@ -3,11 +3,11 @@ name: CI Tests
 on:
   push:
     branches:
-    - master
+    - main
   #  tags: # run CI if specific tags are pushed
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   # Github Actions supports ubuntu, windows, and macos virtual environments:

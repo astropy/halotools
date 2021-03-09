@@ -22,7 +22,7 @@ Then install halotools into this environment::
 
 	pip install halotools
 
-Or, alternatively, you can install the latest master branch by following the :ref:`install_from_source` instructions.
+Or, alternatively, you can install the latest main branch by following the :ref:`install_from_source` instructions.
 
 Any additional packages you install into the ``ht07`` virtual environment will not impact your system-wide environment. Whenever you want to do science involving Halotools,
 just activate the environment and import the code. When you are done
