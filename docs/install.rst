@@ -1,14 +1,14 @@
 .. _step_by_step_install:
 
-************************
+********************
 Package Installation
-************************
+********************
 
 To install Halotools, you can either use pip or clone the repo from GitHub and build the source code.
 Either way, be sure to read the :ref:`halotools_dependencies` section prior to installation.
 
 Using pip
-====================
+=========
 
 The simplest way to install the latest release of the code is with pip. Before installation, be sure you have installed the package dependencies described in the :ref:`halotools_dependencies` section. If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing with pip::
 
@@ -56,7 +56,7 @@ The first step is to clone the halotools repository::
 	cd halotools
 
 Installing one of the official releases
-------------------------------------------
+---------------------------------------
 
 All official releases of the code are tagged with their version name, e.g., v0.7.
 To install a particular release::
@@ -67,7 +67,7 @@ To install a particular release::
 This will install the v0.7 release of the code. Other official release versions (e.g., v0.5) can be installed similarly.
 
 Installing the most recent main branch
-------------------------------------------
+--------------------------------------
 
 If you prefer to use the most recent version of the code::
 
@@ -134,7 +134,7 @@ Any of the above can be installed with either pip or conda.
 .. _verifying_your_installation:
 
 Verifying your installation
-==============================
+===========================
 
 After installing the code and its dependencies, fire up a Python interpreter and
 check that the version number matches what you expect:
@@ -179,9 +179,5 @@ Whether you installed the main branch or a release branch, the message that conc
 
 
 Troubleshooting
-==================
+===============
 See :ref:`installation_troubleshooting` for solutions to known installation-related problems.
-
-
-
-
