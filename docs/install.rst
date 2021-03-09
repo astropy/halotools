@@ -19,7 +19,7 @@ Alternatively, you can install using the conda-forge channel on conda::
     conda install -c conda-forge halotools
 
 Either pip or conda will install the latest official release of the code.
-If instead you want the latest master branch,
+If instead you want the latest main branch,
 you will need to build the code from source following the instructions in the next section.
 
 .. note::
@@ -66,15 +66,15 @@ To install a particular release::
 
 This will install the v0.7 release of the code. Other official release versions (e.g., v0.5) can be installed similarly.
 
-Installing the most recent master branch
+Installing the most recent main branch
 ------------------------------------------
 
 If you prefer to use the most recent version of the code::
 
-	git checkout master
+	git checkout main
 	python setup.py install
 
-This will install the master branch of the code that is currently under development. While the features in the official releases have a stable API, new features being developed in the master branch may not. However, the master branch may have new features and/or performance enhancements that you may wish to use for your science application. A concerted effort is made to ensure that only thoroughly tested and documented code appears in the public master branch, though Halotools users should be aware of the distinction between the bleeding edge version in master and the official release version available through pip.
+This will install the main branch of the code that is currently under development. While the features in the official releases have a stable API, new features being developed in the main branch may not. However, the main branch may have new features and/or performance enhancements that you may wish to use for your science application. A concerted effort is made to ensure that only thoroughly tested and documented code appears in the public main branch, though Halotools users should be aware of the distinction between the bleeding edge version in main and the official release version available through pip.
 
 .. note::
 
@@ -175,7 +175,7 @@ For earlier versions, you will need to run the full test suite, which is more me
 	halotools.test()  #  v0.5 and earlier
 
 
-Whether you installed the master branch or a release branch, the message that concludes the execution of the test suite should not indicate that there were any errors or failures. A typical acceptable test suite report will read something like "445 passed, 45 skipped in 383.2 seconds". If you installed the master branch, your message may read something like "475 passed, 4 xfailed in 374.3 seconds". The *xfail* marker is shorthand for "expected failure"; tests marked by *xfail* do not indicate a bug or installation problem; instead, this indicates that there is a new feature that has only been partially implemented. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.
+Whether you installed the main branch or a release branch, the message that concludes the execution of the test suite should not indicate that there were any errors or failures. A typical acceptable test suite report will read something like "445 passed, 45 skipped in 383.2 seconds". If you installed the main branch, your message may read something like "475 passed, 4 xfailed in 374.3 seconds". The *xfail* marker is shorthand for "expected failure"; tests marked by *xfail* do not indicate a bug or installation problem; instead, this indicates that there is a new feature that has only been partially implemented. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.
 
 
 Troubleshooting
