@@ -38,10 +38,10 @@ Core package contributors
 * Brigitta Sipocz
 * Erik Tollerud
 * Doug Watson
+* Haojie Xu
 * Andrew Zentner
 
 Other credits
 =============
 
 * Special thanks to Ralf Kaehler and the Kavli Institute for Particle Astrophysics and Cosmology (KIPAC) for the use of the visualization of an n-body simulation that is used in the top banner of these documentation pages.
-

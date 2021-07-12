@@ -13,8 +13,8 @@ from ...monte_carlo_helpers import MonteCarloGalProf
 from ..... import model_defaults
 
 
-__author__ = ['Andrew Hearin']
-__all__ = ['NFWPhaseSpace']
+__author__ = ["Andrew Hearin"]
+__all__ = ["NFWPhaseSpace"]
 
 
 class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
@@ -28,6 +28,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
     including descriptions of how the relevant equations are
     implemented in the Halotools code base, see :ref:`nfw_profile_tutorial`.
     """
+
     def __init__(self, **kwargs):
         r"""
         Parameters
@@ -50,6 +51,9 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         mdef: str, optional
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
             Default is set in `~halotools.empirical_models.model_defaults`.
+
+        halo_boundary_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
 
         concentration_key : string, optional
             Column name of the halo catalog storing NFW concentration.
@@ -76,16 +80,19 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         prof_lookup_args = self._retrieve_prof_lookup_info(**kwargs)
         self.setup_prof_lookup_tables(*prof_lookup_args)
 
-        self._mock_generation_calling_sequence = ['assign_phase_space']
+        self._mock_generation_calling_sequence = ["assign_phase_space"]
 
     def _retrieve_prof_lookup_info(self, **kwargs):
         r""" Retrieve the arrays defining the lookup table control points
         """
-        cmin, cmax = model_defaults.min_permitted_conc, model_defaults.max_permitted_conc
-        dc = 1.
-        npts_conc = int(np.round((cmax-cmin)/float(dc)))
+        cmin, cmax = (
+            model_defaults.min_permitted_conc,
+            model_defaults.max_permitted_conc,
+        )
+        dc = 1.0
+        npts_conc = int(np.round((cmax - cmin) / float(dc)))
         default_conc_arr = np.linspace(cmin, cmax, npts_conc)
-        conc_arr = kwargs.get('concentration_bins', default_conc_arr)
+        conc_arr = kwargs.get("concentration_bins", default_conc_arr)
         return [conc_arr]
 
     def assign_phase_space(self, table, seed=None):
@@ -599,11 +606,12 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         """
         virial_velocities = self.virial_velocity(total_mass)
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
-        scaled_radius = radius/halo_radius
+        scaled_radius = radius / halo_radius
 
-        dimensionless_velocities = (
-            self.dimensionless_radial_velocity_dispersion(scaled_radius, halo_conc))
-        return dimensionless_velocities*virial_velocities
+        dimensionless_velocities = self.dimensionless_radial_velocity_dispersion(
+            scaled_radius, halo_conc
+        )
+        return dimensionless_velocities * virial_velocities
 
     def setup_prof_lookup_tables(self, *concentration_bins):
         r"""
@@ -616,10 +624,12 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         """
         MonteCarloGalProf.setup_prof_lookup_tables(self, *concentration_bins)
 
-    def build_lookup_tables(self,
-            logrmin=model_defaults.default_lograd_min,
-            logrmax=model_defaults.default_lograd_max,
-            Npts_radius_table=model_defaults.Npts_radius_table):
+    def build_lookup_tables(
+        self,
+        logrmin=model_defaults.default_lograd_min,
+        logrmax=model_defaults.default_lograd_max,
+        Npts_radius_table=model_defaults.Npts_radius_table,
+    ):
         r""" Method used to create a lookup table of the spatial and velocity radial profiles.
 
         Parameters
@@ -715,7 +725,9 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions.
 
         """
-        return MonteCarloGalProf.mc_halo_centric_pos(self, *concentration_array, **kwargs)
+        return MonteCarloGalProf.mc_halo_centric_pos(
+            self, *concentration_array, **kwargs
+        )
 
     def mc_pos(self, *concentration_array, **kwargs):
         r""" Method to generate random, three-dimensional positions of galaxies.
@@ -783,10 +795,13 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             scaled by the size of the halo's virial velocity.
 
         """
-        return MonteCarloGalProf._vrad_disp_from_lookup(self,
-            scaled_radius, *concentration_array, **kwargs)
+        return MonteCarloGalProf._vrad_disp_from_lookup(
+            self, scaled_radius, *concentration_array, **kwargs
+        )
 
-    def mc_radial_velocity(self, scaled_radius, total_mass, *concentration_array, **kwargs):
+    def mc_radial_velocity(
+        self, scaled_radius, total_mass, *concentration_array, **kwargs
+    ):
         r"""
         Method returns a Monte Carlo realization of radial velocities drawn from Gaussians
         with a width determined by the solution to the isotropic Jeans equation.
@@ -813,8 +828,9 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             Array of radial velocities drawn from Gaussians with a width determined by the
             solution to the Jeans equation.
         """
-        return MonteCarloGalProf.mc_radial_velocity(self,
-            scaled_radius, total_mass, *concentration_array, **kwargs)
+        return MonteCarloGalProf.mc_radial_velocity(
+            self, scaled_radius, total_mass, *concentration_array, **kwargs
+        )
 
     def mc_vel(self, table, seed=None):
         r""" Method assigns a Monte Carlo realization of the Jeans velocity
@@ -834,8 +850,9 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         """
         MonteCarloGalProf.mc_vel(self, table, seed=seed)
 
-    def mc_generate_nfw_phase_space_points(self, Ngals=int(1e4), conc=5, mass=1e12,
-            verbose=True, seed=None):
+    def mc_generate_nfw_phase_space_points(
+        self, Ngals=int(1e4), conc=5, mass=1e12, verbose=True, seed=None
+    ):
         r""" Return a Monte Carlo realization of points
         in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
@@ -913,10 +930,11 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
 
         rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass=m)
 
-        x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, c,
-            halo_radius=rvir, seed=seed)
-        r = np.sqrt(x**2 + y**2 + z**2)
-        scaled_radius = r/rvir
+        x, y, z = MonteCarloGalProf.mc_halo_centric_pos(
+            self, c, halo_radius=rvir, seed=seed
+        )
+        r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+        scaled_radius = r / rvir
 
         if seed is not None:
             seed += 1
@@ -932,16 +950,25 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         yrel, vyrel = _relative_positions_and_velocities(y, 0, v1=vy, v2=0)
         zrel, vzrel = _relative_positions_and_velocities(z, 0, v1=vz, v2=0)
 
-        vrad = (xrel*vxrel + yrel*vyrel + zrel*vzrel)/r
+        vrad = (xrel * vxrel + yrel * vyrel + zrel * vzrel) / r
 
-        t = Table({'x': x, 'y': y, 'z': z,
-            'vx': vx, 'vy': vy, 'vz': vz,
-            'radial_position': r, 'radial_velocity': vrad})
+        t = Table(
+            {
+                "x": x,
+                "y": y,
+                "z": z,
+                "vx": vx,
+                "vy": vy,
+                "vz": vz,
+                "radial_position": r,
+                "radial_velocity": vrad,
+            }
+        )
 
         return t
 
 
-def _sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=False):
+def _sign_pbc(x1, x2, period=None, equality_fill_val=0.0, return_pbc_correction=False):
     x1 = np.atleast_1d(x1)
     x2 = np.atleast_1d(x2)
     result = np.sign(x1 - x2)
@@ -956,9 +983,9 @@ def _sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=F
             msg = "If period is not None, all values of x and y must be between [0, period)"
             raise ValueError(msg)
 
-        d = np.abs(x1-x2)
-        pbc_correction = np.sign(period/2. - d)
-        result = pbc_correction*result
+        d = np.abs(x1 - x2)
+        pbc_correction = np.sign(period / 2.0 - d)
+        result = pbc_correction * result
 
     if equality_fill_val != 0:
         result = np.where(result == 0, equality_fill_val, result)
@@ -970,17 +997,16 @@ def _sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=F
 
 
 def _relative_positions_and_velocities(x1, x2, period=None, **kwargs):
-    s = _sign_pbc(x1, x2, period=period, equality_fill_val=1.)
+    s = _sign_pbc(x1, x2, period=period, equality_fill_val=1.0)
     absd = np.abs(x1 - x2)
     if period is None:
-        xrel = s*absd
+        xrel = s * absd
     else:
-        xrel = s*np.where(absd > period/2., period - absd, absd)
+        xrel = s * np.where(absd > period / 2.0, period - absd, absd)
 
     try:
-        v1 = kwargs['v1']
-        v2 = kwargs['v2']
-        return xrel, s*(v1-v2)
+        v1 = kwargs["v1"]
+        v2 = kwargs["v2"]
+        return xrel, s * (v1 - v2)
     except KeyError:
         return xrel
-
