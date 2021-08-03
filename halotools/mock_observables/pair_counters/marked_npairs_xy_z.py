@@ -6,12 +6,13 @@ import numpy as np
 import multiprocessing
 from functools import partial
 
-from .marked_npairs_3d import _marked_npairs_process_weights
 from .npairs_xy_z import _npairs_xy_z_process_args
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .rectangular_mesh import RectangularDoubleMesh
 
 from .marked_cpairs import marked_npairs_xy_z_engine
+
+from ...custom_exceptions import HalotoolsError
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
@@ -109,6 +110,40 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
     See the docstring of the `~halotools.mock_observables.marked_tpcf` function
     for a description of the available marking functions that can be passed in
     via the ``wfunc`` optional argument.
+
+    Examples
+    --------
+    For demonstration purposes we create randomly distributed sets of points within a
+    periodic unit cube, using random weights.
+
+    >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
+    >>> period = [Lbox, Lbox, Lbox]
+    >>> rp_bins = np.logspace(-1, 1.5, 15)
+    >>> pi_bins = [20, 40, 60]
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> z1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> z2 = np.random.uniform(0, Lbox, Npts2)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> sample1 = np.vstack([x1, y1, z1]).T
+    >>> sample2 = np.vstack([x2, y2, z2]).T
+
+    We create a set of random weights:
+
+    >>> weights1 = np.random.random((Npts1, 1))
+    >>> weights2 = np.random.random((Npts2, 1))
+
+    The weighted counts are calculated by:
+
+    >>> weighted_counts = marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period, weights1=weights1, weights2=weights2, weight_func_id=1)
+
     """
 
     # Process the inputs with the helper function
@@ -157,3 +192,142 @@ def marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
         counts = engine(cell1_tuples[0])
 
     return np.array(counts)
+
+
+def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
+    """
+    """
+
+    correct_num_weights = _func_signature_int_from_wfunc(weight_func_id)
+    npts_sample1 = np.shape(sample1)[0]
+    npts_sample2 = np.shape(sample2)[0]
+    correct_shape1 = (npts_sample1, correct_num_weights)
+    correct_shape2 = (npts_sample2, correct_num_weights)
+
+    # Process the input weights1
+    _converted_to_2d_from_1d = False
+    # First convert weights1 into a 2-d ndarray
+    if weights1 is None:
+        weights1 = np.ones(correct_shape1, dtype=np.float64)
+    else:
+        weights1 = np.atleast_1d(weights1)
+        weights1 = weights1.astype("float64")
+        if weights1.ndim == 1:
+            _converted_to_2d_from_1d = True
+            npts1 = len(weights1)
+            weights1 = weights1.reshape((npts1, 1))
+        elif weights1.ndim == 2:
+            pass
+        else:
+            ndim1 = weights1.ndim
+            msg = ("\n You must either pass in a 1-D or 2-D array \n"
+                   "for the input `weights1`. Instead, an array of \n"
+                   "dimension %i was received.")
+            raise HalotoolsError(msg % ndim1)
+
+    npts_weights1 = np.shape(weights1)[0]
+    num_weights1 = np.shape(weights1)[1]
+    # At this point, weights1 is guaranteed to be a 2-d ndarray
+    # now we check its shape
+    if np.shape(weights1) != correct_shape1:
+        if _converted_to_2d_from_1d is True:
+            msg = ("\n You passed in a 1-D array for `weights1` that \n"
+                   "does not have the correct length. The number of \n"
+                   "points in `sample1` = %i, while the number of points \n"
+                   "in your input 1-D `weights1` array = %i")
+            raise HalotoolsError(msg % (npts_sample1, npts_weights1))
+        else:
+            msg = ("\n You passed in a 2-D array for `weights1` that \n"
+                   "does not have a consistent shape with `sample1`. \n"
+                   "`sample1` has length %i. The input value of `weight_func_id` = %i \n"
+                   "For this value of `weight_func_id`, there should be %i weights \n"
+                   "per point. The shape of your input `weights1` is (%i, %i)\n")
+            raise HalotoolsError(msg %
+                (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
+
+    # Process the input weights2
+    _converted_to_2d_from_1d = False
+    # Now convert weights2 into a 2-d ndarray
+    if weights2 is None:
+        weights2 = np.ones(correct_shape2, dtype=np.float64)
+    else:
+        weights2 = np.atleast_1d(weights2)
+        weights2 = weights2.astype("float64")
+        if weights2.ndim == 1:
+            _converted_to_2d_from_1d = True
+            npts2 = len(weights2)
+            weights2 = weights2.reshape((npts2, 1))
+        elif weights2.ndim == 2:
+            pass
+        else:
+            ndim2 = weights2.ndim
+            msg = ("\n You must either pass in a 1-D or 2-D array \n"
+                   "for the input `weights2`. Instead, an array of \n"
+                   "dimension %i was received.")
+            raise HalotoolsError(msg % ndim2)
+
+    npts_weights2 = np.shape(weights2)[0]
+    num_weights2 = np.shape(weights2)[1]
+    # At this point, weights2 is guaranteed to be a 2-d ndarray
+    # now we check its shape
+    if np.shape(weights2) != correct_shape2:
+        if _converted_to_2d_from_1d is True:
+            msg = ("\n You passed in a 1-D array for `weights2` that \n"
+                   "does not have the correct length. The number of \n"
+                   "points in `sample2` = %i, while the number of points \n"
+                   "in your input 1-D `weights2` array = %i")
+            raise HalotoolsError(msg % (npts_sample2, npts_weights2))
+        else:
+            msg = ("\n You passed in a 2-D array for `weights2` that \n"
+                   "does not have a consistent shape with `sample2`. \n"
+                   "`sample2` has length %i. The input value of `weight_func_id` = %i \n"
+                   "For this value of `weight_func_id`, there should be %i weights \n"
+                   "per point. The shape of your input `weights2` is (%i, %i)\n")
+            raise HalotoolsError(msg %
+                (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
+
+    return weights1, weights2
+
+
+def _func_signature_int_from_wfunc(weight_func_id):
+    """
+    Return the function signature available weighting functions.
+    """
+
+    if type(weight_func_id) != int:
+        msg = "\n weight_func_id parameter must be an integer ID of a weighting function."
+        raise ValueError(msg)
+
+    if weight_func_id == 1:
+        return 1
+    elif weight_func_id == 2:
+        return 1
+    elif weight_func_id == 3:
+        return 2
+    elif weight_func_id == 4:
+        return 2
+    elif weight_func_id == 5:
+        return 2
+    elif weight_func_id == 6:
+        return 2
+    elif weight_func_id == 7:
+        return 2
+    elif weight_func_id == 8:
+        return 2
+    elif weight_func_id == 9:
+        return 2
+    elif weight_func_id == 10:
+        return 2
+    elif weight_func_id == 11:
+        return 2
+    elif weight_func_id == 12:
+        return 4
+    elif weight_func_id == 13:
+        return 4
+    elif weight_func_id == 14:
+        return 3
+    elif weight_func_id == 15:
+        return 3
+    else:
+        msg = ("The value ``weight_func_id`` = %i is not recognized")
+        raise HalotoolsError(msg % weight_func_id)
