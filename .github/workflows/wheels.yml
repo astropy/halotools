@@ -22,6 +22,7 @@ jobs:
         env:
           CIBW_BEFORE_BUILD: pip install oldest-supported-numpy Cython
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.6"
+          CIBW_SKIP: pp*
 
       - uses: actions/upload-artifact@v2
         with:
