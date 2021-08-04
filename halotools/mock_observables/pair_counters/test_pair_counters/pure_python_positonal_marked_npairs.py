@@ -8,10 +8,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from ..pairs import distance
-from rotations.vector_utilities import normalized_vectors
+from ....utils.rotations3d import normalized_vectors
 
-__all__ = ['cos2theta_pairs']
-__author__ = ['Duncan Campbell']
+__all__ = ["cos2theta_pairs"]
+__author__ = ["Duncan Campbell"]
 
 
 def cos2theta_pairs(sample1, orientations1, sample2, rbins, period=None):
@@ -56,16 +56,18 @@ def cos2theta_pairs(sample1, orientations1, sample2, rbins, period=None):
 
     # Check to make sure both data sets have the same dimension. Otherwise, throw an error
     if np.shape(orientations1)[-1] != np.shape(sample1)[-1]:
-        raise ValueError("orientations1 and sample1 inputs do not have the same dimension.")
+        raise ValueError(
+            "orientations1 and sample1 inputs do not have the same dimension."
+        )
         return None
 
     # Process period entry and check for consistency.
     if period is None:
-        period = np.array([np.inf]*np.shape(sample1)[-1])
+        period = np.array([np.inf] * np.shape(sample1)[-1])
     else:
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
+            period = np.array([period] * np.shape(sample1)[-1])
         elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have len == dimension of points")
             return None
@@ -77,21 +79,23 @@ def cos2theta_pairs(sample1, orientations1, sample2, rbins, period=None):
 
     N1 = len(sample1)
     N2 = len(sample2)
-    dd = np.zeros((N1*N2,))  # store radial pair separations
-    oo = np.zeros((N1*N2, k))  # store orientation vectors for each pair
-    vs = np.zeros((N1*N2, k))  # separation vectors for each pair
-    for i in range(0, N1):  # calculate distance between every point and every other point
+    dd = np.zeros((N1 * N2,))  # store radial pair separations
+    oo = np.zeros((N1 * N2, k))  # store orientation vectors for each pair
+    vs = np.zeros((N1 * N2, k))  # separation vectors for each pair
+    for i in range(
+        0, N1
+    ):  # calculate distance between every point and every other point
         x1 = sample1[i, :]
         x2 = sample2
-        dd[i*N2:i*N2+N2] = distance(x1, x2, period)
-        vs[i*N2:i*N2+N2, :] = r_12(x1, x2, period)
-        oo[i*N2:i*N2+N2, :] = orientations1[i, :]
+        dd[i * N2 : i * N2 + N2] = distance(x1, x2, period)
+        vs[i * N2 : i * N2 + N2, :] = r_12(x1, x2, period)
+        oo[i * N2 : i * N2 + N2, :] = orientations1[i, :]
 
     # preform dot prouct between vs and orientations1
     vs = normalized_vectors(vs)  # normalize
-    costheta = (vs*oo).sum(1)
+    costheta = (vs * oo).sum(1)
     costheta[~np.isfinite(costheta)] = 0.0  # remove zero length vectors
-    cos2theta = costheta*costheta
+    cos2theta = costheta * costheta
     print(costheta)
 
     # calculate sum of cos^2 theta in radial bins
@@ -130,7 +134,7 @@ def r_12(x1, x2, period=None):
     x1 = np.atleast_2d(x1)
     x2 = np.atleast_2d(x2)
     if period is None:
-        period = np.array([np.inf]*np.shape(x1)[-1])
+        period = np.array([np.inf] * np.shape(x1)[-1])
 
     # check for consistency
     if np.shape(x1)[-1] != np.shape(x2)[-1]:
@@ -142,12 +146,9 @@ def r_12(x1, x2, period=None):
 
     m = x2 - x1
     for n in range(0, k):
-        mask = (m[:, n] < -1.0*period[n]/2.0)
+        mask = m[:, n] < -1.0 * period[n] / 2.0
         m[:, n][mask] += period[n]
-        mask = (m[:, n] > 1.0*period[n]/2.0)
+        mask = m[:, n] > 1.0 * period[n] / 2.0
         m[:, n][mask] -= period[n]
 
     return m
-
-
-
