@@ -127,3 +127,51 @@ def test_tpcf_jackknife_cov_matrix():
     )
 
     assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"
+
+
+@pytest.mark.slow
+def test_tpcf_jackknife_auto_cross():
+    """
+    test the tpcf_jackknife returns the expected number of quantities when passed
+    different combinations of do_auto and do_cross
+    """
+    Npts1, Npts2, Nran = 100, 90, 500
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
+
+    xi_12_full, xi_12_cov = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+        do_auto=False,
+    )
+
+    xi_11_full, xi_22_full, xi_11_cov, xi_22_cov = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+        do_cross=False,
+    )
+
+    res = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+        do_auto=True,
+        do_cross=True,
+    )
+    xi_11_full, xi_12_full, xi_22_full, xi_11_cov, xi_12_cov, xi_22_cov = res
