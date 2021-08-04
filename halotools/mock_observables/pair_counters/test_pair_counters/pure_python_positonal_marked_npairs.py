@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from ..pairs import distance
-from ....utils.rotations3d import normalized_vectors
+from ....utils.vector_utilities import normalized_vectors
 
 __all__ = ["cos2theta_pairs"]
 __author__ = ["Duncan Campbell"]
