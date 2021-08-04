@@ -9,11 +9,11 @@ from .pure_python_positonal_marked_npairs import cos2theta_pairs
 from ..positional_marked_npairs_3d import positional_marked_npairs_3d
 from ..npairs_3d import npairs_3d
 
-from halotools.mock_observables.tests.cf_helpers import (
+from ...tests.cf_helpers import (
     generate_3d_regular_mesh,
     generate_locus_of_3d_points,
 )
-from halotools.utils.vector_utilities import (
+from ....utils.vector_utilities import (
     normalized_vectors,
     angles_between_list_of_vectors,
 )
