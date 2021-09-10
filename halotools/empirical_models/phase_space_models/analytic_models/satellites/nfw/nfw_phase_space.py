@@ -88,7 +88,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             model_defaults.min_permitted_conc,
             model_defaults.max_permitted_conc,
         )
-        dc = 1.0
+        dc = 0.25
         npts_conc = int(np.round((cmax - cmin) / float(dc)))
         default_conc_arr = np.linspace(cmin, cmax, npts_conc)
         conc_arr = kwargs.get("concentration_bins", default_conc_arr)
