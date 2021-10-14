@@ -9,11 +9,11 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..component_model_templates import PrimGalpropModel
 
-__all__ = ('ZuMandelbaum15SmHm', )
+__all__ = ("ZuMandelbaum15SmHm",)
 
 
 class ZuMandelbaum15SmHm(PrimGalpropModel):
-    """ Stellar-to-halo-mass relation based on
+    """Stellar-to-halo-mass relation based on
     `Zu and Mandelbaum 2015 <http://arxiv.org/abs/astro-ph/1505.02781/>`_.
 
     .. note::
@@ -24,7 +24,8 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         composite model, see :ref:`zu_mandelbaum15_composite_model`.
 
     """
-    def __init__(self, prim_haloprop_key='halo_m200m', **kwargs):
+
+    def __init__(self, prim_haloprop_key="halo_m200m", **kwargs):
         """
         Parameters
         ----------
@@ -45,12 +46,13 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         """
 
         super(ZuMandelbaum15SmHm, self).__init__(
-            galprop_name='stellar_mass', prim_haloprop_key=prim_haloprop_key, **kwargs)
+            galprop_name="stellar_mass", prim_haloprop_key=prim_haloprop_key, **kwargs
+        )
 
         self.param_dict = self.retrieve_default_param_dict()
 
-        self._methods_to_inherit.extend(['mean_halo_mass', 'mean_stellar_mass'])
-        self.publications = ['arXiv:1505.02781']
+        self._methods_to_inherit.extend(["mean_halo_mass", "mean_stellar_mass"])
+        self.publications = ["arXiv:1505.02781"]
 
     def retrieve_default_param_dict(self):
         """
@@ -67,18 +69,20 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         sigma = 0.5
         eta = -0.04
 
-        d = ({'smhm_m0': 10**lgmh0,
-            'smhm_m1': 10**lgmh1,
-            'smhm_beta': beta,
-            'smhm_delta': delta,
-            'smhm_gamma': gamma,
-            'smhm_sigma': sigma,
-            'smhm_sigma_slope': eta})
+        d = {
+            "smhm_m0": 10 ** lgmh0,
+            "smhm_m1": 10 ** lgmh1,
+            "smhm_beta": beta,
+            "smhm_delta": delta,
+            "smhm_gamma": gamma,
+            "smhm_sigma": sigma,
+            "smhm_sigma_slope": eta,
+        }
 
         return d
 
     def mean_halo_mass(self, stellar_mass, **kwargs):
-        r""" Return the halo mass of a central galaxy as a function
+        r"""Return the halo mass of a central galaxy as a function
         of the stellar mass.
 
         Parameters
@@ -97,19 +101,19 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         >>> model = ZuMandelbaum15SmHm()
         >>> halo_mass = model.mean_halo_mass(10**11)
         """
-        m0 = self.param_dict['smhm_m0']
-        m1 = self.param_dict['smhm_m1']
-        beta = self.param_dict['smhm_beta']
-        delta = self.param_dict['smhm_delta']
-        gamma = self.param_dict['smhm_gamma']
+        m0 = self.param_dict["smhm_m0"]
+        m1 = self.param_dict["smhm_m1"]
+        beta = self.param_dict["smhm_beta"]
+        delta = self.param_dict["smhm_delta"]
+        gamma = self.param_dict["smhm_gamma"]
 
-        mass_ratio = stellar_mass/m0
-        exparg = ((mass_ratio**delta) / (1. + mass_ratio**(-gamma))) - 0.5
-        halo_mass = m1*(mass_ratio**beta)*np.exp(exparg)
+        mass_ratio = stellar_mass / m0
+        exparg = ((mass_ratio ** delta) / (1.0 + mass_ratio ** (-gamma))) - 0.5
+        halo_mass = m1 * (mass_ratio ** beta) * np.exp(exparg)
         return halo_mass
 
     def mean_stellar_mass(self, **kwargs):
-        r""" Return the stellar mass of a central galaxy as a function
+        r"""Return the stellar mass of a central galaxy as a function
         of the input table.
 
         Parameters
@@ -135,22 +139,25 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         >>> stellar_mass = model.mean_stellar_mass(prim_haloprop=10**12)
         """
 
-        if 'table' in list(kwargs.keys()):
-            halo_mass = np.atleast_1d(kwargs['table'][self.prim_haloprop_key])
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            halo_mass = np.atleast_1d(kwargs['prim_haloprop'])
+        if "table" in list(kwargs.keys()):
+            halo_mass = np.atleast_1d(kwargs["table"][self.prim_haloprop_key])
+        elif "prim_haloprop" in list(kwargs.keys()):
+            halo_mass = np.atleast_1d(kwargs["prim_haloprop"])
         else:
-            raise KeyError("Must pass one of the following keyword arguments "
-                "to mean_stellar_mass:\n``table`` or ``prim_haloprop``")
+            raise KeyError(
+                "Must pass one of the following keyword arguments "
+                "to mean_stellar_mass:\n``table`` or ``prim_haloprop``"
+            )
 
         stellar_mass_table = np.logspace(8.5, 12.5, 500)
         halo_mass_table = self.mean_halo_mass(stellar_mass_table, **kwargs)
-        log_stellar_mass = np.interp(np.log10(halo_mass),
-            np.log10(halo_mass_table), np.log10(stellar_mass_table))
-        return 10.**log_stellar_mass
+        log_stellar_mass = np.interp(
+            np.log10(halo_mass), np.log10(halo_mass_table), np.log10(stellar_mass_table)
+        )
+        return 10.0 ** log_stellar_mass
 
     def scatter_ln_mstar(self, halo_mass):
-        r""" Scatter in :math:`{\rm ln M}_{\ast}` as a function of halo mass.
+        r"""Scatter in :math:`{\rm ln M}_{\ast}` as a function of halo mass.
 
         Parameters
         -----------
@@ -167,23 +174,22 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         >>> model = ZuMandelbaum15SmHm()
         >>> sigma = model.scatter_ln_mstar(1e12)
         """
-        m1 = self.param_dict['smhm_m1']
-        sigma = self.param_dict['smhm_sigma']
-        eta = self.param_dict['smhm_sigma_slope']
+        m1 = self.param_dict["smhm_m1"]
+        sigma = self.param_dict["smhm_sigma"]
+        eta = self.param_dict["smhm_sigma_slope"]
 
-        return np.where(halo_mass < m1, sigma, sigma + eta*np.log10(halo_mass/m1))
+        return np.where(halo_mass < m1, sigma, sigma + eta * np.log10(halo_mass / m1))
 
     def mean_scatter(self, **kwargs):
-        if 'table' in kwargs.keys():
-            halo_mass = kwargs['table'][self.prim_haloprop_key]
+        if "table" in kwargs.keys():
+            halo_mass = kwargs["table"][self.prim_haloprop_key]
         else:
-            halo_mass = np.atleast_1d(kwargs['prim_haloprop'])
-        return np.log10(np.e)*self.scatter_ln_mstar(halo_mass)
+            halo_mass = np.atleast_1d(kwargs["prim_haloprop"])
+        return np.log10(np.e) * self.scatter_ln_mstar(halo_mass)
 
     def scatter_realization(self, **kwargs):
-        """ Monte Carlo realization of stellar mass stochasticity
-        """
-        seed = kwargs.get('seed', None)
+        """Monte Carlo realization of stellar mass stochasticity"""
+        seed = kwargs.get("seed", None)
 
         scatter_scale = np.atleast_1d(self.mean_scatter(**kwargs))
 
@@ -191,7 +197,7 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
         result = np.zeros(len(scatter_scale))
 
         # only draw from a normal distribution for non-zero values of scatter
-        mask = (scatter_scale > 0.0)
+        mask = scatter_scale > 0.0
         with NumpyRNGContext(seed):
             result[mask] = np.random.normal(loc=0, scale=scatter_scale[mask])
 
