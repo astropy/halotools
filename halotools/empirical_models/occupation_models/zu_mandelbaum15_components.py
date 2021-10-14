@@ -302,7 +302,7 @@ class ZuMandelbaum15Sats(OccupationComponent):
         mean_ncen = self.central_occupation_model.mean_occupation(**kwargs)
         mean_nsat = (
             mean_ncen
-            * np.exp(-self._mcut / halo_mass)
+            * 10 ** (-self._mcut / halo_mass)
             * (halo_mass / self._msat) ** self.param_dict["alphasat"]
         )
         return mean_nsat

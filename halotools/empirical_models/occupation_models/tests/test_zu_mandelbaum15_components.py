@@ -85,7 +85,7 @@ def test_ZuMandelbaum15Sats1():
     """
     model = ZuMandelbaum15Sats()
 
-    npts = int(1e4)
+    npts = int(1e5)
     testmass = 5e12
     mass_array = np.zeros(npts) + testmass
     nsat = model.mean_occupation(prim_haloprop=testmass)
