@@ -11,7 +11,7 @@ from ..tpcf import tpcf
 
 slow = pytest.mark.slow
 
-__all__ = ['test_tpcf_jackknife_corr_func', 'test_tpcf_jackknife_cov_matrix']
+__all__ = ["test_tpcf_jackknife_corr_func", "test_tpcf_jackknife_cov_matrix"]
 
 # create toy data to test functions
 period = np.array([1.0, 1.0, 1.0])
@@ -29,15 +29,17 @@ def test_tpcf_jackknife_corr_func():
     Npts = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
-        randoms = np.random.random((Npts*10, 3))
+        randoms = np.random.random((Npts * 10, 3))
 
-    result_1, err = tpcf_jackknife(sample1, randoms, rbins,
-        Nsub=2, period=period, num_threads=1)
+    result_1, err = tpcf_jackknife(
+        sample1, randoms, rbins, Nsub=2, period=period, num_threads=1
+    )
 
-    result_2 = tpcf(sample1, rbins,
-        randoms=randoms, period=period, num_threads=1)
+    result_2 = tpcf(sample1, rbins, randoms=randoms, period=period, num_threads=1)
 
-    assert np.allclose(result_1, result_2, rtol=1e-09), "correlation functions do not match"
+    assert np.allclose(
+        result_1, result_2, rtol=1e-09
+    ), "correlation functions do not match"
 
 
 @pytest.mark.slow
@@ -48,10 +50,9 @@ def test_tpcf_jackknife_no_pbc():
     Npts = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
-        randoms = np.random.random((Npts*10, 3))
+        randoms = np.random.random((Npts * 10, 3))
 
-    result_1, err = tpcf_jackknife(sample1, randoms, rbins,
-        Nsub=2, num_threads=1)
+    result_1, err = tpcf_jackknife(sample1, randoms, rbins, Nsub=2, num_threads=1)
 
 
 @pytest.mark.slow
@@ -63,10 +64,11 @@ def test_tpcf_jackknife_cross_corr():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts1, 3))
         sample2 = np.random.random((Npts2, 3))
-        randoms = np.random.random((Nran*10, 3))
+        randoms = np.random.random((Nran * 10, 3))
 
-    result = tpcf_jackknife(sample1, randoms, rbins,
-        period=period, Nsub=2, num_threads=1, sample2=sample2)
+    result = tpcf_jackknife(
+        sample1, randoms, rbins, period=period, Nsub=2, num_threads=1, sample2=sample2
+    )
 
 
 @pytest.mark.slow
@@ -80,8 +82,9 @@ def test_tpcf_jackknife_no_randoms():
         sample2 = np.random.random((Npts2, 3))
         randoms = [Nran]
 
-    result = tpcf_jackknife(sample1, randoms, rbins,
-        period=period, Nsub=2, num_threads=1, sample2=sample2)
+    result = tpcf_jackknife(
+        sample1, randoms, rbins, period=period, Nsub=2, num_threads=1, sample2=sample2
+    )
 
 
 @pytest.mark.slow
@@ -95,8 +98,16 @@ def test_tpcf_jackknife_alt_estimator():
         sample2 = np.random.random((Npts2, 3))
         randoms = [Nran]
 
-    result = tpcf_jackknife(sample1, randoms, rbins, estimator='Hewett',
-        period=period, Nsub=2, num_threads=1, sample2=sample2)
+    result = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        estimator="Hewett",
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+    )
 
 
 @pytest.mark.slow
@@ -107,10 +118,60 @@ def test_tpcf_jackknife_cov_matrix():
     Npts = 100
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((Npts, 3))
-        randoms = np.random.random((Npts*10, 3))
+        randoms = np.random.random((Npts * 10, 3))
 
-    nbins = len(rbins)-1
+    nbins = len(rbins) - 1
 
-    result_1, err = tpcf_jackknife(sample1, randoms, rbins, Nsub=2, period=period, num_threads=1)
+    result_1, err = tpcf_jackknife(
+        sample1, randoms, rbins, Nsub=2, period=period, num_threads=1
+    )
 
     assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"
+
+
+@pytest.mark.slow
+def test_tpcf_jackknife_auto_cross():
+    """
+    test the tpcf_jackknife returns the expected number of quantities when passed
+    different combinations of do_auto and do_cross
+    """
+    Npts1, Npts2, Nran = 100, 90, 500
+    with NumpyRNGContext(fixed_seed):
+        sample1 = np.random.random((Npts1, 3))
+        sample2 = np.random.random((Npts2, 3))
+        randoms = [Nran]
+
+    xi_12_full, xi_12_cov = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+        do_auto=False,
+    )
+
+    xi_11_full, xi_22_full, xi_11_cov, xi_22_cov = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+        do_cross=False,
+    )
+
+    res = tpcf_jackknife(
+        sample1,
+        randoms,
+        rbins,
+        period=period,
+        Nsub=2,
+        num_threads=1,
+        sample2=sample2,
+        do_auto=True,
+        do_cross=True,
+    )
+    xi_11_full, xi_12_full, xi_22_full, xi_11_cov, xi_12_cov, xi_22_cov = res
