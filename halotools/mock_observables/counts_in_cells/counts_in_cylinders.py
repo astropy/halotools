@@ -10,18 +10,34 @@ from .engines import counts_in_cylinders_engine
 
 from ..mock_observables_helpers import get_num_threads, get_period
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
-from ..pair_counters.mesh_helpers import (_set_approximate_cell_sizes,
-    _cell1_parallelization_indices, _enclose_in_box, _enforce_maximum_search_length)
+from ..pair_counters.mesh_helpers import (
+    _set_approximate_cell_sizes,
+    _cell1_parallelization_indices,
+    _enclose_in_box,
+    _enforce_maximum_search_length,
+)
 
 from ...utils.array_utils import custom_len
 
-__author__ = ('Andrew Hearin', )
+__author__ = ("Andrew Hearin",)
 
-__all__ = ('counts_in_cylinders', )
+__all__ = ("counts_in_cylinders",)
 
-def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period=None, verbose=False, num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None, return_indexes=False):
+
+def counts_in_cylinders(
+    sample1,
+    sample2,
+    proj_search_radius,
+    cylinder_half_length,
+    period=None,
+    verbose=False,
+    num_threads=1,
+    approx_cell1_size=None,
+    approx_cell2_size=None,
+    return_indexes=False,
+    condition=None,
+    condition_args=(),
+):
     """
     Function counts the number of points in ``sample2`` separated by a xy-distance
     *r* and z-distance *z* from each point in ``sample1``,
@@ -88,6 +104,27 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     return_indexes: bool, optional
         If true, return both counts and the indexes of the pairs.
 
+    condition : str, optional
+        Require a condition to be met for a pair to be counted.
+        See options below:
+        None | "always_true":
+            Count all pairs in cylinder
+
+        "mass_frac":
+            Only count pairs which satisfy lim[0] < mass2/mass1 < lim[1]
+
+    condition_args : tuple, optional
+        Arguments passed to the condition constructor
+        None | "always_true":
+            condition_args will be ignored
+
+        "mass_frac":
+            -mass1 (array of mass of sample 1; required)
+            -mass2 (array of mass of sample 2; required)
+            -lim (tuple of min,max; required)
+            -lower_equality (bool to use lim[0] <= m2/m1; optional)
+            -upper_equality (bool to use m2/m1 <= lim[1]; optional)
+
     Returns
     -------
     num_pairs : array_like
@@ -143,11 +180,31 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     """
 
     # Process the inputs with the helper function
-    result = _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius,
-            cylinder_half_length, period, verbose, num_threads, approx_cell1_size, approx_cell2_size,
-            return_indexes)
-    x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length = result[0:8]
-    period, num_threads, PBCs, approx_cell1_size, approx_cell2_size, autocorr = result[8:]
+    result = _counts_in_cylinders_process_args(
+        sample1,
+        sample2,
+        proj_search_radius,
+        cylinder_half_length,
+        period,
+        verbose,
+        num_threads,
+        approx_cell1_size,
+        approx_cell2_size,
+        return_indexes,
+    )
+    (
+        x1in,
+        y1in,
+        z1in,
+        x2in,
+        y2in,
+        z2in,
+        proj_search_radius,
+        cylinder_half_length,
+    ) = result[0:8]
+    period, num_threads, PBCs, approx_cell1_size, approx_cell2_size, autocorr = result[
+        8:
+    ]
     xperiod, yperiod, zperiod = period
 
     rp_max = np.max(proj_search_radius)
@@ -155,25 +212,56 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
     search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
 
     # Compute the estimates for the cell sizes
-    approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
-        )
+    approx_cell1_size, approx_cell2_size = _set_approximate_cell_sizes(
+        approx_cell1_size, approx_cell2_size, period
+    )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
 
     # Build the rectangular mesh
-    double_mesh = RectangularDoubleMesh(x1in, y1in, z1in, x2in, y2in, z2in,
-        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
-        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
-        search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
+    double_mesh = RectangularDoubleMesh(
+        x1in,
+        y1in,
+        z1in,
+        x2in,
+        y2in,
+        z2in,
+        approx_x1cell_size,
+        approx_y1cell_size,
+        approx_z1cell_size,
+        approx_x2cell_size,
+        approx_y2cell_size,
+        approx_z2cell_size,
+        search_xlength,
+        search_ylength,
+        search_zlength,
+        xperiod,
+        yperiod,
+        zperiod,
+        PBCs,
+    )
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(counts_in_cylinders_engine,
-        double_mesh, x1in, y1in, z1in, x2in, y2in, z2in, proj_search_radius, cylinder_half_length, return_indexes)
+    engine = partial(
+        counts_in_cylinders_engine,
+        double_mesh,
+        x1in,
+        y1in,
+        z1in,
+        x2in,
+        y2in,
+        z2in,
+        proj_search_radius,
+        cylinder_half_length,
+        return_indexes,
+        condition,
+        condition_args,
+    )
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
-        double_mesh.mesh1.ncells, num_threads)
+        double_mesh.mesh1.ncells, num_threads
+    )
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
@@ -202,15 +290,29 @@ def counts_in_cylinders(sample1, sample2, proj_search_radius, cylinder_half_leng
         return counts, indexes
     return counts
 
-def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cylinder_half_length,
-        period, verbose, num_threads, approx_cell1_size, approx_cell2_size, return_indexes):
-    """
-    """
+
+def _counts_in_cylinders_process_args(
+    sample1,
+    sample2,
+    proj_search_radius,
+    cylinder_half_length,
+    period,
+    verbose,
+    num_threads,
+    approx_cell1_size,
+    approx_cell2_size,
+    return_indexes,
+):
+    """"""
     num_threads = get_num_threads(num_threads)
 
     autocorr = False
     if sample2 is None:
         sample2, autocorr = sample1, True
+
+    # The engine expects position arrays to be double-precision
+    sample1 = np.asarray(sample1, dtype=np.float64)
+    sample2 = np.asarray(sample2, dtype=np.float64)
 
     # Passively enforce that we are working with ndarrays
     x1 = sample1[:, 0]
@@ -220,13 +322,15 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     y2 = sample2[:, 1]
     z2 = sample2[:, 2]
 
-    if return_indexes and ((len(x1) > 2**32) or (len(x2) > 2**32)):
-        msg = ("Return indexes uses a uint32 and so can only handle inputs shorter than " +
-            "2^32 (~4 Billion). If you are affected by this please raise an Issue on " +
-            "https://github.com/astropy/halotools.\n")
+    if return_indexes and ((len(x1) > 2 ** 32) or (len(x2) > 2 ** 32)):
+        msg = (
+            "Return indexes uses a uint32 and so can only handle inputs shorter than "
+            + "2^32 (~4 Billion). If you are affected by this please raise an Issue on "
+            + "https://github.com/astropy/halotools.\n"
+        )
         raise ValueError(msg)
 
-    proj_search_radius = np.atleast_1d(proj_search_radius).astype('f8')
+    proj_search_radius = np.atleast_1d(proj_search_radius).astype("f8")
     if len(proj_search_radius) == 1:
         proj_search_radius = np.zeros_like(x1) + proj_search_radius[0]
     elif len(proj_search_radius) == len(x1):
@@ -236,7 +340,7 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
         raise ValueError(msg)
     max_rp_max = np.max(proj_search_radius)
 
-    cylinder_half_length = np.atleast_1d(cylinder_half_length).astype('f8')
+    cylinder_half_length = np.atleast_1d(cylinder_half_length).astype("f8")
     if len(cylinder_half_length) == 1:
         cylinder_half_length = np.zeros_like(x1) + cylinder_half_length[0]
     elif len(cylinder_half_length) == len(x1):
@@ -251,11 +355,15 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     # in which case we must remap our points inside the smallest enclosing cube
     # and set ``period`` equal to this cube size.
     if period is None:
-        x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(
-                sample1[:, 0], sample1[:, 2], sample1[:, 2],
-                sample2[:, 0], sample2[:, 2], sample2[:, 2],
-                min_size=[max_rp_max*3.0, max_rp_max*3.0, max_pi_max*3.0]))
+        x1, y1, z1, x2, y2, z2, period = _enclose_in_box(
+            sample1[:, 0],
+            sample1[:, 2],
+            sample1[:, 2],
+            sample2[:, 0],
+            sample2[:, 2],
+            sample2[:, 2],
+            min_size=[max_rp_max * 3.0, max_rp_max * 3.0, max_pi_max * 3.0],
+        )
         x1 = sample1[:, 0]
         y1 = sample1[:, 1]
         z1 = sample1[:, 2]
@@ -283,6 +391,19 @@ def _counts_in_cylinders_process_args(sample1, sample2, proj_search_radius, cyli
     elif custom_len(approx_cell2_size) == 1:
         approx_cell2_size = [approx_cell2_size, approx_cell2_size, approx_cell2_size]
 
-    return (x1, y1, z1, x2, y2, z2,
-        proj_search_radius, cylinder_half_length, period, num_threads, PBCs,
-        approx_cell1_size, approx_cell2_size, autocorr)
+    return (
+        x1,
+        y1,
+        z1,
+        x2,
+        y2,
+        z2,
+        proj_search_radius,
+        cylinder_half_length,
+        period,
+        num_threads,
+        PBCs,
+        approx_cell1_size,
+        approx_cell2_size,
+        autocorr,
+    )
