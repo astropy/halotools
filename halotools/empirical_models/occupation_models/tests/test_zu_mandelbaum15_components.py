@@ -5,11 +5,11 @@ import numpy as np
 
 from .. import ZuMandelbaum15Cens, ZuMandelbaum15Sats
 
-__all__ = ('test_ZuMandelbaum15Cens1', 'test_ZuMandelbaum15Cens2')
+__all__ = ("test_ZuMandelbaum15Cens1", "test_ZuMandelbaum15Cens2")
 
 
 def test_ZuMandelbaum15Cens1():
-    """ Verify that the mean and Monte Carlo occupations
+    """Verify that the mean and Monte Carlo occupations
     are both reasonable and in agreement for a few halo masses
     """
     model = ZuMandelbaum15Cens()
@@ -35,7 +35,7 @@ def test_ZuMandelbaum15Cens1():
 
 
 def test_ZuMandelbaum15Cens2():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing smhm_sigma
     """
     model = ZuMandelbaum15Cens(threshold=11)
@@ -44,13 +44,13 @@ def test_ZuMandelbaum15Cens2():
     ncen1 = model.mean_occupation(prim_haloprop=testmass)
 
     # Increasing scatter picks up more galaxies in low-mass halos
-    model.param_dict['smhm_sigma'] *= 1.5
+    model.param_dict["smhm_sigma"] *= 1.5
     ncen2 = model.mean_occupation(prim_haloprop=testmass)
     assert ncen2 > ncen1
 
 
 def test_ZuMandelbaum15Cens3():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing smhm_m1
     """
     model = ZuMandelbaum15Cens(threshold=11)
@@ -58,14 +58,13 @@ def test_ZuMandelbaum15Cens3():
     testmass = 1e12
     ncen1 = model.mean_occupation(prim_haloprop=testmass)
 
-    model.param_dict['smhm_m1'] *= 1.1
+    model.param_dict["smhm_m1"] *= 1.1
     ncen3 = model.mean_occupation(prim_haloprop=testmass)
     assert ncen3 < ncen1
 
 
 def test_ZuMandelbaum15Cens4():
-    """ Check that increasing stellar mass thresholds decreases the mean occupation
-    """
+    """Check that increasing stellar mass thresholds decreases the mean occupation"""
     testmass = 1e12
 
     model1 = ZuMandelbaum15Cens(threshold=11)
@@ -81,12 +80,12 @@ def test_ZuMandelbaum15Cens4():
 
 
 def test_ZuMandelbaum15Sats1():
-    """ Verify that the mean and Monte Carlo occupations
+    """Verify that the mean and Monte Carlo occupations
     are both reasonable and in agreement for a few halo masses
     """
     model = ZuMandelbaum15Sats()
 
-    npts = int(1e4)
+    npts = int(1e5)
     testmass = 5e12
     mass_array = np.zeros(npts) + testmass
     nsat = model.mean_occupation(prim_haloprop=testmass)
@@ -113,20 +112,20 @@ def test_ZuMandelbaum15Sats1():
 
 
 def test_ZuMandelbaum15Sats2():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing alphasat values
     """
     model = ZuMandelbaum15Sats()
 
     testmass = 5e13
     nsat1 = model.mean_occupation(prim_haloprop=testmass)
-    model.param_dict['alphasat'] *= 1.1
+    model.param_dict["alphasat"] *= 1.1
     nsat2 = model.mean_occupation(prim_haloprop=testmass)
     assert nsat2 > nsat1
 
 
 def test_ZuMandelbaum15Sats3():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing betasat values
     """
     model = ZuMandelbaum15Sats()
@@ -134,14 +133,14 @@ def test_ZuMandelbaum15Sats3():
     # Msat := Bsat(mhalo_thresh/1e12)**betasat
     # since mhalo_thresh(logM*=10.5) > 1e12, increasing betasat should increase Msat
     msat1 = np.copy(model._msat)
-    model.param_dict['betasat'] *= 1.1
+    model.param_dict["betasat"] *= 1.1
     model._update_satellite_params()
     msat2 = np.copy(model._msat)
     assert msat2 > msat1
 
 
 def test_ZuMandelbaum15Sats4():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing bsat values
     """
     model = ZuMandelbaum15Sats()
@@ -150,14 +149,14 @@ def test_ZuMandelbaum15Sats4():
     # Increasing Bsat should increase Msat
     model._update_satellite_params()
     msat1 = np.copy(model._msat)
-    model.param_dict['bsat'] *= 1.1
+    model.param_dict["bsat"] *= 1.1
     model._update_satellite_params()
     msat2 = np.copy(model._msat)
     assert msat2 > msat1
 
 
 def test_ZuMandelbaum15Sats5():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing betacut values
     """
     model = ZuMandelbaum15Sats(threshold=11)
@@ -165,17 +164,17 @@ def test_ZuMandelbaum15Sats5():
     # Mcut := Bcut(mhalo_thresh/1e12)**betacut
     # since mean_halo_mass(10**11) > knee_mass=1e12,
     # increasing betacut should increase Mcut
-    model.param_dict['betacut'] = 0.41
+    model.param_dict["betacut"] = 0.41
     model._update_satellite_params()
     mcut1 = np.copy(model._mcut)
-    model.param_dict['betacut'] = 0.5
+    model.param_dict["betacut"] = 0.5
     model._update_satellite_params()
     mcut2 = np.copy(model._mcut)
     assert mcut2 > mcut1
 
 
 def test_ZuMandelbaum15Sats6():
-    """ Check that the model behavior is altered in the expected way
+    """Check that the model behavior is altered in the expected way
     by changing bcut values
     """
     model = ZuMandelbaum15Sats(threshold=10)
@@ -184,15 +183,14 @@ def test_ZuMandelbaum15Sats6():
     # Increasing Bcut should increase Mcut
     model._update_satellite_params()
     mcut1 = np.copy(model._mcut)
-    model.param_dict['bcut'] *= 1.1
+    model.param_dict["bcut"] *= 1.1
     model._update_satellite_params()
     mcut2 = np.copy(model._mcut)
     assert mcut2 > mcut1
 
 
 def test_ZuMandelbaum15Sats7():
-    """ Check that increasing stellar mass thresholds decreases the mean occupation
-    """
+    """Check that increasing stellar mass thresholds decreases the mean occupation"""
     model10 = ZuMandelbaum15Sats(threshold=10)
     model105 = ZuMandelbaum15Sats(threshold=10.5)
     model11 = ZuMandelbaum15Sats(threshold=11)
@@ -211,10 +209,9 @@ def test_ZuMandelbaum15Sats7():
 
 
 def test_ZuMandelbaum15Sats8():
-    """ Check that changes to centrals parameters propagate through to satellites
-    """
+    """Check that changes to centrals parameters propagate through to satellites"""
     model = ZuMandelbaum15Sats(threshold=10)
-    model.param_dict['smhm_sigma'] = 0.5
+    model.param_dict["smhm_sigma"] = 0.5
 
     # Verify that we have identified a mass range with mean_ncen <~ 1
     # In such a mass range, decreasing scatter increases <Ncen>
@@ -228,7 +225,7 @@ def test_ZuMandelbaum15Sats8():
     assert nsat1 > 0.01
 
     # Modifying scatter should only impact <Nsat> via <Ncen>
-    model.param_dict['smhm_sigma'] = 0.25
+    model.param_dict["smhm_sigma"] = 0.25
     nsat2 = model.mean_occupation(prim_haloprop=testmass)
 
     assert nsat2 > nsat1
