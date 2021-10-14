@@ -109,7 +109,7 @@ class ZuMandelbaum15SmHm(PrimGalpropModel):
 
         mass_ratio = stellar_mass / m0
         exparg = ((mass_ratio ** delta) / (1.0 + mass_ratio ** (-gamma))) - 0.5
-        halo_mass = m1 * (mass_ratio ** beta) * np.exp(exparg)
+        halo_mass = m1 * (mass_ratio ** beta) * 10 ** (exparg)
         return halo_mass
 
     def mean_stellar_mass(self, **kwargs):
