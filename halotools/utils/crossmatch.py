@@ -187,12 +187,12 @@ def compute_richness(unique_halo_ids, halo_id_of_galaxies):
         Numpy array of shape (num_halos, ) storing unique integers
 
     halo_id_of_galaxies : ndarray
-        Numpy integer array of shape (num_halos, ) storing the host ID of each galaxy
+        Numpy integer array of shape (num_galaxies, ) storing the host ID of each galaxy
 
     Returns
     -------
     richness : ndarray
-        Numpy integer array of shape (num_halos, ) storing halo richness
+        Numpy integer array of shape (num_halos, ) storing richness of each host halo
 
     Examples
     --------
