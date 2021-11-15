@@ -1,14 +1,15 @@
 """
 """
 import numpy as np
-from astropy.utils.misc import NumpyRNGContext
-
-from ..rotate_vector_collection import rotate_vector_collection
-from ..rotations2d import *
+from ..vector_utilities import rotate_vector_collection
+from ..rotations2d import rotation_matrices_from_vectors
+from ..rotations2d import rotation_matrices_from_angles
+from ..rotations2d import rotation_matrices_from_basis
 
 __all__ = (
     "test_rotation_matrices_from_vectors_1",
-    "test_rotation_matrices_from_vectors_2" "test_rotation_matrices_from_angles",
+    "test_rotation_matrices_from_vectors_2",
+    "test_rotation_matrices_from_angles",
     "test_rotation_matrices_from_basis_1",
     "test_rotation_matrices_from_basis_2",
 )

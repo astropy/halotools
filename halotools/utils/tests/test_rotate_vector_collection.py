@@ -1,12 +1,10 @@
 """
 """
 import numpy as np
-from astropy.utils.misc import NumpyRNGContext
+from ..vector_utilities import rotate_vector_collection
+from ..rotations3d import rotation_matrices_from_vectors
 
-from ..rotate_vector_collection import rotate_vector_collection
-from ..rotations3d import *
-
-__all__ = ("test_rotation_3d",)
+__all__ = ("test_rotation_1",)
 
 fixed_seed = 43
 

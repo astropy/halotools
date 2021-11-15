@@ -2,10 +2,16 @@
 test suite for vector_utilities.py
 """
 import numpy as np
-from astropy.utils.misc import NumpyRNGContext
 
-from ..vector_utilities import *
-from ..rotate_vector_collection import rotate_vector_collection
+from ..vector_utilities import (
+    normalized_vectors,
+    elementwise_norm,
+    elementwise_dot,
+    vectors_normal_to_planes,
+    angles_between_list_of_vectors,
+    project_onto_plane,
+    rotate_vector_collection,
+)
 from ..rotations2d import (
     rotation_matrices_from_angles as rotation_matrices_from_angles_2d,
 )
