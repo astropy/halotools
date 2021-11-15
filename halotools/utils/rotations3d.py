@@ -1,11 +1,11 @@
 """
 A set of vector rotation utilites for manipulating 3-dimensional vectors
 """
-
 from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
-from .vector_utilities import *
-from halotools.utils import rotate_vector_collection
+from .vector_utilities import normalized_vectors, vectors_normal_to_planes
+from .vector_utilities import angles_between_list_of_vectors, elementwise_dot
+from .vector_utilities import rotate_vector_collection
 
 
 __all__ = [
