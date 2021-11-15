@@ -2,17 +2,18 @@ r"""
 A set of vector calculations to aid in rotation calculations
 """
 
-from __future__ import (division, print_function, absolute_import,
-                        unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
 
-__all__=['elementwise_dot', 
-         'elementwise_norm', 
-         'normalized_vectors',
-         'angles_between_list_of_vectors', 
-         'vectors_normal_to_planes', 
-         'project_onto_plane']
-__author__ = ['Duncan Campbell', 'Andrew Hearin']
+__all__ = [
+    "elementwise_dot",
+    "elementwise_norm",
+    "normalized_vectors",
+    "angles_between_list_of_vectors",
+    "vectors_normal_to_planes",
+    "project_onto_plane",
+]
+__author__ = ["Duncan Campbell", "Andrew Hearin"]
 
 
 def normalized_vectors(vectors):
@@ -42,8 +43,8 @@ def normalized_vectors(vectors):
     vectors = np.atleast_2d(vectors)
     npts = vectors.shape[0]
 
-    with np.errstate(divide='ignore', invalid='ignore'):
-        return vectors/elementwise_norm(vectors).reshape((npts, -1))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return vectors / elementwise_norm(vectors).reshape((npts, -1))
 
 
 def elementwise_norm(x):
@@ -69,7 +70,7 @@ def elementwise_norm(x):
     """
 
     x = np.atleast_2d(x)
-    return np.sqrt(np.sum(x**2, axis=1))
+    return np.sqrt(np.sum(x ** 2, axis=1))
 
 
 def elementwise_dot(x, y):
@@ -94,24 +95,24 @@ def elementwise_dot(x, y):
     Examples
     --------
     Let's create two sets of semi-random 3D vectors, x1 and x2.
-    
+
     >>> npts = int(1e3)
     >>> ndim = 3
     >>> x1 = np.random.random((npts, ndim))
     >>> x2 = np.random.random((npts, ndim))
 
-    We then can find the dot product between each pair of vectors in x1 and x2.  
+    We then can find the dot product between each pair of vectors in x1 and x2.
 
     >>> dots = elementwise_dot(x1, x2)
     """
 
     x = np.atleast_2d(x)
     y = np.atleast_2d(y)
-    return np.sum(x*y, axis=1)
+    return np.sum(x * y, axis=1)
 
 
 def angles_between_list_of_vectors(v0, v1, tol=1e-3, vn=None):
-    r""" Calculate the angle between a collection of n-dimensional vectors
+    r"""Calculate the angle between a collection of n-dimensional vectors
 
     Parameters
     ----------
@@ -149,30 +150,30 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3, vn=None):
     >>> v1 = np.random.random((npts, ndim))
     >>> v2 = np.random.random((npts, ndim))
 
-    We then can find the angle between each pair of vectors in v1 and v2.  
+    We then can find the angle between each pair of vectors in v1 and v2.
 
     >>> angles = angles_between_list_of_vectors(v1, v2)
     """
 
     dot = elementwise_dot(normalized_vectors(v0), normalized_vectors(v1))
-    
+
     if vn is None:
         #  Protect against tiny numerical excesses beyond the range [-1 ,1]
         mask1 = (dot > 1) & (dot < 1 + tol)
-        dot = np.where(mask1, 1., dot)
+        dot = np.where(mask1, 1.0, dot)
         mask2 = (dot < -1) & (dot > -1 - tol)
-        dot = np.where(mask2, -1., dot)
+        dot = np.where(mask2, -1.0, dot)
         a = np.arccos(dot)
     else:
-        cross = np.cross(v0,v1)
+        cross = np.cross(v0, v1)
         a = np.arctan2(elementwise_dot(cross, vn), dot)
-    
-    return a   
+
+    return a
 
 
 def vectors_normal_to_planes(x, y):
-    r""" 
-    Given a collection of 3d vectors x and y, return a collection of 
+    r"""
+    Given a collection of 3d vectors x and y, return a collection of
     3d unit-vectors that are orthogonal to x and y.
 
     Parameters
@@ -241,6 +242,6 @@ def project_onto_plane(x1, x2):
     """
 
     n = normalized_vectors(x2)
-    d = elementwise_dot(x1,n)
+    d = elementwise_dot(x1, n)
 
-    return x1 - d[:,np.newaxis]*n
+    return x1 - d[:, np.newaxis] * n

@@ -2,18 +2,19 @@
 A set of vector rotation utilites for manipulating 3-dimensional vectors
 """
 
-from __future__ import (division, print_function, absolute_import,
-                        unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
 from .vector_utilities import *
 from halotools.utils import rotate_vector_collection
 
 
-__all__=['rotation_matrices_from_angles',
-         'rotation_matrices_from_vectors',
-         'rotation_matrices_from_basis',
-         'vectors_between_list_of_vectors']
-__author__ = ['Duncan Campbell', 'Andrew Hearin']
+__all__ = [
+    "rotation_matrices_from_angles",
+    "rotation_matrices_from_vectors",
+    "rotation_matrices_from_basis",
+    "vectors_between_list_of_vectors",
+]
+__author__ = ["Duncan Campbell", "Andrew Hearin"]
 
 
 def rotation_matrices_from_angles(angles, directions):
@@ -63,7 +64,7 @@ def rotation_matrices_from_angles(angles, directions):
     R1[:, 2, 2] = cosa
 
     R2 = directions[..., None] * directions[:, None, :]
-    R2 = R2*np.repeat(1.-cosa, 9).reshape((npts, 3, 3))
+    R2 = R2 * np.repeat(1.0 - cosa, 9).reshape((npts, 3, 3))
 
     directions *= sina.reshape((npts, 1))
     R3 = np.zeros((npts, 3, 3))
@@ -76,7 +77,7 @@ def rotation_matrices_from_angles(angles, directions):
 def rotation_matrices_from_vectors(v0, v1):
     r"""
     Calculate a collection of rotation matrices defined by two sets of vectors,
-    v1 into v2, such that the resulting matrices rotate v1 into v2 about 
+    v1 into v2, such that the resulting matrices rotate v1 into v2 about
     the mutually perpendicular axis.
 
     Parameters
@@ -118,15 +119,19 @@ def rotation_matrices_from_vectors(v0, v1):
     angles = angles_between_list_of_vectors(v0, v1)
 
     # where angles are 0.0, replace directions with v0
-    mask_a = (np.isnan(directions[:,0]) | np.isnan(directions[:,1]) | np.isnan(directions[:,2]))
-    mask_b = (angles==0.0)
+    mask_a = (
+        np.isnan(directions[:, 0])
+        | np.isnan(directions[:, 1])
+        | np.isnan(directions[:, 2])
+    )
+    mask_b = angles == 0.0
     mask = mask_a | mask_b
     directions[mask] = v0[mask]
 
     return rotation_matrices_from_angles(angles, directions)
 
 
-def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
+def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi / 1000.0):
     r"""
     Calculate a collection of rotation matrices defined by a set of basis vectors
 
@@ -151,7 +156,7 @@ def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
 
     Example
     -------
-    Let's build a rotation matrix that rotates from a frame 
+    Let's build a rotation matrix that rotates from a frame
     rotated by 45 degrees to the standard frame.
 
     >>> u1 = [np.sqrt(2), np.sqrt(2), 0.0]
@@ -161,13 +166,13 @@ def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
 
     Notes
     -----
-    The rotation matrices transform from the Cartesian frame defined by the standard 
+    The rotation matrices transform from the Cartesian frame defined by the standard
     basis vectors,
-    
+
     .. math::
         \u_1=(1,0,0)
-        \u_2=(0,1,0) 
-        \u_3=(0,0,1) 
+        \u_2=(0,1,0)
+        \u_3=(0,0,1)
 
     The function `rotate_vector_collection` can be used to efficiently
     apply the returned collection of matrices to a collection of 3d vectors
@@ -176,27 +181,27 @@ def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
     N = np.shape(ux)[0]
 
     # assume initial unit vectors are the standard ones
-    ex = np.array([1.0, 0.0, 0.0]*N).reshape(N, 3)
-    ey = np.array([0.0, 1.0, 0.0]*N).reshape(N, 3)
-    ez = np.array([0.0, 0.0, 1.0]*N).reshape(N, 3)
+    ex = np.array([1.0, 0.0, 0.0] * N).reshape(N, 3)
+    ey = np.array([0.0, 1.0, 0.0] * N).reshape(N, 3)
+    ez = np.array([0.0, 0.0, 1.0] * N).reshape(N, 3)
 
     ux = normalized_vectors(ux)
     uy = normalized_vectors(uy)
     uz = normalized_vectors(uz)
 
     d_theta = angles_between_list_of_vectors(ux, uy)
-    if np.any(np.fabs(np.pi/2.0 - d_theta) > tol):
-        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+    if np.any(np.fabs(np.pi / 2.0 - d_theta) > tol):
+        msg = "At least one set of basis vectors are not orthoginal to within the specified tolerance."
         raise ValueError(msg)
 
     d_theta = angles_between_list_of_vectors(ux, uz)
-    if np.any(np.fabs(np.pi/2.0 - d_theta) > tol):
-        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+    if np.any(np.fabs(np.pi / 2.0 - d_theta) > tol):
+        msg = "At least one set of basis vectors are not orthoginal to within the specified tolerance."
         raise ValueError(msg)
 
     d_theta = angles_between_list_of_vectors(uy, uz)
-    if np.any(np.fabs(np.pi/2.0 - d_theta) > tol):
-        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+    if np.any(np.fabs(np.pi / 2.0 - d_theta) > tol):
+        msg = "At least one set of basis vectors are not orthoginal to within the specified tolerance."
         raise ValueError(msg)
 
     r_11 = elementwise_dot(ex, ux)
@@ -212,15 +217,15 @@ def rotation_matrices_from_basis(ux, uy, uz, tol=np.pi/1000.0):
     r_33 = elementwise_dot(ez, uz)
 
     r = np.zeros((N, 3, 3))
-    r[:,0,0] = r_11
-    r[:,0,1] = r_12
-    r[:,0,2] = r_13
-    r[:,1,0] = r_21
-    r[:,1,1] = r_22
-    r[:,1,2] = r_23
-    r[:,2,0] = r_31
-    r[:,2,1] = r_32
-    r[:,2,2] = r_33
+    r[:, 0, 0] = r_11
+    r[:, 0, 1] = r_12
+    r[:, 0, 2] = r_13
+    r[:, 1, 0] = r_21
+    r[:, 1, 1] = r_22
+    r[:, 1, 2] = r_23
+    r[:, 2, 0] = r_31
+    r[:, 2, 1] = r_32
+    r[:, 2, 2] = r_33
 
     return r
 
@@ -273,8 +278,8 @@ def vectors_between_list_of_vectors(x, y, p):
 
     >>> v = vectors_between_list_of_vectors(x, y, p)
 
-    Note that `p` determines how close the new vector is to 
-    the corresponding vectors in the original sets. 
+    Note that `p` determines how close the new vector is to
+    the corresponding vectors in the original sets.
 
     >>> angles_xy = angles_between_list_of_vectors(x, y)
     >>> angles_xp = angles_between_list_of_vectors(x, v)
@@ -286,6 +291,6 @@ def vectors_between_list_of_vectors(x, y, p):
 
     z = vectors_normal_to_planes(x, y)
     theta = angles_between_list_of_vectors(x, y)
-    angles = p*theta
+    angles = p * theta
     rotation_matrices = rotation_matrices_from_angles(angles, z)
     return normalized_vectors(rotate_vector_collection(rotation_matrices, x))
