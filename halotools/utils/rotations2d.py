@@ -2,17 +2,22 @@ r"""
 A set of vector rotation utilites for manipulating 2-dimensional vectors
 """
 
-from __future__ import (division, print_function, absolute_import,
-                        unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
-from .vector_utilities import (elementwise_dot, elementwise_norm,
-                               normalized_vectors, angles_between_list_of_vectors)
+from .vector_utilities import (
+    elementwise_dot,
+    elementwise_norm,
+    normalized_vectors,
+    angles_between_list_of_vectors,
+)
 
 
-__all__=['rotation_matrices_from_angles',
-         'rotation_matrices_from_vectors',
-         'rotation_matrices_from_basis']
-__author__ = ['Duncan Campbell', 'Andrew Hearin']
+__all__ = [
+    "rotation_matrices_from_angles",
+    "rotation_matrices_from_vectors",
+    "rotation_matrices_from_basis",
+]
+__author__ = ["Duncan Campbell", "Andrew Hearin"]
 
 
 def rotation_matrices_from_angles(angles):
@@ -55,7 +60,7 @@ def rotation_matrices_from_angles(angles):
 
     R[:, 0, 1] = -sina
     R[:, 1, 0] = sina
-    
+
     return R
 
 
@@ -96,14 +101,14 @@ def rotation_matrices_from_vectors(v0, v1):
     """
     v0 = normalized_vectors(v0)
     v1 = normalized_vectors(v1)
-    
+
     # use the atan2 function to get the direction of rotation right
-    angles = np.arctan2(v0[:,0], v0[:,1])-np.arctan2(v1[:,0],v1[:,1])
+    angles = np.arctan2(v0[:, 0], v0[:, 1]) - np.arctan2(v1[:, 0], v1[:, 1])
 
     return rotation_matrices_from_angles(angles)
 
 
-def rotation_matrices_from_basis(ux, uy, tol=np.pi/1000.0):
+def rotation_matrices_from_basis(ux, uy, tol=np.pi / 1000.0):
     r"""
     Calculate a collection of rotation matrices defined by an input collection
     of basis vectors.
@@ -126,7 +131,7 @@ def rotation_matrices_from_basis(ux, uy, tol=np.pi/1000.0):
 
     Example
     -------
-    Let's build a rotation matrix that roates from a frame 
+    Let's build a rotation matrix that roates from a frame
     rotated by 45 degrees to the standard frame.
 
     >>> u1 = [np.sqrt(2), np.sqrt(2)]
@@ -135,29 +140,29 @@ def rotation_matrices_from_basis(ux, uy, tol=np.pi/1000.0):
 
     Notes
     -----
-    The rotation matrices transform from the Cartesian frame defined by the standard 
+    The rotation matrices transform from the Cartesian frame defined by the standard
     basis vectors,
-    
+
     .. math::
         \u_1=(1,0)
         \u_2=(0,1)
 
     The function `rotate_vector_collection` can be used to efficiently
-    apply the returned collection of matrices to a collection of 2d vectors 
+    apply the returned collection of matrices to a collection of 2d vectors
     """
 
     N = np.shape(ux)[0]
 
     # assume initial unit vectors are the standard ones
-    ex = np.array([1.0, 0.0]*N).reshape(N, 2)
-    ey = np.array([0.0, 1.0]*N).reshape(N, 2)
+    ex = np.array([1.0, 0.0] * N).reshape(N, 2)
+    ey = np.array([0.0, 1.0] * N).reshape(N, 2)
 
     ux = normalized_vectors(ux)
     uy = normalized_vectors(uy)
 
     d_theta = angles_between_list_of_vectors(ux, uy)
-    if np.any((np.pi/2.0 - d_theta) > tol):
-        msg = ('At least one set of basis vectors are not orthoginal to within the specified tolerance.')
+    if np.any((np.pi / 2.0 - d_theta) > tol):
+        msg = "At least one set of basis vectors are not orthoginal to within the specified tolerance."
         raise ValueError(msg)
 
     r_11 = elementwise_dot(ex, ux)
@@ -167,9 +172,9 @@ def rotation_matrices_from_basis(ux, uy, tol=np.pi/1000.0):
     r_22 = elementwise_dot(ey, uy)
 
     r = np.zeros((N, 2, 2))
-    r[:,0,0] = r_11
-    r[:,0,1] = r_12
-    r[:,1,0] = r_21
-    r[:,1,1] = r_22
+    r[:, 0, 0] = r_11
+    r[:, 0, 1] = r_12
+    r[:, 1, 0] = r_21
+    r[:, 1, 1] = r_22
 
     return r

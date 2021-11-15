@@ -2,17 +2,19 @@ r"""
 A set of vector calculations to aid in rotation calculations
 """
 
-from __future__ import (division, print_function, absolute_import,
-                        unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
 
-__all__=['elementwise_dot', 
-         'elementwise_norm', 
-         'normalized_vectors',
-         'angles_between_list_of_vectors', 
-         'vectors_normal_to_planes', 
-         'project_onto_plane']
-__author__ = ['Duncan Campbell', 'Andrew Hearin']
+__all__ = [
+    "elementwise_dot",
+    "elementwise_norm",
+    "normalized_vectors",
+    "angles_between_list_of_vectors",
+    "vectors_normal_to_planes",
+    "project_onto_plane",
+    "rotate_vector_collection",
+]
+__author__ = ["Duncan Campbell", "Andrew Hearin"]
 
 
 def normalized_vectors(vectors):
@@ -42,8 +44,8 @@ def normalized_vectors(vectors):
     vectors = np.atleast_2d(vectors)
     npts = vectors.shape[0]
 
-    with np.errstate(divide='ignore', invalid='ignore'):
-        return vectors/elementwise_norm(vectors).reshape((npts, -1))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return vectors / elementwise_norm(vectors).reshape((npts, -1))
 
 
 def elementwise_norm(x):
@@ -69,7 +71,7 @@ def elementwise_norm(x):
     """
 
     x = np.atleast_2d(x)
-    return np.sqrt(np.sum(x**2, axis=1))
+    return np.sqrt(np.sum(x ** 2, axis=1))
 
 
 def elementwise_dot(x, y):
@@ -94,24 +96,24 @@ def elementwise_dot(x, y):
     Examples
     --------
     Let's create two sets of semi-random 3D vectors, x1 and x2.
-    
+
     >>> npts = int(1e3)
     >>> ndim = 3
     >>> x1 = np.random.random((npts, ndim))
     >>> x2 = np.random.random((npts, ndim))
 
-    We then can find the dot product between each pair of vectors in x1 and x2.  
+    We then can find the dot product between each pair of vectors in x1 and x2.
 
     >>> dots = elementwise_dot(x1, x2)
     """
 
     x = np.atleast_2d(x)
     y = np.atleast_2d(y)
-    return np.sum(x*y, axis=1)
+    return np.sum(x * y, axis=1)
 
 
 def angles_between_list_of_vectors(v0, v1, tol=1e-3, vn=None):
-    r""" Calculate the angle between a collection of n-dimensional vectors
+    r"""Calculate the angle between a collection of n-dimensional vectors
 
     Parameters
     ----------
@@ -149,30 +151,30 @@ def angles_between_list_of_vectors(v0, v1, tol=1e-3, vn=None):
     >>> v1 = np.random.random((npts, ndim))
     >>> v2 = np.random.random((npts, ndim))
 
-    We then can find the angle between each pair of vectors in v1 and v2.  
+    We then can find the angle between each pair of vectors in v1 and v2.
 
     >>> angles = angles_between_list_of_vectors(v1, v2)
     """
 
     dot = elementwise_dot(normalized_vectors(v0), normalized_vectors(v1))
-    
+
     if vn is None:
         #  Protect against tiny numerical excesses beyond the range [-1 ,1]
         mask1 = (dot > 1) & (dot < 1 + tol)
-        dot = np.where(mask1, 1., dot)
+        dot = np.where(mask1, 1.0, dot)
         mask2 = (dot < -1) & (dot > -1 - tol)
-        dot = np.where(mask2, -1., dot)
+        dot = np.where(mask2, -1.0, dot)
         a = np.arccos(dot)
     else:
-        cross = np.cross(v0,v1)
+        cross = np.cross(v0, v1)
         a = np.arctan2(elementwise_dot(cross, vn), dot)
-    
-    return a   
+
+    return a
 
 
 def vectors_normal_to_planes(x, y):
-    r""" 
-    Given a collection of 3d vectors x and y, return a collection of 
+    r"""
+    Given a collection of 3d vectors x and y, return a collection of
     3d unit-vectors that are orthogonal to x and y.
 
     Parameters
@@ -241,6 +243,80 @@ def project_onto_plane(x1, x2):
     """
 
     n = normalized_vectors(x2)
-    d = elementwise_dot(x1,n)
+    d = elementwise_dot(x1, n)
 
-    return x1 - d[:,np.newaxis]*n
+    return x1 - d[:, np.newaxis] * n
+
+
+def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
+    r"""
+    Given a collection of rotation matrices and a collection of n-dimensional vectors,
+    apply an asscoiated matrix to rotate corresponding vector(s).
+
+    Parameters
+    ----------
+    rotation_matrices : ndarray
+        The options are:
+        1.) array of shape (npts, ndim, ndim) storing a collection of rotation matrices.
+        2.) array of shape (ndim, ndim) storing a single rotation matrix
+
+    vectors : ndarray
+        The corresponding options for above are:
+        1.) array of shape (npts, ndim) storing a collection of ndim-dimensional vectors
+        2.) array of shape (npts, ndim) storing a collection of ndim-dimensional vectors
+
+    Returns
+    -------
+    rotated_vectors : ndarray
+        Numpy array of shape (npts, ndim) storing a collection of ndim-dimensional vectors
+
+    Notes
+    -----
+    This function is set up to preform either rotation operations on a single collection \
+    of vectors, either applying a single rotation matrix to all vectors in the collection,
+    or applying a unique rotation matrix to each vector in the set.
+
+    The behavior of the function is determined by the arguments supplied by the user.
+
+    Examples
+    --------
+    In this example, we'll randomly generate two sets of unit-vectors, `v0` and `v1`.
+    We'll use the `rotation_matrices_from_vectors` function to generate the
+    rotation matrices that rotate each `v0` into the corresponding `v1`.
+    Then we'll use the `rotate_vector_collection` function to apply each
+    rotation, and verify that we recover each of the `v1`.
+
+    >>> from halotools.utils.rotations3d import rotation_matrices_from_vectors
+    >>> from halotools.utils import normalized_vectors
+    >>> npts, ndim = int(1e4), 3
+    >>> v0 = normalized_vectors(np.random.random((npts, ndim)))
+    >>> v1 = normalized_vectors(np.random.random((npts, ndim)))
+    >>> rotation_matrices = rotation_matrices_from_vectors(v0, v1)
+    >>> v2 = rotate_vector_collection(rotation_matrices, v0)
+    >>> assert np.allclose(v1, v2)
+    """
+
+    ndim_rotm = np.shape(rotation_matrices)[-1]
+    ndim_vec = np.shape(vectors)[-1]
+    assert ndim_rotm == ndim_vec
+
+    if len(np.shape(vectors)) == 2:
+        ntps, ndim = np.shape(vectors)
+        nsets = 0
+    elif len(np.shape(vectors)) == 3:
+        nsets, ntps, ndim = np.shape(vectors)
+
+    # apply same rotation matrix to all vectors
+    if len(np.shape(rotation_matrices)) == 2:
+        if nsets == 1:
+            vectors = vectors[0]
+        return np.dot(rotation_matrices, vectors.T).T
+    # rotate each vector by associated rotation matrix
+    else:
+        ein_string = "ijk,ik->ij"
+        n1, ndim = np.shape(vectors)
+
+        try:
+            return np.einsum(ein_string, rotation_matrices, vectors, optimize=optimize)
+        except TypeError:
+            return np.einsum(ein_string, rotation_matrices, vectors)
