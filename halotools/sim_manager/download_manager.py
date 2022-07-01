@@ -18,10 +18,12 @@ except ImportError:
 try:
     import requests
 except ImportError:
-    raise HalotoolsError("Must have requests package installed to use the DownloadManager")
+    raise HalotoolsError(
+        "Must have requests package installed to use the DownloadManager"
+    )
 
 import posixpath
-from six.moves import urllib
+import urllib
 
 import os
 import fnmatch
@@ -36,8 +38,10 @@ from .halo_table_cache_log_entry import get_redshift_string
 try:
     import h5py
 except ImportError:
-    warn("Some of the functionality of the DownloadManager requires h5py to be installed,\n"
-        "which can be accomplished either with pip or conda")
+    warn(
+        "Some of the functionality of the DownloadManager requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda"
+    )
 
 
 from ..utils.array_utils import find_idx_nearest_val
@@ -45,29 +49,38 @@ from ..utils.array_utils import custom_len
 from ..utils.io_utils import download_file_from_url
 
 
-__all__ = ('DownloadManager', )
+__all__ = ("DownloadManager",)
 
-unsupported_simname_msg = "There are no web locations recognized by Halotools \n for simname ``%s``"
+unsupported_simname_msg = (
+    "There are no web locations recognized by Halotools \n for simname ``%s``"
+)
 
 
 class DownloadManager(object):
-    """ Class used to scrape the web for simulation data and cache the downloaded catalogs.
+    """Class used to scrape the web for simulation data and cache the downloaded catalogs.
 
     For a list of available pre-processed halo catalogs provided by Halotools,
     see :ref:`supported_sim_list`.
     """
 
     def __init__(self):
-        """
-        """
+        """ """
         self.halo_table_cache = HaloTableCache()
         self.ptcl_table_cache = PtclTableCache()
 
-    def download_processed_halo_table(self, simname, halo_finder, redshift,
-            dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_version_name,
-            download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
-            **kwargs):
-        """ Method to download one of the pre-processed binary files
+    def download_processed_halo_table(
+        self,
+        simname,
+        halo_finder,
+        redshift,
+        dz_tol=0.1,
+        overwrite=False,
+        version_name=sim_defaults.default_version_name,
+        download_dirname="std_cache_loc",
+        ignore_nearby_redshifts=False,
+        **kwargs
+    ):
+        """Method to download one of the pre-processed binary files
         storing a reduced halo catalog.
 
         Parameters
@@ -160,9 +173,10 @@ class DownloadManager(object):
         # Identify candidate file to download
 
         available_fnames_to_download = (
-            self._processed_halo_tables_available_for_download(simname=simname,
-                halo_finder=halo_finder, version_name=version_name)
+            self._processed_halo_tables_available_for_download(
+                simname=simname, halo_finder=halo_finder, version_name=version_name
             )
+        )
 
         if len(available_fnames_to_download) == 0:
             msg = "You made the following request for a pre-processed halo catalog:\n"
@@ -173,18 +187,21 @@ class DownloadManager(object):
             msg = msg + "There are no halo catalogs meeting your specifications"
             raise HalotoolsError(msg)
 
-        url, closest_redshift = (
-            self._closest_fname(available_fnames_to_download, redshift))
+        url, closest_redshift = self._closest_fname(
+            available_fnames_to_download, redshift
+        )
 
         closest_redshift_string = get_redshift_string(closest_redshift)
         closest_redshift = float(closest_redshift_string)
 
         if abs(closest_redshift - redshift) > dz_tol:
             msg = (
-                "\nNo pre-processed %s halo catalog has \na redshift within %.2f " +
-                "of the redshift = %.2f.\n The closest redshift for these catalogs is %s \n"
-                )
-            raise HalotoolsError(msg % (simname, dz_tol, redshift, closest_redshift_string))
+                "\nNo pre-processed %s halo catalog has \na redshift within %.2f "
+                + "of the redshift = %.2f.\n The closest redshift for these catalogs is %s \n"
+            )
+            raise HalotoolsError(
+                msg % (simname, dz_tol, redshift, closest_redshift_string)
+            )
 
         # At this point we have a candidate file to download that
         # matches the input specifications.
@@ -193,9 +210,11 @@ class DownloadManager(object):
         ############################################################
         # Determine the download directory,
         # passively creating the necessary directory tree
-        if download_dirname == 'std_cache_loc':
+        if download_dirname == "std_cache_loc":
             cache_basedir = os.path.dirname(self.halo_table_cache.cache_log_fname)
-            download_dirname = os.path.join(cache_basedir, 'halo_catalogs', simname, halo_finder)
+            download_dirname = os.path.join(
+                cache_basedir, "halo_catalogs", simname, halo_finder
+            )
             try:
                 os.makedirs(download_dirname)
             except OSError:
@@ -204,7 +223,7 @@ class DownloadManager(object):
             try:
                 assert os.path.exists(download_dirname)
             except AssertionError:
-                msg = ("\nYour input ``download_dirname`` is a non-existent path.\n")
+                msg = "\nYour input ``download_dirname`` is a non-existent path.\n"
                 raise HalotoolsError(msg)
         output_fname = os.path.join(download_dirname, os.path.basename(url))
         ############################################################
@@ -212,46 +231,64 @@ class DownloadManager(object):
         ############################################################
         # Now we check the cache log to see if there are any matching entries
         exact_match_generator = self.halo_table_cache.matching_log_entry_generator(
-            simname=simname, halo_finder=halo_finder, version_name=version_name,
-            redshift=closest_redshift, dz_tol=0.)
+            simname=simname,
+            halo_finder=halo_finder,
+            version_name=version_name,
+            redshift=closest_redshift,
+            dz_tol=0.0,
+        )
         exact_matches = list(exact_match_generator)
 
         if len(exact_matches) > 0:
-            msg = ("\nThere already exists a halo catalog in your cache log with \n"
-                "specifications that exactly match your inputs.\n")
+            msg = (
+                "\nThere already exists a halo catalog in your cache log with \n"
+                "specifications that exactly match your inputs.\n"
+            )
             if overwrite is False:
-                if 'initial_download_script_msg' in list(kwargs.keys()):
-                    msg = kwargs['initial_download_script_msg']
+                if "initial_download_script_msg" in list(kwargs.keys()):
+                    msg = kwargs["initial_download_script_msg"]
                     raise HalotoolsError(msg % output_fname)
                 else:
-                    msg += ("If you want to overwrite this catalog with your download, \n"
+                    msg += (
+                        "If you want to overwrite this catalog with your download, \n"
                         "you must set the ``overwrite`` keyword argument to True. \n"
                         "Alternatively, you can delete the log entry using the \n"
-                        "remove_entry_from_cache_log method of the HaloTableCache class.\n")
+                        "remove_entry_from_cache_log method of the HaloTableCache class.\n"
+                    )
                     raise HalotoolsError(msg)
             else:
-                msg += ("Since you have set ``overwrite`` to True, \n"
-                    "the download will proceed and the existing file will be overwritten.\n")
+                msg += (
+                    "Since you have set ``overwrite`` to True, \n"
+                    "the download will proceed and the existing file will be overwritten.\n"
+                )
                 warn(msg)
 
         close_match_generator = self.halo_table_cache.matching_log_entry_generator(
-            simname=simname, halo_finder=halo_finder, version_name=version_name,
-            redshift=closest_redshift, dz_tol=dz_tol)
+            simname=simname,
+            halo_finder=halo_finder,
+            version_name=version_name,
+            redshift=closest_redshift,
+            dz_tol=dz_tol,
+        )
         close_matches = list(close_match_generator)
 
-        if ((len(close_matches) > 0) &
-            (len(exact_matches) == 1) &
-                (ignore_nearby_redshifts is False)):
+        if (
+            (len(close_matches) > 0)
+            & (len(exact_matches) == 1)
+            & (ignore_nearby_redshifts is False)
+        ):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
             msg += str(entry.fname) + "\n\n"
-            msg += ("This log entry has exactly matching metadata "
-                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) +
-                "\n of the redshift of the most closely matching catalog on the web.\n"
+            msg += (
+                "This log entry has exactly matching metadata "
+                "and a redshift within the input ``dz_tol`` = "
+                + str(dz_tol)
+                + "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
-                    )
+            )
             raise HalotoolsError(msg)
 
         # At this point there are no conflicts with the existing log
@@ -263,46 +300,55 @@ class DownloadManager(object):
         # initial download script (hidden feature for developers only)
         if (overwrite is False) & (os.path.isfile(output_fname)):
 
-            if 'initial_download_script_msg' in list(kwargs.keys()):
-                msg = kwargs['initial_download_script_msg']
+            if "initial_download_script_msg" in list(kwargs.keys()):
+                msg = kwargs["initial_download_script_msg"]
             else:
-                msg = ("The following filename already exists "
+                msg = (
+                    "The following filename already exists "
                     "in your cache directory: \n\n%s\n\n"
                     "If you really want to overwrite the file, \n"
                     "you must call the same function again \n"
-                    "with the keyword argument `overwrite` set to `True`")
+                    "with the keyword argument `overwrite` set to `True`"
+                )
             raise HalotoolsError(msg % output_fname)
 
         start = time()
         download_file_from_url(url, output_fname)
         end = time()
-        runtime = (end - start)
-        print(("\nTotal runtime to download pre-processed "
-            "halo catalog = %.1f seconds\n" % runtime))
+        runtime = end - start
+        print(
+            (
+                "\nTotal runtime to download pre-processed "
+                "halo catalog = %.1f seconds\n" % runtime
+            )
+        )
 
         # overwrite the fname metadata so that
         # it is consistent with the downloaded location
         try:
             import h5py
         except ImportError:
-            msg = ("\nYou must have h5py installed to use "
+            msg = (
+                "\nYou must have h5py installed to use "
                 "the \ndownload_processed_halo_table method "
-                "of the DownloadManager class.\n")
+                "of the DownloadManager class.\n"
+            )
             raise HalotoolsError(msg)
 
-        f = h5py.File(output_fname, 'a')
-        f.attrs['fname'] = str(output_fname)
+        f = h5py.File(output_fname, "a")
+        f.attrs["fname"] = str(output_fname)
         f.close()
 
-        new_log_entry = (
-            self.halo_table_cache.determine_log_entry_from_fname(
-                output_fname)
-            )
+        new_log_entry = self.halo_table_cache.determine_log_entry_from_fname(
+            output_fname
+        )
 
         if new_log_entry.safe_for_cache is False:
-            msg = ("\nThere is a problem with the file you downloaded.\n"
+            msg = (
+                "\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
-                "and contact the Halotools developers.\n" + output_fname)
+                "and contact the Halotools developers.\n" + output_fname
+            )
             raise HalotoolsError(msg)
 
         self.halo_table_cache.add_entry_to_cache_log(new_log_entry)
@@ -310,23 +356,25 @@ class DownloadManager(object):
         # Print a special message if this download was triggered
         # by the downloading script (hidden feature for developers only)
         try:
-            success_msg = kwargs['success_msg']
+            success_msg = kwargs["success_msg"]
         except KeyError:
             args_msg = "simname = '" + str(new_log_entry.simname) + "'"
             args_msg += ", halo_finder = '" + str(new_log_entry.halo_finder) + "'"
             args_msg += ", version_name = '" + str(new_log_entry.version_name) + "'"
             args_msg += ", redshift = " + str(new_log_entry.redshift)
 
-            success_msg = ("\nThe halo catalog has been successfully downloaded "
+            success_msg = (
+                "\nThe halo catalog has been successfully downloaded "
                 "to the following location:\n" + str(output_fname) + "\n\n"
                 "This filename and its associated metadata have also been "
                 "added to the Halotools cache log, \n"
-                "as reflected by a newly added line to the following ASCII file:\n\n" +
-                str(self.halo_table_cache.cache_log_fname) + "\n\n"
+                "as reflected by a newly added line to the following ASCII file:\n\n"
+                + str(self.halo_table_cache.cache_log_fname)
+                + "\n\n"
                 "Since the catalog will now be recognized in cache, \n"
                 "you can load it into memory using the following syntax:\n\n"
                 ">>> from halotools.sim_manager import CachedHaloCatalog \n"
-                ">>> halocat = CachedHaloCatalog("+args_msg+") \n\n"
+                ">>> halocat = CachedHaloCatalog(" + args_msg + ") \n\n"
                 "For convenience, you can set this catalog to be your default catalog \n"
                 "and omit the CachedHaloCatalog constructor arguments.\n"
                 "To do that, change the following variables in the \n"
@@ -346,18 +394,26 @@ class DownloadManager(object):
                 "you must update both the ``fname`` metadata of the hdf5 file \n"
                 "as well as the``fname`` column of the corresponding entry in the log. \n"
                 "You can accomplish this with the ``update_cached_file_location``"
-                "method \nof the HaloTableCache class.\n\n")
+                "method \nof the HaloTableCache class.\n\n"
+            )
 
-        if 'initial_download_script_msg' in list(kwargs.keys()):
+        if "initial_download_script_msg" in list(kwargs.keys()):
             return new_log_entry
         else:
             print(success_msg)
 
-    def download_ptcl_table(self, simname, redshift,
-            dz_tol=0.1, overwrite=False, version_name=sim_defaults.default_ptcl_version_name,
-            download_dirname='std_cache_loc', ignore_nearby_redshifts=False,
-            **kwargs):
-        """ Method to download one of the binary files storing a
+    def download_ptcl_table(
+        self,
+        simname,
+        redshift,
+        dz_tol=0.1,
+        overwrite=False,
+        version_name=sim_defaults.default_ptcl_version_name,
+        download_dirname="std_cache_loc",
+        ignore_nearby_redshifts=False,
+        **kwargs
+    ):
+        """Method to download one of the binary files storing a
         random downsampling of dark matter particles.
 
         Parameters
@@ -443,7 +499,8 @@ class DownloadManager(object):
         # Identify candidate file to download
 
         available_fnames_to_download = self._ptcl_tables_available_for_download(
-            simname=simname, version_name=version_name)
+            simname=simname, version_name=version_name
+        )
 
         if len(available_fnames_to_download) == 0:
             msg = "You made the following request for a pre-processed halo catalog:\n"
@@ -453,18 +510,21 @@ class DownloadManager(object):
             msg = msg + "There are no particle catalogs meeting your specifications"
             raise HalotoolsError(msg)
 
-        url, closest_redshift = (
-            self._closest_fname(available_fnames_to_download, redshift))
+        url, closest_redshift = self._closest_fname(
+            available_fnames_to_download, redshift
+        )
 
         closest_redshift_string = get_redshift_string(closest_redshift)
         closest_redshift = float(closest_redshift_string)
 
         if abs(closest_redshift - redshift) > dz_tol:
             msg = (
-                "\nNo particle catalog for the ``%s`` simulation has \na redshift within %.2f " +
-                "of the redshift = %.2f.\n The closest redshift for these catalogs is %s \n"
-                )
-            raise HalotoolsError(msg % (simname, dz_tol, redshift, closest_redshift_string))
+                "\nNo particle catalog for the ``%s`` simulation has \na redshift within %.2f "
+                + "of the redshift = %.2f.\n The closest redshift for these catalogs is %s \n"
+            )
+            raise HalotoolsError(
+                msg % (simname, dz_tol, redshift, closest_redshift_string)
+            )
 
         # At this point we have a candidate file to download that
         # matches the input specifications.
@@ -473,9 +533,9 @@ class DownloadManager(object):
         ############################################################
         # Determine the download directory,
         # passively creating the necessary directory tree
-        if download_dirname == 'std_cache_loc':
+        if download_dirname == "std_cache_loc":
             cache_basedir = os.path.dirname(self.ptcl_table_cache.cache_log_fname)
-            download_dirname = os.path.join(cache_basedir, 'particle_catalogs', simname)
+            download_dirname = os.path.join(cache_basedir, "particle_catalogs", simname)
             try:
                 os.makedirs(download_dirname)
             except OSError:
@@ -484,7 +544,7 @@ class DownloadManager(object):
             try:
                 assert os.path.exists(download_dirname)
             except AssertionError:
-                msg = ("\nYour input ``download_dirname`` is a non-existent path.\n")
+                msg = "\nYour input ``download_dirname`` is a non-existent path.\n"
                 raise HalotoolsError(msg)
         output_fname = os.path.join(download_dirname, os.path.basename(url))
         ############################################################
@@ -492,46 +552,62 @@ class DownloadManager(object):
         ############################################################
         # Now we check the cache log to see if there are any matching entries
         exact_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
-            simname=simname, version_name=version_name,
-            redshift=closest_redshift, dz_tol=0.)
+            simname=simname,
+            version_name=version_name,
+            redshift=closest_redshift,
+            dz_tol=0.0,
+        )
         exact_matches = list(exact_match_generator)
 
         if len(exact_matches) > 0:
-            msg = ("\nThere already exists a particle catalog in your cache log with \n"
-                "specifications that exactly match your inputs.\n")
+            msg = (
+                "\nThere already exists a particle catalog in your cache log with \n"
+                "specifications that exactly match your inputs.\n"
+            )
             if overwrite is False:
-                if 'initial_download_script_msg' in list(kwargs.keys()):
-                    msg = kwargs['initial_download_script_msg']
+                if "initial_download_script_msg" in list(kwargs.keys()):
+                    msg = kwargs["initial_download_script_msg"]
                     raise HalotoolsError(msg % output_fname)
                 else:
-                    msg += ("If you want to overwrite this catalog with your download, \n"
+                    msg += (
+                        "If you want to overwrite this catalog with your download, \n"
                         "you must set the ``overwrite`` keyword argument to True. \n"
                         "Alternatively, you can delete the log entry using the \n"
-                        "remove_entry_from_cache_log method of the PtclTableCache class.\n")
+                        "remove_entry_from_cache_log method of the PtclTableCache class.\n"
+                    )
                     raise HalotoolsError(msg)
             else:
-                msg += ("Since you have set ``overwrite`` to True, \n"
-                    "the download will proceed and the existing file will be overwritten.\n")
+                msg += (
+                    "Since you have set ``overwrite`` to True, \n"
+                    "the download will proceed and the existing file will be overwritten.\n"
+                )
                 warn(msg)
 
         close_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
-            simname=simname, version_name=version_name,
-            redshift=closest_redshift, dz_tol=dz_tol)
+            simname=simname,
+            version_name=version_name,
+            redshift=closest_redshift,
+            dz_tol=dz_tol,
+        )
         close_matches = list(close_match_generator)
 
-        if ((len(close_matches) > 0) &
-            (len(exact_matches) == 0) &
-                (ignore_nearby_redshifts is False)):
+        if (
+            (len(close_matches) > 0)
+            & (len(exact_matches) == 0)
+            & (ignore_nearby_redshifts is False)
+        ):
 
             entry = close_matches[0]
             msg = "\nThe following filename appears in the cache log. \n\n"
             msg += str(entry.fname) + "\n\n"
-            msg += ("This log entry has exactly matching metadata "
-                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) +
-                "\n of the redshift of the most closely matching catalog on the web.\n"
+            msg += (
+                "This log entry has exactly matching metadata "
+                "and a redshift within the input ``dz_tol`` = "
+                + str(dz_tol)
+                + "\n of the redshift of the most closely matching catalog on the web.\n"
                 "In order to proceed, you must either set "
                 "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
-                    )
+            )
             raise HalotoolsError(msg)
 
         # At this point there are no conflicts with the existing log
@@ -543,14 +619,16 @@ class DownloadManager(object):
         # initial download script (hidden feature for developers only)
         if (overwrite is False) & (os.path.isfile(output_fname)):
 
-            if 'initial_download_script_msg' in list(kwargs.keys()):
-                msg = kwargs['initial_download_script_msg']
+            if "initial_download_script_msg" in list(kwargs.keys()):
+                msg = kwargs["initial_download_script_msg"]
             else:
-                msg = ("The following filename already exists "
+                msg = (
+                    "The following filename already exists "
                     "in your cache directory: \n\n%s\n\n"
                     "If you really want to overwrite the file, \n"
                     "you must call the same function again \n"
-                    "with the keyword argument `overwrite` set to `True`")
+                    "with the keyword argument `overwrite` set to `True`"
+                )
             raise HalotoolsError(msg % output_fname)
 
         download_file_from_url(url, output_fname)
@@ -560,23 +638,26 @@ class DownloadManager(object):
         try:
             import h5py
         except ImportError:
-            msg = ("\nYou must have h5py installed to use "
+            msg = (
+                "\nYou must have h5py installed to use "
                 "the \ndownload_ptcl_table method "
-                "of the DownloadManager class.\n")
+                "of the DownloadManager class.\n"
+            )
             raise HalotoolsError(msg)
-        f = h5py.File(output_fname, 'a')
-        f.attrs['fname'] = str(output_fname)
+        f = h5py.File(output_fname, "a")
+        f.attrs["fname"] = str(output_fname)
         f.close()
 
-        new_log_entry = (
-            self.ptcl_table_cache.determine_log_entry_from_fname(
-                output_fname)
-            )
+        new_log_entry = self.ptcl_table_cache.determine_log_entry_from_fname(
+            output_fname
+        )
 
         if new_log_entry.safe_for_cache is False:
-            msg = ("\nThere is a problem with the file you downloaded.\n"
+            msg = (
+                "\nThere is a problem with the file you downloaded.\n"
                 "Please take note of the following filename "
-                "and contact the Halotools developers.\n" + output_fname)
+                "and contact the Halotools developers.\n" + output_fname
+            )
             raise HalotoolsError(msg)
 
         self.ptcl_table_cache.add_entry_to_cache_log(new_log_entry)
@@ -584,21 +665,23 @@ class DownloadManager(object):
         # Print a special message if this download was triggered
         # by the downloading script (hidden feature for developers only)
         try:
-            success_msg = kwargs['success_msg']
+            success_msg = kwargs["success_msg"]
         except KeyError:
             args_msg = "simname = '" + str(new_log_entry.simname) + "'"
             args_msg += ", version_name = '" + str(new_log_entry.version_name) + "'"
             args_msg += ", redshift = " + str(new_log_entry.redshift)
 
-            success_msg = ("\nThe particle catalog has been successfully downloaded "
+            success_msg = (
+                "\nThe particle catalog has been successfully downloaded "
                 "to the following location:\n" + str(output_fname) + "\n\n"
                 "This filename and its associated metadata have also been "
                 "added to the Halotools cache log, \n"
-                "as reflected by a newly added line to the following ASCII file:\n\n" +
-                str(self.ptcl_table_cache.cache_log_fname) + "\n\n"
+                "as reflected by a newly added line to the following ASCII file:\n\n"
+                + str(self.ptcl_table_cache.cache_log_fname)
+                + "\n\n"
                 "You can access the particle data with the following syntax:\n\n"
                 ">>> from halotools.sim_manager import CachedHaloCatalog \n"
-                ">>> halocat = CachedHaloCatalog("+args_msg+")\n"
+                ">>> halocat = CachedHaloCatalog(" + args_msg + ")\n"
                 ">>> particles = halocat.ptcl_table \n\n"
                 "Mock observable functions such as the galaxy-galaxy lensing signal \n"
                 "can now be computed for mock galaxies populated into this simulation.\n\n"
@@ -606,9 +689,10 @@ class DownloadManager(object):
                 "you must update both the ``fname`` metadata of the hdf5 file \n"
                 "as well as the``fname`` column of the corresponding entry in the log. \n"
                 "You can accomplish this with the ``update_cached_file_location``"
-                "method \nof the PtclTableCache class.\n\n")
+                "method \nof the PtclTableCache class.\n\n"
+            )
 
-        if 'initial_download_script_msg' in list(kwargs.keys()):
+        if "initial_download_script_msg" in list(kwargs.keys()):
             return new_log_entry
         else:
             print(success_msg)
@@ -631,29 +715,33 @@ class DownloadManager(object):
             Web location from which the original halo catalogs were downloaded.
         """
         try:
-            simname = kwargs['simname']
-            halo_finder = kwargs['halo_finder']
+            simname = kwargs["simname"]
+            halo_finder = kwargs["halo_finder"]
         except KeyError:
-            raise HalotoolsError("\nDownloadManager._orig_halo_table_web_location method "
-                "must be called with ``simname`` and ``halo_finder`` arguments")
+            raise HalotoolsError(
+                "\nDownloadManager._orig_halo_table_web_location method "
+                "must be called with ``simname`` and ``halo_finder`` arguments"
+            )
 
-        if simname == 'multidark':
-            return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
-        elif simname == 'bolshoi':
-            if halo_finder == 'rockstar':
-                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
-            elif halo_finder == 'bdm':
-                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
-        elif simname == 'bolplanck':
-            return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
-        elif simname == 'consuelo':
-            return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
+        if simname == "multidark":
+            return "http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/"
+        elif simname == "bolshoi":
+            if halo_finder == "rockstar":
+                return "http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/"
+            elif halo_finder == "bdm":
+                return "http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/"
+        elif simname == "bolplanck":
+            return "http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/"
+        elif simname == "consuelo":
+            return "http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/"
         else:
-            raise HalotoolsError("Input simname %s and halo_finder %s do not "
-                "have Halotools-recognized web locations" % (simname, halo_finder))
+            raise HalotoolsError(
+                "Input simname %s and halo_finder %s do not "
+                "have Halotools-recognized web locations" % (simname, halo_finder)
+            )
 
     def _get_scale_factor_substring(self, fname):
-        """ Method extracts the portion of the Rockstar hlist fname
+        """Method extracts the portion of the Rockstar hlist fname
         that contains the scale factor of the snapshot.
 
         Parameters
@@ -674,14 +762,13 @@ class DownloadManager(object):
         These assumptions are valid for all catalogs currently on the hipacc website.
 
         """
-        first_index = fname.index('_')+1
-        last_index = fname.index('.', fname.index('.')+1)
+        first_index = fname.index("_") + 1
+        last_index = fname.index(".", fname.index(".") + 1)
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
     def _closest_fname(self, filename_list, redshift):
-        """
-        """
+        """ """
 
         if custom_len(filename_list) == 0:
             msg = "The _closest_fname method was passed an empty filename_list"
@@ -690,7 +777,7 @@ class DownloadManager(object):
         if redshift <= -1:
             raise ValueError("redshift of <= -1 is unphysical")
         else:
-            input_scale_factor = 1./(1.+redshift)
+            input_scale_factor = 1.0 / (1.0 + redshift)
 
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
@@ -703,18 +790,20 @@ class DownloadManager(object):
 
         # Now use the array utils module to determine
         # which scale factor is the closest
-        input_scale_factor = 1./(1. + redshift)
+        input_scale_factor = 1.0 / (1.0 + redshift)
         idx_closest_catalog = find_idx_nearest_val(
-            scale_factor_list, input_scale_factor)
+            scale_factor_list, input_scale_factor
+        )
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
         output_fname = filename_list[idx_closest_catalog]
 
-        closest_available_redshift = (1./closest_scale_factor) - 1
+        closest_available_redshift = (1.0 / closest_scale_factor) - 1
 
         return output_fname, closest_available_redshift
 
-    def _closest_catalog_on_web(self, catalog_type,
-            simname, desired_redshift, **kwargs):
+    def _closest_catalog_on_web(
+        self, catalog_type, simname, desired_redshift, **kwargs
+    ):
         """
         Parameters
         ----------
@@ -764,62 +853,67 @@ class DownloadManager(object):
         >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
         """
-        if 'redshift' in list(kwargs.keys()):
-            msg = ("\nThe correct argument to use to specify the redshift \n"
+        if "redshift" in list(kwargs.keys()):
+            msg = (
+                "\nThe correct argument to use to specify the redshift \n"
                 "you are searching for is with the ``desired_redshift`` keyword, \n"
-                "not the ``redshift`` keyword.\n")
+                "not the ``redshift`` keyword.\n"
+            )
             raise HalotoolsError(msg)
 
         try:
-            assert catalog_type in ('particles', 'halos')
+            assert catalog_type in ("particles", "halos")
         except AssertionError:
-            msg = ("Input ``catalog_type`` must be either ``particles`` or ``halos``")
+            msg = "Input ``catalog_type`` must be either ``particles`` or ``halos``"
             raise HalotoolsError(msg)
 
-        if catalog_type is 'halos':
+        if catalog_type is "halos":
             try:
-                halo_finder = kwargs['halo_finder']
+                halo_finder = kwargs["halo_finder"]
             except KeyError:
-                raise HalotoolsError("\nIf input catalog_type is ``halos``, "
-                    "must pass ``halo_finder`` argument")
+                raise HalotoolsError(
+                    "\nIf input catalog_type is ``halos``, "
+                    "must pass ``halo_finder`` argument"
+                )
         else:
-            if 'halo_finder' in list(kwargs.keys()):
-                warn("There is no need to specify a halo-finder "
-                    "when requesting particle data")
+            if "halo_finder" in list(kwargs.keys()):
+                warn(
+                    "There is no need to specify a halo-finder "
+                    "when requesting particle data"
+                )
 
         if simname not in supported_sims.supported_sim_list:
             raise HalotoolsError(unsupported_simname_msg % simname)
 
         try:
-            version_name = kwargs['version_name']
+            version_name = kwargs["version_name"]
         except KeyError:
             version_name = sim_defaults.default_version_name
 
         try:
-            ptcl_version_name = kwargs['ptcl_version_name']
+            ptcl_version_name = kwargs["ptcl_version_name"]
         except KeyError:
             ptcl_version_name = sim_defaults.default_ptcl_version_name
 
-        if catalog_type is 'particles':
-            filename_list = (
-                self._ptcl_tables_available_for_download(simname=simname,
-                    version_name=ptcl_version_name)
-                )
-        elif catalog_type is 'halos':
-            filename_list = (
-                self._processed_halo_tables_available_for_download(simname=simname,
-                    halo_finder=halo_finder, version_name=version_name)
-                )
-
-        output_fname, actual_redshift = (
-            self._closest_fname(filename_list, desired_redshift)
+        if catalog_type is "particles":
+            filename_list = self._ptcl_tables_available_for_download(
+                simname=simname, version_name=ptcl_version_name
             )
+        elif catalog_type is "halos":
+            filename_list = self._processed_halo_tables_available_for_download(
+                simname=simname, halo_finder=halo_finder, version_name=version_name
+            )
+
+        output_fname, actual_redshift = self._closest_fname(
+            filename_list, desired_redshift
+        )
 
         return output_fname, actual_redshift
 
-    def _ptcl_tables_available_for_download(self,
-            version_name=sim_defaults.default_ptcl_version_name, **kwargs):
-        """ Method searches the appropriate web location and
+    def _ptcl_tables_available_for_download(
+        self, version_name=sim_defaults.default_ptcl_version_name, **kwargs
+    ):
+        """Method searches the appropriate web location and
         returns a list of the filenames of all reduced
         halo catalog binaries processed by Halotools
         that are available for download.
@@ -848,7 +942,7 @@ class DownloadManager(object):
 
         """
         try:
-            simname = kwargs['simname']
+            simname = kwargs["simname"]
             if simname not in supported_sims.supported_sim_list:
                 raise HalotoolsError(unsupported_simname_msg % simname)
         except KeyError:
@@ -857,23 +951,23 @@ class DownloadManager(object):
         baseurl = sim_defaults.ptcl_tables_webloc
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
-        for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urllib.parse.urlparse(a['href']).path)
-            if dirpath and dirpath[0] != '/':
-                simloclist.append(baseurl + '/' + dirpath)
+        for a in soup.find_all("a", href=True):
+            dirpath = posixpath.dirname(urllib.parse.urlparse(a["href"]).path)
+            if dirpath and dirpath[0] != "/":
+                simloclist.append(baseurl + "/" + dirpath)
 
         catlist = []
         for simloc in simloclist:
             soup = BeautifulSoup(requests.get(simloc).text)
-            for a in soup.find_all('a'):
-                catlist.append(simloc + '/' + a['href'])
+            for a in soup.find_all("a"):
+                catlist.append(simloc + "/" + a["href"])
 
         file_pattern = version_name
-        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*.hdf5')
+        all_ptcl_tables = fnmatch.filter(catlist, "*" + file_pattern + "*.hdf5")
 
-        if 'simname' in list(kwargs.keys()):
-            simname = kwargs['simname']
-            file_pattern = '*'+simname+'*'
+        if "simname" in list(kwargs.keys()):
+            simname = kwargs["simname"]
+            file_pattern = "*" + simname + "*"
             output = fnmatch.filter(all_ptcl_tables, file_pattern)
         else:
             output = all_ptcl_tables
@@ -881,7 +975,7 @@ class DownloadManager(object):
         return output
 
     def _processed_halo_tables_available_for_download(self, **kwargs):
-        """ Method searches the appropriate web location and
+        """Method searches the appropriate web location and
         returns a list of the filenames of all reduced
         halo catalog binaries processed by Halotools
         that are available for download.
@@ -918,57 +1012,57 @@ class DownloadManager(object):
 
         """
         try:
-            simname = kwargs['simname']
+            simname = kwargs["simname"]
             if simname not in supported_sims.supported_sim_list:
                 raise HalotoolsError(unsupported_simname_msg % simname)
         except KeyError:
             pass
 
         try:
-            version_name = kwargs['version_name']
+            version_name = kwargs["version_name"]
         except KeyError:
             version_name = sim_defaults.default_version_name
 
         baseurl = sim_defaults.processed_halo_tables_webloc
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
-        for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urllib.parse.urlparse(a['href']).path)
-            if dirpath and dirpath[0] != '/':
-                simloclist.append(baseurl + '/' + dirpath)
+        for a in soup.find_all("a", href=True):
+            dirpath = posixpath.dirname(urllib.parse.urlparse(a["href"]).path)
+            if dirpath and dirpath[0] != "/":
+                simloclist.append(baseurl + "/" + dirpath)
 
         halocatloclist = []
         for simloc in simloclist:
             soup = BeautifulSoup(requests.get(simloc).text)
-            for a in soup.find_all('a', href=True):
-                dirpath = posixpath.dirname(urllib.parse.urlparse(a['href']).path)
-                if dirpath and dirpath[0] != '/':
-                    halocatloclist.append(simloc + '/' + dirpath)
+            for a in soup.find_all("a", href=True):
+                dirpath = posixpath.dirname(urllib.parse.urlparse(a["href"]).path)
+                if dirpath and dirpath[0] != "/":
+                    halocatloclist.append(simloc + "/" + dirpath)
 
         catlist = []
         for halocatdir in halocatloclist:
             soup = BeautifulSoup(requests.get(halocatdir).text)
-            for a in soup.find_all('a'):
-                catlist.append(halocatdir + '/' + a['href'])
+            for a in soup.find_all("a"):
+                catlist.append(halocatdir + "/" + a["href"])
 
-        file_pattern = version_name + '.hdf5'
-        all_halocats = fnmatch.filter(catlist, '*'+file_pattern)
+        file_pattern = version_name + ".hdf5"
+        all_halocats = fnmatch.filter(catlist, "*" + file_pattern)
 
         # all_halocats a list of all pre-processed catalogs on the web
         # Now we apply our filter, if applicable
 
-        if ('simname' in list(kwargs.keys())) & ('halo_finder' in list(kwargs.keys())):
-            simname = kwargs['simname']
-            halo_finder = kwargs['halo_finder']
-            file_pattern = '*'+simname+'/'+halo_finder+'/*' + file_pattern
+        if ("simname" in list(kwargs.keys())) & ("halo_finder" in list(kwargs.keys())):
+            simname = kwargs["simname"]
+            halo_finder = kwargs["halo_finder"]
+            file_pattern = "*" + simname + "/" + halo_finder + "/*" + file_pattern
             output = fnmatch.filter(all_halocats, file_pattern)
-        elif 'simname' in list(kwargs.keys()):
-            simname = kwargs['simname']
-            file_pattern = '*'+simname+'/*' + file_pattern
+        elif "simname" in list(kwargs.keys()):
+            simname = kwargs["simname"]
+            file_pattern = "*" + simname + "/*" + file_pattern
             output = fnmatch.filter(all_halocats, file_pattern)
-        elif 'halo_finder' in list(kwargs.keys()):
-            halo_finder = kwargs['halo_finder']
-            file_pattern = '*/' + halo_finder + '/*' + file_pattern
+        elif "halo_finder" in list(kwargs.keys()):
+            halo_finder = kwargs["halo_finder"]
+            file_pattern = "*/" + halo_finder + "/*" + file_pattern
             output = fnmatch.filter(all_halocats, file_pattern)
         else:
             output = all_halocats
