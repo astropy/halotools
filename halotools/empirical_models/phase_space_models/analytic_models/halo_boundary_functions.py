@@ -62,15 +62,6 @@ def density_threshold(cosmology, redshift, mdef):
 
     """
 
-    try:
-        assert isinstance(cosmology, astropy_cosmology_obj.FLRW)
-    except AssertionError:
-        msg = (
-            "\nYour input ``cosmology`` must be an instance of "
-            "`~astropy.cosmology.FLRW`\n"
-        )
-        raise HalotoolsError(msg)
-
     mdef_msg = (
         "\nYour input mdef = ``%s`` is not recognized.\n\n"
         "The string formatting of the ``mdef`` input must be one of the following:\n"
@@ -98,8 +89,12 @@ def density_threshold(cosmology, redshift, mdef):
         if mdef != "vir":
             raise HalotoolsError(mdef_msg)
 
-    rho_crit = cosmology.critical_density(redshift)
-    rho_crit = rho_crit.to(u.Msun / u.Mpc**3).value / cosmology.h**2
+    try:
+        rho_crit = cosmology.critical_density(redshift)
+        rho_crit = rho_crit.to(u.Msun / u.Mpc**3).value / cosmology.h**2
+    except AttributeError:
+        msg = "Input cosmology must be astropy.cosmology object"
+        raise HalotoolsError(msg)
 
     if mdef[-1] == "c":
         delta = int(mdef[:-1])
@@ -148,15 +143,6 @@ def delta_vir(cosmology, redshift):
     density_threshold: The threshold density for a given mass definition.
 
     """
-    try:
-        assert isinstance(cosmology, astropy_cosmology_obj.FLRW)
-    except AssertionError:
-        msg = (
-            "\nYour input ``cosmology`` must be an instance of "
-            "`~astropy.cosmology.FLRW`\n"
-        )
-        raise HalotoolsError(msg)
-
     x = cosmology.Om(redshift) - 1.0
     delta = 18 * np.pi**2 + 82.0 * x - 39.0 * x**2
 
@@ -195,15 +181,6 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
     halo_radius_to_halo_mass: Spherical overdensity radius from mass.
 
     """
-    try:
-        assert isinstance(cosmology, astropy_cosmology_obj.FLRW)
-    except AssertionError:
-        msg = (
-            "\nYour input ``cosmology`` must be an instance of "
-            "`~astropy.cosmology.FLRW`\n"
-        )
-        raise HalotoolsError(msg)
-
     rho = density_threshold(cosmology, redshift, mdef)
     radius = (mass * 3.0 / 4.0 / np.pi / rho) ** (1.0 / 3.0)
 
@@ -238,15 +215,6 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
         Total halo mass in :math:`M_{\odot}/h`; has the same dimensions as the input ``radius``.
 
     """
-    try:
-        assert isinstance(cosmology, astropy_cosmology_obj.FLRW)
-    except AssertionError:
-        msg = (
-            "\nYour input ``cosmology`` must be an instance of "
-            "`~astropy.cosmology.FLRW`\n"
-        )
-        raise HalotoolsError(msg)
-
     rho = density_threshold(cosmology, redshift, mdef)
     mass = 4.0 / 3.0 * np.pi * rho * radius**3
     return mass
