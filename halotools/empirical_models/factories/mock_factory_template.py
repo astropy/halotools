@@ -7,8 +7,6 @@ from __future__ import absolute_import
 import numpy as np
 from multiprocessing import cpu_count
 from copy import copy
-import six
-from abc import ABCMeta, abstractmethod
 from astropy.table import Table
 
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
@@ -18,6 +16,7 @@ import weakref
 
 try:
     from ... import mock_observables
+
     HAS_MOCKOBS = True
 except ImportError:
     HAS_MOCKOBS = False
@@ -26,13 +25,12 @@ from ...utils.array_utils import randomly_downsample_data
 from ...custom_exceptions import HalotoolsError
 
 
-__all__ = ['MockFactory']
-__author__ = ['Andrew Hearin']
+__all__ = ["MockFactory"]
+__author__ = ["Andrew Hearin"]
 
 
-@six.add_metaclass(ABCMeta)
 class MockFactory(object):
-    """ Abstract base class responsible for populating a simulation
+    """Abstract base class responsible for populating a simulation
     with a synthetic galaxy population.
 
     `MockFactory` is an abstract base class, and cannot be instantiated.
@@ -54,21 +52,23 @@ class MockFactory(object):
 
         """
 
-        required_kwargs = ['model']
+        required_kwargs = ["model"]
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         # Make any cuts on the halo catalog requested by the model
         try:
-            halocat = kwargs['halocat']
-            self.model = kwargs['model']
+            halocat = kwargs["halocat"]
+            self.model = kwargs["model"]
         except KeyError:
-            msg = ("\n``halocat`` and ``model`` are required ``MockFactory`` arguments\n")
+            msg = "\n``halocat`` and ``model`` are required ``MockFactory`` arguments\n"
             raise HalotoolsError(msg)
         for key in list(halocat.__dict__.keys()):
             setattr(self, key, halocat.__dict__[key])
 
         try:
-            self.ptcl_table = halocat.ptcl_table  # pre-retrieve the particles from disk, if available
+            self.ptcl_table = (
+                halocat.ptcl_table
+            )  # pre-retrieve the particles from disk, if available
         except:
             pass
 
@@ -77,11 +77,12 @@ class MockFactory(object):
         except:
             pass
 
-
         # Create a list of halo properties that will be inherited by the mock galaxies
-        self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
+        self.additional_haloprops = copy(
+            model_defaults.default_haloprop_list_inherited_by_mock
+        )
 
-        if hasattr(self.model, '_haloprop_list'):
+        if hasattr(self.model, "_haloprop_list"):
             self.additional_haloprops.extend(self.model._haloprop_list)
         # Eliminate any possible redundancies
         self.additional_haloprops = list(set(self.additional_haloprops))
@@ -90,14 +91,13 @@ class MockFactory(object):
 
     @property
     def model(self):
-        """ model, a weak reference to the model because mock is always a member of model """
+        """model, a weak reference to the model because mock is always a member of model"""
         return self._model()
 
     @model.setter
     def model(self, value):
         self._model = weakref.ref(value)
 
-    @abstractmethod
     def populate(self, **kwargs):
         """
         Method populating halos with mock galaxies.
@@ -183,12 +183,13 @@ class MockFactory(object):
         >>> model_instance.mock.populate()
 
         """
-        raise NotImplementedError("All subclasses of MockFactory"
-        " must include a populate method")
+        raise NotImplementedError(
+            "All subclasses of MockFactory" " must include a populate method"
+        )
 
     @property
     def number_density(self):
-        """ Comoving number density of the mock galaxy catalog.
+        """Comoving number density of the mock galaxy catalog.
 
         Returns
         --------
@@ -198,7 +199,7 @@ class MockFactory(object):
         """
         ngals = len(self.galaxy_table)
         comoving_volume = np.prod(self.Lbox)
-        return ngals/float(comoving_volume)
+        return ngals / float(comoving_volume)
 
     def compute_galaxy_clustering(self, include_crosscorr=False, **kwargs):
         """
@@ -275,54 +276,79 @@ class MockFactory(object):
         see the `~halotools.mock_observables.tpcf` documentation.
         """
         if HAS_MOCKOBS is False:
-            msg = ("\nThe compute_galaxy_clustering method is only available "
+            msg = (
+                "\nThe compute_galaxy_clustering method is only available "
                 " if the mock_observables sub-package has been compiled.\n"
                 "You are likely encountering this error because you are using \nyour Halotools repository "
                 "as your working directory."
-                   )
+            )
             raise HalotoolsError(msg)
 
         try:
-            num_threads = kwargs['num_threads']
+            num_threads = kwargs["num_threads"]
         except KeyError:
             num_threads = cpu_count()
 
-        if 'rbins' in kwargs:
-            rbins = kwargs['rbins']
+        if "rbins" in kwargs:
+            rbins = kwargs["rbins"]
         else:
             rbins = model_defaults.default_rbins
-        rbin_centers = (rbins[1:] + rbins[0:-1])/2.
+        rbin_centers = (rbins[1:] + rbins[0:-1]) / 2.0
         rmax = max(rbins)
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
-        if len(self.galaxy_table['x'][mask]) == 0:
+        if len(self.galaxy_table["x"][mask]) == 0:
             msg = "Zero mock galaxies pass your cuts"
             raise HalotoolsError(msg)
 
         if include_crosscorr is False:
-            pos = three_dim_pos_bundle(table=self.galaxy_table,
-                key1='x', key2='y', key3='z', mask=mask, return_complement=False)
+            pos = three_dim_pos_bundle(
+                table=self.galaxy_table,
+                key1="x",
+                key2="y",
+                key3="z",
+                mask=mask,
+                return_complement=False,
+            )
             clustering = mock_observables.tpcf(
-                pos, rbins, period=self.Lbox, num_threads=num_threads,
-                approx_cell1_size=[rmax, rmax, rmax])
+                pos,
+                rbins,
+                period=self.Lbox,
+                num_threads=num_threads,
+                approx_cell1_size=[rmax, rmax, rmax],
+            )
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
-            if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
-                msg = ("All mock galaxies pass your cut.\n"
+            if len(self.galaxy_table["x"][mask]) == len(self.galaxy_table["x"]):
+                msg = (
+                    "All mock galaxies pass your cut.\n"
                     "If this result is expected, you should not call the compute_galaxy_clustering"
-                    "method with the include_complement keyword")
+                    "method with the include_complement keyword"
+                )
                 raise HalotoolsError(msg)
-            pos, pos2 = three_dim_pos_bundle(table=self.galaxy_table,
-                key1='x', key2='y', key3='z', mask=mask, return_complement=True)
+            pos, pos2 = three_dim_pos_bundle(
+                table=self.galaxy_table,
+                key1="x",
+                key2="y",
+                key3="z",
+                mask=mask,
+                return_complement=True,
+            )
             xi11, xi12, xi22 = mock_observables.tpcf(
-                sample1=pos, rbins=rbins, sample2=pos2,
-                period=self.Lbox, num_threads=num_threads,
-                approx_cell1_size=[rmax, rmax, rmax])
+                sample1=pos,
+                rbins=rbins,
+                sample2=pos2,
+                period=self.Lbox,
+                num_threads=num_threads,
+                approx_cell1_size=[rmax, rmax, rmax],
+            )
             return rbin_centers, xi11, xi12, xi22
 
-    def compute_galaxy_matter_cross_clustering(self, include_complement=False, seed=None, **kwargs):
+    def compute_galaxy_matter_cross_clustering(
+        self, include_complement=False, seed=None, **kwargs
+    ):
         """
         Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function.
 
@@ -399,11 +425,12 @@ class MockFactory(object):
         see the `~halotools.mock_observables.tpcf` documentation.
         """
         if HAS_MOCKOBS is False:
-            msg = ("\nThe compute_galaxy_matter_cross_clustering method is only available "
+            msg = (
+                "\nThe compute_galaxy_matter_cross_clustering method is only available "
                 " if the mock_observables sub-package has been compiled\n"
                 "You are likely encountering this error because you are using \nyour Halotools repository "
                 "as your working directory."
-                   )
+            )
             raise HalotoolsError(msg)
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
@@ -412,61 +439,93 @@ class MockFactory(object):
         else:
             ptcl_table = self.ptcl_table
 
-        ptcl_pos = three_dim_pos_bundle(table=ptcl_table,
-            key1='x', key2='y', key3='z')
+        ptcl_pos = three_dim_pos_bundle(table=ptcl_table, key1="x", key2="y", key3="z")
 
         try:
-            num_threads = kwargs['num_threads']
+            num_threads = kwargs["num_threads"]
         except KeyError:
             num_threads = cpu_count()
 
-        if 'rbins' in kwargs:
-            rbins = kwargs['rbins']
+        if "rbins" in kwargs:
+            rbins = kwargs["rbins"]
         else:
             rbins = model_defaults.default_rbins
-        rbin_centers = (rbins[1:] + rbins[0:-1])/2.
+        rbin_centers = (rbins[1:] + rbins[0:-1]) / 2.0
         rmax = max(rbins)
 
         try:
-            f = kwargs['mask_function']
+            f = kwargs["mask_function"]
             mask = f(self.galaxy_table)
         except KeyError:
             mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
-        if len(self.galaxy_table['x'][mask]) == 0:
+        if len(self.galaxy_table["x"][mask]) == 0:
             msg = "Zero mock galaxies pass your cut"
             raise HalotoolsError(msg)
 
         if include_complement is False:
-            pos = three_dim_pos_bundle(table=self.galaxy_table,
-                key1='x', key2='y', key3='z', mask=mask, return_complement=False)
+            pos = three_dim_pos_bundle(
+                table=self.galaxy_table,
+                key1="x",
+                key2="y",
+                key3="z",
+                mask=mask,
+                return_complement=False,
+            )
             clustering = mock_observables.tpcf(
-                sample1=pos, rbins=rbins, sample2=ptcl_pos,
-                period=self.Lbox, num_threads=num_threads, do_auto=False,
-                approx_cell1_size=[rmax, rmax, rmax])
+                sample1=pos,
+                rbins=rbins,
+                sample2=ptcl_pos,
+                period=self.Lbox,
+                num_threads=num_threads,
+                do_auto=False,
+                approx_cell1_size=[rmax, rmax, rmax],
+            )
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
-            if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
-                msg = ("All mock galaxies pass your cut.\n"
+            if len(self.galaxy_table["x"][mask]) == len(self.galaxy_table["x"]):
+                msg = (
+                    "All mock galaxies pass your cut.\n"
                     "If this result is expected, you should not call the compute_galaxy_clustering"
-                    "method with the include_complement keyword")
+                    "method with the include_complement keyword"
+                )
                 raise HalotoolsError(msg)
-            pos, pos2 = three_dim_pos_bundle(table=self.galaxy_table,
-                key1='x', key2='y', key3='z', mask=mask, return_complement=True)
+            pos, pos2 = three_dim_pos_bundle(
+                table=self.galaxy_table,
+                key1="x",
+                key2="y",
+                key3="z",
+                mask=mask,
+                return_complement=True,
+            )
             clustering = mock_observables.tpcf(
-                sample1=pos, rbins=rbins, sample2=ptcl_pos,
-                period=self.Lbox, num_threads=num_threads, do_auto=False,
-                approx_cell1_size=[rmax, rmax, rmax])
+                sample1=pos,
+                rbins=rbins,
+                sample2=ptcl_pos,
+                period=self.Lbox,
+                num_threads=num_threads,
+                do_auto=False,
+                approx_cell1_size=[rmax, rmax, rmax],
+            )
             clustering2 = mock_observables.tpcf(
-                sample1=pos2, rbins=rbins, sample2=ptcl_pos,
-                period=self.Lbox, num_threads=num_threads, do_auto=False,
-                approx_cell1_size=[rmax, rmax, rmax])
+                sample1=pos2,
+                rbins=rbins,
+                sample2=ptcl_pos,
+                period=self.Lbox,
+                num_threads=num_threads,
+                do_auto=False,
+                approx_cell1_size=[rmax, rmax, rmax],
+            )
             return rbin_centers, clustering, clustering2
 
-    def compute_fof_group_ids(self, zspace=True,
-            b_perp=model_defaults.default_b_perp,
-            b_para=model_defaults.default_b_para, **kwargs):
+    def compute_fof_group_ids(
+        self,
+        zspace=True,
+        b_perp=model_defaults.default_b_perp,
+        b_para=model_defaults.default_b_para,
+        **kwargs
+    ):
         """
         Method computes the friends-of-friends group IDs of the
         mock galaxy catalog after (optionally) placing the mock into redshift space.
@@ -506,35 +565,39 @@ class MockFactory(object):
 
         """
         if HAS_MOCKOBS is False:
-            msg = ("\nThe compute_fof_group_ids method is only available "
+            msg = (
+                "\nThe compute_fof_group_ids method is only available "
                 " if the mock_observables sub-package has been compiled\n"
                 "You are likely encountering this error because you are using \nyour Halotools repository "
                 "as your working directory."
-                   )
+            )
             raise HalotoolsError(msg)
 
         try:
-            num_threads = kwargs['num_threads']
+            num_threads = kwargs["num_threads"]
         except KeyError:
             num_threads = cpu_count()
 
-        x = self.galaxy_table['x']
-        y = self.galaxy_table['y']
-        z = self.galaxy_table['z']
+        x = self.galaxy_table["x"]
+        y = self.galaxy_table["y"]
+        z = self.galaxy_table["z"]
         if zspace is True:
-            z += self.galaxy_table['vz']/100.
+            z += self.galaxy_table["vz"] / 100.0
             z = model_helpers.enforce_periodicity_of_box(z, self.Lbox[2])
         pos = np.vstack((x, y, z)).T
 
-        group_finder = mock_observables.FoFGroups(positions=pos,
-            b_perp=b_perp, b_para=b_para,
-            Lbox=self.Lbox, num_threads=num_threads)
+        group_finder = mock_observables.FoFGroups(
+            positions=pos,
+            b_perp=b_perp,
+            b_para=b_para,
+            Lbox=self.Lbox,
+            num_threads=num_threads,
+        )
 
         return group_finder.group_ids
 
     @property
     def satellite_fraction(self):
-        """ Fraction of mock galaxies that are satellites.
-        """
-        satmask = self.galaxy_table['gal_type'] != 'centrals'
+        """Fraction of mock galaxies that are satellites."""
+        satmask = self.galaxy_table["gal_type"] != "centrals"
         return len(self.galaxy_table[satmask]) / float(len(self.galaxy_table))

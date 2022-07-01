@@ -6,8 +6,7 @@ in all HOD-style models of the galaxy-halo connection.
 
 import numpy as np
 from scipy.special import pdtrik
-import six
-from abc import ABCMeta
+
 from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults, model_helpers
@@ -18,9 +17,8 @@ from ...custom_exceptions import HalotoolsError
 __all__ = ("OccupationComponent",)
 
 
-@six.add_metaclass(ABCMeta)
 class OccupationComponent(object):
-    """ Abstract base class of any occupation model.
+    """Abstract base class of any occupation model.
     Functionality is mostly trivial.
     The sole purpose of the base class is to
     standardize the attributes and methods
@@ -115,7 +113,7 @@ class OccupationComponent(object):
         )
 
     def mc_occupation(self, seed=None, **kwargs):
-        """ Method to generate Monte Carlo realizations of the abundance of galaxies.
+        """Method to generate Monte Carlo realizations of the abundance of galaxies.
 
         Parameters
         ----------
@@ -164,7 +162,7 @@ class OccupationComponent(object):
     def _nearest_integer_distribution(
         self, first_occupation_moment, seed=None, **kwargs
     ):
-        """ Nearest-integer distribution used to draw Monte Carlo occupation statistics
+        """Nearest-integer distribution used to draw Monte Carlo occupation statistics
         for central-like populations with only permissible galaxy per halo.
 
         Parameters
@@ -190,7 +188,7 @@ class OccupationComponent(object):
         return result
 
     def _poisson_distribution(self, first_occupation_moment, seed=None, **kwargs):
-        """ Poisson distribution used to draw Monte Carlo occupation statistics
+        """Poisson distribution used to draw Monte Carlo occupation statistics
         for satellite-like populations in which per-halo abundances are unbounded.
 
         Parameters
@@ -221,7 +219,7 @@ class OccupationComponent(object):
         return result
 
     def _weighted_nearest_integer(self, first_occupation_moment, seed=None, **kwargs):
-        """ Non-Poisson distribution for satellite occupation statistics.
+        """Non-Poisson distribution for satellite occupation statistics.
         If <Nsat> = i + r where r is the remainder, then the Monte Carlo realization
         will produce Nsat = i with probability r, and Nsat = i + 1 with probability 1-r.
 
