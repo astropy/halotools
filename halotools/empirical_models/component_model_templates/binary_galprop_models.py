@@ -5,8 +5,6 @@ used to map a binary-valued galaxy property to a halo catalog.
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
-import six
-from abc import ABCMeta
 from astropy.utils.misc import NumpyRNGContext
 
 from .. import model_defaults
@@ -15,20 +13,19 @@ from .. import model_helpers
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ('BinaryGalpropModel', 'BinaryGalpropInterpolModel')
-__author__ = ('Andrew Hearin', )
+__all__ = ("BinaryGalpropModel", "BinaryGalpropInterpolModel")
+__author__ = ("Andrew Hearin",)
 
 
-@six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(object):
     r"""
     Container class for any component model of a binary-valued galaxy property.
 
     """
 
-    def __init__(self,
-            prim_haloprop_key=model_defaults.default_binary_galprop_haloprop,
-            **kwargs):
+    def __init__(
+        self, prim_haloprop_key=model_defaults.default_binary_galprop_haloprop, **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -41,31 +38,34 @@ class BinaryGalpropModel(object):
             Default is set in the `~halotools.empirical_models.model_defaults` module.
 
         """
-        required_kwargs = ['galprop_name']
+        required_kwargs = ["galprop_name"]
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.prim_haloprop_key = prim_haloprop_key
 
-        if 'sec_haloprop_key' in list(kwargs.keys()):
-            self.sec_haloprop_key = kwargs['sec_haloprop_key']
+        if "sec_haloprop_key" in list(kwargs.keys()):
+            self.sec_haloprop_key = kwargs["sec_haloprop_key"]
 
         # Enforce the requirement that sub-classes have been configured properly
-        required_method_name = 'mean_'+self.galprop_name+'_fraction'
+        required_method_name = "mean_" + self.galprop_name + "_fraction"
         if not hasattr(self, required_method_name):
-            raise HalotoolsError("Any sub-class of BinaryGalpropModel must "
-                "implement a method named %s " % required_method_name)
+            raise HalotoolsError(
+                "Any sub-class of BinaryGalpropModel must "
+                "implement a method named %s " % required_method_name
+            )
 
-        setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
+        setattr(self, "mc_" + self.galprop_name, self._mc_galprop)
 
-        self._mock_generation_calling_sequence = ['mc_'+self.galprop_name]
-        self._methods_to_inherit = (
-            ['mean_'+self.galprop_name+'_fraction',
-            'mc_'+self.galprop_name])
+        self._mock_generation_calling_sequence = ["mc_" + self.galprop_name]
+        self._methods_to_inherit = [
+            "mean_" + self.galprop_name + "_fraction",
+            "mc_" + self.galprop_name,
+        ]
 
         self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
     def _mc_galprop(self, seed=None, **kwargs):
-        r""" Return a Monte Carlo realization of the galaxy property
+        r"""Return a Monte Carlo realization of the galaxy property
         based on draws from a nearest-integer distribution.
 
         Parameters
@@ -96,13 +96,13 @@ class BinaryGalpropModel(object):
             of the galaxies living in the input halos.
         """
 
-        mean_func = getattr(self, 'mean_'+self.galprop_name+'_fraction')
+        mean_func = getattr(self, "mean_" + self.galprop_name + "_fraction")
         mean_galprop_fraction = mean_func(**kwargs)
         with NumpyRNGContext(seed):
             mc_generator = np.random.random(custom_len(mean_galprop_fraction))
         result = np.where(mc_generator < mean_galprop_fraction, True, False)
-        if 'table' in kwargs:
-            kwargs['table'][self.galprop_name][:] = result
+        if "table" in kwargs:
+            kwargs["table"][self.galprop_name][:] = result
         return result
 
 
@@ -122,8 +122,14 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     """
 
-    def __init__(self, galprop_abscissa, galprop_ordinates,
-            logparam=True, interpol_method='spline', **kwargs):
+    def __init__(
+        self,
+        galprop_abscissa,
+        galprop_ordinates,
+        logparam=True,
+        interpol_method="spline",
+        **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -199,12 +205,14 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         .. automethod:: _mean_galprop_fraction
         """
         try:
-            galprop_name = kwargs['galprop_name']
+            galprop_name = kwargs["galprop_name"]
         except KeyError:
-            raise HalotoolsError("\nAll sub-classes of BinaryGalpropInterpolModel must pass "
-                "a ``galprop_name`` keyword argument to the constructor\n")
+            raise HalotoolsError(
+                "\nAll sub-classes of BinaryGalpropInterpolModel must pass "
+                "a ``galprop_name`` keyword argument to the constructor\n"
+            )
 
-        setattr(self, 'mean_'+galprop_name+'_fraction', self._mean_galprop_fraction)
+        setattr(self, "mean_" + galprop_name + "_fraction", self._mean_galprop_fraction)
         super(BinaryGalpropInterpolModel, self).__init__(**kwargs)
 
         self._interpol_method = interpol_method
@@ -217,53 +225,64 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._ordinates = galprop_ordinates
 
         try:
-            self.gal_type = kwargs['gal_type']
+            self.gal_type = kwargs["gal_type"]
         except KeyError:
             pass
 
-        if self._interpol_method == 'spline':
-            if 'input_spline_degree' in list(kwargs.keys()):
-                self._input_spine_degree = kwargs['input_spline_degree']
+        if self._interpol_method == "spline":
+            if "input_spline_degree" in list(kwargs.keys()):
+                self._input_spine_degree = kwargs["input_spline_degree"]
             else:
                 self._input_spline_degree = 3
             scipy_maxdegree = 5
             self._spline_degree = np.min(
-                [scipy_maxdegree, self._input_spline_degree,
-                custom_len(self._abscissa)-1])
+                [
+                    scipy_maxdegree,
+                    self._input_spline_degree,
+                    custom_len(self._abscissa) - 1,
+                ]
+            )
 
-        self._abscissa_key = self.galprop_name+'_abscissa'
+        self._abscissa_key = self.galprop_name + "_abscissa"
         try:
-            self._ordinates_key_prefix = self.gal_type + '_'+self.galprop_name+'_ordinates'
+            self._ordinates_key_prefix = (
+                self.gal_type + "_" + self.galprop_name + "_ordinates"
+            )
         except AttributeError:
-            self._ordinates_key_prefix = self.galprop_name+'_ordinates'
+            self._ordinates_key_prefix = self.galprop_name + "_ordinates"
         self._build_param_dict()
 
-        setattr(self, self.galprop_name+'_abscissa', self._abscissa)
+        setattr(self, self.galprop_name + "_abscissa", self._abscissa)
 
     def _test_abscissa_ordinates(self, galprop_abscissa, galprop_ordinates):
         try:
             assert len(galprop_abscissa) == len(galprop_ordinates)
         except AssertionError:
-            msg = ("\nInput ``galprop_abscissa`` and ``galprop_ordinates`` must have the same length\n")
+            msg = "\nInput ``galprop_abscissa`` and ``galprop_ordinates`` must have the same length\n"
             raise HalotoolsError(msg)
 
         try:
             assert len(set(galprop_abscissa)) == len(galprop_abscissa)
         except AssertionError:
-            msg = ("\nYour input ``galprop_abscissa`` cannot have any repeated values\n")
+            msg = "\nYour input ``galprop_abscissa`` cannot have any repeated values\n"
             raise HalotoolsError(msg)
 
         try:
             assert np.all(galprop_abscissa >= 0)
             assert np.all(galprop_ordinates <= 1)
         except AssertionError:
-            msg = ("\nAll values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive.")
+            msg = "\nAll values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive."
             raise HalotoolsError(msg)
 
     def _build_param_dict(self):
 
-        self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abscissa))]
-        self.param_dict = {key: value for key, value in zip(self._ordinates_keys, self._ordinates)}
+        self._ordinates_keys = [
+            self._ordinates_key_prefix + "_param" + str(i + 1)
+            for i in range(custom_len(self._abscissa))
+        ]
+        self.param_dict = {
+            key: value for key, value in zip(self._ordinates_keys, self._ordinates)
+        }
 
     def _mean_galprop_fraction(self, **kwargs):
         r"""
@@ -286,31 +305,38 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in list(kwargs.keys()):
-            prim_haloprop = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            prim_haloprop = kwargs['prim_haloprop']
+        if "table" in list(kwargs.keys()):
+            prim_haloprop = kwargs["table"][self.prim_haloprop_key]
+        elif "prim_haloprop" in list(kwargs.keys()):
+            prim_haloprop = kwargs["prim_haloprop"]
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``table`` or  ``prim_haloprop``")
+            raise KeyError(
+                "Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``table`` or  ``prim_haloprop``"
+            )
 
         if self._logparam is True:
             prim_haloprop = np.log10(prim_haloprop)
 
         # Update self._abscissa, in case the user has changed it
-        self._abscissa = getattr(self, self.galprop_name+'_abscissa')
+        self._abscissa = getattr(self, self.galprop_name + "_abscissa")
 
-        model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
-        if self._interpol_method == 'polynomial':
+        model_ordinates = [
+            self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys
+        ]
+        if self._interpol_method == "polynomial":
             mean_galprop_fraction = model_helpers.polynomial_from_table(
-                self._abscissa, model_ordinates, prim_haloprop)
-        elif self._interpol_method == 'spline':
+                self._abscissa, model_ordinates, prim_haloprop
+            )
+        elif self._interpol_method == "spline":
             spline_function = model_helpers.custom_spline(
-                    self._abscissa, model_ordinates,
-                    k=self._spline_degree)
+                self._abscissa, model_ordinates, k=self._spline_degree
+            )
             mean_galprop_fraction = spline_function(prim_haloprop)
         else:
-            raise HalotoolsError("Input interpol_method must be 'polynomial' or 'spline'.")
+            raise HalotoolsError(
+                "Input interpol_method must be 'polynomial' or 'spline'."
+            )
 
         # Enforce boundary conditions
         mean_galprop_fraction[mean_galprop_fraction < 0] = 0

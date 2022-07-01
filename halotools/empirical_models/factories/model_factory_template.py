@@ -5,8 +5,6 @@ any composite model of the galaxy-halo connection.
 """
 
 import numpy as np
-import six
-from abc import ABCMeta
 
 
 from .. import model_defaults
@@ -15,31 +13,38 @@ from ...sim_manager import CachedHaloCatalog, FakeSim
 from ...sim_manager import sim_defaults
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ['ModelFactory']
-__author__ = ['Andrew Hearin']
+__all__ = ["ModelFactory"]
+__author__ = ["Andrew Hearin"]
 
 
-inconsistent_redshift_error_msg = ("Inconsistency between the redshift "
+inconsistent_redshift_error_msg = (
+    "Inconsistency between the redshift "
     "already bound to the existing mock = ``%f`` "
     "and the redshift passed as a keyword argument = ``%f``.\n"
-    "You should instantiate a new model object if you wish to switch halo catalogs.")
-inconsistent_simname_error_msg = ("Inconsistency between the simname "
+    "You should instantiate a new model object if you wish to switch halo catalogs."
+)
+inconsistent_simname_error_msg = (
+    "Inconsistency between the simname "
     "already bound to the existing mock = ``%s`` "
     "and the simname passed as a keyword argument = ``%s``.\n"
-    "You should instantiate a new model object if you wish to switch halo catalogs.")
-inconsistent_halo_finder_error_msg = ("Inconsistency between the halo-finder "
+    "You should instantiate a new model object if you wish to switch halo catalogs."
+)
+inconsistent_halo_finder_error_msg = (
+    "Inconsistency between the halo-finder "
     "already bound to the existing mock = ``%s`` "
     "and the halo-finder passed as a keyword argument = ``%s``.\n"
-    "You should instantiate a new model object if you wish to switch halo catalogs.")
-inconsistent_version_name_error_msg = ("Inconsistency between the version_name "
+    "You should instantiate a new model object if you wish to switch halo catalogs."
+)
+inconsistent_version_name_error_msg = (
+    "Inconsistency between the version_name "
     "already bound to the existing mock = ``%s`` "
     "and the version_name passed as a keyword argument = ``%s``.\n"
-    "You should instantiate a new model object if you wish to switch halo catalogs.")
+    "You should instantiate a new model object if you wish to switch halo catalogs."
+)
 
 
-@six.add_metaclass(ABCMeta)
 class ModelFactory(object):
-    r""" Abstract container class used to build
+    r"""Abstract container class used to build
     any composite model of the galaxy-halo connection.
 
     See `~halotools.empirical_models.SubhaloModelFactory` for
@@ -77,18 +82,18 @@ class ModelFactory(object):
         self._input_model_dictionary = input_model_dictionary
 
         try:
-            self.galaxy_selection_func = kwargs['galaxy_selection_func']
+            self.galaxy_selection_func = kwargs["galaxy_selection_func"]
         except KeyError:
             pass
 
         try:
-            self.halo_selection_func = kwargs['halo_selection_func']
+            self.halo_selection_func = kwargs["halo_selection_func"]
         except KeyError:
             pass
 
-    def populate_mock(self, halocat,
-            Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement,
-            **kwargs):
+    def populate_mock(
+        self, halocat, Num_ptcl_requirement=sim_defaults.Num_ptcl_requirement, **kwargs
+    ):
         r"""
         Method used to populate a simulation
         with a Monte Carlo realization of a model.
@@ -217,20 +222,33 @@ class ModelFactory(object):
         :ref:`mock_making_tutorials`
 
         """
-        if hasattr(self, 'redshift'):
+        if hasattr(self, "redshift"):
             if abs(self.redshift - halocat.redshift) > 0.05:
-                raise HalotoolsError("Inconsistency between the model redshift = %.2f"
-                    " and the halocat redshift = %.2f" % (self.redshift, halocat.redshift))
+                raise HalotoolsError(
+                    "Inconsistency between the model redshift = %.2f"
+                    " and the halocat redshift = %.2f"
+                    % (self.redshift, halocat.redshift)
+                )
 
-        mock_factory_init_args = (
-            {'halocat': halocat, 'model': self, 'Num_ptcl_requirement': Num_ptcl_requirement})
+        mock_factory_init_args = {
+            "halocat": halocat,
+            "model": self,
+            "Num_ptcl_requirement": Num_ptcl_requirement,
+        }
         try:
-            mock_factory_init_args['halo_mass_column_key'] = kwargs['halo_mass_column_key']
+            mock_factory_init_args["halo_mass_column_key"] = kwargs[
+                "halo_mass_column_key"
+            ]
         except KeyError:
             pass
         self.mock = self.mock_factory(**mock_factory_init_args)
 
-        additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC', 'seed')
+        additional_potential_kwargs = (
+            "masking_function",
+            "_testing_mode",
+            "enforce_PBC",
+            "seed",
+        )
         mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
         mockpop_kwargs = {key: kwargs[key] for key in mockpop_keys}
         self.mock.populate(**mockpop_kwargs)
@@ -281,6 +299,7 @@ class ModelFactory(object):
         # passing `self` causes a cycle reference when
         # the function is assigned as attributes of self.
         __param_dict__ = self.param_dict
+
         def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
@@ -293,7 +312,9 @@ class ModelFactory(object):
 
         return decorated_func
 
-    def compute_average_galaxy_clustering(self, num_iterations=5, summary_statistic='median', **kwargs):
+    def compute_average_galaxy_clustering(
+        self, num_iterations=5, summary_statistic="median", **kwargs
+    ):
         r"""
         Method repeatedly populates a simulation with a mock galaxy catalog, computes the clustering
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering
@@ -430,23 +451,23 @@ class ModelFactory(object):
         `~halotools.mock_observables.tpcf` after placing a cut on the
         ``galaxy_table``, as demonstrated in :ref:`galaxy_catalog_analysis_tutorial2`.
         """
-        if summary_statistic == 'mean':
+        if summary_statistic == "mean":
             summary_func = np.mean
         else:
             summary_func = np.median
 
         halocat_kwargs = {}
-        if 'simname' in kwargs:
-            halocat_kwargs['simname'] = kwargs['simname']
-        if 'redshift' in kwargs:
-            halocat_kwargs['redshift'] = kwargs['redshift']
-        elif hasattr(self, 'redshift'):
-            halocat_kwargs['redshift'] = self.redshift
-        if 'halo_finder' in kwargs:
-            halocat_kwargs['halo_finder'] = kwargs['halo_finder']
+        if "simname" in kwargs:
+            halocat_kwargs["simname"] = kwargs["simname"]
+        if "redshift" in kwargs:
+            halocat_kwargs["redshift"] = kwargs["redshift"]
+        elif hasattr(self, "redshift"):
+            halocat_kwargs["redshift"] = self.redshift
+        if "halo_finder" in kwargs:
+            halocat_kwargs["halo_finder"] = kwargs["halo_finder"]
 
         try:
-            assert kwargs['simname'] == 'fake'
+            assert kwargs["simname"] == "fake"
             use_fake_sim = True
         except (AssertionError, KeyError):
             use_fake_sim = False
@@ -456,43 +477,51 @@ class ModelFactory(object):
         else:
             halocat = CachedHaloCatalog(preload_halo_table=True, **halocat_kwargs)
 
-        if 'rbins' in kwargs:
-            rbins = kwargs['rbins']
+        if "rbins" in kwargs:
+            rbins = kwargs["rbins"]
         else:
             rbins = model_defaults.default_rbins
 
-        if 'include_crosscorr' in list(kwargs.keys()):
-            include_crosscorr = kwargs['include_crosscorr']
+        if "include_crosscorr" in list(kwargs.keys()):
+            include_crosscorr = kwargs["include_crosscorr"]
         else:
             include_crosscorr = False
 
         if include_crosscorr is True:
 
-            xi_coll = np.zeros(
-                (len(rbins)-1)*num_iterations*3).reshape(3, num_iterations, len(rbins)-1)
+            xi_coll = np.zeros((len(rbins) - 1) * num_iterations * 3).reshape(
+                3, num_iterations, len(rbins) - 1
+            )
 
             for i in range(num_iterations):
                 self.populate_mock(halocat=halocat)
-                rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :], xi_coll[2, i, :] = (
-                    self.mock.compute_galaxy_clustering(**kwargs)
-                    )
+                (
+                    rbin_centers,
+                    xi_coll[0, i, :],
+                    xi_coll[1, i, :],
+                    xi_coll[2, i, :],
+                ) = self.mock.compute_galaxy_clustering(**kwargs)
             xi_11 = summary_func(xi_coll[0, :], axis=0)
             xi_12 = summary_func(xi_coll[1, :], axis=0)
             xi_22 = summary_func(xi_coll[2, :], axis=0)
             return rbin_centers, xi_11, xi_12, xi_22
         else:
 
-            xi_coll = np.zeros(
-                (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
+            xi_coll = np.zeros((len(rbins) - 1) * num_iterations).reshape(
+                num_iterations, len(rbins) - 1
+            )
 
             for i in range(num_iterations):
                 self.populate_mock(halocat=halocat)
-                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
+                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(
+                    **kwargs
+                )
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi
 
-    def compute_average_galaxy_matter_cross_clustering(self, num_iterations=5,
-            summary_statistic='median', **kwargs):
+    def compute_average_galaxy_matter_cross_clustering(
+        self, num_iterations=5, summary_statistic="median", **kwargs
+    ):
         r"""
         Method repeatedly populates a simulation with a mock galaxy catalog,
         computes the galaxy-matter cross-correlation
@@ -635,23 +664,23 @@ class ModelFactory(object):
         rather than calling the `~halotools.mock_observables.mean_delta_sigma` function.
 
         """
-        if summary_statistic == 'mean':
+        if summary_statistic == "mean":
             summary_func = np.mean
         else:
             summary_func = np.median
 
         halocat_kwargs = {}
-        if 'simname' in kwargs:
-            halocat_kwargs['simname'] = kwargs['simname']
-        if 'redshift' in kwargs:
-            halocat_kwargs['redshift'] = kwargs['redshift']
-        elif hasattr(self, 'redshift'):
-            halocat_kwargs['redshift'] = self.redshift
-        if 'halo_finder' in kwargs:
-            halocat_kwargs['halo_finder'] = kwargs['halo_finder']
+        if "simname" in kwargs:
+            halocat_kwargs["simname"] = kwargs["simname"]
+        if "redshift" in kwargs:
+            halocat_kwargs["redshift"] = kwargs["redshift"]
+        elif hasattr(self, "redshift"):
+            halocat_kwargs["redshift"] = self.redshift
+        if "halo_finder" in kwargs:
+            halocat_kwargs["halo_finder"] = kwargs["halo_finder"]
 
         try:
-            assert kwargs['simname'] == 'fake'
+            assert kwargs["simname"] == "fake"
             use_fake_sim = True
         except (AssertionError, KeyError):
             use_fake_sim = False
@@ -661,36 +690,43 @@ class ModelFactory(object):
         else:
             halocat = CachedHaloCatalog(preload_halo_table=True, **halocat_kwargs)
 
-        if 'rbins' in kwargs:
-            rbins = kwargs['rbins']
+        if "rbins" in kwargs:
+            rbins = kwargs["rbins"]
         else:
             rbins = model_defaults.default_rbins
 
-        if 'include_complement' in list(kwargs.keys()):
-            include_complement = kwargs['include_complement']
+        if "include_complement" in list(kwargs.keys()):
+            include_complement = kwargs["include_complement"]
         else:
             include_complement = False
 
         if include_complement is True:
 
-            xi_coll = np.zeros(
-                (len(rbins)-1)*num_iterations*2).reshape(2, num_iterations, len(rbins)-1)
+            xi_coll = np.zeros((len(rbins) - 1) * num_iterations * 2).reshape(
+                2, num_iterations, len(rbins) - 1
+            )
 
             for i in range(num_iterations):
                 self.populate_mock(halocat=halocat)
-                rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :] = (
-                    self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
-                    )
+                (
+                    rbin_centers,
+                    xi_coll[0, i, :],
+                    xi_coll[1, i, :],
+                ) = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
             xi_11 = summary_func(xi_coll[0, :], axis=0)
             xi_22 = summary_func(xi_coll[1, :], axis=0)
             return rbin_centers, xi_11, xi_22
         else:
 
-            xi_coll = np.zeros(
-                (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
+            xi_coll = np.zeros((len(rbins) - 1) * num_iterations).reshape(
+                num_iterations, len(rbins) - 1
+            )
 
             for i in range(num_iterations):
                 self.populate_mock(halocat=halocat)
-                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
+                (
+                    rbin_centers,
+                    xi_coll[i, :],
+                ) = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi

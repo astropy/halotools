@@ -6,8 +6,6 @@ within dark matter halos.
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
-import six
-from abc import ABCMeta, abstractmethod
 from scipy.integrate import quad as quad_integration
 from scipy.optimize import minimize as scipy_minimize
 from astropy import units as u
@@ -24,9 +22,8 @@ __author__ = ["Andrew Hearin", "Benedikt Diemer"]
 __all__ = ["AnalyticDensityProf"]
 
 
-@six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
-    r""" Container class for any analytical radial profile model.
+    r"""Container class for any analytical radial profile model.
 
     See :ref:`profile_template_tutorial` for a review of the mathematics of
     halo profiles, and a thorough description of how the relevant equations
@@ -79,7 +76,6 @@ class AnalyticDensityProf(object):
         self.publications = []
         self.param_dict = {}
 
-    @abstractmethod
     def dimensionless_mass_density(self, scaled_radius, *prof_params):
         r"""
         Physical density of the halo scaled by the density threshold of the mass definition:
@@ -194,7 +190,7 @@ class AnalyticDensityProf(object):
         dimensionless_density = self.dimensionless_mass_density(
             scaled_radius, *prof_params
         )
-        return dimensionless_density * 4 * np.pi * scaled_radius ** 2
+        return dimensionless_density * 4 * np.pi * scaled_radius**2
 
     def cumulative_mass_PDF(self, scaled_radius, *prof_params):
         r"""
@@ -282,7 +278,7 @@ class AnalyticDensityProf(object):
         return mass
 
     def dimensionless_circular_velocity(self, scaled_radius, *prof_params):
-        r""" Circular velocity scaled by the virial velocity,
+        r"""Circular velocity scaled by the virial velocity,
         :math:`V_{\rm cir}(x) / V_{\rm vir}`, as a function of
         dimensionless position :math:`\tilde{r} = r / R_{\rm vir}`.
 
@@ -312,7 +308,7 @@ class AnalyticDensityProf(object):
         )
 
     def virial_velocity(self, total_mass):
-        r""" The circular velocity evaluated at the halo boundary,
+        r"""The circular velocity evaluated at the halo boundary,
         :math:`V_{\rm vir} \equiv \sqrt{GM_{\rm halo}/R_{\rm halo}}`.
 
         Parameters
@@ -369,13 +365,12 @@ class AnalyticDensityProf(object):
         ) * self.virial_velocity(total_mass)
 
     def _vmax_helper(self, scaled_radius, *prof_params):
-        """ Helper function used to calculate `vmax` and `rmax`.
-        """
+        """Helper function used to calculate `vmax` and `rmax`."""
         encl = self.cumulative_mass_PDF(scaled_radius, *prof_params)
         return -1.0 * encl / scaled_radius
 
     def rmax(self, total_mass, *prof_params):
-        r""" Radius at which the halo attains its maximum circular velocity.
+        r"""Radius at which the halo attains its maximum circular velocity.
 
         Parameters
         ----------
@@ -405,7 +400,7 @@ class AnalyticDensityProf(object):
         return result.x[0] * halo_radius
 
     def vmax(self, total_mass, *prof_params):
-        r""" Maximum circular velocity of the halo profile.
+        r"""Maximum circular velocity of the halo profile.
 
         Parameters
         ----------

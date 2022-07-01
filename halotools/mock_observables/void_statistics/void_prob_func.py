@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from six.moves import xrange as range
 from astropy.utils.misc import NumpyRNGContext
 
 from ..pair_counters import npairs_per_object_3d
@@ -16,16 +15,24 @@ from ...utils.array_utils import array_is_monotonic
 from ...custom_exceptions import HalotoolsError
 
 
-__all__ = ('void_prob_func', )
-__author__ = ['Duncan Campbell', 'Andrew Hearin']
+__all__ = ("void_prob_func",)
+__author__ = ["Duncan Campbell", "Andrew Hearin"]
 
 
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
-        period=None, num_threads=1,
-        approx_cell1_size=None, approx_cellran_size=None, seed=None):
+def void_prob_func(
+    sample1,
+    rbins,
+    n_ran=None,
+    random_sphere_centers=None,
+    period=None,
+    num_threads=1,
+    approx_cell1_size=None,
+    approx_cellran_size=None,
+    seed=None,
+):
     """
     Calculate the void probability function (VPF), :math:`P_0(r)`,
     defined as the probability that a random
@@ -135,26 +142,55 @@ def void_prob_func(sample1, rbins, n_ran=None, random_sphere_centers=None,
     :ref:`galaxy_catalog_analysis_tutorial8`
 
     """
-    (sample1, rbins, n_ran, random_sphere_centers,
-        period, num_threads, approx_cell1_size, approx_cellran_size) = (
-        _void_prob_func_process_args(sample1, rbins, n_ran, random_sphere_centers,
-            period, num_threads, approx_cell1_size, approx_cellran_size, seed))
+    (
+        sample1,
+        rbins,
+        n_ran,
+        random_sphere_centers,
+        period,
+        num_threads,
+        approx_cell1_size,
+        approx_cellran_size,
+    ) = _void_prob_func_process_args(
+        sample1,
+        rbins,
+        n_ran,
+        random_sphere_centers,
+        period,
+        num_threads,
+        approx_cell1_size,
+        approx_cellran_size,
+        seed,
+    )
 
-    result = npairs_per_object_3d(random_sphere_centers, sample1, rbins,
-        period=period, num_threads=num_threads,
+    result = npairs_per_object_3d(
+        random_sphere_centers,
+        sample1,
+        rbins,
+        period=period,
+        num_threads=num_threads,
         approx_cell1_size=approx_cell1_size,
-        approx_cell2_size=approx_cellran_size)
+        approx_cell2_size=approx_cellran_size,
+    )
 
     num_empty_spheres = np.array(
-        [sum(result[:, i] == 0) for i in range(result.shape[1])])
-    return num_empty_spheres/n_ran
+        [sum(result[:, i] == 0) for i in range(result.shape[1])]
+    )
+    return num_empty_spheres / n_ran
 
 
-def _void_prob_func_process_args(sample1, rbins,
-        n_ran, random_sphere_centers, period, num_threads,
-        approx_cell1_size, approx_cellran_size, seed):
-    """
-    """
+def _void_prob_func_process_args(
+    sample1,
+    rbins,
+    n_ran,
+    random_sphere_centers,
+    period,
+    num_threads,
+    approx_cell1_size,
+    approx_cellran_size,
+    seed,
+):
+    """ """
     sample1 = np.atleast_1d(sample1)
 
     rbins = np.atleast_1d(rbins)
@@ -165,8 +201,10 @@ def _void_prob_func_process_args(sample1, rbins,
         if len(rbins) > 2:
             assert array_is_monotonic(rbins, strict=True) == 1
     except AssertionError:
-        msg = ("\n Input ``rbins`` must be a monotonically increasing \n"
-               "1-D array with at least two entries. All entries must be strictly positive.")
+        msg = (
+            "\n Input ``rbins`` must be a monotonically increasing \n"
+            "1-D array with at least two entries. All entries must be strictly positive."
+        )
         raise HalotoolsError(msg)
 
     if period is None:
@@ -180,27 +218,29 @@ def _void_prob_func_process_args(sample1, rbins,
         elif len(period) == 3:
             pass
         else:
-            msg = ("\nInput ``period`` must either be a float or length-3 sequence")
+            msg = "\nInput ``period`` must either be a float or length-3 sequence"
             raise HalotoolsError(msg)
-        xmin, xmax = 0., float(period[0])
-        ymin, ymax = 0., float(period[1])
-        zmin, zmax = 0., float(period[2])
+        xmin, xmax = 0.0, float(period[0])
+        ymin, ymax = 0.0, float(period[1])
+        zmin, zmax = 0.0, float(period[2])
 
-    if (n_ran is None):
-        if (random_sphere_centers is None):
-            msg = ("You must pass either ``n_ran`` or ``random_sphere_centers``")
+    if n_ran is None:
+        if random_sphere_centers is None:
+            msg = "You must pass either ``n_ran`` or ``random_sphere_centers``"
             raise HalotoolsError(msg)
         else:
             random_sphere_centers = np.atleast_1d(random_sphere_centers)
             try:
                 assert random_sphere_centers.shape[1] == 3
             except AssertionError:
-                msg = ("Your input ``random_sphere_centers`` must have shape (Nspheres, 3)")
+                msg = (
+                    "Your input ``random_sphere_centers`` must have shape (Nspheres, 3)"
+                )
                 raise HalotoolsError(msg)
         n_ran = float(random_sphere_centers.shape[0])
     else:
         if random_sphere_centers is not None:
-            msg = ("If passing in ``random_sphere_centers``, do not also pass in ``n_ran``.")
+            msg = "If passing in ``random_sphere_centers``, do not also pass in ``n_ran``."
             raise HalotoolsError(msg)
         else:
             with NumpyRNGContext(seed):
@@ -209,5 +249,13 @@ def _void_prob_func_process_args(sample1, rbins,
                 zran = np.random.uniform(zmin, zmax, n_ran)
             random_sphere_centers = np.vstack([xran, yran, zran]).T
 
-    return (sample1, rbins, n_ran, random_sphere_centers,
-        period, num_threads, approx_cell1_size, approx_cellran_size)
+    return (
+        sample1,
+        rbins,
+        n_ran,
+        random_sphere_centers,
+        period,
+        num_threads,
+        approx_cell1_size,
+        approx_cellran_size,
+    )

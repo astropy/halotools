@@ -4,12 +4,9 @@ used to model the mapping between the "primary galaxy property" (usually stellar
 and some underlying halo property (such as halo mass).
 """
 
-from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 import numpy as np
-import six
-from abc import ABCMeta
 from warnings import warn
 
 from . import LogNormalScatterModel
@@ -19,20 +16,23 @@ from .. import model_defaults
 from ...sim_manager import sim_defaults
 
 
-__all__ = ('PrimGalpropModel', )
-__author__ = ('Andrew Hearin', )
+__all__ = ("PrimGalpropModel",)
+__author__ = ("Andrew Hearin",)
 
 
-@six.add_metaclass(ABCMeta)
 class PrimGalpropModel(object):
-    """ Abstract container class for models connecting table to their primary
+    """Abstract container class for models connecting table to their primary
     galaxy property, e.g., stellar mass or luminosity.
 
     """
 
-    def __init__(self, galprop_name,
-            prim_haloprop_key=model_defaults.default_smhm_haloprop,
-            scatter_model=LogNormalScatterModel, **kwargs):
+    def __init__(
+        self,
+        galprop_name,
+        prim_haloprop_key=model_defaults.default_smhm_haloprop,
+        scatter_model=LogNormalScatterModel,
+        **kwargs
+    ):
         """
         Parameters
         ----------
@@ -74,40 +74,46 @@ class PrimGalpropModel(object):
         self.galprop_name = galprop_name
         self.prim_haloprop_key = prim_haloprop_key
 
-        if 'redshift' in kwargs:
-            self.redshift = float(max(0, kwargs['redshift']))
+        if "redshift" in kwargs:
+            self.redshift = float(max(0, kwargs["redshift"]))
 
         self.scatter_model = scatter_model(
-            prim_haloprop_key=self.prim_haloprop_key, **kwargs)
+            prim_haloprop_key=self.prim_haloprop_key, **kwargs
+        )
 
         self._build_param_dict(**kwargs)
 
         # Enforce the requirement that sub-classes have been configured properly
-        required_method_name = 'mean_'+self.galprop_name
+        required_method_name = "mean_" + self.galprop_name
         if not hasattr(self, required_method_name):
-            raise SyntaxError("Any sub-class of PrimGalpropModel must "
-                "implement a method named %s " % required_method_name)
+            raise SyntaxError(
+                "Any sub-class of PrimGalpropModel must "
+                "implement a method named %s " % required_method_name
+            )
 
         # If the sub-class did not implement their own Monte Carlo method mc_galprop,
         # then use _mc_galprop and give it the usual name
-        if not hasattr(self, 'mc_'+self.galprop_name):
-            setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
+        if not hasattr(self, "mc_" + self.galprop_name):
+            setattr(self, "mc_" + self.galprop_name, self._mc_galprop)
 
         # The _mock_generation_calling_sequence determines which methods
         # will be called during mock population, as well as in what order they will be called
-        self._mock_generation_calling_sequence = ['mc_'+self.galprop_name]
-        self._galprop_dtypes_to_allocate = np.dtype([(str(self.galprop_name), 'f4')])
+        self._mock_generation_calling_sequence = ["mc_" + self.galprop_name]
+        self._galprop_dtypes_to_allocate = np.dtype([(str(self.galprop_name), "f4")])
 
         # The _methods_to_inherit determines which methods will be directly callable
         # by the composite model built by the HodModelFactory
-        method_names_to_inherit = ['mc_' + self.galprop_name, 'mean_' + self.galprop_name]
+        method_names_to_inherit = [
+            "mc_" + self.galprop_name,
+            "mean_" + self.galprop_name,
+        ]
         try:
             self._methods_to_inherit.extend(method_names_to_inherit)
         except AttributeError:
             self._methods_to_inherit = method_names_to_inherit
 
     def mean_scatter(self, **kwargs):
-        """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict``
+        """Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict``
         of the scatter model, and then call the `mean_scatter` method of
         the scatter model.
         """
@@ -117,7 +123,7 @@ class PrimGalpropModel(object):
         return self.scatter_model.mean_scatter(**kwargs)
 
     def scatter_realization(self, **kwargs):
-        """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict``
+        """Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict``
         of the scatter model, and then call the `scatter_realization` method of
         the scatter model.
         """
@@ -127,11 +133,11 @@ class PrimGalpropModel(object):
         return self.scatter_model.scatter_realization(**kwargs)
 
     def _build_param_dict(self, **kwargs):
-        """ Method combines the parameter dictionaries of the
+        """Method combines the parameter dictionaries of the
         smhm model and the scatter model.
         """
 
-        if hasattr(self, 'retrieve_default_param_dict'):
+        if hasattr(self, "retrieve_default_param_dict"):
             self.param_dict = self.retrieve_default_param_dict()
         else:
             self.param_dict = {}
@@ -142,7 +148,7 @@ class PrimGalpropModel(object):
             self.param_dict[key] = value
 
     def _mc_galprop(self, include_scatter=True, **kwargs):
-        """ Return the prim_galprop of the galaxies living in the input table.
+        """Return the prim_galprop of the galaxies living in the input table.
 
         Parameters
         ----------
@@ -171,28 +177,30 @@ class PrimGalpropModel(object):
         """
 
         # Interpret the inputs to determine the appropriate redshift
-        if 'redshift' not in list(kwargs.keys()):
-            if hasattr(self, 'redshift'):
-                kwargs['redshift'] = self.redshift
+        if "redshift" not in list(kwargs.keys()):
+            if hasattr(self, "redshift"):
+                kwargs["redshift"] = self.redshift
             else:
-                warn("\nThe PrimGalpropModel class was not instantiated with a redshift,\n"
-                "nor was a redshift passed to the primary function call.\n"
-                "Choosing the default redshift z = %.2f\n" % sim_defaults.default_redshift)
-                kwargs['redshift'] = sim_defaults.default_redshift
+                warn(
+                    "\nThe PrimGalpropModel class was not instantiated with a redshift,\n"
+                    "nor was a redshift passed to the primary function call.\n"
+                    "Choosing the default redshift z = %.2f\n"
+                    % sim_defaults.default_redshift
+                )
+                kwargs["redshift"] = sim_defaults.default_redshift
 
-        prim_galprop_func = getattr(self, 'mean_'+self.galprop_name)
+        prim_galprop_func = getattr(self, "mean_" + self.galprop_name)
         galprop_first_moment = prim_galprop_func(**kwargs)
 
         if include_scatter is False:
             result = galprop_first_moment
         else:
-            log10_galprop_with_scatter = (
-                np.log10(galprop_first_moment) +
-                self.scatter_realization(**kwargs)
-                )
-            result = 10.**log10_galprop_with_scatter
+            log10_galprop_with_scatter = np.log10(
+                galprop_first_moment
+            ) + self.scatter_realization(**kwargs)
+            result = 10.0**log10_galprop_with_scatter
 
-        if 'table' in kwargs:
-            kwargs['table'][self.galprop_name][:] = result
+        if "table" in kwargs:
+            kwargs["table"][self.galprop_name][:] = result
 
         return result

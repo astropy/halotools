@@ -10,11 +10,9 @@ import collections
 from time import time
 import numpy as np
 
-from six.moves import xrange as range
-
 from ..utils.python_string_comparisons import _passively_decode_string
 
-__all__ = ('TabularAsciiReader', )
+__all__ = ("TabularAsciiReader",)
 
 
 class TabularAsciiReader(object):
@@ -52,9 +50,17 @@ class TabularAsciiReader(object):
     of the data stream.
     """
 
-    def __init__(self, input_fname, columns_to_keep_dict, header_char='#',
-            row_cut_min_dict={}, row_cut_max_dict={},
-            row_cut_eq_dict={}, row_cut_neq_dict={}, num_lines_header=None):
+    def __init__(
+        self,
+        input_fname,
+        columns_to_keep_dict,
+        header_char="#",
+        row_cut_min_dict={},
+        row_cut_max_dict={},
+        row_cut_eq_dict={},
+        row_cut_neq_dict={},
+        num_lines_header=None,
+    ):
         """
         Parameters
         -----------
@@ -210,12 +216,16 @@ class TabularAsciiReader(object):
         self._enforce_no_repeated_columns()
 
     def _verify_input_row_cuts_keys(self, **kwargs):
-        """ Require all columns upon which a row-cut is placed to also appear in
+        """Require all columns upon which a row-cut is placed to also appear in
         the input ``columns_to_keep_dict``. For purposes of good bookeeping,
         you are not permitted to place a cut on a column that you do not keep.
         """
-        potential_row_cuts = ('row_cut_min_dict', 'row_cut_max_dict',
-            'row_cut_eq_dict', 'row_cut_neq_dict')
+        potential_row_cuts = (
+            "row_cut_min_dict",
+            "row_cut_max_dict",
+            "row_cut_eq_dict",
+            "row_cut_neq_dict",
+        )
         for row_cut_key in potential_row_cuts:
 
             row_cut_dict = getattr(self, row_cut_key)
@@ -224,15 +234,17 @@ class TabularAsciiReader(object):
                 try:
                     assert key in list(self.columns_to_keep_dict.keys())
                 except AssertionError:
-                    msg = ("\nThe ``"+key+"`` key does not appear in the input \n"
+                    msg = (
+                        "\nThe ``" + key + "`` key does not appear in the input \n"
                         "``columns_to_keep_dict``, but it does appear in the "
-                        "input ``"+row_cut_key+"``. \n"
+                        "input ``" + row_cut_key + "``. \n"
                         "It is not permissible to place a cut "
-                        "on a column that you do not keep.\n")
+                        "on a column that you do not keep.\n"
+                    )
                     raise KeyError(msg)
 
     def _verify_min_max_consistency(self, **kwargs):
-        """ Verify that no min_cut column has a value greater to the corresponding max_cut.
+        """Verify that no min_cut column has a value greater to the corresponding max_cut.
 
         Such a choice would laboriously result in a final catalog with zero entries.
         """
@@ -241,11 +253,14 @@ class TabularAsciiReader(object):
             try:
                 row_cut_max = self.row_cut_max_dict[row_cut_min_key]
                 if row_cut_max <= row_cut_min:
-                    msg = ("\nFor the ``"+row_cut_min_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_min_dict`` to " +
-                        str(row_cut_min)+"\nand the value of the input "
-                        "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
-                        "This will result in zero selected rows and is not permissible.\n")
+                    msg = (
+                        "\nFor the ``" + row_cut_min_key + "`` column, \n"
+                        "you set the value of the input ``row_cut_min_dict`` to "
+                        + str(row_cut_min)
+                        + "\nand the value of the input "
+                        "``row_cut_max_dict`` to " + str(row_cut_max) + "\n"
+                        "This will result in zero selected rows and is not permissible.\n"
+                    )
                     raise ValueError(msg)
             except KeyError:
                 pass
@@ -254,17 +269,20 @@ class TabularAsciiReader(object):
             try:
                 row_cut_min = self.row_cut_min_dict[row_cut_max_key]
                 if row_cut_min >= row_cut_max:
-                    msg = ("\nFor the ``"+row_cut_max_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_max_dict`` to " +
-                        str(row_cut_max)+"\nand the value of the input "
-                        "``row_cut_min_dict`` to "+str(row_cut_min)+"\n"
-                        "This will result in zero selected rows and is not permissible.\n")
+                    msg = (
+                        "\nFor the ``" + row_cut_max_key + "`` column, \n"
+                        "you set the value of the input ``row_cut_max_dict`` to "
+                        + str(row_cut_max)
+                        + "\nand the value of the input "
+                        "``row_cut_min_dict`` to " + str(row_cut_min) + "\n"
+                        "This will result in zero selected rows and is not permissible.\n"
+                    )
                     raise ValueError(msg)
             except KeyError:
                 pass
 
     def _verify_eq_neq_consistency(self, **kwargs):
-        """ Verify that no neq_cut column has a value equal to the corresponding eq_cut.
+        """Verify that no neq_cut column has a value equal to the corresponding eq_cut.
 
         Such a choice would laboriously result in a final catalog with zero entries.
         """
@@ -273,11 +291,14 @@ class TabularAsciiReader(object):
             try:
                 row_cut_neq = self.row_cut_neq_dict[row_cut_eq_key]
                 if row_cut_neq == row_cut_eq:
-                    msg = ("\nFor the ``"+row_cut_eq_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_eq_dict`` to " +
-                        str(row_cut_eq)+"\nand the value of the input "
-                        "``row_cut_neq_dict`` to "+str(row_cut_neq)+"\n"
-                        "This will result in zero selected rows and is not permissible.\n")
+                    msg = (
+                        "\nFor the ``" + row_cut_eq_key + "`` column, \n"
+                        "you set the value of the input ``row_cut_eq_dict`` to "
+                        + str(row_cut_eq)
+                        + "\nand the value of the input "
+                        "``row_cut_neq_dict`` to " + str(row_cut_neq) + "\n"
+                        "This will result in zero selected rows and is not permissible.\n"
+                    )
                     raise ValueError(msg)
             except KeyError:
                 pass
@@ -286,17 +307,20 @@ class TabularAsciiReader(object):
             try:
                 row_cut_eq = self.row_cut_eq_dict[row_cut_neq_key]
                 if row_cut_eq == row_cut_neq:
-                    msg = ("\nFor the ``"+row_cut_neq_key+"`` column, \n"
-                        "you set the value of the input ``row_cut_neq_dict`` to " +
-                        str(row_cut_neq)+"\nand the value of the input "
-                        "``row_cut_eq_dict`` to "+str(row_cut_eq)+"\n"
-                        "This will result in zero selected rows and is not permissible.\n")
+                    msg = (
+                        "\nFor the ``" + row_cut_neq_key + "`` column, \n"
+                        "you set the value of the input ``row_cut_neq_dict`` to "
+                        + str(row_cut_neq)
+                        + "\nand the value of the input "
+                        "``row_cut_eq_dict`` to " + str(row_cut_eq) + "\n"
+                        "This will result in zero selected rows and is not permissible.\n"
+                    )
                     raise ValueError(msg)
             except KeyError:
                 pass
 
     def _process_columns_to_keep(self, columns_to_keep_dict):
-        """ Private method performs sanity checks in the input ``columns_to_keep_dict``
+        """Private method performs sanity checks in the input ``columns_to_keep_dict``
         and uses this input to define two attributes used for future bookkeeping,
         ``self.column_indices_to_keep`` and ``self.dt``.
         """
@@ -306,29 +330,36 @@ class TabularAsciiReader(object):
                 assert type(value) == tuple
                 assert len(value) == 2
             except AssertionError:
-                msg = ("\nThe value bound to every key of the input ``columns_to_keep_dict``\n"
+                msg = (
+                    "\nThe value bound to every key of the input ``columns_to_keep_dict``\n"
                     "must be a two-element tuple.\n"
-                    "The ``"+key+"`` is not the required type.\n"
-                       )
+                    "The ``" + key + "`` is not the required type.\n"
+                )
                 raise TypeError(msg)
 
             column_index, dtype = value
             try:
                 assert type(column_index) == int
             except AssertionError:
-                msg = ("\nThe first element of the two-element tuple bound to every key of \n"
+                msg = (
+                    "\nThe first element of the two-element tuple bound to every key of \n"
                     "the input ``columns_to_keep_dict`` must an integer.\n"
-                    "The first element of the ``"+key+"`` is not the required type.\n"
-                       )
+                    "The first element of the ``"
+                    + key
+                    + "`` is not the required type.\n"
+                )
                 raise TypeError(msg)
             try:
                 dt = np.dtype(dtype)
             except:
-                msg = ("\nThe second element of the two-element tuple bound to every key of \n"
+                msg = (
+                    "\nThe second element of the two-element tuple bound to every key of \n"
                     "the input ``columns_to_keep_dict`` must be a string recognized by Numpy\n"
                     "as a data type, e.g., 'f4' or 'i8'.\n"
-                    "The second element of the ``"+key+"`` is not the required type.\n"
-                       )
+                    "The second element of the ``"
+                    + key
+                    + "`` is not the required type.\n"
+                )
                 raise TypeError(msg)
         self.columns_to_keep_dict = columns_to_keep_dict
 
@@ -341,17 +372,16 @@ class TabularAsciiReader(object):
         # will be yielded by the data_chunk_generator
         self.column_indices_to_keep = list(
             [columns_to_keep_dict[key][0] for key in column_key_list]
-            )
+        )
 
         # The rows of data yielded by the data_chunk_generator
         # will be assumed to be the following Numpy dtype
         self.dt = np.dtype(
             [(key, columns_to_keep_dict[key][1]) for key in column_key_list]
-            )
+        )
 
     def _get_fname(self, input_fname):
-        """ Verify that the input fname exists on disk.
-        """
+        """Verify that the input fname exists on disk."""
         # Check whether input_fname exists.
         if not os.path.isfile(input_fname):
             # Check to see whether the uncompressed version is available instead
@@ -359,24 +389,31 @@ class TabularAsciiReader(object):
                 msg = "Input filename %s is not a file"
                 raise IOError(msg % input_fname)
             else:
-                msg = ("Input filename ``%s`` is not a file. \n"
-                    "However, ``%s`` exists, so change your input_fname accordingly.")
+                msg = (
+                    "Input filename ``%s`` is not a file. \n"
+                    "However, ``%s`` exists, so change your input_fname accordingly."
+                )
                 raise IOError(msg % (input_fname, input_fname[:-3]))
 
         return _passively_decode_string(os.path.abspath(input_fname))
 
     def _enforce_no_repeated_columns(self):
         duplicates = list(
-            k for k, v in list(collections.Counter(self.column_indices_to_keep).items()) if v > 1
-            )
+            k
+            for k, v in list(collections.Counter(self.column_indices_to_keep).items())
+            if v > 1
+        )
         if len(duplicates) > 0:
             example_repeated_column_index = str(duplicates[0])
-            msg = ("\nColumn number " + example_repeated_column_index +
-                " appears more than once in your ``columns_to_keep_dict``.")
+            msg = (
+                "\nColumn number "
+                + example_repeated_column_index
+                + " appears more than once in your ``columns_to_keep_dict``."
+            )
             raise ValueError(msg)
 
     def _get_header_char(self, header_char):
-        """ Verify that the input header_char is
+        """Verify that the input header_char is
         a one-character string or unicode variable.
 
         """
@@ -384,15 +421,17 @@ class TabularAsciiReader(object):
             assert (type(header_char) == str) or (type(header_char) == bytes)
             assert len(header_char) == 1
         except AssertionError:
-            msg = ("\nThe input ``header_char`` must be a single string/bytes character.\n")
+            msg = (
+                "\nThe input ``header_char`` must be a single string/bytes character.\n"
+            )
             raise TypeError(msg)
         return header_char
 
     def _determine_compression_safe_file_opener(self):
-        """ Determine whether to use *open* or *gzip.open* to read
+        """Determine whether to use *open* or *gzip.open* to read
         the input file, depending on whether or not the file is compressed.
         """
-        f = gzip.open(self.input_fname, 'r')
+        f = gzip.open(self.input_fname, "r")
         try:
             f.read(1)
             self._compression_safe_file_opener = gzip.open
@@ -402,7 +441,7 @@ class TabularAsciiReader(object):
             f.close()
 
     def header_len(self):
-        """ Number of rows in the header of the ASCII file.
+        """Number of rows in the header of the ASCII file.
 
         Parameters
         ----------
@@ -422,9 +461,11 @@ class TabularAsciiReader(object):
         """
         if self.num_lines_header is None:
             Nheader = 0
-            with self._compression_safe_file_opener(self.input_fname, 'r') as f:
+            with self._compression_safe_file_opener(self.input_fname, "r") as f:
                 for i, l in enumerate(f):
-                    if ((l[0:len(self.header_char)] == self.header_char) or (l == "\n")):
+                    if (l[0 : len(self.header_char)] == self.header_char) or (
+                        l == "\n"
+                    ):
                         Nheader += 1
                     else:
                         break
@@ -457,9 +498,9 @@ class TabularAsciiReader(object):
 
         """
         Nrows_data = 0
-        with self._compression_safe_file_opener(self.input_fname, 'r') as f:
+        with self._compression_safe_file_opener(self.input_fname, "r") as f:
             for i, l in enumerate(f):
-                if ((l[0:len(self.header_char)] != self.header_char) and (l != "\n")):
+                if (l[0 : len(self.header_char)] != self.header_char) and (l != "\n"):
                     Nrows_data += 1
         return Nrows_data
 
@@ -494,7 +535,7 @@ class TabularAsciiReader(object):
             cur += 1
 
     def apply_row_cut(self, array_chunk):
-        """ Method applies a boolean mask to the input array
+        """Method applies a boolean mask to the input array
         based on the row-cuts determined by the
         dictionaries passed to the constructor.
 
@@ -523,7 +564,7 @@ class TabularAsciiReader(object):
         return array_chunk[mask]
 
     def read_ascii(self, chunk_memory_size=500):
-        """ Method reads the input ascii and returns
+        """Method reads the input ascii and returns
         a structured Numpy array of the data
         that passes the row- and column-cuts.
 
@@ -548,8 +589,7 @@ class TabularAsciiReader(object):
         ----------
         data_chunk_generator
         """
-        print(("\n...Processing ASCII data of file: \n%s\n "
-               % self.input_fname))
+        print(("\n...Processing ASCII data of file: \n%s\n " % self.input_fname))
         start = time()
 
         file_size = os.path.getsize(self.input_fname)
@@ -563,45 +603,48 @@ class TabularAsciiReader(object):
         try:
             Nchunks = int(max(1, min(file_size / chunk_memory_size, num_data_rows)))
         except ZeroDivisionError:
-            msg = ("\nMust choose non-zero size for input "
-                   "``chunk_memory_size``")
+            msg = "\nMust choose non-zero size for input " "``chunk_memory_size``"
             raise ValueError(msg)
 
         num_rows_in_chunk = int(num_data_rows // Nchunks)
         num_full_chunks = int(num_data_rows // num_rows_in_chunk)
-        num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk*Nchunks
+        num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk * Nchunks
 
         header_length = int(self.header_len())
         print(("Number of rows in detected header = %i \n" % header_length))
 
         chunklist = []
-        with self._compression_safe_file_opener(self.input_fname, 'r') as f:
+        with self._compression_safe_file_opener(self.input_fname, "r") as f:
 
             for skip_header_row in range(header_length):
                 _s = f.readline()
 
             for _i in range(num_full_chunks):
-                print(("... working on chunk " + str(_i) +
-                       " of " + str(num_full_chunks)))
+                print(
+                    ("... working on chunk " + str(_i) + " of " + str(num_full_chunks))
+                )
 
-                chunk_array = np.array(list(
-                    self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt)
+                chunk_array = np.array(
+                    list(self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt
+                )
                 cut_chunk = self.apply_row_cut(chunk_array)
                 chunklist.append(cut_chunk)
 
             # Now for the remainder chunk
-            chunk_array = np.array(list(
-                self.data_chunk_generator(num_rows_in_chunk_remainder, f)), dtype=self.dt)
+            chunk_array = np.array(
+                list(self.data_chunk_generator(num_rows_in_chunk_remainder, f)),
+                dtype=self.dt,
+            )
             cut_chunk = self.apply_row_cut(chunk_array)
             chunklist.append(cut_chunk)
 
         full_array = np.concatenate(chunklist)
 
         end = time()
-        runtime = (end-start)
+        runtime = end - start
 
         if runtime > 60:
-            runtime = runtime/60.
+            runtime = runtime / 60.0
             msg = "Total runtime to read in ASCII = %.1f minutes\n"
         else:
             msg = "Total runtime to read in ASCII = %.2f seconds\n"
