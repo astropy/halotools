@@ -14,6 +14,7 @@ from .clustering_helpers import (
     tpcf_estimator_dd_dr_rr_requirements,
 )
 from .tpcf_estimators import _TP_estimator
+from .tpcf_estimators import _TP_estimator_crossx
 
 from ..mock_observables_helpers import (
     enforce_sample_has_correct_shape,
@@ -485,11 +486,11 @@ def tpcf(
     else:
         if (do_auto is True) & (do_cross is True):
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            xi_12 = _TP_estimator_crossx(D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator)
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_12, xi_22
         elif do_cross is True:
-            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            xi_12 = _TP_estimator_crossx(D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator)
             return xi_12
         elif do_auto is True:
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)

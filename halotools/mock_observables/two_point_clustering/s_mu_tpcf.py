@@ -21,6 +21,7 @@ from ..mock_observables_helpers import (
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
+from .tpcf_estimators import _TP_estimator_crossx
 from ..pair_counters import npairs_s_mu
 
 __all__ = ["s_mu_tpcf"]
@@ -303,11 +304,15 @@ def s_mu_tpcf(
     else:
         if (do_auto is True) & (do_cross is True):
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
-            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
+            xi_12 = _TP_estimator_crossx(D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator)[
+                :, ::-1
+            ]
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11, xi_12, xi_22
         elif do_cross is True:
-            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
+            xi_12 = _TP_estimator_crossx(D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator)[
+                :, ::-1
+            ]
             return xi_12
         elif do_auto is True:
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]

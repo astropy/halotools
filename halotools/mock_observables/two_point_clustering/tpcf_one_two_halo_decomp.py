@@ -20,6 +20,7 @@ from ..mock_observables_helpers import (
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .tpcf_estimators import _TP_estimator_crossx
 from ..pair_counters import npairs_3d
 from ..pair_counters import marked_npairs_3d
 
@@ -311,8 +312,8 @@ def tpcf_one_two_halo_decomp(
             one_halo_xi_11 = _TP_estimator(
                 one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
             )
-            one_halo_xi_12 = _TP_estimator(
-                one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            one_halo_xi_12 = _TP_estimator_crossx(
+                one_halo_D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator
             )
             one_halo_xi_22 = _TP_estimator(
                 one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator
@@ -320,8 +321,8 @@ def tpcf_one_two_halo_decomp(
             two_halo_xi_11 = _TP_estimator(
                 two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
             )
-            two_halo_xi_12 = _TP_estimator(
-                two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            two_halo_xi_12 = _TP_estimator_crossx(
+                two_halo_D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator
             )
             two_halo_xi_22 = _TP_estimator(
                 two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator
@@ -335,11 +336,11 @@ def tpcf_one_two_halo_decomp(
                 two_halo_xi_22,
             )
         elif do_cross is True:
-            one_halo_xi_12 = _TP_estimator(
-                one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            one_halo_xi_12 = _TP_estimator_crossx(
+                one_halo_D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator
             )
-            two_halo_xi_12 = _TP_estimator(
-                two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            two_halo_xi_12 = _TP_estimator_crossx(
+                two_halo_D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator
             )
             return one_halo_xi_12, two_halo_xi_12
         elif do_auto is True:

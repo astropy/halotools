@@ -67,6 +67,58 @@ def _TP_estimator(DD, DR, RR, ND1, ND2, NR1, NR2, estimator):
         return xi  # for jackknife
 
 
+def _TP_estimator_crossx(DD, D1R, D2R, RR, ND1, ND2, NR1, NR2, estimator):
+    """
+    two point correlation function estimator
+    """
+
+    ND1 = np.atleast_1d(ND1)
+    ND2 = np.atleast_1d(ND2)
+    NR1 = np.atleast_1d(NR1)
+    NR2 = np.atleast_1d(NR2)
+    Ns = np.array([len(ND1), len(ND2), len(NR1), len(NR2)])
+
+    if np.any(Ns > 1):
+        # used for the jackknife calculations
+        # the outer dimension is the number of samples.
+        # the N arrays are the number of points in each dimension.
+        # so, what we want to do is multiple each row of e.g. DD by the number of 1/N
+        def mult(x, y):
+            return (x * y.T).T
+
+    else:
+
+        def mult(x, y):
+            return x * y
+
+    _test_for_zero_division(DD, D1R, RR, ND1, ND2, NR1, NR2, estimator)
+    _test_for_zero_division(DD, D2R, RR, ND1, ND2, NR1, NR2, estimator)
+
+    if estimator == "Natural":
+        factor = ND1 * ND2 / (NR1 * NR2)
+        # DD/RR-1
+        xi = mult(1.0 / factor, DD / RR) - 1.0
+    elif estimator == "Hamilton":
+        # DDRR/DRDR-1
+        xi = (DD * RR) / (D1R * D2R) - 1.0
+    elif estimator == "Landy-Szalay":
+        factor1 = ND1 * ND2 / (NR1 * NR2)
+        factor2 = ND1 * NR2 / (NR1 * NR2)
+        # (DD - 2.0*DR + RR)/RR
+        term1 = mult(1.0 / factor1, DD / RR)
+        term2 = mult(1.0 / factor2, D1R / RR)
+        term3 = mult(1.0 / factor2, D2R / RR)
+        xi = term1 - term2 - term3 + 1.0
+    else:
+        msg = "{0} estimator is not supported for cross-correlations"
+        raise ValueError(msg.format(estimator))
+
+    if np.shape(xi)[0] == 1:
+        return xi[0]
+    else:
+        return xi  # for jackknife
+
+
 def _list_estimators():
     """
     list available tpcf estimators.
