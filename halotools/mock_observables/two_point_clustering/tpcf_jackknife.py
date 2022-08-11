@@ -75,7 +75,8 @@ def tpcf_jackknife(
     Nsub : array_like, optional
         Lenght-3 numpy array of number of divisions along each dimension defining
         jackknife sample subvolumes.  If single integer is given, it is assumed to be
-        equivalent for each dimension.  The total number of samples used is then given by
+        equivalent for each dimension.
+        The total number of samples used is then given by
         *numpy.prod(Nsub)*. Default is 5 divisions per dimension.
 
     sample2 : array_like, optional

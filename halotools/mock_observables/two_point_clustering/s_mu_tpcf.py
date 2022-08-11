@@ -6,25 +6,45 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from .clustering_helpers import (process_optional_input_sample2,
-    verify_tpcf_estimator, tpcf_estimator_dd_dr_rr_requirements)
-from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
-    get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
+from .clustering_helpers import (
+    process_optional_input_sample2,
+    verify_tpcf_estimator,
+    tpcf_estimator_dd_dr_rr_requirements,
+)
+from ..mock_observables_helpers import (
+    enforce_sample_has_correct_shape,
+    get_separation_bins_array,
+    get_line_of_sight_bins_array,
+    get_period,
+    get_num_threads,
+)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
 from ..pair_counters import npairs_s_mu
 
-__all__ = ['s_mu_tpcf']
-__author__ = ['Duncan Campbell']
+__all__ = ["s_mu_tpcf"]
+__author__ = ["Duncan Campbell"]
 
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
-        period=None, do_auto=True, do_cross=True, estimator='Natural',
-        num_threads=1, approx_cell1_size=None,
-        approx_cell2_size=None, approx_cellran_size=None, seed=None):
+def s_mu_tpcf(
+    sample1,
+    s_bins,
+    mu_bins,
+    sample2=None,
+    randoms=None,
+    period=None,
+    do_auto=True,
+    do_cross=True,
+    estimator="Natural",
+    num_threads=1,
+    approx_cell1_size=None,
+    approx_cell2_size=None,
+    approx_cellran_size=None,
+    seed=None,
+):
     r"""
     Calculate the redshift space correlation function, :math:`\xi(s, \mu)`
 
@@ -200,12 +220,36 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
     """
 
     # process arguments
-    function_args = (sample1, s_bins, mu_bins, sample2, randoms, period,
-        do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
+    function_args = (
+        sample1,
+        s_bins,
+        mu_bins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        estimator,
+        num_threads,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+        seed,
+    )
 
-    sample1, s_bins, mu_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _s_mu_tpcf_process_args(*function_args)
+    (
+        sample1,
+        s_bins,
+        mu_bins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+    ) = _s_mu_tpcf_process_args(*function_args)
 
     # what needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
@@ -220,13 +264,36 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
         # this is arbitrarily set, but must remain consistent!
         NR = N1
 
-    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,
-        num_threads, do_auto, do_cross, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size)
+    D1D1, D1D2, D2D2 = pair_counts(
+        sample1,
+        sample2,
+        s_bins,
+        mu_bins,
+        period,
+        num_threads,
+        do_auto,
+        do_cross,
+        _sample1_is_sample2,
+        approx_cell1_size,
+        approx_cell2_size,
+    )
 
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, s_bins, mu_bins,
-        period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size)
+    D1R, D2R, RR = random_counts(
+        sample1,
+        sample2,
+        randoms,
+        s_bins,
+        mu_bins,
+        period,
+        PBCs,
+        num_threads,
+        do_RR,
+        do_DR,
+        _sample1_is_sample2,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+    )
 
     # return results.  remember to reverse the final result since
     # the pair counts are done in order of increasing theta_LOS (i.e. decreasing mu)
@@ -239,10 +306,10 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,
             xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11, xi_12, xi_22
-        elif (do_cross is True):
+        elif do_cross is True:
             xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)[:, ::-1]
             return xi_12
-        elif (do_auto is True):
+        elif do_auto is True:
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)[:, ::-1]
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)[:, ::-1]
             return xi_11, xi_22
@@ -259,13 +326,26 @@ def spherical_sector_volume(s, mu):
     """
     theta = np.arccos(mu)
 
-    vol = (2.0*np.pi/3.0) * np.outer((s**3.0), (1.0-np.cos(theta)))*2.0
+    vol = (2.0 * np.pi / 3.0) * np.outer((s**3.0), (1.0 - np.cos(theta))) * 2.0
     return vol
 
 
-def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
-        period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size):
+def random_counts(
+    sample1,
+    sample2,
+    randoms,
+    s_bins,
+    mu_bins,
+    period,
+    PBCs,
+    num_threads,
+    do_RR,
+    do_DR,
+    _sample1_is_sample2,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+):
     r"""
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
@@ -281,18 +361,30 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
     # PBCs and randoms.
     if randoms is not None:
         if do_RR is True:
-            RR = npairs_s_mu(randoms, randoms, s_bins, mu_bins, period=period,
-                             num_threads=num_threads,
-                             approx_cell1_size=approx_cellran_size,
-                             approx_cell2_size=approx_cellran_size)
+            RR = npairs_s_mu(
+                randoms,
+                randoms,
+                s_bins,
+                mu_bins,
+                period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cellran_size,
+                approx_cell2_size=approx_cellran_size,
+            )
             RR = np.diff(np.diff(RR, axis=0), axis=1)
         else:
             RR = None
         if do_DR is True:
-            D1R = npairs_s_mu(sample1, randoms, s_bins, mu_bins, period=period,
-                              num_threads=num_threads,
-                              approx_cell1_size=approx_cell1_size,
-                              approx_cell2_size=approx_cellran_size)
+            D1R = npairs_s_mu(
+                sample1,
+                randoms,
+                s_bins,
+                mu_bins,
+                period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cellran_size,
+            )
             D1R = np.diff(np.diff(D1R, axis=0), axis=1)
         else:
             D1R = None
@@ -300,10 +392,16 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
             D2R = None
         else:
             if do_DR is True:
-                D2R = npairs_s_mu(sample2, randoms, s_bins, mu_bins, period=period,
-                                  num_threads=num_threads,
-                                  approx_cell1_size=approx_cell2_size,
-                                  approx_cell2_size=approx_cellran_size)
+                D2R = npairs_s_mu(
+                    sample2,
+                    randoms,
+                    s_bins,
+                    mu_bins,
+                    period=period,
+                    num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cellran_size,
+                )
                 D2R = np.diff(np.diff(D2R, axis=0), axis=1)
             else:
                 D2R = None
@@ -324,33 +422,49 @@ def random_counts(sample1, sample2, randoms, s_bins, mu_bins,
 
         # calculate randoms for sample1
         N1 = np.shape(sample1)[0]
-        rho1 = N1/global_volume
-        D1R = (N1-1.0)*(dv*rho1)  # read note about pair counter
+        rho1 = N1 / global_volume
+        D1R = (N1 - 1.0) * (dv * rho1)  # read note about pair counter
 
         N2 = np.shape(sample2)[0]
-        rho2 = N2/global_volume
-        D2R = (N2-1.0)*(dv*rho2)  # read note about pair counter
+        rho2 = N2 / global_volume
+        D2R = (N2 - 1.0) * (dv * rho2)  # read note about pair counter
 
         # calculate the random-random pairs.
-        rhor = NR**2/global_volume
-        RR = (dv*rhor)
+        rhor = NR**2 / global_volume
+        RR = dv * rhor
 
         return D1R, D2R, RR
     else:
-        raise ValueError('Un-supported combination of PBCs and randoms provided.')
+        raise ValueError("Un-supported combination of PBCs and randoms provided.")
 
 
-def pair_counts(sample1, sample2, s_bins, mu_bins, period,
-        num_threads, do_auto, do_cross, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size):
+def pair_counts(
+    sample1,
+    sample2,
+    s_bins,
+    mu_bins,
+    period,
+    num_threads,
+    do_auto,
+    do_cross,
+    _sample1_is_sample2,
+    approx_cell1_size,
+    approx_cell2_size,
+):
     """
     Count data pairs.
     """
     if do_auto is True:
-        D1D1 = npairs_s_mu(sample1, sample1, s_bins, mu_bins, period=period,
+        D1D1 = npairs_s_mu(
+            sample1,
+            sample1,
+            s_bins,
+            mu_bins,
+            period=period,
             num_threads=num_threads,
             approx_cell1_size=approx_cell1_size,
-            approx_cell2_size=approx_cell1_size)
+            approx_cell2_size=approx_cell1_size,
+        )
         D1D1 = np.diff(np.diff(D1D1, axis=0), axis=1)
     else:
         D1D1 = None
@@ -361,18 +475,30 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = npairs_s_mu(sample1, sample2, s_bins, mu_bins,
-                period=period, num_threads=num_threads,
+            D1D2 = npairs_s_mu(
+                sample1,
+                sample2,
+                s_bins,
+                mu_bins,
+                period=period,
+                num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
-                approx_cell2_size=approx_cell2_size)
+                approx_cell2_size=approx_cell2_size,
+            )
             D1D2 = np.diff(np.diff(D1D2, axis=0), axis=1)
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = npairs_s_mu(sample2, sample2, s_bins, mu_bins, period=period,
+            D2D2 = npairs_s_mu(
+                sample2,
+                sample2,
+                s_bins,
+                mu_bins,
+                period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
-                approx_cell2_size=approx_cell2_size)
+                approx_cell2_size=approx_cell2_size,
+            )
             D2D2 = np.diff(np.diff(D2D2, axis=0), axis=1)
         else:
             D2D2 = None
@@ -380,9 +506,22 @@ def pair_counts(sample1, sample2, s_bins, mu_bins, period,
     return D1D1, D1D2, D2D2
 
 
-def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
-        period, do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
+def _s_mu_tpcf_process_args(
+    sample1,
+    s_bins,
+    mu_bins,
+    sample2,
+    randoms,
+    period,
+    do_auto,
+    do_cross,
+    estimator,
+    num_threads,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+    seed,
+):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.s_mu_tpcf`.
@@ -391,7 +530,8 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     sample1 = enforce_sample_has_correct_shape(sample1)
 
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
-        sample1, sample2, do_cross)
+        sample1, sample2, do_cross
+    )
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
@@ -412,7 +552,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
     _enforce_maximum_search_length(s_max, period)
 
     if (randoms is None) & (PBCs is False):
-        msg = ('\n If no PBCs are specified, randoms must be provided.\n')
+        msg = "\n If no PBCs are specified, randoms must be provided.\n"
         raise ValueError(msg)
 
     try:
@@ -426,5 +566,16 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,
 
     verify_tpcf_estimator(estimator)
 
-    return sample1, s_bins, mu_bins, sample2, randoms, period,\
-        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+    return (
+        sample1,
+        s_bins,
+        mu_bins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+    )

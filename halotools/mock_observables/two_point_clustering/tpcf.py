@@ -8,28 +8,48 @@ import numpy as np
 from math import gamma
 from warnings import warn
 
-from .clustering_helpers import (process_optional_input_sample2,
-    verify_tpcf_estimator, tpcf_estimator_dd_dr_rr_requirements)
+from .clustering_helpers import (
+    process_optional_input_sample2,
+    verify_tpcf_estimator,
+    tpcf_estimator_dd_dr_rr_requirements,
+)
 from .tpcf_estimators import _TP_estimator
 
-from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
-    get_separation_bins_array, get_period, get_num_threads)
+from ..mock_observables_helpers import (
+    enforce_sample_has_correct_shape,
+    get_separation_bins_array,
+    get_period,
+    get_num_threads,
+)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import npairs_3d
 
 from ...custom_exceptions import HalotoolsError
+
 ##########################################################################################
 
 
-__all__ = ['tpcf']
-__author__ = ['Duncan Campbell']
+__all__ = ["tpcf"]
+__author__ = ["Duncan Campbell"]
 
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
-        do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
-        approx_cell2_size, approx_cellran_size):
+def _random_counts(
+    sample1,
+    sample2,
+    randoms,
+    rbins,
+    period,
+    PBCs,
+    num_threads,
+    do_RR,
+    do_DR,
+    _sample1_is_sample2,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+):
     r"""
     Internal function used to random pairs during the calculation of the tpcf.
     There are two high level branches:
@@ -41,29 +61,39 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     Analytical counts are N**2*dv*rho, where dv is the volume of the spherical
     shells, which is the correct volume to use for a continious cubical volume with PBCs.
     """
+
     def nball_volume(R, k=3):
         """
         Calculate the volume of a n-shpere.
         This is used for the analytical randoms.
         """
-        return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
+        return (np.pi ** (k / 2.0) / gamma(k / 2.0 + 1.0)) * R**k
 
     # randoms provided, so calculate random pair counts.
     if randoms is not None:
         if do_RR is True:
-            RR = npairs_3d(randoms, randoms, rbins, period=period,
-                        num_threads=num_threads,
-                        approx_cell1_size=approx_cellran_size,
-                        approx_cell2_size=approx_cellran_size)
+            RR = npairs_3d(
+                randoms,
+                randoms,
+                rbins,
+                period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cellran_size,
+                approx_cell2_size=approx_cellran_size,
+            )
             RR = np.diff(RR)
         else:
             RR = None
         if do_DR is True:
-            D1R = npairs_3d(sample1, randoms, rbins, period=period,
-                         num_threads=num_threads,
-                         approx_cell1_size=approx_cell1_size,
-                         approx_cell2_size=approx_cellran_size
-                            )
+            D1R = npairs_3d(
+                sample1,
+                randoms,
+                rbins,
+                period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cellran_size,
+            )
             D1R = np.diff(D1R)
         else:
             D1R = None
@@ -71,10 +101,15 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
             D2R = None
         else:
             if do_DR is True:
-                D2R = npairs_3d(sample2, randoms, rbins, period=period,
-                             num_threads=num_threads,
-                             approx_cell1_size=approx_cell2_size,
-                             approx_cell2_size=approx_cellran_size)
+                D2R = npairs_3d(
+                    sample2,
+                    randoms,
+                    rbins,
+                    period=period,
+                    num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cellran_size,
+                )
                 D2R = np.diff(D2R)
             else:
                 D2R = None
@@ -94,32 +129,46 @@ def _random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
 
         # calculate randoms for sample1
         N1 = np.shape(sample1)[0]  # number of points in sample1
-        rho1 = N1/global_volume  # number density of points
-        D1R = (NR)*(dv*rho1)  # random counts are N**2*dv*rho
+        rho1 = N1 / global_volume  # number density of points
+        D1R = (NR) * (dv * rho1)  # random counts are N**2*dv*rho
 
         # calculate randoms for sample2
         N2 = np.shape(sample2)[0]  # number of points in sample2
-        rho2 = N2/global_volume  # number density of points
-        D2R = (NR)*(dv*rho2)  # random counts are N**2*dv*rho
+        rho2 = N2 / global_volume  # number density of points
+        D2R = (NR) * (dv * rho2)  # random counts are N**2*dv*rho
 
         # calculate the random-random pairs.
-        rhor = (NR**2)/global_volume
-        RR = (dv*rhor)
+        rhor = (NR**2) / global_volume
+        RR = dv * rhor
 
         return D1R, D2R, RR
 
 
-def _pair_counts(sample1, sample2, rbins,
-        period, num_threads, do_auto, do_cross,
-        _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+def _pair_counts(
+    sample1,
+    sample2,
+    rbins,
+    period,
+    num_threads,
+    do_auto,
+    do_cross,
+    _sample1_is_sample2,
+    approx_cell1_size,
+    approx_cell2_size,
+):
     r"""
     Internal function used calculate DD-pairs during the calculation of the tpcf.
     """
     if do_auto is True:
-        D1D1 = npairs_3d(sample1, sample1, rbins, period=period,
+        D1D1 = npairs_3d(
+            sample1,
+            sample1,
+            rbins,
+            period=period,
             num_threads=num_threads,
             approx_cell1_size=approx_cell1_size,
-            approx_cell2_size=approx_cell1_size)
+            approx_cell2_size=approx_cell1_size,
+        )
         D1D1 = np.diff(D1D1)
     else:
         D1D1 = None
@@ -130,18 +179,28 @@ def _pair_counts(sample1, sample2, rbins,
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = npairs_3d(sample1, sample2, rbins, period=period,
+            D1D2 = npairs_3d(
+                sample1,
+                sample2,
+                rbins,
+                period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell1_size,
-                approx_cell2_size=approx_cell2_size)
+                approx_cell2_size=approx_cell2_size,
+            )
             D1D2 = np.diff(D1D2)
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = npairs_3d(sample2, sample2, rbins, period=period,
+            D2D2 = npairs_3d(
+                sample2,
+                sample2,
+                rbins,
+                period=period,
                 num_threads=num_threads,
                 approx_cell1_size=approx_cell2_size,
-                approx_cell2_size=approx_cell2_size)
+                approx_cell2_size=approx_cell2_size,
+            )
             D2D2 = np.diff(D2D2)
         else:
             D2D2 = None
@@ -149,10 +208,23 @@ def _pair_counts(sample1, sample2, rbins,
     return D1D1, D1D2, D2D2
 
 
-def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
-        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None, approx_cellran_size=None,
-        RR_precomputed=None, NR_precomputed=None, seed=None):
+def tpcf(
+    sample1,
+    rbins,
+    sample2=None,
+    randoms=None,
+    period=None,
+    do_auto=True,
+    do_cross=True,
+    estimator="Natural",
+    num_threads=1,
+    approx_cell1_size=None,
+    approx_cell2_size=None,
+    approx_cellran_size=None,
+    RR_precomputed=None,
+    NR_precomputed=None,
+    seed=None,
+):
     r"""
     Calculate the real space two-point correlation function, :math:`\xi(r)`.
 
@@ -320,16 +392,39 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     """
 
     # check input arguments using clustering helper functions
-    function_args = (sample1, rbins, sample2, randoms, period,
-        do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size,
-        RR_precomputed, NR_precomputed, seed)
+    function_args = (
+        sample1,
+        rbins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        estimator,
+        num_threads,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+        RR_precomputed,
+        NR_precomputed,
+        seed,
+    )
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
-    (sample1, rbins, sample2, randoms, period,
-        do_auto, do_cross, num_threads,
-        _sample1_is_sample2, PBCs,
-        RR_precomputed, NR_precomputed) = _tpcf_process_args(*function_args)
+    (
+        sample1,
+        rbins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+        RR_precomputed,
+        NR_precomputed,
+    ) = _tpcf_process_args(*function_args)
 
     # What needs to be done?
     do_DD, do_DR, do_RR = tpcf_estimator_dd_dr_rr_requirements[estimator]
@@ -351,14 +446,35 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
             NR = N1
 
     # count data pairs
-    D1D1, D1D2, D2D2 = _pair_counts(sample1, sample2, rbins, period,
-        num_threads, do_auto, do_cross, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size)
+    D1D1, D1D2, D2D2 = _pair_counts(
+        sample1,
+        sample2,
+        rbins,
+        period,
+        num_threads,
+        do_auto,
+        do_cross,
+        _sample1_is_sample2,
+        approx_cell1_size,
+        approx_cell2_size,
+    )
 
     # count random pairs
-    D1R, D2R, RR = _random_counts(sample1, sample2, randoms, rbins,
-        period, PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size)
+    D1R, D2R, RR = _random_counts(
+        sample1,
+        sample2,
+        randoms,
+        rbins,
+        period,
+        PBCs,
+        num_threads,
+        do_RR,
+        do_DR,
+        _sample1_is_sample2,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+    )
     if RR_precomputed is not None:
         RR = RR_precomputed
 
@@ -372,19 +488,32 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
             xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_12, xi_22
-        elif (do_cross is True):
+        elif do_cross is True:
             xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
             return xi_12
-        elif (do_auto is True):
+        elif do_auto is True:
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_22
 
 
-def _tpcf_process_args(sample1, rbins, sample2, randoms,
-        period, do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size,
-        RR_precomputed, NR_precomputed, seed):
+def _tpcf_process_args(
+    sample1,
+    rbins,
+    sample2,
+    randoms,
+    period,
+    do_auto,
+    do_cross,
+    estimator,
+    num_threads,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+    RR_precomputed,
+    NR_precomputed,
+    seed,
+):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf`.
@@ -392,7 +521,8 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
 
     sample1 = enforce_sample_has_correct_shape(sample1)
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
-        sample1, sample2, do_cross)
+        sample1, sample2, do_cross
+    )
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
@@ -419,34 +549,52 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
 
     verify_tpcf_estimator(estimator)
 
-    if ((RR_precomputed is not None) | (NR_precomputed is not None)):
+    if (RR_precomputed is not None) | (NR_precomputed is not None):
         try:
             assert ((RR_precomputed is not None) & (NR_precomputed is not None)) is True
         except AssertionError:
-            msg = ("\nYou must either provide both "
-                "``RR_precomputed`` and ``NR_precomputed`` arguments, or neither\n")
+            msg = (
+                "\nYou must either provide both "
+                "``RR_precomputed`` and ``NR_precomputed`` arguments, or neither\n"
+            )
             raise HalotoolsError(msg)
         # At this point, we have been provided *both* RR_precomputed *and* NR_precomputed
 
         try:
-            assert len(RR_precomputed) == len(rbins)-1
+            assert len(RR_precomputed) == len(rbins) - 1
         except AssertionError:
-            msg = ("\nLength of ``RR_precomputed`` must match length of ``rbins``\n")
+            msg = "\nLength of ``RR_precomputed`` must match length of ``rbins``\n"
             raise HalotoolsError(msg)
 
         if np.any(RR_precomputed == 0):
-            msg = ("RR_precomputed has radial bin(s) which contain no pairs. \n"
-                   "Consider increasing the number of randoms, or using larger bins.")
+            msg = (
+                "RR_precomputed has radial bin(s) which contain no pairs. \n"
+                "Consider increasing the number of randoms, or using larger bins."
+            )
             warn(msg)
 
         try:
             assert len(randoms) == NR_precomputed
         except AssertionError:
-            msg = ("If passing in randoms and also NR_precomputed, \n"
-                "the value of NR_precomputed must agree with the number of randoms\n")
+            msg = (
+                "If passing in randoms and also NR_precomputed, \n"
+                "the value of NR_precomputed must agree with the number of randoms\n"
+            )
             raise HalotoolsError(msg)
 
-    assert np.all(rbins > 0.), "All values of input ``rbins`` must be positive"
+    assert np.all(rbins > 0.0), "All values of input ``rbins`` must be positive"
 
-    return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs, RR_precomputed, NR_precomputed
+    return (
+        sample1,
+        rbins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+        RR_precomputed,
+        NR_precomputed,
+    )

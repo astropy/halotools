@@ -5,10 +5,14 @@ from __future__ import absolute_import, division, print_function
 import pytest
 import numpy as np
 
-from ..tpcf_estimators import _test_for_zero_division, _list_estimators, _TP_estimator_requirements
+from ..tpcf_estimators import (
+    _test_for_zero_division,
+    _list_estimators,
+    _TP_estimator_requirements,
+)
 from ....custom_exceptions import HalotoolsError
 
-__all__ = ('test_zero_division1', )
+__all__ = ("test_zero_division1",)
 
 
 def test_zero_division1():
@@ -29,8 +33,8 @@ def test_zero_division2():
     RR = np.arange(nbins) + 10
     ND1, ND2, NR1, NR2 = 100, 100, 100, 100
 
-    RR[0] = 0.
-    DR[0] = 0.
+    RR[0] = 0.0
+    DR[0] = 0.0
     for estimator in _list_estimators():
         with pytest.raises(ValueError) as err:
             _test_for_zero_division(DD, DR, RR, ND1, ND2, NR1, NR2, estimator)
@@ -39,22 +43,22 @@ def test_zero_division2():
 
 
 def test_TP_estimator_requirements_davis_peebles():
-    do_DD, do_DR, do_RR = _TP_estimator_requirements('Davis-Peebles')
+    do_DD, do_DR, do_RR = _TP_estimator_requirements("Davis-Peebles")
     assert np.all((do_DD, do_DR, do_RR) == (True, True, False))
 
 
 def test_TP_estimator_requirements_hewett():
-    do_DD, do_DR, do_RR = _TP_estimator_requirements('Hewett')
+    do_DD, do_DR, do_RR = _TP_estimator_requirements("Hewett")
     assert np.all((do_DD, do_DR, do_RR) == (True, True, True))
 
 
 def test_TP_estimator_requirements_hamilton():
-    do_DD, do_DR, do_RR = _TP_estimator_requirements('Hamilton')
+    do_DD, do_DR, do_RR = _TP_estimator_requirements("Hamilton")
     assert np.all((do_DD, do_DR, do_RR) == (True, True, True))
 
 
 def test_TP_estimator_requirements_bad_estimator():
     with pytest.raises(HalotoolsError) as err:
-        __ = _TP_estimator_requirements('Ron Perlman')
+        __ = _TP_estimator_requirements("Ron Perlman")
     substr = "Input `estimator` must be one of the following"
     assert substr in err.value.args[0]

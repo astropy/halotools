@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from math import gamma
 
-from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
+from .clustering_helpers import process_optional_input_sample2, verify_tpcf_estimator
 
-from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
-    get_separation_bins_array, get_period, get_num_threads)
+from ..mock_observables_helpers import (
+    enforce_sample_has_correct_shape,
+    get_separation_bins_array,
+    get_period,
+    get_num_threads,
+)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
@@ -21,19 +25,30 @@ from ..pair_counters import marked_npairs_3d
 
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ['tpcf_one_two_halo_decomp']
-__author__ = ['Duncan Campbell']
+__all__ = ["tpcf_one_two_halo_decomp"]
+__author__ = ["Duncan Campbell"]
 
 
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
-        sample2=None, sample2_host_halo_id=None,
-        randoms=None, period=None,
-        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
-        approx_cell1_size=None, approx_cell2_size=None,
-        approx_cellran_size=None, seed=None):
+def tpcf_one_two_halo_decomp(
+    sample1,
+    sample1_host_halo_id,
+    rbins,
+    sample2=None,
+    sample2_host_halo_id=None,
+    randoms=None,
+    period=None,
+    do_auto=True,
+    do_cross=True,
+    estimator="Natural",
+    num_threads=1,
+    approx_cell1_size=None,
+    approx_cell2_size=None,
+    approx_cellran_size=None,
+    seed=None,
+):
     r"""
     Calculate the real space one-halo and two-halo decomposed two-point correlation
     functions, :math:`\xi^{1h}(r)` and :math:`\xi^{2h}(r)`.
@@ -186,14 +201,39 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     """
 
     # check input arguments using clustering helper functions
-    function_args = (sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
-        randoms, period, do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
+    function_args = (
+        sample1,
+        sample1_host_halo_id,
+        rbins,
+        sample2,
+        sample2_host_halo_id,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        estimator,
+        num_threads,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+        seed,
+    )
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
-    sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,\
-        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =\
-        _tpcf_one_two_halo_decomp_process_args(*function_args)
+    (
+        sample1,
+        sample1_host_halo_id,
+        rbins,
+        sample2,
+        sample2_host_halo_id,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+    ) = _tpcf_one_two_halo_decomp_process_args(*function_args)
 
     # What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
@@ -211,46 +251,110 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     # calculate 1-halo pairs
     weight_func_id = 3
     one_halo_D1D1, one_halo_D1D2, one_halo_D2D2 = marked_pair_counts(
-            sample1, sample2, rbins, period, num_threads,
-            do_auto, do_cross, sample1_host_halo_id,
-            sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
+        sample1,
+        sample2,
+        rbins,
+        period,
+        num_threads,
+        do_auto,
+        do_cross,
+        sample1_host_halo_id,
+        sample2_host_halo_id,
+        weight_func_id,
+        _sample1_is_sample2,
+    )
 
     # calculate 2-halo pairs
     weight_func_id = 4
     two_halo_D1D1, two_halo_D1D2, two_halo_D2D2 = marked_pair_counts(
-            sample1, sample2, rbins, period, num_threads,
-            do_auto, do_cross, sample1_host_halo_id,
-            sample2_host_halo_id, weight_func_id, _sample1_is_sample2)
+        sample1,
+        sample2,
+        rbins,
+        period,
+        num_threads,
+        do_auto,
+        do_cross,
+        sample1_host_halo_id,
+        sample2_host_halo_id,
+        weight_func_id,
+        _sample1_is_sample2,
+    )
 
     # count random pairs
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
-                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
-                                 approx_cell1_size, approx_cell2_size, approx_cellran_size)
+    D1R, D2R, RR = random_counts(
+        sample1,
+        sample2,
+        randoms,
+        rbins,
+        period,
+        PBCs,
+        num_threads,
+        do_RR,
+        do_DR,
+        _sample1_is_sample2,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+    )
 
     # run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
-        one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-        two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
+        one_halo_xi_11 = _TP_estimator(
+            one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
+        )
+        two_halo_xi_11 = _TP_estimator(
+            two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
+        )
         return one_halo_xi_11, two_halo_xi_11
     else:
         if (do_auto is True) & (do_cross is True):
-            one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-            one_halo_xi_12 = _TP_estimator(one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
-            one_halo_xi_22 = _TP_estimator(one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
-            two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-            two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
-            two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
-            return one_halo_xi_11, two_halo_xi_11, one_halo_xi_12,\
-                two_halo_xi_12, one_halo_xi_22, two_halo_xi_22
-        elif (do_cross is True):
-            one_halo_xi_12 = _TP_estimator(one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
-            two_halo_xi_12 = _TP_estimator(two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            one_halo_xi_11 = _TP_estimator(
+                one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
+            )
+            one_halo_xi_12 = _TP_estimator(
+                one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            )
+            one_halo_xi_22 = _TP_estimator(
+                one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator
+            )
+            two_halo_xi_11 = _TP_estimator(
+                two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
+            )
+            two_halo_xi_12 = _TP_estimator(
+                two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            )
+            two_halo_xi_22 = _TP_estimator(
+                two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator
+            )
+            return (
+                one_halo_xi_11,
+                two_halo_xi_11,
+                one_halo_xi_12,
+                two_halo_xi_12,
+                one_halo_xi_22,
+                two_halo_xi_22,
+            )
+        elif do_cross is True:
+            one_halo_xi_12 = _TP_estimator(
+                one_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            )
+            two_halo_xi_12 = _TP_estimator(
+                two_halo_D1D2, D1R, RR, N1, N2, NR, NR, estimator
+            )
             return one_halo_xi_12, two_halo_xi_12
-        elif (do_auto is True):
-            one_halo_xi_11 = _TP_estimator(one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-            one_halo_xi_22 = _TP_estimator(one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
-            two_halo_xi_11 = _TP_estimator(two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-            two_halo_xi_22 = _TP_estimator(two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator)
+        elif do_auto is True:
+            one_halo_xi_11 = _TP_estimator(
+                one_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
+            )
+            one_halo_xi_22 = _TP_estimator(
+                one_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator
+            )
+            two_halo_xi_11 = _TP_estimator(
+                two_halo_D1D1, D1R, RR, N1, N1, NR, NR, estimator
+            )
+            two_halo_xi_22 = _TP_estimator(
+                two_halo_D2D2, D2R, RR, N2, N2, NR, NR, estimator
+            )
             return one_halo_xi_11, two_halo_xi_11, one_halo_xi_22, two_halo_xi_22
 
 
@@ -259,12 +363,24 @@ def nball_volume(R, k=3):
     Calculate the volume of a n-shpere.
     This is used for the analytical randoms.
     """
-    return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
+    return (np.pi ** (k / 2.0) / gamma(k / 2.0 + 1.0)) * R**k
 
 
-def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
-        do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,
-        approx_cell2_size, approx_cellran_size):
+def random_counts(
+    sample1,
+    sample2,
+    randoms,
+    rbins,
+    period,
+    PBCs,
+    num_threads,
+    do_RR,
+    do_DR,
+    _sample1_is_sample2,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+):
     r"""
     Count random pairs.  There are two high level branches:
         1. w/ or wo/ PBCs and randoms.
@@ -279,19 +395,28 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
     # randoms provided, so calculate random pair counts.
     if randoms is not None:
         if do_RR is True:
-            RR = npairs_3d(randoms, randoms, rbins, period=period,
-                        num_threads=num_threads,
-                        approx_cell1_size=approx_cellran_size,
-                        approx_cell2_size=approx_cellran_size)
+            RR = npairs_3d(
+                randoms,
+                randoms,
+                rbins,
+                period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cellran_size,
+                approx_cell2_size=approx_cellran_size,
+            )
             RR = np.diff(RR)
         else:
             RR = None
         if do_DR is True:
-            D1R = npairs_3d(sample1, randoms, rbins, period=period,
-                         num_threads=num_threads,
-                         approx_cell1_size=approx_cell1_size,
-                         approx_cell2_size=approx_cellran_size
-                            )
+            D1R = npairs_3d(
+                sample1,
+                randoms,
+                rbins,
+                period=period,
+                num_threads=num_threads,
+                approx_cell1_size=approx_cell1_size,
+                approx_cell2_size=approx_cellran_size,
+            )
             D1R = np.diff(D1R)
         else:
             D1R = None
@@ -299,10 +424,15 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
             D2R = None
         else:
             if do_DR is True:
-                D2R = npairs_3d(sample2, randoms, rbins, period=period,
-                             num_threads=num_threads,
-                             approx_cell1_size=approx_cell2_size,
-                             approx_cell2_size=approx_cellran_size)
+                D2R = npairs_3d(
+                    sample2,
+                    randoms,
+                    rbins,
+                    period=period,
+                    num_threads=num_threads,
+                    approx_cell1_size=approx_cell2_size,
+                    approx_cell2_size=approx_cellran_size,
+                )
                 D2R = np.diff(D2R)
             else:
                 D2R = None
@@ -320,23 +450,34 @@ def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,
 
         # calculate randoms for sample1
         N1 = np.shape(sample1)[0]  # number of points in sample1
-        rho1 = N1/global_volume  # number density of points
-        D1R = (NR)*(dv*rho1)  # random counts are N**2*dv*rho
+        rho1 = N1 / global_volume  # number density of points
+        D1R = (NR) * (dv * rho1)  # random counts are N**2*dv*rho
 
         # calculate randoms for sample2
         N2 = np.shape(sample2)[0]  # number of points in sample2
-        rho2 = N2/global_volume  # number density of points
-        D2R = (NR)*(dv*rho2)  # random counts are N**2*dv*rho
+        rho2 = N2 / global_volume  # number density of points
+        D2R = (NR) * (dv * rho2)  # random counts are N**2*dv*rho
 
         # calculate the random-random pairs.
-        rhor = (NR**2)/global_volume
-        RR = (dv*rhor)
+        rhor = (NR**2) / global_volume
+        RR = dv * rhor
 
         return D1R, D2R, RR
 
 
-def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
-        do_auto, do_cross, marks1, marks2, weight_func_id, _sample1_is_sample2):
+def marked_pair_counts(
+    sample1,
+    sample2,
+    rbins,
+    period,
+    num_threads,
+    do_auto,
+    do_cross,
+    marks1,
+    marks2,
+    weight_func_id,
+    _sample1_is_sample2,
+):
     """
     Count weighted data pairs.
     """
@@ -346,9 +487,16 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     marks2 = np.vstack((marks2, np.ones(len(marks2)))).T
 
     if do_auto is True:
-        D1D1 = marked_npairs_3d(sample1, sample1, rbins,
-            weights1=marks1, weights2=marks1,
-            weight_func_id=weight_func_id, period=period, num_threads=num_threads)
+        D1D1 = marked_npairs_3d(
+            sample1,
+            sample1,
+            rbins,
+            weights1=marks1,
+            weights2=marks1,
+            weight_func_id=weight_func_id,
+            period=period,
+            num_threads=num_threads,
+        )
         D1D1 = np.diff(D1D1)
     else:
         D1D1 = None
@@ -359,16 +507,30 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = marked_npairs_3d(sample1, sample2, rbins,
-                weights1=marks1, weights2=marks2,
-                weight_func_id=weight_func_id, period=period, num_threads=num_threads)
+            D1D2 = marked_npairs_3d(
+                sample1,
+                sample2,
+                rbins,
+                weights1=marks1,
+                weights2=marks2,
+                weight_func_id=weight_func_id,
+                period=period,
+                num_threads=num_threads,
+            )
             D1D2 = np.diff(D1D2)
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = marked_npairs_3d(sample2, sample2, rbins,
-                weights1=marks2, weights2=marks2,
-                weight_func_id=weight_func_id, period=period, num_threads=num_threads)
+            D2D2 = marked_npairs_3d(
+                sample2,
+                sample2,
+                rbins,
+                weights1=marks2,
+                weights2=marks2,
+                weight_func_id=weight_func_id,
+                period=period,
+                num_threads=num_threads,
+            )
             D2D2 = np.diff(D2D2)
         else:
             D2D2 = None
@@ -376,10 +538,23 @@ def marked_pair_counts(sample1, sample2, rbins, period, num_threads,
     return D1D1, D1D2, D2D2
 
 
-def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
-        sample2, sample2_host_halo_id, randoms,
-        period, do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
+def _tpcf_one_two_halo_decomp_process_args(
+    sample1,
+    sample1_host_halo_id,
+    rbins,
+    sample2,
+    sample2_host_halo_id,
+    randoms,
+    period,
+    do_auto,
+    do_cross,
+    estimator,
+    num_threads,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+    seed,
+):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.tpcf_one_two_halo_decomp`.
@@ -389,12 +564,13 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
     sample1_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype(np.int64)
 
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
-        sample1, sample2, do_cross)
+        sample1, sample2, do_cross
+    )
     if _sample1_is_sample2 is True:
         sample2_host_halo_id = sample1_host_halo_id
     else:
         if sample2_host_halo_id is None:
-            msg = ("If passing an input ``sample2``, must also pass sample2_host_halo_id")
+            msg = "If passing an input ``sample2``, must also pass sample2_host_halo_id"
             raise ValueError(msg)
         else:
             sample2_host_halo_id = np.atleast_1d(sample2_host_halo_id).astype(np.int64)
@@ -404,12 +580,16 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
 
     # test to see if halo ids are the same length as samples
     if np.shape(sample1_host_halo_id) != (len(sample1),):
-        msg = ("\n `sample1_host_halo_id` must be a 1-D \n"
-               "array the same length as `sample1`.")
+        msg = (
+            "\n `sample1_host_halo_id` must be a 1-D \n"
+            "array the same length as `sample1`."
+        )
         raise HalotoolsError(msg)
     if np.shape(sample2_host_halo_id) != (len(sample2),):
-        msg = ("\n `sample2_host_halo_id` must be a 1-D \n"
-               "array the same length as `sample2`.")
+        msg = (
+            "\n `sample2_host_halo_id` must be a 1-D \n"
+            "array the same length as `sample2`."
+        )
         raise HalotoolsError(msg)
 
     rbins = get_separation_bins_array(rbins)
@@ -420,7 +600,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
     _enforce_maximum_search_length(rmax, period)
 
     if (randoms is None) & (PBCs is False):
-        msg = ('\n If no PBCs are specified, randoms must be provided.')
+        msg = "\n If no PBCs are specified, randoms must be provided."
         raise HalotoolsError(msg)
 
     try:
@@ -434,5 +614,17 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
 
     verify_tpcf_estimator(estimator)
 
-    return sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,\
-        randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+    return (
+        sample1,
+        sample1_host_halo_id,
+        rbins,
+        sample2,
+        sample2_host_halo_id,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+    )
