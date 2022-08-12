@@ -9,6 +9,7 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .tpcf_estimators import _TP_estimator_crossx
 from ..pair_counters import npairs_jackknife_3d
 
 from .clustering_helpers import process_optional_input_sample2, verify_tpcf_estimator
@@ -75,7 +76,8 @@ def tpcf_jackknife(
     Nsub : array_like, optional
         Lenght-3 numpy array of number of divisions along each dimension defining
         jackknife sample subvolumes.  If single integer is given, it is assumed to be
-        equivalent for each dimension.  The total number of samples used is then given by
+        equivalent for each dimension.
+        The total number of samples used is then given by
         *numpy.prod(Nsub)*. Default is 5 divisions per dimension.
 
     sample2 : array_like, optional
@@ -355,8 +357,8 @@ def tpcf_jackknife(
             D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator
         )
     if do_cross is True:
-        xi_12_full = _TP_estimator(
-            D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator
+        xi_12_full = _TP_estimator_crossx(
+            D1D2_full, D1R_full, D2R_full, RR_full, N1, N2, NR, NR, estimator
         )
 
     # calculate the correlation function for the subsamples
@@ -368,8 +370,16 @@ def tpcf_jackknife(
             D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator
         )
     if do_cross is True:
-        xi_12_sub = _TP_estimator(
-            D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator
+        xi_12_sub = _TP_estimator_crossx(
+            D1D2_sub,
+            D1R_sub,
+            D2R_sub,
+            RR_sub,
+            N1_subs,
+            N2_subs,
+            NR_subs,
+            NR_subs,
+            estimator,
         )
 
     # calculate the covariance matrix

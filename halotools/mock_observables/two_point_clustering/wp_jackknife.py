@@ -9,28 +9,47 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 
 from .tpcf_estimators import _TP_estimator, _TP_estimator_requirements
+from .tpcf_estimators import _TP_estimator_crossx
 from .tpcf_jackknife import get_subvolume_numbers, _enclose_in_box
 
-from .clustering_helpers import (process_optional_input_sample2, verify_tpcf_estimator)
-from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
-    get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
+from .clustering_helpers import process_optional_input_sample2, verify_tpcf_estimator
+from ..mock_observables_helpers import (
+    enforce_sample_has_correct_shape,
+    get_separation_bins_array,
+    get_line_of_sight_bins_array,
+    get_period,
+    get_num_threads,
+)
 from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
 from ..pair_counters import npairs_jackknife_xy_z
 
 from ..catalog_analysis_helpers import cuboid_subvolume_labels
 
 
-__all__ = ('wp_jackknife', )
-__author__ = ('Duncan Campbell', 'Andrew Hearin')
+__all__ = ("wp_jackknife",)
+__author__ = ("Duncan Campbell", "Andrew Hearin")
 
 
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
-        sample2=None, period=None, do_auto=True, do_cross=True,
-        estimator='Natural', num_threads=1, seed=None,
-        approx_cell1_size=None, approx_cell2_size=None, approx_cellran_size=None):
+def wp_jackknife(
+    sample1,
+    randoms,
+    rp_bins,
+    pi_max,
+    Nsub=[5, 5, 5],
+    sample2=None,
+    period=None,
+    do_auto=True,
+    do_cross=True,
+    estimator="Natural",
+    num_threads=1,
+    seed=None,
+    approx_cell1_size=None,
+    approx_cell2_size=None,
+    approx_cellran_size=None,
+):
     r"""
     Calculate the projected two-point correlation function, :math:`w_p(r_p)` and the covariance
     matrix, :math:`{C}_{ij}`, between ith and jth projected radial bin.
@@ -215,11 +234,35 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
     pi_bins = np.array([0.0, float(pi_max)])
 
     # process input parameters
-    function_args = (sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,
-        do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed)
-    sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _wp_jackknife_tpcf_process_args(*function_args)
+    function_args = (
+        sample1,
+        rp_bins,
+        pi_bins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        estimator,
+        num_threads,
+        approx_cell1_size,
+        approx_cell2_size,
+        approx_cellran_size,
+        seed,
+    )
+    (
+        sample1,
+        rp_bins,
+        pi_bins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+    ) = _wp_jackknife_tpcf_process_args(*function_args)
 
     # determine box size the data occupies.
     # This is used in determining jackknife samples.
@@ -249,30 +292,62 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
 
     # calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(
-        sample1, sample2, j_index_1, j_index_2, N_sub_vol,
-        rp_bins, pi_bins, period, num_threads, do_auto, do_cross, _sample1_is_sample2)
+        sample1,
+        sample2,
+        j_index_1,
+        j_index_2,
+        N_sub_vol,
+        rp_bins,
+        pi_bins,
+        period,
+        num_threads,
+        do_auto,
+        do_cross,
+        _sample1_is_sample2,
+    )
 
     # pull out the full and sub sample results
-    if (do_auto is True):
+    if do_auto is True:
         D1D1_full = D1D1[0, :, 0]
         D1D1_sub = D1D1[1:, :, 0]
         D2D2_full = D2D2[0, :, 0]
         D2D2_sub = D2D2[1:, :, 0]
-    if (do_cross is True):
+    if do_cross is True:
         D1D2_full = D1D2[0, :, 0]
         D1D2_sub = D1D2[1:, :, 0]
 
-
     # do random counts
-    D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,
-        rp_bins, pi_bins, period, num_threads, do_DR, do_RR)
+    D1R, RR = jrandom_counts(
+        sample1,
+        randoms,
+        j_index_1,
+        j_index_random,
+        N_sub_vol,
+        rp_bins,
+        pi_bins,
+        period,
+        num_threads,
+        do_DR,
+        do_RR,
+    )
 
     if _sample1_is_sample2:
         D2R = D1R
     else:
         if do_DR is True:
-            D2R, RR_dummy = jrandom_counts(sample2, randoms, j_index_2, j_index_random,
-                N_sub_vol, rp_bins, pi_bins, period, num_threads, do_DR, do_RR=False)
+            D2R, RR_dummy = jrandom_counts(
+                sample2,
+                randoms,
+                j_index_2,
+                j_index_random,
+                N_sub_vol,
+                rp_bins,
+                pi_bins,
+                period,
+                num_threads,
+                do_DR,
+                do_RR=False,
+            )
         else:
             D2R = None
 
@@ -294,35 +369,55 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
         RR_sub = None
 
     # calculate the correlation function for the full sample
-    if (do_auto is True):
-        xi_11_full = _TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
-        xi_22_full = _TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
-    if (do_cross is True):
-        xi_12_full = _TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
+    if do_auto is True:
+        xi_11_full = _TP_estimator(
+            D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator
+        )
+        xi_22_full = _TP_estimator(
+            D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator
+        )
+    if do_cross is True:
+        xi_12_full = _TP_estimator_crossx(
+            D1D2_full, D1R_full, D2R_full, RR_full, N1, N2, NR, NR, estimator
+        )
 
     # calculate the correlation function for the subsamples
-    if (do_auto is True):
-        xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator)
-        xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator)
-    if (do_cross is True):
-        xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs, NR_subs, estimator)
+    if do_auto is True:
+        xi_11_sub = _TP_estimator(
+            D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs, NR_subs, estimator
+        )
+        xi_22_sub = _TP_estimator(
+            D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs, NR_subs, estimator
+        )
+    if do_cross is True:
+        xi_12_sub = _TP_estimator_crossx(
+            D1D2_sub,
+            D1R_sub,
+            D2R_sub,
+            RR_sub,
+            N1_subs,
+            N2_subs,
+            NR_subs,
+            NR_subs,
+            estimator,
+        )
 
     # account for factor of 2*pi_max in the integration
-    if (do_auto is True):
-        xi_11_full = 2.0*pi_max*xi_11_full
-        xi_22_full = 2.0*pi_max*xi_22_full
-        xi_11_sub = 2.0*pi_max*xi_11_sub
-        xi_22_sub = 2.0*pi_max*xi_22_sub
-    if (do_cross is True):
-        xi_12_full = 2.0*pi_max*xi_12_full
-        xi_12_sub = 2.0*pi_max*xi_12_sub
+    if do_auto is True:
+        xi_11_full = 2.0 * pi_max * xi_11_full
+        xi_22_full = 2.0 * pi_max * xi_22_full
+        xi_11_sub = 2.0 * pi_max * xi_11_sub
+        xi_22_sub = 2.0 * pi_max * xi_22_sub
+    if do_cross is True:
+        xi_12_full = 2.0 * pi_max * xi_12_full
+        xi_12_sub = 2.0 * pi_max * xi_12_sub
 
     # calculate the covariance matrix
-    if (do_auto is True):
-        xi_11_cov = np.array(np.cov(xi_11_sub.T, bias=True))*(N_sub_vol-1)
-        xi_22_cov = np.array(np.cov(xi_22_sub.T, bias=True))*(N_sub_vol-1)
-    if (do_cross is True):
-        xi_12_cov = np.array(np.cov(xi_12_sub.T, bias=True))*(N_sub_vol-1)
+    if do_auto is True:
+        xi_11_cov = np.array(np.cov(xi_11_sub.T, bias=True)) * (N_sub_vol - 1)
+        xi_22_cov = np.array(np.cov(xi_22_sub.T, bias=True)) * (N_sub_vol - 1)
+    if do_cross is True:
+        xi_12_cov = np.array(np.cov(xi_12_sub.T, bias=True)) * (N_sub_vol - 1)
 
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
@@ -335,15 +430,35 @@ def wp_jackknife(sample1, randoms, rp_bins, pi_max, Nsub=[5, 5, 5],
             return xi_12_full, xi_12_cov
 
 
-def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi_bins,
-        period, num_threads, do_auto, do_cross, _sample1_is_sample2):
+def jnpair_counts(
+    sample1,
+    sample2,
+    j_index_1,
+    j_index_2,
+    N_sub_vol,
+    rp_bins,
+    pi_bins,
+    period,
+    num_threads,
+    do_auto,
+    do_cross,
+    _sample1_is_sample2,
+):
     """
     Count jackknife data pairs: DD
     """
     if do_auto is True:
-        D1D1 = npairs_jackknife_xy_z(sample1, sample1, rp_bins, pi_bins, period=period,
-            jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,
-            num_threads=num_threads)
+        D1D1 = npairs_jackknife_xy_z(
+            sample1,
+            sample1,
+            rp_bins,
+            pi_bins,
+            period=period,
+            jtags1=j_index_1,
+            jtags2=j_index_1,
+            N_samples=N_sub_vol,
+            num_threads=num_threads,
+        )
         D1D1 = np.diff(np.diff(D1D1, axis=1), axis=2)
     else:
         D1D1 = None
@@ -354,38 +469,81 @@ def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rp_bins, pi
         D2D2 = D1D1
     else:
         if do_cross is True:
-            D1D2 = npairs_jackknife_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
-                jtags1=j_index_1, jtags2=j_index_2,
-                N_samples=N_sub_vol, num_threads=num_threads)
+            D1D2 = npairs_jackknife_xy_z(
+                sample1,
+                sample2,
+                rp_bins,
+                pi_bins,
+                period=period,
+                jtags1=j_index_1,
+                jtags2=j_index_2,
+                N_samples=N_sub_vol,
+                num_threads=num_threads,
+            )
             D1D2 = np.diff(np.diff(D1D2, axis=1), axis=2)
         else:
             D1D2 = None
         if do_auto is True:
-            D2D2 = npairs_jackknife_xy_z(sample2, sample2, rp_bins, pi_bins, period=period,
-                jtags1=j_index_2, jtags2=j_index_2,
-                N_samples=N_sub_vol, num_threads=num_threads)
+            D2D2 = npairs_jackknife_xy_z(
+                sample2,
+                sample2,
+                rp_bins,
+                pi_bins,
+                period=period,
+                jtags1=j_index_2,
+                jtags2=j_index_2,
+                N_samples=N_sub_vol,
+                num_threads=num_threads,
+            )
             D2D2 = np.diff(np.diff(D2D2, axis=1), axis=2)
 
     return D1D1, D1D2, D2D2
 
 
-def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins, pi_bins,
-        period, num_threads, do_DR, do_RR):
+def jrandom_counts(
+    sample,
+    randoms,
+    j_index,
+    j_index_randoms,
+    N_sub_vol,
+    rp_bins,
+    pi_bins,
+    period,
+    num_threads,
+    do_DR,
+    do_RR,
+):
     """
     Count jackknife random pairs: DR, RR
     """
 
     if do_DR is True:
-        DR = npairs_jackknife_xy_z(sample, randoms, rp_bins, pi_bins, period=period,
-            jtags1=j_index, jtags2=j_index_randoms,
-            N_samples=N_sub_vol, num_threads=num_threads)
+        DR = npairs_jackknife_xy_z(
+            sample,
+            randoms,
+            rp_bins,
+            pi_bins,
+            period=period,
+            jtags1=j_index,
+            jtags2=j_index_randoms,
+            N_samples=N_sub_vol,
+            num_threads=num_threads,
+        )
         DR = np.diff(np.diff(DR, axis=1), axis=2)
     else:
         DR = None
     if do_RR is True:
-        RR = npairs_jackknife_xy_z(randoms, randoms, rp_bins, pi_bins, period=period,
-            jtags1=j_index_randoms, jtags2=j_index_randoms,
-            N_samples=N_sub_vol, num_threads=num_threads)
+        RR = npairs_jackknife_xy_z(
+            randoms,
+            randoms,
+            rp_bins,
+            pi_bins,
+            period=period,
+            jtags1=j_index_randoms,
+            jtags2=j_index_randoms,
+            N_samples=N_sub_vol,
+            num_threads=num_threads,
+        )
         RR = np.diff(np.diff(RR, axis=1), axis=2)
     else:
         RR = None
@@ -393,16 +551,30 @@ def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rp_bins
     return DR, RR
 
 
-def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
-        period, do_auto, do_cross, estimator, num_threads,
-        approx_cell1_size, approx_cell2_size, approx_cellran_size, seed):
+def _wp_jackknife_tpcf_process_args(
+    sample1,
+    rp_bins,
+    pi_bins,
+    sample2,
+    randoms,
+    period,
+    do_auto,
+    do_cross,
+    estimator,
+    num_threads,
+    approx_cell1_size,
+    approx_cell2_size,
+    approx_cellran_size,
+    seed,
+):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.redshift_space_tpcf`.
     """
     sample1 = enforce_sample_has_correct_shape(sample1)
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
-        sample1, sample2, do_cross)
+        sample1, sample2, do_cross
+    )
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
@@ -420,11 +592,13 @@ def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
         N_randoms = randoms[0]
         if PBCs is True:
             with NumpyRNGContext(seed):
-                randoms = np.random.random((N_randoms, 3))*period
+                randoms = np.random.random((N_randoms, 3)) * period
         else:
-            msg = ("\n When no `period` parameter is passed, \n"
-                   "the user must provide true randoms, and \n"
-                   "not just the number of randoms desired.")
+            msg = (
+                "\n When no `period` parameter is passed, \n"
+                "the user must provide true randoms, and \n"
+                "not just the number of randoms desired."
+            )
             raise ValueError(msg)
 
     _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
@@ -444,5 +618,16 @@ def _wp_jackknife_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,
 
     verify_tpcf_estimator(estimator)
 
-    return sample1, rp_bins, pi_bins, sample2, randoms, period,\
-        do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+    return (
+        sample1,
+        rp_bins,
+        pi_bins,
+        sample2,
+        randoms,
+        period,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+    )

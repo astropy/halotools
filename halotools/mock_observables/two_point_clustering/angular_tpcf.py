@@ -7,7 +7,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from .tpcf_estimators import _TP_estimator_requirements, _TP_estimator
-from .clustering_helpers import (verify_tpcf_estimator, process_optional_input_sample2)
+from .tpcf_estimators import _TP_estimator_crossx
+
+from .clustering_helpers import verify_tpcf_estimator, process_optional_input_sample2
 
 
 from ..pair_counters import npairs_3d
@@ -17,14 +19,22 @@ from ...utils.spherical_geometry import spherical_to_cartesian, chord_to_cartesi
 from ...custom_exceptions import HalotoolsError
 from ...utils.array_utils import array_is_monotonic
 
-__all__ = ['angular_tpcf']
-__author__ = ['Duncan Campbell']
+__all__ = ["angular_tpcf"]
+__author__ = ["Duncan Campbell"]
 
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
-        do_auto=True, do_cross=True, estimator='Natural', num_threads=1):
+def angular_tpcf(
+    sample1,
+    theta_bins,
+    sample2=None,
+    randoms=None,
+    do_auto=True,
+    do_cross=True,
+    estimator="Natural",
+    num_threads=1,
+):
     r"""
     Calculate the angular two-point correlation function, :math:`w(\theta)`.
 
@@ -123,12 +133,28 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     """
 
     # check input arguments using clustering helper functions
-    function_args = (sample1, theta_bins, sample2, randoms, do_auto, do_cross,
-        estimator, num_threads)
+    function_args = (
+        sample1,
+        theta_bins,
+        sample2,
+        randoms,
+        do_auto,
+        do_cross,
+        estimator,
+        num_threads,
+    )
 
     # pass arguments in, and get out processed arguments, plus some control flow variables
-    sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2 = _angular_tpcf_process_args(*function_args)
+    (
+        sample1,
+        theta_bins,
+        sample2,
+        randoms,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+    ) = _angular_tpcf_process_args(*function_args)
 
     # convert angular bins to coord lengths on a unit sphere
     chord_bins = chord_to_cartesian(theta_bins, radians=False)
@@ -145,29 +171,36 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         x, y, z = spherical_to_cartesian(randoms[:, 0], randoms[:, 1])
         randoms = np.vstack((x, y, z)).T
 
-    def random_counts(sample1, sample2, randoms, chord_bins,
-            num_threads, do_RR, do_DR, _sample1_is_sample2):
+    def random_counts(
+        sample1,
+        sample2,
+        randoms,
+        chord_bins,
+        num_threads,
+        do_RR,
+        do_DR,
+        _sample1_is_sample2,
+    ):
         """
         Count random pairs.
         """
+
         def area_spherical_cap(chord):
             """
             Calculate the area of a spherical cap on a unit sphere given the chord length
             """
-            h = 1.0 - np.sqrt(1.0-chord**2)
-            return np.pi*(chord**2+h**2)
+            h = 1.0 - np.sqrt(1.0 - chord**2)
+            return np.pi * (chord**2 + h**2)
 
         # randoms provided, so calculate random pair counts.
         if randoms is not None:
             if do_RR is True:
-                RR = npairs_3d(randoms, randoms, chord_bins,
-                            num_threads=num_threads)
+                RR = npairs_3d(randoms, randoms, chord_bins, num_threads=num_threads)
                 RR = np.diff(RR)
             else:
                 RR = None
             if do_DR is True:
-                D1R = npairs_3d(sample1, randoms, chord_bins,
-                             num_threads=num_threads)
+                D1R = npairs_3d(sample1, randoms, chord_bins, num_threads=num_threads)
                 D1R = np.diff(D1R)
             else:
                 D1R = None
@@ -175,8 +208,9 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
                 D2R = None
             else:
                 if do_DR is True:
-                    D2R = npairs_3d(sample2, randoms, chord_bins,
-                                 num_threads=num_threads)
+                    D2R = npairs_3d(
+                        sample2, randoms, chord_bins, num_threads=num_threads
+                    )
                     D2R = np.diff(D2R)
                 else:
                     D2R = None
@@ -190,26 +224,33 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             # do area calculations
             da = area_spherical_cap(chord_bins)
             da = np.diff(da)
-            global_area = 4.0*np.pi  # surface area of a unit sphere
+            global_area = 4.0 * np.pi  # surface area of a unit sphere
 
             # calculate randoms for sample1
             N1 = np.shape(sample1)[0]  # number of points in sample1
-            rho1 = N1/global_area  # number density of points
-            D1R = (N1)*(da*rho1)  # random counts are N**2*dv*rho
+            rho1 = N1 / global_area  # number density of points
+            D1R = (N1) * (da * rho1)  # random counts are N**2*dv*rho
 
             N2 = np.shape(sample2)[0]
-            rho2 = N2/global_area  # number density of points
-            D2R = N2*(da*rho2)
+            rho2 = N2 / global_area  # number density of points
+            D2R = N2 * (da * rho2)
 
             # calculate the random-random pairs.
             # cbx: This should be NR(NR-1) if we are doing an autocorr I think? Maybe it doesn't matter.
-            rhor = NR**2/global_area
-            RR = (da*rhor)
+            rhor = NR**2 / global_area
+            RR = da * rhor
 
             return D1R, D2R, RR
 
-    def pair_counts(sample1, sample2, chord_bins,
-            num_threads, do_auto, do_cross, _sample1_is_sample2):
+    def pair_counts(
+        sample1,
+        sample2,
+        chord_bins,
+        num_threads,
+        do_auto,
+        do_cross,
+        _sample1_is_sample2,
+    ):
         """
         Count data-data pairs.
         """
@@ -252,11 +293,26 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
         NR = N1
 
     # count data pairs
-    D1D1, D1D2, D2D2 = pair_counts(sample1, sample2, chord_bins,
-        num_threads, do_auto, do_cross, _sample1_is_sample2)
+    D1D1, D1D2, D2D2 = pair_counts(
+        sample1,
+        sample2,
+        chord_bins,
+        num_threads,
+        do_auto,
+        do_cross,
+        _sample1_is_sample2,
+    )
     # count random pairs
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, chord_bins,
-        num_threads, do_RR, do_DR, _sample1_is_sample2)
+    D1R, D2R, RR = random_counts(
+        sample1,
+        sample2,
+        randoms,
+        chord_bins,
+        num_threads,
+        do_RR,
+        do_DR,
+        _sample1_is_sample2,
+    )
 
     # run results through the estimator and return relavent/user specified results.
     if _sample1_is_sample2:
@@ -265,20 +321,21 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     else:
         if (do_auto is True) & (do_cross is True):
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
-            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+            xi_12 = _TP_estimator_crossx(D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator)
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_12, xi_22
-        elif (do_cross is True):
-            xi_12 = _TP_estimator(D1D2, D1R, RR, N1, N2, NR, NR, estimator)
+        elif do_cross is True:
+            xi_12 = _TP_estimator_crossx(D1D2, D1R, D2R, RR, N1, N2, NR, NR, estimator)
             return xi_12
-        elif (do_auto is True):
+        elif do_auto is True:
             xi_11 = _TP_estimator(D1D1, D1R, RR, N1, N1, NR, NR, estimator)
             xi_22 = _TP_estimator(D2D2, D2R, RR, N2, N2, NR, NR, estimator)
             return xi_11, xi_22
 
 
-def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
-        do_auto, do_cross, estimator, num_threads):
+def _angular_tpcf_process_args(
+    sample1, theta_bins, sample2, randoms, do_auto, do_cross, estimator, num_threads
+):
     """
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.angular_tpcf`.
@@ -287,7 +344,8 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
     sample1 = np.atleast_1d(sample1)
 
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
-        sample1, sample2, do_cross, ndim=2)
+        sample1, sample2, do_cross, ndim=2
+    )
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
@@ -300,23 +358,35 @@ def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms,
         if len(theta_bins) > 2:
             assert array_is_monotonic(theta_bins, strict=True) == 1
     except AssertionError:
-        msg = ("\n Input `theta_bins` must be a monotonically increasing 1-D \n"
-               "array with at least two entries.")
+        msg = (
+            "\n Input `theta_bins` must be a monotonically increasing 1-D \n"
+            "array with at least two entries."
+        )
         raise HalotoolsError(msg)
 
     # check for input parameter consistency
-    if (theta_max >= 180.0):
-        msg = ("\n The maximum length over which you search for pairs of points \n"
-               "cannot be larger than 180.0 deg. \n")
+    if theta_max >= 180.0:
+        msg = (
+            "\n The maximum length over which you search for pairs of points \n"
+            "cannot be larger than 180.0 deg. \n"
+        )
         raise HalotoolsError(msg)
 
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        msg = ('\n `do_auto` and `do_cross` keywords must be of type boolean.')
+        msg = "\n `do_auto` and `do_cross` keywords must be of type boolean."
         raise HalotoolsError(msg)
 
     num_threads = get_num_threads(num_threads)
 
     verify_tpcf_estimator(estimator)
 
-    return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2
+    return (
+        sample1,
+        theta_bins,
+        sample2,
+        randoms,
+        do_auto,
+        do_cross,
+        num_threads,
+        _sample1_is_sample2,
+    )
