@@ -11,7 +11,7 @@ from .crossmatch import crossmatch
 
 from ..custom_exceptions import HalotoolsError
 
-__all__ = ("broadcast_host_halo_property", "add_halo_hostid")
+__all__ = ("broadcast_host_halo_property", "add_halo_hostid", "compute_uber_hostid")
 
 
 def broadcast_host_halo_property(
