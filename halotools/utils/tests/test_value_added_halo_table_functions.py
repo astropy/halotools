@@ -14,6 +14,7 @@ import pytest
 from ..value_added_halo_table_functions import (
     broadcast_host_halo_property,
     add_halo_hostid,
+    compute_uber_hostid,
 )
 from ..crossmatch import crossmatch
 
@@ -131,3 +132,16 @@ def test_add_halo_hostid3():
 
     add_halo_hostid(t, delete_possibly_existing_column=True)
     assert np.all(t["halo_hostid"] == existing_halo_hostid)
+
+
+def test_compute_uber_hostid():
+    haloid = np.array((0, 1, 2, 3))
+    upid = np.array((-1, 0, 25, 2))
+
+    corrected_upid, uber_hostid, n_iter = compute_uber_hostid(upid, haloid)
+
+    correct_upid = np.array((-1, 1, -1, 2))
+    correct_hostid = np.array((0, 0, 2, 2))
+
+    assert np.allclose(correct_upid, correct_upid)
+    assert np.allclose(uber_hostid, correct_hostid)
