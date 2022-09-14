@@ -1,3 +1,26 @@
+0.0 (2022-9-14)
+----------------
+
+- No changes yet
+
+
+0.8 (2022-9-14)
+----------------
+
+- Add new calculator for uber_hostid quantity
+
+- Bug fix for cross-correlations with the Hamilton and Landy-Szalay estimators. See https://github.com/astropy/halotools/pull/1032
+
+- Bug fix for tpcf jackknife. See https://github.com/astropy/halotools/pull/1020
+
+- Bug fix for the central occupation function of the Zu & Mandelbaum 2016 HOD. See https://github.com/astropy/halotools/pull/1028.
+
+- Add support for non-Poissonian satellite occupation statistics. See https://github.com/astropy/halotools/pull/996
+
+- Add vector rotation utilities to halotools.utils
+
+- Add support for Conditional counts in cylinders. See https://github.com/astropy/halotools/pull/987
+
 0.7 (2020-1-29)
 ----------------
 

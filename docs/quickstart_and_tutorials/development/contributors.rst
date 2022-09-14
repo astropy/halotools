@@ -23,6 +23,7 @@ Core package contributors
 * Peter Behroozi
 * Chris Bradshaw
 * Duncan Campbell
+* Matt Craig
 * Benedikt Diemer
 * Yu Feng
 * Nathan Goldbaum
@@ -30,10 +31,13 @@ Core package contributors
 * Andrew Hearin
 * Elise Jennings
 * Johannes Ulf Lange
+* Francois Lanusse
 * Alexie Leauthaud
+* P.L. Lim
 * Yao-Yuan Mao
 * Surhud More
 * John Parejko
+* Alan Pearl
 * Manodeep Sinha
 * Brigitta Sipocz
 * Erik Tollerud
