@@ -1,6 +1,6 @@
 :orphan:
 
-.. _whats_new:
+.. _whats_new_v0p8:
 
 *******************************************
 What's New in Halotools v0.8?

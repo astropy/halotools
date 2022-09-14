@@ -4,21 +4,24 @@
 Package Installation
 ************************
 
-To install Halotools, you can either use pip or clone the repo from GitHub and build the source code.
+To install Halotools, you can use conda-forge, pip, or clone the repo from GitHub and build the source code.
 Either way, be sure to read the :ref:`halotools_dependencies` section prior to installation.
 
 Using pip
 ====================
 
-The simplest way to install the latest release of the code is with pip. Before installation, be sure you have installed the package dependencies described in the :ref:`halotools_dependencies` section. If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing with pip::
+The simplest way to install the latest release of the code is with conda-forge.
+If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing::
 
-	pip install halotools
-
-Alternatively, you can install using the conda-forge channel on conda::
 
     conda install -c conda-forge halotools
 
+Alternatively, you can install using pip::
+
+		pip install halotools
+
 Either pip or conda will install the latest official release of the code.
+
 If instead you want the latest master branch,
 you will need to build the code from source following the instructions in the next section.
 
@@ -39,7 +42,7 @@ you will need to build the code from source following the instructions in the ne
 Building from source
 ====================
 
-If you don't install the latest release using pip,
+If you don't install the latest release using conda or pip,
 you can instead clone the cource code and call the setup file.
 This is the most common way to install Halotools if you want versions of the
 code that have been updated since the latest official release. In this case,
@@ -105,13 +108,13 @@ This will install the master branch of the code that is currently under developm
 Dependencies
 ============
 
-If you install halotools using pip, then most of your dependencies will be handled for you automatically. The only additional dependency you may need is:
+If you install halotools using conda or pip, then most of your dependencies will be handled for you automatically. The only additional dependency you may need is:
 
 - `h5py <http://h5py.org/>`_: 2.5 or later
 
 The h5py package is used for fast I/O of large simulated datasets.
 
-If you did not use pip, then you should be aware of the following strict requirements:
+If you did not use conda or pip, then you should be aware of the following strict requirements:
 
 - `Python <http://www.python.org/>`_: 3.7.x
 
@@ -136,7 +139,7 @@ Any of the above can be installed with either pip or conda.
 Verifying your installation
 ==============================
 
-After installing the code and its dependencies, fire up a Python interpreter and
+After installing the code and its dependencies, start up a Python interpreter and
 check that the version number matches what you expect:
 
 .. code:: python
@@ -145,7 +148,7 @@ check that the version number matches what you expect:
 	print(halotools.__version__)
 
 If the version number is not what it should be, this likely means you have a previous
-installation that is superseding the version you tried to install. This *should* be accomplished by doing `pip uninstall halotools` before your new installation, but you may need to uninstall the previous build "manually". Like all python packages, you can find the installation location as follows:
+installation that is superseding the version you tried to install. This *should* be accomplished by doing `conda remove halotools` before your new installation, but you may need to uninstall the previous build "manually". Like all python packages, you can find the installation location as follows:
 
 .. code:: python
 
@@ -181,7 +184,3 @@ Whether you installed the master branch or a release branch, the message that co
 Troubleshooting
 ==================
 See :ref:`installation_troubleshooting` for solutions to known installation-related problems.
-
-
-
-

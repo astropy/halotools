@@ -15,3 +15,4 @@ Links to the "What's New?" sections of the documentation for all ``v0.x`` versio
    whats_new_0.5
    whats_new_0.6
    whats_new_0.7
+   whats_new_0.8
