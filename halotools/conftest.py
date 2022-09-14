@@ -25,13 +25,9 @@ else:
     # variables that are used for configuration.
     from pytest_astropy_header.display import PYTEST_HEADER_MODULES, TESTED_VERSIONS
 
-from astropy.tests.helper import enable_deprecations_as_exceptions
 
 from .version import version, astropy_helpers_version
 
-if LooseVersion(astropy_version) > LooseVersion("1"):
-    # The warnings_to_ignore_by_pyver parameter was added in astropy 2.0
-    enable_deprecations_as_exceptions(modules_to_ignore_on_import=["requests"])
 
 # Uncomment and customize the following lines to add/remove entries from
 # the list of packages for which version numbers are displayed when running
