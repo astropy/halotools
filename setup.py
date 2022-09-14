@@ -112,7 +112,7 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     scripts=scripts,
-    install_requires=["astropy>=1", "scipy", "beautifulsoup4", "requests", "numpy"],
+    install_requires=["astropy>=4", "scipy", "beautifulsoup4", "requests", "numpy"],
     provides=[PACKAGENAME],
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
