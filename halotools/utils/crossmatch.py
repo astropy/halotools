@@ -5,7 +5,7 @@ sharing a common objectID.
 import numpy as np
 
 
-__all__ = ('crossmatch', 'compute_richness')
+__all__ = ("crossmatch", "compute_richness")
 
 
 def crossmatch(x, y, skip_bounds_checking=False):
@@ -140,16 +140,16 @@ def crossmatch(x, y, skip_bounds_checking=False):
     else:
         try:
             assert len(set(y)) == len(y)
-            assert np.all(np.array(y, dtype=np.int64) == y)
-            assert np.shape(y) == (len(y), )
+            assert np.all(np.array(y).astype(int) == y)
+            assert np.shape(y) == (len(y),)
         except:
-            msg = ("Input array y must be a 1d sequence of unique integers")
+            msg = "Input array y must be a 1d sequence of unique integers"
             raise ValueError(msg)
         try:
-            assert np.all(np.array(x, dtype=np.int64) == x)
-            assert np.shape(x) == (len(x), )
+            assert np.all(np.array(x).astype(int) == x)
+            assert np.shape(x) == (len(x),)
         except:
-            msg = ("Input array x must be a 1d sequence of integers")
+            msg = "Input array x must be a 1d sequence of integers"
             raise ValueError(msg)
 
     # Internally, we will work with sorted arrays, and then undo the sorting at the end
@@ -168,7 +168,9 @@ def crossmatch(x, y, skip_bounds_checking=False):
     idx_x = np.repeat(unique_xval_has_match, counts)
 
     # For each unique value of x with a match in y, identify the index of the match
-    matching_indices_in_y = np.searchsorted(y_sorted, unique_xvals[unique_xval_has_match])
+    matching_indices_in_y = np.searchsorted(
+        y_sorted, unique_xvals[unique_xval_has_match]
+    )
 
     # Repeat each matching index according to the multiplicity in x
     idx_y = np.repeat(matching_indices_in_y, counts[unique_xval_has_match])
@@ -178,7 +180,7 @@ def crossmatch(x, y, skip_bounds_checking=False):
 
 
 def compute_richness(unique_halo_ids, halo_id_of_galaxies):
-    r""" For every ID in unique_halo_ids,
+    r"""For every ID in unique_halo_ids,
     calculate the number of times the ID appears in halo_id_of_galaxies.
 
     Parameters

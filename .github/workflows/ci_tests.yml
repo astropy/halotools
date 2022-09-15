@@ -18,15 +18,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Ubuntu - Python 3.7 with all optional dependencies
+          - name: Ubuntu - Python 3.9 with all optional dependencies
             os: ubuntu-latest
-            python: 3.7
-            toxenv: 'py37-test-alldeps'
+            python: 3.9
+            toxenv: 'py39-test-alldeps'
 
-          - name: MacOs - Python 3.7 with all optional dependencies
+          - name: MacOs - Python 3.9 with all optional dependencies
             os: macos-latest
-            python: 3.7
-            toxenv: 'py37-test-alldeps'
+            python: 3.9
+            toxenv: 'py39-test-alldeps'
 
     steps:
     - name: Checkout code

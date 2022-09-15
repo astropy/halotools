@@ -4,21 +4,13 @@ Module storing `~halotools.empirical_models.PrebuiltSubhaloModelFactory` and
 the factories used to generate Halotools-provided composite models
 of the galaxy-halo connection.
 """
-from warnings import warn
 
 from ..factories import SubhaloModelFactory, HodModelFactory
 
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ('PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory')
-__author__ = ['Andrew Hearin']
-
-
-under_development_warning = ("This particular model is "
-    "still being tested in collaboration with {0}.\n"
-    "If you need to use this prebuilt model for science, \n"
-    "you will either need to test it yourself \n"
-    "or wait for the Halotools developers to finish science verification.\n")
+__all__ = ("PrebuiltSubhaloModelFactory", "PrebuiltHodModelFactory")
+__author__ = ["Andrew Hearin"]
 
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
@@ -30,7 +22,8 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
     For a tutorial on all prebuilt models, see :ref:`preloaded_models_overview`.
 
     """
-    prebuilt_model_nickname_list = ['behroozi10']
+
+    prebuilt_model_nickname_list = ["behroozi10"]
 
     def __init__(self, model_nickname, **kwargs):
         """
@@ -89,9 +82,10 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
         `~halotools.empirical_models.MockFactory.populate` method bound to
         ``model_instance.mock``.
         """
-        input_model_dictionary, supplementary_kwargs = (
-            self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
-            )
+        (
+            input_model_dictionary,
+            supplementary_kwargs,
+        ) = self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
 
         super_class_kwargs = {}
         for key, value in input_model_dictionary.items():
@@ -102,40 +96,45 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
         SubhaloModelFactory.__init__(self, **super_class_kwargs)
 
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
-        """
-        """
-        forbidden_constructor_kwargs = ('model_feature_calling_sequence')
+        """ """
+        forbidden_constructor_kwargs = "model_feature_calling_sequence"
         for kwarg in forbidden_constructor_kwargs:
             if kwarg in constructor_kwargs:
-                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
+                msg = (
+                    "\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
                     "do not pass a ``%s`` keyword argument to the SubhaloModelFactory constructor.\n"
-                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
+                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n"
+                )
                 raise HalotoolsError(msg % kwarg)
 
         model_nickname = model_nickname.lower()
 
-        if model_nickname == 'behroozi10':
+        if model_nickname == "behroozi10":
             from ..composite_models import smhm_models
+
             dictionary_retriever = smhm_models.behroozi10_model_dictionary
-        elif model_nickname == 'smhm_binary_sfr':
+        elif model_nickname == "smhm_binary_sfr":
             from ..composite_models import sfr_models
+
             dictionary_retriever = sfr_models.smhm_binary_sfr_model_dictionary
         else:
-            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
+            msg = "\nThe ``%s`` model_nickname is not recognized by Halotools\n"
             raise HalotoolsError(msg % model_nickname)
 
         result = dictionary_retriever(**constructor_kwargs)
         if type(result) is dict:
             input_model_dictionary = result
             supplementary_kwargs = {}
-            supplementary_kwargs['model_feature_calling_sequence'] = None
+            supplementary_kwargs["model_feature_calling_sequence"] = None
         elif type(result) is tuple:
             input_model_dictionary = result[0]
             supplementary_kwargs = result[1]
         else:
-            raise HalotoolsError("Unexpected result returned from ``%s``\n"
-            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
-             % dictionary_retriever.__name__)
+            raise HalotoolsError(
+                "Unexpected result returned from ``%s``\n"
+                "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
+                % dictionary_retriever.__name__
+            )
 
         return input_model_dictionary, supplementary_kwargs
 
@@ -149,8 +148,15 @@ class PrebuiltHodModelFactory(HodModelFactory):
     For a tutorial on all prebuilt models, see :ref:`preloaded_models_overview`.
     """
 
-    prebuilt_model_nickname_list = ('zheng07', 'leauthaud11', 'tinker13',
-            'hearin15', 'zu_mandelbaum15', 'zu_mandelbaum16', 'cacciato09')
+    prebuilt_model_nickname_list = (
+        "zheng07",
+        "leauthaud11",
+        "tinker13",
+        "hearin15",
+        "zu_mandelbaum15",
+        "zu_mandelbaum16",
+        "cacciato09",
+    )
 
     def __init__(self, model_nickname, **kwargs):
         """
@@ -216,9 +222,10 @@ class PrebuiltHodModelFactory(HodModelFactory):
         `~halotools.empirical_models.MockFactory.populate` method bound to
         ``model_instance.mock``.
         """
-        input_model_dictionary, supplementary_kwargs = (
-            self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
-            )
+        (
+            input_model_dictionary,
+            supplementary_kwargs,
+        ) = self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
 
         super_class_kwargs = {}
         for key, value in input_model_dictionary.items():
@@ -229,53 +236,56 @@ class PrebuiltHodModelFactory(HodModelFactory):
         HodModelFactory.__init__(self, **super_class_kwargs)
 
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
-        """
-        """
-        forbidden_constructor_kwargs = ('gal_type_list', 'model_feature_calling_sequence')
+        """ """
+        forbidden_constructor_kwargs = (
+            "gal_type_list",
+            "model_feature_calling_sequence",
+        )
         for kwarg in forbidden_constructor_kwargs:
             if kwarg in constructor_kwargs:
-                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
+                msg = (
+                    "\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
                     "do not pass a ``%s`` keyword argument to the HodModelFactory constructor.\n"
-                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
+                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n"
+                )
                 raise HalotoolsError(msg % kwarg)
 
         from ..composite_models import hod_models
 
         model_nickname = model_nickname.lower()
 
-        if model_nickname == 'zheng07':
+        if model_nickname == "zheng07":
             dictionary_retriever = hod_models.zheng07_model_dictionary
-        elif model_nickname == 'cacciato09':
+        elif model_nickname == "cacciato09":
             dictionary_retriever = hod_models.cacciato09_model_dictionary
-        elif model_nickname == 'leauthaud11':
+        elif model_nickname == "leauthaud11":
             dictionary_retriever = hod_models.leauthaud11_model_dictionary
-        elif model_nickname == 'hearin15':
+        elif model_nickname == "hearin15":
             dictionary_retriever = hod_models.hearin15_model_dictionary
-        elif model_nickname == 'tinker13':
-            warn(under_development_warning.format("Jeremy Tinker"))
+        elif model_nickname == "tinker13":
             dictionary_retriever = hod_models.tinker13_model_dictionary
-        elif model_nickname == 'zu_mandelbaum15':
-            warn(under_development_warning.format("Ying Zu"))
+        elif model_nickname == "zu_mandelbaum15":
             dictionary_retriever = hod_models.zu_mandelbaum15_model_dictionary
-        elif model_nickname == 'zu_mandelbaum16':
-            warn(under_development_warning.format("Ying Zu"))
+        elif model_nickname == "zu_mandelbaum16":
             dictionary_retriever = hod_models.zu_mandelbaum16_model_dictionary
         else:
-            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
+            msg = "\nThe ``%s`` model_nickname is not recognized by Halotools\n"
             raise HalotoolsError(msg % model_nickname)
 
         result = dictionary_retriever(**constructor_kwargs)
         if type(result) is dict:
             input_model_dictionary = result
             supplementary_kwargs = {}
-            supplementary_kwargs['gal_type_list'] = None
-            supplementary_kwargs['model_feature_calling_sequence'] = None
+            supplementary_kwargs["gal_type_list"] = None
+            supplementary_kwargs["model_feature_calling_sequence"] = None
         elif type(result) is tuple:
             input_model_dictionary = result[0]
             supplementary_kwargs = result[1]
         else:
-            raise HalotoolsError("Unexpected result returned from ``%s``\n"
-            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
-             % dictionary_retriever.__name__)
+            raise HalotoolsError(
+                "Unexpected result returned from ``%s``\n"
+                "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
+                % dictionary_retriever.__name__
+            )
 
         return input_model_dictionary, supplementary_kwargs

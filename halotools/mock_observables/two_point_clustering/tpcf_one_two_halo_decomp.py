@@ -562,7 +562,7 @@ def _tpcf_one_two_halo_decomp_process_args(
     """
 
     sample1 = enforce_sample_has_correct_shape(sample1)
-    sample1_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype(np.int64)
+    sample1_host_halo_id = np.atleast_1d(sample1_host_halo_id).astype(int)
 
     sample2, _sample1_is_sample2, do_cross = process_optional_input_sample2(
         sample1, sample2, do_cross
@@ -574,7 +574,7 @@ def _tpcf_one_two_halo_decomp_process_args(
             msg = "If passing an input ``sample2``, must also pass sample2_host_halo_id"
             raise ValueError(msg)
         else:
-            sample2_host_halo_id = np.atleast_1d(sample2_host_halo_id).astype(np.int64)
+            sample2_host_halo_id = np.atleast_1d(sample2_host_halo_id).astype(int)
 
     if randoms is not None:
         randoms = np.atleast_1d(randoms)
