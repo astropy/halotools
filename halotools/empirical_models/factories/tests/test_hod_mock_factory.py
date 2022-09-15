@@ -56,9 +56,7 @@ def test_estimate_ngals1():
 
 def test_estimate_ngals2():
 
-    with warnings.catch_warnings(record=True) as w:
-        model = PrebuiltHodModelFactory("tinker13")
-        assert "new_haloprop_func_dict" in str(w[-1].message)
+    model = PrebuiltHodModelFactory("tinker13")
     halocat = FakeSim(seed=fixed_seed)
     model.populate_mock(halocat, seed=fixed_seed)
 
