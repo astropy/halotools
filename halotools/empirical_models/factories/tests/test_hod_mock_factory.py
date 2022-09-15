@@ -1,7 +1,7 @@
 """
 """
 from __future__ import absolute_import, division, print_function
-
+import warnings
 import pytest
 from astropy.config.paths import _find_home
 import numpy as np
@@ -55,7 +55,10 @@ def test_estimate_ngals1():
 
 
 def test_estimate_ngals2():
-    model = PrebuiltHodModelFactory("tinker13")
+
+    with warnings.catch_warnings(record=True) as w:
+        model = PrebuiltHodModelFactory("tinker13")
+        assert "new_haloprop_func_dict" in str(w[-1].message)
     halocat = FakeSim(seed=fixed_seed)
     model.populate_mock(halocat, seed=fixed_seed)
 
