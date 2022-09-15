@@ -1,6 +1,6 @@
 """ Module providing unit-testing for `~halotools.sim_manager.DownloadManager`.
 """
-
+import warnings
 import os
 import shutil
 import numpy as np
@@ -430,18 +430,20 @@ class TestDownloadManager(TestCase):
     @pytest.mark.skipif("not APH_MACHINE")
     def test_download_processed_halo_table5(self):
         """ """
-        with pytest.raises(HalotoolsError) as err:
-            self.downman.download_processed_halo_table(
-                simname="bolshoi",
-                halo_finder="rockstar",
-                version_name="halotools_v0p4",
-                redshift=11.7,
-                dz_tol=200,
-                overwrite=True,
-                download_dirname="std_cache_loc",
-            )
-        substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``"
-        assert substr in err.value.args[0]
+        with warnings.catch_warnings(record=True) as w:
+            with pytest.raises(HalotoolsError) as err:
+                self.downman.download_processed_halo_table(
+                    simname="bolshoi",
+                    halo_finder="rockstar",
+                    version_name="halotools_v0p4",
+                    redshift=11.7,
+                    dz_tol=200,
+                    overwrite=True,
+                    download_dirname="std_cache_loc",
+                )
+            substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``"
+            assert substr in err.value.args[0]
+            assert "existing file will be overwritten" in str(w[-1].message)
 
     @pytest.mark.skipif("not APH_MACHINE")
     def test_download_processed_halo_table6(self):
