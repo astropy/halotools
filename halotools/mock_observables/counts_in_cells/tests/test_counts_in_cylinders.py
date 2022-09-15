@@ -296,7 +296,7 @@ def test_counts_in_cylinders_parallel_serial_consistency():
     assert result1.shape == result2.shape
 
 
-@pytest.mark.parametrize("num_threads", [1, 4])
+@pytest.mark.parametrize("num_threads", [1, 2])
 def test_counts_in_cylinders_with_indexes(num_threads):
     """"""
     npts1 = 100
