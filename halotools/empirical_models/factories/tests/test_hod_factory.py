@@ -3,11 +3,9 @@
 import warnings
 from copy import copy
 
-from ...factories import HodModelFactory, PrebuiltHodModelFactory
+from ...factories import PrebuiltHodModelFactory
 from ... import factories
-from ...occupation_models import *
-
-from ....sim_manager import FakeSim
+from ... import occupation_models as occm
 
 __all__ = ["test_Zheng07_composite"]
 
@@ -57,7 +55,7 @@ def test_alt_Zheng07_composites():
     default_satocc_component = default_model_dictionary["satellites_occupation"]
     default_cenocc_component = default_model_dictionary["centrals_occupation"]
 
-    cenmod_satocc_component = Zheng07Sats(
+    cenmod_satocc_component = occm.Zheng07Sats(
         threshold=default_satocc_component.threshold,
         modulate_with_cenocc=True,
         gal_type_centrals="centrals",
@@ -66,7 +64,8 @@ def test_alt_Zheng07_composites():
     cenmod_model_dictionary = copy(default_model_dictionary)
     cenmod_model_dictionary["satellites_occupation"] = cenmod_satocc_component
     cenmod_model_dictionary["centrals_occupation"] = default_cenocc_component
-    cenmod_model = factories.HodModelFactory(**cenmod_model_dictionary)
+    with warnings.catch_warnings(record=True) as w:
+        cenmod_model = factories.HodModelFactory(**cenmod_model_dictionary)
 
     # Now we test whether changes to the param_dict keys of the composite model
     # that pertain to the centrals properly propagate through to the behavior
