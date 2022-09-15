@@ -122,8 +122,7 @@ def test_ncen_inheritance_behavior2():
             result = np.zeros(num_halos) + self.param_dict["new_cen_param"]
             return result
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    with warnings.catch_warnings(record=True) as w:
         my_cen_model = MyCenModel(threshold=-20)
         my_sat_model1 = Zheng07Sats(
             threshold=-20, modulate_with_cenocc=True, cenocc_model=my_cen_model
@@ -132,6 +131,7 @@ def test_ncen_inheritance_behavior2():
         my_sat_model3 = Zheng07Sats(
             threshold=-20, modulate_with_cenocc=False, cenocc_model=my_cen_model
         )
+        assert "modulate_with_cenocc" in str(w[-1].message)
 
     mass_array = np.logspace(11, 15, 10)
     result1a = my_sat_model1.mean_occupation(prim_haloprop=mass_array)
