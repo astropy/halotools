@@ -41,9 +41,9 @@ def test_conc_gal_bias1():
     model.param_dict["conc_gal_bias_param1"] = gal_bias_bins.max()
 
     a = model.calculate_conc_gal_bias_satellites(prim_haloprop=10**log_lowmass_value)
-    assert np.allclose(a, model.param_dict["conc_gal_bias_param0"])
+    assert np.allclose(a, model.param_dict["conc_gal_bias_param0"], atol=1e-3)
     b = model.calculate_conc_gal_bias_satellites(prim_haloprop=10**log_highmass_value)
-    assert np.allclose(b, model.param_dict["conc_gal_bias_param1"])
+    assert np.allclose(b, model.param_dict["conc_gal_bias_param1"], atol=1e-3)
 
 
 def test_sfr_biased_nfw_phase_space_conc_gal_bias():
@@ -74,20 +74,28 @@ def test_sfr_biased_nfw_phase_space_conc_gal_bias():
     aq = model.calculate_conc_gal_bias_satellites(
         prim_haloprop=10**log_lowmass_value, quiescent=True
     )
-    assert np.allclose(aq, model.param_dict["quiescent_conc_gal_bias_param0"])
+    assert np.allclose(
+        aq, model.param_dict["quiescent_conc_gal_bias_param0"], atol=1e-3
+    )
     bq = model.calculate_conc_gal_bias_satellites(
         prim_haloprop=10**log_highmass_value, quiescent=True
     )
-    assert np.allclose(bq, model.param_dict["quiescent_conc_gal_bias_param1"])
+    assert np.allclose(
+        bq, model.param_dict["quiescent_conc_gal_bias_param1"], atol=1e-3
+    )
 
     asf = model.calculate_conc_gal_bias_satellites(
         prim_haloprop=10**log_lowmass_value, quiescent=False
     )
-    assert np.allclose(asf, model.param_dict["star_forming_conc_gal_bias_param0"])
+    assert np.allclose(
+        asf, model.param_dict["star_forming_conc_gal_bias_param0"], atol=1e-3
+    )
     bsf = model.calculate_conc_gal_bias_satellites(
         prim_haloprop=10**log_highmass_value, quiescent=False
     )
-    assert np.allclose(bsf, model.param_dict["star_forming_conc_gal_bias_param1"])
+    assert np.allclose(
+        bsf, model.param_dict["star_forming_conc_gal_bias_param1"], atol=1e-3
+    )
 
     masses = np.zeros(100) + 10**log_lowmass_value
     quiescent = np.random.randint(0, 1, 100).astype(bool)
@@ -95,8 +103,12 @@ def test_sfr_biased_nfw_phase_space_conc_gal_bias():
         prim_haloprop=masses, quiescent=quiescent
     )
     mask = quiescent == True
-    assert np.allclose(c[mask], model.param_dict["quiescent_conc_gal_bias_param0"])
-    assert np.allclose(c[~mask], model.param_dict["star_forming_conc_gal_bias_param0"])
+    assert np.allclose(
+        c[mask], model.param_dict["quiescent_conc_gal_bias_param0"], atol=1e-3
+    )
+    assert np.allclose(
+        c[~mask], model.param_dict["star_forming_conc_gal_bias_param0"], atol=1e-3
+    )
 
     masses = np.zeros(100) + 10**log_highmass_value
     quiescent = np.random.randint(0, 1, 100).astype(bool)
@@ -104,8 +116,12 @@ def test_sfr_biased_nfw_phase_space_conc_gal_bias():
         prim_haloprop=masses, quiescent=quiescent
     )
     mask = quiescent == True
-    assert np.allclose(c[mask], model.param_dict["quiescent_conc_gal_bias_param1"])
-    assert np.allclose(c[~mask], model.param_dict["star_forming_conc_gal_bias_param1"])
+    assert np.allclose(
+        c[mask], model.param_dict["quiescent_conc_gal_bias_param1"], atol=1e-3
+    )
+    assert np.allclose(
+        c[~mask], model.param_dict["star_forming_conc_gal_bias_param1"], atol=1e-3
+    )
 
 
 def test_sfr_biased_nfw_phase_space_mockpop():
