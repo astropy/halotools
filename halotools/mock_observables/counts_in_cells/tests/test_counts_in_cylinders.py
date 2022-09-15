@@ -290,7 +290,7 @@ def test_counts_in_cylinders_parallel_serial_consistency():
         proj_search_radius,
         cylinder_half_length,
         period=period,
-        num_threads=4,
+        num_threads=2,
     )
 
     assert result1.shape == result2.shape
