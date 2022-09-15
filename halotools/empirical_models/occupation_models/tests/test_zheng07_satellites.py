@@ -95,7 +95,7 @@ def test_ncen_inheritance_behavior1():
 
 
 def test_ncen_inheritance_behavior2():
-    """ Verify that the ``modulate_with_cenocc`` and ``cenocc_model``
+    """Verify that the ``modulate_with_cenocc`` and ``cenocc_model``
     keyword arguments behave as expected, including propagation of
     param_dict values.
     """
@@ -122,14 +122,16 @@ def test_ncen_inheritance_behavior2():
             result = np.zeros(num_halos) + self.param_dict["new_cen_param"]
             return result
 
-    my_cen_model = MyCenModel(threshold=-20)
-    my_sat_model1 = Zheng07Sats(
-        threshold=-20, modulate_with_cenocc=True, cenocc_model=my_cen_model
-    )
-    my_sat_model2 = Zheng07Sats(threshold=-20, modulate_with_cenocc=True)
-    my_sat_model3 = Zheng07Sats(
-        threshold=-20, modulate_with_cenocc=False, cenocc_model=my_cen_model
-    )
+    with warnings.catch_warnings(record=True) as w:
+        my_cen_model = MyCenModel(threshold=-20)
+        my_sat_model1 = Zheng07Sats(
+            threshold=-20, modulate_with_cenocc=True, cenocc_model=my_cen_model
+        )
+        my_sat_model2 = Zheng07Sats(threshold=-20, modulate_with_cenocc=True)
+        my_sat_model3 = Zheng07Sats(
+            threshold=-20, modulate_with_cenocc=False, cenocc_model=my_cen_model
+        )
+        assert "modulate_with_cenocc" in str(w[-1].message)
 
     mass_array = np.logspace(11, 15, 10)
     result1a = my_sat_model1.mean_occupation(prim_haloprop=mass_array)
@@ -152,7 +154,7 @@ def test_alpha_scaling1_mean_occupation():
     model2.param_dict["alpha"] *= 1.25
 
     logmass = model2.param_dict["logM1"] + np.log10(5)
-    mass = 10.0 ** logmass
+    mass = 10.0**logmass
     assert model2.mean_occupation(prim_haloprop=mass) > default_model.mean_occupation(
         prim_haloprop=mass
     )
@@ -164,7 +166,7 @@ def test_alpha_scaling2_mc_occupation():
     model2.param_dict["alpha"] *= 1.25
 
     logmass = model2.param_dict["logM1"] + np.log10(5)
-    mass = 10.0 ** logmass
+    mass = 10.0**logmass
     Npts = 1000
     masses = np.ones(Npts) * mass
 
@@ -180,7 +182,7 @@ def test_alpha_propagation():
     model2.param_dict["alpha"] *= 1.25
 
     logmass = model2.param_dict["logM1"] + np.log10(5)
-    mass = 10.0 ** logmass
+    mass = 10.0**logmass
     Npts = 1000
     masses = np.ones(Npts) * mass
 
@@ -286,7 +288,7 @@ def test_raises_correct_exception():
 
 
 def test_occupation_component_requirement():
-    """ Verify that the optional ``cenocc_model`` input is correctly
+    """Verify that the optional ``cenocc_model`` input is correctly
     enforced to be an instance of the OccupationComponent class.
     """
     with pytest.raises(HalotoolsError) as err:
