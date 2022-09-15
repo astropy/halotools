@@ -213,7 +213,7 @@ class OccupationComponent(object):
                     np.random.rand(*first_occupation_moment.shape),
                     first_occupation_moment,
                 )
-            ).astype(np.int)
+            ).astype(int)
         if "table" in kwargs:
             kwargs["table"]["halo_num_" + self.gal_type] = result
         return result
