@@ -33,8 +33,8 @@ try:
     import astropy_helpers
 except ImportError:
     # Building from inside the docs/ directory?
-    if os.path.basename(os.getcwd()) == 'docs':
-        a_h_path = os.path.abspath(os.path.join('..', 'astropy_helpers'))
+    if os.path.basename(os.getcwd()) == "docs":
+        a_h_path = os.path.abspath(os.path.join("..", "astropy_helpers"))
         if os.path.isdir(a_h_path):
             sys.path.insert(1, a_h_path)
 
@@ -47,8 +47,8 @@ try:
 except ImportError:
     from configparser import ConfigParser
 conf = ConfigParser()
-conf.read([os.path.join(os.path.dirname(__file__), '..', 'setup.cfg')])
-setup_cfg = dict(conf.items('metadata'))
+conf.read([os.path.join(os.path.dirname(__file__), "..", "setup.cfg")])
+setup_cfg = dict(conf.items("metadata"))
 
 # -- General configuration ----------------------------------------------------
 
@@ -61,7 +61,7 @@ check_sphinx_version("1.3.1")
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns.append('_templates')
+exclude_patterns.append("_templates")
 
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
@@ -71,20 +71,19 @@ rst_epilog += """
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = setup_cfg['package_name']
-author = setup_cfg['author']
-copyright = '{0}, {1}'.format(
-    datetime.datetime.now().year, setup_cfg['author'])
+project = setup_cfg["package_name"]
+author = setup_cfg["author"]
+copyright = "{0}, {1}".format(datetime.datetime.now().year, setup_cfg["author"])
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-__import__(setup_cfg['package_name'])
-package = sys.modules[setup_cfg['package_name']]
+__import__(setup_cfg["package_name"])
+package = sys.modules[setup_cfg["package_name"]]
 
 # The short X.Y version.
-version = package.__version__.split('-', 1)[0]
+version = package.__version__.split("-", 1)[0]
 # The full version, including alpha/beta/rc tags.
 release = package.__version__
 
@@ -93,10 +92,10 @@ release = package.__version__
 
 # A NOTE ON HTML THEMES
 html_theme_options = {
-    'logotext1': 'halo',  # white,  semi-bold
-    'logotext2': 'tools',  # red, light
-    'logotext3': ':docs'   # white,  light
-    }
+    "logotext1": "halo",  # white,  semi-bold
+    "logotext2": "tools",  # red, light
+    "logotext3": ":docs",  # white,  light
+}
 
 # The global astropy configuration uses a custom theme, 'bootstrap-astropy',
 # which is installed along with astropy. A different theme can be used or
@@ -127,38 +126,38 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = '{0} v{1}'.format(project, release)
+html_title = "{0} v{1}".format(project, release)
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = project + 'doc'
+htmlhelp_basename = project + "doc"
 
 # Static files to copy after template files
-html_static_path = ['_static']
-html_style = 'halotools.css'
+html_static_path = ["_static"]
+html_style = "halotools.css"
 
 # -- Options for LaTeX output --------------------------------------------------
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [('index', project + '.tex', project + u' Documentation',
-                    author, 'manual')]
+latex_documents = [
+    ("index", project + ".tex", project + " Documentation", author, "manual")
+]
 
 
 # -- Options for manual page output --------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [('index', project.lower(), project + u' Documentation',
-              [author], 1)]
+man_pages = [("index", project.lower(), project + " Documentation", [author], 1)]
 
 
 ## -- Options for the edit_on_github extension ----------------------------------------
 
-if eval(setup_cfg.get('edit_on_github')):
-    extensions += ['astropy_helpers.sphinx.ext.edit_on_github']
+if eval(setup_cfg.get("edit_on_github")):
+    extensions += ["astropy_helpers.sphinx.ext.edit_on_github"]
 
-    versionmod = __import__(setup_cfg['package_name'] + '.version')
-    edit_on_github_project = setup_cfg['github_project']
+    versionmod = __import__(setup_cfg["package_name"] + ".version")
+    edit_on_github_project = setup_cfg["github_project"]
     if versionmod.version.release:
         edit_on_github_branch = "v" + versionmod.version.version
     else:
@@ -167,4 +166,4 @@ if eval(setup_cfg.get('edit_on_github')):
     edit_on_github_source_root = ""
     edit_on_github_doc_root = "docs"
 
-extensions += ['halotools.utils.autosummary_workaround']
+extensions += ["halotools.utils.autosummary_workaround"]
