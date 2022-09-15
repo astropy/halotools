@@ -949,7 +949,7 @@ class DownloadManager(object):
             pass
 
         baseurl = sim_defaults.ptcl_tables_webloc
-        soup = BeautifulSoup(requests.get(baseurl).text, features="lxml")
+        soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all("a", href=True):
             dirpath = posixpath.dirname(urllib.parse.urlparse(a["href"]).path)
@@ -958,7 +958,7 @@ class DownloadManager(object):
 
         catlist = []
         for simloc in simloclist:
-            soup = BeautifulSoup(requests.get(simloc).text, features="lxml")
+            soup = BeautifulSoup(requests.get(simloc).text)
             for a in soup.find_all("a"):
                 catlist.append(simloc + "/" + a["href"])
 
@@ -1024,7 +1024,7 @@ class DownloadManager(object):
             version_name = sim_defaults.default_version_name
 
         baseurl = sim_defaults.processed_halo_tables_webloc
-        soup = BeautifulSoup(requests.get(baseurl).text, features="lxml")
+        soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all("a", href=True):
             dirpath = posixpath.dirname(urllib.parse.urlparse(a["href"]).path)
@@ -1033,7 +1033,7 @@ class DownloadManager(object):
 
         halocatloclist = []
         for simloc in simloclist:
-            soup = BeautifulSoup(requests.get(simloc).text, features="lxml")
+            soup = BeautifulSoup(requests.get(simloc).text)
             for a in soup.find_all("a", href=True):
                 dirpath = posixpath.dirname(urllib.parse.urlparse(a["href"]).path)
                 if dirpath and dirpath[0] != "/":
@@ -1041,7 +1041,7 @@ class DownloadManager(object):
 
         catlist = []
         for halocatdir in halocatloclist:
-            soup = BeautifulSoup(requests.get(halocatdir).text, features="lxml")
+            soup = BeautifulSoup(requests.get(halocatdir).text)
             for a in soup.find_all("a"):
                 catlist.append(halocatdir + "/" + a["href"])
 
