@@ -6,13 +6,24 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 import multiprocessing
 import pytest
+import warnings
 
-from ..mock_observables_helpers import enforce_sample_respects_pbcs, get_num_threads, get_period
-from ..mock_observables_helpers import enforce_sample_has_correct_shape, get_separation_bins_array
+from ..mock_observables_helpers import (
+    enforce_sample_respects_pbcs,
+    get_num_threads,
+    get_period,
+)
+from ..mock_observables_helpers import (
+    enforce_sample_has_correct_shape,
+    get_separation_bins_array,
+)
 from ..mock_observables_helpers import get_line_of_sight_bins_array
 
-__all__ = ('test_enforce_sample_respects_pbcs', 'test_get_num_threads',
-    'test_get_period')
+__all__ = (
+    "test_enforce_sample_respects_pbcs",
+    "test_get_num_threads",
+    "test_get_period",
+)
 
 fixed_seed = 43
 
@@ -53,21 +64,25 @@ def test_get_num_threads():
     result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == 1
 
-    input_num_threads = 'max'
+    input_num_threads = "max"
     result = get_num_threads(input_num_threads, enforce_max_cores=False)
     assert result == multiprocessing.cpu_count()
 
     max_cores = multiprocessing.cpu_count()
 
     input_num_threads = max_cores + 1
-    result = get_num_threads(input_num_threads, enforce_max_cores=False)
+    with warnings.catch_warnings(record=True) as w:
+        result = get_num_threads(input_num_threads, enforce_max_cores=False)
+        assert "num_available_cores" in str(w[-1].message)
     assert result == input_num_threads
 
     input_num_threads = max_cores + 1
-    result = get_num_threads(input_num_threads, enforce_max_cores=True)
+    with warnings.catch_warnings(record=True) as w:
+        result = get_num_threads(input_num_threads, enforce_max_cores=True)
+        assert "num_available_cores" in str(w[-1].message)
     assert result == max_cores
 
-    input_num_threads = '$'
+    input_num_threads = "$"
     with pytest.raises(ValueError) as err:
         result = get_num_threads(input_num_threads, enforce_max_cores=True)
     substr = "Input ``num_threads`` must be an integer"
