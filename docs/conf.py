@@ -150,7 +150,6 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [("index", project.lower(), project + " Documentation", [author], 1)]
 
-
 ## -- Options for the edit_on_github extension ----------------------------------------
 
 if eval(setup_cfg.get("edit_on_github")):
