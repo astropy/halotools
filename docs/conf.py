@@ -153,7 +153,7 @@ man_pages = [("index", project.lower(), project + " Documentation", [author], 1)
 ## -- Options for the edit_on_github extension ----------------------------------------
 
 if eval(setup_cfg.get("edit_on_github")):
-    extensions += ["astropy.sphinx.ext.edit_on_github"]
+    extensions += ["sphinx_astropy.ext.edit_on_github"]
 
     versionmod = __import__(setup_cfg["name"] + ".version")
     edit_on_github_project = setup_cfg["github_project"]
