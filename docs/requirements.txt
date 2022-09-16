@@ -1,6 +1,0 @@
-numpy
-matplotlib
-Cython
-astropy
-scipy
-sphinx-astropy
