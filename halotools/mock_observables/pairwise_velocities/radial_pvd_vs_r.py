@@ -14,18 +14,30 @@ from .engines import radial_pvd_vs_r_engine
 
 from .mean_radial_velocity_vs_r import _process_args
 
-from ..pair_counters.mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
+from ..pair_counters.mesh_helpers import (
+    _set_approximate_cell_sizes,
+    _cell1_parallelization_indices,
+)
 from ..pair_counters.rectangular_mesh import RectangularDoubleMesh
 
 
-__all__ = ('radial_pvd_vs_r', )
-__author__ = ('Andrew Hearin', 'Duncan Campbell')
+__all__ = ("radial_pvd_vs_r",)
+__author__ = ("Andrew Hearin", "Duncan Campbell")
 
 
-def radial_pvd_vs_r(sample1, velocities1,
-        rbins_absolute=None, rbins_normalized=None, normalize_rbins_by=None,
-        sample2=None, velocities2=None, period=None,
-        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
+def radial_pvd_vs_r(
+    sample1,
+    velocities1,
+    rbins_absolute=None,
+    rbins_normalized=None,
+    normalize_rbins_by=None,
+    sample2=None,
+    velocities2=None,
+    period=None,
+    num_threads=1,
+    approx_cell1_size=None,
+    approx_cell2_size=None,
+):
     r"""
     Calculate the pairwise radial velocity dispersion as a function of absolute distance,
     or as a function of :math:`s = r / R_{\rm vir}`.
@@ -164,26 +176,49 @@ def radial_pvd_vs_r(sample1, velocities1,
     See also
     ---------
     ref:`galaxy_catalog_analysis_tutorial7`
-    """
-    result = _process_args(sample1, velocities1, sample2, velocities2,
-        rbins_absolute, rbins_normalized, normalize_rbins_by,
-        period, num_threads, approx_cell1_size, approx_cell2_size)
 
-    sample1, velocities1, sample2, velocities2, max_rbins_absolute, period,\
-        num_threads, _sample1_is_sample2, PBCs, \
-        approx_cell1_size, approx_cell2_size, rbins_normalized, normalize_rbins_by = result
+    """
+    result = _process_args(
+        sample1,
+        velocities1,
+        sample2,
+        velocities2,
+        rbins_absolute,
+        rbins_normalized,
+        normalize_rbins_by,
+        period,
+        num_threads,
+        approx_cell1_size,
+        approx_cell2_size,
+    )
+
+    (
+        sample1,
+        velocities1,
+        sample2,
+        velocities2,
+        max_rbins_absolute,
+        period,
+        num_threads,
+        _sample1_is_sample2,
+        PBCs,
+        approx_cell1_size,
+        approx_cell2_size,
+        rbins_normalized,
+        normalize_rbins_by,
+    ) = result
     x1in, y1in, z1in = sample1[:, 0], sample1[:, 1], sample1[:, 2]
     x2in, y2in, z2in = sample2[:, 0], sample2[:, 1], sample2[:, 2]
     xperiod, yperiod, zperiod = period
-    squared_normalize_rbins_by = normalize_rbins_by*normalize_rbins_by
+    squared_normalize_rbins_by = normalize_rbins_by * normalize_rbins_by
     search_xlength = max_rbins_absolute
     search_ylength = max_rbins_absolute
     search_zlength = max_rbins_absolute
 
     #  Compute the estimates for the cell sizes
-    approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, period)
-        )
+    approx_cell1_size, approx_cell2_size = _set_approximate_cell_sizes(
+        approx_cell1_size, approx_cell2_size, period
+    )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
 
@@ -193,20 +228,52 @@ def radial_pvd_vs_r(sample1, velocities1,
     vx2in, vy2in, vz2in = velocities2[:, 0], velocities2[:, 1], velocities2[:, 2]
 
     # Build the rectangular mesh
-    double_mesh = RectangularDoubleMesh(x1in, y1in, z1in, x2in, y2in, z2in,
-        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size,
-        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size,
-        search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
+    double_mesh = RectangularDoubleMesh(
+        x1in,
+        y1in,
+        z1in,
+        x2in,
+        y2in,
+        z2in,
+        approx_x1cell_size,
+        approx_y1cell_size,
+        approx_z1cell_size,
+        approx_x2cell_size,
+        approx_y2cell_size,
+        approx_z2cell_size,
+        search_xlength,
+        search_ylength,
+        search_zlength,
+        xperiod,
+        yperiod,
+        zperiod,
+        PBCs,
+    )
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(radial_pvd_vs_r_engine, double_mesh,
-        x1in, y1in, z1in, x2in, y2in, z2in,
-        vx1in, vy1in, vz1in, vx2in, vy2in, vz2in,
-        squared_normalize_rbins_by, rbins_normalized)
+    engine = partial(
+        radial_pvd_vs_r_engine,
+        double_mesh,
+        x1in,
+        y1in,
+        z1in,
+        x2in,
+        y2in,
+        z2in,
+        vx1in,
+        vy1in,
+        vz1in,
+        vx2in,
+        vy2in,
+        vz2in,
+        squared_normalize_rbins_by,
+        rbins_normalized,
+    )
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
-        double_mesh.mesh1.ncells, num_threads)
+        double_mesh.mesh1.ncells, num_threads
+    )
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
@@ -219,12 +286,12 @@ def radial_pvd_vs_r(sample1, velocities1,
     else:
         counts, vrad_sum, vradsq_sum = np.array(engine(cell1_tuples[0]))
 
-    counts = np.diff(counts).astype('f4')
+    counts = np.diff(counts).astype("f4")
     vrad = np.diff(vrad_sum)
     vradsq = np.diff(vradsq_sum)
 
     vrad_dispersion_squared = np.zeros(len(vrad))
-    term1 = vradsq[counts > 0]/counts[counts > 0]
-    term2 = (vrad[counts > 0]/counts[counts > 0])**2
+    term1 = vradsq[counts > 0] / counts[counts > 0]
+    term2 = (vrad[counts > 0] / counts[counts > 0]) ** 2
     vrad_dispersion_squared[counts > 0] = term1 - term2
     return np.sqrt(vrad_dispersion_squared)
