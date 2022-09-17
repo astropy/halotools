@@ -175,7 +175,7 @@ def radial_pvd_vs_r(
 
     See also
     ---------
-    ref:`galaxy_catalog_analysis_tutorial7`
+    :ref:`galaxy_catalog_analysis_tutorial7`
 
     """
     result = _process_args(
