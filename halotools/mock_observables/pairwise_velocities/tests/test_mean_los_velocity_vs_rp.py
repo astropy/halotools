@@ -8,17 +8,23 @@ from astropy.utils.misc import NumpyRNGContext
 from ..mean_los_velocity_vs_rp import mean_los_velocity_vs_rp
 from ...tests.cf_helpers import generate_locus_of_3d_points
 
-__all__ = ('test_mean_los_velocity_vs_rp_correctness1', 'test_mean_los_velocity_vs_rp_correctness2',
-    'test_mean_los_velocity_vs_rp_correctness3', 'test_mean_los_velocity_vs_rp_correctness4',
-    'test_mean_los_velocity_vs_rp_parallel', 'test_mean_los_velocity_vs_rp_auto_consistency',
-    'test_mean_los_velocity_vs_rp_cross_consistency')
+__all__ = (
+    "test_mean_los_velocity_vs_rp_correctness1",
+    "test_mean_los_velocity_vs_rp_correctness2",
+    "test_mean_los_velocity_vs_rp_correctness3",
+    "test_mean_los_velocity_vs_rp_correctness4",
+    "test_mean_los_velocity_vs_rp_parallel",
+    "test_mean_los_velocity_vs_rp_auto_consistency",
+    "test_mean_los_velocity_vs_rp_cross_consistency",
+)
 
 fixed_seed = 43
 
 
 def pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox=None):
-    """ Brute force pure python function calculating mean los velocities
+    sample1, velocities1, sample2, velocities2, rp_min, rp_max, pi_max, Lbox=None
+):
+    """Brute force pure python function calculating mean los velocities
     in a single bin of separation.
     """
     if Lbox is None:
@@ -36,30 +42,30 @@ def pure_python_mean_los_velocity_vs_rp(
             dz = sample1[i, 2] - sample2[j, 2]
             dvz = velocities1[i, 2] - velocities2[j, 2]
 
-            if dx > xperiod/2.:
+            if dx > xperiod / 2.0:
                 dx = xperiod - dx
-            elif dx < -xperiod/2.:
+            elif dx < -xperiod / 2.0:
                 dx = -(xperiod + dx)
 
-            if dy > yperiod/2.:
+            if dy > yperiod / 2.0:
                 dy = yperiod - dy
-            elif dy < -yperiod/2.:
+            elif dy < -yperiod / 2.0:
                 dy = -(yperiod + dy)
 
-            if dz > zperiod/2.:
+            if dz > zperiod / 2.0:
                 dz = zperiod - dz
                 zsign_flip = -1
-            elif dz < -zperiod/2.:
+            elif dz < -zperiod / 2.0:
                 dz = -(zperiod + dz)
                 zsign_flip = -1
             else:
                 zsign_flip = 1
 
-            d_rp = np.sqrt(dx*dx + dy*dy)
+            d_rp = np.sqrt(dx * dx + dy * dy)
 
             if (d_rp > rp_min) & (d_rp < rp_max) & (abs(dz) < pi_max):
                 if abs(dz) > 0:
-                    vlos = dvz*dz*zsign_flip/abs(dz)
+                    vlos = dvz * dz * zsign_flip / abs(dz)
                 else:
                     vlos = dvz
                 running_tally.append(vlos)
@@ -67,11 +73,11 @@ def pure_python_mean_los_velocity_vs_rp(
     if len(running_tally) > 0:
         return np.mean(running_tally)
     else:
-        return 0.
+        return 0.0
 
 
 def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
-    """ This function tests that the
+    """This function tests that the
     `~halotools.mock_observables.mean_radial_velocity_vs_r` function returns
     results that agree with a brute force pure python implementation
     for a random distribution of points, both with and without PBCs.
@@ -82,55 +88,75 @@ def test_mean_radial_velocity_vs_r_vs_brute_force_pure_python():
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
         sample2 = np.random.random((npts, 3))
-        velocities1 = np.random.uniform(-10, 10, npts*3).reshape((npts, 3))
-        velocities2 = np.random.uniform(-10, 10, npts*3).reshape((npts, 3))
+        velocities1 = np.random.uniform(-10, 10, npts * 3).reshape((npts, 3))
+        velocities2 = np.random.uniform(-10, 10, npts * 3).reshape((npts, 3))
 
     rp_bins, pi_max = np.array([0, 0.1, 0.2, 0.3]), 0.1
 
     ############################################
     # Run the test with PBCs turned off
-    s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2, do_auto=False)
+    s1s2 = mean_los_velocity_vs_rp(
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        do_auto=False,
+    )
 
     rmin, rmax = rp_bins[0], rp_bins[1]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max
+    )
     assert np.allclose(s1s2[0], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[1], rp_bins[2]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max
+    )
     assert np.allclose(s1s2[1], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[2], rp_bins[3]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max)
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max
+    )
     assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
     # ############################################
     # # Run the test with PBCs operative
-    s1s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2, do_auto=False, period=1)
+    s1s2 = mean_los_velocity_vs_rp(
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        do_auto=False,
+        period=1,
+    )
 
     rmin, rmax = rp_bins[0], rp_bins[1]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1
+    )
     assert np.allclose(s1s2[0], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[1], rp_bins[2]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1
+    )
     assert np.allclose(s1s2[1], pure_python_s1s2, rtol=0.01)
 
     rmin, rmax = rp_bins[2], rp_bins[3]
     pure_python_s1s2 = pure_python_mean_los_velocity_vs_rp(
-        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1)
+        sample1, velocities1, sample2, velocities2, rmin, rmax, pi_max, Lbox=1
+    )
     assert np.allclose(s1s2[2], pure_python_s1s2, rtol=0.01)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness1():
-    """ This function tests that the
+    """This function tests that the
     `~halotools.mock_observables.mean_los_velocity_vs_rp` function returns correct
     results for a controlled distribution of points whose mean radial velocity
     is analytically calculable.
@@ -163,14 +189,15 @@ def test_mean_los_velocity_vs_rp_correctness1():
     sample1 = generate_locus_of_3d_points(npts, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
-    velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:, 2] = 50.
+    velocities1 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities2 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities1[:, 2] = 50.0
 
     rp_bins, pi_max = np.array([0, 0.1, 0.15, 0.21, 0.25]), 0.2
 
-    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2)
+    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(
+        sample1, velocities1, rp_bins, pi_max, sample2=sample2, velocities2=velocities2
+    )
     assert np.allclose(s1s1[0:2], 0, rtol=0.01)
     assert np.allclose(s1s2[0:2], 0, rtol=0.01)
     assert np.allclose(s2s2[0:2], 0, rtol=0.01)
@@ -191,9 +218,8 @@ def test_mean_los_velocity_vs_rp_correctness1():
     assert np.allclose(s1s1[3], 0, rtol=0.01)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness2():
-    """ This function tests that the
+    """This function tests that the
     `~halotools.mock_observables.mean_los_velocity_vs_rp` function returns correct
     results for a controlled distribution of points whose mean radial velocity
     is analytically calculable.
@@ -226,14 +252,15 @@ def test_mean_los_velocity_vs_rp_correctness2():
     sample1 = generate_locus_of_3d_points(npts, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
-    velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:, 2] = -50.
+    velocities1 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities2 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities1[:, 2] = -50.0
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
-    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2)
+    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(
+        sample1, velocities1, rp_bins, pi_max, sample2=sample2, velocities2=velocities2
+    )
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -250,9 +277,8 @@ def test_mean_los_velocity_vs_rp_correctness2():
     assert np.allclose(s1s1[1], correct_relative_velocity, rtol=0.01)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness3():
-    """ This function tests that the
+    """This function tests that the
     `~halotools.mock_observables.mean_los_velocity_vs_rp` function returns correct
     results for a controlled distribution of points whose mean radial velocity
     is analytically calculable.
@@ -284,20 +310,27 @@ def test_mean_los_velocity_vs_rp_correctness3():
     sample1 = generate_locus_of_3d_points(npts, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
-    velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:, 0] = -50.
-    velocities1[:, 1] = -10.
-    velocities1[:, 2] = +20.
+    velocities1 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities1[:, 0] = -50.0
+    velocities1[:, 1] = -10.0
+    velocities1[:, 2] = +20.0
 
-    velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2[:, 0] = +25.
-    velocities2[:, 1] = +10.
-    velocities2[:, 2] = +40.
+    velocities2 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities2[:, 0] = +25.0
+    velocities2[:, 1] = +10.0
+    velocities2[:, 2] = +40.0
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
-    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2, period=1)
+    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        period=1,
+    )
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -314,9 +347,8 @@ def test_mean_los_velocity_vs_rp_correctness3():
     assert np.allclose(s1s1[1], correct_relative_velocity, rtol=0.01)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_correctness4():
-    """ This function tests that the
+    """This function tests that the
     `~halotools.mock_observables.mean_los_velocity_vs_rp` function returns correct
     results for a controlled distribution of points whose mean radial velocity
     is analytically calculable.
@@ -351,20 +383,27 @@ def test_mean_los_velocity_vs_rp_correctness4():
     sample1 = generate_locus_of_3d_points(npts, xc=xc1, yc=yc1, zc=zc1, seed=fixed_seed)
     sample2 = generate_locus_of_3d_points(npts, xc=xc2, yc=yc2, zc=zc2, seed=fixed_seed)
 
-    velocities1 = np.zeros(npts*3).reshape(npts, 3)
-    velocities1[:, 0] = -50.
-    velocities1[:, 1] = -10.
-    velocities1[:, 2] = +20.
+    velocities1 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities1[:, 0] = -50.0
+    velocities1[:, 1] = -10.0
+    velocities1[:, 2] = +20.0
 
-    velocities2 = np.zeros(npts*3).reshape(npts, 3)
-    velocities2[:, 0] = +25.
-    velocities2[:, 1] = +10.
-    velocities2[:, 2] = +40.
+    velocities2 = np.zeros(npts * 3).reshape(npts, 3)
+    velocities2[:, 0] = +25.0
+    velocities2[:, 1] = +10.0
+    velocities2[:, 2] = +40.0
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
-    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2, period=1)
+    s1s1, s1s2, s2s2 = mean_los_velocity_vs_rp(
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        period=1,
+    )
     assert np.allclose(s1s1[0], 0, rtol=0.01)
     assert np.allclose(s1s2[0], 0, rtol=0.01)
     assert np.allclose(s2s2[0], 0, rtol=0.01)
@@ -381,7 +420,6 @@ def test_mean_los_velocity_vs_rp_correctness4():
     assert np.allclose(s1s1[1], correct_relative_velocity, rtol=0.01)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_parallel():
     """
     Verify that the `~halotools.mock_observables.mean_los_velocity_vs_rp` function
@@ -392,28 +430,45 @@ def test_mean_los_velocity_vs_rp_parallel():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts * 3).reshape(
+            (npts, 3)
+        )
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts * 3).reshape(
+            (npts, 3)
+        )
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
     s1s1_parallel, s1s2_parallel, s2s2_parallel = mean_los_velocity_vs_rp(
-        sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2, num_threads=2, period=1)
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        num_threads=2,
+        period=1,
+    )
 
     s1s1_serial, s1s2_serial, s2s2_serial = mean_los_velocity_vs_rp(
-        sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2, num_threads=1, period=1)
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        num_threads=1,
+        period=1,
+    )
 
     assert np.allclose(s1s1_serial, s1s1_parallel, rtol=0.001)
     assert np.allclose(s1s2_serial, s1s2_parallel, rtol=0.001)
     assert np.allclose(s2s2_serial, s2s2_parallel, rtol=0.001)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_auto_consistency():
-    """ Verify that the `~halotools.mock_observables.mean_los_velocity_vs_rp` function
+    """Verify that the `~halotools.mock_observables.mean_los_velocity_vs_rp` function
     returns self-consistent auto-correlation results
     regardless of whether we ask for cross-correlations.
     """
@@ -421,25 +476,35 @@ def test_mean_los_velocity_vs_rp_auto_consistency():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts * 3).reshape(
+            (npts, 3)
+        )
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts * 3).reshape(
+            (npts, 3)
+        )
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
-    s1s1a, s1s2a, s2s2a = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2)
-    s1s1b, s2s2b = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2,
-        do_cross=False)
+    s1s1a, s1s2a, s2s2a = mean_los_velocity_vs_rp(
+        sample1, velocities1, rp_bins, pi_max, sample2=sample2, velocities2=velocities2
+    )
+    s1s1b, s2s2b = mean_los_velocity_vs_rp(
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        do_cross=False,
+    )
 
     assert np.allclose(s1s1a, s1s1b, rtol=0.001)
     assert np.allclose(s2s2a, s2s2b, rtol=0.001)
 
 
-@pytest.mark.slow
 def test_mean_los_velocity_vs_rp_cross_consistency():
-    """ Verify that the `~halotools.mock_observables.mean_los_velocity_vs_rp` function
+    """Verify that the `~halotools.mock_observables.mean_los_velocity_vs_rp` function
     returns self-consistent cross-correlation results
     regardless of whether we ask for auto-correlations.
     """
@@ -447,16 +512,27 @@ def test_mean_los_velocity_vs_rp_cross_consistency():
 
     with NumpyRNGContext(fixed_seed):
         sample1 = np.random.random((npts, 3))
-        velocities1 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        velocities1 = np.random.normal(loc=0, scale=100, size=npts * 3).reshape(
+            (npts, 3)
+        )
         sample2 = np.random.random((npts, 3))
-        velocities2 = np.random.normal(loc=0, scale=100, size=npts*3).reshape((npts, 3))
+        velocities2 = np.random.normal(loc=0, scale=100, size=npts * 3).reshape(
+            (npts, 3)
+        )
 
     rp_bins, pi_max = np.array([0, 0.1, 0.3]), 0.2
 
-    s1s1a, s1s2a, s2s2a = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2)
-    s1s2b = mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
-        sample2=sample2, velocities2=velocities2,
-        do_auto=False)
+    s1s1a, s1s2a, s2s2a = mean_los_velocity_vs_rp(
+        sample1, velocities1, rp_bins, pi_max, sample2=sample2, velocities2=velocities2
+    )
+    s1s2b = mean_los_velocity_vs_rp(
+        sample1,
+        velocities1,
+        rp_bins,
+        pi_max,
+        sample2=sample2,
+        velocities2=velocities2,
+        do_auto=False,
+    )
 
     assert np.allclose(s1s2a, s1s2b, rtol=0.001)

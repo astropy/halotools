@@ -21,7 +21,6 @@ rmax = rbins.max()
 fixed_seed = 43
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_corr_func():
     """
     test the correlation function
@@ -42,7 +41,6 @@ def test_tpcf_jackknife_corr_func():
     ), "correlation functions do not match"
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_no_pbc():
     """
     test the correlation function
@@ -55,7 +53,6 @@ def test_tpcf_jackknife_no_pbc():
     result_1, err = tpcf_jackknife(sample1, randoms, rbins, Nsub=2, num_threads=1)
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_cross_corr():
     """
     test the correlation function
@@ -71,7 +68,6 @@ def test_tpcf_jackknife_cross_corr():
     )
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_no_randoms():
     """
     test the correlation function
@@ -87,7 +83,6 @@ def test_tpcf_jackknife_no_randoms():
     )
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_alt_estimator():
     """
     test the correlation function
@@ -102,7 +97,7 @@ def test_tpcf_jackknife_alt_estimator():
         sample1,
         randoms,
         rbins,
-        estimator="Hewett",
+        estimator="Landy-Szalay",
         period=period,
         Nsub=2,
         num_threads=1,
@@ -110,7 +105,6 @@ def test_tpcf_jackknife_alt_estimator():
     )
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_cov_matrix():
     """
     test the covariance matrix
@@ -129,7 +123,6 @@ def test_tpcf_jackknife_cov_matrix():
     assert np.shape(err) == (nbins, nbins), "cov matrix not correct shape"
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_auto_cross():
     """
     test the tpcf_jackknife returns the expected number of quantities when passed
