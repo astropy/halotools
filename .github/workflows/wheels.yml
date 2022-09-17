@@ -21,7 +21,7 @@ jobs:
         uses: pypa/cibuildwheel@2.10.0
         env:
           CIBW_BEFORE_BUILD: pip install oldest-supported-numpy Cython
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.7"
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_SKIP: pp*
 
       - uses: actions/upload-artifact@v2
