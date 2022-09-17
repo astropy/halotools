@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-20.04, macos-11]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build wheels
         uses: pypa/cibuildwheel@2.10.0
@@ -24,6 +24,6 @@ jobs:
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_SKIP: pp*
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
