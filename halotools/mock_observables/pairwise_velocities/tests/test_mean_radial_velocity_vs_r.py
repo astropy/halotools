@@ -770,7 +770,7 @@ def test_mean_radial_velocity_vs_r_parallel1():
         rbins,
         sample2=sample2,
         velocities2=velocities2,
-        num_threads=3,
+        num_threads=2,
         period=1,
     )
 
