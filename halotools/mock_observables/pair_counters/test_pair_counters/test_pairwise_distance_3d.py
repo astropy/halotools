@@ -7,7 +7,10 @@ import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 import pytest
 
-from .pure_python_distance_matrix import pure_python_distance_matrix_3d, pure_python_distance_matrix_xy_z
+from .pure_python_distance_matrix import (
+    pure_python_distance_matrix_3d,
+    pure_python_distance_matrix_xy_z,
+)
 
 from ..pairwise_distance_3d import pairwise_distance_3d, _get_r_max
 from ..pairwise_distance_xy_z import pairwise_distance_xy_z
@@ -95,8 +98,12 @@ def test_pairwise_distance_3d_periodic_tight_locus1():
     # tigh locus
     Npts1 = 10
     Npts2 = 10
-    data1 = generate_locus_of_3d_points(Npts1, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
-    data2 = generate_locus_of_3d_points(Npts2, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
+    data1 = generate_locus_of_3d_points(
+        Npts1, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed
+    )
+    data2 = generate_locus_of_3d_points(
+        Npts2, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed
+    )
     period = 1.0
 
     # should be no connections
@@ -111,7 +118,7 @@ def test_pairwise_distance_3d_periodic_tight_locus1():
     m = pairwise_distance_3d(data1, data2, rmax, period=period)
 
     # each point has 10 connections
-    assert m.getnnz() == Npts1*Npts2
+    assert m.getnnz() == Npts1 * Npts2
 
 
 def test_pairwise_distance_3d_nonperiodic_tight_locus1():
@@ -121,8 +128,12 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus1():
     # tight locus
     Npts1 = 10
     Npts2 = 10
-    data1 = generate_locus_of_3d_points(Npts1, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed)
-    data2 = generate_locus_of_3d_points(Npts2, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed)
+    data1 = generate_locus_of_3d_points(
+        Npts1, xc=0.05, yc=0.05, zc=0.05, seed=fixed_seed
+    )
+    data2 = generate_locus_of_3d_points(
+        Npts2, xc=0.95, yc=0.95, zc=0.95, seed=fixed_seed
+    )
     period = 1.0
 
     # should be no connections
@@ -163,11 +174,10 @@ def test_pairwise_distance_3d_nonperiodic_tight_locus2():
     m = pairwise_distance_3d(data1, data2, rmax, period=None)
 
     # each point has 0 connections including 1 self connection
-    assert m.getnnz() == Npts1*Npts2
+    assert m.getnnz() == Npts1 * Npts2
 
 
 @pytest.mark.installation_test
-@pytest.mark.slow
 def test_3d_brute_force_elementwise_comparison():
     Npts1, Npts2 = int(1e2), int(1e2)
 
@@ -180,7 +190,9 @@ def test_3d_brute_force_elementwise_comparison():
     sparse_matrix = pairwise_distance_3d(sample1, sample2, r_max, period=1)
     dense_matrix = sparse_matrix.tocsc()
 
-    pure_python_dense_matrix = pure_python_distance_matrix_3d(sample1, sample2, r_max, Lbox=1)
+    pure_python_dense_matrix = pure_python_distance_matrix_3d(
+        sample1, sample2, r_max, Lbox=1
+    )
 
     for i in range(pure_python_dense_matrix.shape[0]):
         for j in range(pure_python_dense_matrix.shape[1]):
@@ -189,7 +201,6 @@ def test_3d_brute_force_elementwise_comparison():
             assert np.allclose(brute_force_element, sparse_matrix_element, rtol=0.001)
 
 
-@pytest.mark.slow
 def test_xy_z_brute_force_elementwise_comparison():
     Npts1, Npts2 = int(1e2), int(1e2)
 
@@ -199,12 +210,16 @@ def test_xy_z_brute_force_elementwise_comparison():
 
     rp_max, pi_max = 0.2, 0.2
 
-    sparse_matrix_xy, sparse_matrix_z = pairwise_distance_xy_z(sample1, sample2, rp_max, pi_max, period=1)
+    sparse_matrix_xy, sparse_matrix_z = pairwise_distance_xy_z(
+        sample1, sample2, rp_max, pi_max, period=1
+    )
     dense_matrix_xy = sparse_matrix_xy.tocsc()
     dense_matrix_z = sparse_matrix_z.tocsc()
 
-    pure_python_dense_matrix_xy, pure_python_dense_matrix_z = pure_python_distance_matrix_xy_z(
-        sample1, sample2, rp_max, pi_max, Lbox=1)
+    (
+        pure_python_dense_matrix_xy,
+        pure_python_dense_matrix_z,
+    ) = pure_python_distance_matrix_xy_z(sample1, sample2, rp_max, pi_max, Lbox=1)
 
     for i in range(pure_python_dense_matrix_xy.shape[0]):
         for j in range(pure_python_dense_matrix_xy.shape[1]):
@@ -219,8 +234,7 @@ def test_xy_z_brute_force_elementwise_comparison():
 
 
 def test_get_rmax1():
-    """
-    """
+    """ """
     sample1 = np.zeros((100, 3))
 
     with pytest.raises(ValueError) as err:
@@ -230,8 +244,7 @@ def test_get_rmax1():
 
 
 def test_get_rmax2():
-    """
-    """
+    """ """
     sample1 = np.zeros((100, 3))
 
     with pytest.raises(ValueError) as err:
@@ -250,22 +263,34 @@ def test_parallel_serial_consistency():
 
     r_max = 0.3
 
-    sparse_matrix_serial = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads=1)
-    sparse_matrix_parallel = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads=3)
-    sparse_matrix_parallel_max = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads='max')
+    sparse_matrix_serial = pairwise_distance_3d(
+        sample1, sample2, r_max, period=1, num_threads=1
+    )
+    sparse_matrix_parallel = pairwise_distance_3d(
+        sample1, sample2, r_max, period=1, num_threads=3
+    )
+    sparse_matrix_parallel_max = pairwise_distance_3d(
+        sample1, sample2, r_max, period=1, num_threads="max"
+    )
     dense_matrix_serial = sparse_matrix_serial.tocsc()
     dense_matrix_parallel = sparse_matrix_parallel.tocsc()
     dense_matrix_parallel_max = sparse_matrix_parallel_max.tocsc()
 
-    pure_python_dense_matrix = pure_python_distance_matrix_3d(sample1, sample2, r_max, Lbox=1)
+    pure_python_dense_matrix = pure_python_distance_matrix_3d(
+        sample1, sample2, r_max, Lbox=1
+    )
     for i in range(pure_python_dense_matrix.shape[0]):
         for j in range(pure_python_dense_matrix.shape[1]):
 
             matrix_element_serial = dense_matrix_serial[i, j]
             matrix_element_parallel = dense_matrix_parallel[i, j]
             matrix_element_parallel_max = dense_matrix_parallel_max[i, j]
-            assert np.allclose(matrix_element_serial, matrix_element_parallel, rtol=0.001)
-            assert np.allclose(matrix_element_serial, matrix_element_parallel_max, rtol=0.001)
+            assert np.allclose(
+                matrix_element_serial, matrix_element_parallel, rtol=0.001
+            )
+            assert np.allclose(
+                matrix_element_serial, matrix_element_parallel_max, rtol=0.001
+            )
 
 
 def test_args1():
@@ -278,7 +303,7 @@ def test_args1():
     r_max = 0.3
 
     with pytest.raises(ValueError) as err:
-        __ = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads='a')
+        __ = pairwise_distance_3d(sample1, sample2, r_max, period=1, num_threads="a")
     substr = "Input ``num_threads`` argument must be an integer or the string 'max'"
     assert substr in err.value.args[0]
 
@@ -307,5 +332,6 @@ def test_args3():
 
     r_max = 0.3
 
-    sparse_matrix = pairwise_distance_3d(sample1, sample2, r_max, approx_cell1_size=1, approx_cell2_size=1)
-
+    sparse_matrix = pairwise_distance_3d(
+        sample1, sample2, r_max, approx_cell1_size=1, approx_cell2_size=1
+    )

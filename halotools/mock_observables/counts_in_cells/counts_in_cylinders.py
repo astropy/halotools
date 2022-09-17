@@ -107,16 +107,14 @@ def counts_in_cylinders(
     condition : str, optional
         Require a condition to be met for a pair to be counted.
         See options below:
-        None | "always_true":
-            Count all pairs in cylinder
+        None | "always_true": Count all pairs in cylinder
 
         "mass_frac":
             Only count pairs which satisfy lim[0] < mass2/mass1 < lim[1]
 
     condition_args : tuple, optional
         Arguments passed to the condition constructor
-        None | "always_true":
-            condition_args will be ignored
+        None | "always_true": condition_args will be ignored
 
         "mass_frac":
             -mass1 (array of mass of sample 1; required)
@@ -322,7 +320,7 @@ def _counts_in_cylinders_process_args(
     y2 = sample2[:, 1]
     z2 = sample2[:, 2]
 
-    if return_indexes and ((len(x1) > 2 ** 32) or (len(x2) > 2 ** 32)):
+    if return_indexes and ((len(x1) > 2**32) or (len(x2) > 2**32)):
         msg = (
             "Return indexes uses a uint32 and so can only handle inputs shorter than "
             + "2^32 (~4 Billion). If you are affected by this please raise an Issue on "

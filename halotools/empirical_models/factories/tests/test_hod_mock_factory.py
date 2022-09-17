@@ -1,7 +1,6 @@
 """
 """
 from __future__ import absolute_import, division, print_function
-import warnings
 import pytest
 from astropy.config.paths import _find_home
 import numpy as np
@@ -106,7 +105,6 @@ def test_convenience_functions():
         assert len(gn) == len(model.mock.galaxy_table)
 
 
-@pytest.mark.slow
 def test_mock_population_mask():
     """Verify that using the masking_function feature properly excludes
     halos in the expected way
@@ -144,7 +142,6 @@ def test_mock_population_pbcs():
     assert np.any(sats["halo_x"] != sats["x"])
 
 
-@pytest.mark.slow
 def test_nonPBC_positions():
     """When we do not enforce PBCs, verify that some satellites are
     getting spilled beyond the boundaries, but never centrals.
@@ -179,7 +176,6 @@ def test_nonPBC_positions():
     assert np.all(cens_outside_boundary_mask == False)
 
 
-@pytest.mark.slow
 def test_PBC_positions():
     """When we do enforce PBCs, verify that no galaxies are
     getting spilled beyond the boundaries.
@@ -259,7 +255,6 @@ def test_zero_halo_edge_case():
     assert substr in err.value.args[0]
 
 
-@pytest.mark.slow
 def test_satellite_positions1():
     """Enforce that all HOD satellites are located inside Rvir"""
     model = PrebuiltHodModelFactory("zheng07", threshold=-18)
@@ -283,23 +278,14 @@ def test_satellite_positions1():
     assert np.all(d <= gals["halo_rvir"])
 
 
-@pytest.mark.slow
+@pytest.mark.skipif("not APH_MACHINE")
 def test_one_two_halo_decomposition_on_mock():
     """Enforce that the one-halo term is exactly zero
     on sufficiently large scales.
     """
     model = PrebuiltHodModelFactory("zheng07", redshift=1, threshold=-21)
 
-    try:
-        bolshoi_halocat = CachedHaloCatalog(simname="bolplanck", redshift=1)
-    except:
-        if APH_MACHINE:
-            raise ValueError(
-                "This test should pass on APH_MACHINE since \n"
-                "this machine should have the requested catalog"
-            )
-        else:
-            return
+    bolshoi_halocat = CachedHaloCatalog(simname="bolplanck", redshift=1)
     model.populate_mock(bolshoi_halocat)
     gals = model.mock.galaxy_table
     pos = return_xyz_formatted_array(gals["x"], gals["y"], gals["z"])

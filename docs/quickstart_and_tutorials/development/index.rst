@@ -12,7 +12,6 @@ contribute to the Halotools code base.
 .. toctree::
    :maxdepth: 1
 
-   staying_up_to_date
    bug_reports
    getting_started
    contributors

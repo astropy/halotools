@@ -10,7 +10,6 @@ from ..rp_pi_tpcf_jackknife import rp_pi_tpcf_jackknife
 from ..wp_jackknife import wp_jackknife
 from ..rp_pi_tpcf import rp_pi_tpcf
 
-from ..wp_jackknife import wp_jackknife
 
 slow = pytest.mark.slow
 
@@ -26,7 +25,6 @@ Npts = 1000
 fixed_seed = 43
 
 
-@pytest.mark.slow
 def test_tpcf_jackknife_corr_func():
     """
     Verify rp_pi_tpcf_jackknife returns the same value as rp_pi_tpcf, PBC case
@@ -49,7 +47,6 @@ def test_tpcf_jackknife_corr_func():
     ), "correlation functions do not match"
 
 
-@pytest.mark.slow
 def test_rp_pi_tpcf_jackknife_no_pbc():
     """
     Verify rp_pi_tpcf_jackknife returns the same value as rp_pi_tpcf, no PBC case
@@ -70,7 +67,6 @@ def test_rp_pi_tpcf_jackknife_no_pbc():
     ), "correlation functions do not match"
 
 
-@pytest.mark.slow
 def test_rp_pi_tpcf_jackknife_cross_corr():
     """
     Verify rp_pi_tpcf_jackknife executes for the case of a cross-correlation
@@ -93,7 +89,6 @@ def test_rp_pi_tpcf_jackknife_cross_corr():
     )
 
 
-@pytest.mark.slow
 def test_rp_pi_tpcf_jackknife_no_randoms():
     """
     Verify the correlation function executes when passed in [Nran] for randoms
@@ -116,10 +111,9 @@ def test_rp_pi_tpcf_jackknife_no_randoms():
     )
 
 
-@pytest.mark.slow
 def test_rp_pi_tpcf_jackknife_alt_estimator():
     """
-    Verify the correlation function executes for the ``Hewett`` estimator
+    Verify the correlation function executes for the ``Landy-Szalay`` estimator
     """
     Npts1, Npts2, Nran = 300, 180, 1000
     with NumpyRNGContext(fixed_seed):
@@ -132,7 +126,7 @@ def test_rp_pi_tpcf_jackknife_alt_estimator():
         randoms,
         rp_bins,
         pi_bins,
-        estimator="Hewett",
+        estimator="Landy-Szalay",
         period=period,
         Nsub=3,
         num_threads=1,
@@ -140,7 +134,6 @@ def test_rp_pi_tpcf_jackknife_alt_estimator():
     )
 
 
-@pytest.mark.slow
 def test_rp_pi_tpcf_jackknife_cov_matrix():
     """
     Verify the covariance matrix returned by rp_pi_tpcf_jackknife has the correct shape
@@ -184,7 +177,6 @@ def test_do_auto_false():
     )
 
 
-@pytest.mark.slow
 def test_consistency_with_wp_jackknife():
     """
     Verify the result and covariance matrix is consistent with wp_jackknife
@@ -228,7 +220,6 @@ def test_consistency_with_wp_jackknife():
     assert np.allclose(err_1, err_2), "cov matrix is not consoistent with wp_jackknife"
 
 
-@pytest.mark.slow
 def test_consistency_with_wp_jackknife_2():
     """
     Verify the result and covariance matrix is consistent with wp_jackknife when len(pi_bins)>2

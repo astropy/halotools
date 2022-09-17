@@ -16,14 +16,18 @@ try:
     import igraph
 except ImportError:
     igraph_available = False
-if igraph_available is True:  # there is another package called igraph--need to distinguish.
-    if not hasattr(igraph, 'Graph'):
+if (
+    igraph_available is True
+):  # there is another package called igraph--need to distinguish.
+    if not hasattr(igraph, "Graph"):
         igraph_available is False
-no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
-    "See http://igraph.org/ and note that there are two packages called 'igraph'.")
+no_igraph_msg = (
+    "igraph package not installed.  Some functions will not be available. \n"
+    "See http://igraph.org/ and note that there are two packages called 'igraph'."
+)
 
-__all__ = ['FoFGroups']
-__author__ = ['Duncan Campbell']
+__all__ = ["FoFGroups"]
+__author__ = ["Duncan Campbell"]
 
 
 class FoFGroups(object):
@@ -31,7 +35,9 @@ class FoFGroups(object):
     Friends-of-friends (FoF) groups class.
     """
 
-    def __init__(self, positions, b_perp, b_para, period=None, Lbox=None, num_threads=1):
+    def __init__(
+        self, positions, b_perp, b_para, period=None, Lbox=None, num_threads=1
+    ):
         r"""
         Build FoF groups in redshift space assuming the distant observer approximation.
 
@@ -133,7 +139,9 @@ class FoFGroups(object):
 
         self.b_perp = float(b_perp)  # perpendicular linking length
         self.b_para = float(b_para)  # parallel linking length
-        self.positions = np.asarray(positions, dtype=np.float64)  # coordinates of galaxies
+        self.positions = np.asarray(
+            positions, dtype=np.float64
+        )  # coordinates of galaxies
 
         # process Lbox parameter
         if (Lbox is None) & (period is None):
@@ -150,23 +158,32 @@ class FoFGroups(object):
             period = Lbox
 
         if np.shape(Lbox) != (3,):
-            raise ValueError("Lbox must be an array of length 3, or number indicating the "
-                "length of one side of a cube")
+            raise ValueError(
+                "Lbox must be an array of length 3, or number indicating the "
+                "length of one side of a cube"
+            )
         if (period is not None) and (not np.all(Lbox == period)):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
 
         self.period = period  # simulation box periodic boundary conditions
-        self.Lbox = np.asarray(Lbox, dtype='float64')  # simulation box periodic boundary conditions
+        self.Lbox = np.asarray(
+            Lbox, dtype="float64"
+        )  # simulation box periodic boundary conditions
         # calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)
-        self.n_gal = len(positions)/self.volume
-        self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
-        self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
+        self.n_gal = len(positions) / self.volume
+        self.d_perp = self.b_perp / (self.n_gal ** (1.0 / 3.0))
+        self.d_para = self.b_para / (self.n_gal ** (1.0 / 3.0))
         self.m_perp, self.m_para = pairwise_distance_xy_z(
-            self.positions, self.positions, self.d_perp, self.d_para,
-            period=self.period, num_threads=num_threads)
+            self.positions,
+            self.positions,
+            self.d_perp,
+            self.d_para,
+            period=self.period,
+            num_threads=num_threads,
+        )
 
-        self.m = self.m_perp.multiply(self.m_perp)+self.m_para.multiply(self.m_para)
+        self.m = self.m_perp.multiply(self.m_perp) + self.m_para.multiply(self.m_para)
         self.m = self.m.sqrt()
 
     @property
@@ -183,9 +200,10 @@ class FoFGroups(object):
             array of group IDs for each galaxy
 
         """
-        if getattr(self, '_group_ids', None) is None:
+        if getattr(self, "_group_ids", None) is None:
             self._n_groups, self._group_ids = csgraph.connected_components(
-                self.m_perp, directed=False, return_labels=True)
+                self.m_perp, directed=False, return_labels=True
+            )
         return self._group_ids
 
     @property
@@ -199,9 +217,10 @@ class FoFGroups(object):
             number of distinct groups
 
         """
-        if getattr(self, '_n_groups', None) is None:
-            self._n_groups = csgraph.connected_components(self.m_perp,
-                directed=False, return_labels=False)
+        if getattr(self, "_n_groups", None) is None:
+            self._n_groups = csgraph.connected_components(
+                self.m_perp, directed=False, return_labels=False
+            )
         return self._n_groups
 
     def create_graph(self):
@@ -315,7 +334,7 @@ class FoFGroups(object):
             except AttributeError:
                 self.create_graph()
                 edges = self.g.es()
-            lens = edges.get_attribute_values('weight')
+            lens = edges.get_attribute_values("weight")
             self.edge_lengths = np.array(lens)
             return self.edge_lengths
         else:
@@ -349,10 +368,13 @@ def _scipy_to_igraph(matrix, coords, directed=False):
     y = coords[:, 1]
     z = coords[:, 2]
     if igraph_available:
-        g = igraph.Graph(list(zip(sources, targets)),
-            n=matrix.shape[0], directed=directed,
-            edge_attrs={'weight': weights},
-            vertex_attrs={'x': x, 'y': y, 'z': z})
+        g = igraph.Graph(
+            list(zip(sources, targets)),
+            n=matrix.shape[0],
+            directed=directed,
+            edge_attrs={"weight": weights},
+            vertex_attrs={"x": x, "y": y, "z": z},
+        )
         return g
     else:
         raise HalotoolsError(no_igraph_msg)

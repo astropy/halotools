@@ -14,10 +14,8 @@ try:
     import igraph
 except ImportError:
     igraph_available = False
-    print("igraph package not installed.  Some functions will not be available.")
 
-__all__ = ['test_fof_groups_init', 'test_fof_group_IDs',
-           'test_igraph_functionality']
+__all__ = ["test_fof_groups_init", "test_fof_group_IDs", "test_igraph_functionality"]
 
 # set random seed to get consistent behavior
 N = 1000
@@ -31,7 +29,6 @@ with NumpyRNGContext(fixed_seed):
     sample = np.random.random((N, 3))
 
 
-@pytest.mark.slow
 def test_fof_groups_init():
     """
     test fof_groups object initialization
@@ -44,7 +41,6 @@ def test_fof_groups_init():
 
 
 @pytest.mark.installation_test
-@pytest.mark.slow
 def test_fof_group_IDs():
     """
     test group ID caclulation
@@ -61,7 +57,6 @@ def test_fof_group_IDs():
     assert N_groups == fof_group.n_groups, "number of groups is incorrect"
 
 
-@pytest.mark.slow
 def test_igraph_functionality():
     """
     test igraph functionality caclulation
@@ -85,7 +80,7 @@ def test_igraph_functionality():
 
         edges = fof_group.get_edges()
         # the number of edges is half the sum of vertex degrees of the graph
-        assert len(edges) == np.sum(fof_group.degree)/2
+        assert len(edges) == np.sum(fof_group.degree) / 2
 
         lens = fof_group.get_edge_lengths()
         assert len(lens) == len(edges)
