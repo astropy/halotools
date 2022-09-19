@@ -78,7 +78,7 @@ except Exception:
 
 setup(
     use_scm_version={
-        "write_to": os.path.join("my_package", "version.py"),
+        "write_to": os.path.join("halotools", "version.py"),
         "write_to_template": VERSION_TEMPLATE,
     },
     ext_modules=get_extensions(),
