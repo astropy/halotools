@@ -5,5 +5,5 @@ filename = "CHANGES.rst"
 
 
 [build-system]
-requires = ["setuptools", "wheel", "cython", "oldest-supported-numpy", "extension-helpers"]
+requires = ["setuptools", "setuptools_scm", "wheel", "cython", "oldest-supported-numpy", "extension-helpers"]
 build-backend = 'setuptools.build_meta'
