@@ -4,6 +4,8 @@ include CHANGES.rst
 include ez_setup.py
 include ah_bootstrap.py
 include setup.cfg
+include pyproject.toml
+include tox.ini
 
 recursive-include halotools *.pyx *.pxd *.c *.cpp *.h
 recursive-include docs *
