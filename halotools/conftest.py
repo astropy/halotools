@@ -1,47 +1,40 @@
-# this contains imports plugins that configure py.test for astropy tests.
-# by importing them here in conftest.py they are discoverable by py.test
-# no matter how it is invoked within the source tree.
-from packaging.version import Version
+"""Configure Test Suite.
 
-from astropy.version import version as astropy_version
+This file is used to configure the behavior of pytest when using the Astropy
+test infrastructure. It needs to live inside the package in order for it to
+get picked up when running the tests inside an interpreter using
+`halotools.test()`.
 
-if Version(astropy_version) < Version("2.0.3"):
-    # Astropy is not compatible with the standalone plugins prior this while
-    # astroquery requires them, so we need this workaround. This will mess
-    # up the test header, but everything else will work.
-    from astropy.tests.pytest_plugins import (
-        PYTEST_HEADER_MODULES,
-        enable_deprecations_as_exceptions,
-        TESTED_VERSIONS,
-    )
-elif Version(astropy_version) < Version("3.0"):
-    # With older versions of Astropy, we actually need to import the pytest
-    # plugins themselves in order to make them discoverable by pytest.
-    from astropy.tests.pytest_plugins import *
-else:
-    # As of Astropy 3.0, the pytest plugins provided by Astropy are
-    # automatically made available when Astropy is installed. This means it's
-    # not necessary to import them here, but we still need to import global
-    # variables that are used for configuration.
+"""
+
+import os
+
+try:
     from pytest_astropy_header.display import PYTEST_HEADER_MODULES, TESTED_VERSIONS
 
-
-from .version import version, astropy_helpers_version
-
-
-# Uncomment and customize the following lines to add/remove entries from
-# the list of packages for which version numbers are displayed when running
-# the tests. Making it pass for KeyError is essential in some cases when
-# the package uses other astropy affiliated packages.
-try:
-    PYTEST_HEADER_MODULES["Astropy"] = "astropy"
-    del PYTEST_HEADER_MODULES["Pandas"]
-except (NameError, KeyError):  # NameError is needed to support Astropy < 1.0
-    pass
+    ASTROPY_HEADER = True
+except ImportError:
+    ASTROPY_HEADER = False
 
 
-# This is to figure out the affiliated package version, rather than
-# using Astropy's
+def pytest_configure(config):
+    """Configure Pytest with Astropy.
 
-TESTED_VERSIONS["halotools"] = version
-TESTED_VERSIONS["astropy_helpers"] = astropy_helpers_version
+    Parameters
+    ----------
+    config : pytest configuration
+
+    """
+    if ASTROPY_HEADER:
+
+        config.option.astropy_header = True
+
+        # Customize the following lines to add/remove entries from the list of
+        # packages for which version numbers are displayed when running the tests.
+        PYTEST_HEADER_MODULES.pop("Pandas", None)
+        PYTEST_HEADER_MODULES["scikit-image"] = "skimage"
+
+        from . import __version__
+
+        packagename = os.path.basename(os.path.dirname(__file__))
+        TESTED_VERSIONS[packagename] = __version__
