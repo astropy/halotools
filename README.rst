@@ -71,7 +71,7 @@ The **mock_observables** sub-package contains a wide variety of optimized functi
 
     from halotools.mock_observables import wp
     from halotools.mock_observables import FoFGroups
-    from halotools.mock_observables import delta_sigma
+    from halotools.mock_observables import mean_delta_sigma
 
 
 There are many other functions provided by the **mock_observables** package, such as RSD multipoles, pairwise velocities, generalized marked correlation functions, customizable isolation criteria, void statistics, and more.
@@ -106,8 +106,6 @@ Although the **sim_manager** provides an object-oriented framework for creating 
 
 Project status
 --------------
-
-[![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
 Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.7, is now available on pip and conda-forge. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
 
