@@ -1,6 +1,5 @@
 from distutils.extension import Extension
 import os
-import numpy as np
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ("radial_profile_3d_engine.pyx",)
@@ -11,7 +10,7 @@ def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace(".pyx", "") for src in SOURCES]
     sources = [os.path.join(PATH_TO_PKG, srcfn) for srcfn in SOURCES]
-    include_dirs = np.get_include()
+    include_dirs = ["numpy"]
     libraries = []
     language = "c++"
     extra_compile_args = ["-Ofast"]
