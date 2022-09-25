@@ -6,11 +6,11 @@
 
 import os
 import sys
-from glob import glob
-import numpy as np
-from setuptools import setup, Extension
 
-from Cython.Build import cythonize
+from setuptools import setup
+
+from extension_helpers import get_extensions
+
 
 # First provide helpful messages if contributors try and run legacy commands
 # for tests or docs.
@@ -76,34 +76,10 @@ except Exception:
     version = '{version}'
 """.lstrip()
 
-ext_sources = glob("halotools/**/*.pyx", recursive=True)
-ext_names = [s[:-4].replace("/", ".") for s in ext_sources]
-
-
-def get_extensions(names, sources):
-
-    language = "c++"
-    extra_compile_args = ["-Ofast"]
-
-    extensions = []
-    for name, source in zip(names, sources):
-        extensions.append(
-            Extension(
-                name=name,
-                sources=[source],
-                include_dirs=[np.get_include()],
-                language=language,
-                extra_compile_args=extra_compile_args,
-            )
-        )
-
-    return extensions
-
-
 setup(
     use_scm_version={
         "write_to": os.path.join("halotools", "version.py"),
         "write_to_template": VERSION_TEMPLATE,
     },
-    ext_modules=cythonize(get_extensions(ext_names, ext_sources)),
+    ext_modules=get_extensions(),
 )
