@@ -7,12 +7,11 @@ Package Installation
 To install Halotools, you can use conda-forge, pip, or clone the repo from GitHub and build the source code.
 Either way, be sure to read the :ref:`halotools_dependencies` section prior to installation.
 
-Using pip
-====================
+Using conda-forge and pip
+=========================
 
 The simplest way to install the latest release of the code is with conda-forge.
 If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing::
-
 
     conda install -c conda-forge halotools
 
@@ -65,7 +64,7 @@ All official releases of the code are tagged with their version name, e.g., v0.7
 To install a particular release::
 
 	git checkout v0.7
-	python setup.py install
+	pip install .
 
 This will install the v0.7 release of the code. Other official release versions (e.g., v0.5) can be installed similarly.
 
@@ -75,7 +74,7 @@ Installing the most recent master branch
 If you prefer to use the most recent version of the code::
 
 	git checkout master
-	python setup.py install
+	pip install .
 
 This will install the master branch of the code that is currently under development. While the features in the official releases have a stable API, new features being developed in the master branch may not. However, the master branch may have new features and/or performance enhancements that you may wish to use for your science application. A concerted effort is made to ensure that only thoroughly tested and documented code appears in the public master branch, though Halotools users should be aware of the distinction between the bleeding edge version in master and the official release version available through pip.
 
