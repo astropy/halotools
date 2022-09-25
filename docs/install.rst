@@ -109,27 +109,25 @@ Dependencies
 
 If you install halotools using conda or pip, then most of your dependencies will be handled for you automatically. The only additional dependency you may need is:
 
-- `h5py <http://h5py.org/>`_: 2.5 or later
+- `h5py <http://h5py.org/>`_: 3.7 or later
 
 The h5py package is used for fast I/O of large simulated datasets.
 
 If you did not use conda or pip, then you should be aware of the following strict requirements:
 
-- `Python <http://www.python.org/>`_: 3.7.x
+- `Python <http://www.python.org/>`_: 3.9.x
 
 - `Numpy <http://www.numpy.org/>`_: 1.9 or later
 
 - `Scipy <http://www.scipy.org/>`_: 0.15 or later
 
-- `Cython <http://www.cython.org/>`_: 0.23 or later
+- `Cython <http://www.cython.org/>`_: 0.29.32 or later
 
-- `Astropy`_: 4.0 or later
+- `Astropy`_: 5.0 or later
 
 - `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs.
 
 - `Requests <http://docs.python-requests.org/en/latest/>`_: Also for crawling the web for halo catalogs.
-
-- `h5py <http://h5py.org/>`_: 2.5 or later
 
 Any of the above can be installed with either pip or conda.
 

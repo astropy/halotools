@@ -123,7 +123,7 @@ You can contact Andrew Hearin directly by email at ahearin-at-anl-dot-gov, or by
 
 Citing Halotools
 ----------------
-If you use Halotools modules to support your science publication, please cite `Hearin et al. (2017)<https://arxiv.org/abs/1606.04106>`_, ideally taking note of the version of the code you used, e.g., v0.8::
+If you use Halotools modules to support your science publication, please cite `Hearin et al. (2017) <https://arxiv.org/abs/1606.04106>`_, ideally taking note of the version of the code you used, e.g., v0.8::
 
     @ARTICLE{halotools,
            author = {{Hearin}, Andrew P. and {Campbell}, Duncan and {Tollerud}, Erik and {Behroozi}, Peter and {Diemer}, Benedikt and {Goldbaum}, Nathan J. and {Jennings}, Elise and {Leauthaud}, Alexie and {Mao}, Yao-Yuan and {More}, Surhud and {Parejko}, John and {Sinha}, Manodeep and {Sip{\"o}cz}, Brigitta and {Zentner}, Andrew},
