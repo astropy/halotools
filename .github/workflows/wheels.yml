@@ -27,7 +27,7 @@ jobs:
         # uses: pypa/cibuildwheel@2.10.0
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BEFORE_BUILD: pip install oldest-supported-numpy Cython
+          CIBW_BEFORE_BUILD: pip install oldest-supported-numpy Cython extension-helpers
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_SKIP: pp*
 
