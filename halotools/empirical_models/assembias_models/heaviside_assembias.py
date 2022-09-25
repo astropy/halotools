@@ -160,7 +160,7 @@ class HeavisideAssembias(object):
         if 'splitting_model' in kwargs:
             self.splitting_model = kwargs['splitting_model']
             func = getattr(self.splitting_model, kwargs['splitting_method_name'])
-            if isinstance(func, collections.Callable):
+            if isinstance(func, collections.abc.Callable):
                 self._input_split_func = func
             else:
                 raise HalotoolsError("Input ``splitting_model`` must have a callable function "
