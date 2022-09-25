@@ -12,17 +12,23 @@ The core feature of Halotools is a modular platform for creating mock universes 
 
 The code is publicly available at https://github.com/astropy/halotools.
 
-Documentation
--------------
-The latest build of the documentation can be found at http://halotools.readthedocs.io. The documentation includes installation instructions, quickstart guides and step-by-step tutorials. The *Basic features* section below gives an overview of the primary functionality of the package.
-
-
 Installation
 -------------
+The simplest way to install the latest release of the code is with conda-forge::
+
+    conda install -c conda-forge halotools
+
+Or alternatively, you can install using pip::
+
+    		pip install halotools
 
 You can find detailed installation instructions
 in the **Package Installation** section of http://halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations.
 
+
+Documentation
+-------------
+The latest build of the documentation can be found at http://halotools.readthedocs.io. The documentation includes installation instructions, quickstart guides and step-by-step tutorials. The *Basic features* section below gives an overview of the primary functionality of the package.
 
 
 Basic features
@@ -107,7 +113,7 @@ Although the **sim_manager** provides an object-oriented framework for creating 
 Project status
 --------------
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.7, is now available on pip and conda-forge. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
+Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.8, is now available on pip and conda-forge. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
 
 
 ## Asking questions and staying up-to-date
@@ -117,8 +123,26 @@ You can contact Andrew Hearin directly by email at ahearin-at-anl-dot-gov, or by
 
 Citing Halotools
 ----------------
-If you use Halotools modules to support your science publication, we ask that you cite the code-release paper, http://arxiv.org/abs/1606.04106 paper, ideally taking note of the version of the code you used, e.g., v0.7. Depending on what modules you use, other citations may also be appropriate; see the **License and Citation Information** section of http://halotools.readthedocs.io for further information about how to properly cite Halotools and its supporting science and software.
+If you use Halotools modules to support your science publication, please cite `Hearin et al. (2017) <https://arxiv.org/abs/1606.04106>`_, ideally taking note of the version of the code you used, e.g., v0.8::
 
+    @ARTICLE{halotools,
+           author = {{Hearin}, Andrew P. and {Campbell}, Duncan and {Tollerud}, Erik and {Behroozi}, Peter and {Diemer}, Benedikt and {Goldbaum}, Nathan J. and {Jennings}, Elise and {Leauthaud}, Alexie and {Mao}, Yao-Yuan and {More}, Surhud and {Parejko}, John and {Sinha}, Manodeep and {Sip{\"o}cz}, Brigitta and {Zentner}, Andrew},
+            title = "{Forward Modeling of Large-scale Structure: An Open-source Approach with Halotools}",
+          journal = {The Astronomical Journal},
+         keywords = {cosmology: theory, galaxies: halos, galaxies: statistics, large-scale structure of universe, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
+             year = 2017,
+            month = nov,
+           volume = {154},
+           number = {5},
+              eid = {190},
+            pages = {190},
+              doi = {10.3847/1538-3881/aa859f},
+    archivePrefix = {arXiv},
+           eprint = {1606.04106},
+     primaryClass = {astro-ph.IM},
+           adsurl = {https://ui.adsabs.harvard.edu/abs/2017AJ....154..190H},
+          adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+    }
 
 License
 -------

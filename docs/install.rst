@@ -7,12 +7,11 @@ Package Installation
 To install Halotools, you can use conda-forge, pip, or clone the repo from GitHub and build the source code.
 Either way, be sure to read the :ref:`halotools_dependencies` section prior to installation.
 
-Using pip
-====================
+Using conda-forge and pip
+=========================
 
 The simplest way to install the latest release of the code is with conda-forge.
 If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing::
-
 
     conda install -c conda-forge halotools
 
@@ -65,7 +64,7 @@ All official releases of the code are tagged with their version name, e.g., v0.7
 To install a particular release::
 
 	git checkout v0.7
-	python setup.py install
+	pip install .
 
 This will install the v0.7 release of the code. Other official release versions (e.g., v0.5) can be installed similarly.
 
@@ -75,7 +74,7 @@ Installing the most recent master branch
 If you prefer to use the most recent version of the code::
 
 	git checkout master
-	python setup.py install
+	pip install .
 
 This will install the master branch of the code that is currently under development. While the features in the official releases have a stable API, new features being developed in the master branch may not. However, the master branch may have new features and/or performance enhancements that you may wish to use for your science application. A concerted effort is made to ensure that only thoroughly tested and documented code appears in the public master branch, though Halotools users should be aware of the distinction between the bleeding edge version in master and the official release version available through pip.
 
@@ -110,27 +109,25 @@ Dependencies
 
 If you install halotools using conda or pip, then most of your dependencies will be handled for you automatically. The only additional dependency you may need is:
 
-- `h5py <http://h5py.org/>`_: 2.5 or later
+- `h5py <http://h5py.org/>`_: 3.7 or later
 
 The h5py package is used for fast I/O of large simulated datasets.
 
 If you did not use conda or pip, then you should be aware of the following strict requirements:
 
-- `Python <http://www.python.org/>`_: 3.7.x
+- `Python <http://www.python.org/>`_: 3.9.x
 
 - `Numpy <http://www.numpy.org/>`_: 1.9 or later
 
 - `Scipy <http://www.scipy.org/>`_: 0.15 or later
 
-- `Cython <http://www.cython.org/>`_: 0.23 or later
+- `Cython <http://www.cython.org/>`_: 0.29.32 or later
 
-- `Astropy`_: 4.0 or later
+- `Astropy`_: 5.0 or later
 
 - `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs.
 
 - `Requests <http://docs.python-requests.org/en/latest/>`_: Also for crawling the web for halo catalogs.
-
-- `h5py <http://h5py.org/>`_: 2.5 or later
 
 Any of the above can be installed with either pip or conda.
 

@@ -1,11 +1,9 @@
-0.9 (2022-9-14)
+0.8 (unreleased)
 ----------------
 
-- No changes yet
+- Change packaging tools to pyproject.toml
 
-
-0.8 (2022-9-14)
-----------------
+- Drop dependency on astropy-helpers
 
 - Add new calculator for uber_hostid quantity
 
