@@ -11,7 +11,7 @@ def get_extensions():
 
     names = [THIS_PKG_NAME + "." + src.replace(".pyx", "") for src in SOURCES]
     sources = [os.path.join(PATH_TO_PKG, srcfn) for srcfn in SOURCES]
-    include_dirs = np.get_include()
+    include_dirs = [np.get_include()]
     libraries = []
     language = "c"
     extra_compile_args = ["-Ofast"]
