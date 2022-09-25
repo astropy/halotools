@@ -1,3 +1,9 @@
+0.9 (unreleased)
+----------------
+
+- No changes yet
+
+
 0.8 (2022-09-25)
 ----------------
 
@@ -18,6 +24,7 @@
 - Add vector rotation utilities to halotools.utils
 
 - Add support for Conditional counts in cylinders. See https://github.com/astropy/halotools/pull/987
+
 
 0.7 (2020-1-29)
 ----------------
