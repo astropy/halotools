@@ -1,14 +1,12 @@
 include README.rst
 include CHANGES.rst
-include setup.cfg
 include licenses/LICENSE.rst
+include setup.cfg
 include pyproject.toml
 include tox.ini
 
 recursive-include halotools *.pyx *.pxd *.c *.cpp *.h
 recursive-include docs *
-recursive-include licenses *
-recursive-include cextern *
 recursive-include scripts *
 
 prune build

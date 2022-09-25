@@ -1,14 +1,9 @@
-[tool.astropy-bot]
-
-[tool.astropy-bot.changelog_checker]
-filename = "CHANGES.rst"
-
-
 [build-system]
-requires = ["setuptools",
+
+requires = ["setuptools>=42.0.0",
             "setuptools_scm",
             "wheel",
-            "extension-helpers",
             "oldest-supported-numpy",
-            "cython==0.29.32"]
+            "cython==0.29.14"]
+
 build-backend = 'setuptools.build_meta'
