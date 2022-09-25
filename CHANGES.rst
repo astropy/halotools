@@ -1,4 +1,4 @@
-0.8 (unreleased)
+0.8 (2022-09-25)
 ----------------
 
 - Change packaging tools to pyproject.toml
