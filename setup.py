@@ -76,10 +76,18 @@ except Exception:
     version = '{version}'
 """.lstrip()
 
+scripts = [
+    "scripts/download_initial_halocat.py",
+    "scripts/download_additional_halocat.py",
+    "scripts/rebuild_halo_table_cache_log.py",
+    "scripts/rebuild_ptcl_table_cache_log.py",
+]
+
 setup(
     use_scm_version={
         "write_to": os.path.join("halotools", "version.py"),
         "write_to_template": VERSION_TEMPLATE,
     },
     ext_modules=get_extensions(),
+    scripts=scripts,
 )
