@@ -24,7 +24,18 @@ However, users who prefer pip can install via::
     		pip install halotools
 
 You can find detailed installation instructions
-in the :ref:`step_by_step_install` section of http://halotools.readthedocs.io. After installing the package, you should follow the :ref:`step_by_step_install` 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations.
+in the :ref:`step_by_step_install` section of http://halotools.readthedocs.io.
+After installing the package, you should follow the :ref:`step_by_step_install` 10-minute tutorial.
+This will get you set up with the default halo catalog so that you can quickly get started
+with creating mock galaxy populations.
+
+After installation, it is recommended that you download the default halo catalog::
+
+    $ download_initial_halocat.py
+
+Halotools works with any halo catalog, but downloading the default halo catalog
+automatically configures the halotools cache directory. More information about
+halo catalog download options in the :ref:`download_default_halos` section of the 10-minute tutorial.
 
 
 Documentation
