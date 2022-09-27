@@ -14,17 +14,20 @@ The code is publicly available at https://github.com/astropy/halotools.
 
 Installation
 -------------
-The simplest way to install the latest release of the code is with conda-forge::
+The simplest and most reliable way to install the latest release of the code is with conda-forge::
 
     conda install -c conda-forge halotools
 
-Or alternatively, you can install using pip::
+Pip installation is not recommended because the conda-forge dependency solver is much more robust.
+However, users who prefer pip can install via::
 
     		pip install halotools
 
-You can find detailed installation instructions
-in the **Package Installation** section of http://halotools.readthedocs.io. After installing the package, you should navigate to the *Quickstart Guides and Tutorials* section and follow the *Getting started with Halotools* 10-minute tutorial. This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations.
+You can find detailed installation instructions `halotools.readthedocs.io <http://halotools.readthedocs.io/>`_.
 
+After installing the package, you should navigate to the *Quickstart Guides and Tutorials*
+section and follow the *Getting started with Halotools* 10-minute tutorial.
+This will get you set up with the default halo catalog so that you can quickly get started with creating mock galaxy populations.
 
 Documentation
 -------------

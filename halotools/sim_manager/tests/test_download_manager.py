@@ -519,6 +519,7 @@ class TestDownloadManager(TestCase):
         substr = "you must set the ``overwrite`` keyword argument to True."
         assert substr in err.value.args[0]
 
+    @pytest.mark.skipif("not APH_MACHINE")
     def test_download_ptcl_table4(self):
         """ """
         with pytest.raises(HalotoolsError) as err:
