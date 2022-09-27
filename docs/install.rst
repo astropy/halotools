@@ -4,18 +4,19 @@
 Package Installation
 ************************
 
-To install Halotools, you can use conda-forge, pip, or clone the repo from GitHub and build the source code.
+To install Halotools, you can use conda-forge (recommended), pip, or clone the repo from GitHub and build the source code.
 Either way, be sure to read the :ref:`halotools_dependencies` section prior to installation.
 
 Using conda-forge and pip
 =========================
 
-The simplest way to install the latest release of the code is with conda-forge.
+The simplest and most reliable way to install the latest release of the code is with conda-forge.
 If you will be :ref:`installing_halotools_with_virtualenv`, activate the environment before installing::
 
     conda install -c conda-forge halotools
 
-Alternatively, you can install using pip::
+Pip installation is not recommended because the conda-forge dependency solver is much more robust.
+However, users who prefer pip can install via::
 
 		pip install halotools
 
