@@ -437,10 +437,10 @@ class TestDownloadManager(TestCase):
                 version_name="halotools_v0p4",
                 redshift=11.7,
                 dz_tol=200,
-                overwrite=True,
+                overwrite=False,
                 download_dirname="std_cache_loc",
             )
-        substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``"
+        substr = "you must set the ``overwrite`` keyword argument to True."
         assert substr in err.value.args[0]
 
     @pytest.mark.skipif("not APH_MACHINE")
