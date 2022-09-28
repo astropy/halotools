@@ -1,7 +1,7 @@
-0.9 (unreleased)
-----------------
+0.8.1 (2022-09-28)
+------------------
 
-- No changes yet
+- Include command-line scripts for halo catalog downloads that were omitted from v0.8 release
 
 
 0.8 (2022-09-25)
