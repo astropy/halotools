@@ -276,6 +276,7 @@ class DownloadManager(object):
             (len(close_matches) > 0)
             & (len(exact_matches) == 1)
             & (ignore_nearby_redshifts is False)
+            & (overwrite is False)
         ):
 
             entry = close_matches[0]
