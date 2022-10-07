@@ -13,13 +13,18 @@ from ..assembias_models import HeavisideAssembias, PreservingNgalHeavisideAssemb
 
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ('Zheng07Cens', 'Zheng07Sats',
-           'AssembiasZheng07Cens', 'AssembiasZheng07Sats',
-           'PreservingNgalAssembiasZheng07Cens', 'PreservingNgalAssembiasZheng07Sats')
+__all__ = (
+    "Zheng07Cens",
+    "Zheng07Sats",
+    "AssembiasZheng07Cens",
+    "AssembiasZheng07Sats",
+    "PreservingNgalAssembiasZheng07Cens",
+    "PreservingNgalAssembiasZheng07Sats",
+)
 
 
 class Zheng07Cens(OccupationComponent):
-    r""" ``Erf`` function model for the occupation statistics of central galaxies,
+    r"""``Erf`` function model for the occupation statistics of central galaxies,
     introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values.
 
@@ -31,10 +36,12 @@ class Zheng07Cens(OccupationComponent):
 
     """
 
-    def __init__(self,
-            threshold=model_defaults.default_luminosity_threshold,
-            prim_haloprop_key=model_defaults.prim_haloprop_key,
-            **kwargs):
+    def __init__(
+        self,
+        threshold=model_defaults.default_luminosity_threshold,
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -65,17 +72,20 @@ class Zheng07Cens(OccupationComponent):
 
         # Call the super class constructor, which binds all the
         # arguments to the instance.
-        super(Zheng07Cens, self).__init__(gal_type='centrals',
-            threshold=threshold, upper_occupation_bound=upper_occupation_bound,
+        super(Zheng07Cens, self).__init__(
+            gal_type="centrals",
+            threshold=threshold,
+            upper_occupation_bound=upper_occupation_bound,
             prim_haloprop_key=prim_haloprop_key,
-            **kwargs)
+            **kwargs
+        )
 
         self.param_dict = self.get_published_parameters(self.threshold)
 
-        self.publications = ['arXiv:0408564', 'arXiv:0703457']
+        self.publications = ["arXiv:0408564", "arXiv:0703457"]
 
     def mean_occupation(self, **kwargs):
-        r""" Expected number of central galaxies in a halo of mass halo_mass.
+        r"""Expected number of central galaxies in a halo of mass halo_mass.
         See Equation 2 of arXiv:0703457.
 
         Parameters
@@ -125,22 +135,26 @@ class Zheng07Cens(OccupationComponent):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in list(kwargs.keys()):
-            mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = np.atleast_1d(kwargs['prim_haloprop'])
+        if "table" in list(kwargs.keys()):
+            mass = kwargs["table"][self.prim_haloprop_key]
+        elif "prim_haloprop" in list(kwargs.keys()):
+            mass = np.atleast_1d(kwargs["prim_haloprop"])
         else:
-            msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
-                "to the ``mean_occupation`` function of the ``Zheng07Cens`` class.\n")
+            msg = (
+                "\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
+                "to the ``mean_occupation`` function of the ``Zheng07Cens`` class.\n"
+            )
             raise HalotoolsError(msg)
 
         logM = np.log10(mass)
-        mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.param_dict['logMmin']) / self.param_dict['sigma_logM']))
+        mean_ncen = 0.5 * (
+            1.0
+            + erf((logM - self.param_dict["logMmin"]) / self.param_dict["sigma_logM"])
+        )
 
         return mean_ncen
 
-    def get_published_parameters(self, threshold, publication='Zheng07'):
+    def get_published_parameters(self, threshold, publication="Zheng07"):
         r"""
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -173,7 +187,17 @@ class Zheng07Cens(OccupationComponent):
 
         def get_zheng07_params(threshold):
             # Load tabulated data from Zheng et al. 2007, Table 1
-            logMmin_array = [11.35, 11.46, 11.6, 11.75, 12.02, 12.3, 12.79, 13.38, 14.22]
+            logMmin_array = [
+                11.35,
+                11.46,
+                11.6,
+                11.75,
+                12.02,
+                12.3,
+                12.79,
+                13.38,
+                14.22,
+            ]
             sigma_logM_array = [0.25, 0.24, 0.26, 0.28, 0.26, 0.21, 0.39, 0.51, 0.77]
             # define the luminosity thresholds corresponding to the above data
             threshold_array = np.arange(-22, -17.5, 0.5)
@@ -181,33 +205,44 @@ class Zheng07Cens(OccupationComponent):
 
             threshold_index = np.where(threshold_array == threshold)[0]
             if len(threshold_index) == 0:
-                msg = ("\nInput luminosity threshold "
+                msg = (
+                    "\nInput luminosity threshold "
                     "does not match any of the Table 1 values \nof "
                     "Zheng et al. 2007 (arXiv:0703457).\n"
                     "Choosing the best-fit parameters "
                     "associated the default_luminosity_threshold variable \n"
                     "set in the model_defaults module.\n"
-                    "You can always manually change the values in ``param_dict``.\n")
+                    "You can always manually change the values in ``param_dict``.\n"
+                )
                 warnings.warn(msg)
                 threshold = model_defaults.default_luminosity_threshold
                 threshold_index = np.where(threshold_array == threshold)[0]
 
-            param_dict = (
-                {'logMmin': logMmin_array[threshold_index[0]],
-                'sigma_logM': sigma_logM_array[threshold_index[0]]}
-                )
+            param_dict = {
+                "logMmin": logMmin_array[threshold_index[0]],
+                "sigma_logM": sigma_logM_array[threshold_index[0]],
+            }
 
             return param_dict
 
-        if publication in ['zheng07', 'Zheng07', 'Zheng_etal07', 'zheng_etal07', 'zheng2007', 'Zheng2007']:
+        if publication in [
+            "zheng07",
+            "Zheng07",
+            "Zheng_etal07",
+            "zheng_etal07",
+            "zheng2007",
+            "Zheng2007",
+        ]:
             param_dict = get_zheng07_params(threshold)
             return param_dict
         else:
-            raise KeyError("For Zheng07Cens, only supported best-fit models are currently Zheng et al. 2007")
+            raise KeyError(
+                "For Zheng07Cens, only supported best-fit models are currently Zheng et al. 2007"
+            )
 
 
 class Zheng07Sats(OccupationComponent):
-    r""" Power law model for the occupation statistics of satellite galaxies,
+    r"""Power law model for the occupation statistics of satellite galaxies,
     introduced in Kravtsov et al. 2004, arXiv:0308519. This implementation uses
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values.
 
@@ -221,10 +256,14 @@ class Zheng07Sats(OccupationComponent):
 
     """
 
-    def __init__(self,
-            threshold=model_defaults.default_luminosity_threshold,
-            prim_haloprop_key=model_defaults.prim_haloprop_key,
-            modulate_with_cenocc=False, cenocc_model=None, **kwargs):
+    def __init__(
+        self,
+        threshold=model_defaults.default_luminosity_threshold,
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        modulate_with_cenocc=False,
+        cenocc_model=None,
+        **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -304,23 +343,28 @@ class Zheng07Sats(OccupationComponent):
         # Call the super class constructor, which binds all the
         # arguments to the instance.
         super(Zheng07Sats, self).__init__(
-            gal_type='satellites', threshold=threshold,
+            gal_type="satellites",
+            threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
             prim_haloprop_key=prim_haloprop_key,
-            **kwargs)
+            **kwargs
+        )
 
         self.param_dict = self.get_published_parameters(self.threshold)
 
         if cenocc_model is None:
             cenocc_model = Zheng07Cens(
-                prim_haloprop_key=prim_haloprop_key, threshold=threshold)
+                prim_haloprop_key=prim_haloprop_key, threshold=threshold
+            )
         else:
             if modulate_with_cenocc is False:
-                msg = ("You chose to input a ``cenocc_model``, but you set the \n"
+                msg = (
+                    "You chose to input a ``cenocc_model``, but you set the \n"
                     "``modulate_with_cenocc`` keyword to False, so your "
                     "``cenocc_model`` will have no impact on the model's behavior.\n"
                     "Be sure this is what you intend before proceeding.\n"
-                    "Refer to the Zheng et al. (2007) composite model tutorial for details.\n")
+                    "Refer to the Zheng et al. (2007) composite model tutorial for details.\n"
+                )
                 warnings.warn(msg)
 
         self.modulate_with_cenocc = modulate_with_cenocc
@@ -328,15 +372,17 @@ class Zheng07Sats(OccupationComponent):
             try:
                 assert isinstance(cenocc_model, OccupationComponent)
             except AssertionError:
-                msg = ("The input ``cenocc_model`` must be an instance of \n"
-                    "``OccupationComponent`` or one of its sub-classes.\n")
+                msg = (
+                    "The input ``cenocc_model`` must be an instance of \n"
+                    "``OccupationComponent`` or one of its sub-classes.\n"
+                )
                 raise HalotoolsError(msg)
 
             self.central_occupation_model = cenocc_model
 
             self.param_dict.update(self.central_occupation_model.param_dict)
 
-        self.publications = ['arXiv:0308519', 'arXiv:0703457']
+        self.publications = ["arXiv:0308519", "arXiv:0703457"]
 
     def mean_occupation(self, **kwargs):
         r"""Expected number of satellite galaxies in a halo of mass logM.
@@ -395,17 +441,19 @@ class Zheng07Sats(OccupationComponent):
                     self.central_occupation_model.param_dict[key] = value
 
         # Retrieve the array storing the mass-like variable
-        if 'table' in list(kwargs.keys()):
-            mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = np.atleast_1d(kwargs['prim_haloprop'])
+        if "table" in list(kwargs.keys()):
+            mass = kwargs["table"][self.prim_haloprop_key]
+        elif "prim_haloprop" in list(kwargs.keys()):
+            mass = np.atleast_1d(kwargs["prim_haloprop"])
         else:
-            msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
-                "to the ``mean_occupation`` function of the ``Zheng07Sats`` class.\n")
+            msg = (
+                "\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
+                "to the ``mean_occupation`` function of the ``Zheng07Sats`` class.\n"
+            )
             raise HalotoolsError(msg)
 
-        M0 = 10.**self.param_dict['logM0']
-        M1 = 10.**self.param_dict['logM1']
+        M0 = 10.0 ** self.param_dict["logM0"]
+        M1 = 10.0 ** self.param_dict["logM1"]
 
         # Call to np.where raises a harmless RuntimeWarning exception if
         # there are entries of input logM for which mean_nsat = 0
@@ -417,19 +465,24 @@ class Zheng07Sats(OccupationComponent):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
 
-            mean_nsat[idx_nonzero] = ((mass[idx_nonzero] - M0)/M1)**self.param_dict['alpha']
+            mean_nsat[idx_nonzero] = ((mass[idx_nonzero] - M0) / M1) ** self.param_dict[
+                "alpha"
+            ]
 
         # If a central occupation model was passed to the constructor,
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.modulate_with_cenocc:
             # compatible with AB models
-            mean_ncen = getattr(self.central_occupation_model, "baseline_mean_occupation",\
-                                    self.central_occupation_model.mean_occupation)(**kwargs)
+            mean_ncen = getattr(
+                self.central_occupation_model,
+                "baseline_mean_occupation",
+                self.central_occupation_model.mean_occupation,
+            )(**kwargs)
             mean_nsat *= mean_ncen
 
         return mean_nsat
 
-    def get_published_parameters(self, threshold, publication='Zheng07'):
+    def get_published_parameters(self, threshold, publication="Zheng07"):
         r"""
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -468,35 +521,45 @@ class Zheng07Sats(OccupationComponent):
             threshold_index = np.where(threshold_array == threshold)[0]
 
             if len(threshold_index) == 0:
-                msg = ("\nInput luminosity threshold "
+                msg = (
+                    "\nInput luminosity threshold "
                     "does not match any of the Table 1 values \nof "
                     "Zheng et al. 2007 (arXiv:0703457).\n"
                     "Choosing the best-fit parameters "
                     "associated the default_luminosity_threshold variable \n"
                     "set in the model_defaults module.\n"
-                    "You can always manually change the values in ``param_dict``.\n")
+                    "You can always manually change the values in ``param_dict``.\n"
+                )
                 warnings.warn(msg)
                 threshold = model_defaults.default_luminosity_threshold
                 threshold_index = np.where(threshold_array == threshold)[0]
                 warnings.warn(msg)
 
-            param_dict = (
-                {'logM0': logM0_array[threshold_index[0]],
-                'logM1': logM1_array[threshold_index[0]],
-                'alpha': alpha_array[threshold_index[0]]}
-                )
+            param_dict = {
+                "logM0": logM0_array[threshold_index[0]],
+                "logM1": logM1_array[threshold_index[0]],
+                "alpha": alpha_array[threshold_index[0]],
+            }
             return param_dict
 
-        if publication in ['zheng07', 'Zheng07', 'Zheng_etal07', 'zheng_etal07', 'zheng2007', 'Zheng2007']:
+        if publication in [
+            "zheng07",
+            "Zheng07",
+            "Zheng_etal07",
+            "zheng_etal07",
+            "zheng2007",
+            "Zheng2007",
+        ]:
             param_dict = get_zheng07_params(threshold)
             return param_dict
         else:
-            raise KeyError("For Zheng07Sats, only supported best-fit models are currently Zheng et al. 2007")
+            raise KeyError(
+                "For Zheng07Sats, only supported best-fit models are currently Zheng et al. 2007"
+            )
 
 
 class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
-    r""" Assembly-biased modulation of `Zheng07Sats`.
-    """
+    r"""Assembly-biased modulation of `Zheng07Sats`."""
 
     def __init__(self, **kwargs):
         r"""
@@ -544,16 +607,17 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
 
         """
         Zheng07Sats.__init__(self, **kwargs)
-        HeavisideAssembias.__init__(self,
-            method_name_to_decorate='mean_occupation',
+        HeavisideAssembias.__init__(
+            self,
+            method_name_to_decorate="mean_occupation",
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
-            **kwargs)
+            **kwargs
+        )
 
 
 class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
-    r""" Assembly-biased modulation of `Zheng07Cens`.
-    """
+    r"""Assembly-biased modulation of `Zheng07Cens`."""
 
     def __init__(self, **kwargs):
         r"""
@@ -601,16 +665,17 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
 
         """
         Zheng07Cens.__init__(self, **kwargs)
-        HeavisideAssembias.__init__(self,
+        HeavisideAssembias.__init__(
+            self,
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
-            method_name_to_decorate='mean_occupation', **kwargs)
-
+            method_name_to_decorate="mean_occupation",
+            **kwargs
+        )
 
 
 class PreservingNgalAssembiasZheng07Sats(Zheng07Sats, PreservingNgalHeavisideAssembias):
-    r""" Assembly-biased modulation of `Zheng07Sats` that preserves N_gals.
-    """
+    r"""Assembly-biased modulation of `Zheng07Sats` that preserves N_gals."""
 
     def __init__(self, **kwargs):
         r"""
@@ -658,16 +723,17 @@ class PreservingNgalAssembiasZheng07Sats(Zheng07Sats, PreservingNgalHeavisideAss
 
         """
         Zheng07Sats.__init__(self, **kwargs)
-        PreservingNgalHeavisideAssembias.__init__(self,
-            method_name_to_decorate='mean_occupation',
+        PreservingNgalHeavisideAssembias.__init__(
+            self,
+            method_name_to_decorate="mean_occupation",
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
-            **kwargs)
+            **kwargs
+        )
 
 
 class PreservingNgalAssembiasZheng07Cens(Zheng07Cens, PreservingNgalHeavisideAssembias):
-    r""" Assembly-biased modulation of `Zheng07Cens` that preserves N_gals.
-    """
+    r"""Assembly-biased modulation of `Zheng07Cens` that preserves N_gals."""
 
     def __init__(self, **kwargs):
         r"""
@@ -715,7 +781,10 @@ class PreservingNgalAssembiasZheng07Cens(Zheng07Cens, PreservingNgalHeavisideAss
 
         """
         Zheng07Cens.__init__(self, **kwargs)
-        PreservingNgalHeavisideAssembias.__init__(self,
+        PreservingNgalHeavisideAssembias.__init__(
+            self,
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
-            method_name_to_decorate='mean_occupation', **kwargs)
+            method_name_to_decorate="mean_occupation",
+            **kwargs
+        )
