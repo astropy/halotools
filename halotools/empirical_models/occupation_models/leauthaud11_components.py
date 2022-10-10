@@ -16,12 +16,16 @@ from ..assembias_models import HeavisideAssembias
 from ... import sim_manager
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ('Leauthaud11Cens', 'Leauthaud11Sats',
-           'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats')
+__all__ = (
+    "Leauthaud11Cens",
+    "Leauthaud11Sats",
+    "AssembiasLeauthaud11Cens",
+    "AssembiasLeauthaud11Sats",
+)
 
 
 class Leauthaud11Cens(OccupationComponent):
-    r""" HOD-style model for any central galaxy occupation that derives from
+    r"""HOD-style model for any central galaxy occupation that derives from
     a stellar-to-halo-mass relation.
 
     .. note::
@@ -32,9 +36,13 @@ class Leauthaud11Cens(OccupationComponent):
 
     """
 
-    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-            prim_haloprop_key=model_defaults.prim_haloprop_key,
-            redshift=sim_manager.sim_defaults.default_redshift, **kwargs):
+    def __init__(
+        self,
+        threshold=model_defaults.default_stellar_mass_threshold,
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        redshift=sim_manager.sim_defaults.default_redshift,
+        **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -63,44 +71,47 @@ class Leauthaud11Cens(OccupationComponent):
         # Call the super class constructor, which binds all the
         # arguments to the instance.
         super(Leauthaud11Cens, self).__init__(
-            gal_type='centrals', threshold=threshold,
+            gal_type="centrals",
+            threshold=threshold,
             upper_occupation_bound=upper_occupation_bound,
             prim_haloprop_key=prim_haloprop_key,
-            **kwargs)
+            **kwargs
+        )
         self.redshift = redshift
 
-        self.smhm_model = Behroozi10SmHm(
-            prim_haloprop_key=prim_haloprop_key, **kwargs)
+        self.smhm_model = Behroozi10SmHm(prim_haloprop_key=prim_haloprop_key, **kwargs)
 
         for key, value in self.smhm_model.param_dict.items():
             self.param_dict[key] = value
 
-        self._methods_to_inherit = (
-            ['mc_occupation', 'mean_occupation',
-            'mean_stellar_mass', 'mean_log_halo_mass']
-            )
+        self._methods_to_inherit = [
+            "mc_occupation",
+            "mean_occupation",
+            "mean_stellar_mass",
+            "mean_log_halo_mass",
+        ]
 
-        self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
+        self.publications = ["arXiv:1103.2077", "arXiv:1104.0928"]
         self.publications.extend(self.smhm_model.publications)
         self.publications = list(set(self.publications))
 
     def get_published_parameters(self):
-        r""" Return the values of ``self.param_dict`` according to
+        r"""Return the values of ``self.param_dict`` according to
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the
         lowest redshift bin.
 
         """
         d = {}
-        d['smhm_m1_0'] = 12.52
-        d['smhm_m0_0'] = 10.916
-        d['smhm_beta_0'] = 0.457
-        d['smhm_delta_0'] = 0.566
-        d['smhm_gamma_0'] = 1.54
-        d['scatter_model_param1'] = 0.206
+        d["smhm_m1_0"] = 12.52
+        d["smhm_m0_0"] = 10.916
+        d["smhm_beta_0"] = 0.457
+        d["smhm_delta_0"] = 0.566
+        d["smhm_gamma_0"] = 1.54
+        d["scatter_model_param1"] = 0.206
         return d
 
     def mean_occupation(self, **kwargs):
-        r""" Expected number of central galaxies in a halo.
+        r"""Expected number of central galaxies in a halo.
         See Equation 8 of arXiv:1103.2077.
 
         Parameters
@@ -126,17 +137,17 @@ class Leauthaud11Cens(OccupationComponent):
             if key in list(self.smhm_model.param_dict.keys()):
                 self.smhm_model.param_dict[key] = value
 
-        logmstar = np.log10(self.smhm_model.mean_stellar_mass(
-            redshift=self.redshift, **kwargs))
-        logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
+        logmstar = np.log10(
+            self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
+        )
+        logscatter = math.sqrt(2) * self.smhm_model.mean_scatter(**kwargs)
 
-        mean_ncen = 0.5*(1.0 -
-            erf((self.threshold - logmstar)/logscatter))
+        mean_ncen = 0.5 * (1.0 - erf((self.threshold - logmstar) / logscatter))
 
         return mean_ncen
 
     def mean_stellar_mass(self, **kwargs):
-        r""" Return the stellar mass of a central galaxy as a function
+        r"""Return the stellar mass of a central galaxy as a function
         of the input table.
 
         Parameters
@@ -161,7 +172,7 @@ class Leauthaud11Cens(OccupationComponent):
         return self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
 
     def mean_log_halo_mass(self, log_stellar_mass):
-        r""" Return the base-10 logarithm of the halo mass of a central galaxy as a function
+        r"""Return the base-10 logarithm of the halo mass of a central galaxy as a function
         of the base-10 logarithm of the input stellar mass.
 
         Parameters
@@ -177,12 +188,13 @@ class Leauthaud11Cens(OccupationComponent):
         for key, value in self.param_dict.items():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value
-        return self.smhm_model.mean_log_halo_mass(log_stellar_mass,
-            redshift=self.redshift)
+        return self.smhm_model.mean_log_halo_mass(
+            log_stellar_mass, redshift=self.redshift
+        )
 
 
 class Leauthaud11Sats(OccupationComponent):
-    r""" HOD-style model for any satellite galaxy occupation that derives from
+    r"""HOD-style model for any satellite galaxy occupation that derives from
     a stellar-to-halo-mass relation.
 
     .. note::
@@ -192,11 +204,15 @@ class Leauthaud11Sats(OccupationComponent):
         composite model, see :ref:`leauthaud11_composite_model`.
     """
 
-    def __init__(self, threshold=model_defaults.default_stellar_mass_threshold,
-            prim_haloprop_key=model_defaults.prim_haloprop_key,
-            redshift=sim_manager.sim_defaults.default_redshift,
-            modulate_with_cenocc=True, cenocc_model=None,
-            **kwargs):
+    def __init__(
+        self,
+        threshold=model_defaults.default_stellar_mass_threshold,
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        redshift=sim_manager.sim_defaults.default_redshift,
+        modulate_with_cenocc=True,
+        cenocc_model=None,
+        **kwargs
+    ):
         r"""
         Parameters
         ----------
@@ -242,11 +258,13 @@ class Leauthaud11Sats(OccupationComponent):
             )
         else:
             if modulate_with_cenocc is False:
-                msg = ("You chose to input a ``cenocc_model``, but you set the \n"
-                       "``modulate_with_cenocc`` keyword to False, so your "
-                       "``cenocc_model`` will have no impact on the model's behavior.\n"
-                       "Be sure this is what you intend before proceeding.\n"
-                       "Refer to the Leauthand et al. (2011) composite model tutorial for details.\n")
+                msg = (
+                    "You chose to input a ``cenocc_model``, but you set the \n"
+                    "``modulate_with_cenocc`` keyword to False, so your "
+                    "``cenocc_model`` will have no impact on the model's behavior.\n"
+                    "Be sure this is what you intend before proceeding.\n"
+                    "Refer to the Leauthand et al. (2011) composite model tutorial for details.\n"
+                )
                 warnings.warn(msg)
 
         self.modulate_with_cenocc = modulate_with_cenocc
@@ -255,17 +273,21 @@ class Leauthaud11Sats(OccupationComponent):
             try:
                 assert isinstance(cenocc_model, OccupationComponent)
             except AssertionError:
-                msg = ("The input ``cenocc_model`` must be an instance of \n"
-                       "``OccupationComponent`` or one of its sub-classes.\n")
+                msg = (
+                    "The input ``cenocc_model`` must be an instance of \n"
+                    "``OccupationComponent`` or one of its sub-classes.\n"
+                )
                 raise HalotoolsError(msg)
 
         self.central_occupation_model = cenocc_model
 
         super(Leauthaud11Sats, self).__init__(
-            gal_type='satellites', threshold=threshold,
+            gal_type="satellites",
+            threshold=threshold,
             upper_occupation_bound=float("inf"),
             prim_haloprop_key=prim_haloprop_key,
-            **kwargs)
+            **kwargs
+        )
 
         self.redshift = redshift
 
@@ -276,7 +298,7 @@ class Leauthaud11Sats(OccupationComponent):
         self.publications = self.central_occupation_model.publications
 
     def mean_occupation(self, **kwargs):
-        r""" Expected number of satellite galaxies in a halo of mass halo_mass.
+        r"""Expected number of satellite galaxies in a halo of mass halo_mass.
         See Equation 12-14 of arXiv:1103.2077.
 
         Parameters
@@ -302,20 +324,22 @@ class Leauthaud11Sats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation.
         """
         # Retrieve the array storing the mass-like variable
-        if 'table' in list(kwargs.keys()):
-            mass = kwargs['table'][self.prim_haloprop_key]
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = np.atleast_1d(kwargs['prim_haloprop'])
+        if "table" in list(kwargs.keys()):
+            mass = kwargs["table"][self.prim_haloprop_key]
+        elif "prim_haloprop" in list(kwargs.keys()):
+            mass = np.atleast_1d(kwargs["prim_haloprop"])
         else:
-            raise KeyError("Must pass one of the following keyword arguments "
-                "to mean_occupation:\n``table`` or ``prim_haloprop``")
+            raise KeyError(
+                "Must pass one of the following keyword arguments "
+                "to mean_occupation:\n``table`` or ``prim_haloprop``"
+            )
 
         self._update_satellite_params()
 
         mean_nsat = (
-            np.exp(-self._mcut/(mass*self.littleh)) *
-            (mass*self.littleh/self._msat)**self.param_dict['alphasat']
-            )
+            np.exp(-self._mcut / (mass * self.littleh))
+            * (mass * self.littleh / self._msat) ** self.param_dict["alphasat"]
+        )
 
         if self.modulate_with_cenocc is True:
             mean_nsat *= self.central_occupation_model.mean_occupation(**kwargs)
@@ -323,17 +347,17 @@ class Leauthaud11Sats(OccupationComponent):
         return mean_nsat
 
     def _initialize_param_dict(self):
-        """ Set the initial values of ``self.param_dict`` according to
+        """Set the initial values of ``self.param_dict`` according to
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the
         lowest redshift bin.
 
         """
 
-        self.param_dict['alphasat'] = 1.0
-        self.param_dict['bsat'] = 10.62
-        self.param_dict['bcut'] = 1.47
-        self.param_dict['betacut'] = -0.13
-        self.param_dict['betasat'] = 0.859
+        self.param_dict["alphasat"] = 1.0
+        self.param_dict["bsat"] = 10.62
+        self.param_dict["bcut"] = 1.47
+        self.param_dict["betacut"] = -0.13
+        self.param_dict["betasat"] = 0.859
 
         for key, value in self.central_occupation_model.param_dict.items():
             self.param_dict[key] = value
@@ -341,31 +365,33 @@ class Leauthaud11Sats(OccupationComponent):
         self._update_satellite_params()
 
     def _update_satellite_params(self):
-        """ Private method to update the model parameters.
-
-        """
+        """Private method to update the model parameters."""
         for key, value in self.param_dict.items():
             if key in self.central_occupation_model.param_dict:
                 self.central_occupation_model.param_dict[key] = value
 
         log_halo_mass_threshold = self.central_occupation_model.mean_log_halo_mass(
-            log_stellar_mass=self.threshold)
-        knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
+            log_stellar_mass=self.threshold
+        )
+        knee_threshold = (10.0**log_halo_mass_threshold) * self.littleh
 
-        knee_mass = 1.e12
+        knee_mass = 1.0e12
 
         self._msat = (
-            knee_mass*self.param_dict['bsat'] *
-            (knee_threshold / knee_mass)**self.param_dict['betasat'])
+            knee_mass
+            * self.param_dict["bsat"]
+            * (knee_threshold / knee_mass) ** self.param_dict["betasat"]
+        )
 
         self._mcut = (
-            knee_mass*self.param_dict['bcut'] *
-            (knee_threshold / knee_mass)**self.param_dict['betacut'])
+            knee_mass
+            * self.param_dict["bcut"]
+            * (knee_threshold / knee_mass) ** self.param_dict["betacut"]
+        )
 
 
 class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
-    """ Assembly-biased modulation of `Leauthaud11Cens`.
-    """
+    """Assembly-biased modulation of `Leauthaud11Cens`."""
 
     def __init__(self, **kwargs):
         r"""
@@ -415,15 +441,17 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
 
         """
         Leauthaud11Cens.__init__(self, **kwargs)
-        HeavisideAssembias.__init__(self,
+        HeavisideAssembias.__init__(
+            self,
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
-            method_name_to_decorate='mean_occupation', **kwargs)
+            method_name_to_decorate="mean_occupation",
+            **kwargs
+        )
 
 
 class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
-    """ Assembly-biased modulation of `Leauthaud11Sats`.
-    """
+    """Assembly-biased modulation of `Leauthaud11Sats`."""
 
     def __init__(self, **kwargs):
         r"""
@@ -474,7 +502,10 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
 
         """
         Leauthaud11Sats.__init__(self, **kwargs)
-        HeavisideAssembias.__init__(self,
+        HeavisideAssembias.__init__(
+            self,
             lower_assembias_bound=self._lower_occupation_bound,
             upper_assembias_bound=self._upper_occupation_bound,
-            method_name_to_decorate='mean_occupation', **kwargs)
+            method_name_to_decorate="mean_occupation",
+            **kwargs
+        )

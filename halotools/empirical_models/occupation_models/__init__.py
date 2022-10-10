@@ -4,3 +4,4 @@ from .leauthaud11_components import *
 from .cacciato09_components import *
 from .tinker13_components import *
 from .zu_mandelbaum15_components import *
+from .negative_binomial_sats import *

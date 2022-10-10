@@ -1,7 +1,7 @@
 0.9 (unreleased)
 ----------------
 
-- No changes yet
+- Add MBK10 model of non-Poisson satellite occupation statistics
 
 
 0.8.1 (2022-09-28)

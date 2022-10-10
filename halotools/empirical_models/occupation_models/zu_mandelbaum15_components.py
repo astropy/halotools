@@ -137,7 +137,7 @@ class ZuMandelbaum15Cens(OccupationComponent):
 
         sigma = self.smhm_model.scatter_ln_mstar(halo_mass)
         mean = self.smhm_model.mean_stellar_mass(prim_haloprop=halo_mass)
-        erfarg = (np.log(10 ** self.threshold) - np.log(mean)) / (sigma * np.sqrt(2))
+        erfarg = (np.log(10**self.threshold) - np.log(mean)) / (sigma * np.sqrt(2))
         return 0.5 * (1 - erf(erfarg))
 
     def mean_stellar_mass(self, **kwargs):
@@ -330,7 +330,7 @@ class ZuMandelbaum15Sats(OccupationComponent):
                 self.central_occupation_model.param_dict[key] = value
 
         knee_threshold = self.central_occupation_model.mean_halo_mass(
-            10 ** self.threshold
+            10**self.threshold
         )
         knee_mass = 1.0e12
 
