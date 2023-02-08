@@ -8,6 +8,10 @@ SOURCES = (
     "distances.pyx",
     "conditional_pairwise_distances.pyx",
     "marked_npairs_3d_engine.pyx",
+    "positional_marked_npairs_3d_engine.pyx",
+    "positional_marking_functions.pyx",
+    "positional_marked_npairs_xy_z_engine.pyx",
+    "positional_projected_marking_functions.pyx",
 )
 
 THIS_PKG_NAME = ".".join(__name__.split(".")[:-1])
