@@ -9,10 +9,10 @@ import numpy as np
 from math import pi
 
 from .alignment_helpers import process_projected_alignment_args
-from halotools.mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
+from ..mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
-from halotools.mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
-from halotools.mock_observables.pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
+from ..mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ..mock_observables.pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
 
 __all__ = ['gi_plus_projected']
 __author__ = ['Duncan Campbell']
