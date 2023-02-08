@@ -6,9 +6,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from astropy.utils.misc import NumpyRNGContext
 from warnings import warn
-from halotools.utils import crossmatch, rotate_vector_collection
-from halotools.utils.rotations3d import rotation_matrices_from_angles
-from halotools.empirical_models import NFWPhaseSpace
+from ...utils import crossmatch, rotate_vector_collection
+from ...utils.rotations3d import rotation_matrices_from_angles
+from .. import NFWPhaseSpace
 
 
 __all__ = ()
@@ -224,9 +224,9 @@ class IsotropicSubhaloPositions():
             return np.vstack((x,y,z)).T
 
     def assign_gal_type(self, **kwargs):
-    	"""
+        """
         specify central and satellites
-    	"""
+        """
 
         if 'table' in kwargs.keys():
             table = kwargs['table']

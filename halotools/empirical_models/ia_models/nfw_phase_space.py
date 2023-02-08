@@ -6,14 +6,14 @@ import numpy as np
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
 
-from halotools.empirical_models import NFWProfile, MonteCarloGalProf, NFWPhaseSpace
-from halotools.utils import angles_between_list_of_vectors, vectors_normal_to_planes
-from halotools.utils.rotations3d import rotation_matrices_from_angles
-from halotools.utils import rotate_vector_collection
-from halotools.mock_observables import relative_positions_and_velocities
+from .. import NFWProfile, MonteCarloGalProf, NFWPhaseSpace
+from ...utils import angles_between_list_of_vectors, vectors_normal_to_planes
+from ...utils.rotations3d import rotation_matrices_from_angles
+from ...utils import rotate_vector_collection
+from ...mock_observables import relative_positions_and_velocities
 
-from halotools.utils.mcrotations import random_unit_vectors_3d
-from halotools.utils.rotations3d import rotation_matrices_from_basis
+from ...utils.mcrotations import random_unit_vectors_3d
+from ...utils.rotations3d import rotation_matrices_from_basis
 
 
 __author__ = ['Andrew Hearin', 'Duncan Campbell']

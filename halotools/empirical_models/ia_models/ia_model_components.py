@@ -8,11 +8,11 @@ import numpy as np
 from .ia_strength_models import alignment_strength
 
 # vector rotations
-from halotools.utils import rotate_vector_collection
-from halotools.utils.mcrotations import random_perpendicular_directions, random_unit_vectors_3d
-from halotools.utils.vector_utilities import (elementwise_dot, elementwise_norm, normalized_vectors,
+from ...utils import rotate_vector_collection
+from ...utils.mcrotations import random_perpendicular_directions, random_unit_vectors_3d
+from ...utils.vector_utilities import (elementwise_dot, elementwise_norm, normalized_vectors,
                                               angles_between_list_of_vectors, vectors_normal_to_planes)
-from halotools.utils.rotations3d import vectors_between_list_of_vectors, rotation_matrices_from_angles
+from ...utils.rotations3d import vectors_between_list_of_vectors, rotation_matrices_from_angles
 
 # watson distribution
 from watson_dist import DimrothWatson
@@ -21,7 +21,7 @@ from watson_dist import DimrothWatson
 from warnings import warn
 from astropy.utils.misc import NumpyRNGContext
 
-from halotools.utils import crossmatch
+from ...utils import crossmatch
 
 
 __all__ = ('RandomAlignment',
