@@ -11,7 +11,7 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..ee_3d import ee_3d
 
-from halotools.custom_exceptions import HalotoolsError
+from ...custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
