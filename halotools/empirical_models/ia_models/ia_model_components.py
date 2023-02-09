@@ -15,7 +15,7 @@ from ...utils.vector_utilities import (elementwise_dot, elementwise_norm, normal
 from ...utils.rotations3d import vectors_between_list_of_vectors, rotation_matrices_from_angles
 
 # watson distribution
-from watson_dist import DimrothWatson
+from .watson_distribution import DimrothWatson
 
 # utilities
 from warnings import warn
