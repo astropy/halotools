@@ -150,4 +150,4 @@ If you use Halotools modules to support your science publication, please cite `H
 License
 -------
 
-Halotools is licensed under a 3-clause BSD style license - see the licenses/LICENSE.rst file.
+Halotools is licensed by Argonne National Lab under a 3-clause BSD style license - see the licenses/LICENSE.rst file.

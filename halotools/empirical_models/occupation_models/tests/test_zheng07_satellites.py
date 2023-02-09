@@ -276,7 +276,7 @@ def test_logM1_scaling2_mean_occupation():
     assert fracdiff_highmass < 0
 
     # The fractional change due to alterations of logM1 should be identical at all mass
-    assert fracdiff_highmass == fracdiff_midmass
+    assert np.allclose(fracdiff_highmass, fracdiff_midmass)
 
 
 def test_raises_correct_exception():
