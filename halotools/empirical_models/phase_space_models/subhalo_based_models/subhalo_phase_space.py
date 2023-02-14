@@ -28,6 +28,30 @@ default_inherited_subhalo_props_dict = (
     'halo_vz': ('vz', 'f8'),
     'halo_mpeak': ('halo_mpeak', 'f8')})
 
+# Inheritance dictionary that included subhalo alignment information as well as some other useful attributes
+# Use this when you want to use SubhaloAlignment
+alignment_inherited_subhalo_props_dict = (
+    {'halo_id': ('halo_id', 'i8'),
+    'halo_x': ('x', 'f8'),
+    'halo_y': ('y', 'f8'),
+    'halo_z': ('z', 'f8'),
+    'halo_vx': ('vx', 'f8'),
+    'halo_vy': ('vy', 'f8'),
+    'halo_vz': ('vz', 'f8'),
+    'halo_x': ('subhalo_x', 'f8'),
+    'halo_y': ('subhalo_y', 'f8'),
+    'halo_z': ('subhalo_z', 'f8'),
+    'halo_vx': ('subhalo_vx', 'f8'),
+    'halo_vy': ('subhalo_vy', 'f8'),
+    'halo_vz': ('subhalo_vz', 'f8'),
+    'halo_mpeak': ('halo_mpeak', 'f8'),
+    'halo_upid': ('subhalo_upid', 'i8'),
+    'halo_rvir': ('subhalo_rvir', 'f8'),
+    'halo_mvir': ('subhalo_mvir', 'f8'),
+    'halo_axisA_x': ('subhalo_axisA_x','f8'),
+    'halo_axisA_y': ('subhalo_axisA_y','f8'),
+    'halo_axisA_z': ('subhalo_axisA_z','f8')})
+
 
 class SubhaloPhaseSpace(object):
     """ Class using subhalo information to model the phase space of satellite galaxies.
