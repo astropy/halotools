@@ -164,7 +164,6 @@ class DimrothWatson(rv_continuous):
 
         k = np.atleast_1d(k).astype(np.float64)
         if size is None:
-            print("B")
             size = len(k)
         if size != 1:
             if len(k) == size:
@@ -182,7 +181,7 @@ class DimrothWatson(rv_continuous):
 
         # take care of k=0 case
         zero_k = (k == 0)
-        uran0 = np.random.random(np.sum(zero_k))*2 - 1.0
+        uran0 = random_state.random(np.sum(zero_k))*2 - 1.0
         result[zero_k] = uran0
 
         # take care of edge cases, i.e. |k| very large
@@ -192,7 +191,7 @@ class DimrothWatson(rv_continuous):
         edge_mask = ((x == np.inf) | (x == 0.0))
         #result[edge_mask & (k>0)] = np.random.choice([1,-1], size=np.sum(edge_mask & (k>0)))
         #result[edge_mask & (k<0)] = 0.0
-        result[edge_mask & (k<0)] = np.random.choice([1,-1], size=np.sum(edge_mask & (k<0)))
+        result[edge_mask & (k<0)] = random_state.choice([1,-1], size=np.sum(edge_mask & (k<0)))
         result[edge_mask & (k>0)] = 0.0
 
         # apply rejection sampling technique to sample from pdf
@@ -205,9 +204,9 @@ class DimrothWatson(rv_continuous):
 
         while (n_sucess < size) & (n_iter < max_iter):
             # get three uniform random numbers
-            uran1 = np.random.random(n_remaining)
-            uran2 = np.random.random(n_remaining)
-            uran3 = np.random.random(n_remaining)
+            uran1 = random_state.random(n_remaining)
+            uran2 = random_state.random(n_remaining)
+            uran3 = random_state.random(n_remaining)
 
             # masks indicating which envelope function is used
             negative_k = (kk < 0.0)
