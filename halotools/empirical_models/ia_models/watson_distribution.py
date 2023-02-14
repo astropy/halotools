@@ -134,7 +134,7 @@ class DimrothWatson(rv_continuous):
 
         return p
 
-    def _rvs(self, k, max_iter=100):
+    def _rvs(self, k, size=None, max_iter=100, random_state=None):
         r"""
         random variate sampling
 
@@ -150,6 +150,9 @@ class DimrothWatson(rv_continuous):
         max_iter : int, optional
             integer indicating the maximum number of times to iteratively draw from
             the proposal distribution until len(s) points are accepted.
+        
+        random_state : numpy.random.RandomState, optional
+            RandomState used to generate random numbers.
 
         Notes
         -----
@@ -160,7 +163,9 @@ class DimrothWatson(rv_continuous):
         """
 
         k = np.atleast_1d(k).astype(np.float64)
-        size = self._size[0]
+        if size is None:
+            print("B")
+            size = len(k)
         if size != 1:
             if len(k) == size:
                 pass
