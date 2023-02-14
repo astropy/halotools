@@ -1,41 +1,33 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.gi_plus_projected` function used to
+Module containing the `~halotools.mock_observables.alignments.gi_minus_3d` function used to
 calculate the projected gravitational shear-intrinsic ellipticity (GI) correlation
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from math import pi
+from math import pi, gamma
 
-from .alignment_helpers import process_projected_alignment_args
-from ..mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
+from .alignment_helpers import process_3d_alignment_args
+from ....mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
-from ..mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ..mock_observables.pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
+from ....mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ....mock_observables.pair_counters import positional_marked_npairs_3d, marked_npairs_3d
 
-__all__ = ['gi_plus_projected']
+__all__ = ['gi_minus_3d']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
+def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
             randoms1=None, randoms2=None, weights1=None, weights2=None,
             ran_weights1=None, ran_weights2=None, estimator='Landy-Szalay',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the projected gravitational shear-intrinsic ellipticity correlation function (GI),
-    :math:`w_{g+}(r_p)`, where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS)
-    between two galaxies.  See the 'Notes' section for details of this calculation.
-
-    The first two dimensions define the plane for perpendicular distances.  The third
-    dimension is used for parallel distances, i.e. x,y positions are on the plane of the
-    sky, and z is the redshift coordinate. This is the 'distant observer' approximation.
-
-    Note in particular that the `~halotools.mock_observables.alignments.gi_plus_projected` function does not
-    accept angular coordinates for the input ``sample1`` or ``sample2``.
+    Calculate the 3-D gravitational shear-intrinsic ellipticity correlation function (GI),
+    :math:`\xi_{g-}(r)`. See the 'Notes' section for details of this calculation.
 
     Parameters
     ----------
@@ -48,7 +40,7 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     orientations1 : array_like
-        Npts1 x 2 numpy array containing projected orientation vectors for each point in ``sample1``.
+        Npts1 x 3 numpy array containing 3-D orientation vectors for each point in ``sample1``.
         these will be normalized if not already.
 
     ellipticities1: array_like
@@ -57,13 +49,9 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
 
-    rp_bins : array_like
-        array of boundaries defining the radial bins perpendicular to the LOS in which
+    rbins : array_like
+        array of boundaries defining the radial bins in which
         pairs are counted.
-        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
-
-    pi_max : float
-        maximum LOS distance defining the projection integral length-scale in the z-dimension.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     randoms1 : array_like, optional
@@ -125,32 +113,27 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
     Returns
     -------
     correlation_function : numpy.array
-        *len(rp_bins)-1* length array containing the correlation function :math:`w_{g+}(r_p)`
-        computed in each of the bins defined by input ``rp_bins``.
+        *len(rbins)-1* length array containing the correlation function :math:`w_{g-}(r)`
+        computed in each of the bins defined by input ``rbins``.
 
     Notes
     -----
 
-    The projected GI-correlation function is calculated as:
-
-    .. math::
-        w_{g+}(r_p) = 2 \int_0^{\pi_{\rm max}} \xi_{g+}(r_p, \pi) \mathrm{d}\pi
-
     If the Landy-Szalay estimator is indicated, the correlation function is estimated as:
 
     .. math::
-        \xi_{g+}(r_p, \pi) = \frac{S_{+}D-S_{+}R}{R_sR}
+        \xi_{g-}(r) = \frac{S_{+}D-S_{+}R}{R_sR}
 
      where
 
     .. math::
-        S_{+}D = \sum_{i \neq j} w_jw_i e_{+}(j|i)
+        S_{-}D = \sum_{i \neq j} w_jw_i e_{-}(j|i)
 
     :math:`w_j` and :math:`w_j` are weights.  Weights are set to 1 for all galaxies by default.
     The alingment of the :math:`j`-th galaxy relative to the direction to the :math:`i`-th galaxy is given by:
 
     .. math::
-        e_{+}(j|i) = e_j\cos(2\phi)
+        e_{-}(j|i) = e_j\sin(2\phi)
 
     where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the
     orientation vector, :math:`\vec{o}_j`, and the projected direction between the :math:`j`-th
@@ -159,7 +142,7 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
     .. math::
         \cos(\phi) = \vec{o}_j \cdot \vec{r}_{p i,j}
 
-    :math:`S_{+}R` is analgous to :math:`S_{+}D` but instead is computed
+    :math:`S_{+}R` is analgous to :math:`S_{-}D` but instead is computed
     with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts,
     where :math:`R_s` corresponds to the shapes sample, i.e. the sample with orienttions
     and ellipticies, ``sample1``, and R correspoinds to ``sample2``.
@@ -188,14 +171,13 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
 
     We then create a set of random orientation vectors and ellipticities for each point
 
-    >>> random_orientations = np.random.random((Npts,2))
+    >>> random_orientations = np.random.random((Npts,3))
     >>> random_ellipticities = np.random.random(Npts)
 
-    We can the calculate the projected auto-GI correlation between these points:
+    We can the calculate the auto-GI correlation between these points:
 
-    >>> rp_bins = np.logspace(-1,1,10)
-    >>> pi_max = 0.25
-    >>> w = gi_plus_projected(sample1, random_orientations, random_ellipticities, sample1, rp_bins, pi_max, period=Lbox)
+    >>> rbins = np.logspace(-1,1,10)
+    >>> w = gi_minus_3d(sample1, random_orientations, random_ellipticities, sample1, rbins, period=Lbox)
 
     """
 
@@ -205,12 +187,12 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
                       randoms1, ran_weights1, randoms2, ran_weights2)
     sample1, orientations1, ellipticities1, weights1, sample2,\
         orientations2, ellipticities2, weights2, randoms1, ran_weights1,\
-        randoms2, ran_weights2 = process_projected_alignment_args(*alignment_args)
+        randoms2, ran_weights2 = process_3d_alignment_args(*alignment_args)
 
-    function_args = (sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
+    function_args = (sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size)
-    sample1, rp_bins, pi_bins, sample2, randoms1, randoms2,\
-        period, num_threads, PBCs, no_randoms = _gi_plus_projected_process_args(*function_args)
+    sample1, rbins, sample2, randoms1, randoms2,\
+        period, num_threads, PBCs, no_randoms = _gi_minus_3d_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -224,29 +206,28 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
 
     #define merk vectors to use in pair counting
     # sample 1
-    marks1 = np.ones((N1, 3))
+    marks1 = np.ones((N1, 4))
     marks1[:, 0] = ellipticities1 * weights1
     marks1[:, 1] = orientations1[:, 0]
     marks1[:, 2] = orientations1[:, 1]
+    marks1[:, 3] = orientations1[:, 2]
     # sample 2
     marks2 = weights2
     # randoms 1
-    ran_marks1 = np.ones((NR1, 3))
+    ran_marks1 = np.ones((NR1, 4))
     ran_marks1[:, 0] = ran_weights1
     ran_marks1[:, 1] = 0  # dummy
     ran_marks1[:, 2] = 0  # dummy
+    ran_marks1[:, 3] = 0  # dummy
     # randoms 2
     ran_marks2 = ran_weights2
-
-    # define pi bins
-    pi_bins = np.array([0.0, pi_max])
 
     do_SD, do_SR, do_RR = GI_estimator_requirements(estimator)
 
     # count marked pairs
     if do_SD:
         SD = marked_pair_counts(sample1, sample2,  marks1,  marks2,
-                                rp_bins, pi_bins, period, num_threads,
+                                rbins, period, num_threads,
                                 approx_cell1_size, approx_cell2_size)
     else:
         SD = None
@@ -257,7 +238,7 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
             SR = 0.0
         else:
             SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
-                                    rp_bins, pi_bins, period, num_threads,
+                                    rbins, period, num_threads,
                                     approx_cell1_size, approx_cell2_size)
     else:
         SR = None
@@ -265,14 +246,14 @@ def gi_plus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, 
     # count random pairs
     if do_RR:
         RR = random_counts(randoms1, randoms2, ran_weights1, ran_weights2,
-                           rp_bins, pi_bins, N1, N2, no_randoms, period, PBCs,
+                           rbins, N1, N2, no_randoms, period, PBCs,
                            num_threads, approx_cell1_size, approx_cell2_size)
     else:
         RR = None
 
     result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
 
-    return result*2.0*pi_max  # factor of 2pi_max accounts for integration
+    return result
 
 
 def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Landy-Szalay'):
@@ -306,24 +287,24 @@ def GI_estimator_requirements(estimator):
         raise ValueError(msg)
 
 
-def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, period,
+def marked_pair_counts(sample1, sample2, weights1, weights2, rbins, period,
         num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Count marked pairs.
     """
 
-    weight_func_id = 2
-    SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
+    weight_func_id = 3
+    SD = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)[0]
-    SD = np.diff(np.diff(SD, axis=0), axis=1)
+    SD = np.diff(SD, axis=0)
     SD = SD.flatten()
 
     return SD
 
 
-def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bins,
+def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rbins,
                   N1, N2, no_randoms, period,
                   PBCs, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
@@ -331,12 +312,13 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
     """
 
     if no_randoms is False:
-        RR = marked_npairs_xy_z(randoms1, randoms2, rp_bins, pi_bins,
+        RR = marked_npairs_3d(randoms1, randoms2, rbins,
                 period=period, num_threads=num_threads, weight_func_id=1,
                 weights1=ran_weights1, weights2=ran_weights2,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
-        RR = np.diff(np.diff(RR, axis=0), axis=1)
+
+        RR = np.diff(RR, axis=0)
         RR = RR.flatten()
 
         return RR
@@ -347,8 +329,8 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
         NR2 = N2
 
         # do volume calculations
-        v = cylinder_volume(rp_bins, 2.0*pi_bins)
-        dv = np.diff(np.diff(v, axis=0), axis=1)
+        v = nball_volume(rbins)
+        dv = np.diff(v, axis=0)
         global_volume = period.prod()
 
         # calculate the expected random-random pairs.
@@ -358,18 +340,19 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
         return RR.flatten()
 
 
-def cylinder_volume(R, h):
-    r"""
-    Calculate the volume of a cylinder(s), used for the analytical randoms.
+def nball_volume(R, k=3):
     """
-    return pi*np.outer(R**2.0, h)
+    Calculate the volume of a n-shpere.
+    This is used for the analytical randoms.
+    """
+    return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
 
 
-def _gi_plus_projected_process_args(sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
+def _gi_minus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.alignments.w_gplus`.
+    `~halotools.mock_observables.alignments.gi_minus_3d`.
     """
     sample1 = enforce_sample_has_correct_shape(sample1)
 
@@ -396,15 +379,12 @@ def _gi_plus_projected_process_args(sample1, rp_bins, pi_max, sample2, randoms1,
     else:
         no_randoms = False
 
-    pi_max = float(pi_max)
-    pi_bins = np.array([0.0, pi_max])
-
-    rp_bins = get_separation_bins_array(rp_bins)
-    rp_max = np.amax(rp_bins)
+    rbins = get_separation_bins_array(rbins)
+    rmax = np.amax(rbins)
 
     period, PBCs = get_period(period)
 
-    _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
+    _enforce_maximum_search_length([rmax, rmax, rmax], period)
 
     if (randoms1 is None) & (PBCs is False):
         msg = "If no PBCs are specified, both randoms must be provided.\n"
@@ -412,4 +392,5 @@ def _gi_plus_projected_process_args(sample1, rp_bins, pi_max, sample2, randoms1,
 
     num_threads = get_num_threads(num_threads)
 
-    return sample1, rp_bins, pi_bins, sample2, randoms1, randoms2, period, num_threads, PBCs, no_randoms
+    return sample1, rbins, sample2, randoms1, randoms2, period, num_threads, PBCs, no_randoms
+

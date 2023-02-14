@@ -1,5 +1,5 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.ii_minus_3d` function used to
+Module containing the `~halotools.mock_observables.alignments.ii_plus_3d` function used to
 calculate the intrinsic ellipticity-ellipticity (II) correlation
 """
 
@@ -9,10 +9,10 @@ import numpy as np
 from math import pi, gamma
 
 from .alignment_helpers import process_3d_alignment_args
-from ..mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
+from ....mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
-from ..mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ..mock_observables.pair_counters import positional_marked_npairs_3d, marked_npairs_3d
+from ....mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ....mock_observables.pair_counters import positional_marked_npairs_3d, marked_npairs_3d
 
 __all__ = ['ii_plus_3d']
 __author__ = ['Duncan Campbell']
@@ -21,13 +21,13 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def ii_minus_3d(sample1, orientations1, ellipticities1, sample2, orientations2, ellipticities2,
+def ii_plus_3d(sample1, orientations1, ellipticities1, sample2, orientations2, ellipticities2,
             rbins, randoms1=None, randoms2=None, weights1=None, weights2=None,
             ran_weights1=None, ran_weights2=None, estimator='Natural',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
     Calculate the intrinsic ellipticity-ellipticity correlation function (II),
-    :math:`\xi_{--}(r)`.  See the 'Notes' section for details of this calculation.
+    :math:`\xi_{++}(r)`.  See the 'Notes' section for details of this calculation.
 
     Parameters
     ----------
@@ -130,18 +130,18 @@ def ii_minus_3d(sample1, orientations1, ellipticities1, sample2, orientations2, 
     The II-correlation function is calculated as:
 
     .. math::
-        \xi_{--}(r) = \frac{S_{-}S_{-}}{R_sR_s}
+        \xi_{++}(r) = \frac{S_{+}S_{+}}{R_sR_s}
 
     where
 
     .. math::
-        S_{-}S_{-} = \sum_{i \neq j} w_jw_i e_{-}(j|i)e_{-}(i|j)
+        S_{+}S_{+} = \sum_{i \neq j} w_jw_i e_{+}(j|i)e_{+}(i|j)
 
     :math:`w_j` and :math:`w_j` are weights.  Weights are set to 1 for all galaxies by default.
     The alingment of the :math:`j`-th galaxy relative to the direction to the :math:`i`-th galaxy is given by:
 
     .. math::
-        e_{-}(j|i) = e_j\sin(2\phi)
+        e_{+}(j|i) = e_j\cos(2\phi)
 
     where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the
     orientation vector, :math:`\vec{o}_j`, and the direction between the :math:`j`-th
@@ -182,7 +182,7 @@ def ii_minus_3d(sample1, orientations1, ellipticities1, sample2, orientations2, 
     We can the calculate the projected auto-GI correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
-    >>> w = ii_minus_3d(sample1, random_orientations, random_ellipticities, sample1, random_orientations, random_ellipticities, rbins, period=Lbox)
+    >>> w = ii_plus_3d(sample1, random_orientations, random_ellipticities, sample1, random_orientations, random_ellipticities, rbins, period=Lbox)
 
     """
 
@@ -197,7 +197,7 @@ def ii_minus_3d(sample1, orientations1, ellipticities1, sample2, orientations2, 
     function_args = (sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size)
     sample1, rbins, sample2, randoms1, randoms2,\
-        period, num_threads, PBCs, no_randoms = _ii_minus_3d_process_args(*function_args)
+        period, num_threads, PBCs, no_randoms = _ii_plus_3d_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -293,7 +293,7 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rbins, period,
     Count marked pairs.
     """
 
-    weight_func_id = 6
+    weight_func_id = 5
     SS = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
@@ -345,7 +345,7 @@ def nball_volume(R, k=3):
     return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
 
 
-def _ii_minus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
+def _ii_plus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
@@ -390,4 +390,5 @@ def _ii_minus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
     num_threads = get_num_threads(num_threads)
 
     return sample1, rbins, sample2, randoms1, randoms2, period, num_threads, PBCs, no_randoms
+
 

@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from warnings import warn
 
-from ..mock_observables.mock_observables_helpers import enforce_sample_has_correct_shape
+from ....mock_observables.mock_observables_helpers import enforce_sample_has_correct_shape
 
 __all__ = ('process_projected_alignment_args', 'process_3d_alignment_args')
 
