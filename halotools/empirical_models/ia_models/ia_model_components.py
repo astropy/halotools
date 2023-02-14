@@ -974,7 +974,10 @@ class HybridSatelliteAlignment(object):
 class SubhaloAlignment(object):
     r"""
     alignment model for satellite galaxies in sub-haloes aligning with their respective subhalos
-    most of the functionality here is copied from SatelltieAlignment by Duncan Campbell
+    most of the functionality here is copied from SatelltieAlignment by Duncan Campbell.
+
+    Note: When using this module, you must use SubhaloPhaseSpace as the phase space model and you must use the alignment_inherited_subhalo_props_dict as the
+    inherited_subhalo_props_dict. This will ensure the proper subhalo value columns are included in the galaxy table
     """
     def __init__(self, halocat=None, satellite_alignment_strength=1.0, prim_gal_axis='major', rotate_relative=True, **kwargs):
         r"""
@@ -1043,41 +1046,6 @@ class SubhaloAlignment(object):
             ['assign_satellite_orientation'])
         self.param_dict = ({
             'satellite_alignment_strength': satellite_alignment_strength})
-    
-    def _set_subhalo_values(self, **kwargs):
-        r"""
-        Earlier, the host halo values were input as a default for every halo within.
-        Now, the satellite galaxies will have their subhalo information overwritten so all alignment will be with respect
-        to the suhalo, not the host halo
-        
-        Parameters
-        ==========
-        table : astropy table holding the halo and galaxy information for every galaxy
-        
-        Returns
-        =======
-        None, table should be altered in place and will not need to return
-        """
-        table = kwargs['table']
-        
-        # Get a list of the columns shared by both the halocat and the table
-        cols = list( set(self._halocat.halo_table.columns) & set(table.columns) )
-        # Remove the halo_id column, otherwise there will be an issue when overwriting
-        # Since this is the column used to match, there is no need to overwrite anyway
-        cols.remove('halo_id')
-        cols.remove('halo_hostid')              # Keep the overwritten host halo id
-        
-        # find where each halo_id appears in the full halocat
-        halo_ids = table['halo_id']
-        inds1, inds2 = crossmatch( halo_ids, self._halocat.halo_table['halo_id'] )
-        
-        # This overwrites the information from their host halo that was used for them instead (unless that halo is the host halo)
-        for col in cols:
-            table[col][ inds1 ] = self._halocat.halo_table[col][ inds2 ]
-                
-        # If the halo is not a real subhalo, overwrite the orientation so it is the same relative to its new host halo as its original
-        if self._rotate_relative:
-            self._orient_false_subhalo( table=table )
        
     def _orient_false_subhalo(self, table):
         r"""
@@ -1095,9 +1063,10 @@ class SubhaloAlignment(object):
         """
         
         # Values of interest
-        axis_A = ['halo_axisA_x', 'halo_axisA_y', 'halo_axisA_z']    # Use this axis to rotate
-        velocity = ['halo_vx', 'halo_vy', 'halo_vz']
-        position = ['halo_x', 'halo_y', 'halo_z']
+        host_axis_A = ['halo_axisA_x', 'halo_axisA_y', 'halo_axisA_z']          # Use this axis to rotate
+        axis_A = ['subhalo_axisA_x', 'subhalo_axisA_y', 'subhalo_axisA_z']
+        velocity = ['subhalo_vx', 'subhalo_vy', 'subhalo_vz']
+        position = ['subhalo_x', 'subhalo_y', 'subhalo_z']
         
         mask = ( table['gal_type'] == 'satellites' ) & ( table['real_subhalo'] == False )
         
@@ -1122,7 +1091,7 @@ class SubhaloAlignment(object):
         
         # Get original host axes
         inds1, inds2 = crossmatch( original_host_ids, self._halocat.halo_table["halo_id"] )
-        original_host_axesA = np.array( [ self._halocat.halo_table[inds2][axis_A[0]], self._halocat.halo_table[inds2][axis_A[1]], self._halocat.halo_table[inds2][axis_A[2]] ] ).T
+        original_host_axesA = np.array( [ self._halocat.halo_table[inds2][host_axis_A[0]], self._halocat.halo_table[inds2][host_axis_A[1]], self._halocat.halo_table[inds2][host_axis_A[2]] ] ).T
         
         # re-order to match original_host_ids
         og_order = np.arange(len(original_host_ids))
@@ -1131,7 +1100,7 @@ class SubhaloAlignment(object):
         
         # Get new host axes
         inds1, inds2 = crossmatch(new_host_ids, self._halocat.halo_table["halo_id"])
-        new_host_axesA = np.array( [ self._halocat.halo_table[inds2][axis_A[0]], self._halocat.halo_table[inds2][axis_A[1]], self._halocat.halo_table[inds2][axis_A[2]] ] ).T
+        new_host_axesA = np.array( [ self._halocat.halo_table[inds2][host_axis_A[0]], self._halocat.halo_table[inds2][host_axis_A[1]], self._halocat.halo_table[inds2][host_axis_A[2]] ] ).T
         
         # re-order to match new_host_ids
         og_order = np.arange(len(new_host_ids))
@@ -1197,18 +1166,19 @@ class SubhaloAlignment(object):
             arrays of galaxies' axes
         """
         
-        # Before anything else, overwrite the default host halo values with the subhalo values for each satellite galaxy
-        self._set_subhalo_values(table=kwargs['table'])
+        # Assume the proper columns exist (i.e. the user has used alignment_inherited_subhalo_props_dict in SubhaloPhaseSpace)
         
         if 'table' in kwargs.keys():
             table = kwargs['table']
-            Ax = table[self.list_of_haloprops_needed[0]]
-            Ay = table[self.list_of_haloprops_needed[1]]
-            Az = table[self.list_of_haloprops_needed[2]]
+            Ax = table["sub"+self.list_of_haloprops_needed[0]]
+            Ay = table["sub"+self.list_of_haloprops_needed[1]]
+            Az = table["sub"+self.list_of_haloprops_needed[2]]
+            if self._rotate_relative:
+                self._orient_false_subhalo(table=table)
         else:
-            Ax = kwargs['halo_axisA_x']
-            Ay = kwargs['halo_axisA_y']
-            Az = kwargs['halo_axisA_z']
+            Ax = kwargs['subhalo_axisA_x']
+            Ay = kwargs['subhalo_axisA_y']
+            Az = kwargs['subhalo_axisA_z']
 
         # get alignment strength for each galaxy
         if 'table' in kwargs.keys():
