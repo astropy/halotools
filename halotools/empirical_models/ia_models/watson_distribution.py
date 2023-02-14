@@ -143,7 +143,7 @@ class DimrothWatson(rv_continuous):
         k : array_like
             array of shape parameters
 
-        size : int, optional
+        size : int or tuple of ints, optional
             integer indicating the number of samples to draw.
             if not given, the number of samples will be equal to len(k).
 
@@ -163,10 +163,11 @@ class DimrothWatson(rv_continuous):
         """
 
         k = np.atleast_1d(k).astype(np.float64)
-        if size is None:
+        if size is None or size == ():
             size = len(k)
         if size != 1:
-            if len(k) == size:
+            # If size is an int, the first condition must be met, if size is a tuple, the second condition is the equivalent form
+            if len(k) == size or k.shape == size:
                 pass
             elif len(k) == 1:
                 k = np.ones(size)*k
@@ -187,7 +188,6 @@ class DimrothWatson(rv_continuous):
         # take care of edge cases, i.e. |k| very large
         with np.errstate(over='ignore'):
             x = np.exp(k)
-            inf_mask = np.array([False]*size)
         edge_mask = ((x == np.inf) | (x == 0.0))
         #result[edge_mask & (k>0)] = np.random.choice([1,-1], size=np.sum(edge_mask & (k>0)))
         #result[edge_mask & (k<0)] = 0.0
@@ -199,7 +199,7 @@ class DimrothWatson(rv_continuous):
         n_remaining = size - n_sucess  # remaining draws necessary
         n_iter = 0  # number of sample-reject iterations
         kk = k[(~zero_k) & (~edge_mask)]  # store subset of k values that still need to be sampled
-        mask = np.array([False]*size)  # mask indicating which k values have a sucessful sample
+        mask = np.repeat(False,size)  # mask indicating which k values have a sucessful sample
         mask[zero_k] = True
 
         while (n_sucess < size) & (n_iter < max_iter):
