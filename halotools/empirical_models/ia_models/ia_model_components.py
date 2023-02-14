@@ -529,7 +529,7 @@ class RadialSatelliteAlignment(object):
         A_v = axes_correlated_with_input_vector(major_input_vectors, p=p)
 
         # check for nan vectors
-        mask = (~np.isfinite(np.sum(np.prod(A_v, axis=-1))))
+        mask = (~np.isfinite(np.prod(A_v, axis=-1)))
         N_bad_axes = np.sum(mask)
         if N_bad_axes>0:
             A_v[mask,:] = random_unit_vectors_3d(N_bad_axes)
@@ -976,7 +976,9 @@ class SubhaloAlignment(object):
     alignment model for satellite galaxies in sub-haloes aligning with their respective subhalos
     most of the functionality here is copied from SatelltieAlignment by Duncan Campbell.
 
-    Note: When using this module, you must use SubhaloPhaseSpace as the phase space model and you must use the alignment_inherited_subhalo_props_dict as the
+    Notes
+    -----
+    When using this module, you must use SubhaloPhaseSpace as the phase space model and you must use the alignment_inherited_subhalo_props_dict as the
     inherited_subhalo_props_dict. This will ensure the proper subhalo value columns are included in the galaxy table
     """
     def __init__(self, halocat=None, satellite_alignment_strength=1.0, prim_gal_axis='major', rotate_relative=True, **kwargs):
