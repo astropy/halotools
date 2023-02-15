@@ -146,3 +146,73 @@ cdef cnp.float64_t ratio_weights(cnp.float64_t* w1, cnp.float64_t* w2):
         return w2[1]
     else:
         return 0.0
+
+
+cdef cnp.float64_t dotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    dot product weights
+    return the cosine of the angle between two vectors if the vectors are normalized
+    id: 12
+    expects length 4 arrays
+    """
+
+    return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])
+
+
+cdef cnp.float64_t squareddotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    squared dot product weights
+    return the square cosine of the angle between two vectors if the vectors are normalized
+    id: 13
+    expects length 4 arrays
+    """
+
+    return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])
+
+cdef cnp.float64_t projdotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    2d dot product weights
+    return the cosine of the angle between two vectors if the vectors are normalized
+    id: 14
+    expects length 4 arrays
+    """
+
+    return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2])
+
+
+cdef cnp.float64_t projsquareddotweights(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    2d squared dot product weights
+    return the square cosine of the angle between two vectors if the vectors are normalized
+    id: 15
+    expects length 4 arrays
+    """
+
+    return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2])*(w1[1]*w2[1] + w1[2]*w2[2])
+
+cdef cnp.float64_t squareddotweights_eq(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    squared dot product weights
+    return the square cosine of the angle between two vectors if the vectors are normalized
+    id: 16
+    expects length 4 arrays
+    """
+
+    if w1[4]==w2[4]:
+        return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])
+    else:
+        return 0.0
+
+cdef cnp.float64_t squareddotweights_ineq(cnp.float64_t* w1, cnp.float64_t* w2):
+    """
+    squared dot product weights
+    return the square cosine of the angle between two vectors if the vectors are normalized
+    id: 17
+    expects length 4 arrays
+    """
+
+    if w1[4]!=w2[4]:
+        return w1[0]*w2[0]*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])*(w1[1]*w2[1] + w1[2]*w2[2] + w1[3]*w2[3])
+    else:
+        return 0.0
+
