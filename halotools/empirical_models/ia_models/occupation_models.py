@@ -23,7 +23,7 @@ class SubHaloPositions():
         """
         """
         self._mock_generation_calling_sequence = ['assign_gal_type', 'assign_positions']
-        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'string'),
+        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'str'),
                                                      (str('x'), 'f4'), (str('y'), 'f4'), (str('z'), 'f4')])
         self.list_of_haloprops_needed = ['halo_upid', 'halo_hostid', 'halo_id', 'halo_x', 'halo_y', 'halo_z']
 
@@ -102,7 +102,7 @@ class IsotropicSubhaloPositions():
     def __init__(self, **kwargs):
 
         self._mock_generation_calling_sequence = ['assign_gal_type', 'assign_positions']
-        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'string'),
+        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'str'),
                                                      (str('x'), 'f4'), (str('y'), 'f4'), (str('z'), 'f4')])
         self.list_of_haloprops_needed = ['halo_upid', 'halo_x', 'halo_y', 'halo_z', 'halo_hostid']
 
@@ -258,7 +258,7 @@ class SemiIsotropicSubhaloPositions():
     def __init__(self, **kwargs):
 
         self._mock_generation_calling_sequence = ['assign_gal_type', 'assign_positions']
-        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'string'),
+        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'str'),
                                                      (str('x'), 'f4'), (str('y'), 'f4'), (str('z'), 'f4')])
         self.list_of_haloprops_needed = ['halo_upid', 'halo_x', 'halo_y', 'halo_z', 'halo_hostid', 'halo_axisA_x', 'halo_axisA_y', 'halo_axisA_z']
 
@@ -427,7 +427,7 @@ class TriaxialNFW():
     def __init__(self, anisotropy_bias=1.0, **kwargs):
 
         self._mock_generation_calling_sequence = ['assign_gal_type', 'assign_positions']
-        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'string'),
+        self._galprop_dtypes_to_allocate = np.dtype([(str('gal_type'), 'str'),
                                                      (str('x'), 'f4'), (str('y'), 'f4'), (str('z'), 'f4'),
                                                      (str('r'), 'f4')])
         self.list_of_haloprops_needed = ['halo_upid', 'halo_x', 'halo_y', 'halo_z', 'halo_hostid',
