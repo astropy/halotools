@@ -223,15 +223,6 @@ def _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
             msg = "Input ``period`` must be a bounded positive number in all dimensions"
             raise ValueError(msg)
 
-    try:
-        assert pi_max > 0.
-        min_required_pi_max = period[2]/3.
-        assert pi_max < min_required_pi_max
-    except:
-        msg = ("Input ``pi_max`` = %.2f must be a "
-            "positive scalar less than period[2]/3 = %.2f" % (pi_max, min_required_pi_max))
-        raise ValueError(msg)
-
     if approx_cell1_size is None:
         approx_cell1_size = [rp_max, rp_max, pi_max]
     elif custom_len(approx_cell1_size) == 1:
