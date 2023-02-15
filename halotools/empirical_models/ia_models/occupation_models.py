@@ -494,7 +494,7 @@ class TriaxialNFW():
             halo_axisC_y = kwargs['halo_axisC_y']
             halo_axisC_z = kwargs['halo_axisC_z']
             concentration = kwargs['halo_nfw_conc']
-            rvir = tabel['halo_rvir']
+            rvir = kwargs['halo_rvir']
             try:
                 Lbox = kwargs['Lbox']
             except KeyError:
