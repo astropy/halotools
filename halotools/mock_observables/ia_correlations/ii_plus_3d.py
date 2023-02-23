@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.gi_minus_3d` function used to
-calculate the projected gravitational shear-intrinsic ellipticity (GI) correlation
+Module containing the `~halotools.mock_observables.alignments.ii_plus_3d` function used to
+calculate the intrinsic ellipticity-ellipticity (II) correlation
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -9,25 +9,25 @@ import numpy as np
 from math import pi, gamma
 
 from .alignment_helpers import process_3d_alignment_args
-from ....mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
-from ....mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ....mock_observables.pair_counters import positional_marked_npairs_3d, marked_npairs_3d
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ..pair_counters import positional_marked_npairs_3d, marked_npairs_3d
 
-__all__ = ['gi_minus_3d']
+__all__ = ['ii_plus_3d']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
-            randoms1=None, randoms2=None, weights1=None, weights2=None,
-            ran_weights1=None, ran_weights2=None, estimator='Landy-Szalay',
+def ii_plus_3d(sample1, orientations1, ellipticities1, sample2, orientations2, ellipticities2,
+            rbins, randoms1=None, randoms2=None, weights1=None, weights2=None,
+            ran_weights1=None, ran_weights2=None, estimator='Natural',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the 3-D gravitational shear-intrinsic ellipticity correlation function (GI),
-    :math:`\xi_{g-}(r)`. See the 'Notes' section for details of this calculation.
+    Calculate the intrinsic ellipticity-ellipticity correlation function (II),
+    :math:`\xi_{++}(r)`.  See the 'Notes' section for details of this calculation.
 
     Parameters
     ----------
@@ -40,14 +40,22 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     orientations1 : array_like
-        Npts1 x 3 numpy array containing 3-D orientation vectors for each point in ``sample1``.
+        Npts1 x 3 numpy array containing projected orientation vectors for each point in ``sample1``.
         these will be normalized if not already.
 
     ellipticities1: array_like
         Npts1 x 1 numpy array containing ellipticities for each point in ``sample1``.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points with associated
+        orientations and ellipticities.
+
+    orientations2 : array_like
+        Npts1 x 3 numpy array containing projected orientation vectors for each point in ``sample2``.
+        these will be normalized if not already.
+
+    ellipticities2: array_like
+        Npts1 x 1 numpy array containing ellipticities for each point in ``sample2``.
 
     rbins : array_like
         array of boundaries defining the radial bins in which
@@ -113,39 +121,36 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     Returns
     -------
     correlation_function : numpy.array
-        *len(rbins)-1* length array containing the correlation function :math:`w_{g-}(r)`
+        *len(rbins)-1* length array containing the correlation function :math:`w_{g+}(r)`
         computed in each of the bins defined by input ``rbins``.
 
     Notes
     -----
 
-    If the Landy-Szalay estimator is indicated, the correlation function is estimated as:
+    The II-correlation function is calculated as:
 
     .. math::
-        \xi_{g-}(r) = \frac{S_{+}D-S_{+}R}{R_sR}
+        \xi_{++}(r) = \frac{S_{+}S_{+}}{R_sR_s}
 
-     where
+    where
 
     .. math::
-        S_{-}D = \sum_{i \neq j} w_jw_i e_{-}(j|i)
+        S_{+}S_{+} = \sum_{i \neq j} w_jw_i e_{+}(j|i)e_{+}(i|j)
 
     :math:`w_j` and :math:`w_j` are weights.  Weights are set to 1 for all galaxies by default.
     The alingment of the :math:`j`-th galaxy relative to the direction to the :math:`i`-th galaxy is given by:
 
     .. math::
-        e_{-}(j|i) = e_j\sin(2\phi)
+        e_{+}(j|i) = e_j\cos(2\phi)
 
     where :math:`e_j` is the ellipticity of the :math:`j`-th galaxy.  :math:`\phi` is the angle between the
-    orientation vector, :math:`\vec{o}_j`, and the projected direction between the :math:`j`-th
-    and :math:`i`-th galaxy, :math:`\vec{r}_{p i,j}`.
+    orientation vector, :math:`\vec{o}_j`, and the direction between the :math:`j`-th
+    and :math:`i`-th galaxy, :math:`\vec{r}_{i,j}`.
 
     .. math::
-        \cos(\phi) = \vec{o}_j \cdot \vec{r}_{p i,j}
+        \cos(\phi) = \vec{o}_j \cdot \vec{r}_{i,j}
 
-    :math:`S_{+}R` is analgous to :math:`S_{-}D` but instead is computed
-    with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts,
-    where :math:`R_s` corresponds to the shapes sample, i.e. the sample with orienttions
-    and ellipticies, ``sample1``, and R correspoinds to ``sample2``.
+    :math:`R_sR_s` are random pair counts,
 
     Examples
     --------
@@ -174,16 +179,16 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     >>> random_orientations = np.random.random((Npts,3))
     >>> random_ellipticities = np.random.random(Npts)
 
-    We can the calculate the auto-GI correlation between these points:
+    We can the calculate the projected auto-GI correlation between these points:
 
     >>> rbins = np.logspace(-1,1,10)
-    >>> w = gi_minus_3d(sample1, random_orientations, random_ellipticities, sample1, rbins, period=Lbox)
+    >>> w = ii_plus_3d(sample1, random_orientations, random_ellipticities, sample1, random_orientations, random_ellipticities, rbins, period=Lbox)
 
     """
 
     # process arguments
     alignment_args = (sample1, orientations1, ellipticities1, weights1,
-                      sample2, None, None, weights2,
+                      sample2, orientations2, ellipticities2, weights2,
                       randoms1, ran_weights1, randoms2, ran_weights2)
     sample1, orientations1, ellipticities1, weights1, sample2,\
         orientations2, ellipticities2, weights2, randoms1, ran_weights1,\
@@ -192,7 +197,7 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     function_args = (sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size)
     sample1, rbins, sample2, randoms1, randoms2,\
-        period, num_threads, PBCs, no_randoms = _gi_minus_3d_process_args(*function_args)
+        period, num_threads, PBCs, no_randoms = _ii_plus_3d_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -212,7 +217,11 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     marks1[:, 2] = orientations1[:, 1]
     marks1[:, 3] = orientations1[:, 2]
     # sample 2
-    marks2 = weights2
+    marks2 = np.ones((N2, 4))
+    marks2[:, 0] = ellipticities2 * weights2
+    marks2[:, 1] = orientations2[:, 0]
+    marks2[:, 2] = orientations2[:, 1]
+    marks2[:, 3] = orientations2[:, 2]
     # randoms 1
     ran_marks1 = np.ones((NR1, 4))
     ran_marks1[:, 0] = ran_weights1
@@ -220,28 +229,21 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     ran_marks1[:, 2] = 0  # dummy
     ran_marks1[:, 3] = 0  # dummy
     # randoms 2
-    ran_marks2 = ran_weights2
+    ran_marks2 = np.ones((NR2, 4))
+    ran_marks2[:, 0] = ran_weights2
+    ran_marks2[:, 1] = 0  # dummy
+    ran_marks2[:, 2] = 0  # dummy
+    ran_marks2[:, 3] = 0  # dummy
 
-    do_SD, do_SR, do_RR = GI_estimator_requirements(estimator)
+    do_SS, do_RR = II_estimator_requirements(estimator)
 
     # count marked pairs
-    if do_SD:
-        SD = marked_pair_counts(sample1, sample2,  marks1,  marks2,
+    if do_SS:
+        SS = marked_pair_counts(sample1, sample2,  marks1,  marks2,
                                 rbins, period, num_threads,
                                 approx_cell1_size, approx_cell2_size)
     else:
-        SD = None
-
-    # count marked random pairs
-    if do_SR:
-        if no_randoms:
-            SR = 0.0
-        else:
-            SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
-                                    rbins, period, num_threads,
-                                    approx_cell1_size, approx_cell2_size)
-    else:
-        SR = None
+        SS = None
 
     # count random pairs
     if do_RR:
@@ -251,37 +253,35 @@ def gi_minus_3d(sample1, orientations1, ellipticities1, sample2, rbins,
     else:
         RR = None
 
-    result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
+    result = II_estimator(SS, RR, N1, N2, NR1, NR2, estimator)
 
-    return result
+    return result  # factor of 2pi_max accounts for integration
 
 
-def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Landy-Szalay'):
+def II_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
     r"""
     apply the supplied GI estimator to calculate the correlation function.
     """
-
-    if estimator == 'Landy-Szalay':
+    if estimator == 'Natural':
         factor = (NR1*NR2)/(N1*N2)
-        return factor*(SD-SR)/RR
+        return factor*(SS/RR)
     else:
         msg = ('The estimator provided is not supported.')
         raise ValueError(msg)
 
 
-def GI_estimator_requirements(estimator):
+def II_estimator_requirements(estimator):
     r"""
     Return the requirments for the supplied GI estimator.
     """
-    do_SD = False
-    do_SR = False
-    do_RR = False
 
-    if estimator == 'Landy-Szalay':
-        do_SD = True
-        do_SR = True
+    do_RR = False
+    do_SS = False
+
+    if estimator == 'Natural':
+        do_SS = True
         do_RR = True
-        return do_SD, do_SR, do_RR
+        return do_SS, do_RR
     else:
         msg = ('The estimator provided is not supported.')
         raise ValueError(msg)
@@ -293,15 +293,14 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rbins, period,
     Count marked pairs.
     """
 
-    weight_func_id = 3
-    SD = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,
+    weight_func_id = 5
+    SS = positional_marked_npairs_3d(sample1, sample2, rbins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)[0]
-    SD = np.diff(SD, axis=0)
-    SD = SD.flatten()
+    SS = np.diff(SS, axis=0)
 
-    return SD
+    return SS
 
 
 def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rbins,
@@ -317,9 +316,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rbins,
                 weights1=ran_weights1, weights2=ran_weights2,
                 approx_cell1_size=approx_cell1_size,
                 approx_cell2_size=approx_cell2_size)
-
         RR = np.diff(RR, axis=0)
-        RR = RR.flatten()
 
         return RR
     else:
@@ -333,7 +330,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rbins,
         dv = np.diff(v, axis=0)
         global_volume = period.prod()
 
-        # calculate the expected random-random pairs.
+        # calculate the random-random pairs.
         rhor = (NR1*NR2)/global_volume
         RR = (dv*rhor)
 
@@ -348,11 +345,11 @@ def nball_volume(R, k=3):
     return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
 
 
-def _gi_minus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
+def _ii_plus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.alignments.gi_minus_3d`.
+    `~halotools.mock_observables.alignments.alignments.ii_plus_projected`.
     """
     sample1 = enforce_sample_has_correct_shape(sample1)
 
@@ -393,4 +390,5 @@ def _gi_minus_3d_process_args(sample1, rbins, sample2, randoms1, randoms2,
     num_threads = get_num_threads(num_threads)
 
     return sample1, rbins, sample2, randoms1, randoms2, period, num_threads, PBCs, no_randoms
+
 

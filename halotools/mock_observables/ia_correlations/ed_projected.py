@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.ed_3d` function used to
-calculate the ellipticity-direction (ED) correlation functon
+Module containing the `~halotools.mock_observables.alignments.ed_projected` function used to
+calculate the ellipticity-direction (ED) projected correlation functon
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -8,23 +8,23 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from math import pi
 
-from .alignment_helpers import process_3d_alignment_args
-from ....mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
+from .alignment_helpers import process_projected_alignment_args
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
-from ....mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ....mock_observables.pair_counters import positional_marked_npairs_3d, npairs_3d, marked_npairs_3d
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ..pair_counters import positional_marked_npairs_xy_z, npairs_xy_z, marked_npairs_xy_z
 
-__all__ = ['ed_3d']
+__all__ = ['ed_projected`']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
+def ed_projected(sample1, orientations1, sample2, rp_bins, pi_max, weights1=None, weights2=None,
         period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the 3-D ellipticity-direction correlation function (ED), :math:`\omega(r)`.
+    Calculate the ellipticity-direction projected correlation function (ED), :math:`\omega(r_p)`.
 
     Parameters
     ----------
@@ -36,16 +36,21 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     orientations1 : array_like
-        Npts1 x 3 numpy array containing orientation vectors for each point in ``sample1``.
+        Npts1 x 2 numpy array containing projected orientation vectors for each point in ``sample1``.
         these will be normalized if not already.
 
     sample2 : array_like, optional
         Npts2 x 3 array containing 3-D positions of points.
 
-    rbins : array_like
-        array of boundaries defining the radial bins in which pairs are counted.
+    rp_bins : array_like
+        array of boundaries defining the radial bins perpendicular to the LOS in which
+        pairs are counted.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
-    
+
+    pi_max : float
+        maximum LOS distance defining the projection integral length-scale in the z-dimension.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
+
     weights1 : array_like, optional
         Npts1 array of weghts.  If this parameter is not specified, it is set to numpy.ones(Npts1).
 
@@ -84,19 +89,19 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
     Returns
     -------
     correlation_function : numpy.array
-        *len(rbins)-1* length array containing the correlation function :math:`\omega(r)`
-        computed in each of the bins defined by input ``rbins``.
+        *len(rp_bins)-1* length array containing the correlation function :math:`\omega(r_p)`
+        computed in each of the bins defined by input ``rp_bins``.
 
     Notes
     -----
-    The ellipticity-direction correlation function is defined as:
+    The ellipticity-direction projected correlation function is defined as:
 
     .. math::
-        \omega = \frac{\sum_{i \neq j}w_iw_j|\hat{e}_i \cdot \hat{r}_{ij}|^2}{\sum_{i \neq j} w_iw_j} - \frac{1}{3}
+        \omega = \frac{\sum_{i \neq j}w_iw_j|\hat{e}_i \cdot \hat{r}_{ij}|^2}{\sum_{i \neq j} w_iw_j} - \frac{1}{2}
 
     where e.g. :math:`\hat{e}_i` is the orientation of the :math:`i`-th galaxy, and
     :math:`\hat{r}_{ij}` is the normalized vector in the direction of the :math:`j`-th galaxy
-    from the :math:`i`-th galaxy.  :math:`w_i` and :math:`w_j` are the weights associated with
+    from the :math:`i`-th galaxy. :math:`w_i` and :math:`w_j` are the weights associated with
     the :math:`i`-th and :math:`j`-th galaxy. The weights default to 1 if not set.
 
     Example
@@ -123,12 +128,13 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
 
     We then create a set of random orientation vectors for each point
 
-    >>> random_orientations = np.random.random((Npts,3))
+    >>> random_orientations = np.random.random((Npts,2))
 
     We can the calculate the auto-ED correlation between these points:
 
-    >>> rbins = np.logspace(-1,1,10)
-    >>> result = ed_3d(sample1, random_orientations, sample1, rbins, period=Lbox)
+    >>> rp_bins = np.logspace(-1,1,10)
+    >>> pi_max = 0.2
+    >>> result = ed_projected(sample1, random_orientations, sample1, rp_bins, pi_max, period=Lbox)
 
     """
 
@@ -139,46 +145,45 @@ def ed_3d(sample1, orientations1, sample2, rbins, weights1=None, weights2=None,
     dum = 0.0  # dummy variable to store arguments not needed for this function
     sample1, orientations1, dum, weights1,\
     sample2, dum, dum, weights2,\
-    dum, dum, dum, dum = process_3d_alignment_args(*alignment_args)
+    dum, dum, dum, dum = process_projected_alignment_args(*alignment_args)
 
-    function_args = (sample1, rbins, sample2, period, num_threads)
-    sample1, rbins, sample2, period, num_threads, PBCs = _ed_3d_process_args(*function_args)
+    function_args = (sample1, rp_bins, pi_max, sample2, period, num_threads)
+    sample1, rp_bins, pi_bins, sample2, period, num_threads, PBCs = _ed_projected_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
     N2 = len(sample2)
 
-    marks1 = np.zeros((N1, 4))
+    marks1 = np.zeros((N1, 3))
     marks1[:,0] = weights1
     marks1[:,1] = orientations1[:,0]
     marks1[:,2] = orientations1[:,1]
-    marks1[:,3] = orientations1[:,2]
     marks2 = weights2
-    marked_counts, counts = positional_marked_npairs_3d(sample1, sample2, rbins,
+    marked_counts, counts = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                                 period=period, weights1=marks1, weights2=marks2,
                                 weight_func_id=4, num_threads=num_threads,
                                 approx_cell1_size=approx_cell1_size,
                                 approx_cell2_size=approx_cell2_size)
-    marked_counts = np.diff(marked_counts)
+    marked_counts = np.diff(np.diff(marked_counts, axis=0),axis=1)
     
     # if no weights, use fast un-weihgted pair counter
     if np.all(weights1==1.0) & np.all(weights2==1.0):
-        counts = npairs_3d(sample1, sample2, rbins,
+        counts = npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                        period=period, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
                        approx_cell2_size=approx_cell2_size)
     else:
-        counts = marked_npairs_3d(sample1, sample2, rbins,
+        counts = marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
                        weights1=weights1, weights2=weights2, weight_func_id=1,
                        period=period, num_threads=num_threads,
                        approx_cell1_size=approx_cell1_size,
                        approx_cell2_size=approx_cell2_size)
-    counts = np.diff(counts)
+    counts = np.diff(np.diff(counts, axis=0),axis=1)
 
-    return marked_counts/counts - 1.0/3.0
+    return marked_counts/counts - 1.0/2.0
 
 
-def _ed_3d_process_args(sample1, rbins, sample2, period, num_threads):
+def _ed_projected_process_args(sample1, rp_bins, pi_max, sample2, period, num_threads):
     r"""
     Private method to do bounds-checking on the arguments passed to
     `~halotools.mock_observables.alignments.ed_3d`.
@@ -190,14 +195,17 @@ def _ed_3d_process_args(sample1, rbins, sample2, period, num_threads):
     N1 = len(sample1)
     N2 = len(sample2)
 
-    rbins = get_separation_bins_array(rbins)
-    rmax = np.amax(rbins)
+    rp_bins = get_separation_bins_array(rp_bins)
+    rp_max = np.amax(rp_bins)
+
+    pi_max = float(pi_max)
+    pi_bins = np.array([0.0, pi_max])
 
     period, PBCs = get_period(period)
 
-    _enforce_maximum_search_length([rmax, rmax, rmax], period)
+    _enforce_maximum_search_length([rp_max, rp_max, pi_max], period)
 
     num_threads = get_num_threads(num_threads)
 
-    return sample1, rbins, sample2, period, num_threads, PBCs
+    return sample1, rp_bins, pi_bins, sample2, period, num_threads, PBCs
 

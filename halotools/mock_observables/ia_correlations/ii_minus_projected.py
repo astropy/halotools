@@ -1,6 +1,6 @@
 r"""
-Module containing the `~halotools.mock_observables.alignments.gi_minus_projected` function used to
-calculate the projected gravitational shear-intrinsic ellipticity (GI) correlation
+Module containing the `~halotools.mock_observables.alignments.ii_minus_projected` function used to
+calculate the projected intrinsic ellipticity-ellipticity (II) correlation
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -9,32 +9,32 @@ import numpy as np
 from math import pi
 
 from .alignment_helpers import process_projected_alignment_args
-from ....mock_observables.mock_observables_helpers import (enforce_sample_has_correct_shape,
+from ..mock_observables_helpers import (enforce_sample_has_correct_shape,
     get_separation_bins_array, get_line_of_sight_bins_array, get_period, get_num_threads)
-from ....mock_observables.pair_counters.mesh_helpers import _enforce_maximum_search_length
-from ....mock_observables.pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
+from ..pair_counters.mesh_helpers import _enforce_maximum_search_length
+from ..pair_counters import positional_marked_npairs_xy_z, marked_npairs_xy_z
 
-__all__ = ['gi_minus_projected']
+__all__ = ['ii_minus_projected']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
 
 
-def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins, pi_max,
-            randoms1=None, randoms2=None, weights1=None, weights2=None,
-            ran_weights1=None, ran_weights2=None, estimator='Landy-Szalay',
+def ii_minus_projected(sample1, orientations1, ellipticities1, sample2, orientations2, ellipticities2,
+            rp_bins, pi_max, randoms1=None, randoms2=None, weights1=None, weights2=None,
+            ran_weights1=None, ran_weights2=None, estimator='Natural',
             period=None, num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     r"""
-    Calculate the projected gravitational shear-intrinsic ellipticity correlation function (GI),
-    :math:`w_{g-}(r_p)`, where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS)
+    Calculate the projected intrinsic ellipticity-ellipticity correlation function (II),
+    :math:`w_{--}(r_p)`, where :math:`r_p` is the separation perpendicular to the line-of-sight (LOS)
     between two galaxies.  See the 'Notes' section for details of this calculation.
 
     The first two dimensions define the plane for perpendicular distances.  The third
     dimension is used for parallel distances, i.e. x,y positions are on the plane of the
     sky, and z is the redshift coordinate. This is the 'distant observer' approximation.
 
-    Note in particular that the `~halotools.mock_observables.alignments.gi_minus_projected` function does not
+    Note in particular that the `~halotools.mock_observables.alignments.ii_minus_projected` function does not
     accept angular coordinates for the input ``sample1`` or ``sample2``.
 
     Parameters
@@ -55,7 +55,15 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
         Npts1 x 1 numpy array containing ellipticities for each point in ``sample1``.
 
     sample2 : array_like, optional
-        Npts2 x 3 array containing 3-D positions of points.
+        Npts2 x 3 array containing 3-D positions of points with associated
+        orientations and ellipticities.
+
+    orientations12 : array_like
+        Npts1 x 2 numpy array containing projected orientation vectors for each point in ``sample2``.
+        these will be normalized if not already.
+
+    ellipticities2: array_like
+        Npts1 x 1 numpy array containing ellipticities for each point in ``sample2``.
 
     rp_bins : array_like
         array of boundaries defining the radial bins perpendicular to the LOS in which
@@ -125,26 +133,27 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
     Returns
     -------
     correlation_function : numpy.array
-        *len(rp_bins)-1* length array containing the correlation function :math:`w_{g+}(r_p)`
+        *len(rp_bins)-1* length array containing the correlation function :math:`w_{--}(r_p)`
         computed in each of the bins defined by input ``rp_bins``.
 
     Notes
     -----
 
-    The projected GI-correlation function is calculated as:
+    The projected II-correlation function is calculated as:
 
     .. math::
-        w_{g-}(r_p) = 2 \int_0^{\pi_{\rm max}} \xi_{g-}(r_p, \pi) \mathrm{d}\pi
+        w_{--}(r_p) = 2 \int_0^{\pi_{\rm max}} \xi_{--}(r_p, \pi) \mathrm{d}\pi
 
-    If the Landy-Szalay estimator is indicated, the correlation function is estimated as:
 
-    .. math::
-        \xi_{g-}(r_p, \pi) = \frac{S_{-}D-S_{-}R}{R_sR}
-
-     where
+    If the Natural estimator is indicated, the projected II-correlation function is calculated as:
 
     .. math::
-        S_{-}D = \sum_{i \neq j} w_jw_i e_{-}(j|i)
+        \xi_{--}(r_p, \pi) = \frac{S_{-}S_{-}}{R_sR_s}
+
+    where
+
+    .. math::
+        S_{-}S_{-} = \sum_{i \neq j} w_jw_i e_{-}(j|i)e_{-}(i|j)
 
     :math:`w_j` and :math:`w_j` are weights.  Weights are set to 1 for all galaxies by default.
     The alingment of the :math:`j`-th galaxy relative to the direction to the :math:`i`-th galaxy is given by:
@@ -159,10 +168,7 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
     .. math::
         \cos(\phi) = \vec{o}_j \cdot \vec{r}_{p i,j}
 
-    :math:`S_{-}R` is analgous to :math:`S_{-}D` but instead is computed
-    with respect to a "random" catalog of galaxies.  :math:`R_sR` are random pair counts,
-    where :math:`R_s` corresponds to the shapes sample, i.e. the sample with orienttions
-    and ellipticies, ``sample1``, and R correspoinds to ``sample2``.
+    :math:`R_sR_s` are random pair counts,
 
     Examples
     --------
@@ -195,13 +201,13 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
 
     >>> rp_bins = np.logspace(-1,1,10)
     >>> pi_max = 0.25
-    >>> w = gi_minus_projected(sample1, random_orientations, random_ellipticities, sample1, rp_bins, pi_max, period=Lbox)
+    >>> w = ii_minus_projected(sample1, random_orientations, random_ellipticities, sample1, random_orientations, random_ellipticities, rp_bins, pi_max, period=Lbox)
 
     """
 
     # process arguments
     alignment_args = (sample1, orientations1, ellipticities1, weights1,
-                      sample2, None, None, weights2,
+                      sample2, orientations2, ellipticities2, weights2,
                       randoms1, ran_weights1, randoms2, ran_weights2)
     sample1, orientations1, ellipticities1, weights1, sample2,\
         orientations2, ellipticities2, weights2, randoms1, ran_weights1,\
@@ -210,7 +216,7 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
     function_args = (sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size)
     sample1, rp_bins, pi_bins, sample2, randoms1, randoms2,\
-        period, num_threads, PBCs, no_randoms = _gi_minus_projected_process_args(*function_args)
+        period, num_threads, PBCs, no_randoms = _ii_minus_projected_process_args(*function_args)
 
     # How many points are there (for normalization purposes)?
     N1 = len(sample1)
@@ -229,38 +235,33 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
     marks1[:, 1] = orientations1[:, 0]
     marks1[:, 2] = orientations1[:, 1]
     # sample 2
-    marks2 = weights2
+    marks2 = np.ones((N2, 3))
+    marks2[:, 0] = ellipticities2 * weights2
+    marks2[:, 1] = orientations1[:, 0]
+    marks2[:, 2] = orientations1[:, 1]
     # randoms 1
     ran_marks1 = np.ones((NR1, 3))
     ran_marks1[:, 0] = ran_weights1
     ran_marks1[:, 1] = 0  # dummy
     ran_marks1[:, 2] = 0  # dummy
     # randoms 2
-    ran_marks2 = ran_weights2
+    ran_marks2 = np.ones((NR2, 3))
+    ran_marks2[:, 0] = ran_weights2
+    ran_marks2[:, 1] = 0  # dummy
+    ran_marks2[:, 2] = 0  # dummy
 
     # define pi bins
     pi_bins = np.array([0.0, pi_max])
 
-    do_SD, do_SR, do_RR = GI_estimator_requirements(estimator)
+    do_SS, do_RR = II_estimator_requirements(estimator)
 
     # count marked pairs
-    if do_SD:
-        SD = marked_pair_counts(sample1, sample2,  marks1,  marks2,
+    if do_SS:
+        SS = marked_pair_counts(sample1, sample2,  marks1,  marks2,
                                 rp_bins, pi_bins, period, num_threads,
                                 approx_cell1_size, approx_cell2_size)
     else:
-        SD = None
-
-    # count marked random pairs
-    if do_SR:
-        if no_randoms:
-            SR = 0.0
-        else:
-            SR = marked_pair_counts(sample1, randoms2, marks1, ran_marks2,
-                                    rp_bins, pi_bins, period, num_threads,
-                                    approx_cell1_size, approx_cell2_size)
-    else:
-        SR = None
+        SS = None
 
     # count random pairs
     if do_RR:
@@ -270,37 +271,35 @@ def gi_minus_projected(sample1, orientations1, ellipticities1, sample2, rp_bins,
     else:
         RR = None
 
-    result = GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator)
+    result = II_estimator(SS, RR, N1, N2, NR1, NR2, estimator)
 
     return result*2.0*pi_max  # factor of 2pi_max accounts for integration
 
 
-def GI_estimator(SD, SR, RR, N1, N2, NR1, NR2, estimator='Landy-Szalay'):
+def II_estimator(SS, RR, N1, N2, NR1, NR2, estimator='Natural'):
     r"""
-    apply the supplied GI estimator to calculate the correlation function.
+    apply the supplied II estimator to calculate the correlation function.
     """
-
-    if estimator == 'Landy-Szalay':
+    if estimator == 'Natural':
         factor = (NR1*NR2)/(N1*N2)
-        return factor*(SD-SR)/RR
+        return factor*(SS/RR)
     else:
         msg = ('The estimator provided is not supported.')
         raise ValueError(msg)
 
 
-def GI_estimator_requirements(estimator):
+def II_estimator_requirements(estimator):
     r"""
-    Return the requirments for the supplied GI estimator.
+    Return the requirments for the supplied II estimator.
     """
-    do_SD = False
-    do_SR = False
-    do_RR = False
 
-    if estimator == 'Landy-Szalay':
-        do_SD = True
-        do_SR = True
+    do_RR = False
+    do_SS = False
+
+    if estimator == 'Natural':
+        do_SS = True
         do_RR = True
-        return do_SD, do_SR, do_RR
+        return do_SS, do_RR
     else:
         msg = ('The estimator provided is not supported.')
         raise ValueError(msg)
@@ -312,15 +311,15 @@ def marked_pair_counts(sample1, sample2, weights1, weights2, rp_bins, pi_bins, p
     Count marked pairs.
     """
 
-    weight_func_id = 3
-    SD = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
+    weight_func_id = 6
+    SS = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period,
         weights1=weights1, weights2=weights2, weight_func_id=weight_func_id,
         num_threads=num_threads, approx_cell1_size=approx_cell1_size,
         approx_cell2_size=approx_cell1_size)[0]
-    SD = np.diff(np.diff(SD, axis=0), axis=1)
-    SD = SD.flatten()
+    SS = np.diff(np.diff(SS, axis=0), axis=1)
+    SS = SS.flatten()
 
-    return SD
+    return SS
 
 
 def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bins,
@@ -351,7 +350,7 @@ def random_counts(randoms1, randoms2, ran_weights1, ran_weights2, rp_bins, pi_bi
         dv = np.diff(np.diff(v, axis=0), axis=1)
         global_volume = period.prod()
 
-        # calculate the expected random-random pairs.
+        # calculate the random-random pairs.
         rhor = (NR1*NR2)/global_volume
         RR = (dv*rhor)
 
@@ -365,11 +364,11 @@ def cylinder_volume(R, h):
     return pi*np.outer(R**2.0, h)
 
 
-def _gi_minus_projected_process_args(sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
+def _ii_minus_projected_process_args(sample1, rp_bins, pi_max, sample2, randoms1, randoms2,
         period, num_threads, approx_cell1_size, approx_cell2_size):
     r"""
     Private method to do bounds-checking on the arguments passed to
-    `~halotools.mock_observables.alignments.gi_minus_projected`.
+    `~halotools.mock_observables.alignments.ii_minus_projected`.
     """
     sample1 = enforce_sample_has_correct_shape(sample1)
 
