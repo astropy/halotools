@@ -28,8 +28,6 @@ __all__ = ('RandomAlignment',
            'CentralAlignment',
            'SatelliteAlignment',
            'RadialSatelliteAlignment',
-           'MajorAxisSatelliteAlignment',
-           'HybridSatelliteAlignment',
            'SubhaloAlignment')
 __author__ = ('Duncan Campbell',)
 
