@@ -102,7 +102,7 @@ class RandomAlignment(object):
 
 class CentralAlignment(object):
     r"""
-    alignment model for central galaxies in host-haloes
+    alignment model for central galaxies in host-halos
     """
     def __init__(self, central_alignment_strength=1.0, prim_gal_axis='major', **kwargs):
         r"""
@@ -253,7 +253,7 @@ class CentralAlignment(object):
 
 class SatelliteAlignment(object):
     r"""
-    alignment model for satellite galaxies in sub-haloes
+    alignment model for satellite galaxies in sub-halos
     """
     def __init__(self, satellite_alignment_strength=1.0, prim_gal_axis='major', **kwargs):
         r"""
@@ -608,7 +608,7 @@ class RadialSatelliteAlignment(object):
         Returns
         =======
         r_vec : numpy.array
-            array of radial vectors of shape (Ngal, 3) between host haloes and satellites
+            array of radial vectors of shape (Ngal, 3) between host halos and satellites
 
         r : numpy.array
             radial distance
@@ -661,7 +661,7 @@ class RadialSatelliteAlignment(object):
 
 class SubhaloAlignment(object):
     r"""
-    alignment model for satellite galaxies in sub-haloes aligning with their respective subhalos
+    alignment model for satellite galaxies in sub-halos aligning with their respective subhalos
     most of the functionality here is copied from SatelltieAlignment by Duncan Campbell.
 
     Notes
