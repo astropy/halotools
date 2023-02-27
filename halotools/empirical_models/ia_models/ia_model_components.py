@@ -1028,6 +1028,8 @@ def axes_correlated_with_input_vector(input_vectors, p=0., seed=None):
     input_unit_vectors = normalized_vectors(input_vectors)
     assert input_unit_vectors.shape[1] == 3
     npts = input_unit_vectors.shape[0]
+
+    z_mask = is_z(input_unit_vectors)
     
     # For some reason, this function is very sensitive, and the difference between float32 and float64 drastically changes results
     # With only a single alignment strength, the np.ones(length)*alignmnet_strength gives float64 numbers
@@ -1044,6 +1046,29 @@ def axes_correlated_with_input_vector(input_vectors, p=0., seed=None):
     rotation_axes = vectors_normal_to_planes(z_axes, input_unit_vectors)
     matrices = rotation_matrices_from_angles(angles, rotation_axes)
 
-    return rotate_vector_collection(matrices, z_correlated_axes)
+    unit_vectors = rotate_vector_collection(matrices, z_correlated_axes)
 
+    # Any vectors directly along z will be nan as you cannot rotate z into z
+    unit_vectors[z_mask] = z_correlated_axes[z_mask]
+    return unit_vectors
 
+def is_z(axes, normalize=False):
+    r"""
+    Returns array of indices where the rows of axes are equal to the z axis.
+
+    Parameters
+    -----------
+    axes : ndarray
+        ndarray of shape (npts,3) where each row represents a 3d orientation axis.
+
+    normalize : boolean, optionsl
+        Boolean specifying whether or not to normalize the axes. Default is False.
+
+    Returns
+    -------
+    z_mask : array of indices marking the rows in axes that point exactly along the z-axis
+    """
+    if normalize:
+        axes = normalized_vectors(axes)
+    
+    return np.where( np.logical_and( axes[:,0] == 0, axes[:,1] == 0, axes[:,2] != 0 ) )
