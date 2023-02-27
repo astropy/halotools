@@ -11,7 +11,7 @@ from astropy.utils.misc import NumpyRNGContext
 
 from ..gi_plus_projected import gi_plus_projected
 
-from ...custom_exceptions import HalotoolsError
+from ....custom_exceptions import HalotoolsError
 
 slow = pytest.mark.slow
 
