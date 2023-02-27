@@ -72,7 +72,7 @@ def npairs(sample1, sample2, rbins, period=None):
     dd.sort()
 
     # count number less than r
-    n = np.zeros((rbins.size,), dtype=np.int)
+    n = np.zeros((rbins.size,), dtype=np.int64)
     for i in range(rbins.size):
         n[i] = len(np.where(dd <= rbins[i])[0])
 
@@ -146,7 +146,7 @@ def xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=None):
         dd[i*N2:i*N2+N2, 0] = perpendicular_distance(x1, x2, period)
 
     # count number less than r
-    n = np.zeros((rp_bins.size, pi_bins.size), dtype=np.int)
+    n = np.zeros((rp_bins.size, pi_bins.size), dtype=np.int64)
     for i in range(rp_bins.size):
         for j in range(pi_bins.size):
             n[i, j] = np.sum((dd[:, 0] <= rp_bins[i]) & (dd[:, 1] <= pi_bins[j]))
@@ -426,7 +426,7 @@ def s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=None):
     mu_bins = np.sort(mu_bins)[::-1]
 
     # bin distances in s and mu bins
-    n = np.zeros((s_bins.size, mu_bins.size), dtype=np.int)
+    n = np.zeros((s_bins.size, mu_bins.size), dtype=np.int64)
     for i in range(s_bins.size):
         for j in range(mu_bins.size):
             n[i, j] = np.sum((dd[:, 0] <= s_bins[i]) & (dd[:, 1] >= mu_bins[j]))
