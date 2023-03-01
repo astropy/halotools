@@ -313,8 +313,14 @@ def rotate_vector_collection(rotation_matrices, vectors, optimize=False):
         return np.dot(rotation_matrices, vectors.T).T
     # rotate each vector by associated rotation matrix
     else:
-        ein_string = "ijk,ik->ij"
-        n1, ndim = np.shape(vectors)
+        # n1 sets of n2 vectors of ndim dimension
+        if len(np.shape(vectors)) == 3:
+            ein_string = "ikl,ijl->ijk"
+            n1, n2, ndim = np.shape(vectors)
+        # n1 vectors of ndim dimensions
+        elif len(np.shape(vectors)) == 2:
+            ein_string = "ijk,ik->ij"
+            n1, ndim = np.shape(vectors)
 
         try:
             return np.einsum(ein_string, rotation_matrices, vectors, optimize=optimize)
