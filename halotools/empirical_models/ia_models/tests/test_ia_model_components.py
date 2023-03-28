@@ -266,7 +266,7 @@ def test_subhalo_alignment_orient_false_subhalo():
             halo_vz = np.array( [ 1, 1, 0 ] ).astype(float)
 
             self.halo_table = Table( [ halo_id, halo_hostid, halo_x, halo_y, halo_z, halo_vx, halo_vy, halo_vz, halo_axisA_x, halo_axisA_y, halo_axisA_z ],
-                                    names=[ "halo_id", "halo_hostid", "halo_x", "halo_y", "halo_z", "halo_vx", "halo_vy", "halo_vz", "halo_axisA_x", "halo_axisA_y", "halo_axisA_z" ] )
+                                    names=[ "halo_id", "halo_hostid", "x", "y", "z", "vx", "vy", "vz", "halo_axisA_x", "halo_axisA_y", "halo_axisA_z" ] )
     
     halocat = FakeHalocat()
 
@@ -277,8 +277,8 @@ def test_subhalo_alignment_orient_false_subhalo():
     for label in set(tab.columns):
         if label == "halo_id" or label == "halo_hostid":
             continue
-
-        tab[ "sub"+label ] = np.array( tab[label] )
+        if "halo" in label:
+            tab[ "sub"+label ] = np.array( tab[label] )
     tab["real_subhalo"] = False
     tab["gal_type"] = np.array(["centrals","satellites"])
     
@@ -288,8 +288,8 @@ def test_subhalo_alignment_orient_false_subhalo():
     # Get the original angles between each property and the host major axis
     og_host_axis = np.array( [ original_host_row["halo_axisA_x"], original_host_row["halo_axisA_y"], original_host_row["halo_axisA_z"] ] ).T
 
-    og_subhalo_pos = np.array( [ original_subhalo_row["subhalo_x"], original_subhalo_row["subhalo_y"], original_subhalo_row["subhalo_z"] ] ).T
-    og_subhalo_v = np.array( [ original_subhalo_row["subhalo_vx"], original_subhalo_row["subhalo_vy"], original_subhalo_row["subhalo_vz"] ] ).T
+    og_subhalo_pos = np.array( [ original_subhalo_row["x"], original_subhalo_row["y"], original_subhalo_row["z"] ] ).T
+    og_subhalo_v = np.array( [ original_subhalo_row["vx"], original_subhalo_row["vy"], original_subhalo_row["vz"] ] ).T
     og_subhalo_axis = np.array( [ original_subhalo_row["subhalo_axisA_x"], original_subhalo_row["subhalo_axisA_y"], original_subhalo_row["subhalo_axisA_z"] ] ).T
 
     og_angles = np.hstack( [ angles_between_list_of_vectors(og_host_axis, og_subhalo_axis), angles_between_list_of_vectors(og_host_axis, og_subhalo_pos), 
@@ -301,8 +301,8 @@ def test_subhalo_alignment_orient_false_subhalo():
 
     new_host_axis = np.array( [ new_host_row["halo_axisA_x"], new_host_row["halo_axisA_y"], new_host_row["halo_axisA_z"] ] ).T
 
-    new_subhalo_pos = np.array( [ new_subhalo_row["subhalo_x"], new_subhalo_row["subhalo_y"], new_subhalo_row["subhalo_z"] ] ).T
-    new_subhalo_v = np.array( [ new_subhalo_row["subhalo_vx"], new_subhalo_row["subhalo_vy"], new_subhalo_row["subhalo_vz"] ] ).T
+    new_subhalo_pos = np.array( [ new_subhalo_row["x"], new_subhalo_row["y"], new_subhalo_row["z"] ] ).T
+    new_subhalo_v = np.array( [ new_subhalo_row["vx"], new_subhalo_row["vy"], new_subhalo_row["vz"] ] ).T
     new_subhalo_axis = np.array( [ new_subhalo_row["subhalo_axisA_x"], new_subhalo_row["subhalo_axisA_y"], new_subhalo_row["subhalo_axisA_z"] ] ).T
 
     new_angles = np.hstack( [ angles_between_list_of_vectors(new_host_axis, new_subhalo_axis), angles_between_list_of_vectors(new_host_axis, new_subhalo_pos), 
@@ -322,8 +322,8 @@ def test_subhalo_alignment_orient_false_subhalo():
 
     new_host_axis = np.array( [ new_host_row["halo_axisA_x"], new_host_row["halo_axisA_y"], new_host_row["halo_axisA_z"] ] ).T
 
-    new_subhalo_pos = np.array( [ new_subhalo_row["subhalo_x"], new_subhalo_row["subhalo_y"], new_subhalo_row["subhalo_z"] ] ).T
-    new_subhalo_v = np.array( [ new_subhalo_row["subhalo_vx"], new_subhalo_row["subhalo_vy"], new_subhalo_row["subhalo_vz"] ] ).T
+    new_subhalo_pos = np.array( [ new_subhalo_row["x"], new_subhalo_row["y"], new_subhalo_row["z"] ] ).T
+    new_subhalo_v = np.array( [ new_subhalo_row["vx"], new_subhalo_row["vy"], new_subhalo_row["vz"] ] ).T
     new_subhalo_axis = np.array( [ new_subhalo_row["subhalo_axisA_x"], new_subhalo_row["subhalo_axisA_y"], new_subhalo_row["subhalo_axisA_z"] ] ).T
 
     new_angles = np.hstack( [ angles_between_list_of_vectors(new_host_axis, new_subhalo_axis), angles_between_list_of_vectors(new_host_axis, new_subhalo_pos), 
