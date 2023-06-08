@@ -755,8 +755,8 @@ class SubhaloAlignment(object):
         # Values of interest
         host_axis_A = ['halo_axisA_x', 'halo_axisA_y', 'halo_axisA_z']          # Use this axis to rotate
         axis_A = ['subhalo_axisA_x', 'subhalo_axisA_y', 'subhalo_axisA_z']
-        velocity = ['subhalo_vx', 'subhalo_vy', 'subhalo_vz']
-        position = ['subhalo_x', 'subhalo_y', 'subhalo_z']
+        velocity = ['vx', 'vy', 'vz']
+        position = ['x', 'y', 'z']
         
         mask = ( table['gal_type'] == 'satellites' ) & ( table['real_subhalo'] == False )
         
