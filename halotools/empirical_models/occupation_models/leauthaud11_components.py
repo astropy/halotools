@@ -10,11 +10,18 @@ import warnings
 from .occupation_model_template import OccupationComponent
 
 from .. import model_defaults
-from ..smhm_models import Behroozi10SmHm
 from ..assembias_models import HeavisideAssembias
 
 from ... import sim_manager
 from ...custom_exceptions import HalotoolsError
+
+from ..component_model_templates import PrimGalpropModel
+from ..smhm_models.smhm_helpers import safely_retrieve_redshift
+from .. import model_helpers
+
+
+L11_LITTLEH = 0.72
+L11_LGH = np.log10(L11_LITTLEH)
 
 __all__ = (
     "Leauthaud11Cens",
@@ -50,6 +57,15 @@ class Leauthaud11Cens(OccupationComponent):
             Stellar mass threshold of the mock galaxy sample in h=1 solar mass units.
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
+            Values in the Leauthaud11 parameter dictionary are quoted assuming h=0.72,
+            so that a direct comparison can be made to the best-fitting values quoted in
+            Leauthaud+11. However, the threshold of the sample in halotools
+            is defined assuming h=1. This means that in order to compare your
+            parameter dictionary to the best-fitting parameters in Leauthaud+11,
+            you will need to compare to the appropriately scaled threshold.
+            For example, in Figure 2 of arXiv:1103.2077, the most massive sample
+            is labeled logsm>11.4. In Halotools, this corresponds to threshold=11.115.
+
         prim_haloprop_key : string, optional
             String giving the column name of the primary halo property governing
             the occupation statistics of gal_type galaxies.
@@ -79,7 +95,7 @@ class Leauthaud11Cens(OccupationComponent):
         )
         self.redshift = redshift
 
-        self.smhm_model = Behroozi10SmHm(prim_haloprop_key=prim_haloprop_key, **kwargs)
+        self.smhm_model = Leauthaud11SmHm(prim_haloprop_key=prim_haloprop_key, **kwargs)
 
         for key, value in self.smhm_model.param_dict.items():
             self.param_dict[key] = value
@@ -137,12 +153,15 @@ class Leauthaud11Cens(OccupationComponent):
             if key in list(self.smhm_model.param_dict.keys()):
                 self.smhm_model.param_dict[key] = value
 
-        logmstar = np.log10(
+        logmstar_h1p0 = np.log10(
             self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
         )
+        logmstar_h0p72 = logmstar_h1p0 - 2 * L11_LGH
+
         logscatter = math.sqrt(2) * self.smhm_model.mean_scatter(**kwargs)
 
-        mean_ncen = 0.5 * (1.0 - erf((self.threshold - logmstar) / logscatter))
+        threshold_h0p72 = self.threshold - 2 * L11_LGH
+        mean_ncen = 0.5 * (1.0 - erf((threshold_h0p72 - logmstar_h0p72) / logscatter))
 
         return mean_ncen
 
@@ -162,35 +181,54 @@ class Leauthaud11Cens(OccupationComponent):
 
         Returns
         -------
-        mstar : array_like
-            Array containing stellar masses living in the input table.
+        mstar_h1p0 : array_like
+            Array containing stellar masses in units of h=1
+
+            Note that throughout Leauthaud+11 it is assumed that h=0.72.
+            As a sanity check on your conversion:
+            mstar_h0p72 = mstar_h1p0/0.5184
+            So that mstar_h0p72 is larger than mstar_h1p0
+
         """
 
         for key, value in self.param_dict.items():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value
-        return self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
+        mstar_h1p0 = self.smhm_model.mean_stellar_mass(redshift=self.redshift, **kwargs)
+        return mstar_h1p0
 
-    def mean_log_halo_mass(self, log_stellar_mass):
+    def mean_log_halo_mass(self, log_stellar_mass_h1p0):
         r"""Return the base-10 logarithm of the halo mass of a central galaxy as a function
         of the base-10 logarithm of the input stellar mass.
 
         Parameters
         ----------
-        log_stellar_mass : array
+        log_stellar_mass_h1p0 : array
             Array of base-10 logarithm of stellar masses in h=1 solar mass units.
+
+            Note that throughout Leauthaud+11 it is assumed that h=0.72.
+            As a sanity check on your conversion:
+            logsm_h0p72 = logsm_h1p0 - 2*log10(0.72)
+            So that logsm_h0p72 is larger than logsm_h1p0
 
         Returns
         -------
-        log_halo_mass : array_like
+        log_halo_mass_h1p0 : array_like
             Array containing 10-base logarithm of halo mass in h=1 solar mass units.
+
+            Note that throughout Leauthaud+11 it is assumed that h=0.72.
+            As a sanity check on your conversion:
+            log_halo_mass_h0p72 = log_halo_mass_h1p0 - log10(0.72)
+            So that log_halo_mass_h0p72 is larger than log_halo_mass_h1p0
+
         """
         for key, value in self.param_dict.items():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value
-        return self.smhm_model.mean_log_halo_mass(
-            log_stellar_mass, redshift=self.redshift
+        log_halo_mass_h1p0 = self.smhm_model.mean_log_halo_mass(
+            log_stellar_mass_h1p0, redshift=self.redshift
         )
+        return log_halo_mass_h1p0
 
 
 class Leauthaud11Sats(OccupationComponent):
@@ -219,6 +257,16 @@ class Leauthaud11Sats(OccupationComponent):
         threshold : float, optional
             Stellar mass threshold of the mock galaxy sample in h=1 solar mass units.
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+            Values in the Leauthaud11 parameter dictionary are quoted assuming h=0.72,
+            so that a direct comparison can be made to the best-fitting values quoted in
+            Leauthaud+11. However, the threshold of the sample in halotools
+            is defined assuming h=1. This means that in order to compare your
+            parameter dictionary to the best-fitting parameters in Leauthaud+11,
+            you will need to compare to the appropriately scaled threshold.
+            For example, in Figure 2 of arXiv:1103.2077, the most massive sample
+            is labeled logsm>11.4. In Halotools, this corresponds to threshold=11.115.
+
 
         prim_haloprop_key : string, optional
             String giving the column name of the primary halo property governing
@@ -249,8 +297,6 @@ class Leauthaud11Sats(OccupationComponent):
         --------
         >>> sat_model = Leauthaud11Sats()
         """
-
-        self.littleh = 0.72
 
         if cenocc_model is None:
             cenocc_model = Leauthaud11Cens(
@@ -324,21 +370,27 @@ class Leauthaud11Sats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation.
         """
         # Retrieve the array storing the mass-like variable
+        # Halotools assumes your input values of mass are supplied assuming h=1
         if "table" in list(kwargs.keys()):
-            mass = kwargs["table"][self.prim_haloprop_key]
+            halo_mass_h1p0 = kwargs["table"][self.prim_haloprop_key]
         elif "prim_haloprop" in list(kwargs.keys()):
-            mass = np.atleast_1d(kwargs["prim_haloprop"])
+            halo_mass_h1p0 = np.atleast_1d(kwargs["prim_haloprop"])
         else:
             raise KeyError(
                 "Must pass one of the following keyword arguments "
                 "to mean_occupation:\n``table`` or ``prim_haloprop``"
             )
 
+        # Convert halo mass to a numerical value that assumes h=0.72
+        halo_mass_h0p72 = halo_mass_h1p0 / L11_LITTLEH
+        # Henceforth, the implemented formulas have an identical form
+        # to the formulas that appear in Leauthaud+11
+
         self._update_satellite_params()
 
         mean_nsat = (
-            np.exp(-self._mcut / (mass * self.littleh))
-            * (mass * self.littleh / self._msat) ** self.param_dict["alphasat"]
+            np.exp(-self._mcut / halo_mass_h0p72)
+            * (halo_mass_h0p72 / self._msat) ** self.param_dict["alphasat"]
         )
 
         if self.modulate_with_cenocc is True:
@@ -370,23 +422,25 @@ class Leauthaud11Sats(OccupationComponent):
             if key in self.central_occupation_model.param_dict:
                 self.central_occupation_model.param_dict[key] = value
 
-        log_halo_mass_threshold = self.central_occupation_model.mean_log_halo_mass(
-            log_stellar_mass=self.threshold
+        log_halo_mass_threshold_h1p0 = self.central_occupation_model.mean_log_halo_mass(
+            log_stellar_mass_h1p0=self.threshold
         )
-        knee_threshold = (10.0**log_halo_mass_threshold) * self.littleh
+        log_halo_mass_threshold_h0p72 = log_halo_mass_threshold_h1p0 - L11_LGH
+        knee_threshold_h0p72 = 10.0**log_halo_mass_threshold_h0p72
 
-        knee_mass = 1.0e12
+        # 1e12 is the numerical value used in Leauthaud+11 and so assumes h=0.72
+        knee_mass_h0p72 = 1.0e12
 
         self._msat = (
-            knee_mass
+            knee_mass_h0p72
             * self.param_dict["bsat"]
-            * (knee_threshold / knee_mass) ** self.param_dict["betasat"]
+            * (knee_threshold_h0p72 / knee_mass_h0p72) ** self.param_dict["betasat"]
         )
 
         self._mcut = (
-            knee_mass
+            knee_mass_h0p72
             * self.param_dict["bcut"]
-            * (knee_threshold / knee_mass) ** self.param_dict["betacut"]
+            * (knee_threshold_h0p72 / knee_mass_h0p72) ** self.param_dict["betacut"]
         )
 
 
@@ -398,8 +452,17 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
         Parameters
         ----------
         threshold : float, optional
-            Stellar mass threshold of the mock galaxy sample.
+            Stellar mass threshold of the mock galaxy sample in h=1 solar mass units.
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+            Values in the Leauthaud11 parameter dictionary are quoted assuming h=0.72,
+            so that a direct comparison can be made to the best-fitting values quoted in
+            Leauthaud+11. However, the threshold of the sample in halotools
+            is defined assuming h=1. This means that in order to compare your
+            parameter dictionary to the best-fitting parameters in Leauthaud+11,
+            you will need to compare to the appropriately scaled threshold.
+            For example, in Figure 2 of arXiv:1103.2077, the most massive sample
+            is labeled logsm>11.4. In Halotools, this corresponds to threshold=11.115.
 
         prim_haloprop_key : string, optional
             String giving the column name of the primary halo property governing
@@ -458,8 +521,17 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
         Parameters
         ----------
         threshold : float, optional
-            Stellar mass threshold of the mock galaxy sample.
+            Stellar mass threshold of the mock galaxy sample in h=1 solar mass units.
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+            Values in the Leauthaud11 parameter dictionary are quoted assuming h=0.72,
+            so that a direct comparison can be made to the best-fitting values quoted in
+            Leauthaud+11. However, the threshold of the sample in halotools
+            is defined assuming h=1. This means that in order to compare your
+            parameter dictionary to the best-fitting parameters in Leauthaud+11,
+            you will need to compare to the appropriately scaled threshold.
+            For example, in Figure 2 of arXiv:1103.2077, the most massive sample
+            is labeled logsm>11.4. In Halotools, this corresponds to threshold=11.115.
 
         prim_haloprop_key : string, optional
             String giving the column name of the primary halo property governing
@@ -499,7 +571,6 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
             will interpreted at the input ``assembias_strength_abscissa``.
             Default is to assume a constant strength of 0.5.
 
-
         """
         Leauthaud11Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(
@@ -509,3 +580,227 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
             method_name_to_decorate="mean_occupation",
             **kwargs
         )
+
+
+class Leauthaud11SmHm(PrimGalpropModel):
+    """Stellar-to-halo-mass relation based on
+    `Behroozi et al 2010 <http://arxiv.org/abs/astro-ph/1001.0015/>`_
+    and adapted in Leauthaud+11.
+
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Parameters
+        ----------
+        prim_haloprop_key : string, optional
+            String giving the column name of the primary halo property governing stellar mass.
+            Default is set in the `~halotools.empirical_models.model_defaults` module.
+
+        scatter_model : object, optional
+            Class governing stochasticity of stellar mass. Default scatter is log-normal,
+            implemented by the `~halotools.empirical_models.LogNormalScatterModel` class.
+
+        scatter_abscissa : array_like, optional
+            Array of values giving the abscissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the
+            `~halotools.empirical_models.model_defaults` module.
+
+        scatter_ordinates : array_like, optional
+            Array of values defining the level of scatter at the input abscissa.
+            Default behavior will result in constant scatter at a level set in the
+            `~halotools.empirical_models.model_defaults` module.
+
+        redshift : float, optional
+            Redshift of the stellar-to-halo-mass relation. Recommended default behavior
+            is to leave this argument unspecified.
+
+            If no ``redshift`` argument is given to the constructor, you will be free to use the
+            analytical relations bound to `Leauthaud11SmHm` to study the redshift-dependence
+            of the SMHM by passing in a ``redshift`` argument to the `mean_log_halo_mass`
+            and `mean_stellar_mass` methods.
+
+            If you do pass a ``redshift`` argument to the constructor, the instance of the
+            `Leauthaud11SmHm` will only return results for this redshift, and will raise an
+            exception if you attempt to pass in a redshift to these methods.
+            See the Notes below to understand the motivation for this behavior.
+
+        Notes
+        ------
+        Note that the `Leauthaud11SmHm` class is a nearly identical copy of the
+        distinct from the `Behroozi10` model, except for the treatment of little h.
+
+        """
+
+        super(Leauthaud11SmHm, self).__init__(galprop_name="stellar_mass", **kwargs)
+
+        self._methods_to_inherit.extend(["mean_log_halo_mass"])
+
+        self.publications = ["arXiv:1001.0015"]
+
+    def retrieve_default_param_dict(self):
+        """Method returns a dictionary of all model parameters
+        set to the column 2 values in Table 2 of Behroozi et al. (2010).
+
+        Returns
+        -------
+        d : dict
+            Dictionary containing parameter values.
+        """
+        # All calculations are done internally using the same h=0.72 units
+        # as in Leauthaud et al. (2011), so the parameter values here are
+        # the same as in Table 2, even though the mean_log_halo_mass and
+        # mean_stellar_mass methods use accept and return arguments in h=1 units.
+
+        d = {
+            "smhm_m0_0": 10.72,
+            "smhm_m0_a": 0.59,
+            "smhm_m1_0": 12.35,
+            "smhm_m1_a": 0.3,
+            "smhm_beta_0": 0.43,
+            "smhm_beta_a": 0.18,
+            "smhm_delta_0": 0.56,
+            "smhm_delta_a": 0.18,
+            "smhm_gamma_0": 1.54,
+            "smhm_gamma_a": 2.52,
+        }
+
+        return d
+
+    def mean_log_halo_mass(self, log_stellar_mass_h1p0, **kwargs):
+        """Return the halo mass of a central galaxy as a function
+        of the stellar mass.
+
+        Parameters
+        ----------
+        log_stellar_mass_h1p0 : array
+            Array of base-10 logarithm of stellar masses in h=1 solar mass units.
+
+            Note that throughout Leauthaud+11 it is assumed that h=0.72.
+            As a sanity check on your conversion:
+            logsm_h0p72 = logsm_h1p0 - 2*log10(0.72)
+            So that logsm_h0p72 is larger than logsm_h1p0
+
+        redshift : float or array, optional
+            Redshift of the halo hosting the galaxy. If passing an array,
+            must be of the same length as the input ``log_stellar_mass``.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
+
+        Returns
+        -------
+        log_halo_mass_h1p0 : array_like
+            Array containing 10-base logarithm of halo mass in h=1 solar mass units.
+
+            Note that throughout Leauthaud+11 it is assumed that h=0.72.
+            As a sanity check on your conversion:
+            log_halo_mass_h0p72 = log_halo_mass_h1p0 - log10(0.72)
+            So that log_halo_mass_h0p72 is larger than log_halo_mass_h1p0
+
+        Notes
+        ------
+        The parameter values in Behroozi+10 were fit to data assuming h=0.7,
+        but all halotools inputs are in h=1 units. Thus we will transform our
+        input stellar mass to h=0.7 units, evaluate using the behroozi parameters,
+        and then transform back to h=1 units before returning the result.
+        """
+        redshift = safely_retrieve_redshift(self, "mean_log_halo_mass", **kwargs)
+
+        # convert mass from h=1 to h=0.72
+        stellar_mass_h1p0 = 10.0**log_stellar_mass_h1p0
+        stellar_mass_h0p72 = stellar_mass_h1p0 / (L11_LITTLEH**2)
+        a = 1.0 / (1.0 + redshift)
+
+        logm0 = self.param_dict["smhm_m0_0"] + self.param_dict["smhm_m0_a"] * (a - 1)
+        m0 = 10.0**logm0
+        logm1 = self.param_dict["smhm_m1_0"] + self.param_dict["smhm_m1_a"] * (a - 1)
+        beta = self.param_dict["smhm_beta_0"] + self.param_dict["smhm_beta_a"] * (a - 1)
+        delta = self.param_dict["smhm_delta_0"] + self.param_dict["smhm_delta_a"] * (
+            a - 1
+        )
+        gamma = self.param_dict["smhm_gamma_0"] + self.param_dict["smhm_gamma_a"] * (
+            a - 1
+        )
+
+        stellar_mass_by_m0 = stellar_mass_h0p72 / m0
+        term3_numerator = (stellar_mass_by_m0) ** delta
+        term3_denominator = 1 + (stellar_mass_by_m0) ** (-gamma)
+
+        log_halo_mass_h0p72 = (
+            logm1
+            + beta * np.log10(stellar_mass_by_m0)
+            + (term3_numerator / term3_denominator)
+            - 0.5
+        )
+
+        # convert from h=0.72 back to h=1 and return the result
+        log_halo_mass_h1p0 = log_halo_mass_h0p72 + L11_LGH
+        return log_halo_mass_h1p0
+
+    def mean_stellar_mass(self, **kwargs):
+        """Return the stellar mass of a central galaxy as a function
+        of the input table.
+
+        Parameters
+        ----------
+        prim_haloprop : array, optional
+            Array of mass-like variable upon which occupation statistics are based.
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed.
+
+        table : object, optional
+            Data table storing halo catalog.
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed.
+
+        redshift : float or array, optional
+            Redshift of the halo hosting the galaxy. If passing an array,
+            must be of the same length as the input ``stellar_mass``.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
+
+        Returns
+        -------
+        mstar_h1p0 : array_like
+            Array containing stellar masses in units of h=1
+
+            Note that throughout Leauthaud+11 it is assumed that h=0.72.
+            As a sanity check on your conversion:
+            mstar_h0p72 = mstar_h1p0/0.5184
+            So that mstar_h0p72 is larger than mstar_h1p0
+
+        """
+        redshift = safely_retrieve_redshift(self, "mean_stellar_mass", **kwargs)
+
+        # Retrieve the array storing the mass-like variable
+        if "table" in list(kwargs.keys()):
+            halo_mass_h1p0 = kwargs["table"][self.prim_haloprop_key]
+        elif "prim_haloprop" in list(kwargs.keys()):
+            halo_mass_h1p0 = kwargs["prim_haloprop"]
+        else:
+            raise KeyError(
+                "Must pass one of the following keyword arguments "
+                "to mean_occupation:\n``table`` or ``prim_haloprop``"
+            )
+
+        log_stellar_mass_table_h1p0 = np.linspace(8.5, 12.5, 100)
+        log_halo_mass_table_h1p0 = self.mean_log_halo_mass(
+            log_stellar_mass_table_h1p0, redshift=redshift
+        )
+
+        if not np.all(np.isfinite(log_halo_mass_table_h1p0)):
+            msg = (
+                "The value of the mean_stellar_mass function in the Leauthuad+11 model \n"
+                "is calculated by numerically inverting results "
+                "from the mean_log_halo_mass function.\nThese lookup tables "
+                "have infinite-valued entries, which may lead to incorrect results.\n"
+                "This is likely caused by the values of one or more of the model parameters "
+                "being set to unphysically large/small values."
+            )
+            warnings.warn(msg)
+
+        interpol_func_h1p0 = model_helpers.custom_spline(
+            log_halo_mass_table_h1p0, log_stellar_mass_table_h1p0
+        )
+
+        log_stellar_mass_h1p0 = interpol_func_h1p0(np.log10(halo_mass_h1p0))
+        mstar_h1p0 = 10.0**log_stellar_mass_h1p0
+
+        return mstar_h1p0
