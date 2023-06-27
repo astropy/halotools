@@ -1,6 +1,6 @@
 r""" Common functions used when analyzing catalogs of galaxies/halos.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 from scipy.stats import binned_statistic
@@ -10,12 +10,18 @@ from ..sim_manager.sim_defaults import default_cosmology, default_redshift
 
 from ..custom_exceptions import HalotoolsError
 
-__all__ = ('mean_y_vs_x', 'return_xyz_formatted_array', 'cuboid_subvolume_labels',
-    'relative_positions_and_velocities', 'sign_pbc', 'apply_zspace_distortion')
-__author__ = ['Andrew Hearin']
+__all__ = (
+    "mean_y_vs_x",
+    "return_xyz_formatted_array",
+    "cuboid_subvolume_labels",
+    "relative_positions_and_velocities",
+    "sign_pbc",
+    "apply_zspace_distortion",
+)
+__author__ = ["Andrew Hearin"]
 
 
-def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
+def mean_y_vs_x(x, y, error_estimator="error_on_mean", **kwargs):
     r"""
     Estimate the mean value of the property *y* as a function of *x*
     for an input sample of galaxies/halos,
@@ -73,34 +79,43 @@ def mean_y_vs_x(x, y, error_estimator='error_on_mean', **kwargs):
 
     """
     try:
-        assert error_estimator in ('error_on_mean', 'variance')
+        assert error_estimator in ("error_on_mean", "variance")
     except AssertionError:
-        msg = ("\nInput ``error_estimator`` must be either "
-            "``error_on_mean`` or ``variance``\n")
+        msg = (
+            "\nInput ``error_estimator`` must be either "
+            "``error_on_mean`` or ``variance``\n"
+        )
         raise HalotoolsError(msg)
 
-    modified_kwargs = {key: kwargs[key] for key in kwargs if key != 'error_estimator'}
-    result = binned_statistic(x, y, statistic='mean', **modified_kwargs)
+    modified_kwargs = {key: kwargs[key] for key in kwargs if key != "error_estimator"}
+    result = binned_statistic(x, y, statistic="mean", **modified_kwargs)
     mean, bin_edges, binnumber = result
-    bin_midpoints = (bin_edges[1:] + bin_edges[:-1])/2.
+    bin_midpoints = (bin_edges[1:] + bin_edges[:-1]) / 2.0
 
-    modified_kwargs['bins'] = bin_edges
+    modified_kwargs["bins"] = bin_edges
 
     result = binned_statistic(x, y, statistic=np.std, **modified_kwargs)
     variance, _, _ = result
 
-    if error_estimator == 'variance':
+    if error_estimator == "variance":
         err = variance
     else:
         counts = np.histogram(x, bins=bin_edges)
-        err = variance/np.sqrt(counts[0])
+        err = variance / np.sqrt(counts[0])
 
     return bin_midpoints, mean, err
 
 
-def return_xyz_formatted_array(x, y, z, period=np.inf,
-        cosmology=default_cosmology, redshift=default_redshift, **kwargs):
-    r""" Returns a Numpy array of shape *(Npts, 3)* storing the
+def return_xyz_formatted_array(
+    x,
+    y,
+    z,
+    period=np.inf,
+    cosmology=default_cosmology,
+    redshift=default_redshift,
+    **kwargs
+):
+    r"""Returns a Numpy array of shape *(Npts, 3)* storing the
     xyz-positions in the format used throughout
     the `~halotools.mock_observables` package, optionally applying redshift-space
     distortions according to the input ``velocity``, ``redshift`` and ``cosmology``.
@@ -194,50 +209,63 @@ def return_xyz_formatted_array(x, y, z, period=np.inf,
         msg = "Input ``period`` must be a single float or a 3-element sequence"
         raise ValueError(msg)
 
-    posdict = {'x': np.copy(x), 'y': np.copy(y), 'z': np.copy(z)}
-    period_dict = {'x': period[0], 'y': period[1], 'z': period[2]}
+    posdict = {"x": np.copy(x), "y": np.copy(y), "z": np.copy(z)}
+    period_dict = {"x": period[0], "y": period[1], "z": period[2]}
 
-    a = 'velocity_distortion_dimension' in list(kwargs.keys())
-    b = 'velocity' in list(kwargs.keys())
-    if bool(a+b) is True:
-        if bool(a*b) is False:
-            msg = ("You must either both or none of the following keyword arguments: "
-                "``velocity_distortion_dimension`` and ``velocity``\n")
+    a = "velocity_distortion_dimension" in list(kwargs.keys())
+    b = "velocity" in list(kwargs.keys())
+    if bool(a + b) is True:
+        if bool(a * b) is False:
+            msg = (
+                "You must either both or none of the following keyword arguments: "
+                "``velocity_distortion_dimension`` and ``velocity``\n"
+            )
             raise KeyError(msg)
         else:
-            vel_dist_dim = kwargs['velocity_distortion_dimension']
-            velocity = np.copy(kwargs['velocity'])
+            vel_dist_dim = kwargs["velocity_distortion_dimension"]
+            velocity = np.copy(kwargs["velocity"])
             apply_distortion = True
     else:
         apply_distortion = False
 
     if apply_distortion is True:
         try:
-            assert vel_dist_dim in ('x', 'y', 'z')
-            spatial_distortion = (1. + redshift)*np.copy(velocity)/100./cosmology.efunc(redshift)
+            assert vel_dist_dim in ("x", "y", "z")
+            spatial_distortion = (
+                (1.0 + redshift) * np.copy(velocity) / 100.0 / cosmology.efunc(redshift)
+            )
             posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + spatial_distortion
             Lbox = period_dict[vel_dist_dim]
             if Lbox != np.inf:
                 posdict[vel_dist_dim] = enforce_periodicity_of_box(
-                    posdict[vel_dist_dim], Lbox)
+                    posdict[vel_dist_dim], Lbox
+                )
         except AssertionError:
-            msg = ("\nInput ``velocity_distortion_dimension`` must be either \n"
-                "``'x'``, ``'y'`` or ``'z'``.")
+            msg = (
+                "\nInput ``velocity_distortion_dimension`` must be either \n"
+                "``'x'``, ``'y'`` or ``'z'``."
+            )
             raise KeyError(msg)
 
-    xout, yout, zout = np.copy(posdict['x']), np.copy(posdict['y']), np.copy(posdict['z'])
+    xout, yout, zout = (
+        np.copy(posdict["x"]),
+        np.copy(posdict["y"]),
+        np.copy(posdict["z"]),
+    )
     pos = np.vstack([xout, yout, zout]).T
 
     # Apply a mask, if applicable
     try:
-        mask = kwargs['mask']
+        mask = kwargs["mask"]
         return pos[mask]
     except KeyError:
         return pos
 
 
-def apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lbox=None):
-    r""" Apply redshift-space distortions to the comoving simulation coordinate,
+def apply_zspace_distortion(
+    true_pos, peculiar_velocity, redshift, cosmology, Lbox=None
+):
+    r"""Apply redshift-space distortions to the comoving simulation coordinate,
     optionally accounting for periodic boundary conditions.
 
     This function implements the following formula:
@@ -288,8 +316,8 @@ def apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lb
     >>> Lbox = halocat.Lbox[2]
     >>> zspace_zcoord = apply_zspace_distortion(true_pos, peculiar_velocity, redshift, cosmology, Lbox)
     """
-    scale_factor = 1./(1. + redshift)
-    pos_err = peculiar_velocity/100./cosmology.efunc(redshift)/scale_factor
+    scale_factor = 1.0 / (1.0 + redshift)
+    pos_err = peculiar_velocity / 100.0 / cosmology.efunc(redshift) / scale_factor
     zspace_pos = true_pos + pos_err
     if Lbox is not None:
         zspace_pos = enforce_periodicity_of_box(zspace_pos, Lbox)
@@ -352,35 +380,35 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     """
 
     # process inputs and check for consistency
-    sample = np.atleast_1d(sample).astype('f8')
+    sample = np.atleast_1d(sample).astype("f8")
     try:
         assert sample.ndim == 2
         assert sample.shape[1] == 3
     except AssertionError:
-        msg = ("Input ``sample`` must have shape (Npts, 3)")
+        msg = "Input ``sample`` must have shape (Npts, 3)"
         raise TypeError(msg)
 
-    Nsub = np.atleast_1d(Nsub).astype('i4')
+    Nsub = np.atleast_1d(Nsub).astype("i4")
     if len(Nsub) == 1:
         Nsub = np.array([Nsub[0], Nsub[0], Nsub[0]])
     elif len(Nsub) != 3:
         msg = "Input ``Nsub`` must be a scalar or length-3 sequence"
         raise TypeError(msg)
 
-    Lbox = np.atleast_1d(Lbox).astype('f8')
+    Lbox = np.atleast_1d(Lbox).astype("f8")
     if len(Lbox) == 1:
-        Lbox = np.array([Lbox[0]]*3)
+        Lbox = np.array([Lbox[0]] * 3)
     elif len(Lbox) != 3:
         msg = "Input ``Lbox`` must be a scalar or length-3 sequence"
         raise TypeError(msg)
 
-    dL = Lbox/Nsub  # length of subvolumes along each dimension
+    dL = Lbox / Nsub  # length of subvolumes along each dimension
     N_sub_vol = int(np.prod(Nsub))  # total the number of subvolumes
     # create an array of unique integer IDs for each subvolume
-    inds = np.arange(1, N_sub_vol+1).reshape(Nsub[0], Nsub[1], Nsub[2])
+    inds = np.arange(1, N_sub_vol + 1).reshape(Nsub[0], Nsub[1], Nsub[2])
 
     # tag each particle with an integer indicating which subvolume it is in
-    index = np.floor(sample/dL).astype(int)
+    index = np.floor(sample / dL).astype(int)
     # take care of the case where a point falls on the boundary
     for i in range(3):
         index[:, i] = np.where(index[:, i] == Nsub[i], Nsub[i] - 1, index[:, i])
@@ -389,8 +417,8 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     return index, int(N_sub_vol)
 
 
-def sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=False):
-    r""" Return the sign of the unit vector pointing from x2 towards x1,
+def sign_pbc(x1, x2, period=None, equality_fill_val=0.0, return_pbc_correction=False):
+    r"""Return the sign of the unit vector pointing from x2 towards x1,
     that is, the sign of (x1 - x2), accounting for periodic boundary conditions.
 
     If x1 > x2, returns 1. If x1 < x2, returns -1. If x1 == x2, returns equality_fill_val.
@@ -451,9 +479,9 @@ def sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=Fa
             msg = "If period is not None, all values of x and y must be between [0, period)"
             raise ValueError(msg)
 
-        d = np.abs(x1-x2)
-        pbc_correction = np.sign(period/2. - d)
-        result = pbc_correction*result
+        d = np.abs(x1 - x2)
+        pbc_correction = np.sign(period / 2.0 - d)
+        result = pbc_correction * result
 
     if equality_fill_val != 0:
         result = np.where(result == 0, equality_fill_val, result)
@@ -465,7 +493,7 @@ def sign_pbc(x1, x2, period=None, equality_fill_val=0., return_pbc_correction=Fa
 
 
 def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
-    r""" Return the vector pointing from x2 towards x1,
+    r"""Return the vector pointing from x2 towards x1,
     that is, x1 - x2, accounting for periodic boundary conditions.
 
     If keyword arguments ``v1`` and ``v2`` are passed in,
@@ -530,16 +558,16 @@ def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
     >>> assert np.isclose(vrel, +400)
 
     """
-    s = sign_pbc(x1, x2, period=period, equality_fill_val=1.)
+    s = sign_pbc(x1, x2, period=period, equality_fill_val=1.0)
     absd = np.abs(x1 - x2)
     if period is None:
-        xrel = s*absd
+        xrel = s * absd
     else:
-        xrel = s*np.where(absd > period/2., period - absd, absd)
+        xrel = s * np.where(absd > period / 2.0, period - absd, absd)
 
     try:
-        v1 = kwargs['v1']
-        v2 = kwargs['v2']
-        return xrel, s*(v1-v2)
+        v1 = kwargs["v1"]
+        v2 = kwargs["v2"]
+        return xrel, s * (v1 - v2)
     except KeyError:
         return xrel
