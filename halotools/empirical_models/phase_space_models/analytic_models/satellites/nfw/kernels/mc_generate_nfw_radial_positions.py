@@ -13,14 +13,19 @@ from ......model_defaults import halo_mass_definition as default_halo_mass_defin
 from .......sim_manager.sim_defaults import default_cosmology, default_redshift
 from .......custom_exceptions import HalotoolsError
 
-__all__ = ('mc_generate_nfw_radial_positions', )
+__all__ = ("mc_generate_nfw_radial_positions",)
 
 
-def mc_generate_nfw_radial_positions(num_pts=int(1e4), conc=5,
-            cosmology=default_cosmology, redshift=default_redshift,
-            mdef=default_halo_mass_definition, seed=None,
-            **kwargs):
-    r""" Return a Monte Carlo realization of points in an NFW profile.
+def mc_generate_nfw_radial_positions(
+    num_pts=int(1e4),
+    conc=5,
+    cosmology=default_cosmology,
+    redshift=default_redshift,
+    mdef=default_halo_mass_definition,
+    seed=None,
+    **kwargs
+):
+    r"""Return a Monte Carlo realization of points in an NFW profile.
 
     See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique.
 
@@ -77,14 +82,16 @@ def mc_generate_nfw_radial_positions(num_pts=int(1e4), conc=5,
     >>> radial_positions = mc_generate_nfw_radial_positions(halo_radius = 0.25)
     """
     try:
-        halo_radius = kwargs['halo_radius']
+        halo_radius = kwargs["halo_radius"]
     except KeyError:
         try:
-            halo_mass = kwargs['halo_mass']
+            halo_mass = kwargs["halo_mass"]
             halo_radius = halo_mass_to_halo_radius(halo_mass, cosmology, redshift, mdef)
         except KeyError:
-            msg = ("\nIf keyword argument ``halo_radius`` is unspecified, "
-                "argument ``halo_mass`` must be specified.\n")
+            msg = (
+                "\nIf keyword argument ``halo_radius`` is unspecified, "
+                "argument ``halo_mass`` must be specified.\n"
+            )
             raise HalotoolsError(msg)
         except TypeError:
             raise HalotoolsError("Input ``halo_mass`` must be a float")
@@ -93,14 +100,14 @@ def mc_generate_nfw_radial_positions(num_pts=int(1e4), conc=5,
     try:
         assert len(halo_radius) == 1
     except AssertionError:
-        msg = ("Input ``halo_radius`` must be a float")
+        msg = "Input ``halo_radius`` must be a float"
         raise HalotoolsError(msg)
 
     conc = np.atleast_1d(conc).astype(np.float64)
     try:
         assert len(conc) == 1
     except AssertionError:
-        msg = ("Input ``conc`` must be a float")
+        msg = "Input ``conc`` must be a float"
         raise HalotoolsError(msg)
 
     # Build lookup table from which to tabulate the inverse cumulative_mass_PDF
@@ -117,7 +124,7 @@ def mc_generate_nfw_radial_positions(num_pts=int(1e4), conc=5,
         randoms = np.random.uniform(0, 1, num_pts)
     log_randoms = np.log10(randoms)
     log_scaled_radial_positions = funcobj(log_randoms)
-    scaled_radial_positions = 10.**log_scaled_radial_positions
-    radial_positions = scaled_radial_positions*halo_radius
+    scaled_radial_positions = 10.0**log_scaled_radial_positions
+    radial_positions = scaled_radial_positions * halo_radius
 
     return radial_positions

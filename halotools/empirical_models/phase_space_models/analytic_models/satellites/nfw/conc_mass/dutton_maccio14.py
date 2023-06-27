@@ -5,11 +5,11 @@ from __future__ import division, print_function, absolute_import, unicode_litera
 import numpy as np
 
 
-__all__ = ('dutton_maccio14', )
+__all__ = ("dutton_maccio14",)
 
 
 def dutton_maccio14(mass, redshift):
-    r""" Power-law fit to the concentration-mass relation from
+    r"""Power-law fit to the concentration-mass relation from
     Equations 12 & 13 of Dutton and Maccio 2014, arXiv:1402.7073.
 
     :math:`\log_{10}c(M, z) \equiv a + b\log_{10}(M / M_{0}),`
@@ -45,7 +45,7 @@ def dutton_maccio14(mass, redshift):
 
     a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * redshift**1.08)
     b = -0.097 + 0.024 * redshift
-    m0 = 1.e12
+    m0 = 1.0e12
 
     logc = a + b * np.log10(mass / m0)
     return 10**logc

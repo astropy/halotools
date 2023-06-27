@@ -11,18 +11,20 @@ import numpy as np
 from .biased_nfw_phase_space import BiasedNFWPhaseSpace
 
 
-__author__ = ('Andrew Hearin', )
-__all__ = ('SFRBiasedNFWPhaseSpace', )
+__author__ = ("Andrew Hearin",)
+__all__ = ("SFRBiasedNFWPhaseSpace",)
 
 
-missing_quiescent_key_msg = ("The `SFRBiasedNFWPhaseSpace` class "
+missing_quiescent_key_msg = (
+    "The `SFRBiasedNFWPhaseSpace` class "
     "can only be used to make mocks \nin concert "
     "with some other component model that is responsible for \nmodeling an"
-    "``quiescent`` property of the ``galaxy_table``.\n")
+    "``quiescent`` property of the ``galaxy_table``.\n"
+)
 
 
 class SFRBiasedNFWPhaseSpace(BiasedNFWPhaseSpace):
-    r""" Model for the phase space distribution of galaxies
+    r"""Model for the phase space distribution of galaxies
     in isotropic Jeans equilibrium in an NFW halo profile,
     based on Navarro, Frenk and White (1995),
     where the concentration of the tracers is permitted to differ from the
@@ -145,21 +147,28 @@ class SFRBiasedNFWPhaseSpace(BiasedNFWPhaseSpace):
         BiasedNFWPhaseSpace.__init__(self, **kwargs)
 
     def _initialize_conc_bias_param_dict(self, **kwargs):
-        r""" Set up the appropriate number of keys in the parameter dictionary
+        r"""Set up the appropriate number of keys in the parameter dictionary
         and give the keys standardized names.
         """
 
-        if 'conc_gal_bias_logM_abscissa' in list(kwargs.keys()):
+        if "conc_gal_bias_logM_abscissa" in list(kwargs.keys()):
             _conc_bias_logM_abscissa = np.atleast_1d(
-                kwargs.get('conc_gal_bias_logM_abscissa')).astype('f4')
+                kwargs.get("conc_gal_bias_logM_abscissa")
+            ).astype("f4")
 
-            d_q = ({'quiescent_conc_gal_bias_param'+str(i): 1.
-                for i in range(len(_conc_bias_logM_abscissa))})
-            d_sf = ({'star_forming_conc_gal_bias_param'+str(i): 1.
-                for i in range(len(_conc_bias_logM_abscissa))})
+            d_q = {
+                "quiescent_conc_gal_bias_param" + str(i): 1.0
+                for i in range(len(_conc_bias_logM_abscissa))
+            }
+            d_sf = {
+                "star_forming_conc_gal_bias_param" + str(i): 1.0
+                for i in range(len(_conc_bias_logM_abscissa))
+            }
 
-            d_abscissa = ({'conc_gal_bias_logM_abscissa_param'+str(i): float(logM)
-                for i, logM in enumerate(_conc_bias_logM_abscissa)})
+            d_abscissa = {
+                "conc_gal_bias_logM_abscissa_param" + str(i): float(logM)
+                for i, logM in enumerate(_conc_bias_logM_abscissa)
+            }
             self._num_conc_bias_params = len(_conc_bias_logM_abscissa)
 
             d = {}
@@ -169,10 +178,10 @@ class SFRBiasedNFWPhaseSpace(BiasedNFWPhaseSpace):
             return d
 
         else:
-            return {'quiescent_conc_gal_bias': 1., 'star_forming_conc_gal_bias': 1.}
+            return {"quiescent_conc_gal_bias": 1.0, "star_forming_conc_gal_bias": 1.0}
 
     def calculate_conc_gal_bias(self, seed=None, **kwargs):
-        r""" Calculate the ratio of the galaxy concentration to the halo concentration,
+        r"""Calculate the ratio of the galaxy concentration to the halo concentration,
         :math:`c_{\rm gal}/c_{\rm halo}`.
 
         Parameters
@@ -211,50 +220,60 @@ class SFRBiasedNFWPhaseSpace(BiasedNFWPhaseSpace):
         >>> quiescent[::2] = True
         >>> conc_gal_bias = model.calculate_conc_gal_bias(prim_haloprop=mass, quiescent=quiescent)
         """
-        if 'table' in list(kwargs.keys()):
-            table = kwargs['table']
+        if "table" in list(kwargs.keys()):
+            table = kwargs["table"]
             mass = table[self.prim_haloprop_key]
             try:
-                quiescent = table['quiescent']
+                quiescent = table["quiescent"]
             except KeyError:
                 raise KeyError(missing_quiescent_key_msg)
-        elif 'prim_haloprop' in list(kwargs.keys()):
-            mass = np.atleast_1d(kwargs['prim_haloprop']).astype('f4')
-            quiescent = np.atleast_1d(kwargs['quiescent']).astype(bool)
+        elif "prim_haloprop" in list(kwargs.keys()):
+            mass = np.atleast_1d(kwargs["prim_haloprop"]).astype("f4")
+            quiescent = np.atleast_1d(kwargs["quiescent"]).astype(bool)
             if len(quiescent) == 1:
                 quiescent = (np.zeros_like(mass) + quiescent[0]).astype(bool)
         else:
-            msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
-                "to the ``assign_conc_gal_bias`` function of the ``BiasedNFWPhaseSpace`` class.\n")
+            msg = (
+                "\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
+                "to the ``assign_conc_gal_bias`` function of the ``BiasedNFWPhaseSpace`` class.\n"
+            )
             raise KeyError(msg)
 
-        if 'conc_gal_bias_logM_abscissa_param0' in self.param_dict.keys():
-            abscissa_keys = list('conc_gal_bias_logM_abscissa_param'+str(i)
-                for i in range(self._num_conc_bias_params))
+        if "conc_gal_bias_logM_abscissa_param0" in self.param_dict.keys():
+            abscissa_keys = list(
+                "conc_gal_bias_logM_abscissa_param" + str(i)
+                for i in range(self._num_conc_bias_params)
+            )
             abscissa = [self.param_dict[key] for key in abscissa_keys]
 
-            q_ordinates_keys = list('quiescent_conc_gal_bias_param'+str(i)
-                for i in range(self._num_conc_bias_params))
+            q_ordinates_keys = list(
+                "quiescent_conc_gal_bias_param" + str(i)
+                for i in range(self._num_conc_bias_params)
+            )
             q_ordinates = [self.param_dict[key] for key in q_ordinates_keys]
 
-            sf_ordinates_keys = list('star_forming_conc_gal_bias_param'+str(i)
-                for i in range(self._num_conc_bias_params))
+            sf_ordinates_keys = list(
+                "star_forming_conc_gal_bias_param" + str(i)
+                for i in range(self._num_conc_bias_params)
+            )
             sf_ordinates = [self.param_dict[key] for key in sf_ordinates_keys]
 
             result = np.zeros_like(mass)
-            result[quiescent] = np.interp(np.log10(mass[quiescent]),
-                abscissa, q_ordinates)
-            result[~quiescent] = np.interp(np.log10(mass[~quiescent]),
-                abscissa, sf_ordinates)
+            result[quiescent] = np.interp(
+                np.log10(mass[quiescent]), abscissa, q_ordinates
+            )
+            result[~quiescent] = np.interp(
+                np.log10(mass[~quiescent]), abscissa, sf_ordinates
+            )
         else:
             result = np.zeros_like(mass)
-            result[quiescent] = self.param_dict['quiescent_conc_gal_bias']
-            result[~quiescent] = self.param_dict['star_forming_conc_gal_bias']
+            result[quiescent] = self.param_dict["quiescent_conc_gal_bias"]
+            result[~quiescent] = self.param_dict["star_forming_conc_gal_bias"]
 
-        if 'table' in list(kwargs.keys()):
-            table['conc_gal_bias'][:] = result
-            halo_conc = table['conc_NFWmodel']
+        if "table" in list(kwargs.keys()):
+            table["conc_gal_bias"][:] = result
+            halo_conc = table["conc_NFWmodel"]
             gal_conc = self._clipped_galaxy_concentration(halo_conc, result)
-            table['conc_galaxy'][:] = gal_conc
+            table["conc_galaxy"][:] = gal_conc
         else:
             return result
