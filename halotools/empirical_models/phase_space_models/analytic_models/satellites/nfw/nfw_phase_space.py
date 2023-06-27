@@ -1006,6 +1006,7 @@ def _relative_positions_and_velocities(x1, x2, period=None, **kwargs):
     try:
         v1 = kwargs["v1"]
         v2 = kwargs["v2"]
-        return xrel, s * (v1 - v2)
+        s_v = _sign_pbc(v1, v2, period=period, equality_fill_val=1.0)
+        return xrel, s_v * np.abs(v1 - v2)
     except KeyError:
         return xrel
