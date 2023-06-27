@@ -6,19 +6,17 @@ from scipy.integrate import quad as quad_integration
 from .mass_profile import _g_integral
 
 
-__all__ = ('dimensionless_radial_velocity_dispersion', )
+__all__ = ("dimensionless_radial_velocity_dispersion",)
 
 
 def _jeans_integrand_term1(y):
-    r"""
-    """
-    return np.log(1+y)/(y**3*(1+y)**2)
+    r""" """
+    return np.log(1 + y) / (y**3 * (1 + y) ** 2)
 
 
 def _jeans_integrand_term2(y):
-    r"""
-    """
-    return 1/(y**2*(1+y)**3)
+    r""" """
+    return 1 / (y**2 * (1 + y) ** 3)
 
 
 def dimensionless_radial_velocity_dispersion(scaled_radius, *conc):
@@ -49,15 +47,17 @@ def dimensionless_radial_velocity_dispersion(scaled_radius, *conc):
     x = np.atleast_1d(scaled_radius).astype(np.float64)
     result = np.zeros_like(x)
 
-    prefactor = conc*(conc*x)*(1. + conc*x)**2/_g_integral(conc)
+    prefactor = conc * (conc * x) * (1.0 + conc * x) ** 2 / _g_integral(conc)
 
-    lower_limit = conc*x
+    lower_limit = conc * x
     upper_limit = float("inf")
     for i in range(len(x)):
-        term1, _ = quad_integration(_jeans_integrand_term1,
-            lower_limit[i], upper_limit, epsrel=1e-5)
-        term2, _ = quad_integration(_jeans_integrand_term2,
-            lower_limit[i], upper_limit, epsrel=1e-5)
+        term1, _ = quad_integration(
+            _jeans_integrand_term1, lower_limit[i], upper_limit, epsrel=1e-5
+        )
+        term2, _ = quad_integration(
+            _jeans_integrand_term2, lower_limit[i], upper_limit, epsrel=1e-5
+        )
         result[i] = term1 - term2
 
-    return np.sqrt(result*prefactor)
+    return np.sqrt(result * prefactor)
