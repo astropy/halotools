@@ -568,6 +568,35 @@ def relative_positions_and_velocities(x1, x2, period=None, **kwargs):
     try:
         v1 = kwargs["v1"]
         v2 = kwargs["v2"]
-        return xrel, s * (v1 - v2)
+        s_v = _sign_pbc(v1, v2, period=period, equality_fill_val=1.0)
+        return xrel, s_v * np.abs(v1 - v2)
     except KeyError:
         return xrel
+
+
+def _sign_pbc(x1, x2, period=None, equality_fill_val=0.0, return_pbc_correction=False):
+    x1 = np.atleast_1d(x1)
+    x2 = np.atleast_1d(x2)
+    result = np.sign(x1 - x2)
+
+    if period is not None:
+        try:
+            assert np.all(x1 >= 0)
+            assert np.all(x2 >= 0)
+            assert np.all(x1 < period)
+            assert np.all(x2 < period)
+        except AssertionError:
+            msg = "If period is not None, all values of x and y must be between [0, period)"
+            raise ValueError(msg)
+
+        d = np.abs(x1 - x2)
+        pbc_correction = np.sign(period / 2.0 - d)
+        result = pbc_correction * result
+
+    if equality_fill_val != 0:
+        result = np.where(result == 0, equality_fill_val, result)
+
+    if return_pbc_correction:
+        return result, pbc_correction
+    else:
+        return result
