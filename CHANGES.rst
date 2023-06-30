@@ -4,6 +4,16 @@
 - Add MBK10 model of non-Poisson satellite occupation statistics
 
 
+0.8.2 (2023-09-30)
+------------------
+
+- Add non-Poissonian occupation statistics for satellites (https://github.com/astropy/halotools/pull/1053)
+
+- Fix bug in little h convention in Leauthaud+11 HOD model (https://github.com/astropy/halotools/pull/1063)
+
+- Fix bug in PBC handling of return_xyz_formatted_array convenience function (https://github.com/astropy/halotools/pull/1066)
+
+
 0.8.1 (2022-09-28)
 ------------------
 
