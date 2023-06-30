@@ -1,17 +1,14 @@
 """
 """
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from astropy.table import Table
 
-from .nfw_profile import NFWProfile
-from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_kernel
-
-from ...monte_carlo_helpers import MonteCarloGalProf
-
 from ..... import model_defaults
-
+from ...monte_carlo_helpers import MonteCarloGalProf
+from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_kernel
+from .nfw_profile import NFWProfile
 
 __author__ = ["Andrew Hearin"]
 __all__ = ["NFWPhaseSpace"]
@@ -885,6 +882,10 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             Keys are 'x', 'y', 'z', 'vx', 'vy', 'vz', 'radial_position', 'radial_velocity'.
             Length units in Mpc/h, velocity units in km/s.
 
+            Sign convention on the returned `radial_velocity` column is such that
+            negative (positive) values correspond to
+            satellites moving radially inward (outward)
+
         Examples
         ---------
         >>> nfw = NFWPhaseSpace()
@@ -996,6 +997,8 @@ def _sign_pbc(x1, x2, period=None, equality_fill_val=0.0, return_pbc_correction=
 
 
 def _relative_positions_and_velocities(x1, x2, period=None, **kwargs):
+    """Sign convention on the returned velocity is such that
+    negative (positive) values correspond to approaching (receding) objects"""
     s = _sign_pbc(x1, x2, period=period, equality_fill_val=1.0)
     absd = np.abs(x1 - x2)
     if period is None:
