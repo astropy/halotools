@@ -1,4 +1,4 @@
-0.8.2 (unreleased)
+0.8.2 (2023-06-30)
 ------------------
 
 - Add non-Poissonian occupation statistics for satellites (https://github.com/astropy/halotools/pull/1053)
