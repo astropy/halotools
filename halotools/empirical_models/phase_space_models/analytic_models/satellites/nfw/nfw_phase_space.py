@@ -1,17 +1,14 @@
 """
 """
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from astropy.table import Table
 
-from .nfw_profile import NFWProfile
-from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_kernel
-
-from ...monte_carlo_helpers import MonteCarloGalProf
-
 from ..... import model_defaults
-
+from ...monte_carlo_helpers import MonteCarloGalProf
+from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_kernel
+from .nfw_profile import NFWProfile
 
 __author__ = ["Andrew Hearin"]
 __all__ = ["NFWPhaseSpace"]
@@ -884,6 +881,10 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             phase space distribution.
             Keys are 'x', 'y', 'z', 'vx', 'vy', 'vz', 'radial_position', 'radial_velocity'.
             Length units in Mpc/h, velocity units in km/s.
+
+            Sign convention on the returned `radial_velocity` column is such that
+            negative (positive) values correspond to
+            satellites moving radially inward (outward)
 
         Examples
         ---------
