@@ -2,13 +2,13 @@
 """
 from __future__ import absolute_import, division, print_function
 
-from unittest import TestCase
 import os
 import shutil
+from unittest import TestCase
 
 from astropy.config.paths import _find_home
-from astropy.tests.helper import pytest
 from astropy.table import Table
+from astropy.tests.helper import pytest
 
 try:
     import h5py
@@ -19,17 +19,16 @@ except ImportError:
 
 import numpy as np
 
-from . import helper_functions
-
+from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
+from ...utils.python_string_comparisons import (
+    _passively_decode_string,
+    compare_strings_py23_safe,
+)
 from ..cached_halo_catalog import CachedHaloCatalog
+from ..download_manager import DownloadManager
 from ..halo_table_cache import HaloTableCache
 from ..ptcl_table_cache import PtclTableCache
-from ..download_manager import DownloadManager
-from ...utils.python_string_comparisons import (
-    compare_strings_py23_safe,
-    _passively_decode_string,
-)
-from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
+from . import helper_functions
 
 # Determine whether the machine is mine
 # This will be used to select tests whose
@@ -354,7 +353,6 @@ class TestCachedHaloCatalog(TestCase):
 
     @pytest.mark.skipif("not APH_MACHINE")
     def test_relocate_simulation_data(self):
-
         dman = DownloadManager()
         cache = HaloTableCache()
 
@@ -495,7 +493,6 @@ class TestCachedHaloCatalog(TestCase):
     @pytest.mark.skipif("not HAS_H5PY")
     @pytest.mark.skipif("not APH_MACHINE")
     def test_user_supplied_ptcl_consistency(self):
-
         from ..user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
         halocat = CachedHaloCatalog()
