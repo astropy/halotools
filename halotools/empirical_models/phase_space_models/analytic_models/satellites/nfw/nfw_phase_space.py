@@ -997,6 +997,8 @@ def _sign_pbc(x1, x2, period=None, equality_fill_val=0.0, return_pbc_correction=
 
 
 def _relative_positions_and_velocities(x1, x2, period=None, **kwargs):
+    """Sign convention on the returned velocity is such that
+    negative (positive) values correspond to approaching (receding) objects"""
     s = _sign_pbc(x1, x2, period=period, equality_fill_val=1.0)
     absd = np.abs(x1 - x2)
     if period is None:
