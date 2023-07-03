@@ -1,4 +1,4 @@
-""" Module containing the `~halotools.mock_observables.npairs_3d` function
+r""" Module containing the `~halotools.mock_observables.npairs_3d` function
 used to count pairs as a function of separation.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -6,37 +6,33 @@ import numpy as np
 import multiprocessing
 from functools import partial
 
-from .npairs_3d import _npairs_3d_process_args
+from .npairs_xy_z import _npairs_xy_z_process_args
 from .mesh_helpers import _set_approximate_cell_sizes, _cell1_parallelization_indices
 from .rectangular_mesh import RectangularDoubleMesh
 
-from .marked_cpairs import marked_npairs_3d_engine
+from .marked_cpairs import positional_marked_npairs_xy_z_engine
 
 from ...custom_exceptions import HalotoolsError
 
 __author__ = ('Duncan Campbell', 'Andrew Hearin')
 
 
-__all__ = ('marked_npairs_3d', )
+__all__ = ('positional_marked_npairs_xy_z', )
 
 
-# cbx_aph: weight_function_id is not optional. However moving it to be a
-# required arg is a breaking change.
-def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
-                  period=None, weights1=None, weights2=None, num_threads=1,
+def positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins,
+                  period=None, weights1=None, weights2=None,
+                  weight_func_id=0, verbose=False, num_threads=1,
                   approx_cell1_size=None, approx_cell2_size=None):
-    """
-    Calculate the weighted number of pairs with separations less than or equal to
-    the input ``rbins``, :math:`W(<r)`.
+    r"""
+    Calculate the number of weighted pairs with separations greater than
+    or equal to :math:`r_{\perp}` and :math:`r_{\parallel}`, :math:`W(>r_{\perp},>r_{\parallel})`.
+
+    :math:`r_{\perp}` and :math:`r_{\parallel}` are defined wrt the z-direction.
 
     The weight given to each pair is determined by the weights for a pair,
     :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated
-    by the ``weight_func_id`` parameter, :math:`f(w_1,w_2)`.
-
-    Note that if sample1 == sample2 that the `marked_npairs` function double-counts pairs.
-
-    Note that this does not count the number of pairs *between* the bins, but rather the
-    total number with separation smaller than each bin.
+    by the ``wfunc`` parameter, :math:`f(w_1,w_2)`.
 
     Parameters
     ----------
@@ -48,18 +44,19 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
         format accepted by the ``sample1`` and ``sample2`` arguments.
         Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    sample2 : array_like
+    sample2 : array_like, optional
         Numpy array of shape (Npts2, 3) containing 3-D positions of points.
         Should be identical to sample1 for cases of auto-sample pair counts.
 
-    rbins : array_like
-        numpy array of length *Nrbins+1* defining the boundaries of bins in which
+    rp_bins : array_like
+        array of boundaries defining the radial bins perpendicular to the LOS in which
         pairs are counted.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
-    weight_func_id : int, optional
-        weighting function integer ID. Each weighting function requires a specific
-        number of weights per point, *N_weights*.  See the Notes for a description of
-        available weighting functions.
+    pi_bins : array_like
+        array of boundaries defining the p radial bins parallel to the LOS in which
+        pairs are counted.
+        Length units are comoving and assumed to be in Mpc/h, here and throughout Halotools.
 
     period : array_like, optional
         Length-3 sequence defining the periodic boundary conditions
@@ -75,6 +72,14 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
         Either a 1-D array of length *N1*, or a 2-D array of length *N1* x *N_weights*,
         containing the weights used for the weighted pair counts. If this parameter is
         None, the weights are set to np.ones(*(N1,N_weights)*).
+
+    wfunc : int, optional
+        weighting function integer ID. Each weighting function requires a specific
+        number of weights per point, *N_weights*.  See the Notes for a description of
+        available weighting functions.
+
+    verbose : Boolean, optional
+        If True, print out information and progress.
 
     num_threads : int, optional
         Number of threads to use in calculation, where parallelization is performed
@@ -100,7 +105,10 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
     Returns
     -------
     wN_pairs : numpy.array
-        array of length *Nrbins* containing the weighted number counts of pairs
+        Numpy array of shape (Nrp_bins, Nrpi_bins) containing the weighted number counts of pairs
+
+    N_pairs : numpy.array
+        Numpy array of shape (Nrp_bins, Nrpi_bins) containing the number counts of pairs
 
     Examples
     --------
@@ -109,7 +117,8 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
 
     >>> Npts1, Npts2, Lbox = 1000, 1000, 250.
     >>> period = [Lbox, Lbox, Lbox]
-    >>> rbins = np.logspace(-1, 1.5, 15)
+    >>> rp_bins = np.logspace(-1, 1.5, 15)
+    >>> pi_bins = [20, 40, 60]
 
     >>> x1 = np.random.uniform(0, Lbox, Npts1)
     >>> y1 = np.random.uniform(0, Lbox, Npts1)
@@ -124,27 +133,28 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
 
     >>> sample1 = np.vstack([x1, y1, z1]).T
     >>> sample2 = np.vstack([x2, y2, z2]).T
-    >>> weights1 = np.random.random(Npts1)
-    >>> weights2 = np.random.random(Npts2)
 
-    >>> result = marked_npairs_3d(sample1, sample2, rbins, period = period, weights1 = weights1, weights2 = weights2, weight_func_id=1)
+    We create a set of random weights:
 
-    Notes
-    -----
-    See the docstring of the `~halotools.mock_observables.marked_tpcf` function
-    for a description of the available marking functions that can be passed in
-    via the ``wfunc`` optional argument.
+    >>> weights1 = np.random.random((Npts1, 3))
+    >>> weights2 = np.random.random((Npts2, 1))
+
+    The weighted counts are calculated by:
+
+    >>> weighted_counts, counts = positional_marked_npairs_xy_z(sample1, sample2, rp_bins, pi_bins, period=period, weights1=weights1, weights2=weights2, weight_func_id=1)
 
     """
 
-    result = _npairs_3d_process_args(sample1, sample2, rbins, period,
+    # Process the inputs with the helper function
+    result = _npairs_xy_z_process_args(sample1, sample2, rp_bins, pi_bins, period,
             num_threads, approx_cell1_size, approx_cell2_size)
     x1in, y1in, z1in, x2in, y2in, z2in = result[0:6]
-    rbins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
+    rp_bins, pi_bins, period, num_threads, PBCs, approx_cell1_size, approx_cell2_size = result[6:]
     xperiod, yperiod, zperiod = period
 
-    rmax = np.max(rbins)
-    search_xlength, search_ylength, search_zlength = rmax, rmax, rmax
+    rp_max = np.max(rp_bins)
+    pi_max = np.max(pi_bins)
+    search_xlength, search_ylength, search_zlength = rp_max, rp_max, pi_max
 
     # Process the input weights and with the helper function
     weights1, weights2 = _marked_npairs_process_weights(sample1, sample2,
@@ -164,9 +174,9 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
         search_xlength, search_ylength, search_zlength, xperiod, yperiod, zperiod, PBCs)
 
     # Create a function object that has a single argument, for parallelization purposes
-    engine = partial(marked_npairs_3d_engine, double_mesh,
+    engine = partial(positional_marked_npairs_xy_z_engine, double_mesh,
         x1in, y1in, z1in, x2in, y2in, z2in,
-        weights1, weights2, weight_func_id, rbins)
+        weights1, weights2, weight_func_id, rp_bins, pi_bins)
 
     # Calculate the cell1 indices that will be looped over by the engine
     num_threads, cell1_tuples = _cell1_parallelization_indices(
@@ -174,24 +184,26 @@ def marked_npairs_3d(sample1, sample2, rbins, weight_func_id,
 
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        result = pool.map(engine, cell1_tuples)
-        counts = np.sum(np.array(result), axis=0)
+        result = np.array(pool.map(engine, cell1_tuples))
+        counts, marked_counts = result[:, 0, :, :], result[:, 1, :, :]
+        marked_counts = np.sum(np.array(marked_counts), axis=0)
+        counts = np.sum(np.array(counts), axis=0)
         pool.close()
     else:
-        counts = engine(cell1_tuples[0])
+        counts, marked_counts = engine(cell1_tuples[0])
 
-    return np.array(counts)
+    return np.array(marked_counts), np.array(counts)
 
 
 def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_func_id):
     """
     """
 
-    correct_num_weights = _func_signature_int_from_wfunc(weight_func_id)
+    correct_num_weights1, correct_num_weights2 = _func_signature_int_from_wfunc(weight_func_id)
     npts_sample1 = np.shape(sample1)[0]
     npts_sample2 = np.shape(sample2)[0]
-    correct_shape1 = (npts_sample1, correct_num_weights)
-    correct_shape2 = (npts_sample2, correct_num_weights)
+    correct_shape1 = (npts_sample1, correct_num_weights1)
+    correct_shape2 = (npts_sample2, correct_num_weights2)
 
     # Process the input weights1
     _converted_to_2d_from_1d = False
@@ -232,7 +244,7 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights1` is (%i, %i)\n")
             raise HalotoolsError(msg %
-                (npts_sample1, weight_func_id, correct_num_weights, npts_weights1, num_weights1))
+                (npts_sample1, weight_func_id, correct_num_weights1, npts_weights1, num_weights1))
 
     # Process the input weights2
     _converted_to_2d_from_1d = False
@@ -273,9 +285,9 @@ def _marked_npairs_process_weights(sample1, sample2, weights1, weights2, weight_
                    "For this value of `weight_func_id`, there should be %i weights \n"
                    "per point. The shape of your input `weights2` is (%i, %i)\n")
             raise HalotoolsError(msg %
-                (npts_sample2, weight_func_id, correct_num_weights, npts_weights2, num_weights2))
+                (npts_sample2, weight_func_id, correct_num_weights2, npts_weights2, num_weights2))
 
-    return weights1, weights2
+    return  weights1, weights2
 
 
 def _func_signature_int_from_wfunc(weight_func_id):
@@ -288,39 +300,17 @@ def _func_signature_int_from_wfunc(weight_func_id):
         raise ValueError(msg)
 
     if weight_func_id == 1:
-        return 1
-    elif weight_func_id == 2:
-        return 1
-    elif weight_func_id == 3:
-        return 2
-    elif weight_func_id == 4:
-        return 2
-    elif weight_func_id == 5:
-        return 2
-    elif weight_func_id == 6:
-        return 2
-    elif weight_func_id == 7:
-        return 2
-    elif weight_func_id == 8:
-        return 2
-    elif weight_func_id == 9:
-        return 2
-    elif weight_func_id == 10:
-        return 2
-    elif weight_func_id == 11:
-        return 2
-    elif weight_func_id == 12:
-        return 4
-    elif weight_func_id == 13:
-        return 4
-    elif weight_func_id == 14:
-        return 3
-    elif weight_func_id == 15:
-        return 3
-    elif weight_func_id == 16:
-        return 5
-    elif weight_func_id == 17:
-        return 5
+        return (3, 1)
+    if weight_func_id == 2:
+        return (3, 1)
+    if weight_func_id == 3:
+        return (3, 1)
+    if weight_func_id == 4:
+        return (3, 1)
+    if weight_func_id == 5:
+        return (3, 3)
+    if weight_func_id == 6:
+        return (3, 3)
     else:
         msg = ("The value ``weight_func_id`` = %i is not recognized")
         raise HalotoolsError(msg % weight_func_id)

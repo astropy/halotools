@@ -15,3 +15,4 @@ from .occupation_models import *
 from .smhm_models import *
 from .composite_models import *
 from .abunmatch import *
+from .ia_models import *

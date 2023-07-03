@@ -10,7 +10,7 @@ from astropy.config.paths import _find_home
 from ..pairs import xy_z_wnpairs as pure_python_weighted_pairs
 from ..marked_npairs_xy_z import marked_npairs_xy_z
 from ..npairs_xy_z import npairs_xy_z
-from ..marked_npairs_3d import _func_signature_int_from_wfunc
+from ..marked_npairs_xy_z import _func_signature_int_from_wfunc
 
 from ....custom_exceptions import HalotoolsError
 

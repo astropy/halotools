@@ -21,3 +21,4 @@ from .occupation_stats import hod_from_mock, get_haloprop_of_galaxies
 from .surface_density import *
 from .velocity_decomposition import *
 from .tensor_calculations import *
+from .ia_correlations import *
