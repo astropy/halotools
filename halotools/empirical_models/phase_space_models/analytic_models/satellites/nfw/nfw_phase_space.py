@@ -1,24 +1,21 @@
 """
 """
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from astropy.table import Table
 
-from .nfw_profile import NFWProfile
-from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_kernel
-
-from ...monte_carlo_helpers import MonteCarloGalProf
-
 from ..... import model_defaults
-
+from ...monte_carlo_helpers import MonteCarloGalProf
+from .kernels import unbiased_dimless_vrad_disp as unbiased_dimless_vrad_disp_kernel
+from .nfw_profile import NFWProfile
 
 __author__ = ["Andrew Hearin"]
 __all__ = ["NFWPhaseSpace"]
 
 
 class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
-    r""" Model for the phase space distribution of mass and/or galaxies
+    r"""Model for the phase space distribution of mass and/or galaxies
     in isotropic Jeans equilibrium in an NFW halo profile,
     based on Navarro, Frenk and White (1995),
     where the concentration of the galaxies is the same
@@ -83,8 +80,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         self._mock_generation_calling_sequence = ["assign_phase_space"]
 
     def _retrieve_prof_lookup_info(self, **kwargs):
-        r""" Retrieve the arrays defining the lookup table control points
-        """
+        r"""Retrieve the arrays defining the lookup table control points"""
         cmin, cmax = (
             model_defaults.min_permitted_conc,
             model_defaults.max_permitted_conc,
@@ -96,7 +92,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return [conc_arr]
 
     def assign_phase_space(self, table, seed=None):
-        r""" Primary method of the `NFWPhaseSpace` class
+        r"""Primary method of the `NFWPhaseSpace` class
         called during the mock-population sequence.
 
         Parameters
@@ -120,7 +116,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         MonteCarloGalProf.mc_vel(self, table=table, seed=seed)
 
     def conc_NFWmodel(self, *args, **kwargs):
-        r""" NFW concentration as a function of halo mass.
+        r"""NFW concentration as a function of halo mass.
 
         Parameters
         ----------
@@ -283,7 +279,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return NFWProfile.mass_density(self, radius, mass, conc)
 
     def cumulative_gal_PDF(self, scaled_radius, conc):
-        r""" Analogous to `cumulative_mass_PDF`, but for the satellite galaxy distribution
+        r"""Analogous to `cumulative_mass_PDF`, but for the satellite galaxy distribution
         instead of the host halo mass distribution.
 
         In `~halotools.empirical_models.NFWPhaseSpace` there is no distinction between the
@@ -404,7 +400,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return NFWProfile.enclosed_mass(self, radius, total_mass, conc)
 
     def virial_velocity(self, total_mass):
-        r""" The circular velocity evaluated at the halo boundary,
+        r"""The circular velocity evaluated at the halo boundary,
         :math:`V_{\rm vir} \equiv \sqrt{GM_{\rm halo}/R_{\rm halo}}`.
 
         Parameters
@@ -472,7 +468,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return NFWProfile.circular_velocity(self, radius, total_mass, conc)
 
     def vmax(self, total_mass, conc):
-        r""" Maximum circular velocity of the halo profile.
+        r"""Maximum circular velocity of the halo profile.
 
         Parameters
         ----------
@@ -630,7 +626,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         logrmax=model_defaults.default_lograd_max,
         Npts_radius_table=model_defaults.Npts_radius_table,
     ):
-        r""" Method used to create a lookup table of the spatial and velocity radial profiles.
+        r"""Method used to create a lookup table of the spatial and velocity radial profiles.
 
         Parameters
         ----------
@@ -650,7 +646,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         MonteCarloGalProf.build_lookup_tables(self, logrmin, logrmax, Npts_radius_table)
 
     def mc_unit_sphere(self, Npts, **kwargs):
-        r""" Returns Npts random points on the unit sphere.
+        r"""Returns Npts random points on the unit sphere.
 
         Parameters
         ----------
@@ -670,7 +666,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return MonteCarloGalProf.mc_unit_sphere(self, Npts, **kwargs)
 
     def mc_solid_sphere(self, *concentration_array, **kwargs):
-        r""" Method to generate random, three-dimensional, halo-centric positions of galaxies.
+        r"""Method to generate random, three-dimensional, halo-centric positions of galaxies.
 
         Parameters
         ----------
@@ -694,7 +690,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return MonteCarloGalProf.mc_solid_sphere(self, *concentration_array, **kwargs)
 
     def mc_halo_centric_pos(self, *concentration_array, **kwargs):
-        r""" Method to generate random, three-dimensional
+        r"""Method to generate random, three-dimensional
         halo-centric positions of galaxies.
 
         Parameters
@@ -730,7 +726,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         )
 
     def mc_pos(self, *concentration_array, **kwargs):
-        r""" Method to generate random, three-dimensional positions of galaxies.
+        r"""Method to generate random, three-dimensional positions of galaxies.
 
         Parameters
         ----------
@@ -776,7 +772,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         return MonteCarloGalProf.mc_pos(self, *concentration_array, **kwargs)
 
     def _vrad_disp_from_lookup(self, scaled_radius, *concentration_array, **kwargs):
-        r""" Method to generate Monte Carlo realizations of the profile model.
+        r"""Method to generate Monte Carlo realizations of the profile model.
 
         Parameters
         ----------
@@ -833,7 +829,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         )
 
     def mc_vel(self, table, seed=None):
-        r""" Method assigns a Monte Carlo realization of the Jeans velocity
+        r"""Method assigns a Monte Carlo realization of the Jeans velocity
         solution to the halos in the input ``table``.
 
         Parameters
@@ -853,7 +849,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
     def mc_generate_nfw_phase_space_points(
         self, Ngals=int(1e4), conc=5, mass=1e12, verbose=True, seed=None
     ):
-        r""" Return a Monte Carlo realization of points
+        r"""Return a Monte Carlo realization of points
         in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
         Parameters
@@ -885,6 +881,10 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
             phase space distribution.
             Keys are 'x', 'y', 'z', 'vx', 'vy', 'vz', 'radial_position', 'radial_velocity'.
             Length units in Mpc/h, velocity units in km/s.
+
+            Sign convention on the returned `radial_velocity` column is such that
+            negative (positive) values correspond to
+            satellites moving radially inward (outward)
 
         Examples
         ---------
@@ -933,7 +933,7 @@ class NFWPhaseSpace(NFWProfile, MonteCarloGalProf):
         x, y, z = MonteCarloGalProf.mc_halo_centric_pos(
             self, c, halo_radius=rvir, seed=seed
         )
-        r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+        r = np.sqrt(x**2 + y**2 + z**2)
         scaled_radius = r / rvir
 
         if seed is not None:
@@ -997,6 +997,8 @@ def _sign_pbc(x1, x2, period=None, equality_fill_val=0.0, return_pbc_correction=
 
 
 def _relative_positions_and_velocities(x1, x2, period=None, **kwargs):
+    """Sign convention on the returned velocity is such that
+    negative (positive) values correspond to approaching (receding) objects"""
     s = _sign_pbc(x1, x2, period=period, equality_fill_val=1.0)
     absd = np.abs(x1 - x2)
     if period is None:

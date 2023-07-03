@@ -3,16 +3,17 @@
 
 import os
 import shutil
-import numpy as np
-from astropy.config.paths import _find_home
-from astropy.tests.helper import pytest
-from astropy.table import Table
 from unittest import TestCase
 
+import numpy as np
+from astropy.config.paths import _find_home
+from astropy.table import Table
+from astropy.tests.helper import pytest
+
+from ...custom_exceptions import HalotoolsError
+from .. import sim_defaults
 from ..download_manager import DownloadManager
 from ..halo_table_cache import HaloTableCache
-from .. import sim_defaults
-from ...custom_exceptions import HalotoolsError
 
 # Determine whether the machine is mine
 # This will be used to select tests whose
@@ -31,13 +32,11 @@ __all__ = ("TestDownloadManager",)
 
 class TestDownloadManager(TestCase):
     def setUp(self):
-
         homedir = _find_home()
 
         self.downman = DownloadManager()
 
         def defensively_create_empty_dir(dirname):
-
             if os.path.isdir(dirname) is False:
                 os.mkdir(dirname)
             else:
@@ -143,7 +142,6 @@ class TestDownloadManager(TestCase):
 
     @pytest.mark.skipif("not APH_MACHINE")
     def test_ptcl_tables_available_for_download(self):
-
         file_list = self.downman._ptcl_tables_available_for_download(simname="bolshoi")
         assert len(file_list) == 1
         assert "hlist_1.00035.particles.halotools_v0p4.hdf5" == os.path.basename(
@@ -188,7 +186,6 @@ class TestDownloadManager(TestCase):
 
     @pytest.mark.skipif("not APH_MACHINE")
     def test_processed_halo_tables_available_for_download1(self):
-
         file_list = self.downman._processed_halo_tables_available_for_download(
             simname="bolshoi", halo_finder="rockstar"
         )
@@ -196,7 +193,6 @@ class TestDownloadManager(TestCase):
 
     @pytest.mark.skipif("not APH_MACHINE")
     def test_processed_halo_tables_available_for_download2(self):
-
         file_list = self.downman._processed_halo_tables_available_for_download(
             simname="bolshoi"
         )
@@ -204,7 +200,6 @@ class TestDownloadManager(TestCase):
 
     @pytest.mark.skipif("not APH_MACHINE")
     def test_processed_halo_tables_available_for_download3(self):
-
         file_list = self.downman._processed_halo_tables_available_for_download(
             halo_finder="bdm"
         )
@@ -350,7 +345,6 @@ class TestDownloadManager(TestCase):
 
     @classmethod
     def clear_APH_MACHINE_of_highz_file(self, delete_corresponding_halo_catalog=True):
-
         cache = HaloTableCache()
         matching_log_entries = cache.matching_log_entry_generator(
             simname="bolshoi",

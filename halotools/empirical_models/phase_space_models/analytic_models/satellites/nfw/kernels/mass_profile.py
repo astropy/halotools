@@ -2,11 +2,11 @@
 """
 import numpy as np
 
-__all__ = ('cumulative_mass_PDF', 'dimensionless_mass_density')
+__all__ = ("cumulative_mass_PDF", "dimensionless_mass_density")
 
 
 def _g_integral(x):
-    r""" Convenience function used to evaluate the profile.
+    r"""Convenience function used to evaluate the profile.
 
         :math:`g(x) \equiv \rm{ln}(1+x) - x / (1+x)`
 
@@ -25,7 +25,7 @@ def _g_integral(x):
     >>> result = _g_integral(np.logspace(-1, 1, Npts))
     """
     x = np.atleast_1d(x).astype(np.float64)
-    return np.log(1.0+x) - (x/(1.0+x))
+    return np.log(1.0 + x) - (x / (1.0 + x))
 
 
 def cumulative_mass_PDF(scaled_radius, conc):
@@ -68,7 +68,7 @@ def cumulative_mass_PDF(scaled_radius, conc):
     """
     scaled_radius = np.where(scaled_radius > 1, 1, scaled_radius)
     scaled_radius = np.where(scaled_radius < 0, 0, scaled_radius)
-    return _g_integral(conc*scaled_radius) / _g_integral(conc)
+    return _g_integral(conc * scaled_radius) / _g_integral(conc)
 
 
 def dimensionless_mass_density(scaled_radius, conc):
@@ -112,7 +112,6 @@ def dimensionless_mass_density(scaled_radius, conc):
         halo mass definition, cosmology, and redshift.
         Result is an array of the dimension as the input ``scaled_radius``.
     """
-    numerator = conc**3/(3.*_g_integral(conc))
-    denominator = conc*scaled_radius*(1 + conc*scaled_radius)**2
-    return numerator/denominator
-
+    numerator = conc**3 / (3.0 * _g_integral(conc))
+    denominator = conc * scaled_radius * (1 + conc * scaled_radius) ** 2
+    return numerator / denominator

@@ -29,7 +29,7 @@ lookup_table_performance_warning = (
 
 
 class BiasedNFWPhaseSpace(NFWPhaseSpace):
-    r""" Model for the phase space distribution of galaxies
+    r"""Model for the phase space distribution of galaxies
     in isotropic Jeans equilibrium in an NFW halo profile,
     based on Navarro, Frenk and White (1995),
     where the concentration of the tracers is permitted to differ from the
@@ -176,7 +176,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         self.param_dict = self._initialize_conc_bias_param_dict(**kwargs)
 
     def _initialize_conc_bias_param_dict(self, **kwargs):
-        r""" Set up the appropriate number of keys in the parameter dictionary
+        r"""Set up the appropriate number of keys in the parameter dictionary
         and give the keys standardized names.
         """
         if "conc_gal_bias_logM_abscissa" in list(kwargs.keys()):
@@ -200,8 +200,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
             return {"conc_gal_bias": 1.0}
 
     def _retrieve_prof_lookup_info(self, **kwargs):
-        r""" Retrieve the arrays defining the lookup table control points
-        """
+        r"""Retrieve the arrays defining the lookup table control points"""
         cmin, cmax = (
             model_defaults.min_permitted_conc,
             model_defaults.max_permitted_conc,
@@ -228,7 +227,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         return [conc_arr, conc_gal_bias_arr]
 
     def conc_NFWmodel(self, **kwargs):
-        r""" NFW concentration as a function of halo mass.
+        r"""NFW concentration as a function of halo mass.
 
         Parameters
         ----------
@@ -261,7 +260,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         return NFWPhaseSpace.conc_NFWmodel(self, **kwargs)
 
     def _clipped_galaxy_concentration(self, halo_conc, conc_gal_bias):
-        r""" Private method used to ensure that biased concentrations are still
+        r"""Private method used to ensure that biased concentrations are still
         bound by the min/max bounds permitted by the lookup tables.
         """
         gal_conc = conc_gal_bias * halo_conc
@@ -279,7 +278,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         return gal_conc
 
     def cumulative_gal_PDF(self, scaled_radius, halo_conc, conc_gal_bias):
-        r""" Analogous to `cumulative_mass_PDF`, but for the satellite galaxy distribution
+        r"""Analogous to `cumulative_mass_PDF`, but for the satellite galaxy distribution
         instead of the host halo mass distribution.
 
         Parameters
@@ -437,7 +436,7 @@ class BiasedNFWPhaseSpace(NFWPhaseSpace):
         return dimensionless_velocities * virial_velocities
 
     def calculate_conc_gal_bias(self, seed=None, **kwargs):
-        r""" Calculate the ratio of the galaxy concentration to the halo concentration,
+        r"""Calculate the ratio of the galaxy concentration to the halo concentration,
         :math:`c_{\rm gal}/c_{\rm halo}`.
 
         Parameters
