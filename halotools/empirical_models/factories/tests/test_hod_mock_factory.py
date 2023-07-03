@@ -1,24 +1,25 @@
 """
 """
 from __future__ import absolute_import, division, print_function
-import pytest
-from astropy.config.paths import _find_home
-import numpy as np
+
 from copy import deepcopy
 
+import numpy as np
+import pytest
+from astropy.config.paths import _find_home
+
+from ....custom_exceptions import HalotoolsError
+from ....empirical_models import (
+    AssembiasZheng07Cens,
+    AssembiasZheng07Sats,
+    HodModelFactory,
+    NFWPhaseSpace,
+    TrivialPhaseSpace,
+)
 from ....mock_observables import return_xyz_formatted_array, tpcf_one_two_halo_decomp
-
-
-from ....empirical_models import AssembiasZheng07Cens
-from ....empirical_models import TrivialPhaseSpace
-from ....empirical_models import AssembiasZheng07Sats
-from ....empirical_models import NFWPhaseSpace
-from ....empirical_models import HodModelFactory
-
-from ....sim_manager import FakeSim, CachedHaloCatalog
+from ....sim_manager import CachedHaloCatalog, FakeSim
 from ....sim_manager.fake_sim import FakeSimHalosNearBoundaries
 from ..prebuilt_model_factory import PrebuiltHodModelFactory
-from ....custom_exceptions import HalotoolsError
 
 # Determine whether the machine is mine
 # This will be used to select tests whose
@@ -54,7 +55,6 @@ def test_estimate_ngals1():
 
 
 def test_estimate_ngals2():
-
     model = PrebuiltHodModelFactory("tinker13")
     halocat = FakeSim(seed=fixed_seed)
     model.populate_mock(halocat, seed=fixed_seed)
@@ -235,7 +235,6 @@ def test_deterministic_mock_making():
 
 
 def test_zero_satellite_edge_case():
-
     model = PrebuiltHodModelFactory("zheng07", threshold=-18)
     model.param_dict["logM0"] = 20
 
@@ -244,7 +243,6 @@ def test_zero_satellite_edge_case():
 
 
 def test_zero_halo_edge_case():
-
     model = PrebuiltHodModelFactory("zheng07", threshold=-18)
     model.param_dict["logM0"] = 20
 
