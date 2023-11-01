@@ -33,6 +33,11 @@ jobs:
             python: 3.12
             toxenv: 'py312-test-alldeps'
 
+          - name: MacOs - Python 3.12 with all optional dependencies
+            os: macos-latest
+            python: 3.12
+            toxenv: 'py312-test-alldeps'
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
