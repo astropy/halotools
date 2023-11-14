@@ -1,3 +1,0 @@
-misspellings = (
-    ('separation', 'seperation'),
-    )

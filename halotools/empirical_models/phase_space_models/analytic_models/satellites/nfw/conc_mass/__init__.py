@@ -1,2 +1,0 @@
-from .dutton_maccio14 import dutton_maccio14
-from .direct_from_halo_catalog import direct_from_halo_catalog
