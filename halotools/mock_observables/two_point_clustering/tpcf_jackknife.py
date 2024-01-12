@@ -413,9 +413,9 @@ def _enclose_in_box(data1, data2, data3):
     xmin = np.min([np.min(x1), np.min(x2), np.min(x3)])
     ymin = np.min([np.min(y1), np.min(y2), np.min(y3)])
     zmin = np.min([np.min(z1), np.min(z2), np.min(z3)])
-    xmax = np.max([np.max(x1), np.max(x2), np.min(x3)])
-    ymax = np.max([np.max(y1), np.max(y2), np.min(y3)])
-    zmax = np.max([np.max(z1), np.max(z2), np.min(z3)])
+    xmax = np.max([np.max(x1), np.max(x2), np.max(x3)])
+    ymax = np.max([np.max(y1), np.max(y2), np.max(y3)])
+    zmax = np.max([np.max(z1), np.max(z2), np.max(z3)])
 
     xyzmin = np.min([xmin, ymin, zmin])
     xyzmax = np.max([xmax, ymax, zmax]) - xyzmin
