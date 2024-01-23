@@ -125,7 +125,7 @@ Now we change integration variables :math:`\tilde{r}'\rightarrow c\tilde{r}'=y`:
 
 .. math::
 
-	P_{\rm NFW}(<\tilde{r}) = \frac{\int_{0}^{c\tilde{r}}dy\frac{y}{(1 + y)^{2}}}{\int_{0}^{1}dy\frac{y}{(1 + y)^{2}}}
+	P_{\rm NFW}(<\tilde{r}) = \frac{\int_{0}^{c\tilde{r}}dy\frac{y}{(1 + y)^{2}}}{\int_{0}^{c}dy\frac{y}{(1 + y)^{2}}}
 
 and use the definition of :math:`g(x) \equiv {\rm ln}(1+x) - x/(1+x) = \int_{0}^{x}dy\frac{y}{(1+y)^{2}}` to write the above expression as
 
