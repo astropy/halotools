@@ -1,4 +1,4 @@
-name: CI Tests
+name: Cron Tests
 
 on:
   push:
