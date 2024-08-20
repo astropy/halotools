@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import kstest
 from scipy.interpolate import interp1d
 import pytest
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 
 from .. import Cacciato09Cens, Cacciato09Sats
 from ....custom_exceptions import HalotoolsError
@@ -486,7 +486,7 @@ def test_Cacciato09_gap():
             0.015821,
         ]
     )
-    cdf_more = np.concatenate([[0], cumtrapz(pdf_more, x=gap_more)])
+    cdf_more = np.concatenate([[0], cumulative_trapezoid(pdf_more, x=gap_more)])
     cdf_more = cdf_more / cdf_more[-1]
     cdf_more = interp1d(gap_more, cdf_more)
 
