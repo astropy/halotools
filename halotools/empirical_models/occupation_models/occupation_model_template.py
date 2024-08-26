@@ -135,6 +135,18 @@ class OccupationComponent(object):
             Integer array giving the number of galaxies in each of the input table.
         """
         first_occupation_moment = self.mean_occupation(**kwargs)
+
+        if np.any(first_occupation_moment < 0):
+            if np.all(first_occupation_moment >= -1e-6):
+                first_occupation_moment = np.maximum(
+                    first_occupation_moment, 0)
+            else:
+                msg = (
+                    "\nThe mean occupation for at least one halo was negative. \n"
+                    "Ensure that the mean occupation is always non-negative. \n"
+                )
+                raise HalotoolsError(msg)
+
         if self._upper_occupation_bound == 1:
             return self._nearest_integer_distribution(
                 first_occupation_moment, seed=seed, **kwargs

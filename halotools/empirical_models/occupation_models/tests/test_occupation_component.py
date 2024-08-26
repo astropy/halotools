@@ -96,7 +96,7 @@ def test_nonstandard_upper_occupation_bound1():
             OccupationComponent.__init__(self, **constructor_kwargs)
 
         def mean_occupation(self, **kwargs):
-            return None
+            return 0.5
 
     model = MyOccupationComponent()
     with pytest.raises(HalotoolsError) as err:
