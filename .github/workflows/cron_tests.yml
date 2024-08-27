@@ -1,13 +1,7 @@
 name: Cron Tests
 
 on:
-  push:
-    branches:
-    - master
-  #  tags: # run CI if specific tags are pushed
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch: null
   schedule:
     # Runs "First of every month at 3:15am Central"
     - cron: '15 8 1 * *'
