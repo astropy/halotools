@@ -1,5 +1,5 @@
 astropy
-numpy
+numpy<2
 scipy
 requests
 beautifulsoup4
