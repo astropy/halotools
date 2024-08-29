@@ -116,7 +116,7 @@ Although the **sim_manager** provides an object-oriented framework for creating 
 Project status
 --------------
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.8, is now available on pip and conda-forge. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
+Halotools is a fully open-source package with contributing scientists spread across many universities. The latest stable release of the package, v0.9, is now available on pip and conda-forge. You can also install the development version of the package by cloning the master branch on GitHub and locally building the source code, as described in the installation instructions.
 
 
 ## Asking questions and staying up-to-date
