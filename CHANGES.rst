@@ -1,4 +1,4 @@
-0.9 (unreleased)
+0.9.0 (2024-09-04)
 ------------------
  
  - Add models and mock observations of intrinsic alignments (https://github.com/astropy/halotools/pull/1056)
