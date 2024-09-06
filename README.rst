@@ -151,4 +151,3 @@ License
 -------
 
 Halotools is licensed by Argonne National Lab under a 3-clause BSD style license - see the licenses/LICENSE.rst file.
-
