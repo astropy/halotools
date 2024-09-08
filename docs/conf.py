@@ -2,9 +2,9 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 #
 
-import datetime
 import os
 import sys
+from datetime import datetime, timezone
 from importlib import metadata
 
 try:
@@ -33,7 +33,7 @@ exclude_patterns.append("_templates")
 
 project = "halotools"
 author = "Andrew Hearin"
-copyright = f"2017–{datetime.now(tz=datetime.timezone.utc).year}, " + author
+copyright = f"2017–{datetime.now(tz=timezone.utc).year}, " + author
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
