@@ -10,6 +10,12 @@ requires = ["setuptools>=42.0.0",
 build-backend = 'setuptools.build_meta'
 
 
+[tool.setuptools]
+include-package-data = true
+package-dir = {halotools = "halotools"}
+package-data = {halotools = ["data/*", "*/data/*", "*/*/data/*", "*/*/*/data/*", "*/*/*/*/data/*", "*/*/*/*/*/data/*", "*/*/*/*/*/*/data/*"]}
+
+
 [tool.coverage]
 
     [tool.coverage.run]
