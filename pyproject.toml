@@ -1,12 +1,55 @@
-[build-system]
+[project]
+name = "halotools"
+dynamic = ["version", "dependencies"]
+description = "Package designed to analyze N-body simulations and constrain models of cosmology and galaxy evolution"
+readme = "README.rst"
+authors = [
+    { name = "Andrew Hearin", email = "ahearin@anl.gov" }
+]
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.10"
 
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.optional-dependencies]
+test = [
+    "coverage[toml]",
+    "pytest>=7.0",
+    "pytest-astropy>=0.10",
+    "pytest-xdist",
+]
+docs = [
+    "sphinx-astropy",
+    "pytest>=7.0",
+    "matplotlib",
+]
+
+
+[tool.setuptools]
+include-package-data = true
+package-dir = {halotools = "halotools"}
+package-data = {halotools = ["data/*", "*/data/*", "*/*/data/*", "*/*/*/data/*", "*/*/*/*/data/*", "*/*/*/*/*/data/*", "*/*/*/*/*/*/data/*"]}
+license-files = ["licenses/*.rst"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["halotools", "docs"]
+astropy_header = true
+doctest_plus = "enabled"
+text_file_format = "rst"
+addopts = [
+    "--doctest-rst",
+]
+markers = ["slow", "installation_test"]
+
+[build-system]
 requires = ["setuptools>=42.0.0",
             "setuptools_scm",
             "wheel",
             "oldest-supported-numpy",
             "cython==3.0.2",
             "extension-helpers==1.*"]
-
 build-backend = 'setuptools.build_meta'
 
 
