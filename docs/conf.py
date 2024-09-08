@@ -2,9 +2,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 #
 
-import datetime
 import os
 import sys
+from datetime import datetime, timezone
+from importlib import metadata
 
 try:
     import sphinx_astropy
@@ -16,53 +17,30 @@ except ImportError:
             sys.path.insert(1, a_h_path)
 
 # Load all of the global Astropy configuration
-from sphinx_astropy.conf import *
-
-# Get configuration information from setup.cfg
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
-conf = ConfigParser()
-conf.read([os.path.join(os.path.dirname(__file__), "..", "setup.cfg")])
-setup_cfg = dict(conf.items("metadata"))
+from sphinx_astropy.conf.v2 import exclude_patterns
 
 # -- General configuration ----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-# needs_sphinx = '1.2'
-
-# To perform a Sphinx version check that needs to be more specific than
-# major.minor, call `check_sphinx_version("x.y.z")` here.
-check_sphinx_version("1.3.1")
+needs_sphinx = "3.0"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns.append("_templates")
 
-# This is added to the end of RST files - a good place to put substitutions to
-# be used globally.
-rst_epilog += """
-"""
 
 # -- Project information ------------------------------------------------------
 
-# This does not *have* to match the package name, but typically does
-project = setup_cfg["name"]
-author = setup_cfg["author"]
-copyright = "{0}, {1}".format(datetime.datetime.now().year, setup_cfg["author"])
+project = "halotools"
+author = "Andrew Hearin"
+copyright = f"2017–{datetime.now(tz=timezone.utc).year}, " + author
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-__import__(setup_cfg["name"])
-package = sys.modules[setup_cfg["name"]]
-
-# The short X.Y version.
-version = package.__version__.split("-", 1)[0]
-# The full version, including alpha/beta/rc tags.
-release = package.__version__
+release = metadata.version(project)
+version = ".".join(release.split(".")[:2])
 
 
 # -- Options for HTML output --------------------------------------------------
@@ -103,7 +81,7 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "{0} v{1}".format(project, release)
+html_title = f"{project} v{release}"
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = project + "doc"
@@ -128,16 +106,3 @@ latex_documents = [
 man_pages = [("index", project.lower(), project + " Documentation", [author], 1)]
 
 # -- Options for the edit_on_github extension ---------------------------------
-
-if eval(setup_cfg.get("edit_on_github")):
-    extensions += ["sphinx_astropy.ext.edit_on_github"]
-
-    versionmod = __import__(setup_cfg["name"] + ".version")
-    edit_on_github_project = setup_cfg["github_project"]
-    if versionmod.version.release:
-        edit_on_github_branch = "v" + versionmod.version.version
-    else:
-        edit_on_github_branch = "master"
-
-    edit_on_github_source_root = ""
-    edit_on_github_doc_root = "docs"
