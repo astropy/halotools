@@ -1,12 +1,22 @@
-[build-system]
+[project]
+name = "halotools"
+dynamic = ["version", "dependencies"]
+description = "Package designed to analyze N-body simulations and constrain models of cosmology and galaxy evolution"
+readme = "README.rst"
+authors = [
+    { name = "Andrew Hearin", email = "ahearin@anl.gov" }
+]
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.10"
 
+
+[build-system]
 requires = ["setuptools>=42.0.0",
             "setuptools_scm",
             "wheel",
             "oldest-supported-numpy",
             "cython==3.0.2",
             "extension-helpers==1.*"]
-
 build-backend = 'setuptools.build_meta'
 
 
