@@ -8,3 +8,42 @@ requires = ["setuptools>=42.0.0",
             "extension-helpers==1.*"]
 
 build-backend = 'setuptools.build_meta'
+
+
+[tool.coverage]
+
+    [tool.coverage.run]
+        omit = [
+            "halotools/_astropy_init*",
+            "halotools/__init__*",
+            "halotools/**/setup*",
+            "halotools/**/tests/*",
+            "halotools/extern/*",
+            "halotools/version*",
+            "halotools/conftest.py",
+            "halotools/*setup_package*",
+            "*/halotools/_astropy_init*",
+            "*/halotools/conftest.py",
+            "*/halotools/*setup_package*"
+        ]
+
+    [tool.coverage.report]
+        exclude_lines = [
+            # Have to re-enable the standard pragma
+            "pragma: no cover",
+            # Don't complain about packages we have installed
+            "except ImportError",
+            # Don't complain if tests don't hit defensive assertion code:
+            "raise AssertionError",
+            "raise NotImplementedError",
+            # Don't complain about script hooks
+            "'def main(.*):'",
+            # Ignore branches that don't pertain to this version of Python
+            "pragma: py{ignore_python_version}",
+            # Don't complain about IPython completion helper
+            "def _ipython_key_completions_",
+            # typing.TYPE_CHECKING is False at runtime
+            "if TYPE_CHECKING:",
+            # Ignore typing overloads
+            "@overload",
+        ]
