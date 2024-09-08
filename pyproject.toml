@@ -1,6 +1,6 @@
 [project]
 name = "halotools"
-dynamic = ["version", "dependencies"]
+dynamic = ["version"]
 description = "Package designed to analyze N-body simulations and constrain models of cosmology and galaxy evolution"
 readme = "README.rst"
 authors = [
