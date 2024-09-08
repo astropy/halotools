@@ -3,7 +3,6 @@
 requires = ["setuptools>=42.0.0",
             "setuptools_scm",
             "wheel",
-            "oldest-supported-numpy",
             "cython==3.0.2",
             "extension-helpers==1.*"]
 
