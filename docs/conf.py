@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from importlib import metadata
 
 # Load all of the global Astropy configuration
-from sphinx_astropy.conf import exclude_patterns
+from sphinx_astropy.conf import *
 
 # -- General configuration ----------------------------------------------------
 
