@@ -62,7 +62,7 @@ The new release of `halotools` creates the capability to construct realistically
 
 ![Figure 12 from @vanalfen_2024 showing correlation functions from IllustrisTNG300 (points with error bars) and correlation functions measured on an HOD made with `halotools` (solid lines with shaded error regions). The parameters for the HOD model were adjusted such that the resulting correlations would match those of IllustrisTNG300, showcasing the flexibility of the model.\label{IllustrisComparison}](figures/Illustris.pdf)
 
-`Halotools` is already widely used by physicists working on galaxy--halo connection research, and this release is part of a suite of modeling tools and analysis pipelines being developed to aid upcoming cosmological surveys, including LSST, Euclid, and Roman. The specific advantage of the type of model `halotools` generates is that they are faster and lighter-weight than more expensive simulations, allowing users to quickly generate and populate catalogs of galaxies following a set of parameters. The efficiency of `halotools` also allows for direct simulation-based modeling.
+This release is part of a suite of modeling tools and analysis pipelines being developed to aid upcoming cosmological surveys, including LSST, Euclid, and Roman. The specific advantage of the type of model `halotools` generates is that they are faster and lighter-weight than more expensive simulations, allowing users to quickly generate and populate catalogs of galaxies following a set of parameters. The efficiency of `halotools` also allows for direct simulation-based modeling.
 
 # Structure
 Currently, to build a mock galaxy catalog using `halotools` with IA, the user needs to provide one of each of the following (with optional components in parentheses):
