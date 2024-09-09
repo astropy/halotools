@@ -3,21 +3,11 @@
 #
 
 import os
-import sys
 from datetime import datetime, timezone
 from importlib import metadata
 
-try:
-    import sphinx_astropy
-except ImportError:
-    # Building from inside the docs/ directory?
-    if os.path.basename(os.getcwd()) == "docs":
-        a_h_path = os.path.abspath(os.path.join("..", "sphinx_astropy"))
-        if os.path.isdir(a_h_path):
-            sys.path.insert(1, a_h_path)
-
 # Load all of the global Astropy configuration
-from sphinx_astropy.conf.v2 import exclude_patterns
+from sphinx_astropy.conf import *
 
 # -- General configuration ----------------------------------------------------
 
@@ -90,6 +80,20 @@ htmlhelp_basename = project + "doc"
 html_static_path = ["_static"]
 html_style = "halotools.css"
 
+# Set canonical URL from the Read the Docs Domain
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
+
+html_context = {
+    "default_mode": "light",
+    "to_be_indexed": ["stable", "latest"],
+    "is_development": False,
+    "github_user": "astropy",
+    "github_repo": "halotools",
+    "github_version": "master",
+    "doc_path": "docs",
+    # Tell Jinja2 templates the build is running on Read the Docs
+    "READTHEDOCS": os.environ.get("READTHEDOCS", "") == "True",
+}
 # -- Options for LaTeX output -------------------------------------------------
 
 # Grouping the document tree into LaTeX files. List of tuples
