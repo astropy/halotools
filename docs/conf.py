@@ -2,6 +2,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 #
 
+import os
 from datetime import datetime, timezone
 from importlib import metadata
 
@@ -79,6 +80,20 @@ htmlhelp_basename = project + "doc"
 html_static_path = ["_static"]
 html_style = "halotools.css"
 
+# Set canonical URL from the Read the Docs Domain
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
+
+html_context = {
+    "default_mode": "light",
+    "to_be_indexed": ["stable", "latest"],
+    "is_development": False,
+    "github_user": "astropy",
+    "github_repo": "halotools",
+    "github_version": "master",
+    "doc_path": "docs",
+    # Tell Jinja2 templates the build is running on Read the Docs
+    "READTHEDOCS": os.environ.get("READTHEDOCS", "") == "True",
+}
 # -- Options for LaTeX output -------------------------------------------------
 
 # Grouping the document tree into LaTeX files. List of tuples
