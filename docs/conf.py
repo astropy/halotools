@@ -2,22 +2,11 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 #
 
-import os
-import sys
 from datetime import datetime, timezone
 from importlib import metadata
 
-try:
-    import sphinx_astropy
-except ImportError:
-    # Building from inside the docs/ directory?
-    if os.path.basename(os.getcwd()) == "docs":
-        a_h_path = os.path.abspath(os.path.join("..", "sphinx_astropy"))
-        if os.path.isdir(a_h_path):
-            sys.path.insert(1, a_h_path)
-
 # Load all of the global Astropy configuration
-from sphinx_astropy.conf.v2 import exclude_patterns
+from sphinx_astropy.conf import exclude_patterns
 
 # -- General configuration ----------------------------------------------------
 
