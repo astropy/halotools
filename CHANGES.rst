@@ -1,3 +1,9 @@
+0.9.1 (2024-09-11)
+------------------
+ 
+ - Repackage halotools according to pyproject.toml (https://github.com/astropy/halotools/pull/1093)
+
+
 0.9.0 (2024-09-06)
 ------------------
  
