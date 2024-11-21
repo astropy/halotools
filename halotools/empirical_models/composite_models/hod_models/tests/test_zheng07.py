@@ -14,8 +14,7 @@ __all__ = ("test_zheng07_composite1", "test_zheng07_composite2")
 
 
 def test_zheng07_composite1():
-    """ Ensure that the ``zheng07`` pre-built model does not accept non-Zheng07Cens.
-    """
+    """Ensure that the ``zheng07`` pre-built model does not accept non-Zheng07Cens."""
     model1 = PrebuiltHodModelFactory("zheng07")
     model2 = PrebuiltHodModelFactory("zheng07", modulate_with_cenocc=True)
 
@@ -30,7 +29,7 @@ def test_zheng07_composite1():
 
 
 def test_zheng07_composite2():
-    """ This test ensures that the source code provided in the
+    """This test ensures that the source code provided in the
     ``Advanced usage of the ``zheng07`` model`` tutorial behaves as expected.
     """
 
@@ -76,7 +75,7 @@ def test_zheng07_composite2():
 
 
 def test_modulate_with_cenocc1():
-    """ Regression test for Issue #646. Verify that the ``modulate_with_cenocc``
+    """Regression test for Issue #646. Verify that the ``modulate_with_cenocc``
     keyword argument is actually passed to the satellite occupation component.
     """
     model1 = PrebuiltHodModelFactory("zheng07", modulate_with_cenocc=True)
@@ -86,7 +85,7 @@ def test_modulate_with_cenocc1():
 
 
 def test_modulate_with_cenocc2():
-    """ Regression test for Issue #646. Verify that the ``modulate_with_cenocc``
+    """Regression test for Issue #646. Verify that the ``modulate_with_cenocc``
     keyword argument results in behavior that is properly modified by the centrals.
     """
     model = PrebuiltHodModelFactory("zheng07", modulate_with_cenocc=True)
@@ -107,8 +106,7 @@ def test_host_centric_distance():
 
 
 def test_mass_definition_flexibility():
-    """ Regression test for Issue #993.
-    """
+    """Regression test for Issue #993."""
     model = PrebuiltHodModelFactory(
         "zheng07", mdef="200m", halo_boundary_key="halo_radius_arbitrary"
     )
