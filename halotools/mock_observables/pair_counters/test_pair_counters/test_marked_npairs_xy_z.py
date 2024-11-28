@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 import pytest
 from astropy.utils.misc import NumpyRNGContext
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 from ..pairs import xy_z_wnpairs as pure_python_weighted_pairs
 from ..marked_npairs_xy_z import marked_npairs_xy_z
@@ -33,7 +33,7 @@ fixed_seed = 43
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = "/Users/aphearin"
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

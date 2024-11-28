@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from astropy.table import Table
 
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 try:
     import h5py
@@ -28,7 +28,7 @@ from ..halo_table_cache_log_entry import HaloTableCacheLogEntry
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

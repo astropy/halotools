@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-from astropy.config.paths import _find_home
+from pathlib import Path
 import pytest
 
 from ..cached_halo_catalog import CachedHaloCatalog
@@ -13,7 +13,7 @@ from ..halo_table_cache import HaloTableCache
 from ...utils.python_string_comparisons import compare_strings_py23_safe
 
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

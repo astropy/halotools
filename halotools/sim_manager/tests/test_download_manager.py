@@ -6,7 +6,7 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
-from astropy.config.paths import _find_home
+from pathlib import Path
 from astropy.table import Table
 from astropy.tests.helper import pytest
 
@@ -20,7 +20,7 @@ from ..halo_table_cache import HaloTableCache
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = "/Users/aphearin"
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:
@@ -32,7 +32,7 @@ __all__ = ("TestDownloadManager",)
 
 class TestDownloadManager(TestCase):
     def setUp(self):
-        homedir = _find_home()
+        homedir = Path.home()
 
         self.downman = DownloadManager()
 

@@ -7,7 +7,7 @@ from unittest import TestCase
 import pytest
 from astropy.table import Table
 
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 from ..tabular_ascii_reader import TabularAsciiReader
 
@@ -17,7 +17,7 @@ from ..tabular_ascii_reader import TabularAsciiReader
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:
@@ -39,7 +39,7 @@ class TestTabularAsciiReader(TestCase):
 
     def setUp(self):
 
-        self.tmpdir = os.path.join(_find_home(), '.temp_halotools_testing_dir')
+        self.tmpdir = os.path.join(Path.home(), '.temp_halotools_testing_dir')
         try:
             os.makedirs(self.tmpdir)
         except OSError:

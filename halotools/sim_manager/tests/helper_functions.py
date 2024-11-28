@@ -8,9 +8,9 @@ import numpy as np
 from astropy.table import Table
 from astropy.table import vstack as table_vstack
 
-from astropy.config.paths import _find_home
+from pathlib import Path
 
-detected_home = _find_home()
+detected_home = Path.home()
 
 __all__ = ('add_new_row_to_cache_log', )
 

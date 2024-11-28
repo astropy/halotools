@@ -17,9 +17,9 @@ from ....... import model_defaults
 # This will be used to select tests whose
 # returned values depend on the configuration
 # of my personal cache directory files
-from astropy.config.paths import _find_home
+from pathlib import Path
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:
