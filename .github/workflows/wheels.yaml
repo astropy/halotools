@@ -1,10 +1,6 @@
 name: Build wheels
 
-on:
-  workflow_dispatch:
-  release:
-    types:
-      - published
+on: [push, pull_request]
 
 jobs:
   build_wheels:
