@@ -8,10 +8,10 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import os
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 try:
-    halotools_cache_dirname = os.path.join(_find_home(), '.astropy', 'cache', 'halotools')
+    halotools_cache_dirname = os.path.join(Path.home(), '.astropy', 'cache', 'halotools')
     os.makedirs(halotools_cache_dirname)
 except OSError:
     pass

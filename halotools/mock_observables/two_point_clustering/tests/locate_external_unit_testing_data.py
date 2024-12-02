@@ -5,8 +5,8 @@ are compared against results obtained from independently-written code bases.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-from astropy.config.paths import _find_home
-halotools_cache_dirname = os.path.join(_find_home(), '.astropy', 'cache', 'halotools')
+from pathlib import Path
+halotools_cache_dirname = os.path.join(Path.home(), '.astropy', 'cache', 'halotools')
 halotool_unit_testing_dirname = os.path.join(halotools_cache_dirname, 'unit_testing_files')
 
 

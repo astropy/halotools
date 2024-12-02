@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 import pytest
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 from ...custom_exceptions import HalotoolsError
 from ..cached_halo_catalog import CachedHaloCatalog, InvalidCacheLogEntry
@@ -12,7 +12,7 @@ from ..cached_halo_catalog import CachedHaloCatalog, InvalidCacheLogEntry
 slow = pytest.mark.slow
 
 aph_home = "/Users/aphearin"
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

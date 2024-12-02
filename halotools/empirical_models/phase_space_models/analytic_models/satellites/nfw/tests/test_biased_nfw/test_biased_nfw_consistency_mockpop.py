@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from astropy.config.paths import _find_home
+from pathlib import Path
 import pytest
 
 from ...biased_nfw_phase_space import BiasedNFWPhaseSpace
@@ -17,7 +17,7 @@ __all__ = ('test_consistency1', 'test_consistency2', 'test_consistency3' )
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

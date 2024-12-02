@@ -9,7 +9,7 @@ from unittest import TestCase
 import pytest
 from astropy.table import Table
 from astropy.utils.misc import NumpyRNGContext
-from astropy.config.paths import _find_home
+from pathlib import Path
 from astropy.utils.data import get_pkg_data_filename
 from collections import OrderedDict
 
@@ -30,7 +30,7 @@ except ImportError:
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:
@@ -59,7 +59,7 @@ class TestRockstarHlistReader(TestCase):
 
     def setUp(self):
 
-        self.tmpdir = os.path.join(_find_home(), '.tmp_testingdir')
+        self.tmpdir = os.path.join(Path.home(), '.tmp_testingdir')
         try:
             os.makedirs(self.tmpdir)
         except OSError:

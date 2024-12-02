@@ -3,7 +3,7 @@ time-out on the Travis CI environment, and so we run them here on APH_MACHINE on
 to ensure the still get executed.
 """
 import numpy as np
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 from ...sim_manager import FakeSim
 from ...empirical_models import PrebuiltHodModelFactory, PrebuiltSubhaloModelFactory
@@ -13,7 +13,7 @@ from ...empirical_models import PrebuiltHodModelFactory, PrebuiltSubhaloModelFac
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = "/Users/aphearin"
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

@@ -6,7 +6,7 @@ from unittest import TestCase
 import os
 import shutil
 
-from astropy.config.paths import _find_home
+from pathlib import Path
 import pytest
 
 try:
@@ -32,7 +32,7 @@ from ...custom_exceptions import HalotoolsError
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = '/Users/aphearin'
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:

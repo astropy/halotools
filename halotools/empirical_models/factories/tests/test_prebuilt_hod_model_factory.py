@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import pytest
-from astropy.config.paths import _find_home
+from pathlib import Path
 
 from ...factories import PrebuiltHodModelFactory
 
@@ -19,7 +19,7 @@ __all__ = ("test_fake_mock_population", "test_fake_mock_observations1")
 # returned values depend on the configuration
 # of my personal cache directory files
 aph_home = "/Users/aphearin"
-detected_home = _find_home()
+detected_home = Path.home()
 if aph_home == detected_home:
     APH_MACHINE = True
 else:
