@@ -1,3 +1,9 @@
+0.9.2 (2024-12-02)
+------------------
+ 
+ - Compatibility with Astropy 7 (https://github.com/astropy/halotools/pull/1107)
+
+
 0.9.1 (2024-09-11)
 ------------------
  
