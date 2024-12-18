@@ -12,7 +12,7 @@ create a virtual environment that will automatically have compatible versions of
 By installing into a virtual environment, you will not change any of the
 packages that are already installed system-wide on your machine. In the example below, we will use conda to create a virtual environment with all the dependencies handled automatically::
 
-    conda create -n htenv python=3.10 halotools=0.8 h5py ipython jupyter matplotlib
+    conda create -n htenv python>=3.11 halotools=0.8 h5py ipython jupyter matplotlib
 
 In order to activate this environment::
 

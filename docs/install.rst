@@ -116,7 +116,7 @@ The h5py package is used for fast I/O of large simulated datasets.
 
 If you did not use conda or pip, then you should be aware of the following strict requirements:
 
-- `Python <http://www.python.org/>`_: 3.10.x or later
+- `Python <http://www.python.org/>`_: 3.11.x or later
 
 - `Numpy <http://www.numpy.org/>`_: 1.9 or later
 
