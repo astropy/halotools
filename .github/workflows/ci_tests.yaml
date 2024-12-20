@@ -18,15 +18,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Ubuntu - Python 3.10 with all optional dependencies
-            os: ubuntu-latest
-            python: "3.10"
-            toxenv: 'py10-test-alldeps'
-
-          - name: MacOs - Python 3.10 with all optional dependencies
-            os: macos-latest
-            python: "3.10"
-            toxenv: 'py10-test-alldeps'
 
           - name: Ubuntu - Python 3.11 with all optional dependencies
             os: ubuntu-latest
