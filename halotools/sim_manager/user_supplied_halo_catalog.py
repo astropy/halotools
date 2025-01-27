@@ -415,11 +415,11 @@ class UserSuppliedHaloCatalog(object):
 
         redshift_string = get_redshift_string(self.redshift)
 
-        f.attrs.create('simname', np.string_(simname))
-        f.attrs.create('halo_finder', np.string_(halo_finder))
-        f.attrs.create('version_name', np.string_(version_name))
-        f.attrs.create('redshift', np.string_(redshift_string))
-        f.attrs.create('fname', np.string_(fname))
+        f.attrs.create('simname', np.bytes_(simname))
+        f.attrs.create('halo_finder', np.bytes_(halo_finder))
+        f.attrs.create('version_name', np.bytes_(version_name))
+        f.attrs.create('redshift', np.bytes_(redshift_string))
+        f.attrs.create('fname', np.bytes_(fname))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
@@ -427,12 +427,12 @@ class UserSuppliedHaloCatalog(object):
         time_right_now = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
 
-        f.attrs.create('time_catalog_was_originally_cached', np.string_(time_right_now))
+        f.attrs.create('time_catalog_was_originally_cached', np.bytes_(time_right_now))
 
-        f.attrs.create('processing_notes', np.string_(processing_notes))
+        f.attrs.create('processing_notes', np.bytes_(processing_notes))
 
         for key, value in additional_metadata.items():
-            f.attrs.create(key, np.string_(value))
+            f.attrs.create(key, np.bytes_(value))
 
         f.close()
         ############################################################

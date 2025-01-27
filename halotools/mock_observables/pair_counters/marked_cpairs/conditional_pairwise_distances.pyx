@@ -30,7 +30,7 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
                              np.float64_t max_r,
                              np.ndarray[np.float64_t, ndim=2] w_icell1,
                              np.ndarray[np.float64_t, ndim=2] w_icell2,
-                             np.int_t cond_func_id):
+                             np.int64_t cond_func_id):
 
     """
     Calculate the conditional limited pairwise distance matrix, :math:`d_{ij}`.
@@ -101,11 +101,11 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     """
 
     #c definitions
-    cdef vector[np.int_t] i_ind
-    cdef vector[np.int_t] j_ind
+    cdef vector[np.int64_t] i_ind
+    cdef vector[np.int64_t] j_ind
     cdef vector[np.float64_t] distances
     cdef double d
-    cdef np.int_t i, j, n
+    cdef np.int64_t i, j, n
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
 
@@ -149,7 +149,7 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
                                   np.float64_t max_rp, np.float64_t max_pi,
                                   np.ndarray[np.float64_t, ndim=2] w_icell1,
                                   np.ndarray[np.float64_t, ndim=2] w_icell2,
-                                  np.int_t cond_func_id):
+                                  np.int64_t cond_func_id):
     """
     Calculate the conditional limited pairwise distance matrices, :math:`d_{{\perp}ij}` and :math:`d_{{\parallel}ij}`.
 
@@ -228,8 +228,8 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
 
 
     #c definitions
-    cdef vector[np.int_t] i_ind
-    cdef vector[np.int_t] j_ind
+    cdef vector[np.int64_t] i_ind
+    cdef vector[np.int64_t] j_ind
     cdef vector[np.float64_t] para_distances
     cdef vector[np.float64_t] perp_distances
     cdef double d_perp, d_para
