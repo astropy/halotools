@@ -395,11 +395,11 @@ class CachedHaloCatalog(object):
         else:
             msg += "redshift = ``" + str(self.redshift) + "``\n"
 
-        msg += ("\nThere is no matching catalog in cache "
-            "within dz_tol = "+str(self._dz_tol)+" of these inputs.\n"
-                )
-
         if len(matching_entries) == 0:
+            msg += (
+                "\nThere is no matching catalog in cache "
+                "within dz_tol = " + str(self._dz_tol) + " of these inputs.\n"
+            )
             suggestion_preamble = ("\nThe following entries in the cache log "
                 "most closely match your inputs:\n\n")
             alt_list1 = list(gen1)  # discard the redshift requirement
