@@ -237,7 +237,7 @@ class Tinker13Cens(OccupationComponent):
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments"
                 )
                 raise HalotoolsError(msg)
-            if type(sfr_designation[0]) in (str, unicode, np.string_, np.unicode_):
+            if type(sfr_designation[0]) in (str, unicode, np.bytes_, np.str_):
                 if sfr_designation[0] not in ["active", "quiescent"]:
                     msg = (
                         "The only acceptable values of "

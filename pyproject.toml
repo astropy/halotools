@@ -11,7 +11,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: BSD License",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
@@ -51,8 +51,8 @@ markers = ["slow", "installation_test"]
 requires = ["setuptools>=42.0.0",
             "setuptools_scm",
             "wheel",
-            "oldest-supported-numpy",
-            "cython==3.0.2",
+            "numpy>=2.0",
+            "cython>=3.0.2",
             "extension-helpers==1.*"]
 build-backend = 'setuptools.build_meta'
 

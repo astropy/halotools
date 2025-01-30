@@ -87,11 +87,11 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     """
 
     #c definitions
-    cdef vector[np.int_t] i_ind
-    cdef vector[np.int_t] j_ind
+    cdef vector[np.int64_t] i_ind
+    cdef vector[np.int64_t] j_ind
     cdef vector[np.float64_t] distances
     cdef double d
-    cdef np.int_t i, j, n
+    cdef np.int64_t i, j, n
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
 
@@ -195,8 +195,8 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     """
 
     #c definitions
-    cdef vector[np.int_t] i_ind
-    cdef vector[np.int_t] j_ind
+    cdef vector[np.int64_t] i_ind
+    cdef vector[np.int64_t] j_ind
     cdef vector[np.float64_t] distances
     cdef double d
     cdef int i, j, n
@@ -307,8 +307,8 @@ def pairwise_xy_z_distance_no_pbc(
 
 
     #c definitions
-    cdef vector[np.int_t] i_ind
-    cdef vector[np.int_t] j_ind
+    cdef vector[np.int64_t] i_ind
+    cdef vector[np.int64_t] j_ind
     cdef vector[np.float64_t] para_distances
     cdef vector[np.float64_t] perp_distances
     cdef double d_perp, d_para
@@ -429,8 +429,8 @@ def pairwise_xy_z_distance_pbc(
     """
 
     #c definitions
-    cdef vector[np.int_t] i_ind
-    cdef vector[np.int_t] j_ind
+    cdef vector[np.int64_t] i_ind
+    cdef vector[np.int64_t] j_ind
     cdef vector[np.float64_t] para_distances
     cdef vector[np.float64_t] perp_distances
     cdef double d_perp, d_para

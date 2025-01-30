@@ -70,8 +70,8 @@ def pairwise_distance_3d_engine(double_mesh, x1in, y1in, z1in, x2in, y2in, z2in,
     cdef cnp.float64_t[:] y2 = np.ascontiguousarray(y2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
     cdef cnp.float64_t[:] z2 = np.ascontiguousarray(z2in[double_mesh.mesh2.idx_sorted], dtype=np.float64)
 
-    cdef vector[cnp.int_t] i_ind
-    cdef vector[cnp.int_t] j_ind
+    cdef vector[cnp.int64_t] i_ind
+    cdef vector[cnp.int64_t] j_ind
     cdef vector[cnp.float64_t] distances
 
     cdef cnp.int64_t icell1, icell2

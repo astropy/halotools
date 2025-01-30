@@ -708,22 +708,22 @@ class RockstarHlistReader(TabularAsciiReader):
 
         # Now add the metadata
         f = h5py.File(self.output_fname, 'a')
-        f.attrs.create('simname', np.string_(self.simname))
-        f.attrs.create('halo_finder', np.string_(self.halo_finder))
-        redshift_string = np.string_(get_redshift_string(self.redshift))
+        f.attrs.create('simname', np.bytes_(self.simname))
+        f.attrs.create('halo_finder', np.bytes_(self.halo_finder))
+        redshift_string = np.bytes_(get_redshift_string(self.redshift))
         f.attrs.create('redshift', redshift_string)
-        f.attrs.create('version_name', np.string_(self.version_name))
-        f.attrs.create('fname', np.string_(self.output_fname))
+        f.attrs.create('version_name', np.bytes_(self.version_name))
+        f.attrs.create('fname', np.bytes_(self.output_fname))
 
         f.attrs.create('Lbox', self.Lbox)
         f.attrs.create('particle_mass', self.particle_mass)
-        f.attrs.create('orig_ascii_fname', np.string_(self.input_fname))
+        f.attrs.create('orig_ascii_fname', np.bytes_(self.input_fname))
 
-        time_right_now = np.string_(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        time_right_now = np.bytes_(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         f.attrs.create('time_of_catalog_production', time_right_now)
 
         if self.processing_notes is not None:
-            f.attrs.create('processing_notes', np.string_(self.processing_notes))
+            f.attrs.create('processing_notes', np.bytes_(self.processing_notes))
 
         # Store all the choices for row cuts as metadata
         for haloprop_key, cut_value in self.row_cut_min_dict.items():
