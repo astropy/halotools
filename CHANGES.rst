@@ -1,3 +1,9 @@
+0.9.3 (2025-02-10)
+------------------
+ 
+ - Compatibility with Numpy 2.0 (https://github.com/astropy/halotools/pull/1114)
+
+
 0.9.2 (2024-12-02)
 ------------------
  

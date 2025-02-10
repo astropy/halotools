@@ -27,8 +27,8 @@ jobs:
         # uses: pypa/cibuildwheel@d4a2945fcc8d13f20a1b99d461b8e844d5fc6e23  # v2.21.1
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BEFORE_BUILD: pip install oldest-supported-numpy Cython extension-helpers
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.10"
+          CIBW_BEFORE_BUILD: pip install numpy>=2 Cython extension-helpers
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.11"
           CIBW_SKIP: pp*
 
       - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
