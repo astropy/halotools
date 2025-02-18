@@ -146,8 +146,8 @@ def counts_in_cylinders_engine(
 
     cdef bint c_return_indexes = return_indexes
     cdef cnp.int64_t[:] counts = np.zeros(len(x1_sorted), dtype=np.int64)
-    cdef int current_indexes_cnt = 0
-    cdef int current_indexes_len = len(x1_sorted) if c_return_indexes else 0
+    cdef cnp.int64_t current_indexes_cnt = 0
+    cdef cnp.int64_t current_indexes_len = len(x1_sorted) if c_return_indexes else 0
     cdef cnp.uint32_t[:,:] indexes = np.ascontiguousarray(
             np.zeros((current_indexes_len, 2), dtype=np.uint32))
 
