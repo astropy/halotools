@@ -34,21 +34,6 @@ get up and running with the default halo catalog.
 First steps with Halotools
 ================================
 
-Running the test suite
-------------------------
-
-After installing the code and its dependencies, navigate to some new working directory and execute the test suite. (This only needs to be done once per installed version.) For halotools versions v0.6 and later, you can use the `test_installation` feature that runs a few select tests scattered throughout the repository. For versions v0.5 and earlier, you will need to run the full test suite, which is much more CPU- and memory-intensive.
-
-.. code:: python
-
-    import halotools
-    halotools.installation_test()  #  v0.6 and later
-    halotools.test()  #  v0.5 and earlier
-
-The full test suite is memory intensive and takes several minutes to run. It will generate a few small, temporary dummy files that you can delete or just ignore.
-
-See :ref:`verifying_your_installation` for details about the message that prints after you run the test suite.
-
 .. _download_default_halos:
 
 Downloading the default halo catalog
