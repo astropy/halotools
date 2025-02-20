@@ -157,28 +157,6 @@ This will show where your active version is located on your machine. You can man
 
 Once you have installed the package, see :ref:`getting_started` for instructions on how to get up and running.
 
-Testing your installation
-=========================
-
-To verify that your Halotools installation runs properly, navigate to some new working directory and execute the test suite. If you installed Halotools into a virtual environment as described in the :ref:`installing_halotools_with_virtualenv` section of the documentation, activate the environment before spawning a python session and executing the code below.
-
-For halotools versions v0.6 and later, there is a `test_installation` feature that runs a few simple tests scattered throughout the code base:
-
-.. code:: python
-
-	import halotools
-	halotools.test_installation()  #  v0.6 and later
-
-For earlier versions, you will need to run the full test suite, which is more memory intensive and takes several minutes to run:
-
-.. code:: python
-
-	halotools.test()  #  v0.5 and earlier
-
-
-Whether you installed the master branch or a release branch, the message that concludes the execution of the test suite should not indicate that there were any errors or failures. A typical acceptable test suite report will read something like "445 passed, 45 skipped in 383.2 seconds". If you installed the master branch, your message may read something like "475 passed, 4 xfailed in 374.3 seconds". The *xfail* marker is shorthand for "expected failure"; tests marked by *xfail* do not indicate a bug or installation problem; instead, this indicates that there is a new feature that has only been partially implemented. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.
-
-
 Troubleshooting
 ==================
 See :ref:`installation_troubleshooting` for solutions to known installation-related problems.
