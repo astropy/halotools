@@ -44,6 +44,7 @@ class NFWProfile(AnalyticDensityProf):
         conc_mass_model=model_defaults.conc_mass_model,
         concentration_key=model_defaults.concentration_key,
         halo_boundary_key=None,
+        prim_haloprop_key=None,
         **kwargs
     ):
         r"""
@@ -60,9 +61,17 @@ class NFWProfile(AnalyticDensityProf):
         mdef: str, optional
             String specifying the halo mass definition, e.g., 'vir' or '200m'.
             Default is set in `~halotools.empirical_models.model_defaults`.
+            Use "custom" to allow arbitrary relationshipts between mass and radius.
+            When mdef is set to "custom", the `prim_haloprop_key` must also be passed.
 
         halo_boundary_key : str, optional
             Default behavior is to use the column associated with the input mdef.
+            When mdef is set to "custom", any halo boundary is permitted.
+            When mdef is set to "custom", the `prim_haloprop_key` must also be passed.
+
+        prim_haloprop_key : str, optional
+            Default behavior is to use the column associated with the input mdef.
+            When mdef is set to "custom", the `prim_haloprop_key` must also be passed.
 
         conc_mass_model : string or callable, optional
             Specifies the function used to model the relation between
@@ -85,7 +94,12 @@ class NFWProfile(AnalyticDensityProf):
         >>> nfw = NFWProfile()
         """
         AnalyticDensityProf.__init__(
-            self, cosmology, redshift, mdef, halo_boundary_key=halo_boundary_key
+            self,
+            cosmology,
+            redshift,
+            mdef,
+            halo_boundary_key=halo_boundary_key,
+            prim_haloprop_key=prim_haloprop_key,
         )
 
         self.gal_prof_param_keys = ["conc_NFWmodel"]
