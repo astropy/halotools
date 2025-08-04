@@ -86,8 +86,8 @@ def ra_dec_z(x, v, cosmo=None):
     sp = x[:, 1] / np.sqrt(x[:, 0] ** 2 + x[:, 1] ** 2)
     vr = v[:, 0] * st * cp + v[:, 1] * st * sp + v[:, 2] * ct
 
-    # compute cosmological redshift and add contribution from perculiar velocity
-    yy = np.arange(0, 1.0, 0.001)
+    # compute cosmological redshift and add contribution from peculiar velocity
+    yy = np.arange(0, 20.0, 0.001)
     xx = cosmo.comoving_distance(yy).value
     f = interp1d(xx, yy, kind="cubic")
     z_cos = f(r)
