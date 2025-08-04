@@ -32,7 +32,7 @@ def ra_dec_z(x, v, cosmo=None):
     Returns
     -------
     ra : np.array
-        right accession in radians
+        right ascension in radians
 
     dec : np.array
         declination in radians
