@@ -5,13 +5,12 @@ create a mock redshift survey given a mock with galaxy positions and velocities.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from scipy.interpolate import interp1d
 from astropy import cosmology
 from astropy.constants import c  # the speed of light
+from scipy.interpolate import interp1d
 
-
-__all__ = ('ra_dec_z', )
-__author__ = ['Duncan Campbell']
+__all__ = ("ra_dec_z",)
+__author__ = ["Duncan Campbell"]
 
 
 def ra_dec_z(x, v, cosmo=None):
@@ -72,34 +71,34 @@ def ra_dec_z(x, v, cosmo=None):
     # calculate the observed redshift
     if cosmo is None:
         cosmo = cosmology.FlatLambdaCDM(H0=0.7, Om0=0.3)
-    c_km_s = c.to('km/s').value
+    c_km_s = c.to("km/s").value
 
     # remove h scaling from position so we can use the cosmo object
-    x = x/cosmo.h
+    x = x / cosmo.h
 
     # compute comoving distance from observer
-    r = np.sqrt(x[:, 0]**2+x[:, 1]**2+x[:, 2]**2)
+    r = np.sqrt(x[:, 0] ** 2 + x[:, 1] ** 2 + x[:, 2] ** 2)
 
     # compute radial velocity
-    ct = x[:, 2]/r
+    ct = x[:, 2] / r
     st = np.sqrt(1.0 - ct**2)
-    cp = x[:, 0]/np.sqrt(x[:, 0]**2 + x[:, 1]**2)
-    sp = x[:, 1]/np.sqrt(x[:, 0]**2 + x[:, 1]**2)
-    vr = v[:, 0]*st*cp + v[:, 1]*st*sp + v[:, 2]*ct
+    cp = x[:, 0] / np.sqrt(x[:, 0] ** 2 + x[:, 1] ** 2)
+    sp = x[:, 1] / np.sqrt(x[:, 0] ** 2 + x[:, 1] ** 2)
+    vr = v[:, 0] * st * cp + v[:, 1] * st * sp + v[:, 2] * ct
 
     # compute cosmological redshift and add contribution from perculiar velocity
     yy = np.arange(0, 1.0, 0.001)
     xx = cosmo.comoving_distance(yy).value
-    f = interp1d(xx, yy, kind='cubic')
+    f = interp1d(xx, yy, kind="cubic")
     z_cos = f(r)
-    redshift = z_cos+(vr/c_km_s)*(1.0+z_cos)
+    redshift = z_cos + (vr / c_km_s) * (1.0 + z_cos)
 
     # calculate spherical coordinates
-    theta = np.arccos(x[:, 2]/r)
+    theta = np.arccos(x[:, 2] / r)
     phi = np.arctan2(x[:, 1], x[:, 0])
 
     # convert spherical coordinates into ra,dec
     ra = phi
-    dec = theta - np.pi/2.0
+    dec = theta - np.pi / 2.0
 
     return ra, dec, redshift
