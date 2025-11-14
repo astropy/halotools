@@ -6,10 +6,10 @@ readme = "README.rst"
 authors = [
     { name = "Andrew Hearin", email = "ahearin@anl.gov" }
 ]
-license = { file = 'LICENSE' }
+license = "BSD-3-Clause"
+license-files = ['LICENSE']
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: BSD License",
 ]
 requires-python = ">=3.11"
 
@@ -34,7 +34,6 @@ docs = [
 include-package-data = true
 package-dir = {halotools = "halotools"}
 package-data = {halotools = ["data/*", "*/data/*", "*/*/data/*", "*/*/*/data/*", "*/*/*/*/data/*", "*/*/*/*/*/data/*", "*/*/*/*/*/*/data/*"]}
-license-files = ["licenses/*.rst"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
