@@ -1,6 +1,5 @@
 include README.rst
 include CHANGES.rst
-include licenses/LICENSE.rst
 include setup.cfg
 include pyproject.toml
 include tox.ini
