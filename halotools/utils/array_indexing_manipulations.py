@@ -337,7 +337,7 @@ def calculate_entry_multiplicity(sorted_repeated_hostids, unique_possible_hostid
 
     unique_appearances_of_hostid, unique_entry_multiplicity = (
         np.unique(sorted_repeated_hostids, return_counts=True))
-    hostid_has_match = np.in1d(unique_possible_hostids, unique_appearances_of_hostid,
+    hostid_has_match = np.isin(unique_possible_hostids, unique_appearances_of_hostid,
         assume_unique=True)
 
     entry_multiplicity = np.zeros_like(unique_possible_hostids)
