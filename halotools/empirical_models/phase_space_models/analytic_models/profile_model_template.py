@@ -60,16 +60,20 @@ class AnalyticDensityProf(object):
         self.redshift = redshift
         self.mdef = mdef
 
-        # The following four attributes are derived quantities from the above,
-        # so that self-consistency between them is ensured
-        self.density_threshold = halo_boundary_functions.density_threshold(
-            cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
-        )
         if halo_boundary_key is None:
             self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
         else:
             self.halo_boundary_key = halo_boundary_key
-        self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
+        # The following four attributes are derived quantities from the above,
+        # so that self-consistency between them is ensured
+        if self.mdef == "custom":
+            self.density_threshold = None
+            self.prim_haloprop_key = kwargs["prim_haloprop_key"]
+        else:
+            self.density_threshold = halo_boundary_functions.density_threshold(
+                cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef
+            )
+            self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
         self.gal_prof_param_keys = []
         self.halo_prof_param_keys = []
@@ -165,6 +169,12 @@ class AnalyticDensityProf(object):
             scaled_radius, *prof_params
         )
 
+        if self.density_threshold is None:
+            msg = (
+                "When using mdef=`custom`, "
+                "there is no way to compute the SO mass_density"
+            )
+            raise ValueError(msg)
         density = self.density_threshold * dimensionless_mass
         return density
 
