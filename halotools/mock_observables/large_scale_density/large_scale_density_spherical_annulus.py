@@ -153,7 +153,6 @@ def _large_scale_density_spherical_annulus_process_args(
     """ """
     sample = np.atleast_1d(sample)
     tracers = np.atleast_1d(tracers)
-    period = get_period(period)[0]
 
     try:
         assert outer_radius > inner_radius
@@ -163,9 +162,14 @@ def _large_scale_density_spherical_annulus_process_args(
     rbins = np.array([inner_radius, outer_radius])
 
     if sample_volume is None:
+        if period is None:
+            raise HalotoolsError("If sample_volume is None, must pass period")
+    if period is not None:
+        if sample_volume is not None:
+            raise HalotoolsError("If period is not None, do not pass in sample_volume")
+
+    period = get_period(period)[0]
+    if sample_volume is None:
         sample_volume = period.prod()
-    else:
-        msg = "If period is not None, do not pass in sample_volume"
-        raise HalotoolsError(msg)
 
     return sample, tracers, rbins, period, sample_volume, num_threads, approx_cell1_size
