@@ -1,17 +1,17 @@
-""" Module providing unit-testing for the
+"""Module providing unit-testing for the
 `~halotools.mock_observables.underdensity_prob_func function.
 """
+
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import pytest
 from astropy.utils.misc import NumpyRNGContext
 
+from ....custom_exceptions import HalotoolsError
+from ...tests.cf_helpers import generate_locus_of_3d_points
 from ..underdensity_prob_func import underdensity_prob_func
 from ..void_prob_func import void_prob_func
-
-from ...tests.cf_helpers import generate_locus_of_3d_points
-from ....custom_exceptions import HalotoolsError
 
 __all__ = ("test_upf1", "test_upf2", "test_upf3", "test_upf4")
 

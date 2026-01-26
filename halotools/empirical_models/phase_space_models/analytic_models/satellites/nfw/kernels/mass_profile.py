@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 import numpy as np
 
 __all__ = ("cumulative_mass_PDF", "dimensionless_mass_density")

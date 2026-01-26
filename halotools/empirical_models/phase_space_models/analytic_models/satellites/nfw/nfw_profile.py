@@ -5,20 +5,20 @@ inside dark matter halos according to the fitting function introduced in
 Navarry, Frenk and White (1995), `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_.
 a sub-class of `~halotools.empirical_models.AnalyticDensityProf`.
 """
-from __future__ import division, print_function, absolute_import, unicode_literals
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 
-from .conc_mass import direct_from_halo_catalog, dutton_maccio14
-from .kernels import nfw_dimensionless_mass_density, nfw_cumulative_mass_PDF
-from .kernels import standalone_mc_generate_nfw_radial_positions
-
-from ...profile_model_template import AnalyticDensityProf
-
-from ..... import model_defaults
-
 from ......sim_manager import sim_defaults
-
+from ..... import model_defaults
+from ...profile_model_template import AnalyticDensityProf
+from .conc_mass import direct_from_halo_catalog, dutton_maccio14
+from .kernels import (
+    nfw_cumulative_mass_PDF,
+    nfw_dimensionless_mass_density,
+    standalone_mc_generate_nfw_radial_positions,
+)
 
 __all__ = ("NFWProfile",)
 __author__ = ("Andrew Hearin", "Benedikt Diemer")
@@ -44,7 +44,7 @@ class NFWProfile(AnalyticDensityProf):
         conc_mass_model=model_defaults.conc_mass_model,
         concentration_key=model_defaults.concentration_key,
         halo_boundary_key=None,
-        **kwargs
+        **kwargs,
     ):
         r"""
         Parameters

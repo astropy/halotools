@@ -1,24 +1,28 @@
+0.9.4 (unreleased)
+------------------
+
+
 0.9.3 (2025-02-10)
 ------------------
- 
+
  - Compatibility with Numpy 2.0 (https://github.com/astropy/halotools/pull/1114)
 
 
 0.9.2 (2024-12-02)
 ------------------
- 
+
  - Compatibility with Astropy 7 (https://github.com/astropy/halotools/pull/1107)
 
 
 0.9.1 (2024-09-11)
 ------------------
- 
+
  - Repackage halotools according to pyproject.toml (https://github.com/astropy/halotools/pull/1093)
 
 
 0.9.0 (2024-09-06)
 ------------------
- 
+
  - Add models and mock observations of intrinsic alignments (https://github.com/astropy/halotools/pull/1056)
 
 

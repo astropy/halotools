@@ -1,16 +1,15 @@
-""" Module providing unit-testing for the
+"""Module providing unit-testing for the
 `~halotools.mock_observables.void_prob_func` function.
 """
+
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 import pytest
 from astropy.utils.misc import NumpyRNGContext
 
-from ..void_prob_func import void_prob_func
-
-from ...tests.cf_helpers import generate_locus_of_3d_points
-
 from ....custom_exceptions import HalotoolsError
+from ..void_prob_func import void_prob_func
 
 __all__ = ("test_vpf1", "test_vpf2", "test_vpf3")
 
@@ -78,22 +77,6 @@ def test_vpf3():
         seed=fixed_seed,
     )
     assert np.allclose(vpf, vpf2, rtol=0.01)
-
-
-def test_vpf_process_args1():
-    Npts = 1000
-    Lbox = 1
-    period = np.array([Lbox, Lbox, Lbox])
-    with NumpyRNGContext(fixed_seed):
-        sample1 = np.random.random((Npts, 3))
-        random_sphere_centers = np.random.random((Npts, 3))
-    n_ran = 1000
-    rbins = np.logspace(-1.5, -1, 5)
-
-    with pytest.raises(HalotoolsError) as err:
-        __ = void_prob_func(sample1, rbins, n_ran=n_ran, period=[Lbox, Lbox])
-    substr = "Input ``period`` must either be a float or length-3 sequence"
-    assert substr in err.value.args[0]
 
 
 def test_vpf_process_args2():

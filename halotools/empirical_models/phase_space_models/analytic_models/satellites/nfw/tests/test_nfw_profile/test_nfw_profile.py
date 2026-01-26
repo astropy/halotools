@@ -1,53 +1,53 @@
-""" Module providing unit-testing for `~halotools.empirical_models.NFWProfile` class
-"""
+"""Module providing unit-testing for `~halotools.empirical_models.NFWProfile` class"""
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-
 import pytest
-
-from astropy.cosmology import WMAP9, FLRW
-
-from ...nfw_profile import NFWProfile
+from astropy.cosmology import FLRW, WMAP9
 
 from ........utils.array_utils import array_is_monotonic
+from ...nfw_profile import NFWProfile
 
-__all__ = ('test_instance_attrs', 'analytic_nfw_density_outer_shell_normalization',
-    'monte_carlo_density_outer_shell_normalization')
+__all__ = (
+    "test_instance_attrs",
+    "analytic_nfw_density_outer_shell_normalization",
+    "monte_carlo_density_outer_shell_normalization",
+)
 
 
 def test_attr_inheritance():
-    r""" Test that `~halotools.empirical_models.NFWProfile`
+    r"""Test that `~halotools.empirical_models.NFWProfile`
     possesses the necessary attributes and methods.
     """
 
-    model_instance = NFWProfile(cosmology=WMAP9, redshift=2, mdef='vir')
+    model_instance = NFWProfile(cosmology=WMAP9, redshift=2, mdef="vir")
 
-    assert hasattr(model_instance, 'cosmology')
+    assert hasattr(model_instance, "cosmology")
     assert isinstance(model_instance.cosmology, FLRW)
 
-    assert hasattr(model_instance, 'redshift')
+    assert hasattr(model_instance, "redshift")
     assert model_instance.redshift == 2
 
-    assert hasattr(model_instance, 'mdef')
-    assert model_instance.mdef == 'vir'
+    assert hasattr(model_instance, "mdef")
+    assert model_instance.mdef == "vir"
 
-    assert hasattr(model_instance, 'halo_boundary_key')
-    assert model_instance.halo_boundary_key == 'halo_rvir'
+    assert hasattr(model_instance, "halo_boundary_key")
+    assert model_instance.halo_boundary_key == "halo_rvir"
 
-    assert hasattr(model_instance, 'prim_haloprop_key')
-    assert model_instance.prim_haloprop_key == 'halo_mvir'
+    assert hasattr(model_instance, "prim_haloprop_key")
+    assert model_instance.prim_haloprop_key == "halo_mvir"
 
-    assert hasattr(model_instance, 'param_dict')
-    assert hasattr(model_instance, 'publications')
-    assert hasattr(model_instance, 'halo_prof_param_keys')
+    assert hasattr(model_instance, "param_dict")
+    assert hasattr(model_instance, "publications")
+    assert hasattr(model_instance, "halo_prof_param_keys")
 
-    assert hasattr(model_instance, 'virial_velocity')
+    assert hasattr(model_instance, "virial_velocity")
     vvir = model_instance.virial_velocity(total_mass=1e12)
 
 
 def analytic_nfw_density_outer_shell_normalization(radii, conc):
-    r""" Density of an NFW profile normalized by the density evaluated at the outermost value of the input ``radii`` array.
+    r"""Density of an NFW profile normalized by the density evaluated at the outermost value of the input ``radii`` array.
 
     For an NFW profile we have the following analytical relation:
 
@@ -73,13 +73,13 @@ def analytic_nfw_density_outer_shell_normalization(radii, conc):
 
     """
     outer_radius = radii[-1]
-    numerator = outer_radius*(1 + conc*outer_radius)**2
-    denominator = radii*(1 + conc*radii)**2
-    return numerator/denominator
+    numerator = outer_radius * (1 + conc * outer_radius) ** 2
+    denominator = radii * (1 + conc * radii) ** 2
+    return numerator / denominator
 
 
 def monte_carlo_density_outer_shell_normalization(rbins, radial_positions):
-    r""" Density of a Monte Carlo realization of a spherically symmetric profile normalized by the density evaluated at the midpoint of the outermost bin of the input ``rbins`` array.
+    r"""Density of a Monte Carlo realization of a spherically symmetric profile normalized by the density evaluated at the midpoint of the outermost bin of the input ``rbins`` array.
 
     Parameters
     ------------
@@ -98,35 +98,36 @@ def monte_carlo_density_outer_shell_normalization(rbins, radial_positions):
         Ratio of the profile number density scaled by the number density at the midpoint of the outermost bin of the input ``rbins`` array.
 
     """
-    rbin_midpoints = 0.5*(rbins[:-1] + rbins[1:])
+    rbin_midpoints = 0.5 * (rbins[:-1] + rbins[1:])
     counts = np.histogram(radial_positions, bins=rbins)[0].astype(np.float64)
     outer_radius = rbin_midpoints[-1]
     outer_counts = counts[-1]
-    return rbin_midpoints, (counts/rbin_midpoints**2)/(outer_counts/outer_radius**2)
+    return rbin_midpoints, (counts / rbin_midpoints**2) / (
+        outer_counts / outer_radius**2
+    )
 
 
 def test_instance_attrs():
-    r""" Require that all model variants have ``cosmology``, ``redshift`` and ``mdef`` attributes.
-    """
+    r"""Require that all model variants have ``cosmology``, ``redshift`` and ``mdef`` attributes."""
     default_nfw = NFWProfile(concentration_bins=np.array((5, 10, 15)))
     wmap9_nfw = NFWProfile(cosmology=WMAP9, concentration_bins=np.array((5, 10, 15)))
-    m200_nfw = NFWProfile(mdef='200m', concentration_bins=np.array((5, 10, 15)))
+    m200_nfw = NFWProfile(mdef="200m", concentration_bins=np.array((5, 10, 15)))
 
-    assert hasattr(default_nfw, 'cosmology')
-    assert hasattr(wmap9_nfw, 'cosmology')
-    assert hasattr(m200_nfw, 'cosmology')
+    assert hasattr(default_nfw, "cosmology")
+    assert hasattr(wmap9_nfw, "cosmology")
+    assert hasattr(m200_nfw, "cosmology")
 
-    assert hasattr(default_nfw, 'redshift')
-    assert hasattr(wmap9_nfw, 'redshift')
-    assert hasattr(m200_nfw, 'redshift')
+    assert hasattr(default_nfw, "redshift")
+    assert hasattr(wmap9_nfw, "redshift")
+    assert hasattr(m200_nfw, "redshift")
 
-    assert hasattr(default_nfw, 'mdef')
-    assert hasattr(wmap9_nfw, 'mdef')
-    assert hasattr(m200_nfw, 'mdef')
+    assert hasattr(default_nfw, "mdef")
+    assert hasattr(wmap9_nfw, "mdef")
+    assert hasattr(m200_nfw, "mdef")
 
 
 def test_mass_density():
-    r""" Require the returned value of the
+    r"""Require the returned value of the
     `~halotools.empirical_models.NFWProfile.mass_density` function
     to be self-consistent with the returned value of the
     `~halotools.empirical_models.NFWProfile.dimensionless_mass_density` function.
@@ -138,23 +139,22 @@ def test_mass_density():
 
     default_nfw = NFWProfile(concentration_bins=np.array((5, 10, 15)))
     wmap9_nfw = NFWProfile(cosmology=WMAP9, concentration_bins=np.array((5, 10, 15)))
-    m200_nfw = NFWProfile(mdef='200m', concentration_bins=np.array((5, 10, 15)))
+    m200_nfw = NFWProfile(mdef="200m", concentration_bins=np.array((5, 10, 15)))
     model_list = [default_nfw, wmap9_nfw, m200_nfw]
 
     for model in model_list:
         result = model.mass_density(radius, mass, conc)
 
         halo_radius = model.halo_mass_to_halo_radius(mass)
-        scaled_radius = radius/halo_radius
-        derived_result = (
-            model.density_threshold *
-            model.dimensionless_mass_density(scaled_radius, conc)
-            )
+        scaled_radius = radius / halo_radius
+        derived_result = model.density_threshold * model.dimensionless_mass_density(
+            scaled_radius, conc
+        )
         assert np.allclose(derived_result, result, rtol=1e-4)
 
 
 def test_cumulative_mass_PDF():
-    r""" Require the `~halotools.empirical_models.NFWProfile.cumulative_mass_PDF`
+    r"""Require the `~halotools.empirical_models.NFWProfile.cumulative_mass_PDF`
     method in all model variants to respect a number of consistency conditions.
 
     1. Returned value is a strictly monotonically increasing array between 0 and 1.
@@ -185,10 +185,10 @@ def test_cumulative_mass_PDF():
     Npts = 100
     total_mass = np.zeros(Npts) + 1e12
     scaled_radius = np.logspace(-2, -0.01, Npts)
-    conc = 5
+    conc = 5.0
 
     default_nfw = NFWProfile(concentration_bins=np.array((5, 10, 15)))
-    m200_nfw = NFWProfile(mdef='200m', concentration_bins=np.array((5, 10, 15)))
+    m200_nfw = NFWProfile(mdef="200m", concentration_bins=np.array((5, 10, 15)))
     model_list = [default_nfw, m200_nfw]
 
     for model in model_list:
@@ -203,20 +203,21 @@ def test_cumulative_mass_PDF():
         # and the direct numerical integral of the analytical expression for
         # dimensionless_mass_density
         super_class_result = super(NFWProfile, model).cumulative_mass_PDF(
-            scaled_radius, conc)
+            scaled_radius, conc
+        )
         assert np.allclose(super_class_result, result, rtol=1e-4)
 
         # Verify that we get a self-consistent result between
         # enclosed_mass and cumulative_mass_PDF
         halo_radius = model.halo_mass_to_halo_radius(total_mass)
-        radius = scaled_radius*halo_radius
+        radius = scaled_radius * halo_radius
         enclosed_mass = model.enclosed_mass(radius, total_mass, conc)
-        derived_enclosed_mass = result*total_mass
+        derived_enclosed_mass = result * total_mass
         assert np.allclose(enclosed_mass, derived_enclosed_mass, rtol=1e-4)
 
 
 def test_vmax():
-    r""" Require that the analytic approximation used to estimate the NFW :math:`V_{\rm max}`
+    r"""Require that the analytic approximation used to estimate the NFW :math:`V_{\rm max}`
     by the `~halotools.empirical_models.NFWProfile.vmax` method
     agrees with the maximum value of :math:`V_{\rm circ}(r)` computed over the entire profile
     of the halo computed using the super-class method
@@ -228,7 +229,7 @@ def test_vmax():
     radius_array = np.logspace(-2, 0, npts)
 
     default_nfw = NFWProfile()
-    m200_nfw = NFWProfile(mdef='200m')
+    m200_nfw = NFWProfile(mdef="200m")
     model_list = [default_nfw, m200_nfw]
 
     for model in model_list:
@@ -240,7 +241,7 @@ def test_vmax():
 
 @pytest.mark.slow
 def test_mc_generate_nfw_radial_positions():
-    r""" Require that the points returned by the
+    r"""Require that the points returned by the
     `~halotools.empirical_models.NFWProfile.mc_generate_nfw_radial_positions`
     function do indeed trace an NFW profile.
 
@@ -280,15 +281,18 @@ def test_mc_generate_nfw_radial_positions():
 
     for conc in conc_to_test:
         radial_positions = default_nfw.mc_generate_nfw_radial_positions(
-            halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43)
+            halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43
+        )
 
         radial_positions /= halo_radius
 
         rbin_midpoints, monte_carlo_ratio = (
-            monte_carlo_density_outer_shell_normalization(rbins, radial_positions))
+            monte_carlo_density_outer_shell_normalization(rbins, radial_positions)
+        )
 
-        analytical_ratio = (
-            analytic_nfw_density_outer_shell_normalization(rbin_midpoints, conc))
+        analytical_ratio = analytic_nfw_density_outer_shell_normalization(
+            rbin_midpoints, conc
+        )
 
         assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.05)
 
@@ -303,29 +307,32 @@ def test_mc_generate_nfw_radial_positions_stochasticity():
     model = NFWProfile()
 
     r1 = model.mc_generate_nfw_radial_positions(
-        halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43)
+        halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43
+    )
     r2 = model.mc_generate_nfw_radial_positions(
-        halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43)
+        halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=43
+    )
     r3 = model.mc_generate_nfw_radial_positions(
-        halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=44)
+        halo_radius=halo_radius, conc=conc, num_pts=num_pts, seed=44
+    )
     assert np.allclose(r1, r2, rtol=0.001)
     assert not np.allclose(r1, r3, rtol=0.001)
 
 
 def test_user_defined_halo_radius():
-    """Regression test for #940
-    """
+    """Regression test for #940"""
     M = 1e14
     model = NFWProfile()
     virial_radius = model.halo_mass_to_halo_radius(M)
     user_defined_radius = 7
 
     r = model.mc_generate_nfw_radial_positions(
-        halo_radius=user_defined_radius, conc=5, num_pts=int(1000), seed=43)
+        halo_radius=user_defined_radius, conc=5, num_pts=int(1000), seed=43
+    )
     assert np.all(r <= user_defined_radius)
     assert np.any(r > virial_radius)
 
     r = model.mc_generate_nfw_radial_positions(
-        halo_mass=M, conc=5, num_pts=int(1000), seed=43)
+        halo_mass=M, conc=5, num_pts=int(1000), seed=43
+    )
     assert np.all(r <= virial_radius)
-

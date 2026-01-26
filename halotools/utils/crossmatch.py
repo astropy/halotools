@@ -162,7 +162,7 @@ def crossmatch(x, y, skip_bounds_checking=False):
     unique_xvals, counts = np.unique(x_sorted, return_counts=True)
 
     # Determine which of the unique x values has a match in y
-    unique_xval_has_match = np.in1d(unique_xvals, y_sorted, assume_unique=True)
+    unique_xval_has_match = np.isin(unique_xvals, y_sorted, assume_unique=True)
 
     # Create a boolean array with True for each value in x with a match, otherwise False
     idx_x = np.repeat(unique_xval_has_match, counts)

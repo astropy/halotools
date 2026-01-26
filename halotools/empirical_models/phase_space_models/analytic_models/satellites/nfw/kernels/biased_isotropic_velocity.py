@@ -1,10 +1,9 @@
-"""
-"""
+""" """
+
 import numpy as np
 from scipy.integrate import quad as quad_integration
 
 from .mass_profile import _g_integral
-
 
 __all__ = ("dimensionless_radial_velocity_dispersion",)
 
@@ -58,21 +57,25 @@ def dimensionless_radial_velocity_dispersion(
         gal_conc * gal_conc * x * (1.0 + gal_conc * x) ** 2 / _g_integral(halo_conc)
     )
     extra_args = halo_conc / np.atleast_1d(gal_conc).astype("f4")
+    assert extra_args.shape == (1,)
+    extra_args = float(extra_args[0])
 
     lower_limit = gal_conc * x
     upper_limit = float("inf")
     for i in range(len(x)):
+        a = lower_limit[i]
+        b = upper_limit
         term1, _ = quad_integration(
             _jeans_integrand_term1,
-            lower_limit[i],
-            upper_limit,
+            a,
+            b,
             epsrel=profile_integration_tol,
             args=extra_args,
         )
         term2, _ = quad_integration(
             _jeans_integrand_term2,
-            lower_limit[i],
-            upper_limit,
+            a,
+            b,
             epsrel=profile_integration_tol,
             args=extra_args,
         )

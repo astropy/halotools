@@ -119,7 +119,7 @@ def calculate_satellite_selection_mask(subhalo_hostids, satellite_occupations, h
     those rare subhalos with no matching host halo
     (this situation occurs in <0.1% for typical Rockstar catalogs).
 
-    >>> matched_mask = np.in1d(halocat.halo_table['halo_hostid'], halocat.halo_table['halo_id'])
+    >>> matched_mask = np.isin(halocat.halo_table['halo_hostid'], halocat.halo_table['halo_id'])
     >>> halos = halocat.halo_table[matched_mask]
 
     Now we will sort the catalog by the ``sorting_keys`` list.

@@ -1,10 +1,9 @@
-"""
-"""
+""" """
+
 import numpy as np
 from scipy.integrate import quad as quad_integration
 
 from .mass_profile import _g_integral
-
 
 __all__ = ("dimensionless_radial_velocity_dispersion",)
 
