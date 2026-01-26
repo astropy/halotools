@@ -82,8 +82,8 @@ def test_marked_npairs_3d_periodic():
         random_sample,
         rbins,
         period=period,
-        weights1=ran_weights1,
-        weights2=ran_weights1,
+        weights1=ran_weights1.flatten(),
+        weights2=ran_weights1.flatten(),
     )
 
     assert np.allclose(test_result, result, rtol=1e-05), "pair counts are incorrect"
@@ -171,8 +171,8 @@ def test_marked_npairs_nonperiodic():
         random_sample,
         rbins,
         period=None,
-        weights1=ran_weights1,
-        weights2=ran_weights1,
+        weights1=ran_weights1.flatten(),
+        weights2=ran_weights1.flatten(),
     )
 
     assert np.allclose(test_result, result, rtol=1e-05), "pair counts are incorrect"
