@@ -1,5 +1,7 @@
-0.9.4 (unreleased)
+0.9.4 (2026-01-26)
 ------------------
+
+ - Restore compatibility with Numpy's new broadcasting conventions (https://github.com/astropy/halotools/pull/1140)
 
 
 0.9.3 (2025-02-10)
