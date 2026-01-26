@@ -149,7 +149,8 @@ def _large_scale_density_spherical_volume_process_args(
         if period is None:
             raise HalotoolsError("If sample_volume is None, must pass period")
     if period is not None:
-        raise HalotoolsError("If period is not None, do not pass in sample_volume")
+        if sample_volume is not None:
+            raise HalotoolsError("If period is not None, do not pass in sample_volume")
 
     period = get_period(period)[0]
     sample_volume = period.prod()
