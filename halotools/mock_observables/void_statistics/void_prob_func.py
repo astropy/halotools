@@ -6,14 +6,12 @@ and `~halotools.mock_observables.underdensity_prob_func` used to calculate void 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-
 from astropy.utils.misc import NumpyRNGContext
 
-from ..pair_counters import npairs_per_object_3d
-
-from ...utils.array_utils import array_is_monotonic
 from ...custom_exceptions import HalotoolsError
-
+from ...utils.array_utils import array_is_monotonic
+from ..mock_observables_helpers import get_period
+from ..pair_counters import npairs_per_object_3d
 
 __all__ = ("void_prob_func",)
 __author__ = ["Duncan Campbell", "Andrew Hearin"]
@@ -207,6 +205,7 @@ def _void_prob_func_process_args(
         )
         raise HalotoolsError(msg)
 
+    period = get_period(period)[0]
     if period is None:
         xmin, xmax = np.min(sample1), np.max(sample1)
         ymin, ymax = np.min(sample1), np.max(sample1)

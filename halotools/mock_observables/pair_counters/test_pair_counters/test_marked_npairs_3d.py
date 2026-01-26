@@ -1,17 +1,16 @@
-"""
-"""
+""" """
+
 from __future__ import absolute_import, division, print_function, unicode_literals
+
+from pathlib import Path
 
 import numpy as np
 import pytest
 from astropy.utils.misc import NumpyRNGContext
-from pathlib import Path
-
-from ..pairs import wnpairs as pure_python_weighted_pairs
-from ..marked_npairs_3d import marked_npairs_3d, _func_signature_int_from_wfunc
 
 from ....custom_exceptions import HalotoolsError
-
+from ..marked_npairs_3d import _func_signature_int_from_wfunc, marked_npairs_3d
+from ..pairs import wnpairs as pure_python_weighted_pairs
 
 error_msg = (
     "\nThe `test_marked_npairs_wfuncs_behavior` function performs \n"
