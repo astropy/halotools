@@ -3,17 +3,17 @@ This module contains the `AnalyticalDensityProf` class,
 a container class for the distribution of mass and/or galaxies
 within dark matter halos.
 """
-from __future__ import division, print_function, absolute_import, unicode_literals
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from scipy.integrate import quad as quad_integration
-from scipy.optimize import minimize as scipy_minimize
 from astropy import units as u
 from astropy.constants import G
-
-from . import halo_boundary_functions
+from scipy.integrate import quad as quad_integration
+from scipy.optimize import minimize as scipy_minimize
 
 from ... import model_defaults
+from . import halo_boundary_functions
 
 newtonG = G.to(u.km * u.km * u.Mpc / (u.Msun * u.s * u.s))
 
