@@ -2,25 +2,32 @@
 Module containing functions used to determine various ways of quantifying
 the large-scale density of a set of points.
 """
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
 
+from ...custom_exceptions import HalotoolsError
+from ..mock_observables_helpers import get_period
 from ..pair_counters import npairs_per_object_3d
 
-from ...custom_exceptions import HalotoolsError
+__all__ = ("large_scale_density_spherical_volume",)
+
+__author__ = ("Andrew Hearin",)
+
+np.seterr(divide="ignore", invalid="ignore")  # ignore divide by zero in e.g. DD/RR
 
 
-__all__ = ('large_scale_density_spherical_volume', )
-
-__author__ = ('Andrew Hearin', )
-
-np.seterr(divide='ignore', invalid='ignore')  # ignore divide by zero in e.g. DD/RR
-
-
-def large_scale_density_spherical_volume(sample, tracers, radius,
-        period=None, sample_volume=None, num_threads=1, approx_cell1_size=None,
-        norm_by_mean_density=False):
+def large_scale_density_spherical_volume(
+    sample,
+    tracers,
+    radius,
+    period=None,
+    sample_volume=None,
+    num_threads=1,
+    approx_cell1_size=None,
+    norm_by_mean_density=False,
+):
     """
     Calculate the mean density of the input ``sample``
     from an input set of tracer particles using a sphere centered on each point
@@ -100,50 +107,50 @@ def large_scale_density_spherical_volume(sample, tracers, radius,
     """
     sample, tracers, rbins, period, sample_volume, num_threads, approx_cell1_size = (
         _large_scale_density_spherical_volume_process_args(
-            sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size)
+            sample,
+            tracers,
+            radius,
+            period,
+            sample_volume,
+            num_threads,
+            approx_cell1_size,
         )
+    )
 
-    result = npairs_per_object_3d(sample, tracers, rbins, period=period,
-        num_threads=num_threads, approx_cell1_size=approx_cell1_size)[:, 0]
+    result = npairs_per_object_3d(
+        sample,
+        tracers,
+        rbins,
+        period=period,
+        num_threads=num_threads,
+        approx_cell1_size=approx_cell1_size,
+    )[:, 0]
 
-    environment_volume = (4/3.)*np.pi*radius**3
-    number_density = result/environment_volume
+    environment_volume = (4 / 3.0) * np.pi * radius**3
+    number_density = result / environment_volume
 
     if norm_by_mean_density is True:
-        mean_rho = tracers.shape[0]/sample_volume
-        return number_density/mean_rho
+        mean_rho = tracers.shape[0] / sample_volume
+        return number_density / mean_rho
     else:
         return number_density
 
 
 def _large_scale_density_spherical_volume_process_args(
-        sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size):
-    """
-    """
+    sample, tracers, radius, period, sample_volume, num_threads, approx_cell1_size
+):
+    """ """
     sample = np.atleast_1d(sample)
     tracers = np.atleast_1d(tracers)
     rbins = np.atleast_1d(radius).astype(float)
-    rbins = np.append(rbins, rbins[0]+0.0001)
+    rbins = np.append(rbins, rbins[0] + 0.0001)
 
-    if period is None:
-        if sample_volume is None:
-            msg = ("If period is None, you must pass in ``sample_volume``.")
-            raise HalotoolsError(msg)
-        else:
-            sample_volume = float(sample_volume)
+    period = get_period(period)[0]
+
+    if sample_volume is None:
+        sample_volume = period.prod()
     else:
-        period = np.atleast_1d(period)
-        if len(period) == 1:
-            period = np.array([period, period, period])
-        elif len(period) == 3:
-            pass
-        else:
-            msg = ("\nInput ``period`` must either be a float or length-3 sequence")
-            raise HalotoolsError(msg)
-        if sample_volume is None:
-            sample_volume = period.prod()
-        else:
-            msg = ("If period is not None, do not pass in sample_volume")
-            raise HalotoolsError(msg)
+        msg = "If period is not None, do not pass in sample_volume"
+        raise HalotoolsError(msg)
 
     return sample, tracers, rbins, period, sample_volume, num_threads, approx_cell1_size
