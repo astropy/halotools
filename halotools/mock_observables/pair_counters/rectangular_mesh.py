@@ -182,17 +182,17 @@ class RectangularMesh(object):
 
         try:
             xperiod = float(xperiod[0])
-        except IndexError:
+        except (IndexError, TypeError):
             xperiod = float(xperiod)
 
         try:
             yperiod = float(yperiod[0])
-        except IndexError:
+        except (IndexError, TypeError):
             yperiod = float(yperiod)
 
         try:
             zperiod = float(zperiod[0])
-        except IndexError:
+        except (IndexError, TypeError):
             zperiod = float(zperiod)
 
         self.xperiod = xperiod
