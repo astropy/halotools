@@ -145,12 +145,13 @@ def _large_scale_density_spherical_volume_process_args(
     rbins = np.atleast_1d(radius).astype(float)
     rbins = np.append(rbins, rbins[0] + 0.0001)
 
-    period = get_period(period)[0]
-
     if sample_volume is None:
-        sample_volume = period.prod()
-    else:
-        msg = "If period is not None, do not pass in sample_volume"
-        raise HalotoolsError(msg)
+        if period is None:
+            raise HalotoolsError("If sample_volume is None, must pass period")
+    if period is not None:
+        raise HalotoolsError("If period is not None, do not pass in sample_volume")
+
+    period = get_period(period)[0]
+    sample_volume = period.prod()
 
     return sample, tracers, rbins, period, sample_volume, num_threads, approx_cell1_size

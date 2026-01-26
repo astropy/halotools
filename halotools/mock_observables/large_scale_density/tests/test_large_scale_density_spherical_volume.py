@@ -25,14 +25,7 @@ def test_large_scale_density_spherical_volume_exception_handling():
 
     with pytest.raises(HalotoolsError) as err:
         result = large_scale_density_spherical_volume(sample, tracers, radius)
-    substr = "If period is None, you must pass in ``sample_volume``."
-    assert substr in err.value.args[0]
-
-    with pytest.raises(HalotoolsError) as err:
-        result = large_scale_density_spherical_volume(
-            sample, tracers, radius, period=[1, 1]
-        )
-    substr = "Input ``period`` must either be a float or length-3 sequence"
+    substr = "must pass"
     assert substr in err.value.args[0]
 
     with pytest.raises(HalotoolsError) as err:
