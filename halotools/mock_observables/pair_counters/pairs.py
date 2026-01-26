@@ -8,6 +8,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
+from ..mock_observables_helpers import get_period
+
 __all__ = ["npairs", "wnpairs", "xy_z_npairs", "xy_z_wnpairs", "s_mu_npairs"]
 __author__ = ["Duncan Campbell"]
 
@@ -204,15 +206,7 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
         return None
 
     # Process period entry and check for consistency.
-    if period is None:
-        period = np.array([np.inf] * np.shape(sample1)[-1])
-    else:
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period] * np.shape(sample1)[-1])
-        if np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have len == dimension of points")
-            return None
+    period = get_period(period)[0]
 
     # Process weights1 entry and check for consistency.
     if weights1 is None:
@@ -245,7 +239,8 @@ def wnpairs(sample1, sample2, r, period=None, weights1=None, weights2=None):
     n = np.zeros((r.size,), dtype=np.float64)
     for i in range(r.size):
         for j in range(N1):
-            n[i] += np.sum(np.extract(dd[j, :] <= r[i], weights2)) * weights1[j]
+            res = np.sum(np.extract(dd[j, :] <= r[i], weights2)) * weights1[j]
+            n[i] += res
 
     return n
 
