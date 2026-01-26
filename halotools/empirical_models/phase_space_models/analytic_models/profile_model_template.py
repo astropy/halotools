@@ -223,9 +223,12 @@ class AnalyticDensityProf(object):
         x = np.atleast_1d(scaled_radius).astype(np.float64)
         enclosed_mass = np.zeros_like(x)
 
+        def _scalar_integrand(*args, **kwargs):
+            return self._enclosed_dimensionless_mass_integrand(*args, **kwargs)[0]
+
         for i in range(len(x)):
             enclosed_mass[i], _ = quad_integration(
-                self._enclosed_dimensionless_mass_integrand,
+                _scalar_integrand,
                 0.0,
                 x[i],
                 epsrel=1e-5,
@@ -233,7 +236,7 @@ class AnalyticDensityProf(object):
             )
 
         total, _ = quad_integration(
-            self._enclosed_dimensionless_mass_integrand,
+            _scalar_integrand,
             0.0,
             1.0,
             epsrel=1e-5,
