@@ -18,12 +18,12 @@ jobs:
           - name: Ubuntu - Python 3.11 with all optional dependencies
             os: ubuntu-latest
             python: "3.11"
-            toxenv: 'py11-test-alldeps'
+            toxenv: 'py311-test-alldeps'
 
           - name: MacOs - Python 3.11 with all optional dependencies
             os: macos-latest
             python: "3.11"
-            toxenv: 'py11-test-alldeps'
+            toxenv: 'py311-test-alldeps'
 
           - name: Ubuntu - Python 3.12 with all optional dependencies
             os: ubuntu-latest
