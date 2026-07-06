@@ -28,7 +28,9 @@ docs = [
     "pytest>=7.0",
     "matplotlib",
 ]
-
+all = [
+    "halotools[test,docs]",
+]
 
 [tool.setuptools]
 include-package-data = true
