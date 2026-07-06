@@ -5,6 +5,9 @@ on:
   schedule:
     # Runs "First of every month at 3:15am Central"
     - cron: '15 8 1 * *'
+  pull_request:
+    branches:
+      - master
 
 jobs:
   # Github Actions supports ubuntu, windows, and macos virtual environments:
