@@ -1,10 +1,13 @@
 name: CI Tests
 
 on:
+  workflow_dispatch:
+  schedule:
+    # Runs "First of every month at 3:15am Central"
+    - cron: '15 8 1 * *'
   push:
     branches:
-    - master
-  #  tags: # run CI if specific tags are pushed
+      - master
   pull_request:
     branches:
       - master
@@ -21,27 +24,27 @@ jobs:
           - name: Ubuntu - Python 3.11 with all optional dependencies
             os: ubuntu-latest
             python: "3.11"
-            toxenv: 'py11-test-alldeps'
+            toxenv: py311-test-alldeps
 
           - name: MacOs - Python 3.11 with all optional dependencies
             os: macos-latest
             python: "3.11"
-            toxenv: 'py11-test-alldeps'
+            toxenv: py311-test-alldeps
 
           - name: Ubuntu - Python 3.12 with all optional dependencies
             os: ubuntu-latest
             python: "3.12"
-            toxenv: 'py312-test-alldeps'
+            toxenv: py312-test-alldeps
 
           - name: MacOs - Python 3.12 with all optional dependencies
             os: macos-latest
             python: "3.12"
-            toxenv: 'py312-test-alldeps'
+            toxenv: py312-test-alldeps
 
           - name: Ubuntu - Python 3.13 with all optional dependencies
             os: ubuntu-latest
             python: "3.13"
-            toxenv: 'py313-test-alldeps'
+            toxenv: py313-test-alldeps
 
           - name: MacOs - Python 3.13 with all optional dependencies
             os: macos-latest
