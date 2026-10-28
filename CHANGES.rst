@@ -1,3 +1,9 @@
+0.9.5 (2026-10-28)
+------------------
+
+ - Update build wheels and CI workflows (https://github.com/astropy/halotools/pull/1155)
+
+
 0.9.4 (2026-01-26)
 ------------------
 
